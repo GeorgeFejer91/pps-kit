@@ -52,16 +52,16 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         summary = self.build_summary
         self.assertEqual(summary["publications"], 94)
         self.assertEqual(summary["networkEdges"], 750)
-        self.assertEqual(summary["studyInstances"], 136)
+        self.assertEqual(summary["studyInstances"], 138)
         self.assertEqual(summary["parsimoniousContractCount"], 11)
-        self.assertEqual(summary["parsimoniousReviewCells"], 1_496)
+        self.assertEqual(summary["parsimoniousReviewCells"], 1_518)
         self.assertEqual(summary["currentToolkitInputParameters"], 115)
-        self.assertEqual(summary["currentInputReviewCells"], 15_640)
+        self.assertEqual(summary["currentInputReviewCells"], 15_870)
         self.assertEqual(summary["currentInputsOutsideTargetInventory"], 26)
         self.assertEqual(summary["targetMethodValidationParameters"], 281)
         self.assertEqual(summary["targetConfigurationCandidates"], 275)
         self.assertEqual(summary["targetValidationLeaves"], 6)
-        self.assertEqual(summary["targetMethodReviewCells"], 38_216)
+        self.assertEqual(summary["targetMethodReviewCells"], 38_778)
         self.assertEqual(summary["structuredOrientationReviewRecords"], 8)
         self.assertEqual(summary["experimentSpecificOrientationRows"], 4)
         self.assertEqual(summary["combinedOrientationRows"], 10)
@@ -84,7 +84,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(paths), len(set(paths)))
         self.assertTrue(all(path.startswith("design.") for path in paths))
         self.assertEqual(matrix_header[-115:], paths)
-        self.assertEqual(len(rows), 136)
+        self.assertEqual(len(rows), 138)
         self.assertTrue(all(row[path] for row in rows for path in paths))
         self.assertIn("parser", dictionary_header)
         self.assertIn("serializer", dictionary_header)
@@ -100,11 +100,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_current_input_review_matrix.csv"
         )
-        self.assertEqual(len(rows), 136)
+        self.assertEqual(len(rows), 138)
         self.assertEqual(header[-115:], paths)
         self.assertTrue(all(row[path] for row in rows for path in paths))
         _, queue = read_csv(self.output_dir / "current_input_review_queue.csv")
-        self.assertEqual(len(queue), 136 * 115)
+        self.assertEqual(len(queue), 138 * 115)
         self.assertEqual(
             len({(row["study_row_id"], row["current_toolkit_input_path"]) for row in queue}),
             len(queue),
@@ -135,7 +135,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(target_paths), len(set(target_paths)))
         self.assertTrue(all(path.startswith("target.") for path in target_paths))
         self.assertEqual(matrix_header[-281:], target_paths)
-        self.assertEqual(len(rows), 136)
+        self.assertEqual(len(rows), 138)
         self.assertTrue(all(row[path] for row in rows for path in target_paths))
         for field in (
             "current_design_binding_state",
@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 49)
+        self.assertEqual(len(registry["entries"]), 50)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 91)
+        self.assertEqual(registered_instance_count, 94)
         network = json.loads(
             (
                 ROOT
@@ -323,7 +323,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_target_method_evidence_sidecar.csv"
         )
-        self.assertEqual(len(rows), 136 * 281)
+        self.assertEqual(len(rows), 138 * 281)
         for field in (
             "study_row_id",
             "network_node_id",
@@ -355,7 +355,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
 
     def test_orientation_and_visualization_reviews_remain_unconfounded(self) -> None:
         _, orientation = read_csv(self.output_dir / "study_orientation_review.csv")
-        self.assertEqual(len(orientation), 136)
+        self.assertEqual(len(orientation), 138)
         orientation_counts = Counter(
             row["orientation_review_status"] for row in orientation
         )
@@ -463,7 +463,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         header, rows = read_csv(
             self.output_dir / "study_instance_parsimonious_status_matrix.csv"
         )
-        self.assertEqual(len(rows), 136)
+        self.assertEqual(len(rows), 138)
         self.assertEqual(
             header[:-11],
             [
@@ -504,7 +504,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             "component_evidence_note_json",
         ):
             self.assertIn(field, evidence_header)
-        self.assertEqual(len(evidence), 136 * 11)
+        self.assertEqual(len(evidence), 138 * 11)
         self.assertEqual(
             len({(row["study_row_id"], row["contract_key"]) for row in evidence}),
             len(evidence),
@@ -688,7 +688,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
                 for row in evidence
                 if row["contract_key"] == contract_key
             )
-            self.assertEqual(summary_row["study_count"], "136")
+            self.assertEqual(summary_row["study_count"], "138")
             for status in summary_statuses:
                 self.assertEqual(int(summary_row[status]), counts[status])
             resolved = sum(
@@ -702,7 +702,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(int(summary_row["available_or_resolved_count"]), resolved)
             self.assertEqual(
                 float(summary_row["available_or_resolved_pct"]),
-                round(100 * resolved / 136, 1),
+                round(100 * resolved / 138, 1),
             )
 
         _, review_queue = read_csv(
@@ -813,6 +813,10 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
                 module._public_text(text)
         for text in ["https://doi.org/10.1016/j.cognition.2015.07.012", "Source https://publisher.example/artifacts/paper.pdf, Methods pp. 3–4", "10.1007/s00221-013-3532-2"]:
             self.assertEqual(module._public_text(text), text)
+        for pointer in [r"C:\Users\private\paper.pdf", "artifacts/paper.pdf", "file:///home/private/paper.pdf", "https://localhost/file", "https://127.0.0.1/paper", "https://user:secret@example.org/paper", "https://example.org/paper?token=private", "https://example.org/paper | artifacts/private.pdf"]:
+            self.assertEqual(module._public_evidence_url(pointer), "")
+        for pointer in ["https://backoffice.biblio.ugent.be/download/8673877/8673880", "https://doi.org/10.1007/s00426-020-01365-6", "https://publisher.example/article?id=123"]:
+            self.assertEqual(module._public_evidence_url(pointer), pointer)
 
     def test_corpus_freeze_preserves_identities_and_explicit_boundaries(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
@@ -1067,7 +1071,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(contracts["tactile_target"]["status"], "composite_requires_split")
             self.assertEqual(study["nativeQualification"], "not_assessed")
         self.assertEqual(len(data["publications"]), 94)
-        self.assertEqual(len(data["studies"]), 136)
+        self.assertEqual(len(data["studies"]), 138)
 
     def test_echolocation_assessment_keeps_training_and_manual_timing_separate(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
@@ -1307,6 +1311,31 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(record["instances"][0]["instance_kind"], "unresolved_publication_review_unit")
         self.assertIn("not one confirmed experiment", record["instance_count_basis"])
         self.assertGreaterEqual(len(record["retrieval_attempts"]), 2)
+
+    def test_jazz_author_version_preserves_control_and_pilot_limits(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        parent = "doi:10.1007/s00426-020-01365-6"
+        ids = [parent + "::" + suffix for suffix in "abc"]
+        self.assertEqual(data["studyRowAliases"][parent], ids)
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        for study_id in ids:
+            self.assertEqual(studies[study_id]["inventoryStatus"], "author_version_inventory_assessed_final_comparison_pending")
+            self.assertNotIn("not_assessed", studies[study_id]["parameterStatusCounts"])
+            for contract in studies[study_id]["contracts"]:
+                self.assertEqual(contract["evidenceSourceUrl"], "https://backoffice.biblio.ugent.be/download/8673877/8673880")
+                self.assertEqual(contract["sourceUrl"], "https://doi.org/10.1007/s00426-020-01365-6")
+                self.assertEqual(contract["sourceType"], "author_thesis_chapter_final_comparison_pending")
+        main = {row["key"]: row for row in studies[ids[0]]["contracts"]}
+        control = {row["key"]: row for row in studies[ids[1]]["contracts"]}
+        pilot = {row["key"]: row for row in studies[ids[2]]["contracts"]}
+        self.assertEqual(main["repetition_allocation"]["status"], "derived_complete")
+        self.assertIn("600", main["repetition_allocation"]["value"])
+        self.assertIn("120", control["repetition_allocation"]["value"])
+        self.assertNotIn("600", control["repetition_allocation"]["value"])
+        self.assertEqual(pilot["repetition_allocation"]["status"], "partial")
+        self.assertEqual(pilot["catch_trial_contract"]["status"], "not_reported")
+        self.assertIn("source_recipe_or_asset_provenance", main["auditory_stimulus"]["missingComponents"])
+        self.assertEqual(main["jitter_iti_policy"]["status"], "partial")
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

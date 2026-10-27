@@ -1227,6 +1227,76 @@
         }
       ],
       "source_review_limit": "This is a dated access audit, not a Methods-confirmed inventory. Neither a single experiment nor missing reporting is inferred from unavailable text. Publisher preview and HAL metadata do not supply the eleven replication contracts; no later Hobeika protocol is silently substituted. An inspectable source could reopen this disposition."
+    },
+    {
+      "network_node_id": "doi:10.1007/s00426-020-01365-6",
+      "doi": "10.1007/s00426-020-01365-6",
+      "inventory_status": "author_version_inventory_assessed_final_comparison_pending",
+      "instance_count_basis": "The identified author thesis separates14musicians in the main social-interaction regimen,14new nonmusicians in the baseline-only comparison, and an earlier10-nonmusician power pilot explicitly called an experiment. These are three protocol/cohort review units in this author version, not three independent replications or a final-article-confirmed inventory.",
+      "evidence_pointer": "https://backoffice.biblio.ugent.be/download/8673877/8673880::publication list p.13; chapter3 Participants/design/task pp.70-74",
+      "review_date": "2026-10-27",
+      "framework_disposition": "static_audiotactile_near_far_social_musical_context",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Musicians: cooperative/uncooperative duet and alone baseline (author version)",
+          "record_id": "jazz_duet_2021",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "experiment_label": "Nonmusician baseline-only comparison (author version)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "control_experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "c",
+          "experiment_label": "Nonmusician sample-size pilot; exact implementation unresolved (author version)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "pilot_experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.1007/s00426-020-01365-6.pdf",
+          "outcome": "HTTP 200 HTML subscription preview rather than a PDF; final Methods not retrieved."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://biblio.ugent.be/publication/8692305",
+          "outcome": "Institutional final-article record exposes a 1.65-MB published-version file restricted to UGent; no final text retrieved."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+          "outcome": "HTTP 200 open author thesis, 148 PDF pages; chapter 3 pp.65-90 and publication list p.13 inspected. Title/authors and forthcoming Psychological Research entry link the chapter to the publication; final equivalence remains unverified."
+        }
+      ],
+      "source_lineage": {
+        "source_type": "author_thesis_chapter",
+        "source_url": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+        "relationship": "identified_forthcoming_article_version_final_equivalence_unverified",
+        "basis": "The author thesis publication list explicitly lists the matching title/authors as forthcoming in Psychological Research. The final publisher and repository full text were inaccessible during this pass. This establishes lineage, not identical final parameters."
+      },
+      "supporting_task_boundaries": [
+        {
+          "label": "Jazz performances and partner/IRI questionnaires",
+          "disposition": "external_context_and_subjective_assessment",
+          "basis": "Musical takes manipulate social cooperation before the tactile RT task; questionnaires measure social experience. They are not additional audio-tactile trial-generation experiments.",
+          "evidence_pointer": "https://backoffice.biblio.ugent.be/download/8673877/8673880::chapter3 design pp.71-72"
+        }
+      ],
+      "source_review_limit": "All extracted values are identified author-version evidence. Final publication equivalence remains unproven. Main and baseline-only control schedules are separable; the power pilot has no independent Methods schedule, so exact counts and apparatus are not copied into it. No electrical-stimulation equivalence or native qualification is inferred."
     }
   ],
   "corpus_freeze": {
@@ -1606,6 +1676,17 @@
       "review_date": "2026-10-27",
       "reason": "Primary short report explicitly describes three social-context experiments. Possible overlap with the longer 2019 report remains flagged; these rows do not establish three independent replications.",
       "evidence_pointer": "https://www.jstage.jst.go.jp/article/ast/41/1/41_E19280/_pdf::sections 2-3"
+    },
+    {
+      "old_study_row_id": "doi:10.1007/s00426-020-01365-6",
+      "child_study_row_ids": [
+        "doi:10.1007/s00426-020-01365-6::a",
+        "doi:10.1007/s00426-020-01365-6::b",
+        "doi:10.1007/s00426-020-01365-6::c"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Identified author thesis explicitly separates main musicians, baseline-only nonmusician controls and a power pilot. Final-article equivalence is unverified, and pilot-specific parameters are retained as missing rather than borrowed. No child alone is equivalent to the former publication placeholder.",
+      "evidence_pointer": "https://backoffice.biblio.ugent.be/download/8673877/8673880::chapter3 Participants/design pp.70-74"
     }
   ]
 }

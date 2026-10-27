@@ -10,11 +10,13 @@ from __future__ import annotations
 
 import argparse
 import csv
+import ipaddress
 import json
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
+from urllib.parse import urlsplit
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -815,7 +817,7 @@ def _public_text(value: Any) -> str:
     """Allow factual review text, but fail closed on local source/runtime paths.
 
     Public HTTP URLs are intentionally preserved (including DOI suffix slashes).
-    Local source_file/profile fields are never selected for this projection.
+    Local source_file/profile fields are never copied into this projection.
     """
     text = str(value or "")
     without_urls = re.sub(r"https?://[^\s<>\"']+", "", text, flags=re.I)
@@ -825,6 +827,31 @@ def _public_text(value: Any) -> str:
         without_urls, flags=re.I,
     ):
         raise ValueError("Public study review contains a local source/runtime path")
+    return text
+
+
+def _public_evidence_url(value: Any) -> str:
+    """Select a single public source URL; local or composite pointers stay private."""
+    text = str(value or "").strip()
+    if not re.fullmatch(r"https?://[^\s<>\"'|]+", text, re.I):
+        return ""
+    try:
+        parsed = urlsplit(text)
+        if not parsed.hostname or parsed.username or parsed.password:
+            return ""
+        # Reviewed publication URLs have DNS names; omit local hosts and literal IPs.
+        if "." not in parsed.hostname or parsed.hostname.lower().endswith((".local", ".localhost")):
+            return ""
+        try:
+            ipaddress.ip_address(parsed.hostname)
+        except ValueError:
+            pass
+        else:
+            return ""
+        if re.search(r"(?:token|signature|credential|password|secret|api[_-]?key)=", parsed.query, re.I):
+            return ""
+    except ValueError:
+        return ""
     return text
 
 
@@ -861,6 +888,8 @@ def public_projection(
                 "derivationNote": _public_text(row["derivation_note"]),
                 "reviewedOn": row["review_date"],
                 "sourceUrl": _doi_source_pointer(study.get("doi")),
+                "evidenceSourceUrl": _public_evidence_url(row["source_file"]),
+                "sourceType": _public_text(row["source_layer"]),
                 "missingComponents": [v for v in row["missing_required_components"].split(" | ") if v],
                 "components": {
                     key: {"status": status, "value": _public_text(values.get(key)),
