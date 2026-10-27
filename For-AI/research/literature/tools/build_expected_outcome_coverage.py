@@ -339,7 +339,7 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
         "condition_contrast": "sham, V1, posterior parietal, and premotor tDCS crossed with near/far hand-centered sounds",
         "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#avenanti_2012_motor_cortex",
-            "Consensus MCP 2026-07-15 query: 10.1016/j.neuroimage.2012.06.063 Avenanti motor cortex peripersonal space audio tactile",
+            "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf#published-pages-282-283",
         ],
     },
     "cimmino_2013_surgical_arm_elongation": {

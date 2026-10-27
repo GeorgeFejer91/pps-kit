@@ -33,25 +33,32 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 163 study/context rows,
-64 registered publication inventories, eleven access-audited publications,
+Current checkpoint (2026-10-27): 94 frozen publications, 166 study/context rows,
+66 registered publication inventories, twelve access-audited publications,
 one audited project-lineage identity,
-and 18 publication inventories still unassessed. Registry presence alone
+and 15 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 62 Methods-backed inventories (48 current primary
+The current audit records 64 Methods-backed inventories (50 current primary
 reviews, eight retained primary reviews, and six identified author versions whose
 final comparison is pending), one abstract/metadata inventory, one partial
-Methods inventories, eleven audited access blockers, one project-lineage boundary, and 18 unregistered publications.
-Only 74 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 20 still need inventory
+Methods inventories, twelve audited access blockers, one project-lineage boundary, and 15 unregistered publications.
+Only 77 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 17 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Serino (2011) has three behavioral audiotactile protocols, with rTMS only a
+preceding manipulation in the third. Avenanti (2012) has two adjacent sound-to-MEP
+experiments; separate ITI touches cannot turn the TMS delays into tactile SOAs.
+The source order and electrical-apparatus wording conflicts remain explicit.
+Làdavas (2001) is a provisional case inventory with documented full-Methods
+access failures, without borrowing parameters from the distinct 2002 study.
+
 Amiel’s front/rear study uses one repeated-measures cohort and distinct fixed
 sound versus pre/post controls that retain sound elsewhere in the trial. Its
 waveform duration does not establish complete movement timing. Rahmani’s two

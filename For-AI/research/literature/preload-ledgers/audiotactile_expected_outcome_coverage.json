@@ -8,20 +8,20 @@
   },
   "summary": {
     "literature_record_count": 75,
-    "structured_expected_outcome_record_count": 68,
+    "structured_expected_outcome_record_count": 67,
     "pending_expected_outcome_record_count": 0,
-    "adjacent_or_out_of_scope_record_count": 7,
+    "adjacent_or_out_of_scope_record_count": 8,
     "runnable_profile_parameter_record_count": 13,
     "observed_behavioral_comparison_record_count": 0,
     "mouse_click_simulated_participant_like_comparison_record_count": 12,
     "synthetic_profile_contrast_comparison_record_count": 12,
     "parameter_run_evidence_only_record_count": 1,
-    "not_runnable_no_observed_comparison_record_count": 55,
-    "adjacent_not_applicable_record_count": 7,
+    "not_runnable_no_observed_comparison_record_count": 54,
+    "adjacent_not_applicable_record_count": 8,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
-      "not_applicable_adjacent_out_of_scope": 7,
-      "not_yet_templated_missing_publication_parameters": 45,
+      "not_applicable_adjacent_out_of_scope": 8,
+      "not_yet_templated_missing_publication_parameters": 44,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 12,
       "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,
       "template_present_blocked_missing_publication_parameters": 10
@@ -336,10 +336,10 @@
       "record_id": "avenanti_2012_motor_cortex",
       "citation_short": "Avenanti et al. (2012)",
       "doi": "10.1016/j.neuroimage.2012.06.063",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "coverage_category": "adjacent_out_of_scope",
       "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {
         "outcome_family": "premotor_dependency_of_motor_pps_coding",
         "primary_expected_effect": "Near-hand sounds are expected to produce a spatially dependent motor response in hand MEPs after sham or V1 stimulation, while cathodal suppression of premotor cortex is expected to abolish the near-far motor coding effect.",
@@ -348,10 +348,10 @@
         "condition_contrast": "sham, V1, posterior parietal, and premotor tDCS crossed with near/far hand-centered sounds",
         "source_basis": [
           "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#avenanti_2012_motor_cortex",
-          "Consensus MCP 2026-07-15 query: 10.1016/j.neuroimage.2012.06.063 Avenanti motor cortex peripersonal space audio tactile"
+          "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf#published-pages-282-283"
         ]
       },
-      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "open_access_unavailable",
         "paper_audit_supplement_status": "not_checked",
@@ -360,10 +360,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_comparison_gap": "not_applicable_adjacent_out_of_scope",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
     },
     {
       "record_id": "serino_2011_professional_fencers",
