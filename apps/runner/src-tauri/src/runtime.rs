@@ -1775,6 +1775,137 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires a real stereo f32 output device; renders silent fixture samples"]
+    fn real_single_block_package_completes_through_native_dispatch() {
+        let runtime = AppRuntime::new();
+        let (root, initial) = verified_audio_package("P001", 1);
+        let manifest_path = initial.manifest_path().to_path_buf();
+        drop(initial);
+        let mut silent_wav = pcm16_wav_bytes(48_000, 4, 0);
+        silent_wav[44..].fill(0);
+        fs::write(root.join("block-0.wav"), silent_wav).unwrap();
+        let verified = verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap();
+        runtime.adopt_verified_session(verified).unwrap();
+        let setup = runtime
+            .dispatch_local(
+                Action::SetupSubmit,
+                serde_json::json!({
+                    "participant_code": "P001", "age": 30, "handedness": "right",
+                    "gender": "other", "name_sharing_opt_in": false,
+                    "part_labels": {"1": "Synthetic test", "2": "Unused part"}
+                }),
+            )
+            .unwrap();
+        assert_eq!(setup.status, AppliedStatus::Accepted, "{}", setup.reason);
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 0);
+        runtime
+            .cache_prepared_audio(prepare_verified_audio(source).unwrap())
+            .unwrap();
+        tauri::async_runtime::block_on(runtime.ensure_execution_journal()).unwrap();
+        drop(guard);
+        assert_eq!(
+            runtime
+                .dispatch_local(Action::TargetArm, serde_json::json!({}))
+                .unwrap()
+                .reason,
+            "package_execution_adapter_not_ready"
+        );
+
+        let inventory =
+            tauri::async_runtime::block_on(runtime.start_native_output_enumerate().unwrap())
+                .unwrap()
+                .unwrap();
+        let (device, config) = inventory
+            .devices
+            .iter()
+            .find_map(|device| {
+                device
+                    .f32_configs
+                    .iter()
+                    .find(|config| {
+                        config.channels == 2
+                            && config.minimum_sample_rate_hz <= 48_000
+                            && config.maximum_sample_rate_hz >= 48_000
+                    })
+                    .map(|config| (device, config))
+            })
+            .expect("no stereo 48 kHz native output route is available");
+        tauri::async_runtime::block_on(
+            runtime
+                .start_native_output_reserve(NativeOutputReserveRequest {
+                    policy_generation: inventory.policy_generation.clone(),
+                    service_generation: inventory.service_generation.clone(),
+                    inventory_generation: inventory.inventory_generation.clone(),
+                    device_ordinal: device.device_ordinal,
+                    config_ordinal: config.config_ordinal,
+                    channels: 2,
+                    sample_rate_hz: 48_000,
+                    buffer_frames: None,
+                    warmup_timeout_ms: 1000,
+                })
+                .unwrap(),
+        )
+        .unwrap()
+        .unwrap();
+        let prepared = runtime.snapshot().unwrap();
+        assert!(!prepared.safety.local_armed);
+        assert!(prepared.allowed_actions.contains(&Action::TargetArm));
+        assert_eq!(
+            runtime
+                .dispatch_local(Action::TargetArm, serde_json::json!({}))
+                .unwrap()
+                .status,
+            AppliedStatus::Accepted
+        );
+        assert_eq!(
+            runtime
+                .dispatch_local(Action::PartStart, serde_json::json!({"part_number": 1}))
+                .unwrap()
+                .status,
+            AppliedStatus::Accepted
+        );
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        loop {
+            let snapshot = runtime.snapshot().unwrap();
+            if snapshot.run.complete {
+                assert_eq!(snapshot.run.phase, RunnerPhase::Completed);
+                assert!(!snapshot.safety.publication_ready);
+                break;
+            }
+            assert!(
+                std::time::Instant::now() < deadline,
+                "native fixture did not complete: {:?}",
+                snapshot.run
+            );
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        let manifests: Vec<_> = fs::read_dir(&root)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .filter(|path| {
+                path.file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .ends_with(".results.json")
+            })
+            .collect();
+        assert_eq!(manifests.len(), 1);
+        let manifest: Value = serde_json::from_slice(&fs::read(&manifests[0]).unwrap()).unwrap();
+        assert_eq!(manifest["completion"], "complete");
+        assert_eq!(manifest["timingQualification"], "unqualified");
+        let csv = fs::read_to_string(root.join(manifest["datasetFile"].as_str().unwrap())).unwrap();
+        assert_eq!(csv.lines().count(), 2);
+        let events =
+            fs::read_to_string(root.join(manifest["eventsFile"].as_str().unwrap())).unwrap();
+        assert!(events.contains("audio.control.applied"));
+        assert!(events.contains("audio.final-frame-submitted"));
+        assert!(events.contains("trial.scored"));
+        drop(runtime);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn audio_preflight_installs_one_durable_journal_and_replacement_closes_it() {
         let runtime = AppRuntime::new();
         let (root, verified) = verified_audio_package("P001", 1);

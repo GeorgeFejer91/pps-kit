@@ -2263,12 +2263,15 @@ impl OwnerState {
         };
         let stamp = self.clock.stamp();
         let mut candidate = self.core.clone();
+        let executable = prepared.source.receipt.verified_session().blocks().len() == 1;
         let prepare = prepared.source.block_summary().and_then(|block| {
-            candidate.prepare_native_block(
-                prepared.source.receipt.verified_session().manifest_sha256(),
-                block,
-                stamp.clone(),
-            )
+            let ordinal = block.block_ordinal;
+            let fingerprint = prepared.source.receipt.verified_session().manifest_sha256();
+            candidate.prepare_native_block(fingerprint, block, stamp.clone())?;
+            if executable {
+                candidate.activate_native_block(fingerprint, ordinal, stamp.clone())?;
+            }
+            Ok::<(), &'static str>(())
         });
         if prepare.is_err() {
             self.native_output.invalidate_for_runner_change();
@@ -2280,7 +2283,7 @@ impl OwnerState {
             "runGeneration": prepared.source.receipt.run_generation().to_string(),
             "renderState": "Prepared",
             "timingQualification": "unqualified",
-            "executable": false,
+            "executable": executable,
         });
         self.commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
             .map_err(|_| {

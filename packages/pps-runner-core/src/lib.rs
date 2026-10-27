@@ -364,6 +364,35 @@ impl RunnerCore {
         self.native_block.is_some()
     }
 
+    /// Native owner only, after binding the current verified media, output
+    /// reservation and journal. This enables local arming, never playback or
+    /// scientific qualification; wire dispatch cannot manufacture this receipt.
+    pub fn activate_native_block(
+        &mut self,
+        fingerprint: &str,
+        block_ordinal: u32,
+        now: ClockStamp,
+    ) -> Result<(), &'static str> {
+        if self.package_fingerprint.as_deref() != Some(fingerprint)
+            || !self
+                .native_block
+                .as_ref()
+                .is_some_and(|block| block.block_ordinal == block_ordinal)
+            || self.native_control_pending.is_some()
+            || !matches!(
+                self.snapshot.run.phase,
+                RunnerPhase::Prepared | RunnerPhase::Interrupted | RunnerPhase::Completed
+            )
+        {
+            return Err("native_activation_scope_invalid");
+        }
+        if !self.package_execution_ready {
+            self.package_execution_ready = true;
+            self.bump_revision(&now);
+        }
+        Ok(())
+    }
+
     pub fn native_control_pending(&self) -> Option<Action> {
         self.native_control_pending
     }
@@ -2106,6 +2135,59 @@ mod tests {
         assert!(core
             .complete_native_finalization(&fingerprint, clock(11))
             .is_err());
+    }
+
+    #[test]
+    fn native_activation_requires_the_current_staged_block_and_remains_unarmed() {
+        let mut core = ready_core();
+        let package = verified_package("P001");
+        core.adopt_verified_package(package.clone(), clock(4))
+            .unwrap();
+        assert_eq!(
+            core.activate_native_block(&package.fingerprint, 0, clock(5)),
+            Err("native_activation_scope_invalid")
+        );
+        core.prepare_native_block(
+            &package.fingerprint,
+            NativeBlockSummary {
+                block_index: 1,
+                block_ordinal: 0,
+                block_label: "Verified block".to_owned(),
+                duration_ns: 1_000_000_000,
+            },
+            clock(6),
+        )
+        .unwrap();
+        for (fingerprint, ordinal) in [("b".repeat(64), 0), (package.fingerprint.clone(), 1)] {
+            assert_eq!(
+                core.activate_native_block(&fingerprint, ordinal, clock(7)),
+                Err("native_activation_scope_invalid")
+            );
+            assert!(!core.snapshot().allowed_actions.contains(&Action::TargetArm));
+        }
+        core.activate_native_block(&package.fingerprint, 0, clock(8))
+            .unwrap();
+        assert_eq!(core.snapshot().run.phase, RunnerPhase::Prepared);
+        assert!(!core.snapshot().safety.local_armed);
+        assert!(!core.snapshot().safety.publication_ready);
+        assert_eq!(
+            core.dispatch_local(Action::TargetArm, json!({}), clock(9))
+                .status,
+            AppliedStatus::Accepted
+        );
+        let started = core.dispatch_local(Action::PartStart, json!({"part_number": 2}), clock(10));
+        assert_eq!(started.status, AppliedStatus::Accepted);
+        assert!(!started.snapshot.run.participant_capture_ready);
+        assert_eq!(
+            core.activate_native_block(&package.fingerprint, 0, clock(11)),
+            Err("native_activation_scope_invalid")
+        );
+        core.dispatch_local(Action::RunStop, json!({}), clock(12));
+        assert_eq!(
+            core.activate_native_block(&package.fingerprint, 0, clock(13)),
+            Err("native_activation_scope_invalid")
+        );
+        assert!(!core.snapshot().allowed_actions.contains(&Action::TargetArm));
     }
 
     #[test]

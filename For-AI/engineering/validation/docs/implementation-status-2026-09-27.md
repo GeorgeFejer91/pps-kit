@@ -15,7 +15,7 @@ Each status applies to its stated surface, not to the whole product.
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
 | 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
-| 9 | PARTIAL: exact CPAL port, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Activation, full-profile execution and an installed experiment; candidate remains non-executable |
+| 9 | PARTIAL: exact CPAL port, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Full-profile/multi-block execution and an installed experiment; single-block activation source-verified |
 | 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; sample/tactile/response/CSV oracle checks | Native JSON assembly and complete execution capability |
 | 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
 | 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
@@ -27,6 +27,19 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- Publication implementation checkpoint (2026-10-27, review branch): the
+  native owner now activates only the current, staged single-block package after
+  media, output and journal checks. Core activation does not arm or play.
+  `real_single_block_package_completes_through_native_dispatch` separately passes
+  on this Windows host with actual CPAL output and silent four-frame PCM, through
+  setup, reservation, local Arm/Start, callback acknowledgement, scoring and final
+  result files. The suite passes 24 core/140 desktop tests plus this opt-in test.
+  Results remain `unqualified`; no installed UI or physical timing claim follows.
+- UI checkpoint `ed0e15a6` (integrated as `9030caf2`) repairs preview races,
+  instruction bundle assets, failed-save locking and polled participant drafts.
+  Worker evidence: 4 Designer/68 Runner/2 Pages tests, canonical builds and
+  headless Chromium real-control checks. Public projection and first bounded
+  extraction batch integrate as `057c0150`; 77 inventories remain unassessed.
 - Native control/input product source: `43566f52cdb2835ce629b18da8fe5da592a3e2af`.
   [Validation run](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36351078594)
   passes all 14 source/oracle/browser/optional-Quest/validation-package jobs, including Core and
@@ -86,8 +99,9 @@ Unsupported hard-link filesystems fail closed. Partial/pending/orphan files rema
 no final data are overwritten or automatically removed. Power-loss recovery,
 directory durability, device drain and physical onset require separate evidence.
 Callback observations, sample positions and CPAL driver predictions are explicitly
-unqualified. Preparation does not enable execution or qualify a device route.
-Native activation, whole profiles/multiple blocks, complete local validation,
+unqualified. Cache inspection does not qualify a device route. Current verified
+media/output/journal binding now enables explicit local Arm/Start for one block.
+Whole profiles/multiple blocks, complete local validation,
 installed inspection and calibrated physical acquisition remain outstanding.
 The workspace volume has approximately 65.5 GiB free as of 2026-10-27; the
 former storage blocker is no longer observed. This documentation review did
