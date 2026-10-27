@@ -1916,6 +1916,164 @@
         }
       ],
       "source_review_limit": "Repository/publisher403 and Elsevier bibliographic-coredata-only response do not establish full Methods access. Primary abstract scope retained; no borrowed protocol/defaults. Dataset landing-page metadata inspected, participant files not acquired."
+    },
+    {
+      "network_node_id": "doi:10.1152/jn.00652.2017",
+      "doi": "10.1152/jn.00652.2017",
+      "inventory_status": "confirmed_two_body_target_cohort_protocols",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "One mixed-design human study has two distinct body-target cohorts: 16 face participants and 16 trunk recruits, with one trunk technical exclusion. Slow/fast speeds are within-subject conditions, not additional cohorts. Computational extensions do not add human experiments.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML::Human Methods; PDF pp. 2-3",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Peri-face cohort: two looming speeds",
+          "record_id": "noel_2018_neural_adaptation",
+          "template_ids": [],
+          "instance_kind": "cohort_protocol",
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "experiment_label": "Peri-trunk cohort: two looming speeds",
+          "record_id": "noel_2018_neural_adaptation",
+          "template_ids": [],
+          "instance_kind": "cohort_protocol",
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+          "outcome": "Primary full XML retrieved; full human Methods and model boundaries inspected."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://noel-lab.org/wp-content/uploads/2024/05/jneurophysiology.pdf",
+          "outcome": "Author-hosted publisher PDF retrieved; human Methods p. 3 rendered and independently inspected. SHA256 4f8c5b67a40f00ef7e190785dd03d997d2cd0b499f859013de7594165d9f8e87."
+        }
+      ],
+      "source_review_limit": "Full primary human Methods reviewed; apparatus recipe/level and block/ITI details remain bounded gaps. Computed neural simulations are not new acquired studies.",
+      "supporting_task_boundaries": [
+        {
+          "label": "Neural model simulations and predictions",
+          "disposition": "model_analysis_not_extra_human_acquisition",
+          "basis": "Additional simulated velocities/static conditions and simulation repetitions do not add empirical cohorts. Model prose says 2640 ms for 200 cm at 75 cm/s; arithmetic is about 2666.67 ms, and neither is a reported human WAV sample count.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML::Computational modeling sections"
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1016/j.neuropsychologia.2020.107579",
+      "doi": "10.1016/j.neuropsychologia.2020.107579",
+      "inventory_status": "two_experiments_from_primary_excerpt_full_methods_access_blocked",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "Primary publisher Methods excerpt confirms 70 included participants, 35 in each of two experiments; Experiment 2 recruits new participants. Actual versus observed tool use separates the experiments. Full Methods/SI remains inaccessible, so inventory is access-audited rather than fully Methods-reviewed.",
+      "evidence_pointer": "https://www.sciencedirect.com/science/article/pii/S0028393220302529::publisher abstract and selected Methods/analysis excerpt",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Experiment 1: actual tool use (partial primary Methods)",
+          "record_id": "",
+          "template_ids": [],
+          "instance_kind": "partially_reviewed_experiment",
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        },
+        {
+          "suffix": "b",
+          "experiment_label": "Experiment 2: observed tool use (partial primary Methods)",
+          "record_id": "",
+          "template_ids": [],
+          "instance_kind": "partially_reviewed_experiment",
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "outcome": "Indexed primary publisher preview exposes author abstract and selected Methods/analysis paragraphs. It establishes 70 included participants, 35 new participants in Experiment 2, but not full acquisition parameters."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0028393220302529",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0028393220302529",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://air.unipr.it/handle/11381/2879719",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://ricerca.unich.it/handle/11564/767635?mode=complete",
+          "outcome": "Search-index metadata saysfulltextreserved/archive-manageronly; directweb403. No restricted PDF requested."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unimore.it/retrieve/e31e124f-58b6-987f-e053-3705fe0a095a/Tesi_Ferroni%20Francesca.pdf",
+          "outcome": "Primaryauthor thesisrouteweb/native403; no chapterdata borrowed."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.openalex.org/works/https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+          "outcome": "Metadata givespublisher/PubMedonly; no alternativeOAfulltext."
+        }
+      ],
+      "source_review_limit": "Retain accessible primary facts; exact acquisition parameters remain blocked. Do not import values from the 2022 schizophrenia paper or depersonalisation supplementary text. Schizotypy groups are classifications, not patient groups or additional cohorts."
+    },
+    {
+      "network_node_id": "doi:10.1016/j.schres.2021.06.026",
+      "doi": "10.1016/j.schres.2021.06.026",
+      "inventory_status": "no_new_human_acquisition_computational_context",
+      "inventory_evidence_status": "author_version_methods_reviewed_final_comparison_pending",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "Accepted manuscript describes a computational model fitted to existing Di Cosmo et al. data, DOI 10.1016/j.schres.2017.12.003. No newly recruited human cohort; retain one model-context review row. Final/SI version parity remains unverified.",
+      "evidence_pointer": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf::Methods 2.1-2.4, PDF pp. 6-10",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Computational model fitted to prior data; no new human acquisition",
+          "record_id": "",
+          "template_ids": [],
+          "instance_kind": "computational_context",
+          "toolkit_scope": "adjacent_computational_model",
+          "disaggregation_status": "not_applicable_no_new_human_experiment"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf",
+          "outcome": "Institutional accepted manuscript readable through web source; Methods 2.1-2.4 and modeling results inspected. Direct native PDF fetch returned 403; this does not negate the actual web access."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://github.com/renatoparedes/SCZ_PPS_Model/blob/357613bbe147c2eaec8ef218b058a50c523617b3/README.md",
+          "outcome": "Pinned current README and file inventory inspected; no notebooks executed and no participant spreadsheet acquired. This revision postdates publication and is not verified publication-era code."
+        }
+      ],
+      "source_review_limit": "Model assumptions and neural inputs are not new experimental acquisition parameters. Current code availability is not executed or publication-parity verification.",
+      "source_lineage": {
+        "network_node_id": "doi:10.1016/j.schres.2017.12.003",
+        "relationship": "model_fits_prior_behavioral_data_not_new_acquisition",
+        "basis": "Methods identifies the Di Cosmo dataset. Ferroni 2020 is discussed as related/future work, not fitted data."
+      }
     }
   ],
   "corpus_freeze": {
@@ -2335,6 +2493,26 @@
       "review_date": "2026-10-27",
       "reason": "Primary abstract explicitly identifies three experiments. Cohort/Methods inventory remains access-audited and unresolved; no child alone equals the former publication placeholder.",
       "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:34666298%20AND%20SRC:MED&format=json&resultType=core::abstract"
+    },
+    {
+      "old_study_row_id": "doi:10.1152/jn.00652.2017",
+      "child_study_row_ids": [
+        "doi:10.1152/jn.00652.2017::a",
+        "doi:10.1152/jn.00652.2017::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Primary human Methods distinguishes face and trunk cohorts; neither child alone equals the original publication placeholder.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML"
+    },
+    {
+      "old_study_row_id": "doi:10.1016/j.neuropsychologia.2020.107579",
+      "child_study_row_ids": [
+        "doi:10.1016/j.neuropsychologia.2020.107579::a",
+        "doi:10.1016/j.neuropsychologia.2020.107579::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Partial primary Methods confirms two independent cohorts/experiments; full Methods remains access-blocked.",
+      "evidence_pointer": "https://www.sciencedirect.com/science/article/pii/S0028393220302529"
     }
   ]
 }
