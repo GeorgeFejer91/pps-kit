@@ -14,6 +14,7 @@ const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/ja
 const server = createServer(async (request, response) => {
   let path = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
   if (path.startsWith("/assets/preloads/")) path = `/packages/pps-resources${path}`;
+  if (path.startsWith("/assets/breathing/")) path = `/packages/pps-resources${path}`;
   if (path.startsWith("/study_templates/")) path = `/packages/pps-resources${path}`;
   const target = resolve(root, `.${path}`);
   if (!target.startsWith(root.endsWith(sep) ? root : root + sep)) { response.writeHead(403).end(); return; }
@@ -22,7 +23,7 @@ const server = createServer(async (request, response) => {
 });
 await new Promise(done => server.listen(0, "127.0.0.1", done));
 const base = `http://127.0.0.1:${server.address().port}`;
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
 const report = { browser: browser.version(), checks: [] };
 try {
   const runner = await browser.newPage({ viewport: { width: 1280, height: 900 } });
@@ -98,9 +99,48 @@ try {
   report.checks.push("Runner real controls consume mocked native two-block transitions and reject preparation after completion");
 
   const designer = await browser.newPage({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
+  await designer.addInitScript(() => {
+    window.previewStarts = 0;
+    const create = AudioContext.prototype.createBufferSource;
+    AudioContext.prototype.createBufferSource = function (...args) {
+      const source = create.apply(this, args);
+      const start = source.start;
+      source.start = function (...parameters) { window.previewStarts++; return start.apply(this, parameters); };
+      return source;
+    };
+  });
   designer.on("pageerror", error => errors.push(error.message));
   await designer.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&desktop=1`);
   await designer.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
+  const play = designer.locator("[data-preview-source-label]").first();
+  await play.click();
+  await designer.waitForFunction(() => window.previewStarts === 1);
+  await play.click();
+  let releaseAudio;
+  const interceptedAudio = new Promise(done => { releaseAudio = done; });
+  await designer.route("**/*.wav", async route => { releaseAudio(route); });
+  await play.click();
+  const heldAudio = await interceptedAudio;
+  const cancelledAudio = designer.waitForEvent("requestfailed", request => request.url().endsWith(".wav"));
+  await designer.evaluate(() => window.PPSDesignerApp.restoreHostedDraft(window.PPSDesignerApp.getState()));
+  await cancelledAudio;
+  await heldAudio.abort().catch(() => {});
+  await designer.unroute("**/*.wav");
+  assert.equal(await designer.evaluate(() => window.previewStarts), 1);
+  assert.equal(await designer.locator("[data-preview-source-label].playing").count(), 0);
+  await designer.evaluate(async () => {
+    const snapshot = window.PPSDesignerApp.getState();
+    const asset = snapshot.preload_inventory.assets[0];
+    const bytes = await (await fetch(window.PPSDesignerApp.preloadAssetUrl(asset.path))).arrayBuffer();
+    const stored = await window.PPSDesigner.drafts.storeAudio(new File([bytes], "Uploaded.wav", { type: "audio/wav" }));
+    snapshot.design.prestimulus_files.push({ label: "Restored upload", path: `browser-asset:${stored.id}`, render_mode: "preserve", target_duration_s: 4 });
+    window.PPSDesignerApp.restoreHostedDraft(snapshot);
+  });
+  const restoredClip = designer.locator('[data-preview-source-label="Restored upload"]').first();
+  await restoredClip.click();
+  await designer.waitForFunction(() => window.previewStarts === 2);
+  await restoredClip.click();
+  report.checks.push("Premade WAV decodes and starts muted; project replacement cancels pending playback without stale start");
   await designer.evaluate(async () => {
     const snapshot = window.PPSDesignerApp.getState();
     snapshot.design.name = "Browser finalization regression";
@@ -116,6 +156,10 @@ try {
     window.PPSDesigner.drafts.save = async () => { throw new Error("Storage quota test failure"); };
   });
   const previewFixture = await designer.evaluate(() => window.PPSDesignerApp.getState());
+  assert.ok(previewFixture.block_csv_preview.blocks.every(block => block.preview_rows.length === block.trial_count));
+  await writeFile(resolve(output, "browser-full-block-plan.json"), JSON.stringify({
+    design: previewFixture.design, block_csv_preview: previewFixture.block_csv_preview,
+  }, null, 2));
   await designer.locator("#edit-mode-button").click();
   await designer.locator("#save-study-profile").click();
   await designer.waitForFunction(() => document.getElementById("toast").textContent.includes("Storage quota test failure"));
@@ -144,8 +188,11 @@ try {
   assert.equal(await designer.evaluate(async () => (await window.PPSDesigner.drafts.load()).custom_workflow.is_finalized), true);
   assert.equal(await designer.locator("#edit-mode-button").getAttribute("aria-checked"), "false");
   const downloadPromise = designer.waitForEvent("download");
+  const exportError = designer.waitForEvent("dialog").then(async dialog => {
+    const message = dialog.message(); await dialog.dismiss(); throw new Error(`Bundle export: ${message}`);
+  });
   await designer.locator("#export-profile-bundle").click();
-  const download = await downloadPromise;
+  const download = await Promise.race([downloadPromise, exportError]);
   await download.saveAs(resolve(output, "browser-finalized.pps-profile"));
   assert.equal(await download.failure(), null);
   await designer.locator("section").filter({ has: designer.locator("#export-profile-bundle") }).last()
@@ -187,6 +234,7 @@ try {
     return { ...previewFixture, design: payload.design,
       run_sequence_setup: { ...previewFixture.run_sequence_setup, participant_count: payload.design.protocol.participants } };
   };
+  await writeFile(resolve(output, "order-preview-payload.json"), JSON.stringify(pendingPreviews[1].request().postDataJSON(), null, 2));
   await pendingPreviews[1].fulfill({ json: responseFor(pendingPreviews[1]) });
   await nativePreview.waitForFunction(() => window.PPSDesignerApp.getState().design.protocol.participants === 3);
   const oldResponse = nativePreview.waitForResponse(response => response.url().endsWith("/api/run-sequence/preview"));
@@ -272,6 +320,12 @@ try {
   const presetPage = await presetPagePromise;
   await presetPage.waitForFunction(id => window.PPSDesignerApp?.getState()?.selected_template === id, linkedPublication.templateIds[0]);
   assert.equal(new URL(presetPage.url()).searchParams.get("template"), linkedPublication.templateIds[0]);
+  const [legacyStudyId, splitStudyIds] = Object.entries(reviewData.studyRowAliases)[0];
+  await mapper.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&page=documentation&study=${encodeURIComponent(legacyStudyId)}#docs-publication-network`);
+  await network.scrollIntoViewIfNeeded();
+  await mapper.locator("[data-study-alias-notice]").waitFor();
+  assert.equal(await detail.locator("[data-study-id]").count(), splitStudyIds.length);
+  assert.match(await detail.innerText(), /Not Applicable/i);
   assert.deepEqual(errors, []);
   report.checks.push("Mapper retry, DOI search, keyboard detail, study deep link, evidence separation, responsive layout and preset navigation");
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });

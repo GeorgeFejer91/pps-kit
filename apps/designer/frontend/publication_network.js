@@ -601,7 +601,7 @@ export async function initializePublicationNetwork(root) {
     detailTitle.textContent = node.title;
     detailKicker.textContent = `${node.year || "Year unavailable"} · ${node.venue || "Venue unavailable"}`;
     const badges = [
-      makeBadge("Audio–tactile publication", "publication-network-badge-at"),
+      makeBadge("Included publication", "publication-network-badge-at"),
       makeBadge(role),
       makeBadge(provenance === "later_exact_doi_audit" ? "Later exact-DOI audit addition" : "Legacy manually confirmed set"),
     ];
@@ -832,14 +832,22 @@ export async function initializePublicationNetwork(root) {
   root.dataset.publicationNetworkRenderer = "inline-svg";
   updateLayout();
   updateSearch({ syncLink: false });
-  const initialSelection = initialUrl.searchParams.get("publication");
+  const initialStudy = initialUrl.searchParams.get("study");
+  const studyAliases = reviews.studyRowAliases?.[initialStudy] || [];
+  const selectedStudyIds = studyById.has(initialStudy) ? [initialStudy] : studyAliases.filter(id => studyById.has(id));
+  const initialSelection = initialUrl.searchParams.get("publication") || studyById.get(selectedStudyIds[0])?.networkNodeId;
   if (initialSelection) {
     const index = nodes.findIndex(node => node.id === initialSelection || node.doi === initialSelection);
     if (index >= 0) {
       selectNode(index);
-      const studyId = initialUrl.searchParams.get("study");
-      const studyDetails = [...detailBody.querySelectorAll("[data-study-id]")].find(item => item.dataset.studyId === studyId);
+      const studyDetails = [...detailBody.querySelectorAll("[data-study-id]")].find(item => item.dataset.studyId === selectedStudyIds[0]);
       if (studyDetails) studyDetails.open = true;
+      if (studyAliases.length && studyDetails) detailBody.prepend(element("p", {
+        className: "publication-network-detail-muted", attributes: { role: "status", "data-study-alias-notice": true },
+        text: `This earlier study record was split into ${selectedStudyIds.length} reviewed records. Both are shown below.`,
+      }));
+      else if (initialStudy && !studyDetails) detailBody.prepend(element("p", { attributes: { role: "status" },
+        text: "The linked study record is unavailable in this publication. Its current reviews are shown below." }));
     } else status.textContent = `This publication link is not in the current snapshot. ${nodes.length} papers remain searchable.`;
   }
   resizeGraph();

@@ -109,28 +109,101 @@ async function sha256(bytes) {
 async function exportBundle(snapshot) {
   const encoder = new TextEncoder();
   const design = structuredClone(snapshot.design);
-  const assetIds = new Set();
   const instructions = design.study_profile_reference_parameters?.dashboard_run_setup?.instruction_profile?.slots || [];
-  for (const item of [...(design.custom_looming_files || []), ...(design.prestimulus_files || []), ...instructions]) {
-    const id = item.browser_asset_id || (item.path?.startsWith("browser-asset:") ? item.path.slice("browser-asset:".length) : "");
-    if (id) assetIds.add(id);
-  }
+  const references = [
+    ...(design.noises || []).map(item => ({ item, key: "prebaked_path" })),
+    ...[...(design.custom_looming_files || []), ...(design.prestimulus_files || []), ...instructions].map(item => ({ item, key: "path" })),
+  ];
+  const inventory = new Map((snapshot.preload_inventory?.assets || []).map(asset => [asset.path, asset]));
+  const spokenManifests = new Set();
+  const resolved = new Map();
   const assetRecords = [];
   const files = [];
-  for (const id of assetIds) {
-    const asset = await drafts.asset(id);
-    if (!asset) throw new Error(`Local browser audio is missing: ${id}`);
-    const path = `assets/${id}`;
-    const bytes = new Uint8Array(asset.bytes);
-    files.push({ name: path, bytes });
-    assetRecords.push({ logical_id: id, path, sha256: await sha256(bytes), bytes: bytes.length, media_type: asset.type, source_name: asset.name });
+  let totalBytes = 0;
+  for (const { item, key } of references) {
+    const reference = String(item[key] || "");
+    const browserId = reference.startsWith("browser-asset:") ? reference.slice("browser-asset:".length) : item.browser_asset_id;
+    if (!reference && !browserId) continue;
+    const sourceKey = browserId ? `browser-asset:${browserId}` : reference;
+    let id = resolved.get(sourceKey);
+    if (!id) {
+      let bytes, mediaType, sourceName, digest;
+      if (browserId) {
+        if (!/^[a-zA-Z0-9._-]+$/.test(browserId) || [".", ".."].includes(browserId)) throw new Error("Invalid local audio asset identity.");
+        const asset = await drafts.asset(browserId);
+        if (!asset) throw new Error(`Local browser audio is missing: ${browserId}`);
+        bytes = new Uint8Array(asset.bytes);
+        mediaType = asset.type;
+        sourceName = asset.name;
+        id = browserId;
+      } else {
+        const spokenPath = /^assets\/breathing\/(?:[a-zA-Z0-9_-]+\/)?[a-zA-Z0-9_-]+\.wav$/.test(reference);
+        const directory = reference.slice(0, reference.lastIndexOf("/"));
+        if (spokenPath && !inventory.has(reference) && !spokenManifests.has(directory)) {
+          const manifestUrl = window.PPSDesignerApp?.preloadAssetUrl(`${directory}/spoken_assets_manifest.json`);
+          if (!manifestUrl) throw new Error("Spoken audio inventory cannot be resolved in this Designer.");
+          const response = await fetch(manifestUrl);
+          if (!response.ok) throw new Error(`Spoken audio inventory unavailable (${response.status}).`);
+          const text = await response.text();
+          if (text.length > 1024 * 1024) throw new Error("Spoken audio inventory exceeds its size limit.");
+          const manifest = JSON.parse(text);
+          for (const [name, entry] of Object.entries(manifest.files || {})) {
+            if (/^[a-zA-Z0-9_-]+\.wav$/.test(name)) inventory.set(`${directory}/${name}`, { path: `${directory}/${name}`, sha256: entry.sha256 });
+          }
+          spokenManifests.add(directory);
+        }
+        const asset = inventory.get(reference);
+        if (!asset || !(spokenPath || /^assets\/preloads\/[a-zA-Z0-9_./-]+$/.test(reference)) || reference.split("/").includes("..") || !/^[a-f0-9]{64}$/.test(asset.sha256 || "")) {
+          throw new Error(`Audio is not in the verified preload inventory: ${item.label || reference}`);
+        }
+        const url = window.PPSDesignerApp?.preloadAssetUrl(reference);
+        if (!url) throw new Error("Preloaded audio cannot be resolved in this Designer.");
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Preloaded audio download failed (${response.status}): ${item.label || reference}`);
+        const reader = response.body.getReader();
+        const chunks = [];
+        let size = 0;
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            size += value.byteLength;
+            if (size > 64 * 1024 * 1024) throw new Error("Audio exceeds the 64 MiB portable asset limit.");
+            chunks.push(value);
+          }
+        } finally { await reader.cancel(); }
+        bytes = new Uint8Array(size);
+        let offset = 0;
+        for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+        digest = await sha256(bytes);
+        if (digest !== asset.sha256) throw new Error(`Preloaded audio checksum mismatch: ${item.label || reference}`);
+        id = `${digest}.wav`;
+        mediaType = "audio/wav";
+        sourceName = reference.split("/").pop();
+      }
+      if (bytes.length > 64 * 1024 * 1024) throw new Error("Audio exceeds the 64 MiB portable asset limit.");
+      digest ||= await sha256(bytes);
+      const existing = assetRecords.find(asset => asset.logical_id === id);
+      if (existing && existing.sha256 !== digest) throw new Error("Conflicting portable audio identities.");
+      if (!existing) {
+        totalBytes += bytes.length;
+        if (totalBytes > 256 * 1024 * 1024) throw new Error("Audio exceeds the 256 MiB portable bundle limit.");
+        const path = `assets/${id}`;
+        files.push({ name: path, bytes });
+        assetRecords.push({ logical_id: id, path, sha256: digest, bytes: bytes.length, media_type: mediaType, source_name: sourceName });
+      }
+      resolved.set(sourceKey, id);
+    }
+    item[key] = `browser-asset:${id}`;
+    item.browser_asset_id = id;
+    delete item.browser_preview_url;
   }
   const profileId = `custom_${String(design.name || "profile").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 32) || "profile"}`;
   const profile = { schema: "pps-study-profile.v1", profile_id: profileId, profile_kind: "custom", display_name: design.name, design, assets: assetRecords };
   const profileBytes = encoder.encode(`${JSON.stringify(profile, null, 2)}\n`);
   files.unshift({ name: "profile.json", bytes: profileBytes });
-  const inventory = [];
-  for (const file of files) inventory.push({ path: file.name, sha256: await sha256(file.bytes), bytes: file.bytes.length });
+  const fileInventory = [];
+  for (const file of files) fileInventory.push({ path: file.name, sha256: await sha256(file.bytes), bytes: file.bytes.length });
   const manifest = {
     schema: "pps-profile-bundle.v1",
     profile_id: profileId,
@@ -139,7 +212,7 @@ async function exportBundle(snapshot) {
     created_at: new Date().toISOString(),
     capability_provenance: "hosted_compose",
     parent: { profile_id: design.study_profile_reference_parameters?.customized_from_profile_id || "" },
-    files: inventory,
+    files: fileInventory,
   };
   files.unshift({ name: "manifest.json", bytes: encoder.encode(`${JSON.stringify(manifest, null, 2)}\n`) });
   await saveProfileDownload(zipStored(files), `${profileId}.pps-profile`);
