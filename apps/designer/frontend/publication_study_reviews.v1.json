@@ -10,23 +10,23 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 128,
-    "contracts": 1408,
-    "reportedComplete": 242,
-    "derivedComplete": 45,
+    "studies": 132,
+    "contracts": 1452,
+    "reportedComplete": 254,
+    "derivedComplete": 53,
     "parameterStatusCounts": {
       "approximation_required": 24,
       "composite_requires_split": 146,
-      "conflicting_evidence": 18,
-      "derived_complete": 45,
+      "conflicting_evidence": 27,
+      "derived_complete": 53,
       "explicitly_absent": 19,
-      "low_confidence": 37,
+      "low_confidence": 27,
       "not_applicable": 77,
       "not_assessed": 308,
       "not_reported": 26,
-      "partial": 228,
-      "reported_complete": 242,
-      "source_unavailable": 238
+      "partial": 254,
+      "reported_complete": 254,
+      "source_unavailable": 237
     }
   },
   "statusLegend": {
@@ -60,6 +60,13 @@
     "doi:10.1371/journal.pone.0006582": [
       "doi:10.1371/journal.pone.0006582::a",
       "doi:10.1371/journal.pone.0006582::b"
+    ],
+    "doi:10.1523/jneurosci.1696-15.2015": [
+      "doi:10.1523/jneurosci.1696-15.2015::a",
+      "doi:10.1523/jneurosci.1696-15.2015::b",
+      "doi:10.1523/jneurosci.1696-15.2015::c",
+      "doi:10.1523/jneurosci.1696-15.2015::d",
+      "doi:10.1523/jneurosci.1696-15.2015::e"
     ]
   },
   "publications": [
@@ -611,9 +618,9 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "conflicting_evidence": 2,
-        "partial": 13,
-        "reported_complete": 7
+        "conflicting_evidence": 5,
+        "partial": 11,
+        "reported_complete": 6
       },
       "nativeQualification": "not_assessed"
     },
@@ -1060,12 +1067,18 @@
     {
       "networkNodeId": "doi:10.1523/jneurosci.1696-15.2015",
       "studyIds": [
-        "doi:10.1523/jneurosci.1696-15.2015"
+        "doi:10.1523/jneurosci.1696-15.2015::a",
+        "doi:10.1523/jneurosci.1696-15.2015::b",
+        "doi:10.1523/jneurosci.1696-15.2015::c",
+        "doi:10.1523/jneurosci.1696-15.2015::d",
+        "doi:10.1523/jneurosci.1696-15.2015::e"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 10,
-        "source_unavailable": 1
+        "conflicting_evidence": 6,
+        "derived_complete": 8,
+        "partial": 28,
+        "reported_complete": 13
       },
       "nativeQualification": "not_assessed"
     },
@@ -18390,9 +18403,9 @@
       "evidenceScope": "composite_requires_split",
       "templateIds": [],
       "parameterStatusCounts": {
-        "conflicting_evidence": 2,
-        "partial": 6,
-        "reported_complete": 3
+        "conflicting_evidence": 5,
+        "partial": 4,
+        "reported_complete": 2
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -18511,11 +18524,11 @@
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "partial",
+          "status": "conflicting_evidence",
           "value": "Variable ITI: Figure 1 prints 4.56, 6.2 and 7.75 seconds.",
           "compositeValue": "",
           "pageOrSection": "Methods pp. 9-10; Figure 1",
-          "evidenceNote": "The figure was visually inspected. Do not silently replace 4.56 with 4.65 by assuming an integer number of scanner TRs; selection frequencies are unresolved.",
+          "evidenceNote": "Original Ferri 2015 reports 4.65 s, while the visually inspected 2021 Figure 1 prints 4.56 s. Preserve both source versions rather than silently normalizing the reanalysis value. Original primary source: https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-021-00048-5",
@@ -18534,7 +18547,7 @@
               "note": ""
             },
             "values_or_range": {
-              "status": "reported",
+              "status": "conflicting_evidence",
               "value": "4.56, 6.2 and 7.75 s, as printed in Figure 1.",
               "note": ""
             }
@@ -18659,11 +18672,11 @@
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "partial",
+          "status": "conflicting_evidence",
           "value": "48 experimental rows per four conditions = 192; catch denominator remains unresolved.",
           "compositeValue": "",
           "pageOrSection": "Methods pp. 9-10; Figure 1",
-          "evidenceNote": "Do not infer 272 total fMRI rows or a behavioral 300-row schedule as directly reported by this source.",
+          "evidenceNote": "Original Ferri 2015 reports 30 experimental rows per condition; this later reanalysis reports 48. The relationship of these differing counts is unresolved, so neither silently overwrites the other. Original primary source: https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-021-00048-5",
@@ -18682,7 +18695,7 @@
               "note": ""
             },
             "repetitions_or_exact_counts": {
-              "status": "reported",
+              "status": "conflicting_evidence",
               "value": "48 main trials per condition; 20 catch trials for the same conditions, ambiguous denominator.",
               "note": ""
             }
@@ -18691,15 +18704,17 @@
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "reported_complete",
+          "status": "conflicting_evidence",
           "value": "Eight six-minute fMRI runs with all four conditions and both trial types distributed equally.",
           "compositeValue": "",
           "pageOrSection": "Methods pp. 9-10; Figure 1",
-          "evidenceNote": "Exact row counts remain a separate unresolved allocation contract.",
+          "evidenceNote": "Original Ferri 2015 reports five six-minute runs; this later reanalysis reports eight. Shared dataset lineage does not resolve the incompatible run descriptions. Original primary source: https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf",
           "derivationNote": "",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-021-00048-5",
-          "missingComponents": [],
+          "missingComponents": [
+            "block_count"
+          ],
           "components": {
             "block_composition": {
               "status": "reported",
@@ -18707,7 +18722,7 @@
               "note": ""
             },
             "block_count": {
-              "status": "reported",
+              "status": "conflicting_evidence",
               "value": "8 runs, 6 min each.",
               "note": ""
             }
@@ -31431,217 +31446,1770 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1523/jneurosci.1696-15.2015",
+      "studyRowId": "doi:10.1523/jneurosci.1696-15.2015::a",
       "networkNodeId": "doi:10.1523/jneurosci.1696-15.2015",
-      "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (a)",
+      "experimentLabel": "Main behavioral boundary estimation",
+      "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
+      "evidenceScope": "composite_requires_split",
       "templateIds": [],
       "parameterStatusCounts": {
-        "low_confidence": 10,
-        "source_unavailable": 1
+        "conflicting_evidence": 1,
+        "derived_complete": 4,
+        "partial": 3,
+        "reported_complete": 3
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "low_confidence",
-          "value": "Source provenance: Auto-mined candidates: SoundForge | Auditory conditions: Auto-mined candidates: approaching; receding; IN sound; front; rear; left; right | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s); headphones",
+          "status": "partial",
+          "value": "3100-ms pink-noise samples at 44.1 kHz; exponentially rising 55-70 dB or flat 62.5 dB.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 6, 2, 3 | source page/section(s) 7, 12, 2 | source page/section(s) 7, 2, 4",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Exact waveform files, noise realization, exponential envelope coefficients and calibration transfer are not available from the inspected Methods. The reported level span is not a complete digital recipe.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Soundforge 4.5 generated looming/flat pink-noise samples; NordicNeuroLab-compatible headphones for fMRI, two loudspeakers for behavioral sessions.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "low_confidence",
-          "value": "Trajectory path: Auto-mined candidates: approaching trajectory; receding trajectory | Stimulus duration: Auto-mined candidates: 1000 ms; 0.15 ms; 0.16 ms; 0.037 ms; 0.036 ms | Trajectory count: Auto-mined candidates: approaching and receding motions | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s); headphones",
+          "status": "partial",
+          "value": "Near right-hand and far speakers separated by 100 cm provide intensity-based looming versus flat control.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 2, 7, 3 | source page/section(s) 2, 3, 6 | source page/section(s) 7, 2, 1 | source page/section(s) 7, 2, 4",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The source level envelope and speaker separation do not establish a physically moving source or a verified continuous metric trajectory.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "intensity_to_distance_mapping"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Participant hand-relative perceived distance.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near speaker beside right hand; far speaker 100 cm from near speaker, with no exact near-hand offset.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "gain_only_proxy",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3100-ms sound.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "low_confidence",
-          "value": "Trial rows families: Auto-mined candidates: audio-tactile trials; catch trials | Task sequence rules: Auto-mined candidates: ignore auditory stimulus; catch/no-target trials; tactile target trials | Condition intermixing: Auto-mined candidates: random combination of trials; randomized",
+          "status": "reported_complete",
+          "value": "Looming/flat sound paired with right-index targets, intermingled with the specified catch family.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 7, 4, 5 | source page/section(s) 2, 4, 5 | source page/section(s) 4, 2, 7",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound onset precedes target touch; trial is followed by a 1000-ms ITI in the main task.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Looming/flat x five positive tactile delays; catches omit touch.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "low_confidence",
-          "value": "Task sequence rules: Auto-mined candidates: ignore auditory stimulus; catch/no-target trials; tactile target trials | Response window: Auto-mined candidates: button response",
+          "status": "partial",
+          "value": "Respond to right-index touch with the left index finger on the response box; ignore sound.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 2, 4, 5 | source page/section(s) 2, 4, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "No online response deadline is stated; analysis filtering is not a substitute.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Left index finger button press as quickly as possible.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Cedrus RB-834 response box in the main behavioral task.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to tactile targets when present; withhold on auditory-only catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "low_confidence",
-          "value": "Iti jitter policy: Auto-mined candidates: 1000 ms; 1500 ms; 2200 ms; 2700 ms; 7.75 s",
+          "status": "reported_complete",
+          "value": "Fixed 1000-ms ITI after each trial.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 2, 3, 4",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "fixed",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "After each trial in the main behavioral task.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "low_confidence",
-          "value": "Soa table: Auto-mined candidates: 0.24 ms; 1500 ms; 2200 ms; 2700 ms; T1,T2,T3,T4,T5)",
+          "status": "reported_complete",
+          "value": "Auditory-onset anchored +300,+800,+1500,+2200,+2700 ms.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 7, 4, 2",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "+300,+800,+1500,+2200,+2700 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive means touch after sound onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "low_confidence",
-          "value": "Tactile stimulus: Auto-mined candidates: electrical tactile stimulation; tactile stimulator; 1000 ms; 1500 ms; 2200 ms; 2700 ms",
+          "status": "conflicting_evidence",
+          "value": "Single 100-microsecond rectangular monophasic electrical pulse; DS7A is called constant-current but the pulse constant-voltage.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 2, 3, 4",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Source reports a ten-target/five-no-stimulation threshold check with 100% criterion, 5-mA increments and 60-90 mA observed settings. These describe the authors apparatus; no new safe operating equivalence or PPS Kit physical qualification is inferred.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
+            "modality"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Hairy surface of right index finger.",
+              "note": ""
+            },
+            "modality": {
+              "status": "conflicting_evidence",
+              "value": "Digitimer DS7A constant-current stimulator versus source constant-voltage pulse wording.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single rectangular monophasic pulse, 100 microseconds; intensity individually above threshold each session.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "low_confidence",
-          "value": "Baseline timing: Auto-mined candidates: 1000 ms; 1500 ms; 2200 ms; 2700 ms; 7.75 s; T6",
+          "status": "derived_complete",
+          "value": "Flat 62.5-dB sound is the control; no separate silent tactile-only baseline is described.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 2, 3, 4",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The static auditory control still includes sound and touch; absence of a described silent control does not establish every unmentioned family as explicitly absent.",
+          "derivationNote": "18 reported targets x 5 flat-condition delays = 90.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "18 targets x 5 flat-condition delays per session.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "static_or_fixed_distance_expectancy_control",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "90 flat targets = 18 x 5.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Same five positive sound-to-touch SOAs.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "low_confidence",
-          "value": "Catch trial type: Auto-mined candidates: auditory-only catch trials",
+          "status": "derived_complete",
+          "value": "Auditory-only withhold catches: derived 120 of 300 total trials.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 4, 2, 5",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "18 x 5 x 2 = 180 target rows; 180 / 0.60 = 300 total; 300 x 0.40 = 120 catch rows.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "40% of total; 180 tactile targets constitute 60% per session.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "120 = (180 / 0.60) x 0.40.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch, so no tactile-detection response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "derived_complete",
+          "value": "300 total trials: 18 x 5 delays x 2 sounds = 180 targets, 60% of total; 120 catches.",
           "compositeValue": "",
-          "pageOrSection": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
           "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "derivationNote": "18 x 5 x 2 = 180 target rows; 180 / 0.60 = 300 total; 300 x 0.40 = 120 catch rows.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "300 = (18 x 5 x 2) / 0.60; catches = 300 - 180 = 120.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Calibration and localization validation counts are separate from the main schedule.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 sound types x 5 target delays, plus catch family.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "18 targets per sound-delay cell; 60% targets and 40% catches per session.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "low_confidence",
-          "value": "Blocked or random order: Auto-mined candidates: randomized/random order | Condition intermixing: Auto-mined candidates: random combination of trials; randomized",
+          "status": "derived_complete",
+          "value": "Three equal behavioral blocks: derived 100 total rows per block.",
           "compositeValue": "",
-          "pageOrSection": "source page/section(s) 4, 2, 7",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The paper does not establish exact factor-balanced cell counts in each behavioral block.",
+          "derivationNote": "300 total rows equally divided into three blocks = 100 rows per block.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "derived",
+              "value": "Target and catch rows randomly intermingled and equally divided across three blocks; 300 / 3 = 100 total rows per block.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "Three blocks.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random condition combination and catch intermixing.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1523/jneurosci.1696-15.2015::b",
+      "networkNodeId": "doi:10.1523/jneurosci.1696-15.2015",
+      "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (b)",
+      "experimentLabel": "fMRI PPS with left-index attention targets",
+      "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
+      "evidenceScope": "composite_requires_split",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "conflicting_evidence": 2,
+        "partial": 6,
+        "reported_complete": 3
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "partial",
+          "value": "3100-ms pink-noise samples at 44.1 kHz; exponentially rising 55-70 dB or flat 62.5 dB.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Exact waveform files, noise realization, exponential envelope coefficients and calibration transfer are not available from the inspected Methods. The reported level span is not a complete digital recipe.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "source_recipe_or_asset_provenance"
+          ],
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Soundforge 4.5 generated looming/flat pink-noise samples; NordicNeuroLab-compatible headphones for fMRI, two loudspeakers for behavioral sessions.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "partial",
+          "value": "Intensity-based looming versus flat control; auditory distance is individually behaviorally anchored in fMRI.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The source level envelope and speaker separation do not establish a physically moving source or a verified continuous metric trajectory.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "intensity_to_distance_mapping"
+          ],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Participant hand-relative perceived distance.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Headphone presentation replaces the behavioral loudspeaker configuration; independent localization task compares setups.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "gain_only_proxy",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3100-ms sound.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "reported_complete",
+          "value": "Looming/flat sound always paired with right- or left-index touch.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound onset, selected tactile delay, then ITI; catch trials have an additional post-trial interval.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Four sound-by-near/far conditions, right-index experimental trials and left-index attention targets.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "Press with the left middle finger only for left-index touch; right-index experimental touch has no response.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "No online response deadline is stated; analysis filtering is not a substitute.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "response_window_and_anchor"
+          ],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Left middle finger button press as quickly as possible.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "MRI-compatible Cedrus Lumina LU400 with LSC-400 controller.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Left-index catches are active attention targets; withhold to right-index experimental touch.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "conflicting_evidence",
+          "value": "ITI 4.65,6.2,7.75 s; additional post-catch interval is printed 1.55 ms but called one MR time point (TR 1550 ms).",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Do not silently correct 1.55 ms to 1.55 s; preserve the explicit unit conflict and unresolved selection probabilities.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "distribution",
+            "resolved_post_catch_interval"
+          ],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "discrete_set",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "After each trial, plus an additional interval after catch trials.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "conflicting_evidence",
+              "value": "4.65,6.2,7.75 s; printed extra 1.55 ms conflicts with one TR = 1550 ms.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "reported_complete",
+          "value": "Two individual near/far delays chosen from the five-delay behavioral ladder.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The selection rule is reported, not one fixed universal near/far pair. The rule does not specify a tie-break when fastest and least-variable ranks disagree.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "TNEAR: fastest and least-variable mean RT; TFAR: slowest and least-variable mean RT, selected per participant from +300,+800,+1500,+2200,+2700 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive means touch after sound onset.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "conflicting_evidence",
+          "value": "Single 100-microsecond rectangular monophasic electrical pulse; DS7A is called constant-current but the pulse constant-voltage.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Source reports a ten-target/five-no-stimulation threshold check with 100% criterion, 5-mA increments and 60-90 mA observed settings. These describe the authors apparatus; no new safe operating equivalence or PPS Kit physical qualification is inferred.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "modality"
+          ],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Hairy index-finger surface; right experimental and left attention/catch target.",
+              "note": ""
+            },
+            "modality": {
+              "status": "conflicting_evidence",
+              "value": "Digitimer DS7A constant-current stimulator versus source constant-voltage pulse wording.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single rectangular monophasic pulse, 100 microseconds; intensity individually above threshold each session.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "partial",
+          "value": "Flat 62.5-dB sound is the control; no separate silent tactile-only baseline is described.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The static auditory control still includes sound and touch; absence of a described silent control does not establish every unmentioned family as explicitly absent.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "resolved_trial_count"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "30 right-index experimental rows for each of two flat-delay conditions; left-index allocation unresolved.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "static_or_fixed_distance_expectancy_control",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Same two individual near/far SOAs.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "partial",
+          "value": "Paper-labelled catches are positive response targets on the left index; press with the left middle finger.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Do not silently expand the ambiguous fMRI phrase to 80 total catches.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "resolved_trial_count"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "20 catch trials for the same four conditions; per-condition versus overall denominator is unclear.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "left_index_positive_response_attention_target",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Respond with left middle finger to left-index touch.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "partial",
+          "value": "30 experimental trials x four conditions = 120, plus 20 catches with unresolved denominator.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Original 2015 reports 30 experimental rows per condition, whereas the later Spadone 2021 reanalysis states 48; protocol equivalence is not assumed.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "derived_total_reconciliation"
+          ],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Catch denominator remains unresolved.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 sound types x 2 individual delays, with right/left stimulation roles.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "30 right-index experimental rows per condition; 20 catch rows for the same conditions.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "reported_complete",
+          "value": "Five six-minute fMRI runs with four conditions and both trial roles distributed equally.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The later reanalysis states eight runs; the original five-run schedule is retained independently.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "Four sound-delay conditions and both stimulation roles equally distributed across runs; catch denominator separately unresolved.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "Five runs of six minutes.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random condition combination and catch intermixing.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1523/jneurosci.1696-15.2015::c",
+      "networkNodeId": "doi:10.1523/jneurosci.1696-15.2015",
+      "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (c)",
+      "experimentLabel": "Across-session reproducibility of the behavioral boundary",
+      "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
+      "evidenceScope": "composite_requires_split",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "conflicting_evidence": 1,
+        "derived_complete": 4,
+        "partial": 3,
+        "reported_complete": 3
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "partial",
+          "value": "3100-ms pink-noise samples at 44.1 kHz; exponentially rising 55-70 dB or flat 62.5 dB.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Exact waveform files, noise realization, exponential envelope coefficients and calibration transfer are not available from the inspected Methods. The reported level span is not a complete digital recipe.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "source_recipe_or_asset_provenance"
+          ],
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Soundforge 4.5 generated looming/flat pink-noise samples; NordicNeuroLab-compatible headphones for fMRI, two loudspeakers for behavioral sessions.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "partial",
+          "value": "Near right-hand and far speakers separated by 100 cm provide intensity-based looming versus flat control.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The source level envelope and speaker separation do not establish a physically moving source or a verified continuous metric trajectory.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "intensity_to_distance_mapping"
+          ],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Participant hand-relative perceived distance.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near speaker beside right hand; far speaker 100 cm from near speaker, with no exact near-hand offset.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "gain_only_proxy",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3100-ms sound.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "reported_complete",
+          "value": "Looming/flat sound paired with right-index targets, intermingled with the specified catch family.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound onset precedes target touch; trial is followed by a 1000-ms ITI in the main task.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Looming/flat x five positive tactile delays; catches omit touch.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "Respond to right-index touch with the left index finger on the response box; ignore sound.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "No online response deadline is stated; analysis filtering is not a substitute.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "response_window_and_anchor"
+          ],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Left index finger button press as quickly as possible.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Cedrus RB-834 response box in the main behavioral task.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to tactile targets when present; withhold on auditory-only catches.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "reported_complete",
+          "value": "Fixed 1000-ms ITI after each trial.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Across-session task is explicitly the same task twice.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "fixed",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "After each trial in the main behavioral task.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "reported_complete",
+          "value": "Auditory-onset anchored +300,+800,+1500,+2200,+2700 ms.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "+300,+800,+1500,+2200,+2700 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive means touch after sound onset.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "conflicting_evidence",
+          "value": "Single 100-microsecond rectangular monophasic electrical pulse; DS7A is called constant-current but the pulse constant-voltage.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Source reports a ten-target/five-no-stimulation threshold check with 100% criterion, 5-mA increments and 60-90 mA observed settings. These describe the authors apparatus; no new safe operating equivalence or PPS Kit physical qualification is inferred.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "modality"
+          ],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Hairy surface of right index finger.",
+              "note": ""
+            },
+            "modality": {
+              "status": "conflicting_evidence",
+              "value": "Digitimer DS7A constant-current stimulator versus source constant-voltage pulse wording.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single rectangular monophasic pulse, 100 microseconds; intensity individually above threshold each session.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "derived_complete",
+          "value": "Flat 62.5-dB sound is the control; no separate silent tactile-only baseline is described.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The static auditory control still includes sound and touch; absence of a described silent control does not establish every unmentioned family as explicitly absent.",
+          "derivationNote": "18 reported targets x 5 flat-condition delays = 90 per session; the same task is explicitly repeated twice.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "18 targets x 5 flat-condition delays per session.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "static_or_fixed_distance_expectancy_control",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "180 flat targets across two sessions, 90 per session.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Same five positive sound-to-touch SOAs.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "derived_complete",
+          "value": "Auditory-only withhold catches: 240 across two sessions, 120 per session.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "180 reported targets / 0.60 = 300 total, of which 120 are catches, per session; identical task repeated twice for 600 total and 240 catches.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "40% of total; 180 tactile targets constitute 60% per session.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "240 overall = 120 per session x two sessions.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch, so no tactile-detection response.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "derived_complete",
+          "value": "600 trials across two sessions: 300 per session, each 180 targets and 120 catches.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "180 reported targets / 0.60 = 300 total, of which 120 are catches, per session; identical task repeated twice for 600 total and 240 catches.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "600 = 2 x ((18 x 5 x 2) / 0.60).",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Two same-task sessions separated by at least one week.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 sound types x 5 target delays, plus catch family.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "18 targets per sound-delay cell; 60% targets and 40% catches per session.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "derived_complete",
+          "value": "Three equal blocks per session; two sessions at least one week apart, six blocks overall.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The paper does not establish exact factor-balanced cell counts in each behavioral block.",
+          "derivationNote": "300 total reported/derived rows equally divided into three blocks = 100 rows per block; two repeated sessions yield six blocks.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "derived",
+              "value": "Target and catch rows randomly intermingled and equally divided across three blocks; 300 / 3 = 100 total rows per block.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "Three blocks per session; six overall across two sessions.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random condition combination and catch intermixing.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1523/jneurosci.1696-15.2015::d",
+      "networkNodeId": "doi:10.1523/jneurosci.1696-15.2015",
+      "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (d)",
+      "experimentLabel": "Across-task Experiment 1: sound-only catches",
+      "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
+      "evidenceScope": "composite_requires_split",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "conflicting_evidence": 1,
+        "partial": 8,
+        "reported_complete": 2
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "partial",
+          "value": "3100-ms pink-noise samples at 44.1 kHz; exponentially rising 55-70 dB or flat 62.5 dB.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Exact waveform files, noise realization, exponential envelope coefficients and calibration transfer are not available from the inspected Methods. The reported level span is not a complete digital recipe.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "source_recipe_or_asset_provenance"
+          ],
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Soundforge 4.5 generated looming/flat pink-noise samples; NordicNeuroLab-compatible headphones for fMRI, two loudspeakers for behavioral sessions.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "partial",
+          "value": "Near right-hand and far speakers separated by 100 cm provide intensity-based looming versus flat control.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The source level envelope and speaker separation do not establish a physically moving source or a verified continuous metric trajectory.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "intensity_to_distance_mapping"
+          ],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Participant hand-relative perceived distance.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near speaker beside right hand; far speaker 100 cm from near speaker, with no exact near-hand offset.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "gain_only_proxy",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3100-ms sound.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "reported_complete",
+          "value": "Looming/flat sound paired with right-index targets, intermingled with the specified catch family.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Across-task experiments refer to the same stimuli and specify the catch-only contrast; cohort-specific repetitions and complete timing procedure are not restated.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound onset precedes target touch; trial is followed by a 1000-ms ITI in the main task.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Looming/flat x five positive tactile delays; catches omit touch.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "Respond to right-index touch with the left index finger on the response box; ignore sound.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "No online response deadline is stated. Across-task response apparatus/mapping follows the referenced behavioral task; the current subsection explicitly changes only catch stimulus and withholding rule.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "response_window_and_anchor"
+          ],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Left index finger button press as quickly as possible.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Cedrus RB-834 response box in the main behavioral task.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to tactile targets when present; withhold on auditory-only catches.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "partial",
+          "value": "The referenced main behavioral task uses a fixed 1000-ms ITI; the across-task subsection does not restate its timing procedure.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "current_variant_timing_confirmation"
+          ],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "fixed",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "After each trial in the main behavioral task.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "reported_complete",
+          "value": "Auditory-onset anchored +300,+800,+1500,+2200,+2700 ms.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Across-task experiments explicitly use the same stimuli as the main behavioral task.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "+300,+800,+1500,+2200,+2700 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive means touch after sound onset.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "conflicting_evidence",
+          "value": "Single 100-microsecond rectangular monophasic electrical pulse; DS7A is called constant-current but the pulse constant-voltage.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Source reports a ten-target/five-no-stimulation threshold check with 100% criterion, 5-mA increments and 60-90 mA observed settings. These describe the authors apparatus; no new safe operating equivalence or PPS Kit physical qualification is inferred.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "modality"
+          ],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Hairy surface of right index finger.",
+              "note": ""
+            },
+            "modality": {
+              "status": "conflicting_evidence",
+              "value": "Digitimer DS7A constant-current stimulator versus source constant-voltage pulse wording.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single rectangular monophasic pulse, 100 microseconds; intensity individually above threshold each session.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "partial",
+          "value": "Flat 62.5-dB sound is the control; no separate silent tactile-only baseline is described.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The static auditory control still includes sound and touch; absence of a described silent control does not establish every unmentioned family as explicitly absent.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "resolved_trial_count"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Flat/looming stimulus conditions are retained, but current subsection does not restate cell repetitions.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "static_or_fixed_distance_expectancy_control",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Same five positive sound-to-touch SOAs.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "partial",
+          "value": "40% auditory-only catches; withhold a response; total unresolved for this cohort.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "resolved_trial_count"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "40% of this experiment, but total or cell repetitions not restated.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch, so no tactile-detection response.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "partial",
+          "value": "Two randomized-order experiments retain a 60% target/40% catch split; cell repetitions and totals are not restated.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "derived_total_reconciliation"
+          ],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Catch family changes between the two experiments; do not infer main-cohort totals.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 sound types x 5 target delays, plus catch family.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "40% catches; no repeated 18-per-cell count in this cohort subsection.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "partial",
+          "value": "Both catch-variant experiments are administered in randomized order; block count/composition not restated.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The paper does not establish exact factor-balanced cell counts in each behavioral block.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
           "missingComponents": [
             "block_count",
             "block_composition"
           ],
-          "components": {}
+          "components": {
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Experiment 1/2 order randomized within the same participants.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1523/jneurosci.1696-15.2015::e",
+      "networkNodeId": "doi:10.1523/jneurosci.1696-15.2015",
+      "label": "Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. (e)",
+      "experimentLabel": "Across-task Experiment 2: left-index withhold catches",
+      "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
+      "evidenceScope": "composite_requires_split",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "conflicting_evidence": 1,
+        "partial": 8,
+        "reported_complete": 2
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "partial",
+          "value": "3100-ms pink-noise samples at 44.1 kHz; exponentially rising 55-70 dB or flat 62.5 dB.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Exact waveform files, noise realization, exponential envelope coefficients and calibration transfer are not available from the inspected Methods. The reported level span is not a complete digital recipe.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "source_recipe_or_asset_provenance"
+          ],
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Soundforge 4.5 generated looming/flat pink-noise samples; NordicNeuroLab-compatible headphones for fMRI, two loudspeakers for behavioral sessions.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "partial",
+          "value": "Near right-hand and far speakers separated by 100 cm provide intensity-based looming versus flat control.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The source level envelope and speaker separation do not establish a physically moving source or a verified continuous metric trajectory.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "intensity_to_distance_mapping"
+          ],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Participant hand-relative perceived distance.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near speaker beside right hand; far speaker 100 cm from near speaker, with no exact near-hand offset.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "gain_only_proxy",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3100-ms sound.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "reported_complete",
+          "value": "Looming/flat sound paired with right-index targets, intermingled with the specified catch family.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Across-task experiments refer to the same stimuli and specify the catch-only contrast; cohort-specific repetitions and complete timing procedure are not restated.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Sound onset precedes target touch; trial is followed by a 1000-ms ITI in the main task.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Looming/flat x five right-index tactile delays; catches instead deliver left-index touch.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "Respond to right-index touch with the left index finger on the response box; ignore sound.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "No online response deadline is stated. Across-task response apparatus/mapping follows the referenced behavioral task; the current subsection explicitly changes only catch stimulus and withholding rule.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "response_window_and_anchor"
+          ],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Left index finger button press as quickly as possible.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Cedrus RB-834 response box in the main behavioral task.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to right-index targets; withhold to left-index catch touch.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "partial",
+          "value": "The referenced main behavioral task uses a fixed 1000-ms ITI; the across-task subsection does not restate its timing procedure.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "current_variant_timing_confirmation"
+          ],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "fixed",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "After each trial in the main behavioral task.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "reported_complete",
+          "value": "Auditory-onset anchored +300,+800,+1500,+2200,+2700 ms.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Across-task experiments explicitly use the same stimuli as the main behavioral task.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "+300,+800,+1500,+2200,+2700 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive means touch after sound onset.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "conflicting_evidence",
+          "value": "Single 100-microsecond rectangular monophasic electrical pulse; DS7A is called constant-current but the pulse constant-voltage.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "Source reports a ten-target/five-no-stimulation threshold check with 100% criterion, 5-mA increments and 60-90 mA observed settings. These describe the authors apparatus; no new safe operating equivalence or PPS Kit physical qualification is inferred.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "modality"
+          ],
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Hairy index-finger surface; right targets and left withhold catches.",
+              "note": ""
+            },
+            "modality": {
+              "status": "conflicting_evidence",
+              "value": "Digitimer DS7A constant-current stimulator versus source constant-voltage pulse wording.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Single rectangular monophasic pulse, 100 microseconds; intensity individually above threshold each session.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "partial",
+          "value": "Flat 62.5-dB sound is the control; no separate silent tactile-only baseline is described.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The static auditory control still includes sound and touch; absence of a described silent control does not establish every unmentioned family as explicitly absent.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "resolved_trial_count"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Flat/looming stimulus conditions are retained, but current subsection does not restate cell repetitions.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "static_or_fixed_distance_expectancy_control",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Same five positive sound-to-touch SOAs.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "partial",
+          "value": "40% left-index tactile catches paired with sound; withhold a response.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "resolved_trial_count"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "40% of this experiment, but total or cell repetitions not restated.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "left_index_nontarget_withhold",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Withhold on left-index touch while responding to right-index targets.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "partial",
+          "value": "Two randomized-order experiments retain a 60% target/40% catch split; cell repetitions and totals are not restated.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "derived_total_reconciliation"
+          ],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Catch family changes between the two experiments; do not infer main-cohort totals.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 sound types x 5 target delays, plus catch family.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "40% catches; no repeated 18-per-cell count in this cohort subsection.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "partial",
+          "value": "Both catch-variant experiments are administered in randomized order; block count/composition not restated.",
+          "compositeValue": "",
+          "pageOrSection": "Materials and Methods pp. 2-3 of author-hosted article copy",
+          "evidenceNote": "The paper does not establish exact factor-balanced cell counts in each behavioral block.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+          "missingComponents": [
+            "block_count",
+            "block_composition"
+          ],
+          "components": {
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Experiment 1/2 order randomized within the same participants.",
+              "note": ""
+            }
+          }
         }
       ]
     },

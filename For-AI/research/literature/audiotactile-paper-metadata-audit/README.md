@@ -34,7 +34,7 @@ live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
 Current checkpoint (2026-10-27): 94 frozen publications, 128 study/context rows,
-42 registered publication inventories and 52 publication inventories still
+43 registered publication inventories and 51 publication inventories still
 unassessed. The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
 time-bisection training and distance validation; manual trial starts, endpoint
@@ -81,6 +81,12 @@ The two existing device presets remain available, but their source completeness
 is now blocked by unresolved publication parameters. Historical software-audit
 references remain in the coverage records. Full source-to-emulated-runner claims
 therefore decrease from 17 to 15; no new human or physical validation is implied.
+
+The original Ferri (2015) Methods now separates five PPS protocol instances in
+three cohorts; localization validation and the passive auditory fMRI localizer
+remain supporting context. The later Spadone (2021) reanalysis differs in
+fMRI repetitions, runs and one ITI, so both versions retain explicit conflicts.
+The original post-catch time-unit conflict and across-task count gaps remain open.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the
