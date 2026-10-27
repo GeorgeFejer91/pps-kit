@@ -1811,3 +1811,73 @@ fn hash_file(path: &std::path::Path, cancelled: &AtomicBool) -> Result<String, G
     }
     Ok(format!("{:x}", hash.finalize()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::{
+        cell::Cell,
+        io::{Cursor, Seek, SeekFrom, Write},
+        sync::atomic::Ordering,
+    };
+
+    #[test]
+    fn cancellation_after_pcm_write_returns_error_with_only_a_strict_prefix() {
+        struct CancelOnWrite<'a> {
+            bytes: Cursor<Vec<u8>>,
+            armed: &'a Cell<bool>,
+            cancelled: &'a AtomicBool,
+        }
+        impl Write for CancelOnWrite<'_> {
+            fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+                let written = self.bytes.write(bytes)?;
+                if written > 0 && self.armed.get() {
+                    self.cancelled.store(true, Ordering::Release);
+                }
+                Ok(written)
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                self.bytes.flush()
+            }
+        }
+        impl Seek for CancelOnWrite<'_> {
+            fn seek(&mut self, position: SeekFrom) -> std::io::Result<u64> {
+                self.bytes.seek(position)
+            }
+        }
+
+        let cancelled = AtomicBool::new(false);
+        let armed = Cell::new(false);
+        let mut sink = CancelOnWrite {
+            bytes: Cursor::new(Vec::new()),
+            armed: &armed,
+            cancelled: &cancelled,
+        };
+        let mut writer = hound::WavWriter::new(
+            &mut sink,
+            hound::WavSpec {
+                channels: 1,
+                sample_rate: 8000,
+                bits_per_sample: 32,
+                sample_format: hound::SampleFormat::Float,
+            },
+        )
+        .unwrap();
+        // Cancel on a real PCM write, after header construction. This exercises
+        // the existing writer boundary without depending on disk or CPU speed.
+        armed.set(true);
+        let pcm = vec![0.25_f32; 32768];
+        assert_eq!(
+            write_pcm(&mut writer, &pcm, &cancelled),
+            Err(GenerationError::Cancelled)
+        );
+        armed.set(false);
+        drop(writer);
+        let mut partial = hound::WavReader::new(Cursor::new(sink.bytes.into_inner())).unwrap();
+        assert!(partial.duration() > 0);
+        assert!((partial.duration() as usize) < pcm.len());
+        assert!(partial
+            .samples::<f32>()
+            .all(|sample| sample.unwrap() == 0.25));
+    }
+}

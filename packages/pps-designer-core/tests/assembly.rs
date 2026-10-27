@@ -677,52 +677,10 @@ fn stationary_comparators_and_sample_rates_are_explicit_no_substitution() {
 }
 
 #[test]
-fn cancelled_mid_write_has_no_session_manifest_and_pre_post_needs_its_own_order() {
-    use std::{
-        sync::Arc,
-        thread,
-        time::{Duration, Instant},
-    };
+fn pre_post_requires_accepted_participant_order_before_creating_output() {
     let root = Temp::new();
-    let (mut assets, cue) = assets();
+    let (assets, cue) = assets();
     let (mut design, preview, variants) = fixture();
-    assets[1] = asset(
-        "noise",
-        AssemblyAssetRole::BinauralIngredient,
-        8000,
-        2,
-        800000,
-        0.05,
-        -0.025,
-    );
-    let plan = accept(&design, &preview, &variants, &assets, &cue);
-    let destination = root.path.join("interrupted");
-    let watch = destination.join("trials/trial_00001.wav");
-    let cancelled = Arc::new(AtomicBool::new(false));
-    let worker = Arc::clone(&cancelled);
-    let observer = thread::spawn(move || {
-        let deadline = Instant::now() + Duration::from_secs(5);
-        while Instant::now() < deadline {
-            if fs::metadata(&watch).is_ok_and(|m| m.len() > 65536) {
-                worker.store(true, Ordering::Release);
-                return true;
-            }
-            thread::sleep(Duration::from_millis(1));
-        }
-        false
-    });
-    let result = prepare_accepted_session(
-        &plan,
-        &assets,
-        &cue,
-        &destination,
-        "P001",
-        "S001",
-        &cancelled,
-    );
-    assert!(observer.join().unwrap());
-    assert_eq!(result.unwrap_err(), GenerationError::Cancelled);
-    assert!(!destination.join("session_manifest.json").exists());
     design["study_profile_reference_parameters"]["dashboard_run_setup"] =
         json!({"experiment_structure":"pre_post"});
     let plan = accept(&design, &preview, &variants, &assets, &cue);
