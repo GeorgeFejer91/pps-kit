@@ -1477,13 +1477,35 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         index = read_csv(self.output_dir / "study_instance_index.csv")[1]
         self.assertEqual(next(row for row in index if row["study_row_id"] == ids[0])["parameter_evidence_scope"], "composite_requires_split")
 
+    def test_wheelchair_groups_share_blindfolded_acquisition_without_timing_defaults(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        node = "doi:10.3389/fpsyg.2015.00639"
+        publication = next(row for row in data["publications"] if row["networkNodeId"] == node)
+        self.assertTrue(publication["inventoryAudit"]["inventoryAndContractsAudited"])
+        self.assertEqual(publication["inventoryAudit"]["studyRowCount"], 3)
+        studies = [row for row in data["studies"] if row["studyRowId"].startswith(node + "::")]
+        for study in studies:
+            cs = {row["key"]: row for row in study["contracts"]}
+            self.assertEqual(study["evidenceScope"], "study_specific_source_review")
+            self.assertEqual(cs["soa_schedule"]["status"], "reported_complete")
+            self.assertIn("2280", cs["soa_schedule"]["value"])
+            self.assertIn("432", cs["repetition_allocation"]["derivationNote"])
+            self.assertIn("216", cs["repetition_allocation"]["value"])
+            for key in ("task_response", "jitter_iti_policy", "baseline_trial_contract", "catch_trial_contract", "block_order_contract", "tactile_target"):
+                self.assertEqual(cs[key]["status"], "partial")
+            self.assertEqual(cs["task_response"]["components"]["response_window_and_anchor"]["status"], "not_reported")
+            self.assertIn("offline", cs["task_response"]["value"])
+            self.assertEqual(cs["tactile_target"]["components"]["intensity_or_calibration"]["status"], "not_reported")
+            self.assertEqual(cs["baseline_trial_contract"]["components"]["allocation_rule"]["status"], "not_reported")
+            self.assertEqual(cs["auditory_stimulus"]["evidenceSourceUrl"], "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML")
+
     def test_inventory_audit_does_not_count_registry_presence_as_methods_review(self) -> None:
         rows = read_csv(self.output_dir / "publication_inventory_audit.csv")[1]
         self.assertEqual(len(rows), 94)
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         summary = data["inventoryAudit"]
         self.assertEqual(summary["registeredInventories"], 62)
-        self.assertEqual(summary["methodsReviewedInventories"], 52)
+        self.assertEqual(summary["methodsReviewedInventories"], 53)
         self.assertEqual(summary["auditedAccessBlockers"], 5)
         self.assertEqual(summary["inventoryEvidenceCounts"], dict(Counter(row["inventory_evidence_status"] for row in rows)))
         self.assertEqual(summary["inventoryAndContractsAudited"], sum(row["inventory_and_contracts_audited"] == "yes" for row in rows))

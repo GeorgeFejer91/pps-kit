@@ -42,16 +42,21 @@ inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 52 Methods-backed inventories (39 current primary
+The current audit records 53 Methods-backed inventories (40 current primary
 reviews, eleven retained primary reviews, and two identified author versions whose
-final comparison is pending), three abstract/metadata inventories, one partial
+final comparison is pending), two abstract/metadata inventories, one partial
 Methods inventories, five audited access blockers, one project-lineage boundary, and 32 unregistered publications.
-Only 51 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 43 still need inventory
+Only 52 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 42 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Galli (2015) now has three Methods-confirmed training groups sharing blindfolded
+pre/post PPS assessment: 216 trials per assessment, 432 across both. The reported
+500 ms ITI and approximate 3.66 s trial duration do not resolve padding or the
+online response window; per-control-cell allocation remains explicit missing.
+
 Holmes (2020) retains four main experiments, Supplementary Experiment 5 with
 a separate same-observer follow-up variant, and the additional experiment
 declared unusable after a coding confound. OSF 73x59 is an audited project

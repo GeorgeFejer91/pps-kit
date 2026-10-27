@@ -12,20 +12,20 @@
     "publications": 94,
     "studies": 148,
     "contracts": 1628,
-    "reportedComplete": 295,
-    "derivedComplete": 63,
+    "reportedComplete": 298,
+    "derivedComplete": 66,
     "parameterStatusCounts": {
-      "approximation_required": 34,
-      "composite_requires_split": 146,
+      "approximation_required": 37,
+      "composite_requires_split": 113,
       "conflicting_evidence": 47,
-      "derived_complete": 63,
+      "derived_complete": 66,
       "explicitly_absent": 22,
       "low_confidence": 10,
       "not_applicable": 165,
       "not_assessed": 198,
       "not_reported": 53,
-      "partial": 357,
-      "reported_complete": 295,
+      "partial": 381,
+      "reported_complete": 298,
       "source_unavailable": 238
     }
   },
@@ -2006,17 +2006,20 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 33
+        "approximation_required": 3,
+        "derived_complete": 3,
+        "partial": 24,
+        "reported_complete": 3
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
         "registered": true,
-        "evidenceStatus": "abstract_or_metadata_inventory",
-        "inventoryStatus": "confirmed_total",
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_three_between_subject_training_groups",
         "studyRowCount": 3,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 3,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -48697,235 +48700,480 @@
       "studyRowId": "doi:10.3389/fpsyg.2015.00639::a",
       "networkNodeId": "doi:10.3389/fpsyg.2015.00639",
       "label": "The wheelchair as a full-body tool extending the peripersonal space. (a)",
-      "experimentLabel": "Experiment 1 — active wheelchair",
-      "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "experimentLabel": "Experiment 1 — active wheelchair use",
+      "inventoryStatus": "confirmed_three_between_subject_training_groups",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 11
+        "approximation_required": 1,
+        "derived_complete": 1,
+        "partial": 8,
+        "reported_complete": 1
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Auditory conditions: Auto-mined candidates: approaching; IN sound; front; left; right | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s)",
-          "pageOrSection": "source page/section(s) 2, 3, 4 | source page/section(s) 3, 4, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "approximation_required",
+          "value": "Broadband sound played through two longitudinal arrays of eight speakers, 27.5 cm spacing and 1 m between arrays, with time-dependent Gaussian amplitude modulation. Exact waveform/source realization, spectral recipe, gain/width parameters and SPL remain unspecified.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "Do not borrow an identical renderer or waveform from the later Serino supplement.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Gaussian amplitude modulation is named; numeric width/gain and SPL/calibration are not given.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two arrays of eight speakers, 27.5 cm spacing, 1 m array separation.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Broadband source presented simultaneously through all speakers with time-dependent Gaussian amplitude modulation.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "The article links a historical lab-techniques page; its exact source algorithm was not recovered.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Broadband sound; no exact source file or narrower white/pink classification supplied.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Trajectory path: Auto-mined candidates: away from body; approaching trajectory; 27.5 cm | Stimulus duration: Auto-mined candidates: duration relative to sound onset; 500 ms; 3.66 s | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s)",
-          "pageOrSection": "source page/section(s) 3, 2, 4 | source page/section(s) 3, 4, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Virtual sound looms from 2 m in front or 2 m behind toward the participant at 75 cm/s. Participant sits midway between arrays and between speakers 4/5; speaker height matches sternum-level tactors. Front/back are two looming trajectories.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "motion_mode",
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "attenuation_law": {
+              "status": "not_reported",
+              "value": "Gaussian modulation named without width/gain parameters.",
+              "note": ""
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Seated participant centered between arrays at sternum-level stimulation height.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Source described as traversing 2 m from front or back to participant; array spacing is separately reported.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Looming toward participant from front or back; not a looming/receding pair.",
+              "note": ""
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "Exact pre/post-source silence and holds are not stated.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Constant 75 cm/s.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Trial rows families: Auto-mined candidates: unimodal tactile trials; catch trials; baseline trials | Task sequence rules: Auto-mined candidates: catch/no-target trials; tactile target trials | Condition intermixing: Auto-mined candidates: randomly intermingled",
-          "pageOrSection": "source page/section(s) 3, 4, 5 | source page/section(s) 4, 3, 5 | source page/section(s) 4, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Randomly intermix audio–tactile targets, auditory-only catches and tactile-only baselines. Trials last approximately 3.66 s and ITI is 500 ms; exact padding, response deadline and whether the approximate duration includes ITI are unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Trial families randomly intermingled.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Front/back looming sounds with delayed touch; catches omit touch and baselines omit sound.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio–tactile targets, auditory-only catches, tactile-only baselines.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Approximate 3.66 s does not resolve exact source onset/offset padding, response deadline or ITI inclusion.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Task sequence rules: Auto-mined candidates: catch/no-target trials; tactile target trials | Response window: Auto-mined candidates: button response",
-          "pageOrSection": "source page/section(s) 4, 3, 5 | source page/section(s) 2, 5, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Press a response-box button with the right index finger as fast as possible to touch. Ignore sounds and withhold on auditory-only catches. The 1000 ms exclusion is an offline analysis criterion, not a reported online timeout.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press one button after tactile target; exact hardware code unspecified.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Response box placed on legs; right index finger.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No explicit online response deadline/window. RT measured from touch.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Offline exclusion of responses before touch and after 1000 ms; not an acquisition timeout.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to touch; ignore sound; withhold on auditory-only catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Iti jitter policy: Auto-mined candidates: 500 ms; 3.66 s",
-          "pageOrSection": "source page/section(s) 4, 3, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Fixed 500 ms inter-trial interval. No jitter range is reported. Whether this interval is included in the approximately 3.66 s trial duration is unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
+            "timing_scope_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed inter-trial interval.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Inter-trial scope is explicit, but exact trial-end definition and inclusion in approximate duration are not.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "500 ms fixed; no jitter range reported.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Tactile onsets 380, 760, 1140, 1520, 1900 and 2280 ms after sound onset in both front and back trajectories. Pair F6/B6 far through F1/B1 near.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "Printed 1.140/1.520 uses thousands punctuation consistently with the full millisecond sequence.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Same delays in front/back looming trajectories; F6/B6 to F1/B1.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "380, 760, 1140, 1520, 1900, 2280 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile onset relative to sound onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Tactile stimulus: Auto-mined candidates: vibrotactile stimulation",
-          "pageOrSection": "source page/section(s) 3, 1, 5",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "100 ms vibrotactile stimulation using two taped Precision MicroDrives 312–101 motors at sternum-level chest and back positions. Listed motor specifications: 3 V, 60 mA, 9000 rpm, 150 Hz, 5 g, 113 mm² contact area. Exact activation routing and measured skin waveform remain unspecified.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
+            "waveform_and_duration",
+            "intensity_or_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Chest and back at matching sternum-level position; retain both sites.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Exact trigger/channel routing of the two tactors not specified.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "150 Hz motor specification, 3 V, 60 mA, 9000 rpm, 5 g; not measured skin acceleration.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No participant-specific intensity procedure or measured skin output reported.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor stimulation.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100 ms motor activation; no recorded skin waveform.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Baseline strategy: Auto-mined candidates: unimodal tactile baseline | Baseline timing: Auto-mined candidates: 500 ms; 3.66 s; Tbefore",
-          "pageOrSection": "source page/section(s) 3, 4, 5 | source page/section(s) 4, 3, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "48 tactile-only baselines per assessment, at early/late delays corresponding to front/back nearest and farthest positions: 380 and 2280 ms. No stationary-sound baseline. Per-cell allocation is not separately reported.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
+            "allocation_rule"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "48 total; exact split across early/late and front/back control cells not printed.",
+              "note": ""
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Early/late controls correspond to B6/B1 and F1/F6.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only with no sound.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "48 per assessment.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "380 and 2280 ms at equivalent nearest/farthest sound-relative schedule positions.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "partial",
+          "value": "24 auditory-only, no-touch catch trials per assessment; no response required. Exact front/back allocation is not separately printed.",
           "compositeValue": "",
-          "pageOrSection": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
+            "allocation_rule"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "24 total randomly intermingled; front/back split not separately printed.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only catch.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "24 per assessment.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Touch absent; withhold response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "derived_complete",
+          "value": "Twelve repetitions at each of twelve front/back locations yield 144 audio–tactile trials, plus 24 catches and 48 tactile-only baselines: 216 per assessment. The identical pre/post schedule implies 432 assessment trials per participant, excluding wheelchair training and questionnaires.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "Aggregate counts do not resolve the separately missing per-control-cell allocation.",
+          "derivationNote": "Twelve repetitions × twelve locations + 24 catches + 48 baselines = 216; identical pre/post assessments imply 2 × 216 = 432.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "12 × 12 + 24 + 48 = 216; two assessments × 216 = 432.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "One participant belongs to one training group; assessment repeated pre/post, not all three training groups.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Six delays × two front/back looming trajectories; separate between-subject training group.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12 repetitions per spatial location; 144 audio–tactile + 24 catch + 48 tactile-only per assessment.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Blocked or random order: Auto-mined candidates: randomized/random order | Condition intermixing: Auto-mined candidates: randomly intermingled",
-          "pageOrSection": "source page/section(s) 4, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Pre-training PPS assessment, approximately 13 minutes of wheelchair use, then post-training PPS assessment. Trials are randomly intermingled; native block subdivision and exact shuffle constraints are not stated. Training groups are between subjects.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "block_count",
-            "block_composition"
+            "block_count"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "Each pre/post assessment contains 144 audio–tactile, 24 catch and 48 tactile-only trials.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_reported",
+              "value": "Two assessments are explicit; subdivision into native execution blocks is not.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Pre assessment → assigned wheelchair training → post assessment; random group assignment.",
+              "note": ""
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Identical assessment design before and after training.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact run constraints and native block boundaries absent.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Trial families randomly intermingled; exact random seed/algorithm not reported.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -48933,235 +49181,480 @@
       "studyRowId": "doi:10.3389/fpsyg.2015.00639::b",
       "networkNodeId": "doi:10.3389/fpsyg.2015.00639",
       "label": "The wheelchair as a full-body tool extending the peripersonal space. (b)",
-      "experimentLabel": "Experiment 2 — passive wheelchair",
-      "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "experimentLabel": "Experiment 2 — passive wheelchair use with vision",
+      "inventoryStatus": "confirmed_three_between_subject_training_groups",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 11
+        "approximation_required": 1,
+        "derived_complete": 1,
+        "partial": 8,
+        "reported_complete": 1
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Auditory conditions: Auto-mined candidates: approaching; IN sound; front; left; right | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s)",
-          "pageOrSection": "source page/section(s) 2, 3, 4 | source page/section(s) 3, 4, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "approximation_required",
+          "value": "Broadband sound played through two longitudinal arrays of eight speakers, 27.5 cm spacing and 1 m between arrays, with time-dependent Gaussian amplitude modulation. Exact waveform/source realization, spectral recipe, gain/width parameters and SPL remain unspecified.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "Do not borrow an identical renderer or waveform from the later Serino supplement.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Gaussian amplitude modulation is named; numeric width/gain and SPL/calibration are not given.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two arrays of eight speakers, 27.5 cm spacing, 1 m array separation.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Broadband source presented simultaneously through all speakers with time-dependent Gaussian amplitude modulation.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "The article links a historical lab-techniques page; its exact source algorithm was not recovered.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Broadband sound; no exact source file or narrower white/pink classification supplied.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Trajectory path: Auto-mined candidates: away from body; approaching trajectory; 27.5 cm | Stimulus duration: Auto-mined candidates: duration relative to sound onset; 500 ms; 3.66 s | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s)",
-          "pageOrSection": "source page/section(s) 3, 2, 4 | source page/section(s) 3, 4, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Virtual sound looms from 2 m in front or 2 m behind toward the participant at 75 cm/s. Participant sits midway between arrays and between speakers 4/5; speaker height matches sternum-level tactors. Front/back are two looming trajectories.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "motion_mode",
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "attenuation_law": {
+              "status": "not_reported",
+              "value": "Gaussian modulation named without width/gain parameters.",
+              "note": ""
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Seated participant centered between arrays at sternum-level stimulation height.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Source described as traversing 2 m from front or back to participant; array spacing is separately reported.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Looming toward participant from front or back; not a looming/receding pair.",
+              "note": ""
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "Exact pre/post-source silence and holds are not stated.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Constant 75 cm/s.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Trial rows families: Auto-mined candidates: unimodal tactile trials; catch trials; baseline trials | Task sequence rules: Auto-mined candidates: catch/no-target trials; tactile target trials | Condition intermixing: Auto-mined candidates: randomly intermingled",
-          "pageOrSection": "source page/section(s) 3, 4, 5 | source page/section(s) 4, 3, 5 | source page/section(s) 4, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Randomly intermix audio–tactile targets, auditory-only catches and tactile-only baselines. Trials last approximately 3.66 s and ITI is 500 ms; exact padding, response deadline and whether the approximate duration includes ITI are unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Trial families randomly intermingled.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Front/back looming sounds with delayed touch; catches omit touch and baselines omit sound.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio–tactile targets, auditory-only catches, tactile-only baselines.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Approximate 3.66 s does not resolve exact source onset/offset padding, response deadline or ITI inclusion.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Task sequence rules: Auto-mined candidates: catch/no-target trials; tactile target trials | Response window: Auto-mined candidates: button response",
-          "pageOrSection": "source page/section(s) 4, 3, 5 | source page/section(s) 2, 5, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Press a response-box button with the right index finger as fast as possible to touch. Ignore sounds and withhold on auditory-only catches. The 1000 ms exclusion is an offline analysis criterion, not a reported online timeout.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press one button after tactile target; exact hardware code unspecified.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Response box placed on legs; right index finger.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No explicit online response deadline/window. RT measured from touch.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Offline exclusion of responses before touch and after 1000 ms; not an acquisition timeout.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to touch; ignore sound; withhold on auditory-only catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Iti jitter policy: Auto-mined candidates: 500 ms; 3.66 s",
-          "pageOrSection": "source page/section(s) 4, 3, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Fixed 500 ms inter-trial interval. No jitter range is reported. Whether this interval is included in the approximately 3.66 s trial duration is unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
+            "timing_scope_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed inter-trial interval.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Inter-trial scope is explicit, but exact trial-end definition and inclusion in approximate duration are not.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "500 ms fixed; no jitter range reported.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Tactile onsets 380, 760, 1140, 1520, 1900 and 2280 ms after sound onset in both front and back trajectories. Pair F6/B6 far through F1/B1 near.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "Printed 1.140/1.520 uses thousands punctuation consistently with the full millisecond sequence.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Same delays in front/back looming trajectories; F6/B6 to F1/B1.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "380, 760, 1140, 1520, 1900, 2280 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile onset relative to sound onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Tactile stimulus: Auto-mined candidates: vibrotactile stimulation",
-          "pageOrSection": "source page/section(s) 3, 1, 5",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "100 ms vibrotactile stimulation using two taped Precision MicroDrives 312–101 motors at sternum-level chest and back positions. Listed motor specifications: 3 V, 60 mA, 9000 rpm, 150 Hz, 5 g, 113 mm² contact area. Exact activation routing and measured skin waveform remain unspecified.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
+            "waveform_and_duration",
+            "intensity_or_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Chest and back at matching sternum-level position; retain both sites.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Exact trigger/channel routing of the two tactors not specified.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "150 Hz motor specification, 3 V, 60 mA, 9000 rpm, 5 g; not measured skin acceleration.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No participant-specific intensity procedure or measured skin output reported.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor stimulation.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100 ms motor activation; no recorded skin waveform.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Baseline strategy: Auto-mined candidates: unimodal tactile baseline | Baseline timing: Auto-mined candidates: 500 ms; 3.66 s; Tbefore",
-          "pageOrSection": "source page/section(s) 3, 4, 5 | source page/section(s) 4, 3, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "48 tactile-only baselines per assessment, at early/late delays corresponding to front/back nearest and farthest positions: 380 and 2280 ms. No stationary-sound baseline. Per-cell allocation is not separately reported.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
+            "allocation_rule"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "48 total; exact split across early/late and front/back control cells not printed.",
+              "note": ""
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Early/late controls correspond to B6/B1 and F1/F6.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only with no sound.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "48 per assessment.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "380 and 2280 ms at equivalent nearest/farthest sound-relative schedule positions.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "partial",
+          "value": "24 auditory-only, no-touch catch trials per assessment; no response required. Exact front/back allocation is not separately printed.",
           "compositeValue": "",
-          "pageOrSection": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
+            "allocation_rule"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "24 total randomly intermingled; front/back split not separately printed.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only catch.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "24 per assessment.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Touch absent; withhold response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "derived_complete",
+          "value": "Twelve repetitions at each of twelve front/back locations yield 144 audio–tactile trials, plus 24 catches and 48 tactile-only baselines: 216 per assessment. The identical pre/post schedule implies 432 assessment trials per participant, excluding wheelchair training and questionnaires.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "Aggregate counts do not resolve the separately missing per-control-cell allocation.",
+          "derivationNote": "Twelve repetitions × twelve locations + 24 catches + 48 baselines = 216; identical pre/post assessments imply 2 × 216 = 432.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "12 × 12 + 24 + 48 = 216; two assessments × 216 = 432.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "One participant belongs to one training group; assessment repeated pre/post, not all three training groups.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Six delays × two front/back looming trajectories; separate between-subject training group.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12 repetitions per spatial location; 144 audio–tactile + 24 catch + 48 tactile-only per assessment.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Blocked or random order: Auto-mined candidates: randomized/random order | Condition intermixing: Auto-mined candidates: randomly intermingled",
-          "pageOrSection": "source page/section(s) 4, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Pre-training PPS assessment, approximately 13 minutes of wheelchair use, then post-training PPS assessment. Trials are randomly intermingled; native block subdivision and exact shuffle constraints are not stated. Training groups are between subjects.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "block_count",
-            "block_composition"
+            "block_count"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "Each pre/post assessment contains 144 audio–tactile, 24 catch and 48 tactile-only trials.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_reported",
+              "value": "Two assessments are explicit; subdivision into native execution blocks is not.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Pre assessment → assigned wheelchair training → post assessment; random group assignment.",
+              "note": ""
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Identical assessment design before and after training.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact run constraints and native block boundaries absent.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Trial families randomly intermingled; exact random seed/algorithm not reported.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -49169,235 +49662,480 @@
       "studyRowId": "doi:10.3389/fpsyg.2015.00639::c",
       "networkNodeId": "doi:10.3389/fpsyg.2015.00639",
       "label": "The wheelchair as a full-body tool extending the peripersonal space. (c)",
-      "experimentLabel": "Experiment 3 — blindfolded",
-      "inventoryStatus": "confirmed_total",
-      "evidenceScope": "composite_requires_split",
+      "experimentLabel": "Experiment 3 — passive wheelchair use without vision",
+      "inventoryStatus": "confirmed_three_between_subject_training_groups",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "composite_requires_split": 11
+        "approximation_required": 1,
+        "derived_complete": 1,
+        "partial": 8,
+        "reported_complete": 1
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Auditory conditions: Auto-mined candidates: approaching; IN sound; front; left; right | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s)",
-          "pageOrSection": "source page/section(s) 2, 3, 4 | source page/section(s) 3, 4, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "approximation_required",
+          "value": "Broadband sound played through two longitudinal arrays of eight speakers, 27.5 cm spacing and 1 m between arrays, with time-dependent Gaussian amplitude modulation. Exact waveform/source realization, spectral recipe, gain/width parameters and SPL remain unspecified.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "Do not borrow an identical renderer or waveform from the later Serino supplement.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Gaussian amplitude modulation is named; numeric width/gain and SPL/calibration are not given.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two arrays of eight speakers, 27.5 cm spacing, 1 m array separation.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Broadband source presented simultaneously through all speakers with time-dependent Gaussian amplitude modulation.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "The article links a historical lab-techniques page; its exact source algorithm was not recovered.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Broadband sound; no exact source file or narrower white/pink classification supplied.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Trajectory path: Auto-mined candidates: away from body; approaching trajectory; 27.5 cm | Stimulus duration: Auto-mined candidates: duration relative to sound onset; 500 ms; 3.66 s | Renderer or apparatus: Auto-mined candidates: loudspeaker(s); speaker(s)",
-          "pageOrSection": "source page/section(s) 3, 2, 4 | source page/section(s) 3, 4, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Virtual sound looms from 2 m in front or 2 m behind toward the participant at 75 cm/s. Participant sits midway between arrays and between speakers 4/5; speaker height matches sternum-level tactors. Front/back are two looming trajectories.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "motion_mode",
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "attenuation_law": {
+              "status": "not_reported",
+              "value": "Gaussian modulation named without width/gain parameters.",
+              "note": ""
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Seated participant centered between arrays at sternum-level stimulation height.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Source described as traversing 2 m from front or back to participant; array spacing is separately reported.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Looming toward participant from front or back; not a looming/receding pair.",
+              "note": ""
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "Exact pre/post-source silence and holds are not stated.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Constant 75 cm/s.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Trial rows families: Auto-mined candidates: unimodal tactile trials; catch trials; baseline trials | Task sequence rules: Auto-mined candidates: catch/no-target trials; tactile target trials | Condition intermixing: Auto-mined candidates: randomly intermingled",
-          "pageOrSection": "source page/section(s) 3, 4, 5 | source page/section(s) 4, 3, 5 | source page/section(s) 4, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Randomly intermix audio–tactile targets, auditory-only catches and tactile-only baselines. Trials last approximately 3.66 s and ITI is 500 ms; exact padding, response deadline and whether the approximate duration includes ITI are unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Trial families randomly intermingled.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Front/back looming sounds with delayed touch; catches omit touch and baselines omit sound.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio–tactile targets, auditory-only catches, tactile-only baselines.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Approximate 3.66 s does not resolve exact source onset/offset padding, response deadline or ITI inclusion.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Task sequence rules: Auto-mined candidates: catch/no-target trials; tactile target trials | Response window: Auto-mined candidates: button response",
-          "pageOrSection": "source page/section(s) 4, 3, 5 | source page/section(s) 2, 5, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Press a response-box button with the right index finger as fast as possible to touch. Ignore sounds and withhold on auditory-only catches. The 1000 ms exclusion is an offline analysis criterion, not a reported online timeout.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press one button after tactile target; exact hardware code unspecified.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Response box placed on legs; right index finger.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No explicit online response deadline/window. RT measured from touch.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Offline exclusion of responses before touch and after 1000 ms; not an acquisition timeout.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to touch; ignore sound; withhold on auditory-only catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Iti jitter policy: Auto-mined candidates: 500 ms; 3.66 s",
-          "pageOrSection": "source page/section(s) 4, 3, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Fixed 500 ms inter-trial interval. No jitter range is reported. Whether this interval is included in the approximately 3.66 s trial duration is unresolved.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
+            "timing_scope_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed inter-trial interval.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Inter-trial scope is explicit, but exact trial-end definition and inclusion in approximate duration are not.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "500 ms fixed; no jitter range reported.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Tactile onsets 380, 760, 1140, 1520, 1900 and 2280 ms after sound onset in both front and back trajectories. Pair F6/B6 far through F1/B1 near.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "Printed 1.140/1.520 uses thousands punctuation consistently with the full millisecond sequence.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Same delays in front/back looming trajectories; F6/B6 to F1/B1.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "380, 760, 1140, 1520, 1900, 2280 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile onset relative to sound onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Tactile stimulus: Auto-mined candidates: vibrotactile stimulation",
-          "pageOrSection": "source page/section(s) 3, 1, 5",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "100 ms vibrotactile stimulation using two taped Precision MicroDrives 312–101 motors at sternum-level chest and back positions. Listed motor specifications: 3 V, 60 mA, 9000 rpm, 150 Hz, 5 g, 113 mm² contact area. Exact activation routing and measured skin waveform remain unspecified.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
+            "waveform_and_duration",
+            "intensity_or_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Chest and back at matching sternum-level position; retain both sites.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Exact trigger/channel routing of the two tactors not specified.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "150 Hz motor specification, 3 V, 60 mA, 9000 rpm, 5 g; not measured skin acceleration.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No participant-specific intensity procedure or measured skin output reported.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor stimulation.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100 ms motor activation; no recorded skin waveform.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Baseline strategy: Auto-mined candidates: unimodal tactile baseline | Baseline timing: Auto-mined candidates: 500 ms; 3.66 s; Tbefore",
-          "pageOrSection": "source page/section(s) 3, 4, 5 | source page/section(s) 4, 3, 6",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "48 tactile-only baselines per assessment, at early/late delays corresponding to front/back nearest and farthest positions: 380 and 2280 ms. No stationary-sound baseline. Per-cell allocation is not separately reported.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
+            "allocation_rule"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "48 total; exact split across early/late and front/back control cells not printed.",
+              "note": ""
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Early/late controls correspond to B6/B1 and F1/F6.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only with no sound.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "48 per assessment.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "380 and 2280 ms at equivalent nearest/farthest sound-relative schedule positions.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "partial",
+          "value": "24 auditory-only, no-touch catch trials per assessment; no response required. Exact front/back allocation is not separately printed.",
           "compositeValue": "",
-          "pageOrSection": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
+            "allocation_rule"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "24 total randomly intermingled; front/back split not separately printed.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only catch.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "24 per assessment.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Touch absent; withhold response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "composite_requires_split",
-          "value": "",
+          "status": "derived_complete",
+          "value": "Twelve repetitions at each of twelve front/back locations yield 144 audio–tactile trials, plus 24 catches and 48 tactile-only baselines: 216 per assessment. The identical pre/post schedule implies 432 assessment trials per participant, excluding wheelchair training and questionnaires.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "Aggregate counts do not resolve the separately missing per-control-cell allocation.",
+          "derivationNote": "Twelve repetitions × twelve locations + 24 catches + 48 baselines = 216; identical pre/post assessments imply 2 × 216 = 432.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "12 × 12 + 24 + 48 = 216; two assessments × 216 = 432.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "One participant belongs to one training group; assessment repeated pre/post, not all three training groups.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Six delays × two front/back looming trajectories; separate between-subject training group.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12 repetitions per spatial location; 144 audio–tactile + 24 catch + 48 tactile-only per assessment.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "composite_requires_split",
-          "value": "",
-          "compositeValue": "Blocked or random order: Auto-mined candidates: randomized/random order | Condition intermixing: Auto-mined candidates: randomly intermingled",
-          "pageOrSection": "source page/section(s) 4, 2, 3",
-          "evidenceNote": "Automated Segment 1-4 miner found field-specific keywords/numeric values; verify against PDF and supplements before final profile recreation.",
+          "status": "partial",
+          "value": "Pre-training PPS assessment, approximately 13 minutes of wheelchair use, then post-training PPS assessment. Trials are randomly intermingled; native block subdivision and exact shuffle constraints are not stated. Training groups are between subjects.",
+          "compositeValue": "",
+          "pageOrSection": "Main Methods > Participants; Audio–Tactile Interaction Task; Procedures; Data Analyses; Figure 1; Results Experiments 1–3",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.3389/fpsyg.2015.00639",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4435246/fullTextXML",
+          "sourceType": "primary_full_article_methods",
           "missingComponents": [
-            "block_count",
-            "block_composition"
+            "block_count"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "Each pre/post assessment contains 144 audio–tactile, 24 catch and 48 tactile-only trials.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_reported",
+              "value": "Two assessments are explicit; subdivision into native execution blocks is not.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Pre assessment → assigned wheelchair training → post assessment; random group assignment.",
+              "note": ""
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Identical assessment design before and after training.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact run constraints and native block boundaries absent.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Trial families randomly intermingled; exact random seed/algorithm not reported.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -52341,19 +53079,19 @@
   "inventoryAudit": {
     "publications": 94,
     "registeredInventories": 62,
-    "methodsReviewedInventories": 52,
+    "methodsReviewedInventories": 53,
     "auditedAccessBlockers": 5,
     "projectLineageReviews": 1,
-    "publicationsWithAllContractDispositions": 51,
-    "inventoryAndContractsAudited": 51,
-    "remainingInventoryOrContractAudit": 43,
+    "publicationsWithAllContractDispositions": 52,
+    "inventoryAndContractsAudited": 52,
+    "remainingInventoryOrContractAudit": 42,
     "inventoryEvidenceCounts": {
-      "abstract_or_metadata_inventory": 3,
+      "abstract_or_metadata_inventory": 2,
       "audited_source_access_gap": 5,
       "author_version_methods_reviewed_final_comparison_pending": 2,
       "not_registered": 32,
       "partial_methods_inventory": 1,
-      "primary_methods_reviewed": 39,
+      "primary_methods_reviewed": 40,
       "primary_project_lineage_reviewed": 1,
       "retained_primary_methods_review": 11
     },
