@@ -181,3 +181,49 @@ test("portable bundle contains instruction audio once with verified inventory an
   await assert.rejects(context.window.PPSDesigner.exportBundle(snapshot), /Local browser audio is missing/);
   assert.equal(context.download, null);
 });
+
+test("premade audio is fetched by inventory identity, verified and embedded for offline import", async () => {
+  const audio = new Uint8Array([82, 73, 70, 70, 8, 7, 6, 5]);
+  const digest = Buffer.from(await webcrypto.subtle.digest("SHA-256", audio)).toString("hex");
+  const path = "assets/preloads/study/stimulus.wav";
+  const calls = [];
+  const context = vm.createContext({ window: { PPSDesignerApp: { preloadAssetUrl: value => `https://fixture.invalid/${value}` } },
+    Blob, TextEncoder, Uint8Array, structuredClone, crypto: webcrypto,
+    fetch: async url => { calls.push(url); return new Response(audio); } });
+  vm.runInContext(chrome.replace(/initializeChrome\(\);\s*$/, ""), context);
+  vm.runInContext("saveProfileDownload = async blob => { globalThis.download = blob; };", context);
+  const snapshot = { preload_inventory: { assets: [{ path, sha256: digest }] }, design: { name: "Premade",
+    noises: [{ label: "Noise", prebaked_path: path }], custom_looming_files: [{ label: "Reused", path }] } };
+  await context.window.PPSDesigner.exportBundle(snapshot);
+  assert.equal(calls.length, 1);
+  const files = zipEntries(new Uint8Array(await context.download.arrayBuffer()));
+  const profile = JSON.parse(new TextDecoder().decode(files.get("profile.json")));
+  assert.deepEqual(files.get(`assets/${digest}.wav`), audio);
+  assert.equal(profile.design.noises[0].prebaked_path, `browser-asset:${digest}.wav`);
+  assert.equal(profile.design.custom_looming_files[0].path, `browser-asset:${digest}.wav`);
+  assert.equal(snapshot.design.noises[0].prebaked_path, path, "export does not mutate the live profile");
+  snapshot.preload_inventory.assets[0].sha256 = "0".repeat(64);
+  context.download = null;
+  await assert.rejects(context.window.PPSDesigner.exportBundle(snapshot), /checksum mismatch/);
+  assert.equal(context.download, null);
+  snapshot.preload_inventory.assets = [];
+  await assert.rejects(context.window.PPSDesigner.exportBundle(snapshot), /not in the verified preload inventory/);
+});
+
+test("stopped source preview cannot start after its delayed audio decode finishes", async () => {
+  const decode = deferred();
+  let starts = 0;
+  const context = vm.createContext({ sourcePreviewRequestId: 1, sourcePreviewAbort: null, activeSourcePreviewNode: null,
+    AbortController, button: { isConnected: true }, armSourcePreviewCleanup() {},
+    fetch: async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(4) }),
+    audioContext: { decodeAudioData: () => decode.promise,
+      createBufferSource: () => ({ connect() {}, addEventListener() {}, start() { starts++; } }) },
+  });
+  const end = app.indexOf("\nfunction ", app.indexOf("async function playSourcePreviewAudio("));
+  vm.runInContext(app.slice(app.indexOf("async function playSourcePreviewAudio("), end), context);
+  const pending = vm.runInContext('playSourcePreviewAudio("/audio.wav", button, audioContext, null, 4, 1)', context);
+  context.sourcePreviewRequestId = 2;
+  decode.resolve({});
+  assert.equal(await pending, false);
+  assert.equal(starts, 0);
+});

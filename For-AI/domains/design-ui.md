@@ -69,3 +69,12 @@ from the inspected manifest, retire prior media at completion, and show an
 explicit next-block preparation action with cleared elapsed progress. The UI
 does not choose or skip native blocks; device preparation, arm and start remain
 separate local actions.
+
+Portable hosted exports embed referenced premade WAVs, spoken instruction clips
+and browser uploads. Resolve premades from their existing inventory/colocated
+spoken manifest and verify SHA-256 before rebinding audio references into the
+bundle; missing or changed bytes fail export. Bound a single asset to 64 MiB and
+the audio bundle to 256 MiB. Browser soundchecks resolve restored uploads from
+IndexedDB and cancel pending fetch/decode publication when the profile changes.
+Study URLs honor generated record aliases and disclose a split into current
+study records rather than silently presenting one as equivalent.

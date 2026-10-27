@@ -328,6 +328,8 @@ let activeSourcePreviewNode = null;
 let activeSourcePreviewButton = null;
 let activeSourcePreviewClearTimer = null;
 let sourcePreviewAudioContext = null;
+let sourcePreviewRequestId = 0;
+let sourcePreviewAbort = null;
 let customizeModalReturnFocus = null;
 let customizeModalMode = "copy";
 let saveProfileModalReturnFocus = null;
@@ -918,6 +920,7 @@ function initializeHostedDesignerProgress(editStep = "stimulus") {
 }
 
 function markDesignerDirty() {
+  stopActiveSourcePreview();
   if (!state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive || designerDirty) return;
   designerDirty = true;
   document.dispatchEvent(new CustomEvent("pps-designer-dirty"));
@@ -2929,6 +2932,7 @@ async function loadState(options = {}) {
 
 function renderAll() {
   if (!state) return;
+  stopActiveSourcePreview();
   document.body.classList.toggle("static-dashboard-mode", staticModeActive);
   document.body.classList.toggle("dashboard-edit-mode", editModeActive);
   document.body.classList.toggle("dashboard-view-mode", !editModeActive);
@@ -5872,6 +5876,9 @@ async function previewSourceLabel(button) {
     stopActiveSourcePreview();
     return;
   }
+  stopActiveSourcePreview();
+  const requestId = sourcePreviewRequestId;
+  const requestedState = state;
   state.design.protocol = state.design.protocol || {};
   state.design.protocol.trial_strips = collectTrialStrips();
   const staticAsset = staticModeActive ? staticPreviewAssetForLabel(label) : null;
@@ -5884,31 +5891,37 @@ async function previewSourceLabel(button) {
   let started = false;
   try {
     if (staticAsset?.url) {
+      let previewUrl = staticAsset.url;
+      let ownedUrl = "";
+      if (previewUrl.startsWith("browser-asset:")) {
+        const asset = await window.PPSDesigner?.drafts?.asset(previewUrl.slice("browser-asset:".length));
+        if (requestId !== sourcePreviewRequestId || state !== requestedState) return;
+        if (!asset) throw new Error("The browser audio asset is missing. Import the clip again.");
+        ownedUrl = URL.createObjectURL(new Blob([asset.bytes], { type: asset.type || "audio/wav" }));
+        previewUrl = ownedUrl;
+      }
       button.disabled = false;
-      await playSourcePreviewAudio(
-        staticAsset.url,
-        button,
-        audioContext,
-        contextReady,
-        Number(staticAsset.duration_s || 0)
-      );
-      started = true;
-      showToast(`Soundcheck: ${staticAsset.label || label}`);
+      try {
+        started = await playSourcePreviewAudio(previewUrl, button, audioContext, contextReady,
+          Number(staticAsset.duration_s || 0), requestId);
+      } finally { if (ownedUrl) URL.revokeObjectURL(ownedUrl); }
+      if (started) showToast(`Soundcheck: ${staticAsset.label || label}`);
       return;
     }
     const preview = await designerApi.previewAudioSource(payload);
+    if (requestId !== sourcePreviewRequestId || state !== requestedState || !button.isConnected) return;
     button.disabled = false;
-    await playSourcePreviewAudio(
+    started = await playSourcePreviewAudio(
       apiUrl(`${preview.url}?v=${Date.now()}`),
       button,
       audioContext,
       contextReady,
-      Number(preview.duration_s) || 0
+      Number(preview.duration_s) || 0, requestId
     );
-    started = true;
-    showToast(`Soundcheck: ${preview.label || label}`);
+    if (started) showToast(`Soundcheck: ${preview.label || label}`);
   } catch (error) {
     button.classList.remove("playing");
+    if (requestId !== sourcePreviewRequestId || state !== requestedState) return;
     throw error;
   } finally {
     if (!started) button.classList.remove("playing");
@@ -5924,7 +5937,7 @@ function staticPreviewAssetForLabel(label) {
     if (normalizeSourceKey(asset.label) === target) {
       return {
         label: asset.label,
-        url: asset.url || staticResourceUrl(asset.path),
+        url: staticResourceUrl(asset.path),
         duration_s: asset.duration_s
       };
     }
@@ -5933,7 +5946,7 @@ function staticPreviewAssetForLabel(label) {
     if (normalizeSourceKey(noise.label) === target && noise.prebaked_path) {
       return {
         label: noise.label,
-        url: staticResourceUrl(noise.prebaked_path),
+        url: noise.prebaked_path.startsWith("browser-asset:") ? noise.prebaked_path : staticResourceUrl(noise.prebaked_path),
         duration_s: noise.duration_s || 0
       };
     }
@@ -5942,7 +5955,7 @@ function staticPreviewAssetForLabel(label) {
     if (normalizeSourceKey(source.label) === target && source.path) {
       return {
         label: source.label,
-        url: staticResourceUrl(source.path),
+        url: source.path.startsWith("browser-asset:") ? source.path : staticResourceUrl(source.path),
         duration_s: source.target_duration_s || source.duration_s || 0
       };
     }
@@ -5960,6 +5973,9 @@ function getSourcePreviewAudioContext() {
 }
 
 function stopActiveSourcePreview() {
+  sourcePreviewRequestId += 1;
+  sourcePreviewAbort?.abort();
+  sourcePreviewAbort = null;
   const previousButton = activeSourcePreviewButton;
   if (activeSourcePreviewNode) {
     try {
@@ -5978,6 +5994,10 @@ function stopActiveSourcePreview() {
 }
 
 function finishSourcePreview(button = activeSourcePreviewButton) {
+  if (button && activeSourcePreviewButton !== button) {
+    button.classList.remove("playing");
+    return;
+  }
   if (activeSourcePreviewClearTimer) {
     clearTimeout(activeSourcePreviewClearTimer);
     activeSourcePreviewClearTimer = null;
@@ -5995,31 +6015,25 @@ function armSourcePreviewCleanup(button, durationS) {
   activeSourcePreviewButton = button;
   activeSourcePreviewClearTimer = window.setTimeout(() => {
     if (activeSourcePreviewButton !== button) return;
-    if (activeSourcePreviewNode) {
-      try {
-        activeSourcePreviewNode.stop();
-      } catch (_error) {
-        // Already stopped.
-      }
-      activeSourcePreviewNode.disconnect();
-      activeSourcePreviewNode = null;
-    }
-    if (activeSourcePreviewAudio) {
-      activeSourcePreviewAudio.pause();
-      activeSourcePreviewAudio = null;
-    }
-    finishSourcePreview(button);
+    stopActiveSourcePreview();
   }, durationMs);
 }
 
-async function playSourcePreviewAudio(url, button, audioContext, contextReady, durationS = 0) {
-  stopActiveSourcePreview();
+async function playSourcePreviewAudio(url, button, audioContext, contextReady, durationS = 0, requestId = sourcePreviewRequestId) {
+  const current = () => requestId === sourcePreviewRequestId && button.isConnected;
+  if (!current()) return false;
+  const abort = new AbortController();
+  sourcePreviewAbort = abort;
   armSourcePreviewCleanup(button, durationS);
   if (audioContext) {
     if (contextReady) await Promise.race([contextReady, delay(250)]);
-    const response = await fetch(url);
+    if (!current()) return false;
+    let response;
+    try { response = await fetch(url, { signal: abort.signal }); }
+    catch (error) { if (!current()) return false; throw error; }
     if (!response.ok) throw new Error(`Preview audio unavailable: ${response.status}`);
     const buffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+    if (!current()) return false;
     const node = audioContext.createBufferSource();
     node.buffer = buffer;
     node.connect(audioContext.destination);
@@ -6032,7 +6046,7 @@ async function playSourcePreviewAudio(url, button, audioContext, contextReady, d
       finishSourcePreview(button);
     }, { once: true });
     node.start();
-    return;
+    return true;
   }
   const audio = new Audio(url);
   activeSourcePreviewAudio = audio;
@@ -6048,10 +6062,8 @@ async function playSourcePreviewAudio(url, button, audioContext, contextReady, d
     }
     finishSourcePreview(button);
   }, { once: true });
-  audio.play().catch((error) => {
-    finishSourcePreview(button);
-    showToast(error.message || String(error));
-  });
+  await audio.play();
+  return current();
 }
 
 function setTrialStrips(strips) {
@@ -9579,6 +9591,7 @@ initializeDocumentationTypography();
 initializeLazySurfaces();
 initializePublicationNetworkSurface();
 window.PPSDesignerApp = Object.freeze({
+  preloadAssetUrl: staticResourceUrl,
   getState: () => clone(state),
   exportProfile: (format) => {
     if (!["json", "bundle"].includes(format)) throw new Error("Unsupported profile export.");
