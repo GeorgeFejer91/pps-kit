@@ -1832,8 +1832,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract the audiotactile PPS task parameters separately from the musical-interaction manipulation; music/social context is non-blocking unless it changes the task audio assets"
-      ]
+        "Final-article equivalence to the identified author thesis remains unverified; exact tone modulation depth/sample rate/level, near-speaker offset, ISI anchor/distribution, online response window and rating collection sequence remain unresolved. Pilot-specific schedule is not reported. Author version resolves static0-msSOA,120rows per main/control administration and the five-administration main regimen."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+      "scope_review_basis": "Author thesis publication list explicitly identifies the matching forthcoming Psychological Research article. Review separates main musicians, new baseline-only controls and power pilot; actual failed/restricted final-text routes remain documented. No final-version equivalence or electrical hardware capability is inferred."
     },
     {
       "record_id": "taffou_2021_auditory_roughness",

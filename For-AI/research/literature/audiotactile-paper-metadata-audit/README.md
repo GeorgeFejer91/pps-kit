@@ -33,9 +33,9 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 136 study/context rows,
-48 registered publication inventories, one access-audited unresolved publication
-unit, and 45 publication inventories still unassessed. Registry presence alone
+Current checkpoint (2026-10-27): 94 frozen publications, 138 study/context rows,
+49 registered publication inventories, one access-audited unresolved publication
+unit, and 44 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits. The earlier counts below describe individual historical checkpoints.
 Tonelli (2019) now separates neck PPS assessment from echolocation training,
@@ -114,6 +114,14 @@ returned subscription-preview HTML, HAL metadata exposed no document URL, and
 the HAL document route returned 404. Its single retained review unit does not
 assert a single experiment. All eleven contracts explicitly remain source
 unavailable, separately from any Methods-confirmed inventory.
+
+Dell’Anna jazz (2021) now has three explicitly distinguished author-thesis units:
+main musicians, new baseline-only nonmusician controls, and the sample-size pilot.
+The thesis publication list identifies the matching forthcoming article, but the
+final full text remains inaccessible and version equivalence is unproven. Main
+and control task schedules are extracted from pp.71-74; pilot-specific values
+remain missing. Public evidence links point to the actual reviewed version while
+retaining the publication DOI identity link.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the

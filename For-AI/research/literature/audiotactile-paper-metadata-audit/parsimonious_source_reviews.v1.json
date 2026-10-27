@@ -17303,6 +17303,815 @@
           "evidence_note": "Retained unresolved publication review unit; experiment count and all parameter contracts remain unresolved after documented access attempts."
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1007/s00426-020-01365-6::a",
+      "source_type": "author_thesis_chapter_final_comparison_pending",
+      "source_file": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+      "review_date": "2026-10-27",
+      "review_scope": "Identified author-version Methods only. Final publisher article not obtained; source equivalence not established.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.1007/s00426-020-01365-6.pdf",
+          "outcome": "HTTP 200 HTML subscription preview rather than a PDF; final Methods not retrieved."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://biblio.ugent.be/publication/8692305",
+          "outcome": "Institutional final-article record exposes a 1.65-MB published-version file restricted to UGent; no final text retrieved."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+          "outcome": "HTTP 200 open author thesis, 148 PDF pages; chapter 3 pp.65-90 and publication list p.13 inspected. Title/authors and forthcoming Psychological Research entry link the chapter to the publication; final equivalence remains unverified."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Author thesis version: 50-ms784-Hz tone with50-Hz sinusoidal amplitude modulation and5-ms rise/fall; Audacity-generated and delivered through one of two loudspeakers.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "generated"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "784-Hz carrier,50-Hz amplitude modulation,50-ms duration and5-ms onset/offset ramps; Audacity."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. Modulation depth, sample rate, absolute playback level and original tone asset are not reported; these are not toolkit defaults.",
+          "missing_required_components": [
+            "source_recipe_or_asset_provenance"
+          ]
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Author thesis version: Static near/far loudspeakers: near beside right arm; far120cm from participant chair beside the partner.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "static"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Near source beside right arm on desk; far distance referenced to participant chair and partner seat."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near beside right arm, no exact metric offset; far120cm from participant chair."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "50-ms static sound, no motion."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. Do not label120cm as hand-to-speaker distance or create a looming trajectory.",
+          "missing_required_components": [
+            "exact_near_position_and_distance_anchor"
+          ]
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Author thesis version: Five families: Anear,Afar,T,TAnear,TAfar; simultaneous bimodal sound/touch; perform a task administration after each musical take and once alone.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Auditory-only near/far catches, tactile-only baseline, simultaneous audio-tactile near/far targets."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "One selected static near/far sound and/or right-hand touch per trial. Main musicians complete two cooperative takes and two uncooperative takes with a task after each, plus an alone-baseline administration."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. Partner-present/alone context is distinct from tactile-only baseline trial family; musical excerpts are an external manipulation, not the50-ms auditory task asset."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Author thesis version: Right-index button press on detecting right-hand touch; withhold for auditory-only events. RT and0-7perceived-touch intensity ratings are collected.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond only to touch; ignore auditory-only catches."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Response box on desk, E-primev2; box model unspecified."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Right-index button press whenever touch is perceived; rating collection also reported."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. No online response deadline or rating collection sequence is stated. The±2SDRT exclusion rule is analysis, not an online timeout.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "rating_collection_timing_and_device"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Author thesis version: Jittering inter-stimulus interval6000-8000ms.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Jittered range."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "6000-8000ms."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. No onset/offset/response/rating anchor or uniform distribution is stated.",
+          "missing_required_components": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ]
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Author thesis version: Simultaneous audio-tactile near and far targets:0msSOA.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Touch and auditory onset simultaneous; positive would mean touch after sound."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "0ms for both static positions."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. "
+        },
+        "tactile_target": {
+          "status": "reported_complete",
+          "value": "Author thesis version: DS7A200-microsecond constant-current square pulse to right-hand dorsum, at twice individual perceptual threshold by method of limits.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Transcutaneous electrical stimulation, DigitimerDS7A."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right-hand dorsum; bipolar electrodes1cm apart on Velcro strap, position randomly shifted about1cm to reduce habituation."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "200-microsecond constant-current square pulse; twice individual perceptual threshold, method of limits."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. Reported group mean2.01mA/range0.51-3.2mA is descriptive, not a transferable safe amplitude or PPS Kit device calibration."
+        },
+        "baseline_trial_contract": {
+          "status": "reported_complete",
+          "value": "Author thesis version: 24tactile-only trials per120-trial task administration; these normalize bimodal RTs.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_unspecified; one T family interleaved with four other families."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Touch is the sole stimulus in T trials; subject to the same incompletely anchored6000-8000msISI."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "12T trials in each of two60-trial blocks."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "24T trials per task administration."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. The alone-baseline social condition contains all five families and must not be confused with the T trial family."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "Author thesis version: 48auditory-only catches per120-trial administration, split equally between near and far; withhold response.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold at near and far positions."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; withhold tactile-detection response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "12Anear+12Afar per60-trial block, two blocks."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "48overall:24near+24far per administration."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. "
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "Author thesis version: Two60-trial blocks per administration:24of each family=120rows. Main musicians have five administrations, giving600task rows by derivation.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five trial families x two60-trial blocks; two cooperative and two uncooperative post-take administrations plus one alone baseline."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "derived",
+              "value": "12of each of five families per block;2blocks per administration."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Pilot is a separate cohort with no independently specified repetition schedule; nonmusician controls perform baseline only."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. ",
+          "derivation_note": "12repetitions x5families x2blocks=120rows per administration. Two cooperative takes+two uncooperative takes+one alone baseline=5administrations;120x5=600main-musician rows. The source states the per-administration recipe and five administrations, not the600total explicitly."
+        },
+        "block_order_contract": {
+          "status": "derived_complete",
+          "value": "Author thesis version: Two60-trial blocks per task, pseudo-randomized with no more than two identical consecutive trials; cooperative/uncooperative session order counterbalanced.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "block_count": {
+              "status": "derived",
+              "value": "Two per administration;five main administrations, hence ten task blocks across the regimen."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "12Anear,12Afar,12T,12TAnear,12TAfar per block."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Pseudo-random order, no more than two identical trials in sequence."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Cooperative/uncooperative sessions counterbalanced and separated by2-3weeks. Alone baseline occurs at start of first or end of second session."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. No random seed, exact pseudo-randomization algorithm or allocation ratio for baseline placement is stated.",
+          "derivation_note": "Two task blocks per administration x five administrations = ten task blocks in the main regimen; session order is directly reported."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1007/s00426-020-01365-6::b",
+      "source_type": "author_thesis_chapter_final_comparison_pending",
+      "source_file": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+      "review_date": "2026-10-27",
+      "review_scope": "Identified author-version Methods only. Final publisher article not obtained; source equivalence not established.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.1007/s00426-020-01365-6.pdf",
+          "outcome": "HTTP 200 HTML subscription preview rather than a PDF; final Methods not retrieved."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://biblio.ugent.be/publication/8692305",
+          "outcome": "Institutional final-article record exposes a 1.65-MB published-version file restricted to UGent; no final text retrieved."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+          "outcome": "HTTP 200 open author thesis, 148 PDF pages; chapter 3 pp.65-90 and publication list p.13 inspected. Title/authors and forthcoming Psychological Research entry link the chapter to the publication; final equivalence remains unverified."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Author thesis version: 50-ms784-Hz tone with50-Hz sinusoidal amplitude modulation and5-ms rise/fall; Audacity-generated and delivered through one of two loudspeakers.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "generated"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "784-Hz carrier,50-Hz amplitude modulation,50-ms duration and5-ms onset/offset ramps; Audacity."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. Modulation depth, sample rate, absolute playback level and original tone asset are not reported; these are not toolkit defaults.",
+          "missing_required_components": [
+            "source_recipe_or_asset_provenance"
+          ]
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Author thesis version: Static near/far loudspeakers: near beside right arm; far120cm from participant chair beside the partner.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "static"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Near source beside right arm on desk; far distance referenced to participant chair and partner seat."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near beside right arm, no exact metric offset; far120cm from participant chair."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "50-ms static sound, no motion."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. Do not label120cm as hand-to-speaker distance or create a looming trajectory.",
+          "missing_required_components": [
+            "exact_near_position_and_distance_anchor"
+          ]
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Author thesis version: Nonmusician comparison performs the alone-baseline administration only, with the same five families Anear,Afar,T,TAnear,TAfar.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Auditory-only near/far catches, tactile-only baseline, simultaneous audio-tactile near/far targets."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "One baseline-only task administration in the absence of a musical partner, retaining the five trial families; no duet manipulation."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. Partner-present/alone context is distinct from tactile-only baseline trial family; musical excerpts are an external manipulation, not the50-ms auditory task asset."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Author thesis version: Right-index button press on detecting right-hand touch; withhold for auditory-only events. RT and0-7perceived-touch intensity ratings are collected.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond only to touch; ignore auditory-only catches."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Response box on desk, E-primev2; box model unspecified."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Right-index button press whenever touch is perceived; rating collection also reported."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. No online response deadline or rating collection sequence is stated. The±2SDRT exclusion rule is analysis, not an online timeout.",
+          "missing_required_components": [
+            "response_window_and_anchor",
+            "rating_collection_timing_and_device"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Author thesis version: Jittering inter-stimulus interval6000-8000ms.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Jittered range."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "6000-8000ms."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. No onset/offset/response/rating anchor or uniform distribution is stated.",
+          "missing_required_components": [
+            "timing_scope_and_anchor",
+            "distribution"
+          ]
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Author thesis version: Simultaneous audio-tactile near and far targets:0msSOA.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Touch and auditory onset simultaneous; positive would mean touch after sound."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "0ms for both static positions."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. "
+        },
+        "tactile_target": {
+          "status": "reported_complete",
+          "value": "Author thesis version: DS7A200-microsecond constant-current square pulse to right-hand dorsum, at twice individual perceptual threshold by method of limits.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Transcutaneous electrical stimulation, DigitimerDS7A."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right-hand dorsum; bipolar electrodes1cm apart on Velcro strap, position randomly shifted about1cm to reduce habituation."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "200-microsecond constant-current square pulse; twice individual perceptual threshold, method of limits."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. Reported group mean2.01mA/range0.51-3.2mA is descriptive, not a transferable safe amplitude or PPS Kit device calibration."
+        },
+        "baseline_trial_contract": {
+          "status": "reported_complete",
+          "value": "Author thesis version: 24tactile-only trials per120-trial task administration; these normalize bimodal RTs.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_unspecified; one T family interleaved with four other families."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Touch is the sole stimulus in T trials; subject to the same incompletely anchored6000-8000msISI."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "12T trials in each of two60-trial blocks."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "24T trials per task administration."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. The alone-baseline social condition contains all five families and must not be confused with the T trial family."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "Author thesis version: 48auditory-only catches per120-trial administration, split equally between near and far; withhold response.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold at near and far positions."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; withhold tactile-detection response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "12Anear+12Afar per60-trial block, two blocks."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "48overall:24near+24far per administration."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. "
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "Author thesis version: Baseline-only control:two60-trial blocks=120trials,24of each of five families.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five trial families across two blocks;one alone-baseline administration."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12of each family per block;24of each family total;120total."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "The14new nonmusician controls do not perform the four post-duet administrations; they are distinct from the10-person power pilot."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. "
+        },
+        "block_order_contract": {
+          "status": "reported_complete",
+          "value": "Author thesis version: Two60-trial blocks in the alone baseline; pseudo-random family order avoids more than two identical consecutive trials.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "12of each of five families per block."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "No more than two identical trials in sequence."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "No cooperative/uncooperative session order applies to baseline-only controls."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. "
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1007/s00426-020-01365-6::c",
+      "source_type": "author_thesis_chapter_final_comparison_pending",
+      "source_file": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+      "review_date": "2026-10-27",
+      "review_scope": "Explicitly identified power pilot; review all11contracts while retaining absent pilot-specific parameters and unverified equivalence to main/control schedules.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.1007/s00426-020-01365-6.pdf",
+          "outcome": "HTTP 200 HTML subscription preview rather than a PDF; final Methods not retrieved."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://biblio.ugent.be/publication/8692305",
+          "outcome": "Institutional final-article record exposes a 1.65-MB published-version file restricted to UGent; no final text retrieved."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+          "outcome": "HTTP 200 open author thesis, 148 PDF pages; chapter 3 pp.65-90 and publication list p.13 inspected. Title/authors and forthcoming Psychological Research entry link the chapter to the publication; final equivalence remains unverified."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_reported",
+          "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
+          "page_or_section": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "evidence_note": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_reported",
+          "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
+          "page_or_section": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "evidence_note": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "timing_constraint": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "Author thesis version: Ten nonmusicians performed the audio-tactile task in the alone-baseline condition for the sample-size power pilot.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Baseline audio-tactile task identified by reference to the later Experimental design and procedure section."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. No separate pilot schedule, target/catch counts or apparatus equivalence is specified; retain the explicit lineage as a constraint only.",
+          "missing_required_components": [
+            "ordered_elements_and_source_selection"
+          ]
+        },
+        "task_response": {
+          "status": "not_reported",
+          "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
+          "page_or_section": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "evidence_note": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "response_mode_or_device": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_reported",
+          "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
+          "page_or_section": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "evidence_note": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_reported",
+          "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
+          "page_or_section": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "evidence_note": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_reported",
+          "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
+          "page_or_section": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "evidence_note": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "body_site_and_side": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "waveform_and_duration": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_reported",
+          "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
+          "page_or_section": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "evidence_note": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "timing_and_anchor": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            }
+          }
+        },
+        "catch_trial_contract": {
+          "status": "not_reported",
+          "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
+          "page_or_section": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "evidence_note": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "partial",
+          "value": "Author thesis version: Power pilot contains10nonmusicians; exact trial repetitions, blocks and total are not specified.",
+          "page_or_section": "Author thesis chapter3, pp.71-74; final-article comparison pending",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Baseline audio-tactile task,10nonmusicians; conditions used in the power contrast are not fully enumerated."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "The pilot precedes the28-person main/control cohorts and supplies effect-size evidence for sample-size planning."
+            }
+          },
+          "evidence_note": "Identified author thesis; final article equivalence not verified. Participant count is not a trial count; do not manufacture120pilot rows from the later implementation.",
+          "missing_required_components": [
+            "repetitions_or_exact_counts"
+          ]
+        },
+        "block_order_contract": {
+          "status": "not_reported",
+          "value": "Author thesis version: The10-nonmusician power pilot is described as performing the baseline audio-tactile task, but no pilot-specific value for this contract is reported. Main/control exact parameters are not silently inherited.",
+          "page_or_section": "Author thesis chapter3 Participants pp.70-71; final comparison pending",
+          "evidence_note": "An experiment is identified, so this is not a source-access gap. The described baseline-task lineage does not prove an identical pilot implementation.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            },
+            "block_composition": {
+              "status": "not_reported",
+              "value": "No pilot-specific specification found in the identified chapter."
+            }
+          }
+        }
+      }
     }
   ]
 }

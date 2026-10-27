@@ -5194,7 +5194,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract the audiotactile PPS task parameters separately from the musical-interaction manipulation; music/social context is non-blocking unless it changes the task audio assets"
+            "Final-article equivalence to the identified author thesis remains unverified; exact tone modulation depth/sample rate/level, near-speaker offset, ISI anchor/distribution, online response window and rating collection sequence remain unresolved. Pilot-specific schedule is not reported. Author version resolves static0-msSOA,120rows per main/control administration and the five-administration main regimen."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -5229,9 +5229,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract the audiotactile PPS task parameters separately from the musical-interaction manipulation; music/social context is non-blocking unless it changes the task audio assets"
+        "Final-article equivalence to the identified author thesis remains unverified; exact tone modulation depth/sample rate/level, near-speaker offset, ISI anchor/distribution, online response window and rating collection sequence remain unresolved. Pilot-specific schedule is not reported. Author version resolves static0-msSOA,120rows per main/control administration and the five-administration main regimen."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract the audiotactile PPS task parameters separately from the musical-interaction manipulation; music/social context is non-blocking unless it changes the task audio assets",
+      "next_required_action": "Extract or source the missing paper parameters: Final-article equivalence to the identified author thesis remains unverified; exact tone modulation depth/sample rate/level, near-speaker offset, ISI anchor/distribution, online response window and rating collection sequence remain unresolved. Pilot-specific schedule is not reported. Author version resolves static0-msSOA,120rows per main/control administration and the five-administration main regimen.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
