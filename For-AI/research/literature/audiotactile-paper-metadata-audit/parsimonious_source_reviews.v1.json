@@ -36634,6 +36634,1277 @@
           }
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.cortex.2025.11.015",
+      "source_type": "author_shared_published_version_web_text",
+      "source_file": "https://www.researchgate.net/publication/398471012_Functional_organization_of_distance-dependent_audio-tactile_integration_is_different_in_rear_and_front_spaces",
+      "review_date": "2026-10-27",
+      "review_scope": "One repeated-measures cohort; published-layout main article Methods read via the author-uploaded full-text transcription. Local PDF and supplementary transparency file not obtained. No raw data accessed.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "approximation_required",
+          "value": "A 3250 ms burst train sampled at 44.1 kHz is rendered with Max/MSP 6.1.10 and Spat. Eight stimuli cross fixed/looming sound with four azimuths. Original materials are explicitly unavailable.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Synthesized spatial burst-train audio."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "3250 ms burst train; 44,100 Hz digitization."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Max/MSP 6.1.10 with Spat; non-individual LISTEN HRTFs; simulated direct sound, early reflections and late reverberation; Beyer Dynamics DT 770 headphones."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No original waveform, noise recipe, seed, burst-envelope timing or selected LISTEN subject is supplied in this article. Its Methods refers to Hobeika 2020; details were not silently borrowed."
+            },
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "No complete numeric level law, output SPL calibration, reflection/reverberation settings or transfer function is supplied."
+            }
+          },
+          "evidence_note": "The transparency statement on p. 233 says study materials are not publicly available. The preserved paper description is not an original stimulus asset."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Looming sound travels toward the head at ear level from 640 cm to 20 cm at reported 210 cm/s. Fixed controls stay at 640 cm. Azimuths are +45°, −45°, +135°, −135°. Exact movement onset within the 3250 ms sound is unresolved.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Looming approach and fixed-distance comparator."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head center at ear level. Hands are together against the trunk at the midsagittal plane; the authors interpret this as peri-trunk rather than isolated peri-hand PPS."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Radii 640→20 cm for looming and 640 cm fixed. Positive azimuth denotes left: front +45/−45°, rear +135/−135°."
+            },
+            "padding_or_holds": {
+              "status": "reported",
+              "value": "300 ms silence precedes sound; 700–1100 ms silence follows. No explicit stationary hold within the sound is specified."
+            },
+            "timing_constraint": {
+              "status": "not_reported",
+              "value": "Sound duration is 3250 ms and speed is 210 cm/s. The 620 cm radial path takes about 2952 ms at that speed; complete movement timing/offset is not specified."
+            },
+            "attenuation_law": {
+              "status": "not_reported",
+              "value": "Spat simulation is described but its executable distance-level law is not given."
+            }
+          },
+          "derivation_note": "(640−20)/210 = 2.95238095 s. This does not justify assuming that the entire 3.25 s waveform is linear motion, nor inventing a hold. The first and last in-sound tactile anchors are 105 and 3050 ms."
+        },
+        "trial_sequence": {
+          "status": "derived_complete",
+          "value": "Each trial contains 300 ms silence, 3250 ms fixed or looming sound, then 700–1100 ms silence. Touch occurs at one of eight sound-relative delays, or is omitted for an auditory-only catch. Pre/post controls retain the trial sound outside the tactile event.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Fixed/looming audio with touch; pre/post touch controls; sound-only no-touch catch trials."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Silence → one fixed/looming sound in the current hemifield → silence. A single left-index tactile pulse appears at the selected delay or is absent."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Fixed and looming trials are randomized within each block."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "derived",
+              "value": "Nominal trial duration is 4250–4650 ms. The −250 ms touch starts 50 ms after trial start; the +3500 ms touch starts 3800 ms after trial start."
+            }
+          },
+          "derivation_note": "Trial duration = 300+3250+(700 to 1100) ms. Add the 300 ms prefix to each sound-relative touch onset. The 20 ms pulse is contained at both endpoints."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Press a response button with the right index finger immediately after a left-index vibration, ignore sound, and avoid anticipation. No numeric acquisition timeout is reported.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch is the response target; sound-only catches omit it."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Right-index response button; Presentation software records RTs."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Speeded button press on tactile detection; no instructed sound response."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Misses and catch false alarms are assessed. RTs below 100 or above 1000 ms are excluded offline; log RTs are analyzed."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "Tactile RT is the reported endpoint, but the numeric online response window and hardware latency compensation are not specified. Offline 100–1000 ms filters are not a timeout."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "A fixed 300 ms silence precedes each sound. The following silence is randomly distributed from 700 to 1100 ms. The distribution family and sampling granularity are not stated.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed prefix plus variable post-sound silence."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Prefix ends at sound onset; suffix starts at the 3250 ms sound offset."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "300 ms prefix; 700–1100 ms suffix."
+            },
+            "randomization": {
+              "status": "reported",
+              "value": "Post-sound interval is described as randomly distributed."
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "Uniformity, discrete step size and random-sequence seed are not reported."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Touch-minus-sound onset is −250, +105, +1625, +2385, +2765, +2955, +3050 and +3500 ms. The same timing grid crosses fixed/looming and all four directions.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Delay is measured from sound onset; negative values precede sound."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "−250, 105, 1625, 2385, 2765, 2955, 3050, 3500 ms. The six interior anchors correspond to reported depths 640, 320, 160, 80, 40, 20 cm."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Identical SOAs for both sound modes and all azimuths. Fixed controls remain 640 cm at every SOA."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "A 20 ms, 250 Hz sinusoid drives a miniature 28 mm speaker touching the palmar surface of the left index finger.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile stimulation."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Palmar left index finger; both hands palm-down, adjacent and in contact with the trunk."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "20 ms sinusoidal pulse."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "250 Hz. The level is adjusted to be easily detected through touch while inaudible in silence; detection is rechecked after each block."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No numeric amplitude, displacement, acceleration or individual threshold rule is reported."
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Presentation controls delivery, but no measured stimulus/response latency or trigger correction is supplied."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "Two distinct control structures are required: fixed-distance sound at all eight delays, and pre/post-sound touch anchors in both sound modes. They must not be collapsed into silent whole-trial baselines.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Fixed-distance expectancy comparator plus pre/post endpoint tactile controls within sounding trials."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Fixed sound stays 640 cm; endpoints are −250/+3500 ms relative to sound onset."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Twenty repetitions for every sound-mode × hemifield × side × delay cell."
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Endpoint controls cross both sound modes and all four azimuths. Fixed in-sound controls cross six interior delays and all four azimuths."
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "320 endpoint rows across both sound modes, plus 480 fixed-sound interior rows. Their union is 800 distinct control rows; do not double-count the 160 fixed endpoint rows."
+            }
+          },
+          "derivation_note": "Endpoints: 2 modes×4 azimuths×2 endpoints×20 = 320. Fixed interior: 1×4×6×20 = 480. All fixed rows = 640, of which 160 already belong to the endpoint group."
+        },
+        "catch_trial_contract": {
+          "status": "partial",
+          "value": "There are 320 auditory-only no-touch catches overall, eight in each of 40 blocks (20% of all 1600 trials). Exact catch allocation between sound modes and left/right sources is not specified.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only catch with touch omitted."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile target; participant should withhold the response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Eight catches per block; total 320."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "320 per participant across both sessions."
+            },
+            "crossing_rule": {
+              "status": "not_reported",
+              "value": "No exact mode/side distribution for the catch rows is given; equal splitting must not be inferred from the 20% total."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "Twenty repeats of 64 experimental cells give 1280 touch trials. Adding 320 catches yields 1600 trials per participant across two sessions.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "2 sound modes × 2 hemifields × 2 sides × 8 touch delays."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "20 repetitions per experimental cell; 1280 experimental trials and 320 catches."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Catches are a separate eight-per-block family and are not included in the 20 repetitions."
+            },
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "480 looming interior +480 fixed interior +320 endpoint rows +320 catches =1600."
+            }
+          },
+          "derivation_note": "2×2×2×8×20=1280; 1280+320=1600. Each of 40 blocks contains 32 experimental and 8 catch rows."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Front and rear hemifields are tested on separate days, counterbalanced across participants. Each session has 20 blocks containing 32 experimental plus eight catch trials.",
+          "page_or_section": "Author-uploaded published-layout full-text transcription, Cortex 194 (2026), pp. 222–225; Methods 2.1–2.3 and Results 3.1–3.2",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "20 blocks per session, 40 overall."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "32 touch trials +8 catches; hemifield held constant within a session."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Overall experimental-cell repetition is 20; exact per-block cell balancing is not explicitly stated."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Fixed and looming trials are randomized within blocks."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Front/rear session order is counterbalanced. A 1 min break is allowed between blocks and a mandatory 10 min break occurs halfway through."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact per-block assignment of delays and sides, run-length limits, random seed and constrained catch placement are not reported."
+            }
+          }
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/publication/398471012_Functional_organization_of_distance-dependent_audio-tactile_integration_is_different_in_rear_and_front_spaces",
+          "outcome": "Methods, participant exclusions, control design and transparency statement read from an author-uploaded transcription of the published-layout article on ResearchGate. Publisher page and direct PDF retrieval returned 403. No local PDF or separate supplementary transparency document was obtained. Do not claim a fresh PDF visual check."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945225003119",
+          "outcome": "HTTP Error 403: Forbidden"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/profile/Marine-Taffou/publication/398471012_Functional_organization_of_distance-dependent_audio-tactile_integration_is_different_in_rear_and_front_spaces/links/69f093bbdb00ec75d02e1407/Functional-organization-of-distance-dependent-audio-tactile-integration-is-different-in-rear-and-front-spaces.pdf",
+          "outcome": "Response status code does not indicate success: 403 (Forbidden)."
+        }
+      ]
+    },
+    {
+      "study_row_id": "doi:10.61782/fa.2025.0866::a",
+      "source_type": "published_conference_proceedings",
+      "source_file": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "2-second protocol; all 13 recruited people also complete the 3-second protocol. Full eight-page proceedings paper read, including Methods, figures and questionnaire table.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "approximation_required",
+          "value": "Pink noise is spatialized in MATLAB using HRTFs to approach laterally from the right. The 2 s protocol uses a 100 cm start; the 3 s protocol uses 150 cm. Original waveform, HRTF identity and output level are not supplied.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Synthesized binaural pink noise."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Two duration-specific stereo stimuli,2 s and 3 s."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "MATLAB HRTF procedure based on Pfeiffer et al.2018; propagation and attenuation for room-temperature air, without added reverberation. Sennheiser HDA 300 headphones; PsychToolBox and WASAPI DAC."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No exact noise seed, asset checksum, HRTF dataset/subject or full executable code is supplied in this proceedings paper."
+            },
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Attenuation and propagation are described but no complete numeric law, headphone calibration or presentation SPL is specified."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "reported_complete",
+          "value": "For the 2 s protocol, the virtual source approaches from 100 cm to 0 cm at 50 cm/s along a straight lateral path toward the head. The 3 s version starts 150 cm away at the same speed.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Looming approach only."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Lateral approach from the right toward the listener/head. Right palm receives touch."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "2 s:100→0 cm;3 s:150→0 cm. Discussion explicitly identifies 0 cm as the intended endpoint."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Constant 50 cm/s,2 s or 3 s according to protocol."
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "No additional auditory hold or full post-sound trial margin is specified."
+            },
+            "attenuation_law": {
+              "status": "not_reported",
+              "value": "Propagation/attenuation follows the cited approach, but its numeric law at the 0 cm endpoint is not supplied."
+            }
+          },
+          "evidence_note": "Duration and initial distance covary at fixed velocity. This is not a duration-only waveform manipulation over a fixed spatial path."
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "A fixation cross precedes trial onset by 1000 ms. Audio-tactile targets contain looming sound plus a 200 ms touch at one of seven delays. Tactile-only baselines use those same delays; sound-only catches omit touch.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile targets, tactile-only baselines, auditory-only no-touch catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Fixation cross →1000 ms→trial/audio onset; touch at the chosen delay or no touch in catches. Baseline trials omit the sound."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Twenty-one catches are interspersed with the 224 target/baseline trials."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "The sound/tactile tracks last 2 s or 3 s; exact trial end, post-response waiting period and separate ITI are not reported."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Press a left-hand response button as soon as the right-palm vibration is felt; withhold on auditory-only catches. RT is keypress time relative to trial onset minus the selected touch delay.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch requires response; no-touch catch requires withholding."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Cherry MX Blue response button within reach of the left hand."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Speeded press on tactile detection while maintaining fixation."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Negative RTs and trials with multiple presses are excluded. Per-delay/condition RTs beyond 2.5 SD are trimmed offline."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "Tactile anchor is explicit, but no numeric online timeout or measured button latency correction is reported."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "The fixation-to-trial-onset interval is fixed at 1000 ms. Independent intertrial timing and post-sound jitter are not specified.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed foreperiod before trial onset."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "1000 ms after fixation-cross appearance; sound begins at trial onset on sounding trials."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms fixed foreperiod."
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "No independent ITI distribution or range is supplied."
+            },
+            "randomization": {
+              "status": "not_reported",
+              "value": "Randomization of foreperiod/ITI is not stated; interspersed catch order does not establish timing jitter."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "The 2 s protocol uses seven touch onsets at 250,500,750,1000,1250,1500,1750 ms after trial/sound onset. Baselines use the same trial-relative delays without sound.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile onset after nominal trial onset, which is sound onset on audio-tactile trials."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "250,500,750,1000,1250,1500,1750 ms."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Only right-to-head looming direction; same seven delays for tactile-only baseline."
+            }
+          },
+          "evidence_note": "Six smoothed analysis points are computed by adjacent pairwise averaging of the seven acquisition delays. They must not replace the seven-point stimulus schedule."
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "An 80 Hz sawtooth lasts 200 ms and drives an audio-driven haptic actuator under the right palm. Methods disagree about the silicone pad dimensions.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Audio-driven vibrotactile actuator."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right palm supported on a molded silicone pad."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "80 Hz sawtooth synthesized in Audacity, lasting 200 ms."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "Frequency 80 Hz; pulse duration 200 ms."
+            },
+            "external_trigger": {
+              "status": "reported",
+              "value": "Separate tactile audio track starts simultaneously with the binaural track through the DAC."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "Numeric amplitude/displacement and individual tactile-threshold calibration are not reported."
+            }
+          },
+          "evidence_note": "Methods 2.2 describes a 15×15×1 cm pad; Methods 2.4 describes 10×10×1 cm. Preserve this apparatus discrepancy; 80 Hz and 200 ms are consistently reported."
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "A full set of tactile-only baselines matches all seven delays, with 16 repetitions per delay and no looming sound.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only SOA-matched trials."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "The same seven trial-relative touch onsets as the audio-tactile trials; sound omitted."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "16 repetitions at each of seven delays."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "112 baseline trials per duration protocol."
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Crosses every delay within each duration-specific protocol."
+            }
+          },
+          "derivation_note": "7×16=112. Unlike pre/post controls in some earlier papers, this baseline is explicitly a tactile-only condition across the full delay grid."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "Twenty-one catch trials contain only the duration-specific auditory stimulus and require no response.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only withhold catches."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile stimulation; withhold button press."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Exact additional count of 21 per duration-specific block."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "21 per protocol;42 across both duration protocols."
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "One looming source per duration; catch has no tactile SOA assignment."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "16 repeats×7 delays×2 modalities yields 224 tactile trials;21 additional catches produce 245 per duration protocol. Both protocols together give 490 trials before the separate practice.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "7 delays ×2 target modalities (baseline/audio-tactile) within each of two duration protocols."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "16 repetitions per delay and modality;112 per modality;224 total touch trials;21 catches;245 per block."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Five practice trials follow initial tactile demonstration and precede the two experiments. Practice is not counted in 245."
+            },
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "112 audio-tactile+112 tactile-only+21 auditory-only=245 per protocol;2×245=490 main trials."
+            }
+          },
+          "derivation_note": "7×2×16+21=245. The same 13 participants perform both versions; this does not yield 26 independently recruited participants.",
+          "evidence_note": "Methods excludes 3 participants in 2 s and 4 in 3 s, consistent with Figure 1's N 10/N 9. Results report modality F(1,8) for 2 s and F(1,9) for 3 s, reversing the apparent subject degrees of freedom. Retain the reported samples and flag the inconsistency; do not invent additional exclusions."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Each participant performs the 2 s and 3 s protocols, each described as a 245-trial block with two scheduled breaks and a following questionnaire. Seven participants start with 2 s and six start with 3 s.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two duration-specific protocol blocks per participant, one of each duration."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "Each protocol:112 audio-tactile targets+112 tactile-only baselines+21 catches."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Semi-counterbalanced duration order:7 participants 2 s first,6 participants 3 s first; questionnaire follows each protocol."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Catch trials are interspersed."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "not_reported",
+              "value": "Exact subdivision around the two breaks is not specified."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "No complete delay/modality randomization algorithm, seed, block-position constraints or catch run limits are supplied."
+            }
+          }
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+          "outcome": "Complete publisher PDF retrieved, parsed and key Methods page visually checked. The exact source SHA256 is recorded in sourceSha256. SHA256 f3bc970fdb78df7bfa1deaee7d22d2285e7999319fd6bb42334b6d8f1bd4a75c."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+          "outcome": "HTTP 200; content type application/pdf; SHA256 f3bc970fdb78df7bfa1deaee7d22d2285e7999319fd6bb42334b6d8f1bd4a75c"
+        }
+      ]
+    },
+    {
+      "study_row_id": "doi:10.61782/fa.2025.0866::b",
+      "source_type": "published_conference_proceedings",
+      "source_file": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "3-second protocol in the same 13 people, not a new cohort. The source-specific seven-SOA schedule is retained.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "approximation_required",
+          "value": "Pink noise is spatialized in MATLAB using HRTFs to approach laterally from the right. The 2 s protocol uses a 100 cm start; the 3 s protocol uses 150 cm. Original waveform, HRTF identity and output level are not supplied.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "Synthesized binaural pink noise."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Two duration-specific stereo stimuli,2 s and 3 s."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "MATLAB HRTF procedure based on Pfeiffer et al.2018; propagation and attenuation for room-temperature air, without added reverberation. Sennheiser HDA 300 headphones; PsychToolBox and WASAPI DAC."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No exact noise seed, asset checksum, HRTF dataset/subject or full executable code is supplied in this proceedings paper."
+            },
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Attenuation and propagation are described but no complete numeric law, headphone calibration or presentation SPL is specified."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "reported_complete",
+          "value": "For the 3 s protocol, the source approaches from 150 cm to 0 cm at 50 cm/s along a straight lateral path toward the head. Duration and starting distance differ together from the 2 s protocol.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Looming approach only."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Lateral approach from the right toward the listener/head. Right palm receives touch."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "2 s:100→0 cm;3 s:150→0 cm. Discussion explicitly identifies 0 cm as the intended endpoint."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Constant 50 cm/s,2 s or 3 s according to protocol."
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "No additional auditory hold or full post-sound trial margin is specified."
+            },
+            "attenuation_law": {
+              "status": "not_reported",
+              "value": "Propagation/attenuation follows the cited approach, but its numeric law at the 0 cm endpoint is not supplied."
+            }
+          },
+          "evidence_note": "Duration and initial distance covary at fixed velocity. This is not a duration-only waveform manipulation over a fixed spatial path."
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "A fixation cross precedes trial onset by 1000 ms. Audio-tactile targets contain looming sound plus a 200 ms touch at one of seven delays. Tactile-only baselines use those same delays; sound-only catches omit touch.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile targets, tactile-only baselines, auditory-only no-touch catches."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Fixation cross →1000 ms→trial/audio onset; touch at the chosen delay or no touch in catches. Baseline trials omit the sound."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Twenty-one catches are interspersed with the 224 target/baseline trials."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "The sound/tactile tracks last 2 s or 3 s; exact trial end, post-response waiting period and separate ITI are not reported."
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Press a left-hand response button as soon as the right-palm vibration is felt; withhold on auditory-only catches. RT is keypress time relative to trial onset minus the selected touch delay.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch requires response; no-touch catch requires withholding."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Cherry MX Blue response button within reach of the left hand."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Speeded press on tactile detection while maintaining fixation."
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Negative RTs and trials with multiple presses are excluded. Per-delay/condition RTs beyond 2.5 SD are trimmed offline."
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "Tactile anchor is explicit, but no numeric online timeout or measured button latency correction is reported."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "The fixation-to-trial-onset interval is fixed at 1000 ms. Independent intertrial timing and post-sound jitter are not specified.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Fixed foreperiod before trial onset."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "1000 ms after fixation-cross appearance; sound begins at trial onset on sounding trials."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1000 ms fixed foreperiod."
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "No independent ITI distribution or range is supplied."
+            },
+            "randomization": {
+              "status": "not_reported",
+              "value": "Randomization of foreperiod/ITI is not stated; interspersed catch order does not establish timing jitter."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "The 3 s protocol uses 375,750,1125,1500,1875,2250,2625 ms after trial/sound onset. Baselines match these seven delays without sound.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile onset after trial/sound onset."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "375,750,1125,1500,1875,2250,2625 ms."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "One right-to-head looming direction. Tactile-only baselines use the same trial-relative delays."
+            }
+          },
+          "evidence_note": "Seven acquisition delays are preserved; the six smoothed analysis positions are not six acquired trial levels."
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "An 80 Hz sawtooth lasts 200 ms and drives an audio-driven haptic actuator under the right palm. Methods disagree about the silicone pad dimensions.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Audio-driven vibrotactile actuator."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right palm supported on a molded silicone pad."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "80 Hz sawtooth synthesized in Audacity, lasting 200 ms."
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "Frequency 80 Hz; pulse duration 200 ms."
+            },
+            "external_trigger": {
+              "status": "reported",
+              "value": "Separate tactile audio track starts simultaneously with the binaural track through the DAC."
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "Numeric amplitude/displacement and individual tactile-threshold calibration are not reported."
+            }
+          },
+          "evidence_note": "Methods 2.2 describes a 15×15×1 cm pad; Methods 2.4 describes 10×10×1 cm. Preserve this apparatus discrepancy; 80 Hz and 200 ms are consistently reported."
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "A full set of tactile-only baselines matches all seven delays, with 16 repetitions per delay and no looming sound.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only SOA-matched trials."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "The same seven trial-relative touch onsets as the audio-tactile trials; sound omitted."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "16 repetitions at each of seven delays."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "112 baseline trials per duration protocol."
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Crosses every delay within each duration-specific protocol."
+            }
+          },
+          "derivation_note": "7×16=112. Unlike pre/post controls in some earlier papers, this baseline is explicitly a tactile-only condition across the full delay grid."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "Twenty-one catch trials contain only the duration-specific auditory stimulus and require no response.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only withhold catches."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tactile stimulation; withhold button press."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Exact additional count of 21 per duration-specific block."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "21 per protocol;42 across both duration protocols."
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "One looming source per duration; catch has no tactile SOA assignment."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "16 repeats×7 delays×2 modalities yields 224 tactile trials;21 additional catches produce 245 per duration protocol. Both protocols together give 490 trials before the separate practice.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "7 delays ×2 target modalities (baseline/audio-tactile) within each of two duration protocols."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "16 repetitions per delay and modality;112 per modality;224 total touch trials;21 catches;245 per block."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Five practice trials follow initial tactile demonstration and precede the two experiments. Practice is not counted in 245."
+            },
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "112 audio-tactile+112 tactile-only+21 auditory-only=245 per protocol;2×245=490 main trials."
+            }
+          },
+          "derivation_note": "7×2×16+21=245. The same 13 participants perform both versions; this does not yield 26 independently recruited participants.",
+          "evidence_note": "Methods excludes 3 participants in 2 s and 4 in 3 s, consistent with Figure 1's N 10/N 9. Results report modality F(1,8) for 2 s and F(1,9) for 3 s, reversing the apparent subject degrees of freedom. Retain the reported samples and flag the inconsistency; do not invent additional exclusions."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Each participant performs the 2 s and 3 s protocols, each described as a 245-trial block with two scheduled breaks and a following questionnaire. Seven participants start with 2 s and six start with 3 s.",
+          "page_or_section": "Published Forum Acusticum / EuroNoise 2025 proceedings PDF pp.2–4 (printed 3550–3552), Methods 2.1–2.5; questionnaire Table 1 p.6",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two duration-specific protocol blocks per participant, one of each duration."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "Each protocol:112 audio-tactile targets+112 tactile-only baselines+21 catches."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Semi-counterbalanced duration order:7 participants 2 s first,6 participants 3 s first; questionnaire follows each protocol."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Catch trials are interspersed."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "not_reported",
+              "value": "Exact subdivision around the two breaks is not specified."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "No complete delay/modality randomization algorithm, seed, block-position constraints or catch run limits are supplied."
+            }
+          }
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+          "outcome": "Complete publisher PDF retrieved, parsed and key Methods page visually checked. The exact source SHA256 is recorded in sourceSha256. SHA256 f3bc970fdb78df7bfa1deaee7d22d2285e7999319fd6bb42334b6d8f1bd4a75c."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+          "outcome": "HTTP 200; content type application/pdf; SHA256 f3bc970fdb78df7bfa1deaee7d22d2285e7999319fd6bb42334b6d8f1bd4a75c"
+        }
+      ]
+    },
+    {
+      "study_row_id": "doi:10.1080/17470210903068989",
+      "source_type": "published_abstract_with_author_thesis_access_gap",
+      "source_file": "https://www.tandfonline.com/doi/abs/10.1080/17470210903068989",
+      "review_date": "2026-10-27",
+      "review_scope": "One provisional adjacent protocol identity. Whole-publication Methods inventory is unresolved; no count or readiness claim from the abstract.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Audiotactile cross-modal dynamic capture: participants judge the direction of an auditory or tactile apparent-motion target while ignoring a congruent/incongruent stream in the other modality. Sound complexity is noise versus pure tone. This is an adjacent direction-discrimination paradigm, not a looming-distance tactile-detection PPS boundary schedule.",
+          "page_or_section": "Published article abstract and bibliographic identity; author thesis chapter 9.2 heading and limited indexed Methods excerpt. Final full text and thesis PDF remain inaccessible in this audit.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Not applicable to the direct distance-dependent PPS contract for this adjacent motion-direction task. Missing full Methods are not converted into assumed parameters."
+            }
+          },
+          "evidence_note": "The final abstract supports the task-role boundary, but complete experiment count, cohort relationships, trial counts, apparatus, timing and control inventory remain unverified. A same-title author thesis chapter is a version lead, not a completed final-version comparison."
+        }
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.tandfonline.com/doi/abs/10.1080/17470210903068989",
+          "outcome": "Publisher abstract and bibliographic identity read. Sage final PDF and institutional thesis PDF returned 403; the institutional record confirms the thesis and Chapter 9 concerns apparent-motion capture. A cached limited thesis excerpt identifies Chapter 9.2/Experiment 6 with this title, but full Methods could not be reopened or downloaded."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unitn.it/retrieve/a1fc2eac-7524-4029-a1bc-feaa500b3c4f/Assessing_audiotactile_interactions_Spatiotemporal_factors_and_role_of_visual_experience.pdf",
+          "outcome": "HTTP Error 403: Forbidden"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/pdf/10.1080/17470210903068989",
+          "outcome": "HTTP Error 403: Forbidden"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unitn.it/retrieve/a1fc2eac-7524-4029-a1bc-feaa500b3c4f/Assessing_audiotactile_interactions_Spatiotemporal_factors_and_role_of_visual_experience.pdf",
+          "outcome": "Response status code does not indicate success: 403 (Forbidden)."
+        }
+      ]
     }
   ]
 }

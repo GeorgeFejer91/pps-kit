@@ -3312,6 +3312,161 @@
           "value": "Abstract describes comparison with controls, but v 1 questionnaire procedure names 13 experimental reminders only; 5 traffic controls are explicitly in the preceding EEG block. Exact interpretation of abstract controls unresolved."
         }
       ]
+    },
+    {
+      "network_node_id": "doi:10.1016/j.cortex.2025.11.015",
+      "doi": "10.1016/j.cortex.2025.11.015",
+      "inventory_status": "confirmed_single_front_rear_factorial_experiment",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "One cohort. Fifteen front/back-confusion exclusions leave 35; one additional high-trait-anxiety exclusion leaves 34. Front and rear sessions are the same people's repeated measurements on separate days, not independent cohorts. Methods, participant exclusions, control design and transparency statement read from an author-uploaded transcription of the published-layout article on ResearchGate. Publisher page and direct PDF retrieval returned 403. No local PDF or separate supplementary transparency document was obtained. Do not claim a fresh PDF visual check.",
+      "evidence_pointer": "https://www.researchgate.net/publication/398471012_Functional_organization_of_distance-dependent_audio-tactile_integration_is_different_in_rear_and_front_spaces",
+      "source_version": "Published online 8 December 2025; Cortex 194 (2026), 220–238. The DOI's 2025 component is not the paginated publication year.",
+      "source_review_limit": "The 620 cm path at 210 cm/s requires about 2.952 s, while the waveform lasts 3.25 s. Exact movement onset, propagation offsets and internal holds cannot be inferred from those values alone. The code/materials transparency statement provides no study stimulus assets. A cited analysis article is not a verified stimulus-generation repository. The ethics statement says participant data are not publicly available. No data were requested or acquired. Random 700–1100 ms post-sound silence does not specify a uniform distribution or sampling step.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/publication/398471012_Functional_organization_of_distance-dependent_audio-tactile_integration_is_different_in_rear_and_front_spaces",
+          "outcome": "Methods, participant exclusions, control design and transparency statement read from an author-uploaded transcription of the published-layout article on ResearchGate. Publisher page and direct PDF retrieval returned 403. No local PDF or separate supplementary transparency document was obtained. Do not claim a fresh PDF visual check."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945225003119",
+          "outcome": "HTTP Error 403: Forbidden"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/profile/Marine-Taffou/publication/398471012_Functional_organization_of_distance-dependent_audio-tactile_integration_is_different_in_rear_and_front_spaces/links/69f093bbdb00ec75d02e1407/Functional-organization-of-distance-dependent-audio-tactile-integration-is-different-in-rear-and-front-spaces.pdf",
+          "outcome": "Response status code does not indicate success: 403 (Forbidden)."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Front/rear distance-dependent audiotactile integration",
+          "record_id": "amiel_2025_front_rear",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific",
+          "cohort": "One cohort. Fifteen front/back-confusion exclusions leave 35; one additional high-trait-anxiety exclusion leaves 34. Front and rear sessions are the same people's repeated measurements on separate days, not independent cohorts."
+        }
+      ],
+      "supporting_task_boundaries": [
+        "Audiometry, handedness scale, trait anxiety questionnaire, tactile detectability checks and front/back localization questions are screening/context within the cohort. No separately recruited supporting experiment is reported in the reviewed Methods. Appendix figures reanalyze the same 34 participants."
+      ]
+    },
+    {
+      "network_node_id": "doi:10.61782/fa.2025.0866",
+      "doi": "10.61782/fa.2025.0866",
+      "inventory_status": "confirmed_one_cohort_two_duration_protocols",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "All 13 participants complete BOTH protocols. The two entries are protocol variants in a shared cohort; unique recruitment is 13, not 26. Order is 7 participants 2 s first and 6 participants 3 s first. Complete publisher PDF retrieved, parsed and key Methods page visually checked. The exact source SHA256 is recorded in sourceSha256.",
+      "evidence_pointer": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+      "source_version": "Eight-page published conference proceedings paper, Forum Acusticum / EuroNoise 2025, printed 3549–3556; not a journal article or merely an abstract.",
+      "source_review_limit": "Seven acquisition delays are transformed into six smoothed analysis points. Do not bake a six-level schedule from the analysis figure. Duration and initial distance covary at fixed 50 cm/s. Exact output levels, HRTF identity, noise seed and complete propagation law are not supplied. The tactile pulse is 200 ms at 80 Hz, not the toolkit's generic 100 ms cue.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+          "outcome": "Complete publisher PDF retrieved, parsed and key Methods page visually checked. The exact source SHA256 is recorded in sourceSha256. SHA256 f3bc970fdb78df7bfa1deaee7d22d2285e7999319fd6bb42334b6d8f1bd4a75c."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
+          "outcome": "HTTP 200; content type application/pdf; SHA256 f3bc970fdb78df7bfa1deaee7d22d2285e7999319fd6bb42334b6d8f1bd4a75c"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "protocol_variant",
+          "experiment_label": "2-second looming protocol",
+          "record_id": "looming_duration_2025",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "All 13 participants complete BOTH protocols. The two entries are protocol variants in a shared cohort; unique recruitment is 13, not 26. Order is 7 participants 2 s first and 6 participants 3 s first."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "protocol_variant",
+          "experiment_label": "3-second looming protocol",
+          "record_id": "looming_duration_2025",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "All 13 participants complete BOTH protocols. The two entries are protocol variants in a shared cohort; unique recruitment is 13, not 26. Order is 7 participants 2 s first and 6 participants 3 s first."
+        }
+      ],
+      "supporting_task_boundaries": [
+        "A tactile demonstration and five practice trials precede the main task; do not include them in the 245-trial protocol count.",
+        "The questionnaire and sound-start/end pointing/distance estimation follow each PPS task in the same cohort. They are supporting measures, not another independent recruitment or extra PPS experiment.",
+        "Two scheduled breaks are mentioned per experiment, but exact subdivisions around them are not supplied."
+      ],
+      "source_conflicts": [
+        "Pad size differs between Methods 2.2 (15×15×1 cm) and 2.4 (10×10×1 cm).",
+        "Methods excludes 3 participants in 2 s and 4 in 3 s, consistent with Figure 1's N 10/N 9. Results report modality F(1,8) for 2 s and F(1,9) for 3 s, reversing the apparent subject degrees of freedom. Retain the reported samples and flag the inconsistency; do not invent additional exclusions."
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1080/17470210903068989",
+      "doi": "10.1080/17470210903068989",
+      "inventory_status": "provisional_adjacent_boundary_with_access_gap",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Participant count, experiment/control boundaries and cohort overlap are not adopted from the inaccessible final Methods. The thesis's Experiment 6 label does not imply six experiments in this article. Publisher abstract and bibliographic identity read. Sage final PDF and institutional thesis PDF returned 403; the institutional record confirms the thesis and Chapter 9 concerns apparent-motion capture. A cached limited thesis excerpt identifies Chapter 9.2/Experiment 6 with this title, but full Methods could not be reopened or downloaded.",
+      "evidence_pointer": "https://www.tandfonline.com/doi/abs/10.1080/17470210903068989",
+      "source_version": "Quarterly Journal of Experimental Psychology 63(4),694–704,2010; publisher lists online publication 8 August 2009. A thesis chapter is an author-version lead, not a verified final article.",
+      "source_review_limit": "All eleven direct-PPS contract dispositions are explicitly not applicable to the evidenced task role; they do not establish a completed full Methods inventory or any runnable template.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.tandfonline.com/doi/abs/10.1080/17470210903068989",
+          "outcome": "Publisher abstract and bibliographic identity read. Sage final PDF and institutional thesis PDF returned 403; the institutional record confirms the thesis and Chapter 9 concerns apparent-motion capture. A cached limited thesis excerpt identifies Chapter 9.2/Experiment 6 with this title, but full Methods could not be reopened or downloaded."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unitn.it/retrieve/a1fc2eac-7524-4029-a1bc-feaa500b3c4f/Assessing_audiotactile_interactions_Spatiotemporal_factors_and_role_of_visual_experience.pdf",
+          "outcome": "HTTP Error 403: Forbidden"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/pdf/10.1080/17470210903068989",
+          "outcome": "HTTP Error 403: Forbidden"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unitn.it/retrieve/a1fc2eac-7524-4029-a1bc-feaa500b3c4f/Assessing_audiotactile_interactions_Spatiotemporal_factors_and_role_of_visual_experience.pdf",
+          "outcome": "Response status code does not indicate success: 403 (Forbidden)."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "provisional_publication_boundary",
+          "experiment_label": "Sound-complexity cross-modal dynamic capture",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_apparent_motion_discrimination",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort": "Participant count, experiment/control boundaries and cohort overlap are not adopted from the inaccessible final Methods. The thesis's Experiment 6 label does not imply six experiments in this article."
+        }
+      ],
+      "source_lineage": [
+        {
+          "url": "https://iris.unitn.it/handle/11572/368342",
+          "role": "Institutional author-thesis metadata; Assessing audiotactile interactions: Spatiotemporal factors and role of visual experience, defended 2009."
+        },
+        {
+          "url": "https://iris.unitn.it/retrieve/a1fc2eac-7524-4029-a1bc-feaa500b3c4f/Assessing_audiotactile_interactions_Spatiotemporal_factors_and_role_of_visual_experience.pdf",
+          "role": "Chapter 9.2 same-title author-version lead; retrieval 403 and final-version comparison pending."
+        }
+      ]
     }
   ],
   "corpus_freeze": {
@@ -3832,6 +3987,16 @@
       ],
       "reason": "Separate numbered or explicitly linked source protocols; no extra recruitment inferred from child rows.",
       "evidence_pointer": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.61782/fa.2025.0866",
+      "child_study_row_ids": [
+        "doi:10.61782/fa.2025.0866::a",
+        "doi:10.61782/fa.2025.0866::b"
+      ],
+      "reason": "Two duration protocols acquired in the same thirteen participants; these rows do not imply two independent cohorts.",
+      "evidence_pointer": "https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf",
       "review_date": "2026-10-27"
     }
   ]
