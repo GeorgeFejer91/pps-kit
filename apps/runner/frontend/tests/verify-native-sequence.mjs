@@ -52,6 +52,7 @@ try {
         if (command === "plugin:event|listen") { listener = args.handler; return 1; }
         if (command === "runner_snapshot") return snapshot();
         if (command === "remote_status") return { enabled: false };
+        if (command === "rotate_pairing") { native.epoch = 1; emit(); return { enabled: false }; }
         if (command === "native_output_status") return { schema: "pps-runner-native-output-preflight.v1", phase: "idle",
           policyGeneration: "1", serviceGeneration: "1", operationGeneration: "1", inventoryGeneration: null,
           reservationGeneration: null, inFlight: false, cleanupPending: false, silenceOnly: true, executable: false, armed: false, qualified: false };
@@ -140,6 +141,12 @@ try {
   await page.evaluate(() => window.sequenceFixture.publishReceipt());
   await page.locator("#session-group-status").filter({ hasText: "Experiment complete · 2 of 2 parts recorded" }).waitFor();
   assert.equal(await page.locator("#advance-session-part").isDisabled(), true);
+  const beforeRotation = Number(await page.locator("#revision").innerText());
+  await page.getByRole("button", { name: "Phone Remote", exact: true }).click();
+  await page.locator("#rotate-pairing").click();
+  await page.waitForFunction(revision => Number(document.getElementById("revision").textContent) > revision, beforeRotation);
+  assert.equal(await page.locator("#session-id").innerText(), "fixture-part-2");
+  await page.getByRole("button", { name: "Experiment Control", exact: true }).click();
   await page.locator("#session-group-status").scrollIntoViewIfNeeded();
   await page.screenshot({ path: resolve(output, "runner-group-complete.png") });
   const geometry = await page.locator("#select-session-group, #advance-session-part, #prepare-first-audio-block, #session-group-status").evaluateAll(nodes => nodes.map(node => ({
