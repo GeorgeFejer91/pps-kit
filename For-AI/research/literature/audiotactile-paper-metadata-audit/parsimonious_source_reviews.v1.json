@@ -9423,6 +9423,261 @@
           "evidence_note": "Participant turns on a stool; four directions are blocks of one experiment, not four independent experiments. Touch remains on chest in every direction."
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1073/pnas.2024548118::a",
+      "source_type": "existing_primary_supplement_review_with_current_main_methods",
+      "source_file": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Cohort-specific timing/count normalization of the existing 2026-06-16 SI review, not renewed SI inspection. Current main Methods corroborates both cohorts. Other combined contracts stay unresolved.",
+      "prior_review_pointer": "manual_reviews/ronga_2021_newborn_erp.json",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/fullTextXML",
+          "outcome": "main_Methods_and_Figure1_caption_read"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
+          "outcome": "HTTP403; historical_critical_SI_review_reused_without_claiming_new_inspection"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://pmc.ncbi.nlm.nih.gov/articles/instance/8000027/bin/pnas.2024548118.sapp.pdf",
+          "outcome": "browser_challenge_HTML_not_PDF; expected_local_SI_absent"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "trial_sequence",
+        "soa_schedule",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Five intermixed conditions: T, ANear, AFar, TANear, TAFar.",
+          "page_or_section": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Tactile-only, two auditory-only positions, two bimodal positions."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Trigger/tactile onset followed 40 ms later by auditory onset in auditory rows."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "reported",
+              "value": "Bimodal auditory stimulus follows tactile stimulus by 40 ms."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Conditions intermixed with counts matched within each block."
+            }
+          },
+          "evidence_note": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. Unisensory control families are distinct from behavioral catches."
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Auditory onset follows tactile onset by 40 ms; canonical tactile-minus-auditory SOA is -40 ms.",
+          "page_or_section": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "derived",
+              "value": "Zero at auditory onset; tactile-minus-auditory sign convention."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "-40 ms for bimodal near and far conditions; no manipulated SOA ladder."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Same offset for static near and far auditory locations."
+            }
+          },
+          "evidence_note": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. ",
+          "derivation_note": "Auditory = tactile +40 ms, so tactile - auditory = -40 ms."
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "Newborn: 5 trials per condition per block; 25 trials per block; 75-150 total over 3-6 blocks.",
+          "page_or_section": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five conditions: T, ANear, AFar, TANear, TAFar."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "5 per condition per block."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Counts matched across conditions within blocks."
+            },
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "5 x 5 x 3-6 = 75-150 trials."
+            }
+          },
+          "evidence_note": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. "
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Newborn: 3-6 blocks of 25 trials; pseudo-random order, at most two identical trials consecutively.",
+          "page_or_section": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "3-6 blocks."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "Five conditions x 5 trials = 25 per block."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Pseudo-randomized; no more than two identical trials in a row."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Condition counts repeated per block."
+            }
+          },
+          "evidence_note": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. Newborn stopping/selection rule for 3-6 blocks is not specified by the stored review.",
+          "missing_required_components": [
+            "sequence_constraints"
+          ]
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1073/pnas.2024548118::b",
+      "source_type": "existing_primary_supplement_review_with_current_main_methods",
+      "source_file": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Cohort-specific timing/count normalization of the existing 2026-06-16 SI review, not renewed SI inspection. Current main Methods corroborates both cohorts. Other combined contracts stay unresolved.",
+      "prior_review_pointer": "manual_reviews/ronga_2021_newborn_erp.json",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/fullTextXML",
+          "outcome": "main_Methods_and_Figure1_caption_read"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
+          "outcome": "HTTP403; historical_critical_SI_review_reused_without_claiming_new_inspection"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://pmc.ncbi.nlm.nih.gov/articles/instance/8000027/bin/pnas.2024548118.sapp.pdf",
+          "outcome": "browser_challenge_HTML_not_PDF; expected_local_SI_absent"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "trial_sequence",
+        "soa_schedule",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Five intermixed conditions: T, ANear, AFar, TANear, TAFar.",
+          "page_or_section": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Tactile-only, two auditory-only positions, two bimodal positions."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Trigger/tactile onset followed 40 ms later by auditory onset in auditory rows."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "reported",
+              "value": "Bimodal auditory stimulus follows tactile stimulus by 40 ms."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Conditions intermixed with counts matched within each block."
+            }
+          },
+          "evidence_note": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. Unisensory control families are distinct from behavioral catches."
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Auditory onset follows tactile onset by 40 ms; canonical tactile-minus-auditory SOA is -40 ms.",
+          "page_or_section": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "derived",
+              "value": "Zero at auditory onset; tactile-minus-auditory sign convention."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "-40 ms for bimodal near and far conditions; no manipulated SOA ladder."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Same offset for static near and far auditory locations."
+            }
+          },
+          "evidence_note": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. ",
+          "derivation_note": "Auditory = tactile +40 ms, so tactile - auditory = -40 ms."
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "Adult: 12 trials per condition per block; 60 trials per block; 180 total over 3 blocks.",
+          "page_or_section": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five conditions: T, ANear, AFar, TANear, TAFar."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12 per condition per block."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Counts matched across conditions within blocks."
+            },
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "5 x 12 x 3 = 180 trials."
+            }
+          },
+          "evidence_note": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. "
+        },
+        "block_order_contract": {
+          "status": "reported_complete",
+          "value": "Adult: 3 blocks of 60 trials; pseudo-random order, at most two identical trials consecutively.",
+          "page_or_section": "SI Appendix p.3, Stimuli and experimental task; existing critical review dated 2026-06-16",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "3 blocks."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "Five conditions x 12 trials = 60 per block."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Pseudo-randomized; no more than two identical trials in a row."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Condition counts repeated per block."
+            }
+          },
+          "evidence_note": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. "
+        }
+      }
     }
   ]
 }
