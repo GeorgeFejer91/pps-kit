@@ -64,7 +64,10 @@ struct PreparedMotion {
     Point end;
     double hold;
     double movement;
+    bool polar = false;
+    double radius_start = 0, radius_end = 0, azimuth_start = 0, azimuth_end = 0, elevation = 0;
     double minimum_distance() const {
+        if (polar) { return std::min(radius_start, radius_end); }
         const double dx = end.app_x - start.app_x, dy = end.app_y - start.app_y, dz = end.app_z - start.app_z;
         const double length_squared = dx * dx + dy * dy + dz * dz;
         const double f = length_squared > 0 ? std::clamp(-(start.app_x * dx + start.app_y * dy + start.app_z * dz) / length_squared, 0.0, 1.0) : 0.0;
@@ -73,6 +76,12 @@ struct PreparedMotion {
     }
     Point at(double time) const {
         const double fraction = movement > 0 ? std::clamp((time - hold) / movement, 0.0, 1.0) : 0.0;
+        if (polar) {
+            const double radius = radius_start + fraction * (radius_end - radius_start);
+            const double az = (azimuth_start + fraction * (azimuth_end - azimuth_start)) * M_PI / 180.0;
+            const double el = elevation * M_PI / 180.0;
+            return Point{time, radius * std::cos(el) * std::sin(az), radius * std::cos(el) * std::cos(az), radius * std::sin(el)};
+        }
         return Point{time, start.app_x + fraction * (end.app_x - start.app_x),
             start.app_y + fraction * (end.app_y - start.app_y), start.app_z + fraction * (end.app_z - start.app_z)};
     }
@@ -85,10 +94,25 @@ PreparedMotion prepared_motion(const json& trajectory, double duration) {
         const Point p = prepared_position(trajectory.at("position"));
         return PreparedMotion{p, p, 0.0, 0.0};
     }
-    if (kind != "linear") { throw std::runtime_error("Unsupported prepared motion."); }
-    exact_keys(trajectory, {"kind", "start", "end", "pre_hold_s", "movement_duration_s"});
-    PreparedMotion result{prepared_position(trajectory.at("start")), prepared_position(trajectory.at("end")),
-        trajectory.at("pre_hold_s").get<double>(), trajectory.at("movement_duration_s").get<double>()};
+    PreparedMotion result{};
+    if (kind == "linear") {
+        exact_keys(trajectory, {"kind", "start", "end", "pre_hold_s", "movement_duration_s"});
+        result.start = prepared_position(trajectory.at("start")); result.end = prepared_position(trajectory.at("end"));
+    } else if (kind == "polar") {
+        exact_keys(trajectory, {"kind", "start_radius_m", "end_radius_m", "azimuth_start_deg", "azimuth_end_deg", "elevation_deg", "pre_hold_s", "movement_duration_s"});
+        result.polar = true;
+        result.radius_start = trajectory.at("start_radius_m").get<double>(); result.radius_end = trajectory.at("end_radius_m").get<double>();
+        result.azimuth_start = trajectory.at("azimuth_start_deg").get<double>(); result.azimuth_end = trajectory.at("azimuth_end_deg").get<double>();
+        result.elevation = trajectory.at("elevation_deg").get<double>();
+        for (const double value : {result.radius_start, result.radius_end, result.azimuth_start, result.azimuth_end, result.elevation}) {
+            if (!std::isfinite(value)) { throw std::runtime_error("Nonfinite polar motion."); }
+        }
+        if (result.radius_start < 0.01 || result.radius_start > 100 || result.radius_end < 0.01 || result.radius_end > 100
+            || std::abs(result.azimuth_start) > 360 || std::abs(result.azimuth_end) > 360 || std::abs(result.elevation) > 90) {
+            throw std::runtime_error("Invalid polar motion.");
+        }
+    } else { throw std::runtime_error("Unsupported prepared motion."); }
+    result.hold = trajectory.at("pre_hold_s").get<double>(); result.movement = trajectory.at("movement_duration_s").get<double>();
     if (!std::isfinite(result.hold) || !std::isfinite(result.movement) || result.hold < 0
         || result.movement <= 0 || result.hold + result.movement > duration + 0.5 / 192000.0) {
         throw std::runtime_error("Invalid prepared motion timing.");
@@ -198,7 +222,7 @@ void spatialize_prepared(const json& config, const Args& args) {
     json report = {{"schema", "pps-3dti-spatialized.v2"}, {"source_sha256", input_hash}, {"stereo_pcm_sha256", pcm_hash},
         {"output", "stereo.wav"}, {"sample_rate_hz", rate}, {"frames", frames}, {"channels", 2}, {"peak", peak},
         {"spatialization", options}, {"motion", config.at("trajectory")}, {"block_size_frames", block_size},
-        {"motion_sampling", "linear-interpolation-at-block-center"}, {"tail_policy", "truncate-at-requested-frames"},
+        {"motion_sampling", "declared-coordinate-interpolation-at-block-center"}, {"tail_policy", "truncate-at-requested-frames"},
         {"physical_spl_qualified", false}, {"source_algorithm", dry_config.at("algorithm")}, {"customized_itd", true}};
     report["attenuation_reference_distance_m"] = DISTANCE_MODEL_THRESHOLD_NEAR;
     report["attenuation_db_per_double_distance"] = core.GetMagnitudes().GetAnechoicDistanceAttenuation();
