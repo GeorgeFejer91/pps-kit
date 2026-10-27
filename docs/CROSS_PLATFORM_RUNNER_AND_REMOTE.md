@@ -408,12 +408,13 @@ npm --prefix apps/runner run tauri build -- --debug --no-bundle
 ```
 
 The desktop UI retains the existing Runner's visual palette and high-level
-Experiment Control, Data Logging, and Phone Remote hierarchy. It can inspect
-and adopt a genuine verified V1 prepared plan, but that plan is intentionally
-not armable yet: only the deterministic compatibility demo has an execution
-adapter. The validated Python scheduler and acquisition stack remain the
-production Runner until their behavior has been ported behind supervised
-adapters and qualified.
+Experiment Control, Data Logging, and Phone Remote hierarchy. Verified prepared
+plans now execute through the native owner after media, output and journal
+checks. Ordered blocks and instruction gates have software callback evidence;
+whole-experiment completion requires every ordered part and its durable receipt.
+The existing V1 production workflow and qualification records remain separate
+from this native preview. Follow the [Windows preview workflow](NATIVE_WINDOWS_PREVIEW.md)
+for its supported preparation, execution and interruption behavior.
 
 CI also produces one host-native packaging-validation artifact per desktop
 platform: an unsigned Windows NSIS installer, an ad-hoc/not-notarized macOS DMG,

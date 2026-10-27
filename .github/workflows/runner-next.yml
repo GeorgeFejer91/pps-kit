@@ -7,7 +7,9 @@ on:
       - "Cargo.toml"
       - "pyproject.toml"
       - "apps/quest-runner/**"
+      - "apps/designer/**"
       - "apps/runner/**"
+      - "packages/pps-designer-core/**"
       - "packages/pps-brsp/**"
       - "packages/pps-contracts/**"
       - "packages/pps-runner-core/**"
@@ -16,12 +18,13 @@ on:
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
       - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
+      - "packages/pps-resources/study_templates/**"
+      - "For-AI/research/literature/tools/**"
+      - "For-AI/research/literature/audiotactile-paper-metadata-audit/**"
+      - "For-AI/research/literature/preload-ledgers/**"
       - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
-      - "For-AI/engineering/tests/test_rust_session_package_differential.py"
-      - "For-AI/engineering/tests/test_rust_timing_schedule_differential.py"
-      - "For-AI/engineering/tests/test_rust_response_differential.py"
-      - "For-AI/engineering/tests/test_native_result_file_audit.py"
+      - "For-AI/engineering/tests/**"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - ".github/workflows/runner-next.yml"
   push:
@@ -31,7 +34,9 @@ on:
       - "Cargo.toml"
       - "pyproject.toml"
       - "apps/quest-runner/**"
+      - "apps/designer/**"
       - "apps/runner/**"
+      - "packages/pps-designer-core/**"
       - "packages/pps-brsp/**"
       - "packages/pps-contracts/**"
       - "packages/pps-runner-core/**"
@@ -40,12 +45,13 @@ on:
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
       - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
+      - "packages/pps-resources/study_templates/**"
+      - "For-AI/research/literature/tools/**"
+      - "For-AI/research/literature/audiotactile-paper-metadata-audit/**"
+      - "For-AI/research/literature/preload-ledgers/**"
       - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
-      - "For-AI/engineering/tests/test_rust_session_package_differential.py"
-      - "For-AI/engineering/tests/test_rust_timing_schedule_differential.py"
-      - "For-AI/engineering/tests/test_rust_response_differential.py"
-      - "For-AI/engineering/tests/test_native_result_file_audit.py"
+      - "For-AI/engineering/tests/**"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
@@ -137,6 +143,17 @@ jobs:
           For-AI/engineering/tests/test_rust_response_differential.py
           For-AI/engineering/tests/test_native_result_file_audit.py
 
+      - name: Verify scientific catalogue and generated review projection
+        if: matrix.os == 'windows-latest'
+        run: >-
+          python -m pytest -q
+          For-AI/engineering/tests/test_publication_parameter_review_matrix.py
+          For-AI/engineering/tests/test_paper_metadata_parser.py
+          For-AI/engineering/tests/test_publication_network.py
+          For-AI/engineering/tests/test_expected_outcome_coverage.py
+          For-AI/engineering/tests/test_full_pipeline_validation_coverage.py
+          For-AI/engineering/tests/test_literature_coverage_audit.py
+
   browser-companion:
     name: Browser companion
     runs-on: ubuntu-latest
@@ -146,8 +163,10 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: apps/runner/package-lock.json
-      - name: Test and build bundled browser frontend
+          cache-dependency-path: |
+            apps/runner/package-lock.json
+            apps/designer/frontend/package-lock.json
+      - name: Test and build canonical Runner and Designer frontends
         shell: pwsh
         run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Browser
 
@@ -254,7 +273,7 @@ jobs:
             "bundle=${{ matrix.bundle }}"
             "signing=${{ matrix.signing }}"
             "distribution_status=ci_validation_artifact_not_release"
-            "scientific_status=preview_only_real_packages_not_executable"
+            "scientific_status=preview_only_installed_acquisition_unqualified"
             "use_for_data_collection=false"
             "updater=false"
           ) | Set-Content -Encoding utf8 (Join-Path $stage "VALIDATION_ONLY.txt")

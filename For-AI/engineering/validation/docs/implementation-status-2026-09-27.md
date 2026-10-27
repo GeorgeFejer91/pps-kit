@@ -29,6 +29,13 @@ Each status applies to its stated surface, not to the whole product.
 
 ## Current source evidence
 
+- The existing validation owner now selects Designer core/host code and both
+  frontends; its workflow also checks the six scientific projection suites on
+  Windows. With pinned Rust 1.88, Core passes 183 tests/nine opt-in skips and
+  Desktop passes 169/seven skips, with formatting, compilation and strict Clippy.
+  Browser mode passes 79 Runner/23 Designer tests, frozen installs with zero
+  reported advisories and canonical build-drift checks. These are local Windows
+  results; the expanded cross-platform CI jobs still require an actual run.
 - Integrated provenance checkpoint `c389449a`: 23 Designer frontend tests,
   ten native bundle tests, actual Chromium export/offline re-export/native import,
   strict package Clippy and inspected mapper/Pages checks pass. The subsequent
