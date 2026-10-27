@@ -1397,6 +1397,46 @@
         }
       ],
       "source_review_limit": "All extracted values are identified author-version evidence. Final publication equivalence remains unproven. Main and baseline-only control schedules are separable; the power pilot has no independent Methods schedule, so exact counts and apparatus are not copied into it. No electrical-stimulation equivalence or native qualification is inferred."
+    },
+    {
+      "network_node_id": "doi:10.1101/249078",
+      "doi": "10.1101/249078",
+      "inventory_status": "confirmed_one_passive_trunk_ieeg_experiment",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "Preprint v1 Methods describes one passive A/T/AT trunk protocol in six patients. The three sensory families and three within-trial pulse delays are factors, not separate experiments. The bioRxiv API explicitly links the final publication; direct Methods comparison supports the same experiment rather than an independent replication.",
+      "evidence_pointer": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf::Methods pp.4-5",
+      "review_date": "2026-10-27",
+      "framework_disposition": "passive_audiotactile_trunk_neurophysiology",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Passive trunk A/T/AT iEEG paradigm (preprint v1)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.1093/cercor/bhy156",
+        "relationship": "preprint_of_final_same_experiment_methods_compared",
+        "basis": "bioRxiv primary API links final DOI; independent direct comparison of preprint pp.4-5 with final Material and Apparatus/Procedures finds the same cohort and core protocol. The final adds an auditory-setup citation and moves participant details into the main table. No full results, analysis or supplement diff is claimed."
+      },
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://api.biorxiv.org/details/biorxiv/10.1101/249078",
+          "outcome": "Primary API identifies v1 posted2018-01-18 and final DOI10.1093/cercor/bhy156."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "outcome": "Primary23-page PDF retrieved and Methods pp.4-5 rendered; SHA25696858cde00e0aee733b92cf3de2dd77846abc71d7ed15467aff47823034f52f6."
+        }
+      ],
+      "source_review_limit": "Explicitly reviewed source version; original binaural recording, SPL/calibration and detailed ordering remain unavailable. The source2500m time-unit typo remains a documented interpretation. Device specifications are not measured tactile traces or PPS Kit qualification."
     }
   ],
   "corpus_freeze": {

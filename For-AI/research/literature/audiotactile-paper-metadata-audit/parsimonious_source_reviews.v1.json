@@ -9166,7 +9166,7 @@
       "source_type": "primary_article_xml",
       "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML",
       "review_date": "2026-10-27",
-      "review_scope": "Bounded measurement-task timing, response and allocation review. Other contracts retain prior evidence. No hardware or native qualification.",
+      "review_scope": "All eleven compact contracts now reviewed. The initial selected timing/allocation review is extended by independent primary Methods/recording/apparatus comparison; exact acoustic assets and physical qualification remain unresolved.",
       "retrieval_attempts": [
         {
           "date": "2026-10-27",
@@ -9175,16 +9175,65 @@
         }
       ],
       "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
         "trial_sequence",
         "task_response",
         "jitter_iti_policy",
         "soa_schedule",
+        "tactile_target",
         "baseline_trial_contract",
         "catch_trial_contract",
         "repetition_allocation",
         "block_order_contract"
       ],
       "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "3000-ms approaching white-noise binaural recording made using two eight-speaker arrays over2m and a head-model microphone; ER-4P insert-earphone playback.",
+          "page_or_section": "Methods, Material and Apparatus; Procedures",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White noise prerecorded from two arrays of eight speakers,2m total length, Omni Binaural Microphone head model; Etymotic ER-4P earphones."
+            }
+          },
+          "missing_required_components": [
+            "source_recipe_or_asset_provenance"
+          ],
+          "evidence_note": "Original audio PCM, sampling rate, source realization, level envelope and SPL/calibration are not provided. A generated HRTF substitute is not the original recording."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Frontal body-centred approach with maximal simulated distance2m, duration3s and reported nominal speed0.66m/s; nominal touch distances1.7,1.0,0.3m.",
+          "page_or_section": "Methods, Material and Apparatus; Procedures",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "approach via recorded physical-array acoustics"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Patient body/trunk; upper body reclined approximately135degrees relative to the rest of the body, eyes closed."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Maximal simulated distance2m, approach from front; nominal pulse distance labels1.7,1.0,0.3m."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3-s waveform with stated0.66m/s speed."
+            }
+          },
+          "missing_required_components": [
+            "exact_recorded_path_and_endpoint_convention"
+          ],
+          "evidence_note": "Do not infer a measured zero-distance endpoint or claim every jittered pulse occurs at the exact nominal distance. The original recording/transfer function remains unresolved."
+        },
         "trial_sequence": {
           "status": "reported_complete",
           "value": "Three randomized trial families: A, T and AT. Each T/AT trial contains three successive tactile events.",
@@ -9260,7 +9309,7 @@
           "evidence_note": "Selection probabilities and the exact ITI endpoint convention are not specified; do not silently assert uniform draws."
         },
         "soa_schedule": {
-          "status": "reported_complete",
+          "status": "derived_complete",
           "value": "Three tactile events per T/AT trial at nominal 500,1500,2500 ms; in AT these are relative to sound onset.",
           "page_or_section": "Methods, Material and Apparatus; Procedures",
           "component_reviews": {
@@ -9269,7 +9318,7 @@
               "value": "Trial onset for T; common trial/sound onset for AT."
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
-              "status": "reported",
+              "status": "derived",
               "value": "500,1500,2500 ms, with 0-200-ms jitter in 50-ms steps."
             },
             "direction_specific_pairing": {
@@ -9277,7 +9326,31 @@
               "value": "Approach only; nominal far/middle/close distances 1.7,1.0,0.3 m."
             }
           },
-          "evidence_note": "The source contains isolated m/ms typographic inconsistencies; the repeated ms statements and 3000-ms trial establish the millisecond schedule."
+          "evidence_note": "Three nominal delays per trial, with discrete0-200-msjitter. Preserve the printed unit error and nominal distance labels; no exact per-jitter acoustic position mapping is supplied.",
+          "derivation_note": "Normalize the printed third delay2500m to2500ms from the parallel500/1500-ms timing syntax and3-s trial. The typo persists in preprint and final XML, so the final is not an independent textual correction."
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Three100-ms vibrations per T/AT trial at upper sternum; Precision MicroDrives312-101 motor with nominal150Hz specification.",
+          "page_or_section": "Methods, Material and Apparatus; Procedures",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Shaftless motor312-101; purpose-built Arduino with10kHzrefresh and ExpyVR serial control."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Upper sternum/chest."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100-ms commanded pulse; motor specifications3V,60mA,9000rpm,150Hz,5g,113mm2,maximum speed reached in50ms."
+            }
+          },
+          "missing_required_components": [
+            "delivered_waveform_and_threshold_calibration"
+          ],
+          "evidence_note": "Motor specifications and command duration do not establish a measured150-Hz delivered waveform, trigger latency or participant-specific threshold calibration; no hardware qualification is inferred."
         },
         "baseline_trial_contract": {
           "status": "reported_complete",
@@ -9328,7 +9401,7 @@
           "evidence_note": "Auditory-only controls must not be relabeled no-target catches when participants perform no overt detection task."
         },
         "repetition_allocation": {
-          "status": "reported_complete",
+          "status": "derived_complete",
           "value": "85 trials each of A, T and AT; 255 total trials, with three touches inside each T/AT trial.",
           "page_or_section": "Methods, Material and Apparatus; Procedures",
           "component_reviews": {
@@ -9345,10 +9418,11 @@
               "value": "Each T/AT trial contains three tactile events, not three independent trial rows."
             },
             "derived_total_reconciliation": {
-              "status": "reported",
+              "status": "derived",
               "value": "3 x 85 =255 trials; 2 x 85 x 3 =510 tactile events."
             }
-          }
+          },
+          "derivation_note": "85trials x3families=255trial rows; (85T+85AT) x3pulses=510scheduled tactile events. Trials and tactile events are different units."
         },
         "block_order_contract": {
           "status": "partial",
@@ -9369,6 +9443,11 @@
           ],
           "evidence_note": "No block count is inferred from the reported experiment duration."
         }
+      },
+      "source_version_comparison": {
+        "preprint": "doi:10.1101/249078",
+        "source": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+        "scope": "Core Methods comparison only; same protocol and time-unit typo, not a full analysis/supplement comparison."
       }
     },
     {
@@ -18110,6 +18189,295 @@
               "value": "No pilot-specific specification found in the identified chapter."
             }
           }
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1101/249078",
+      "source_type": "primary_preprint_v1_methods_compared_with_final",
+      "source_file": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Independent exact-version primary PDF review, all eleven contracts; compared with final Methods. Same experiment, not an independent replication.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://api.biorxiv.org/details/biorxiv/10.1101/249078",
+          "outcome": "Primary API identifies v1 posted2018-01-18 and final DOI10.1093/cercor/bhy156."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "outcome": "Primary23-page PDF retrieved and Methods pp.4-5 rendered; SHA25696858cde00e0aee733b92cf3de2dd77846abc71d7ed15467aff47823034f52f6."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "3000-ms approaching white-noise binaural recording made using two eight-speaker arrays over2m and a head-model microphone; ER-4P insert-earphone playback.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White noise prerecorded from two arrays of eight speakers,2m total length, Omni Binaural Microphone head model; Etymotic ER-4P earphones."
+            }
+          },
+          "missing_required_components": [
+            "source_recipe_or_asset_provenance"
+          ],
+          "evidence_note": "Original audio PCM, sampling rate, source realization, level envelope and SPL/calibration are not provided. A generated HRTF substitute is not the original recording."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Frontal body-centred approach with maximal simulated distance2m, duration3s and reported nominal speed0.66m/s; nominal touch distances1.7,1.0,0.3m.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "approach via recorded physical-array acoustics"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Patient body/trunk; upper body reclined approximately135degrees relative to the rest of the body, eyes closed."
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Maximal simulated distance2m, approach from front; nominal pulse distance labels1.7,1.0,0.3m."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3-s waveform with stated0.66m/s speed."
+            }
+          },
+          "missing_required_components": [
+            "exact_recorded_path_and_endpoint_convention"
+          ],
+          "evidence_note": "Do not infer a measured zero-distance endpoint or claim every jittered pulse occurs at the exact nominal distance. The original recording/transfer function remains unresolved."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Three randomized trial families: A, T and AT. Each T/AT trial contains three successive tactile events.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "Auditory-only A control, tactile-only T control, and multisensory AT."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "A: 3000-ms approaching white noise; T: three touches without sound; AT: same three touches with sound."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "reported",
+              "value": "Nominal tactile events at 500, 1500 and 2500 ms; each delay jittered by 0-200 ms in 50-ms steps."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "85 trials of each A/T/AT family presented randomly."
+            }
+          },
+          "evidence_note": "Three tactile events occur within each T/AT trial; do not expand them into three single-target trials."
+        },
+        "task_response": {
+          "status": "reported_complete",
+          "value": "Passive iEEG task: attend to sound and touch with eyes closed; no overt response requested.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "No behavioral detection or catch-response rule."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "No overt response device/task."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Attend to auditory and tactile stimulation while reclined, eyes closed."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable: electrophysiological acquisition without behavioral response deadline."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Tactile-delay jitter 0-200 ms in 50-ms steps; ITI randomly selected/shuffled among 1.4, 1.7 and 1.9 s.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Discrete tactile-event jitter plus discrete intertrial intervals."
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Each nominal tactile delay and interval between trials."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "Jitter 0,50,100,150,200 ms; ITI 1.4,1.7,1.9 s."
+            },
+            "randomization": {
+              "status": "reported",
+              "value": "Randomized ITI choice/order."
+            }
+          },
+          "missing_required_components": [
+            "distribution"
+          ],
+          "evidence_note": "Selection probabilities and the exact ITI endpoint convention are not specified; do not silently assert uniform draws."
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Three tactile events per T/AT trial at nominal 500,1500,2500 ms; in AT these are relative to sound onset.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Trial onset for T; common trial/sound onset for AT."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "500,1500,2500 ms, with 0-200-ms jitter in 50-ms steps."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Approach only; nominal far/middle/close distances 1.7,1.0,0.3 m."
+            }
+          },
+          "evidence_note": "Three nominal delays per trial, with discrete0-200-msjitter. Preserve the printed unit error and nominal distance labels; no exact per-jitter acoustic position mapping is supplied.",
+          "derivation_note": "Normalize the printed third delay2500m to2500ms from the parallel500/1500-ms timing syntax and3-s trial. The typo persists in preprint and final XML, so the final is not an independent textual correction."
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Three100-ms vibrations per T/AT trial at upper sternum; Precision MicroDrives312-101 motor with nominal150Hz specification.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Shaftless motor312-101; purpose-built Arduino with10kHzrefresh and ExpyVR serial control."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Upper sternum/chest."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100-ms commanded pulse; motor specifications3V,60mA,9000rpm,150Hz,5g,113mm2,maximum speed reached in50ms."
+            }
+          },
+          "missing_required_components": [
+            "delivered_waveform_and_threshold_calibration"
+          ],
+          "evidence_note": "Motor specifications and command duration do not establish a measured150-Hz delivered waveform, trigger latency or participant-specific threshold calibration; no hardware qualification is inferred."
+        },
+        "baseline_trial_contract": {
+          "status": "reported_complete",
+          "value": "85 tactile-only T control trials, each with three tactile events; separate A controls remain auditory-only.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Unisensory tactile T control."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "500,1500,2500 ms after T-trial onset, with reported jitter."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "85 T trials in the global randomized pool."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "85 tactile-only control trials."
+            }
+          },
+          "evidence_note": "Prestimulus EEG baseline correction is an analysis operation, not an additional trial family."
+        },
+        "catch_trial_contract": {
+          "status": "explicitly_absent",
+          "value": "No behavioral catches; 85 auditory-only A trials are unisensory controls in a passive task.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No behavioral catch family in exhaustive A/T/AT design."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No overt response in any family; A trials provide an auditory control."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Zero additional behavioral catches."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "0."
+            }
+          },
+          "evidence_note": "Auditory-only controls must not be relabeled no-target catches when participants perform no overt detection task."
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "85 trials each of A, T and AT; 255 total trials, with three touches inside each T/AT trial.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Three trial families, A/T/AT."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "85 per family."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Each T/AT trial contains three tactile events, not three independent trial rows."
+            },
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "3 x 85 =255 trials; 2 x 85 x 3 =510 tactile events."
+            }
+          },
+          "derivation_note": "85trials x3families=255trial rows; (85T+85AT) x3pulses=510scheduled tactile events. Trials and tactile events are different units."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "A/T/AT trials randomized; about 20 minutes overall; block subdivisions not reported.",
+          "page_or_section": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "component_reviews": {
+            "block_composition": {
+              "status": "reported",
+              "value": "85 trials per family in the experiment."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Trial families presented in randomized manner."
+            }
+          },
+          "missing_required_components": [
+            "block_count"
+          ],
+          "evidence_note": "No block count is inferred from the reported experiment duration."
         }
       }
     }

@@ -52,7 +52,7 @@ doi:10.1073/pnas.2516229122,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1080/17470210903068989,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1093/braincomms/fcac179,yes,primary_methods_reviewed,confirmed_one_audiotactile_experiment,1,1,yes,yes,"https://arodes.hes-so.ch/nanna/record/11915/files/Bassolino_2022_Body_peripersonal_space.pdf::PPS task p. 4; Supplementary Methods, PPS task p. 7",2026-10-27
 doi:10.1093/cercor/bhh197,no,not_registered,not_assessed,1,0,no,no,,
-doi:10.1093/cercor/bhy156,yes,primary_methods_reviewed,confirmed_main_audio_tactile_experiment,1,0,no,no,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML::Methods,2026-10-27
+doi:10.1093/cercor/bhy156,yes,primary_methods_reviewed,confirmed_main_audio_tactile_experiment,1,1,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML::Methods,2026-10-27
 doi:10.1093/neucas/7.2.97,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1093/oso/9780198851738.003.0005,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1093/schbul/sbac067,yes,primary_methods_reviewed,confirmed_one_group_comparison_experiment,1,1,yes,yes,https://www.unipr.it/sites/default/files/2022-06/Ferroni%20et%20al%202022_0.pdf::Procedure p. 3; publisher Supplementary Materials section 1.2 Apparatus and Procedure,2026-10-27
@@ -60,7 +60,7 @@ doi:10.1098/rsos.181878,yes,primary_methods_reviewed,confirmed_three_social_cont
 doi:10.1101/2024.10.25.619776,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1101/2025.06.25.660685,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1101/2025.09.02.673729,no,not_registered,not_assessed,1,0,no,no,,
-doi:10.1101/249078,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1101/249078,yes,primary_methods_reviewed,confirmed_one_passive_trunk_ieeg_experiment,1,1,yes,yes,https://www.biorxiv.org/content/10.1101/249078v1.full.pdf::Methods pp.4-5,2026-10-27
 doi:10.1101/492017,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1109/whc.2017.7989970,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1111/ejn.13872,yes,abstract_or_metadata_inventory,confirmed_total,3,0,no,no,publication_network.v3.json::doi:10.1111/ejn.13872; metadata_audit.jsonl::pfeiffer_2018_vestibular,2026-10-27
