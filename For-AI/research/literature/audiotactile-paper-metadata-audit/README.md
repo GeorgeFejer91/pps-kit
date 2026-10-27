@@ -33,25 +33,28 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 166 study/context rows,
-66 registered publication inventories, twelve access-audited publications,
-one audited project-lineage identity,
-and 15 publication inventories still unassessed. Registry presence alone
-does not certify a Methods-confirmed inventory: earlier abstract-based or partial
-inventories still require their source and compact-contract audits.
+Current checkpoint (2026-10-27): 94 frozen publications, 168 study/context rows,
+82 registered publication inventories and 12 unregistered publications.
+Registry presence alone does not certify a Methods-confirmed inventory.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
-`inventoryAudit` summary derive these distinctions from explicit registry
-evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 64 Methods-backed inventories (50 current primary
-reviews, eight retained primary reviews, and six identified author versions whose
-final comparison is pending), one abstract/metadata inventory, one partial
-Methods inventories, twelve audited access blockers, one project-lineage boundary, and 15 unregistered publications.
-Only 77 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 17 still need inventory
-or contract review. A partial parameter value can count as reviewed when its
-missing parts are explicit; a coarse inherited field or unassessed child cannot.
-These are audit counts, not counts of runnable or scientifically qualified studies.
+`inventoryAudit` summary derive evidence categories and finalized eleven-contract
+source dispositions. The current audit records 66 Methods-backed inventories
+(52 current primary reviews, 8 retained primary reviews and
+6 identified author versions whose final comparison is pending),
+1 abstract/metadata and 1 partial Methods inventories,
+13 audited access blockers and 1 project-lineage boundary.
+Only 80 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 14 still need inventory
+or contract review. A partial value counts as reviewed when its missing parts
+are explicit; an inherited coarse field or unassessed child does not.
+These are audit counts, not runnable or scientifically qualified study counts.
 The earlier counts below describe individual historical checkpoints.
+The pregnancy v1 protocol retains its own longitudinal sampling and acquisition
+parameters; additions in the final paper are comparison notes only. The affective
+touch v1 has three tasks in one 35-person cohort, with incompatible allocations,
+touch direction/site and event-anchor descriptions preserved. The IMRF full-body
+abstract retains one provisional boundary because its experiment count is unresolved.
+
 Serino (2011) has three behavioral audiotactile protocols, with rTMS only a
 preceding manipulation in the third. Avenanti (2012) has two adjacent sound-to-MEP
 experiments; separate ITI touches cannot turn the TMS delays into tactile SOAs.

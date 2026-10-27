@@ -3619,6 +3619,210 @@
         "Number of experimental blocks, separate diagnostic/control tasks, repeated sessions and any additional participants cannot be established from abstract. Do not claim full inventory completed."
       ],
       "source_review_limit": "Number of experimental blocks, separate diagnostic/control tasks, repeated sessions and any additional participants cannot be established from abstract. Do not claim full inventory completed."
+    },
+    {
+      "network_node_id": "doi:10.1101/492017",
+      "doi": "10.1101/492017",
+      "inventory_status": "confirmed_longitudinal_protocol",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "One longitudinal pregnant/non-pregnant comparison with attrition: wave 1 = 37 pregnant + 19 controls; wave 2 = 28 + 17; wave 3 = 20 + 15. Four additional pregnant participants enter late and take part in waves 2/3. Do not sum waves as independent N. Same PPS protocol at about gestational week 20, week 34 and 8 weeks postpartum; no separate experiment per visit. Body growth is natural history, not a randomized manipulation. No other acquired task is described in v1.",
+      "evidence_pointer": "https://www.biorxiv.org/content/10.1101/492017v1.full.pdf",
+      "source_version": "primary_preprint_v1",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://api.biorxiv.org/details/biorxiv/10.1101/492017",
+          "outcome": "HTTP 200; application/json; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.biorxiv.org/content/10.1101/492017v1.full.pdf",
+          "outcome": "HTTP 200; application/pdf; primary PDF SHA256 b773a881889821a1516872c11ff48913980a913ccce413346e67e6f02aa190e8"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.nature.com/articles/s41598-019-45224-w.pdf",
+          "outcome": "HTTP 200; application/pdf; primary PDF SHA256 05c634ec9bc152cd34fd6774f3ba3f6f220e5f735d3dd62fde7fd6665a5c05e8"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "protocol",
+          "experiment_label": "Longitudinal pregnancy audiotactile protocol, preprint v1",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific",
+          "cohort": "One longitudinal pregnant/non-pregnant comparison with attrition: wave 1 = 37 pregnant + 19 controls; wave 2 = 28 + 17; wave 3 = 20 + 15. Four additional pregnant participants enter late and take part in waves 2/3. Do not sum waves as independent N."
+        }
+      ],
+      "source_lineage": "Strong same-study lineage to final DOI 10.1038/s41598-019-45224-w: same authors, participant wave counts, apparatus and delay/count schedule. Not an independent replication; no raw-data file identity checked.",
+      "supporting_task_boundaries": [
+        "Same PPS protocol at about gestational week 20, week 34 and 8 weeks postpartum; no separate experiment per visit. Body growth is natural history, not a randomized manipulation. No other acquired task is described in v1."
+      ],
+      "source_version_differences": [
+        "Final Methods p.5 adds seven control non-completers and replacement controls (1 in wave 2, 3 in wave 3); v1 does not report that detail.",
+        "Final Methods p.5 adds adjustable-chair hand/abdomen alignment; this is absent from v1.",
+        "Final p.6 explicitly excludes unimodal baseline trials to reduce fatigue and mentions other same-day experiments; v1 only provides the complete 65-trial inventory.",
+        "Preprint Results uses separate 5×2 mixed ANOVAs; final uses mixed models across waves to accommodate missing data. Acquisition parameters were not silently updated from the final.",
+        "bioRxiv API still says published=NA despite the identifiable final; do not infer that no final exists."
+      ],
+      "source_sha256": "b773a881889821a1516872c11ff48913980a913ccce413346e67e6f02aa190e8"
+    },
+    {
+      "network_node_id": "doi:10.1163/22134808-000s0136",
+      "doi": "10.1163/22134808-000s0136",
+      "inventory_status": "provisional_conference_abstract_inventory_with_access_gap",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "No N, recruitment counts, demographics or participant overlap recovered. The abstract explicitly summarizes a set of experiments but gives no numbered experiment boundaries. Front/back PPS, comparison with peri-hand PPS, hand/trunk proximity and speed dependence are themes/variants, not four proven independent cohorts.",
+      "evidence_pointer": "https://www.researchgate.net/publication/275742143_Audio-tactile_multisensory_integration_as_a_proxy_for_full_body_peri-personal_space",
+      "source_version": "indexed_abstract_transcription",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://api.crossref.org/works/10.1163/22134808-000s0136",
+          "outcome": "HTTP 200; application/json; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://doi.org/10.1163/22134808-000s0136",
+          "outcome": "HTTP 403; text/html; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://brill.com/downloadpdf/journals/msr/26/1-2/article-p181_135.xml",
+          "outcome": "HTTP 403; text/html; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://citeseerx.ist.psu.edu/document?doi=ac43ea30edb8229a80cfde49e3b71ccd57705ca9&repid=rep1&type=pdf",
+          "outcome": "HTTP 429; text/html; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://brill.com/view/journals/msr/26/1-2/article-p181_135.xml?language=en",
+          "outcome": "HTTP 403; text/html; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.uniroma1.it/cris/rp/rp23432?type=all",
+          "outcome": "HTTP 403; text/html; charset=UTF-8; not treated as a full Methods PDF"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "provisional_conference_boundary",
+          "experiment_label": "IMRF 2013 full-body conference abstract; unresolved experiment inventory",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort": "No N, recruitment counts, demographics or participant overlap recovered."
+        }
+      ],
+      "source_lineage": "Possible thematic precursor to later full-body and speed papers, but no exact dataset/protocol mapping is established. Do not import Serino 2015 or Noel 2018 numerical parameters.",
+      "supporting_task_boundaries": [
+        "The abstract explicitly summarizes a set of experiments but gives no numbered experiment boundaries. Front/back PPS, comparison with peri-hand PPS, hand/trunk proximity and speed dependence are themes/variants, not four proven independent cohorts."
+      ],
+      "source_review_limit": "Publisher HTML/PDF inaccessible; conference identity rests on deposited metadata and indexed author CV, with abstract transcription not freshly compared with publisher text. Numbered experiment inventory and participant counts unresolved."
+    },
+    {
+      "network_node_id": "doi:10.31234/osf.io/etvb6_v1",
+      "doi": "10.31234/osf.io/etvb6_v1",
+      "inventory_status": "confirmed_three_tasks_one_cohort",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "One cohort of 35 healthy participants, 12 male, mean age 22.77 years (SE 0.51). All complete all three tasks on the same day in randomized task order. No separate recruitment or task-specific exclusion cohort is established. Experiment 1 Classic: speeded electrical-touch detection during looming/flat sound. Experiment 2 Discriminative: speeded auditory beep during sequential neutral vibration. Experiment 3 Affective: speeded auditory beep during manual stroking. End-of-task verbal pleasantness ratings (0–100) are a shared secondary measure, not a separately recruited protocol. Gender/order tests, PSE/DL and trimmed-mean models are analyses.",
+      "evidence_pointer": "https://osf.io/download/gnv46/",
+      "source_version": "primary_preprint_v1",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://api.osf.io/v2/preprints/etvb6/",
+          "outcome": "HTTP 200; application/vnd.api+json; charset=utf-8; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://osf.io/preprints/psyarxiv/etvb6_v1",
+          "outcome": "HTTP 200; text/html; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/profile/Francesca-Rastelli-6/publication/397970716_The_spatial_reach_of_affective_touch_a_new_perspective_on_social_peripersonal_space/links/697a1b7b7247bc6473dba5e5/The-spatial-reach-of-affective-touch-a-new-perspective-on-social-peripersonal-space.pdf",
+          "outcome": "HTTP 403; text/html; charset=UTF-8; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.datacite.org/dois/10.31234/osf.io/etvb6_v1",
+          "outcome": "HTTP 404; application/json; charset=utf-8; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.osf.io/v2/files/6924b7f115486015f9117248/",
+          "outcome": "HTTP 200; application/vnd.api+json; charset=utf-8; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.osf.io/v2/preprints/etvb6_v1/versions/",
+          "outcome": "HTTP 200; application/vnd.api+json; charset=utf-8; not treated as a full Methods PDF"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://osf.io/download/gnv46/",
+          "outcome": "HTTP 200; application/octet-stream; primary PDF SHA256 f1cde7e7bc5cfca0ace69737ae1f6a2e52877620d742240308888321c97d483b"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "protocol",
+          "experiment_label": "Experiment 1: classic tactile detection",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "One cohort of 35 healthy participants, 12 male, mean age 22.77 years (SE 0.51). All complete all three tasks on the same day in randomized task order. No separate recruitment or task-specific exclusion cohort is established."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "protocol",
+          "experiment_label": "Experiment 2: auditory detection during discriminative touch",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "One cohort of 35 healthy participants, 12 male, mean age 22.77 years (SE 0.51). All complete all three tasks on the same day in randomized task order. No separate recruitment or task-specific exclusion cohort is established."
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "protocol",
+          "experiment_label": "Experiment 3: auditory detection during affective touch",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "One cohort of 35 healthy participants, 12 male, mean age 22.77 years (SE 0.51). All complete all three tasks on the same day in randomized task order. No separate recruitment or task-specific exclusion cohort is established."
+        }
+      ],
+      "source_lineage": "OSF API identifies v1 as latest; author publication list still identifies PsyArXiv. A related IMRF 2025 poster exists, but exact dataset identity and version differences are not established and no new corpus member is added. No final publication found in this bounded title/author lookup.",
+      "supporting_task_boundaries": [
+        "Experiment 1 Classic: speeded electrical-touch detection during looming/flat sound. Experiment 2 Discriminative: speeded auditory beep during sequential neutral vibration. Experiment 3 Affective: speeded auditory beep during manual stroking. End-of-task verbal pleasantness ratings (0–100) are a shared secondary measure, not a separately recruited protocol. Gender/order tests, PSE/DL and trimmed-mean models are analyses."
+      ],
+      "source_conflicts": [
+        "Trial totals/proportions/repetitions need reconciliation; conditional arithmetic is not a repaired schedule.",
+        "Experiment 3 Methods p.7: proximal-to-distal on right hand; Figure 1 p.8: distal-to-proximal on arm. Rendered primary pages confirm both.",
+        "Experiment 3 brush begins 2 seconds before sound, but a later sentence anchors beep delays to auditory and tactile onset together.",
+        "Experiments 2/3 define auditory beep targets but repeat-on-miss clauses name tactile targets. Experiment 3 Figure 4 caption also says tactile target.",
+        "Experiment 1 describes a constant-current stimulator and constant-voltage electrical pulse; device operating mode needs clarification."
+      ],
+      "source_sha256": "f1cde7e7bc5cfca0ace69737ae1f6a2e52877620d742240308888321c97d483b"
     }
   ],
   "corpus_freeze": {
@@ -4170,6 +4374,17 @@
       ],
       "reason": "Two different samples: 16 in Experiment 1 and 14 in Experiment 2; repeated post-tDCS sessions within participant.",
       "evidence_pointer": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.31234/osf.io/etvb6_v1",
+      "child_study_row_ids": [
+        "doi:10.31234/osf.io/etvb6_v1::a",
+        "doi:10.31234/osf.io/etvb6_v1::b",
+        "doi:10.31234/osf.io/etvb6_v1::c"
+      ],
+      "reason": "One cohort of 35 healthy participants, 12 male, mean age 22.77 years (SE 0.51). All complete all three tasks on the same day in randomized task order. No separate recruitment or task-specific exclusion cohort is established. Experiment 1 Classic: speeded electrical-touch detection during looming/flat sound. Experiment 2 Discriminative: speeded auditory beep during sequential neutral vibration. Experiment 3 Affective: speeded auditory beep during manual stroking. End-of-task verbal pleasantness ratings (0–100) are a shared secondary measure, not a separately recruited protocol. Gender/order tests, PSE/DL and trimmed-mean models are analyses.",
+      "evidence_pointer": "https://osf.io/download/gnv46/",
       "review_date": "2026-10-27"
     }
   ]
