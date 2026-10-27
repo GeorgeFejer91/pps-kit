@@ -1,0 +1,47 @@
+{
+  "participant_id": "P001",
+  "design": {
+    "name": "Native contract fixture",
+    "study_profile_id": "reference_fixture",
+    "study_profile_title": "Reference fixture",
+    "sofa_file": "bundled-fabian-44100",
+    "trajectory": {
+      "coordinate_mode": "polar", "path_direction": "custom",
+      "start_radius_m": 2.0, "end_radius_m": 2.0,
+      "azimuth_start_deg": 170.0, "azimuth_end_deg": -170.0, "elevation_deg": 0.0,
+      "path_length_m": 1.2, "propagation_speed_mps": 2.0,
+      "padding_pre_s": 0.2, "padding_post_s": 0.2, "sample_rate": 8000,
+      "use_inverse_square": true
+    },
+    "study_profile_reference_parameters": {"head_diameter_m": 0.18},
+    "noises": [], "custom_looming_files": [], "prestimulus_files": [],
+    "protocol": {"random_seed": 123, "trial_strips": []}
+  },
+  "trajectory_controls": {
+    "start_distance_cm": 200.0, "end_distance_cm": 200.0,
+    "start_rotation_deg": 170.0, "end_rotation_deg": -170.0,
+    "start_height_cm": 0.0, "end_height_cm": 0.0,
+    "movement_duration_s": 0.6, "start_hold_s": 0.2, "end_hold_s": 0.2
+  },
+  "run_setup": {"experiment_structure": "single", "seed": 123},
+  "bake_recipe": {
+    "kind": "generated_noise", "action": "create", "original_label": "",
+    "label": "Native burst", "gain": 1.0, "display_color_hex": "#1C7A86",
+    "noise_type": "white", "source_profile": "dynaspace_gaussian_burst_train",
+    "source_profile_parameters": {
+      "burst_count_mode": "duration_derived", "burst_duration_s": 0.03,
+      "rise_fall_s": 0.01, "target_period_s": 0.095, "onset_s": 0.3,
+      "active_window_source": "trajectory_movement_duration", "spacing_policy": "symmetric_fit"
+    },
+    "loudness_policy": {
+      "schema": "pps-loudness-policy.v1", "mode": "estimated_spl",
+      "calibration_mode": "estimate_allowed", "calibration_status": "estimated_not_measured",
+      "start_spl_db": 40.0, "end_spl_db": 60.0, "estimated_full_scale_spl_db": 109.2,
+      "audio_peak_ceiling_dbfs": -1.0, "movement_ramp_shape": "linear_db",
+      "hold_level_policy": "constant_start_and_endpoint",
+      "calibration_window": "final_500ms_active_movement_excluding_padding",
+      "calibration_window_s": 0.5,
+      "distance_gain_policy": "disable_direct_path_gain_for_calibrated_loudness"
+    }
+  }
+}
