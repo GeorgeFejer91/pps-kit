@@ -135,6 +135,146 @@ fn accept(
     accept_assembly_preview(preview, &dh, &ph, 7).unwrap()
 }
 
+fn signed_soa_fixture(soa_ms: f64) -> (Value, Value, Value) {
+    let (mut design, mut preview, _) = fixture();
+    design["protocol"]["trial_strips"][0]["elements"] = json!([
+        {"kind":"jitter","label":"Wait","jitter_values_ms":[1000]},
+        {"kind":"looming_stimulus","source_labels":["Noise"]}
+    ]);
+    let key = "jitter_1000ms + Noise";
+    let variants = json!([{"row_label":"Row","sequence_variant_key":key,"choices":[
+        {"kind":"jitter","label":"Wait (1000 ms)","value":1000},
+        {"kind":"audio","label":"Noise"}
+    ]}]);
+    for block in preview["blocks"].as_array_mut().unwrap() {
+        for row in block["preview_rows"].as_array_mut().unwrap() {
+            row["sequence_variant_key"] = json!(key);
+            row["sequence_labels"] = json!("Wait (1000 ms) | Noise");
+            row["soa_ms"] = json!(soa_ms);
+        }
+    }
+    (design, preview, variants)
+}
+
+#[test]
+fn signed_soa_preserves_real_prefix_cue_pcm_and_verified_schedule() {
+    let root = Temp::new();
+    let (assets, cue) = assets();
+    let (design, preview, variants) = signed_soa_fixture(-700.0);
+    let cancel = AtomicBool::new(false);
+    let enriched =
+        plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap();
+    for block in enriched.preview["blocks"].as_array().unwrap() {
+        let rows = block["preview_rows"].as_array().unwrap();
+        assert_eq!(rows[0]["looming_segment_onset_s"], 1.0);
+        assert_eq!(rows[0]["tactile_onset_s"], 0.3);
+        assert_eq!(rows[0]["duration_s"], 1.2);
+        assert_eq!(rows[1]["tactile_onset_s"], "");
+    }
+    let plan = accept(&design, &preview, &variants, &assets, &cue);
+    let staged = prepare_accepted_session(
+        &plan,
+        &assets,
+        &cue,
+        &root.path.join("candidate"),
+        "P001",
+        "S001",
+        &cancel,
+    )
+    .unwrap();
+    let verified =
+        verify_prepared_session(VerificationRequest::new(staged.manifest_path())).unwrap();
+    for (index, block) in verified.blocks().iter().enumerate() {
+        let mut options = BlockScheduleOptions::new((index + 1) as i64);
+        options.sample_rate = 8000;
+        options.block_wav_path = Some(block.wav_path().to_owned());
+        let schedule = compile_verified_block_schedule(
+            block.manifest_path(),
+            block.manifest_sha256(),
+            options,
+        )
+        .unwrap();
+        let tactile: Vec<_> = schedule
+            .events()
+            .iter()
+            .filter(|event| event.event_type == "tactile_onset")
+            .map(|event| event.sample_index)
+            .collect();
+        assert_eq!(tactile, [2400]);
+        let mut csv = csv::Reader::from_path(block.manifest_path()).unwrap();
+        let soa_column = csv
+            .headers()
+            .unwrap()
+            .iter()
+            .position(|s| s == "soa_ms")
+            .unwrap();
+        let first = csv.records().next().unwrap().unwrap();
+        assert_eq!(first[soa_column].parse::<f64>().unwrap(), -700.0);
+        let mut wav = hound::WavReader::open(block.wav_path()).unwrap();
+        assert_eq!(wav.duration(), 19_200);
+        let pcm: Vec<f32> = wav.samples::<f32>().map(Result::unwrap).collect();
+        for (frame, channels) in pcm.chunks_exact(3).enumerate() {
+            assert_eq!(
+                channels[2],
+                if (2400..2480).contains(&frame) {
+                    0.7
+                } else {
+                    0.0
+                }
+            );
+            if frame < 8000 {
+                assert_eq!(&channels[..2], &[0.0, 0.0]);
+            }
+        }
+        assert_eq!(pcm[8000 * 3], if index == 0 { 0.05 } else { 0.0 });
+        assert_eq!(pcm[8000 * 3 + 1], if index == 0 { -0.025 } else { 0.0 });
+    }
+}
+
+#[test]
+fn signed_soa_checks_whole_cue_bounds_and_keeps_ties_to_even_offset_rounding() {
+    let (assets, cue) = assets();
+    for (soa_ms, expected_sample) in [
+        (-1000.0, 0),
+        (190.0, 9520),
+        (-0.0625, 8000),
+        (0.0625, 8000),
+        (-0.1875, 7998),
+        (0.1875, 8002),
+    ] {
+        let (design, preview, variants) = signed_soa_fixture(soa_ms);
+        let enriched = plan_assembly_preview(
+            &design,
+            &preview,
+            &variants,
+            &assets,
+            &cue,
+            &AtomicBool::new(false),
+        )
+        .unwrap_or_else(|error| panic!("SOA {soa_ms}: {error:?}"));
+        assert_eq!(
+            enriched.preview["blocks"][0]["preview_rows"][0]["tactile_onset_s"],
+            expected_sample as f64 / 8000.0,
+            "SOA {soa_ms}"
+        );
+    }
+    for soa_ms in [-1000.125, 190.125, -1e300, 1e300] {
+        let (design, preview, variants) = signed_soa_fixture(soa_ms);
+        assert!(
+            plan_assembly_preview(
+                &design,
+                &preview,
+                &variants,
+                &assets,
+                &cue,
+                &AtomicBool::new(false),
+            )
+            .is_err(),
+            "out-of-trial SOA {soa_ms} must fail without adding padding"
+        );
+    }
+}
+
 #[test]
 fn reviewed_rows_keep_order_and_actual_prefix_timing_through_real_package_and_schedule() {
     let root = Temp::new();
