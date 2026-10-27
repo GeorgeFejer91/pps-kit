@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 27)
+        self.assertEqual(len(registry["entries"]), 28)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 59)
+        self.assertEqual(registered_instance_count, 60)
         network = json.loads(
             (
                 ROOT
@@ -984,6 +984,30 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(study["nativeQualification"], "not_assessed")
         self.assertEqual(len(data["publications"]), 94)
         self.assertEqual(len(data["studies"]), 126)
+
+    def test_echolocation_assessment_keeps_training_and_manual_timing_separate(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        study = next(row for row in data["studies"] if row["studyRowId"] == "doi:10.1007/s00221-019-05469-3")
+        contracts = {row["key"]: row for row in study["contracts"]}
+        self.assertIn("left", contracts["trajectory_kinematics"]["value"])
+        self.assertIn("119", contracts["trajectory_kinematics"]["value"])
+        self.assertEqual(contracts["soa_schedule"]["status"], "derived_complete")
+        self.assertIn("0,500,1000,1500,2000,2500,3000", contracts["soa_schedule"]["value"])
+        self.assertIn("manual_or_event_driven", contracts["jitter_iti_policy"]["components"]["policy_type"]["value"])
+        self.assertIn("experimenter", contracts["jitter_iti_policy"]["value"])
+        self.assertEqual(contracts["task_response"]["status"], "conflicting_evidence")
+        self.assertIn("response_window_and_anchor", contracts["task_response"]["missingComponents"])
+        self.assertEqual(contracts["baseline_trial_contract"]["status"], "partial")
+        self.assertIn("+3500", contracts["baseline_trial_contract"]["value"])
+        self.assertIn("28", contracts["catch_trial_contract"]["value"])
+        self.assertIn("140", contracts["repetition_allocation"]["value"])
+        self.assertNotRegex(contracts["repetition_allocation"]["value"], r"\b40 trials\b")
+        self.assertEqual(study["templateIds"], ["tonelli_2019_echolocation"])
+        self.assertEqual(study["nativeQualification"], "not_assessed")
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        inventory = next(row for row in registry["entries"] if row["network_node_id"] == study["networkNodeId"])
+        self.assertEqual(len(inventory["instances"]), 1)
+        self.assertEqual(len(inventory["supporting_task_boundaries"]), 3)
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

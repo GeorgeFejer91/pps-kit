@@ -489,6 +489,48 @@
         }
       ],
       "source_review_limit": "Current SI retrieval failed (PNAS403, PMC browser challenge); historical source review remains authoritative and is explicitly identified. Unreviewed cohort-specific contracts remain composite."
+    },
+    {
+      "network_node_id": "doi:10.1007/s00221-019-05469-3",
+      "doi": "10.1007/s00221-019-05469-3",
+      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "instance_count_basis": "One pre/post PPS assessment protocol shared by ECHO, TIME and REST groups. Group interventions and distance validation are supporting tasks, not three separate PPS experiments.",
+      "evidence_pointer": "https://link.springer.com/content/pdf/10.1007/s00221-019-05469-3.pdf::Methods pp.856-859; Figure 1 p.857",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Pre/post neck PPS assessment with echolocation and control groups",
+          "record_id": "tonelli_2019_echolocation",
+          "template_ids": [
+            "tonelli_2019_echolocation"
+          ],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Echolocation detection training",
+          "disposition": "supporting_training_not_separate_pps_experiment",
+          "basis": "Object at 34 cm in front of mouth; 40 training/practice trials and 20-s response allowance do not belong to the lateral neck PPS assessment.",
+          "evidence_pointer": "https://link.springer.com/content/pdf/10.1007/s00221-019-05469-3.pdf::p.858, Echolocation detection task"
+        },
+        {
+          "label": "Auditory time-bisection training and rest control",
+          "disposition": "supporting_control_not_separate_pps_experiment",
+          "basis": "TIME uses 80 temporal-judgment trials; REST has no assessment stimuli during the break. Neither defines the PPS task trial generator.",
+          "evidence_pointer": "https://link.springer.com/content/pdf/10.1007/s00221-019-05469-3.pdf::pp.858-859, Auditory time bisection task; Procedure"
+        },
+        {
+          "label": "Distance perception validation",
+          "disposition": "supporting_validation_not_separate_pps_experiment",
+          "basis": "49 trials with verbal distance ratings validate sound localization; they do not increase the tactile-detection assessment count.",
+          "evidence_pointer": "https://link.springer.com/content/pdf/10.1007/s00221-019-05469-3.pdf::p.858, Distance perception task"
+        }
+      ],
+      "source_review_limit": "Main article and Figure 1 inspected. Supplement not inspected in this checkpoint. Main text has contradictory recruitment/exclusion wording and REST duration (30 min in Procedure versus 15 min in Figure 2 caption); no silent resolution."
     }
   ],
   "corpus_freeze": {

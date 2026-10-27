@@ -9678,6 +9678,296 @@
           "evidence_note": "Transcribed and normalized from existing primary-SI critical review; current SI reaccess failed. "
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1007/s00221-019-05469-3",
+      "source_type": "primary_article_pdf",
+      "source_file": "https://link.springer.com/content/pdf/10.1007/s00221-019-05469-3.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Primary Methods and rendered Figure 1 review of the PPS measurement task, with training and validation boundaries. No supplement or physical qualification claim.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.1007/s00221-019-05469-3.pdf",
+          "outcome": "HTTP200_PDF; Methods_pp856-859_read; Figure1_p857_rendered_and_inspected"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/article/10.1007/s00221-019-05469-3",
+          "outcome": "publisher_Methods_and_figure_captions_read"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Approaching white noise delivered by seven serial loudspeakers, controlled in MATLAB.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_reported",
+              "value": "White noise through physical speakers; generated versus prerecorded source unresolved."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White noise, 3000-ms approach."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Seven custom serial loudspeakers."
+            }
+          },
+          "missing_required_components": [
+            "source_mode",
+            "source_recipe_or_asset_provenance",
+            "level_envelope_calibration"
+          ],
+          "evidence_note": "Exact source generation, transition envelope and sound level are unresolved; 53 dB is the vocal-response trigger threshold, not stimulus calibration."
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Seven speakers to the left of the head at head height: 119 to 17 cm over 3000 ms; 17-cm spacing, reported speed 34 cm/s.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "Approach through ordered physical sources."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-centred array on the left, at head elevation; touch on left neck."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "102-cm travel over 3 s, 34 cm/s."
+            }
+          },
+          "missing_required_components": [
+            "geometry"
+          ],
+          "evidence_note": "Figure 1A pixels inspected. Exact metric Cartesian/azimuth layout and loudspeaker switching envelope are not recovered; do not substitute the frontal 34-cm training object."
+        },
+        "trial_sequence": {
+          "status": "reported_complete",
+          "value": "Randomly intermixed bimodal target, tactile-only baseline and auditory-only catch families.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "84 bimodal,28 tactile-only and 28 auditory-only catches per PPS assessment."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Bimodal: approaching white noise with one neck vibration at a speaker position. Baseline: neck vibration outside the nominal sound interval. Catch: sound without touch."
+            },
+            "within_trial_timing_or_placement": {
+              "status": "reported",
+              "value": "Seven bimodal positions; baseline 500 ms before onset or 500 ms after offset."
+            },
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Three families randomized within the assessment."
+            }
+          }
+        },
+        "task_response": {
+          "status": "conflicting_evidence",
+          "value": "Say TAH promptly to neck vibration, withhold on auditory-only catches; microphone trigger at 53 dB.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to touch; ignore sound; withhold on no-touch catches."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Vocal response recorded by microphone with 53-dB threshold."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Say TAH as quickly as possible."
+            },
+            "scoring_rule": {
+              "status": "conflicting_evidence",
+              "value": "Printed Methods subtract vocal-trigger time from tactile time, opposite to conventional positive RT; raw scoring sign remains unresolved."
+            }
+          },
+          "missing_required_components": [
+            "response_window_and_anchor"
+          ],
+          "evidence_note": "No PPS response deadline is reported. The 20-s allowance belongs to echolocation training; the printed RT subtraction order is retained as a conflict rather than silently corrected."
+        },
+        "jitter_iti_policy": {
+          "status": "reported_complete",
+          "value": "Each PPS trial is started by the experimenter; no fixed intertrial interval.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "manual_or_event_driven"
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Experimenter initiates the next trial."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "No numeric ITI: explicitly not fixed."
+            }
+          },
+          "evidence_note": "A manual start is a reported policy, not missing numerical jitter. Timing distributions from the separate TIME training must not be imported."
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Onset-relative tactile times 0,500,1000,1500,2000,2500,3000 ms map respectively to 119,102,85,68,51,34,17 cm.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Auditory onset at farthest speaker; positive values delay tactile stimulation."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "Seven positions from 119 to 17 cm, separated by 17 cm at 34 cm/s."
+            },
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Approach only; Figure 1A locates onset at D 1 and offset at D 7."
+            }
+          },
+          "derivation_note": "Time at distance d is (119-d)/34 seconds;17/34 =0.5 s between adjacent positions. Figure 1A confirms the endpoint anchors."
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "20-ms vibration from an 18 mm² custom motor on the left side of the neck.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Left neck."
+            }
+          },
+          "missing_required_components": [
+            "waveform_and_duration",
+            "frequency_or_amplitude",
+            "intensity_or_calibration"
+          ],
+          "evidence_note": "Motor surface area does not establish vibration amplitude or calibration."
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "28 tactile-only controls at -500 ms before onset or +3500 ms from onset (500 ms after offset); per-endpoint split unresolved.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only controls outside the sound interval."
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "-500 ms onset-relative and+500 ms offset-relative for 3000-ms sound."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "28 controls across two timings; exact allocation between timings unspecified."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "28 total per assessment."
+            }
+          },
+          "missing_required_components": [
+            "crossing_rule"
+          ],
+          "evidence_note": "Do not assume 14 at each endpoint.",
+          "derivation_note": "3000-ms sound duration +500-ms post-offset delay =+3500 ms onset-relative."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "28 auditory-only catch trials per 140-trial assessment; do not respond.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only withhold catches."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Sound without neck touch; no response."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Exact 28 catches, approximately 20% of the assessment."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "28 per assessment."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "12 repetitions at each of 7 positions:84 bimodal +28 tactile-only +28 catch =140 trials per PPS assessment.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Seven approaching-sound positions; PRE and POST assessments in ECHO/TIME/REST groups."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12 bimodal per position;28 baseline;28 catches."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Supporting 40-trial echolocation,80-trial TIME and 49-trial distance tasks excluded."
+            },
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "7 x 12 +28 +28 =140 per assessment; two assessments per participant."
+            }
+          }
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "PPS assessed PRE then POST training/rest; trial families randomized. Subdivision of each 140-trial assessment into blocks is unresolved.",
+          "page_or_section": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "component_reviews": {
+            "block_composition": {
+              "status": "reported",
+              "value": "140 trials per PPS assessment."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random intermixing of the three trial families."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Fixed PRE/intervention/POST sequence."
+            }
+          },
+          "missing_required_components": [
+            "block_count"
+          ],
+          "evidence_note": "The two blocks described for echolocation training are not PPS blocks. REST duration is contradictory: Procedure 30 min, Figure 2 caption 15 min."
+        }
+      }
     }
   ]
 }
