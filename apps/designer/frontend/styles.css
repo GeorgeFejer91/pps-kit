@@ -1338,8 +1338,33 @@ code {
   background: var(--surface-2);
 }
 
+.publication-network-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.publication-network-search-row input {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+}
+
+.publication-network-readiness {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.publication-network-readiness dt { font-weight: 700; }
+.publication-network-readiness dd { margin: var(--space-1) 0 0; overflow-wrap: break-word; }
+.publication-network-contract-evidence { display: grid; gap: var(--space-2); padding: var(--space-3); min-width: 0; }
+.publication-network-contract-evidence > * { min-width: 0; overflow-wrap: anywhere; }
+
 .publication-network-workspace.detail-open {
-  grid-template-columns: minmax(320px, 720px) minmax(320px, 420px);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
 }
 
 .publication-network-stage {
@@ -1873,10 +1898,18 @@ code {
   flex: 1 0 auto;
 }
 
-@media (max-width: 1040px) {
-  .publication-network-workspace.detail-open {
-    grid-template-columns: minmax(300px, 1fr) minmax(320px, 40%);
+.publication-network-shell { container-type: inline-size; }
+
+@container (max-width: 700px) {
+  .publication-network-summary-row,
+  .publication-network-utilities,
+  .publication-network-results-toolbar {
+    grid-template-columns: minmax(0, 1fr);
   }
+
+  .publication-network-detail { max-height: none; overflow: visible; }
+  .publication-network-detail-heading { position: static; }
+  .publication-network-summary-row button { min-height: 44px; }
 }
 
 @media (max-width: 760px) {

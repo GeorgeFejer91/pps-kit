@@ -1,4 +1,5 @@
 const DATA_URL = new URL("./publication_network.v3.json", import.meta.url);
+const REVIEWS_URL = new URL("./publication_study_reviews.v1.json", import.meta.url);
 const RESULT_PAGE_SIZE = 40;
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
@@ -51,11 +52,8 @@ function toolkitStatus(node) {
 }
 
 function toolkitStatusLabel(node) {
-  const status = toolkitStatus(node);
-  if (status === "runnable") return "Runnable Toolkit profile";
-  if (status === "supported_incomplete") return "Supported paradigm; parameters incomplete";
-  if (status === "adjacent_scope_conflict") return "Adjacent / scope conflict";
-  return "Not yet assessed for Toolkit";
+  const count = node.studyReview?.templateIds.length || 0;
+  return count ? `${count} linked Toolkit template${count === 1 ? "" : "s"}` : "No linked Toolkit template";
 }
 
 function reviewPriority(node) {
@@ -66,17 +64,29 @@ function reviewPriority(node) {
   return 1;
 }
 
-function isRunnable(node) {
-  return toolkitStatus(node) === "runnable";
+function hasTemplate(node) {
+  return Boolean(node.studyReview?.templateIds.length);
+}
+
+export function publicationMatches(node, query) {
+  const normalize = value => String(value || "").normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
+  const terms = normalize(query).replace(/^https?:\/\/(?:dx\.)?doi\.org\//, "").replace(/^doi:\s*/, "").trim().split(/\s+/).filter(Boolean);
+  const text = normalize([node.title, ...(node.authors || []), node.doi, node.year].join(" "));
+  return terms.every(term => text.includes(term));
+}
+
+export function evidenceSummary(counts = {}) {
+  const total = Object.values(counts).reduce((sum, value) => sum + value, 0);
+  return `${counts.reported_complete || 0} reported complete · ${counts.derived_complete || 0} derived complete · ${total} contracts`;
 }
 
 function makeBadge(text, className = "") {
-  return element("span", { className: `publication-network-badge ${className}`.trim(), text });
+  return element("span", { className: `publication-network-badge ${className}`.trim(), text, attributes: { "data-pretext": true } });
 }
 
 function makeSection(title, children = []) {
   return element("section", { className: "publication-network-detail-section" }, [
-    element("h4", { text: title }),
+    element("h4", { text: title, attributes: { "data-pretext": true } }),
     ...children,
   ]);
 }
@@ -93,6 +103,7 @@ function designerTemplateUrl(templateId) {
   const url = new URL(window.location.href);
   url.searchParams.set("page", "toolkit");
   url.searchParams.set("template", templateId);
+  for (const key of ["publication", "study", "publicationQuery"]) url.searchParams.delete(key);
   url.hash = "study-segment";
   return url.href;
 }
@@ -116,6 +127,7 @@ export async function initializePublicationNetwork(root) {
   const controls = {
     layout: [...root.querySelectorAll('input[name="publication-network-layout"]')],
     resultsSort: root.querySelector("#publication-network-results-sort"),
+    search: root.querySelector("#publication-network-search"),
   };
   const shell = root.querySelector(".publication-network-shell");
   const workspace = root.querySelector("#publication-network-workspace");
@@ -137,14 +149,21 @@ export async function initializePublicationNetwork(root) {
     throw new Error("Publication-network SVG is unavailable.");
   }
 
-  const response = await fetch(DATA_URL);
-  if (!response.ok) throw new Error(`Publication-network data request failed (${response.status}).`);
-  const data = await response.json();
+  const [response, reviewResponse] = await Promise.all([fetch(DATA_URL), fetch(REVIEWS_URL)]);
+  if (!response.ok || !reviewResponse.ok) throw new Error(`Publication data request failed (${response.status}, ${reviewResponse.status}).`);
+  const [data, reviews] = await Promise.all([response.json(), reviewResponse.json()]);
   if (data.schema !== "pps-publication-citation-network.v3") {
     throw new Error(`Unsupported publication-network schema: ${data.schema || "missing"}`);
   }
 
-  const nodes = data.nodes;
+  if (reviews.schema !== "pps-publication-study-reviews.v1") throw new Error("Unsupported study-review schema.");
+  const reviewByPublication = new Map(reviews.publications.map(review => [review.networkNodeId, review]));
+  const studyById = new Map(reviews.studies.map(study => [study.studyRowId, study]));
+  if (data.nodes.some(node => !reviewByPublication.has(node.id))
+    || reviews.publications.some(review => review.studyIds.some(id => !studyById.has(id)))) {
+    throw new Error("Publication and study-review snapshots do not match.");
+  }
+  const nodes = data.nodes.map(node => ({ ...node, studyReview: reviewByPublication.get(node.id) }));
   const edges = data.edges;
   const incoming = Array.from({ length: nodes.length }, () => []);
   const outgoing = Array.from({ length: nodes.length }, () => []);
@@ -166,6 +185,21 @@ export async function initializePublicationNetwork(root) {
     projected: new Map(),
     overlapCount: 0,
   };
+  const initialUrl = new URL(window.location.href);
+  controls.search.value = initialUrl.searchParams.get("publicationQuery") || "";
+  root.querySelector("#publication-network-size-note").textContent = `Circle area reflects incoming citations in this ${nodes.length}-paper map. Size and position are navigation aids, not study-quality scores.`;
+  graph.setAttribute("aria-label", `Citation network of ${nodes.length} publications. Search or use the publication list for keyboard access; arrow keys move between papers.`);
+
+  function updateLink(studyId = "") {
+    const url = new URL(window.location.href);
+    url.searchParams.set("page", "documentation");
+    if (state.selected === null) url.searchParams.delete("publication");
+    else url.searchParams.set("publication", nodes[state.selected].id);
+    if (studyId) url.searchParams.set("study", studyId); else url.searchParams.delete("study");
+    const query = controls.search.value.trim();
+    if (query) url.searchParams.set("publicationQuery", query); else url.searchParams.delete("publicationQuery");
+    history.replaceState(null, "", url);
+  }
 
   function positionFor(index) {
     return nodes[index].layouts[state.layout] || nodes[index].layouts.topology;
@@ -340,6 +374,9 @@ export async function initializePublicationNetwork(root) {
     const selectedEdgeGroups = [];
     for (let edgeIndex = 0; edgeIndex < edges.length; edgeIndex += 1) {
       const [source, target] = edges[edgeIndex];
+      const visible = state.visibleSet.has(source) && state.visibleSet.has(target);
+      edgeElements[edgeIndex].group.style.display = visible ? "" : "none";
+      if (!visible) continue;
       if (renderCitationEdge(edgeIndex, source, target, projected, geometry)) {
         selectedEdgeGroups.push(edgeElements[edgeIndex].group);
       }
@@ -349,8 +386,10 @@ export async function initializePublicationNetwork(root) {
     for (const index of orderedNodeIndices) {
       const point = projected.get(index);
       const radius = radiusFor(index, geometry);
-      const implemented = isRunnable(nodes[index]);
+      const implemented = hasTemplate(nodes[index]);
       const { group, selection, circle } = nodeElements.get(index);
+      group.style.display = point ? "" : "none";
+      if (!point) continue;
       group.setAttribute("class", [
         "publication-network-node-mark",
         implemented ? "implemented" : "not-implemented",
@@ -447,12 +486,25 @@ export async function initializePublicationNetwork(root) {
   }
 
   function updateStatus() {
-    const notImplemented = nodes.length - data.counts.toolkitRunnableNodes;
     const layoutLabel = state.layout === "timeline" ? "publication-year arrangement" : "citation topology";
     const selectedText = state.selected === null
       ? ""
       : ` · selected: ${nodes[state.selected].title} (${incoming[state.selected].length} incoming, ${outgoing[state.selected].length} outgoing)`;
-    status.textContent = `${nodes.length.toLocaleString()} audio–tactile papers · ${data.counts.toolkitRunnableNodes} implemented · ${notImplemented} not yet · all ${edges.length.toLocaleString()} indexed direct citations shown · ${layoutLabel}${selectedText}`;
+    status.textContent = `${state.visible.length} of ${nodes.length} papers · ${reviews.counts.studies} study records · ${nodes.filter(hasTemplate).length} papers with linked templates · ${edges.length} indexed citations · ${layoutLabel}${selectedText}`;
+  }
+
+  function updateSearch({ syncLink = true } = {}) {
+    state.visible = allIndices.filter(index => publicationMatches(nodes[index], controls.search.value));
+    state.visibleSet = new Set(state.visible);
+    state.resultLimit = RESULT_PAGE_SIZE;
+    if (state.selected !== null && !state.visibleSet.has(state.selected)) closeDetail({ restoreFocus: false });
+    if (controls.search.value.trim()) resultList.closest("details").open = true;
+    state.hovered = null;
+    tooltip.hidden = true;
+    renderResults();
+    updateStatus();
+    requestDraw();
+    if (syncLink) updateLink();
   }
 
   function updateLayout() {
@@ -495,63 +547,61 @@ export async function initializePublicationNetwork(root) {
     }));
   }
 
-  function toolkitRecord(record) {
-    const header = record.citationShort || record.recordId || "Toolkit literature record";
-    const adjacent = record.coverageCategory === "adjacent_out_of_scope";
-    const details = element("details", { className: "publication-network-parameter-segment" });
+  function studyRecord(study) {
+    const details = element("details", { className: "publication-network-parameter-segment",
+      attributes: { "data-study-id": study.studyRowId } });
     details.append(element("summary", {}, [
-      element("span", { text: header }),
-      element("small", { text: adjacent ? "Adjacent / out of scope" : record.recreatable ? "Runnable profile" : "Parameters incomplete" }),
+      element("span", { text: study.label, attributes: { "data-pretext": true } }),
+      element("small", { text: evidenceSummary(study.parameterStatusCounts) }),
     ]));
-    const content = element("div", { className: "publication-network-detail-section" });
-    if (record.taskFamily) content.append(element("p", { text: record.taskFamily }));
-    if (record.missingParameters?.length) content.append(element("small", { text: `Missing publication parameters: ${record.missingParameters.join(", ")}` }));
-    const review = record.manualReview;
-    if (!review) {
-      content.append(element("p", { className: "publication-network-detail-muted", text: "No manual field-level parameter review is attached to this record." }));
-    } else {
-      content.append(element("small", { text: `Manual review: ${review.confidenceLabel || "confidence not labelled"}${review.confidenceScore ? ` (${compactNumber(review.confidenceScore, 2)})` : ""}` }));
-      for (const [segmentName, fields] of Object.entries(review.segments || {})) {
-        const segment = element("details", { className: "publication-network-parameter-segment" });
-        const fieldEntries = Object.entries(fields || {});
-        segment.append(element("summary", {}, [
-          element("span", { text: titleCase(segmentName) }),
-          element("small", { text: `${fieldEntries.length} fields` }),
-        ]));
-        segment.append(element("ul", { className: "publication-network-parameter-list" }, fieldEntries.map(([field, entry]) =>
-          element("li", {}, [
-            element("span", { className: "publication-network-parameter-field", text: titleCase(field) }),
-            element("span", { text: entry.value === "" || entry.value === null ? "No reported value" : String(entry.value) }),
-            element("span", { className: "publication-network-parameter-status", text: `${titleCase(entry.status)}${entry.pageOrSection ? ` · ${entry.pageOrSection}` : ""}` }),
-            entry.evidenceNote ? element("small", { text: entry.evidenceNote }) : null,
-          ]))));
-        content.append(segment);
-      }
+    const content = element("div", { className: "publication-network-detail-section" }, [
+      element("p", { text: `Evidence scope: ${titleCase(study.evidenceScope)} · Native qualification: ${titleCase(study.nativeQualification)}` }),
+    ]);
+    for (const contract of study.contracts) {
+      const disclosure = element("details", { className: "publication-network-parameter-segment",
+        attributes: { "data-contract-key": contract.key } });
+      disclosure.append(element("summary", {}, [
+        element("span", { text: contract.label, attributes: { "data-pretext": true } }),
+        element("small", { text: titleCase(contract.status), attributes: { title: reviews.statusLegend[contract.status] } }),
+      ]));
+      const fields = element("div", { className: "publication-network-contract-evidence" }, [
+        element("p", { text: reviews.statusLegend[contract.status] || "Evidence status unavailable." }),
+        element("p", { text: contract.value || "No study-specific value recorded." }),
+      ]);
+      if (contract.compositeValue) fields.append(element("p", { text: `Combined-record evidence, not a study-specific value: ${contract.compositeValue}` }));
+      if (contract.missingComponents.length) fields.append(element("p", { text: `Unresolved components: ${contract.missingComponents.map(titleCase).join(", ")}` }));
+      const components = Object.entries(contract.components);
+      if (components.length) fields.append(element("ul", { className: "publication-network-parameter-list" }, components.map(([name, component]) => element("li", {}, [
+        element("strong", { text: titleCase(name) }),
+        element("span", { text: `${titleCase(component.status)} · ${component.value || "No value recorded"}` }),
+        component.note ? element("small", { text: component.note }) : null,
+      ]))));
+      if (contract.evidenceNote) fields.append(element("p", { text: contract.evidenceNote }));
+      if (contract.derivationNote) fields.append(element("p", { text: `Derivation: ${contract.derivationNote}` }));
+      const location = [contract.pageOrSection, contract.reviewedOn ? `Reviewed ${contract.reviewedOn}` : ""].filter(Boolean).join(" · ");
+      if (location) fields.append(element("small", { text: location }));
+      const source = safeExternalLink("Evidence source", contract.sourceUrl);
+      if (source) fields.append(source);
+      disclosure.append(fields);
+      content.append(disclosure);
     }
     details.append(content);
+    details.addEventListener("toggle", () => {
+      if (details.open && nodes[state.selected]?.id === study.networkNodeId) updateLink(study.studyRowId);
+    });
     return details;
   }
 
   function renderDetail(index) {
     const node = nodes[index];
     const records = node.toolkit?.records || [];
-    const nodeStatus = toolkitStatus(node);
+    const review = node.studyReview;
     const role = titleCase(node.corpus?.documentRole || "unclassified publication");
     const provenance = node.scope?.provenance || "legacy_confirmed";
     detailTitle.textContent = node.title;
     detailKicker.textContent = `${node.year || "Year unavailable"} · ${node.venue || "Venue unavailable"}`;
     const badges = [
       makeBadge("Audio–tactile publication", "publication-network-badge-at"),
-      makeBadge(
-        toolkitStatusLabel(node),
-        nodeStatus === "runnable"
-          ? "publication-network-badge-runnable"
-          : nodeStatus === "supported_incomplete"
-            ? "publication-network-badge-incomplete"
-            : nodeStatus === "adjacent_scope_conflict"
-              ? "publication-network-badge-conflict"
-              : "publication-network-badge-unassessed",
-      ),
       makeBadge(role),
       makeBadge(provenance === "later_exact_doi_audit" ? "Later exact-DOI audit addition" : "Legacy manually confirmed set"),
     ];
@@ -581,49 +631,51 @@ export async function initializePublicationNetwork(root) {
     const inclusionBasis = provenance === "later_exact_doi_audit"
       ? "This publication was added through a later exact-DOI literature-audit match identifying an in-scope audio–tactile PPS task."
       : "This publication belongs to the manually verified legacy audio–tactile PPS citation set.";
-    const statusExplanation = nodeStatus === "runnable"
-      ? `An exact DOI match links ${records.length} Toolkit literature-audit record${records.length === 1 ? "" : "s"}; at least one task has enough reported parameters for a runnable profile.`
-      : nodeStatus === "supported_incomplete"
-        ? `An exact DOI match links ${records.length} in-scope Toolkit literature-audit record${records.length === 1 ? "" : "s"}. The paradigm is supported, but publication parameters needed for a runnable profile remain unavailable.`
-        : nodeStatus === "adjacent_scope_conflict"
-          ? "The citation audit classifies this publication as audio–tactile, while the Toolkit literature audit currently marks its matched task as adjacent or out of scope. It needs an explicit scope decision."
-          : "No exact-DOI Toolkit literature-audit record is linked yet. The publication remains visible so its paradigm can be assessed instead of being silently excluded.";
-    const classification = makeSection("Toolkit inclusion status", [
+    const classification = makeSection("Evidence and availability", [
       element("p", { text: inclusionBasis }),
-      element("p", { text: statusExplanation }),
+      element("dl", { className: "publication-network-readiness" }, [
+        ["Publication evidence", evidenceSummary(review.parameterStatusCounts)],
+        ["Template availability", toolkitStatusLabel(node)],
+        ["Native qualification", titleCase(review.nativeQualification)],
+      ].map(([label, value]) => element("div", {}, [element("dt", { text: label }), element("dd", { text: value, attributes: { "data-pretext": true } })]))),
+      element("p", { className: "publication-network-detail-muted", text: "A linked template supports preparation and preview. Publication evidence and native acquisition qualification are separate checks." }),
     ]);
-    const templateIds = [...new Set(records.flatMap((record) => record.templateIds || []))];
+    const templateIds = review.templateIds;
     const templateSection = templateIds.length
       ? makeSection("Open in Experiment Designer", [
         element("p", {
           className: "publication-network-detail-muted",
-          text: "Load this paper's available Toolkit template in a new browser tab.",
+          text: "Prepare and preview this paper's linked preset in a new browser tab. Review its evidence gaps before adapting it.",
         }),
         element("div", { className: "publication-network-detail-links publication-network-template-links" }, templateIds.map(designerTemplateLink)),
       ])
       : null;
 
-    const parameterChildren = records.length
-      ? records.map(toolkitRecord)
+    const parameterChildren = review.studyIds.length
+      ? review.studyIds.map(id => studyRecord(studyById.get(id)))
       : [element("p", {
         className: "publication-network-detail-muted",
-        text: "Not yet assessed: no exact-DOI Toolkit parameter record is attached to this publication.",
+        text: "No study-level review is attached to this publication.",
       })];
 
     detailBody.replaceChildren(
       overview,
-      ...(templateSection ? [templateSection] : []),
-      makeSection("Abstract", abstractChildren),
       classification,
+      ...(templateSection ? [templateSection] : []),
+      makeSection("Study-level parameter review", parameterChildren),
+      makeSection("Abstract", abstractChildren),
       makeSection("Citation metrics", [makeMetricGrid(node), element("small", { text: "Displayed-network metrics determine this map's size and topology. Broader source counts are provided for context. Neither is a study-quality score." })]),
       makeSection(`Cited by included papers (${incoming[index].length})`, [citationList(incoming[index], "No incoming citation links from other included papers are present.")]),
       makeSection(`References to included papers (${outgoing[index].length})`, [citationList(outgoing[index], "No outgoing citation links to other included papers are present.")]),
-      makeSection("PPS Toolkit parameters", parameterChildren),
     );
   }
 
   function selectNode(index, trigger = graph) {
-    if (!Number.isInteger(index) || !state.visibleSet.has(index)) return;
+    if (!Number.isInteger(index) || !nodes[index]) return;
+    if (!state.visibleSet.has(index)) {
+      controls.search.value = "";
+      updateSearch({ syncLink: false });
+    }
     state.selected = index;
     state.lastFocus = trigger;
     state.lastFocusNode = trigger.classList?.contains("publication-network-result-button") ? index : null;
@@ -633,6 +685,7 @@ export async function initializePublicationNetwork(root) {
     renderResults();
     updateStatus();
     requestDraw();
+    updateLink();
     requestAnimationFrame(() => {
       resizeGraph();
       detail.focus({ preventScroll: true });
@@ -647,6 +700,7 @@ export async function initializePublicationNetwork(root) {
     renderResults();
     updateStatus();
     requestAnimationFrame(resizeGraph);
+    updateLink();
     if (restoreFocus) {
       const resultTrigger = state.lastFocusNode === null
         ? null
@@ -657,6 +711,7 @@ export async function initializePublicationNetwork(root) {
   }
 
   for (const input of controls.layout) input.addEventListener("change", updateLayout);
+  controls.search.addEventListener("input", () => updateSearch());
   controls.resultsSort.addEventListener("change", renderResults);
   resultMore.addEventListener("click", () => {
     state.resultLimit += RESULT_PAGE_SIZE;
@@ -717,6 +772,7 @@ export async function initializePublicationNetwork(root) {
     renderResults();
     updateStatus();
     requestDraw();
+    updateLink();
   });
   detail.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
@@ -741,7 +797,7 @@ export async function initializePublicationNetwork(root) {
       },
       layout: state.layout,
       visibleCount: state.visible.length,
-      drawnEdgeCount: edges.length,
+      drawnEdgeCount: edges.filter(([source, target]) => state.visibleSet.has(source) && state.visibleSet.has(target)).length,
       totalEdgeCount: edges.length,
       overlapCount: state.overlapCount,
       nodes: state.visible.map((index) => {
@@ -751,8 +807,9 @@ export async function initializePublicationNetwork(root) {
           x: point.x,
           y: point.y,
           radius: radiusFor(index, geometry),
-          implemented: isRunnable(nodes[index]),
-          runnable: isRunnable(nodes[index]),
+          hasTemplate: hasTemplate(nodes[index]),
+          parameterStatusCounts: nodes[index].studyReview.parameterStatusCounts,
+          nativeQualification: nodes[index].studyReview.nativeQualification,
           status: toolkitStatus(nodes[index]),
           inDegree: nodes[index].network?.inDegree || 0,
           outDegree: nodes[index].network?.outDegree || 0,
@@ -771,8 +828,20 @@ export async function initializePublicationNetwork(root) {
   root.dataset.publicationNetworkNodes = String(nodes.length);
   root.dataset.publicationNetworkEdges = String(edges.length);
   root.dataset.publicationNetworkRecords = String(data.counts.toolkitRecordJoins);
+  root.dataset.publicationNetworkStudies = String(reviews.counts.studies);
   root.dataset.publicationNetworkRenderer = "inline-svg";
   updateLayout();
+  updateSearch({ syncLink: false });
+  const initialSelection = initialUrl.searchParams.get("publication");
+  if (initialSelection) {
+    const index = nodes.findIndex(node => node.id === initialSelection || node.doi === initialSelection);
+    if (index >= 0) {
+      selectNode(index);
+      const studyId = initialUrl.searchParams.get("study");
+      const studyDetails = [...detailBody.querySelectorAll("[data-study-id]")].find(item => item.dataset.studyId === studyId);
+      if (studyDetails) studyDetails.open = true;
+    } else status.textContent = `This publication link is not in the current snapshot. ${nodes.length} papers remain searchable.`;
+  }
   resizeGraph();
   root.dispatchEvent(new CustomEvent("pps:publication-network-ready", {
     bubbles: true,
