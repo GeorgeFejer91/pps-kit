@@ -413,6 +413,53 @@
           "disaggregation_status": "not_applicable_no_new_human_experiment"
         }
       ]
+    },
+    {
+      "network_node_id": "doi:10.1093/cercor/bhy156",
+      "doi": "10.1093/cercor/bhy156",
+      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "instance_count_basis": "One passive protocol with A/T/AT conditions; patients are a single clinical cohort. Electrode selection and control analyses are not additional experimental studies.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML::Methods",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Passive trunk audio-tactile iEEG experiment",
+          "record_id": "ieeg_trunk_2018",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Electrode selection, multisensory/PPS contrasts and control analyses",
+          "disposition": "analysis_of_main_protocol",
+          "basis": "Uses the same acquired A/T/AT trials; does not introduce another stimulus experiment.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML::Statistical Analysis; Control Analysis"
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1038/s41598-021-90784-5",
+      "doi": "10.1038/s41598-021-90784-5",
+      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "instance_count_basis": "One experiment with four direction blocks. The participant rotates relative to two loudspeakers; the chest actuator remains in place.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8163804/fullTextXML::Methods",
+      "review_date": "2026-10-27",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Four-direction body-rotation audio-tactile experiment",
+          "record_id": "matsuda_2021_four_directions",
+          "template_ids": ["matsuda_2021_four_directions"],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": []
     }
   ],
   "corpus_freeze": {

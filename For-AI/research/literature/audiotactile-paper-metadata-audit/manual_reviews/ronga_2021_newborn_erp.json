@@ -278,5 +278,22 @@
     "Newborn trial totals vary by compliance across 3-6 blocks.",
     "This is a passive ERP endpoint rather than a behavioral RT task."
   ],
-  "next_manual_action": "Use this as a high-confidence static near/far protocol source for Cell lineage and newborn/adult ERP profile recreation; exact ITI distribution and speaker model remain approximation points."
+  "next_manual_action": "Use this as a high-confidence static near/far protocol source for Cell lineage and newborn/adult ERP profile recreation; exact ITI distribution and speaker model remain approximation points.",
+  "source_retrieval_followups": [
+    {
+      "date": "2026-10-27",
+      "source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/fullTextXML",
+      "outcome": "Main Methods and Figure1 caption read; confirms newborn and adult groups; details delegated to SI Appendix."
+    },
+    {
+      "date": "2026-10-27",
+      "source": "https://www.pnas.org/doi/suppl/10.1073/pnas.2024548118/suppl_file/pnas.2024548118.sapp.pdf",
+      "outcome": "Current retrieval HTTP403; no renewed SI inspection claimed."
+    },
+    {
+      "date": "2026-10-27",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/instance/8000027/bin/pnas.2024548118.sapp.pdf",
+      "outcome": "Returned browser-challenge HTML, not PDF. Expected local SI file also absent. Historical June review retained; no new source-unavailable blanket status."
+    }
+  ]
 }

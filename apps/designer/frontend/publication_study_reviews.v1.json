@@ -12,20 +12,20 @@
     "publications": 94,
     "studies": 125,
     "contracts": 1375,
-    "reportedComplete": 179,
-    "derivedComplete": 40,
+    "reportedComplete": 188,
+    "derivedComplete": 41,
     "parameterStatusCounts": {
       "approximation_required": 24,
       "composite_requires_split": 132,
       "conflicting_evidence": 6,
-      "derived_complete": 40,
-      "explicitly_absent": 14,
+      "derived_complete": 41,
+      "explicitly_absent": 15,
       "low_confidence": 64,
-      "not_applicable": 47,
+      "not_applicable": 46,
       "not_assessed": 341,
       "not_reported": 23,
-      "partial": 228,
-      "reported_complete": 179,
+      "partial": 218,
+      "reported_complete": 188,
       "source_unavailable": 277
     }
   },
@@ -603,8 +603,10 @@
         "matsuda_2021_four_directions"
       ],
       "parameterStatusCounts": {
+        "derived_complete": 1,
         "not_reported": 1,
-        "partial": 10
+        "partial": 5,
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed"
     },
@@ -748,8 +750,9 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_applicable": 1,
-        "partial": 10
+        "explicitly_absent": 1,
+        "partial": 5,
+        "reported_complete": 5
       },
       "nativeQualification": "not_assessed"
     },
@@ -17079,16 +17082,18 @@
     {
       "studyRowId": "doi:10.1038/s41598-021-90784-5",
       "networkNodeId": "doi:10.1038/s41598-021-90784-5",
-      "label": "Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. (a)",
+      "experimentLabel": "Four-direction body-rotation audio-tactile experiment",
+      "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+      "evidenceScope": "experiment_specific",
       "templateIds": [
         "matsuda_2021_four_directions"
       ],
       "parameterStatusCounts": {
+        "derived_complete": 1,
         "not_reported": 1,
-        "partial": 10
+        "partial": 5,
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -17180,19 +17185,32 @@
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "partial",
-          "value": "Soa table: T1-T5 occurred 300, 800, 1500, 2200, and 2700 ms from sound onset; Tbefore was 700 ms before sound onset and Tafter was 700 ms after sound offset.",
+          "status": "reported_complete",
+          "value": "T1-T5:300,800,1500,2200,2700 ms from auditory onset for approaching and receding sounds.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.2 and 7, overview/Tactile stimuli",
-          "evidenceNote": "All seven tactile timing values are directly reported.",
+          "pageOrSection": "Methods, Tactile stimuli; Conditions; Procedure",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-021-90784-5",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Same temporal schedule for both motions; body-relative direction fixed within each block.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "300,800,1500,2200,2700 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile delays from sound onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
@@ -17214,72 +17232,152 @@
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "partial",
-          "value": "Baseline strategy: Unimodal tactile-only trials used Tbefore and Tafter timings as pre/post-sound baseline-like controls without audio. | Baseline timing: Baseline-like tactile-only timings were Tbefore at -700 ms relative to sound onset and Tafter at +700 ms after sound offset. | Baseline count: Each direction block had 40 unimodal tactile-only trials: 2 audio-motion timing labels x Tbefore/Tafter x 10 repetitions.",
+          "status": "derived_complete",
+          "value": "40 outside-sound tactile controls per direction block at -700 ms and +3700 ms from sound onset.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Conditions | PDF pp.2 and 7, Tactile stimuli/Conditions",
-          "evidenceNote": "The unimodal family is explicitly defined as tactile stimulus without audio stimulus. | The same Tbefore/Tafter values define the unimodal timing rows. | Unimodal baseline-like trial count and formula are reported.",
-          "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Methods, Tactile stimuli; Conditions; Procedure",
+          "evidenceNote": "",
+          "derivationNote": "Offset-relative +700 ms becomes onset-relative +3700 ms; 2 x 2 x 10 =40 per block.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-021-90784-5",
-          "missingComponents": [
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "2 motion contexts x 2 baseline timings x 10 repetitions per block.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tbefore/Tafter tactile controls outside the sound interval.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "40 per block;160 across four blocks.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "derived",
+              "value": "700 ms before onset and 700 ms after offset of 3000-ms sound: -700/+3700 ms relative to onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "partial",
-          "value": "Catch trial type: Catch trials contained the sound sequence but no tactile stimulus; participants were instructed not to respond. | Catch count: Each direction block had 60 no-tactile catch trials.",
+          "status": "reported_complete",
+          "value": "60 trials without touch per 200-trial block (30%); withhold response.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Conditions/Procedure | PDF p.7, Conditions",
-          "evidenceNote": "Catch trials were included to limit tactile-timing prediction. | Catch count is directly reported.",
+          "pageOrSection": "Methods, Tactile stimuli; Conditions; Procedure",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-021-90784-5",
-          "missingComponents": [
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "60 per direction block, randomized with targets.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "No-tactile catch trials.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "60 per block;240 across four blocks.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No touch; explicitly do not respond.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "partial",
-          "value": "Repetitions per tactile soa condition: Per direction block, bimodal trials were 2 audio motions x 5 T1-T5 delays x 10 repetitions, giving 10 repetitions per motion-delay cell. | Total trial count: Each block had 200 trials, for 800 total trials across four direction blocks.",
+          "status": "reported_complete",
+          "value": "Ten repetitions per motion/timing cell per block;100 bimodal+40 tactile controls+60 catches=200 trials.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Conditions",
-          "evidenceNote": "The repetition formula is explicitly reported. | Per-block and total trial counts are reported.",
+          "pageOrSection": "Methods, Tactile stimuli; Conditions; Procedure",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-021-90784-5",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "200 per block x 4 directions =800 total trials.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "60 catch trials per block.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Two audio motions xfive bimodal delays or two outside-sound timings; four body-relative direction blocks.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "Ten repetitions per motion/timing cell in each block.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "partial",
-          "value": "Blocked or random order: Four body-relative direction blocks were used; block order was counterbalanced across participants. | Block count: The experiment had four blocks, one each for front, rear, left, and right body-relative directions. | Condition intermixing: Trials from the three families and timing/motion cells were randomized within each direction block. | Total trial count: Each block had 200 trials, for 800 total trials across four direction blocks.",
+          "status": "reported_complete",
+          "value": "Four body-rotation blocks: front,rear,left,right relative to fixed speakers; counterbalanced block order; randomized trials.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.7, Conditions/Procedure | PDF p.7, Procedure | PDF p.7, Conditions",
-          "evidenceNote": "Direction was blocked, while block order was counterbalanced. | The direction-block structure is explicitly reported. | The procedure reports randomized trial order within each block. | Per-block and total trial counts are reported.",
+          "pageOrSection": "Methods, Tactile stimuli; Conditions; Procedure",
+          "evidenceNote": "Participant turns on a stool; four directions are blocks of one experiment, not four independent experiments. Touch remains on chest in every direction.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1038/s41598-021-90784-5",
-          "missingComponents": [
-            "block_composition",
-            "block_order_or_counterbalancing"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "100 bimodal,40 tactile controls and 60 catches per block.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "Four 200-trial blocks.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Body-relative direction order counterbalanced between participants.",
+              "note": ""
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Each direction receives the full 200-trial allocation.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "reported",
+              "value": "Breaks every 50 trials and between blocks.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Randomized trial order.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -22107,14 +22205,15 @@
     {
       "studyRowId": "doi:10.1093/cercor/bhy156",
       "networkNodeId": "doi:10.1093/cercor/bhy156",
-      "label": "Audio-Tactile and Peripersonal Space Processing Around the Trunk in Human Parietal and Temporal Cortex: An Intracranial EEG Study.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Audio-Tactile and Peripersonal Space Processing Around the Trunk in Human Parietal and Temporal Cortex: An Intracranial EEG Study. (a)",
+      "experimentLabel": "Passive trunk audio-tactile iEEG experiment",
+      "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_applicable": 1,
-        "partial": 10
+        "explicitly_absent": 1,
+        "partial": 5,
+        "reported_complete": 5
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -22156,68 +22255,139 @@
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "partial",
-          "value": "Trial rows families: Three trial families: auditory-only A, tactile-only T, and audio-tactile AT. | Task sequence rules: Patients lay reclined with eyes closed, attended to approaching sound/vibrations, and did not respond overtly. | Condition intermixing: A, T, and AT trials were presented in randomized order.",
+          "status": "reported_complete",
+          "value": "Three randomized trial families: A, T and AT. Each T/AT trial contains three successive tactile events.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Procedures",
-          "evidenceNote": "The procedure enumerates the three trial types. | The passive attention rule is explicitly described. | Randomized presentation is directly reported.",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "Three tactile events occur within each T/AT trial; do not expand them into three single-target trials.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
-          "missingComponents": [
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "85 trials of each A/T/AT family presented randomly.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "A: 3000-ms approaching white noise; T: three touches without sound; AT: same three touches with sound.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Auditory-only A control, tactile-only T control, and multisensory AT.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "reported",
+              "value": "Nominal tactile events at 500, 1500 and 2500 ms; each delay jittered by 0-200 ms in 50-ms steps.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "partial",
-          "value": "Task sequence rules: Patients lay reclined with eyes closed, attended to approaching sound/vibrations, and did not respond overtly. | Response window: No per-trial behavioral response window applies; patients had no overt task.",
+          "status": "reported_complete",
+          "value": "Passive iEEG task: attend to sound and touch with eyes closed; no overt response requested.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Procedures",
-          "evidenceNote": "The passive attention rule is explicitly described. | The procedure states that no overt task was requested.",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
-          "missingComponents": [
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Attend to auditory and tactile stimulation while reclined, eyes closed.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "No overt response device/task.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable: electrophysiological acquisition without behavioral response deadline.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "No behavioral detection or catch-response rule.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
           "status": "partial",
-          "value": "Iti jitter policy: Tactile timing jitter was 0-200 ms in 50 ms steps; ITI was randomly shuffled among 1.4, 1.7, and 1.9 s.",
+          "value": "Tactile-delay jitter 0-200 ms in 50-ms steps; ITI randomly selected/shuffled among 1.4, 1.7 and 1.9 s.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Procedures",
-          "evidenceNote": "Both within-trial tactile jitter and between-trial ITI values are reported.",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "Selection probabilities and the exact ITI endpoint convention are not specified; do not silently assert uniform draws.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
           "missingComponents": [
-            "timing_scope_and_anchor",
-            "values_or_range"
+            "distribution"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Discrete tactile-event jitter plus discrete intertrial intervals.",
+              "note": ""
+            },
+            "randomization": {
+              "status": "reported",
+              "value": "Randomized ITI choice/order.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Each nominal tactile delay and interval between trials.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "Jitter 0,50,100,150,200 ms; ITI 1.4,1.7,1.9 s.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "partial",
-          "value": "Soa table: Tactile stimulation occurred at 500, 1500, and 2500 ms after trial/sound onset, plus 0-200 ms jitter.",
+          "status": "reported_complete",
+          "value": "Three tactile events per T/AT trial at nominal 500,1500,2500 ms; in AT these are relative to sound onset.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Procedures",
-          "evidenceNote": "The same three timings are used for T and AT trials.",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "The source contains isolated m/ms typographic inconsistencies; the repeated ms statements and 3000-ms trial establish the millisecond schedule.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Approach only; nominal far/middle/close distances 1.7,1.0,0.3 m.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "500,1500,2500 ms, with 0-200-ms jitter in 50-ms steps.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Trial onset for T; common trial/sound onset for AT.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
@@ -22239,68 +22409,134 @@
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "partial",
-          "value": "Baseline strategy: Unisensory tactile T trials served as the control/baseline for tactile responses and anticipation checks. | Baseline timing: Tactile-only control timings were 500, 1500, and 2500 ms; EEG baseline correction used -100 to 0 ms prestimulus. | Baseline count: 85 tactile-only T trials were presented as the unisensory tactile control condition.",
+          "status": "reported_complete",
+          "value": "85 tactile-only T control trials, each with three tactile events; separate A controls remain auditory-only.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.3-5, Procedures and Statistical Analysis | PDF pp.3-4, Procedures and Preprocessing | PDF p.3, Procedures",
-          "evidenceNote": "Analyses compare AT responses with tactile-only and EEG baseline responses. | Both task-control timing and neural baseline window are reported. | T is one of the three 85-trial conditions.",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "Prestimulus EEG baseline correction is an analysis operation, not an additional trial family.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
-          "missingComponents": [
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "85 T trials in the global randomized pool.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Unisensory tactile T control.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "85 tactile-only control trials.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "500,1500,2500 ms after T-trial onset, with reported jitter.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_applicable",
-          "value": "Catch trial type: No behavioral catch/no-go trials are applicable; auditory-only trials are unisensory controls. | Catch count: No catch/no-go count applies; 85 auditory-only trials are unisensory A controls, not behavioral catches.",
+          "status": "explicitly_absent",
+          "value": "No behavioral catches; 85 auditory-only A trials are unisensory controls in a passive task.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "There was no overt response task. | The passive task has no response-withholding catch rule.",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "Auditory-only controls must not be relabeled no-target catches when participants perform no overt detection task.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
           "missingComponents": [],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Zero additional behavioral catches.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No behavioral catch family in exhaustive A/T/AT design.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "0.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No overt response in any family; A trials provide an auditory control.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "partial",
-          "value": "Repetitions per tactile soa condition: 85 trials were presented for each A, T, and AT condition; T and AT trials each contained the three tactile timings. | Total trial count: 255 trials total, derived from 85 trials x 3 conditions.",
+          "status": "reported_complete",
+          "value": "85 trials each of A, T and AT; 255 total trials, with three touches inside each T/AT trial.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Procedures",
-          "evidenceNote": "The per-condition trial count is explicit. | Total is derived from the explicit per-condition count.",
-          "derivationNote": "Total is derived from the explicit per-condition count.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "3 x 85 =255 trials; 2 x 85 x 3 =510 tactile events.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Each T/AT trial contains three tactile events, not three independent trial rows.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Three trial families, A/T/AT.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "85 per family.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "partial",
-          "value": "Blocked or random order: Trial order was randomized; no separate condition blocks are reported. | Condition intermixing: A, T, and AT trials were presented in randomized order. | Total trial count: 255 trials total, derived from 85 trials x 3 conditions.",
+          "value": "A/T/AT trials randomized; about 20 minutes overall; block subdivisions not reported.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Procedures | PDF p.3 methods; OUP supplement route checked 2026-06-16",
-          "evidenceNote": "The paper says trials were presented in randomized manner. | Experiment duration is reported as about 20 minutes, but no block count was found. | Randomized presentation is directly reported. | Total is derived from the explicit per-condition count.",
-          "derivationNote": "Total is derived from the explicit per-condition count.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "No block count is inferred from the reported experiment duration.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
           "missingComponents": [
-            "block_composition",
-            "block_order_or_counterbalancing"
+            "block_count"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "85 trials per family in the experiment.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Trial families presented in randomized manner.",
+              "note": ""
+            }
+          }
         }
       ]
     },
