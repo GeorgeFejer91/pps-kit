@@ -94,6 +94,10 @@ test("scientific file enumeration preserves row order, global variant IDs and un
   assert.deepEqual(JSON.parse(JSON.stringify(actual)), expected);
   assert.equal(context.staticTrialFileCount(design), expected.length);
   assert.throws(() => context.staticTrialFileBakePayload(design, {}, expected.length - 1), /limit/);
+  const mixedSoas = { protocol: { trial_strips: [{ elements: [audio(["A"])] }],
+    soa_values_ms: [100, "100"], include_baseline_trials: true, baseline_strategy: "min_max" } };
+  assert.equal(context.staticTrialFileCount(mixedSoas), 3);
+  assert.equal(context.staticTrialFileBakePayload(mixedSoas, {}, 3).files.length, 3);
 });
 
 test("native review bounds precede source planning while audit examples disclose truncation", () => {
