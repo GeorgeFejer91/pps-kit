@@ -78,3 +78,10 @@ the audio bundle to 256 MiB. Browser soundchecks resolve restored uploads from
 IndexedDB and cancel pending fetch/decode publication when the profile changes.
 Study URLs honor generated record aliases and disclose a split into current
 study records rather than silently presenting one as equivalent.
+
+New static block previews preserve the selected baseline strategy and include
+instruction/jitter prefixes in looming and tactile onset times. Catch/audio-only
+rows have no tactile onset. Existing restored snapshots remain unchanged and
+require native timing enrichment and operator review before acceptance. The
+actual 204-row Study 5 browser preview is a regression fixture; native assembly
+receives complete rows plus the existing strip planner's explicit variant choices.

@@ -1505,6 +1505,26 @@ function staticVariantNoiseType(variant, sourceInventory) {
   return "";
 }
 
+function staticVariantLoomingOnsetMs(variant, sourceInventory) {
+  let onsetMs = 0;
+  for (const choice of variant) {
+    if (choice.kind === "jitter") onsetMs += Math.max(0, Number(choice.value || 0));
+    else {
+      const source = sourceInventory.get(choice.label);
+      if (source && source.kind !== "prestimulus") return onsetMs;
+      onsetMs += Math.max(0, Number(source?.duration_ms || 0));
+    }
+  }
+  return 0;
+}
+
+function staticBaselineMode(protocol) {
+  const strategy = protocol.baseline_strategy || "none";
+  if (strategy === "custom") return protocol.baseline_custom_trial_mode === "audio_tactile" ? "audio_tactile" : "tactile_only";
+  if (["min_anchor", "max_anchor", "min_max", "soa_zero", "sound_offset"].includes(strategy)) return "audio_tactile";
+  return strategy;
+}
+
 function staticTrialFileRow({
   templateId,
   rowIndex,
@@ -1514,6 +1534,7 @@ function staticTrialFileRow({
   variant,
   variantIndex,
   durationMs,
+  loomingOnsetMs = 0,
   soaMs = "",
   baselineMode = "",
   noiseType = "",
@@ -1540,8 +1561,9 @@ function staticTrialFileRow({
     sha256: "",
     duration_ms: durationMs,
     duration_s: Math.round((durationMs / 1000) * 1000) / 1000,
-    looming_segment_onset_s: "",
-    tactile_onset_s: Number.isFinite(Number(soaMs)) ? Math.round((Number(soaMs) / 1000) * 1000) / 1000 : "",
+    looming_segment_onset_s: loomingOnsetMs / 1000,
+    tactile_onset_s: ["audio_tactile", "baseline"].includes(family) && soaMs !== "" && Number.isFinite(Number(soaMs))
+      ? (loomingOnsetMs + Number(soaMs)) / 1000 : "",
     soa_ms: soaMs,
     baseline_mode: baselineMode,
     sequence_variant_key: variantKey,
@@ -1570,6 +1592,7 @@ function staticTrialFileBakePayload(design, status) {
     const rowLabel = strip.label || `Trial type ${rowIndex + 1}`;
     for (const [variantListIndex, variant] of variants.entries()) {
       const durationMs = staticVariantDurationMs(variant, sourceInventory);
+      const loomingOnsetMs = staticVariantLoomingOnsetMs(variant, sourceInventory);
       const noiseType = staticVariantNoiseType(variant, sourceInventory);
       const variantIndex = variantCounter;
       variantCounter += 1;
@@ -1583,6 +1606,7 @@ function staticTrialFileBakePayload(design, status) {
           variant,
           variantIndex,
           durationMs,
+          loomingOnsetMs,
           soaMs,
           noiseType,
         }));
@@ -1598,8 +1622,9 @@ function staticTrialFileBakePayload(design, status) {
             variant,
             variantIndex,
             durationMs,
+            loomingOnsetMs,
             soaMs,
-            baselineMode: protocol.baseline_custom_trial_mode || protocol.baseline_strategy || "tactile_only",
+            baselineMode: staticBaselineMode(protocol),
             noiseType,
           }));
         }
@@ -1614,6 +1639,7 @@ function staticTrialFileBakePayload(design, status) {
           variant,
           variantIndex,
           durationMs,
+          loomingOnsetMs,
           noiseType,
         }));
       }
@@ -1627,6 +1653,7 @@ function staticTrialFileBakePayload(design, status) {
           variant,
           variantIndex,
           durationMs,
+          loomingOnsetMs,
           soaMs: 0,
           baselineMode: "auditory_only",
           noiseType,
@@ -1822,8 +1849,8 @@ function staticTrialPoolRows(files, settings) {
         source_sha256: record.file.sha256 || "",
         duration_ms: record.file.duration_ms || 0,
         duration_s: record.file.duration_s || "",
-        looming_segment_onset_s: record.file.looming_segment_onset_s || "",
-        tactile_onset_s: record.file.tactile_onset_s || "",
+        looming_segment_onset_s: record.file.looming_segment_onset_s ?? "",
+        tactile_onset_s: record.file.tactile_onset_s ?? "",
         repetition_index: repetitionIndex,
         configured_repetitions: record.configured,
         base_repetitions: record.baseRepetitions,
@@ -1833,7 +1860,7 @@ function staticTrialPoolRows(files, settings) {
         balancing_stratum: record.balancingStratum,
         balancing_signature: `static-${seed}`,
         source_lineage: record.sourceLineage,
-        soa_ms: record.file.soa_ms || "",
+        soa_ms: record.file.soa_ms ?? "",
         baseline_mode: record.file.baseline_mode || "",
         sequence_variant_key: record.file.sequence_variant_key || "",
         sequence_labels: record.file.sequence_labels || "",
@@ -2114,7 +2141,7 @@ function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax)
     folder_name: row.folder_name || "",
     noise_type: row.noise_type || "",
     noise_color_hex: row.noise_type ? sourceColor(row.noise_type) : "#d8dde2",
-    soa_ms: row.soa_ms || "",
+    soa_ms: row.soa_ms ?? "",
     soa_color_hex: soaValue > 0 ? staticSoaColor(soaValue, soaMin, soaMax) : "#d8dde2",
     baseline_mode: row.baseline_mode || "",
     sequence_variant_key: row.sequence_variant_key || "",
@@ -2124,8 +2151,8 @@ function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax)
     source_sha256: row.source_sha256 || "",
     duration_ms: row.duration_ms || 0,
     duration_s: row.duration_s || "",
-    looming_segment_onset_s: row.looming_segment_onset_s || "",
-    tactile_onset_s: row.tactile_onset_s || "",
+    looming_segment_onset_s: row.looming_segment_onset_s ?? "",
+    tactile_onset_s: row.tactile_onset_s ?? "",
     repetition_index: row.repetition_index || "",
     configured_repetitions: row.configured_repetitions || "",
     fractional_extra: row.fractional_extra || "",
@@ -9593,6 +9620,9 @@ initializePublicationNetworkSurface();
 window.PPSDesignerApp = Object.freeze({
   preloadAssetUrl: staticResourceUrl,
   getState: () => clone(state),
+  getAssemblyVariants: () => (state?.design?.protocol?.trial_strips || []).flatMap((strip, index) =>
+    stripPreviewVariants(strip).map(choices => ({ row_label: strip.label || `Trial type ${index + 1}`,
+      sequence_variant_key: previewVariantKey(choices), choices }))),
   exportProfile: (format) => {
     if (!["json", "bundle"].includes(format)) throw new Error("Unsupported profile export.");
     return api(`/api/profiles/export-${format}`, { method: "POST", rawResponse: true,

@@ -157,8 +157,18 @@ try {
   });
   const previewFixture = await designer.evaluate(() => window.PPSDesignerApp.getState());
   assert.ok(previewFixture.block_csv_preview.blocks.every(block => block.preview_rows.length === block.trial_count));
+  const allPlanRows = previewFixture.block_csv_preview.blocks.flatMap(block => block.preview_rows);
+  assert.equal(allPlanRows.length, 204);
+  assert.equal(previewFixture.design.protocol.baseline_strategy, "stationary_burst");
+  assert.ok(allPlanRows.filter(row => row.family === "baseline").every(row => row.baseline_mode === "stationary_burst"));
+  assert.ok(allPlanRows.every(row => row.looming_segment_onset_s === 4));
+  assert.ok(allPlanRows.filter(row => ["baseline", "audio_tactile"].includes(row.family))
+    .every(row => row.tactile_onset_s === 4 + row.soa_ms / 1000));
+  assert.ok(allPlanRows.filter(row => ["catch", "auditory_only"].includes(row.family))
+    .every(row => row.tactile_onset_s === ""));
   await writeFile(resolve(output, "browser-full-block-plan.json"), JSON.stringify({
     design: previewFixture.design, block_csv_preview: previewFixture.block_csv_preview,
+    variants: await designer.evaluate(() => window.PPSDesignerApp.getAssemblyVariants()),
   }, null, 2));
   await designer.locator("#edit-mode-button").click();
   await designer.locator("#save-study-profile").click();
