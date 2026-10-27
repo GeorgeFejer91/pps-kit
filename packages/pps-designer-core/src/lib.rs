@@ -3,6 +3,7 @@ pub mod assembly;
 pub mod design;
 mod imported;
 mod level;
+pub mod run_order;
 mod source;
 mod spatializer;
 mod wav;
@@ -38,11 +39,14 @@ pub fn generation_capabilities() -> serde_json::Value {
             "source_profile_ids":["continuous_noise","dynaspace_gaussian_burst_train"],"output_channels":2,
             "source_algorithm_opt_in_required":true,"fixed_audio_preservation":false,"measured_calibration_receipt":false,
             "propagation_delay_default":true,"near_field":false,"qualification":"customized_native_generation_unqualified"},
-        "assembly":{"scope":"reviewed_source_blocks_once","planner":"existing_complete_segment5_snapshot",
+        "assembly":{"scope":"reviewed_participant_parts","planner":"existing_complete_segment5_snapshot_plus_python_compatible_run_order",
             "formats":["pcm16","pcm24","pcm32","float32"],"sample_rate_policy":"exact_match",
             "families":["audio_tactile","baseline","catch","auditory_only"],"baseline_policies":["tactile_only","verified_stationary_burst"],
             "tactile_source":"verified_mono_wav","hidden_normalization":false,"physical_timing_qualified":false,
-            "max_blocks":128,"max_rows":10000,"participant_phase_order":false,"instruction_slots":false},
+            "max_blocks":128,"max_rows":10000,"participant_phase_order":true,"instruction_slots":"verified_materialization_only",
+            "max_order_blocks":run_order::MAX_ORDER_BLOCKS,"max_participants":run_order::MAX_PARTICIPANTS,
+            "order_algorithms":["legacy",run_order::FACTORADIC_ALGORITHM,"fixed","counterbalanced_rotation","seeded_random_permutation"],
+            "order_compatibility":run_order::ORDER_COMPATIBILITY,"runner_instruction_execution_qualified":false},
         "renderer_contract":"pps-3dti-spatialize.v2","near_field_ild":false,"far_distance_filter":false,
         "max_frames":MAX_FRAMES,"max_spectral_frames":MAX_SPECTRAL_FRAMES,"max_tactile_cues":MAX_TACTILE_CUES})
 }

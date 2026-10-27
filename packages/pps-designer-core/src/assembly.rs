@@ -770,6 +770,446 @@ fn validate_variants(
     Ok(result)
 }
 
+/// Native receipt binding the full participant occurrence list and instruction
+/// assets to the exact enriched source-block preview. No Deserialize.
+#[derive(Debug, Serialize)]
+pub struct RunOrderPreview {
+    pub design_sha256: String,
+    pub assembly_preview_sha256: String,
+    pub run_order_sha256: String,
+    pub preview: Value,
+    #[serde(skip_serializing)]
+    sealed_digest: String,
+}
+
+/// Both reviews travel together; neither browser `accepted` flags nor a saved
+/// order JSON can manufacture this receipt.
+#[derive(Debug)]
+pub struct AcceptedParticipantAssembly {
+    source: AcceptedAssemblyPlan,
+    order: Value,
+    order_sha256: String,
+}
+impl AcceptedParticipantAssembly {
+    pub fn revision(&self) -> u64 {
+        self.source.revision
+    }
+    pub fn design_sha256(&self) -> &str {
+        &self.source.design_sha256
+    }
+    pub fn assembly_preview_sha256(&self) -> &str {
+        &self.source.preview_sha256
+    }
+    pub fn run_order_sha256(&self) -> &str {
+        &self.order_sha256
+    }
+}
+
+pub fn plan_run_order_preview(
+    source: &AssemblyPreview,
+    assets: &[VerifiedAssemblyAsset],
+    cancelled: &AtomicBool,
+) -> Result<RunOrderPreview, GenerationError> {
+    check_cancelled(cancelled)?;
+    if hash_json(&source.preview)? != source.recipe.preview_digest
+        || source.preview_sha256 != source.recipe.preview_digest
+        || hash_json(&source.recipe.design)? != source.design_sha256
+    {
+        return Err(GenerationError::Invalid("assembly_preview_stale"));
+    }
+    verify_asset_hashes(&source.recipe, assets)?;
+    let mut preview =
+        crate::run_order::preview_run_order(&source.recipe.design, &source.preview, cancelled)?;
+    preview["instruction_profile"] =
+        verified_instruction_profile(&source.recipe.design, assets, source.recipe.sample_rate)?;
+    preview["design_sha256"] = json!(source.design_sha256);
+    preview["assembly_preview_sha256"] = json!(source.preview_sha256);
+    preview["physical_timing_qualified"] = json!(false);
+    let digest = hash_json(&preview)?;
+    Ok(RunOrderPreview {
+        design_sha256: source.design_sha256.clone(),
+        assembly_preview_sha256: source.preview_sha256.clone(),
+        run_order_sha256: digest.clone(),
+        preview,
+        sealed_digest: digest,
+    })
+}
+
+pub fn accept_participant_assembly(
+    source: AssemblyPreview,
+    mut order: RunOrderPreview,
+    expected_design_sha256: &str,
+    expected_assembly_preview_sha256: &str,
+    expected_run_order_sha256: &str,
+    revision: u64,
+) -> Result<AcceptedParticipantAssembly, GenerationError> {
+    if order.design_sha256 != expected_design_sha256
+        || order.assembly_preview_sha256 != expected_assembly_preview_sha256
+        || order.run_order_sha256 != expected_run_order_sha256
+        || order.sealed_digest != order.run_order_sha256
+        || hash_json(&order.preview)? != order.sealed_digest
+        || order.preview["design_sha256"] != expected_design_sha256
+        || order.preview["assembly_preview_sha256"] != expected_assembly_preview_sha256
+    {
+        return Err(GenerationError::Invalid("assembly_run_order_stale"));
+    }
+    let source = accept_assembly_preview(
+        source,
+        expected_design_sha256,
+        expected_assembly_preview_sha256,
+        revision,
+    )?;
+    order.preview["accepted"] = json!(true);
+    Ok(AcceptedParticipantAssembly {
+        source,
+        order: order.preview,
+        order_sha256: order.run_order_sha256,
+    })
+}
+
+fn verify_asset_hashes(
+    recipe: &Recipe,
+    assets: &[VerifiedAssemblyAsset],
+) -> Result<(), GenerationError> {
+    let mut seen = BTreeSet::new();
+    if assets.len() != recipe.asset_hashes.len()
+        || assets.iter().any(|a| {
+            !seen.insert(&a.reference) || recipe.asset_hashes.get(&a.reference) != Some(&a.sha256)
+        })
+    {
+        return Err(GenerationError::Invalid("assembly_assets_changed"));
+    }
+    Ok(())
+}
+
+fn verified_instruction_profile(
+    design: &Value,
+    assets: &[VerifiedAssemblyAsset],
+    rate: u32,
+) -> Result<Value, GenerationError> {
+    let slots = [
+        (
+            "before_experiment",
+            "Before experiment",
+            "General instructions",
+            "General_Instructions.wav",
+            "click",
+            "Start experiment",
+        ),
+        (
+            "before_each_block",
+            "Before each block",
+            "Pre-block instruction",
+            "Pre-Block_Instruction.wav",
+            "delay",
+            "Start block",
+        ),
+        (
+            "after_each_block",
+            "After each block",
+            "Post-block instruction",
+            "Post-Block_Instruction.wav",
+            "click",
+            "Next block",
+        ),
+        (
+            "between_conditions",
+            "Between conditions",
+            "Condition transition",
+            "InterimMessage.wav",
+            "button",
+            "Start next condition",
+        ),
+        (
+            "after_experiment",
+            "After experiment",
+            "Finish message",
+            "FinishMessage.wav",
+            "delay",
+            "Finish",
+        ),
+    ];
+    let study5 = design["study_profile_id"] == "study5_box_breathing_pps";
+    let raw =
+        &design["study_profile_reference_parameters"]["dashboard_run_setup"]["instruction_profile"];
+    let mut incoming = BTreeMap::new();
+    let values: Vec<_> = match &raw["slots"] {
+        Value::Null => Vec::new(),
+        Value::Array(a) => a.iter().collect(),
+        Value::Object(o) => o.values().collect(),
+        _ => return Err(GenerationError::Invalid("assembly_instruction_slots")),
+    };
+    if values.len() > slots.len() {
+        return Err(GenerationError::Invalid("assembly_instruction_slots"));
+    }
+    for value in values {
+        let slot = string(&value["slot"])?;
+        if !slots.iter().any(|s| s.0 == slot) || incoming.insert(slot, value).is_some() {
+            return Err(GenerationError::Invalid("assembly_instruction_slots"));
+        }
+    }
+    let mut output = Vec::new();
+    for (slot, generic_label, study_label, file, mode, button) in slots {
+        let item = incoming.get(slot).copied().unwrap_or(&Value::Null);
+        let enabled = item
+            .get("enabled")
+            .map(|v| {
+                v.as_bool()
+                    .ok_or(GenerationError::Invalid("assembly_instruction_enabled"))
+            })
+            .transpose()?
+            .unwrap_or(study5);
+        let default_path = if study5 {
+            format!("assets/breathing/original_study5/{file}")
+        } else {
+            String::new()
+        };
+        let path = item["path"].as_str().unwrap_or(&default_path);
+        let label = item["label"]
+            .as_str()
+            .filter(|v| !v.is_empty())
+            .unwrap_or(if study5 { study_label } else { generic_label });
+        let mode = item["continue_mode"]
+            .as_str()
+            .filter(|v| !v.is_empty())
+            .unwrap_or(if study5 { mode } else { "click" })
+            .trim()
+            .to_lowercase();
+        if !["click", "delay", "button"].contains(&mode.as_str()) {
+            return Err(GenerationError::Invalid(
+                "assembly_instruction_continue_mode",
+            ));
+        }
+        let delay = item
+            .get("delay_s")
+            .map(finite_number)
+            .transpose()?
+            .unwrap_or(0.0);
+        if !(0.0..=3600.0).contains(&delay) {
+            return Err(GenerationError::Invalid("assembly_instruction_delay"));
+        }
+        let button = item["button_label"]
+            .as_str()
+            .map(str::trim)
+            .filter(|v| !v.is_empty())
+            .unwrap_or(if study5 { button } else { "Continue" });
+        if [label, button, path]
+            .iter()
+            .any(|s| s.len() > 4096 || s.chars().any(char::is_control))
+        {
+            return Err(GenerationError::Invalid("assembly_instruction_text"));
+        }
+        let mut resolved = json!({"slot":slot,"label":label,"enabled":enabled,"required":false,"path":"","duration_s":0.0,"sample_rate":0,"channels":0,"sha256":"","continue_mode":mode,"delay_s":delay,"button_label":button,"source":item["source"].as_str().unwrap_or(if study5 { "original_study5" } else { "" })});
+        if enabled {
+            let asset =
+                assets
+                    .iter()
+                    .find(|a| a.reference == path)
+                    .ok_or(GenerationError::Invalid(
+                        "assembly_instruction_asset_required",
+                    ))?;
+            if asset.role != AssemblyAssetRole::Instruction {
+                return Err(GenerationError::Invalid("assembly_instruction_asset_role"));
+            }
+            if asset.rate != rate {
+                return Err(GenerationError::Invalid("assembly_component_rate_mismatch"));
+            }
+            if item["sha256"]
+                .as_str()
+                .is_some_and(|h| !h.is_empty() && h != asset.sha256)
+            {
+                return Err(GenerationError::Invalid("assembly_instruction_sha256"));
+            }
+            resolved["path"] = json!(path);
+            resolved["duration_s"] = json!(asset.frames() as f64 / f64::from(rate));
+            resolved["sample_rate"] = json!(rate);
+            resolved["channels"] = json!(asset.channels);
+            resolved["sha256"] = json!(asset.sha256);
+            resolved["native_pcm_policy"] = json!("verified_source_samples_no_level_change.v1");
+        }
+        output.push(resolved);
+    }
+    Ok(json!({"schema":"pps-run-instructions.v1","slots":output}))
+}
+
+#[derive(Debug)]
+pub struct StagedParticipantSession {
+    group_manifest_path: Option<std::path::PathBuf>,
+    parts: Vec<StagedSession>,
+}
+impl StagedParticipantSession {
+    pub fn group_manifest_path(&self) -> Option<&std::path::Path> {
+        self.group_manifest_path.as_deref()
+    }
+    pub fn parts(&self) -> &[StagedSession] {
+        &self.parts
+    }
+}
+
+struct PartWriteContext {
+    group_id: String,
+    number: usize,
+    phase: String,
+    phase_label: String,
+    global_start: usize,
+    source_blocks: Vec<usize>,
+    siblings: Vec<std::path::PathBuf>,
+    order: Value,
+    order_sha256: String,
+    split: bool,
+    shared_setup: Option<(std::path::PathBuf, String)>,
+}
+
+pub fn prepare_accepted_participant(
+    plan: &AcceptedParticipantAssembly,
+    assets: &[VerifiedAssemblyAsset],
+    tactile: &VerifiedAssemblyAsset,
+    private_output_dir: &std::path::Path,
+    participant_index: usize,
+    session_group_id: &str,
+    cancelled: &AtomicBool,
+) -> Result<StagedParticipantSession, GenerationError> {
+    check_cancelled(cancelled)?;
+    verify_asset_hashes(&plan.source.recipe, assets)?;
+    if !safe_identity(session_group_id) {
+        return Err(GenerationError::Invalid("assembly_session_identity"));
+    }
+    let occurrences = plan.order["csv_rows"]
+        .as_array()
+        .ok_or(GenerationError::Invalid("assembly_run_order_rows"))?;
+    let selected: Vec<_> = occurrences
+        .iter()
+        .filter(|r| r["participant_index"].as_u64() == Some(participant_index as u64))
+        .collect();
+    if participant_index == 0 || selected.is_empty() {
+        return Err(GenerationError::Invalid("assembly_participant_selection"));
+    }
+    // Bound the entire selected participant, including repeated phase occurrences.
+    let bytes = selected.iter().try_fold(0_u64, |total, row| {
+        let index = integer(&row["source_block_index"])?;
+        let block = plan
+            .source
+            .recipe
+            .blocks
+            .get(index - 1)
+            .ok_or(GenerationError::Invalid("assembly_run_order_block"))?;
+        total
+            .checked_add(block.frames as u64 * 12)
+            .ok_or(GenerationError::ResourceLimit)
+    })?;
+    if bytes > MAX_PACKAGE_BYTES {
+        return Err(GenerationError::ResourceLimit);
+    }
+    let split = plan.order["experiment_structure"] == "pre_post";
+    let count = if split { 2 } else { 1 };
+    let participant_id = format!("P{participant_index:03}");
+    let root = if split {
+        new_output_directory(private_output_dir)?
+    } else {
+        private_output_dir.to_owned()
+    };
+    let shared_setup = if split {
+        let path = root.join("run_setup_manifest.json");
+        let digest = write_json_new(
+            &path,
+            &json!({"schema":"pps-native-run-setup.v1","participant_id":participant_id,"session_group_id":session_group_id,
+            "design_revision":plan.source.revision,"design_sha256":plan.source.design_sha256,"approved_preview_sha256":plan.source.preview_sha256,
+            "approved_run_order_sha256":plan.order_sha256,"approved_segment5":plan.source.preview,"approved_segment6":plan.order,
+            "design":plan.source.recipe.design,"assets":plan.source.recipe.asset_hashes,"tactile_asset_sha256":tactile.sha256,
+            "assembly_policy":"verified_pcm_exact_rate_no_hidden_normalization.v1","physical_timing_qualified":false,"replication_qualified":false}),
+            cancelled,
+        )?;
+        Some((path, digest))
+    } else {
+        None
+    };
+    let paths: Vec<_> = (1..=count)
+        .map(|number| {
+            if split {
+                root.join(format!("part_{number:02}"))
+                    .join("session_manifest.json")
+            } else {
+                root.join("session_manifest.json")
+            }
+        })
+        .collect();
+    let mut parts = Vec::new();
+    let mut entries = Vec::new();
+    let mut global_start = 0;
+    for number in 1..=count {
+        check_cancelled(cancelled)?;
+        let rows: Vec<_> = selected
+            .iter()
+            .filter(|r| r["phase_index"].as_u64() == Some(number as u64))
+            .collect();
+        if rows.is_empty() {
+            return Err(GenerationError::Invalid("assembly_run_order_empty_part"));
+        }
+        let source_blocks: Vec<_> = rows
+            .iter()
+            .map(|r| integer(&r["source_block_index"]))
+            .collect::<Result<_, _>>()?;
+        let phase = string(&rows[0]["phase"])?.to_owned();
+        let phase_label = string(&rows[0]["phase_label"])?.to_owned();
+        let context = PartWriteContext {
+            group_id: session_group_id.into(),
+            number,
+            phase,
+            phase_label,
+            global_start,
+            source_blocks,
+            siblings: paths
+                .iter()
+                .enumerate()
+                .filter(|(i, _)| *i + 1 != number)
+                .map(|(_, p)| p.clone())
+                .collect(),
+            order: plan.order.clone(),
+            order_sha256: plan.order_sha256.clone(),
+            split,
+            shared_setup: shared_setup.clone(),
+        };
+        let id = if split {
+            format!("{session_group_id}_part_{number:02}")
+        } else {
+            session_group_id.into()
+        };
+        let path = paths[number - 1].parent().unwrap();
+        let part = write_session(
+            &plan.source,
+            assets,
+            tactile,
+            path,
+            &participant_id,
+            &id,
+            cancelled,
+            Some(&context),
+        )?;
+        global_start += part.block_count;
+        entries.push(json!({"part_number":number,"part_label":context.phase_label,"part_session_id":id,"part_folder_name":format!("part_{number:02}"),"session_manifest_path":part.manifest_path,"session_dir":path,"block_count":part.block_count,"completed":false,"completion_message":"not_started","part_completion_status_path":path.join("part_completion_status.json")}));
+        parts.push(part);
+    }
+    let group_manifest_path = if split {
+        let path = root.join("session_group_manifest.json");
+        write_json_new(
+            &path,
+            &json!({"schema":"pps-run-session-group.v1","part_split_schema":"pps-runner-part-split.v1","session_group_id":session_group_id,"participant_id":participant_id,
+            "experiment_structure":"pre_post","parts_per_participant":parts.len(),"parts":entries,"approved_run_order_sha256":plan.order_sha256,
+            "source_run_setup_manifest_path":shared_setup.as_ref().unwrap().0,"source_run_setup_sha256":shared_setup.as_ref().unwrap().1,
+            "full_experiment_completed":false,"physical_timing_qualified":false}),
+            cancelled,
+        )?;
+        Some(path)
+    } else {
+        None
+    };
+    check_cancelled(cancelled)?;
+    Ok(StagedParticipantSession {
+        group_manifest_path,
+        parts,
+    })
+}
+
 #[derive(Debug)]
 pub struct StagedSession {
     manifest_path: std::path::PathBuf,
@@ -805,7 +1245,6 @@ pub fn prepare_accepted_session(
     session_id: &str,
     cancelled: &AtomicBool,
 ) -> Result<StagedSession, GenerationError> {
-    use std::{fs, io::BufWriter};
     check_cancelled(cancelled)?;
     let structure = plan.recipe.design["study_profile_reference_parameters"]["dashboard_run_setup"]
         ["experiment_structure"]
@@ -821,6 +1260,31 @@ pub fn prepare_accepted_session(
             "assembly_participant_run_order_required",
         ));
     }
+    write_session(
+        plan,
+        assets,
+        tactile,
+        private_output_dir,
+        participant_id,
+        session_id,
+        cancelled,
+        None,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn write_session(
+    plan: &AcceptedAssemblyPlan,
+    assets: &[VerifiedAssemblyAsset],
+    tactile: &VerifiedAssemblyAsset,
+    private_output_dir: &std::path::Path,
+    participant_id: &str,
+    session_id: &str,
+    cancelled: &AtomicBool,
+    part: Option<&PartWriteContext>,
+) -> Result<StagedSession, GenerationError> {
+    use std::{fs, io::BufWriter};
+    check_cancelled(cancelled)?;
     if !safe_identity(participant_id) || !safe_identity(session_id) {
         return Err(GenerationError::Invalid("assembly_session_identity"));
     }
@@ -836,27 +1300,34 @@ pub fn prepare_accepted_session(
     {
         return Err(GenerationError::Invalid("assembly_assets_changed"));
     }
-    let parent = private_output_dir
-        .parent()
-        .ok_or(GenerationError::Invalid("assembly_output_parent"))?
-        .canonicalize()
-        .map_err(|_| GenerationError::Io)?;
-    let name = private_output_dir
-        .file_name()
-        .and_then(|n| n.to_str())
-        .filter(|n| safe_identity(n))
-        .ok_or(GenerationError::Invalid("assembly_output_name"))?;
-    let root = parent.join(name);
-    fs::create_dir(&root).map_err(|_| GenerationError::Invalid("assembly_output_must_be_new"))?;
+    let root = new_output_directory(private_output_dir)?;
     for directory in ["blocks", "sources", "trials"] {
         fs::create_dir(root.join(directory)).map_err(|_| GenerationError::Io)?;
     }
-    let setup = json!({"schema":"pps-native-run-setup.v1","participant_id":participant_id,"session_id":session_id,"design_revision":plan.revision,
+    let mut setup = json!({"schema":"pps-native-run-setup.v1","participant_id":participant_id,"session_id":session_id,"design_revision":plan.revision,
         "design_sha256":plan.design_sha256,"approved_preview_sha256":plan.preview_sha256,"approved_segment5":plan.preview,
         "design":plan.recipe.design,"assets":plan.recipe.asset_hashes,"tactile_asset_sha256":tactile.sha256,
         "assembly_policy":"verified_pcm_exact_rate_no_hidden_normalization.v1","physical_timing_qualified":false,"replication_qualified":false});
-    let setup_path = root.join("run_setup_manifest.json");
-    let setup_hash = write_json_new(&setup_path, &setup, cancelled)?;
+    let instruction_profile = if let Some(part) = part {
+        setup["approved_segment6"] = part.order.clone();
+        setup["approved_run_order_sha256"] = json!(part.order_sha256);
+        materialize_instruction_assets(
+            &part.order["instruction_profile"],
+            &root,
+            &asset_map,
+            cancelled,
+        )?
+    } else {
+        json!({"schema":"pps-run-instructions.v1","slots":[]})
+    };
+    let (setup_path, setup_hash) = if let Some(shared) = part.and_then(|p| p.shared_setup.as_ref())
+    {
+        shared.clone()
+    } else {
+        let path = root.join("run_setup_manifest.json");
+        let digest = write_json_new(&path, &setup, cancelled)?;
+        (path, digest)
+    };
     let rate = plan.recipe.sample_rate;
     let spec = hound::WavSpec {
         channels: 3,
@@ -867,9 +1338,14 @@ pub fn prepare_accepted_session(
     let mut manifests = Vec::new();
     let mut cache: BTreeMap<String, (String, String)> = BTreeMap::new();
     let mut trial_total = 0;
-    for block in &plan.recipe.blocks {
+    let block_order: Vec<_> = part
+        .map(|p| p.source_blocks.clone())
+        .unwrap_or_else(|| (1..=plan.recipe.blocks.len()).collect());
+    for (position, source_index) in block_order.iter().enumerate() {
         check_cancelled(cancelled)?;
-        let stem = format!("block_{:03}", block.index);
+        let block = &plan.recipe.blocks[*source_index - 1];
+        let block_number = position + 1;
+        let stem = format!("block_{block_number:03}");
         let wav_relative = format!("blocks/{stem}.wav");
         let csv_relative = format!("blocks/{stem}.csv");
         let source_relative = format!("sources/{stem}_final.csv");
@@ -912,14 +1388,30 @@ pub fn prepare_accepted_session(
             let mut row = source;
             row["Participant_ID"] = json!(participant_id);
             row["Session_ID"] = json!(session_id);
-            row["Block_Number"] = json!(block.index);
+            row["Block_Number"] = json!(block_number);
             row["Block_Label"] = json!(block.label);
             row["Trial_Number"] = json!(ordinal + 1);
             row["Trial_UID"] = json!(format!(
                 "{participant_id}_{session_id}_B{:03}_T{:05}",
-                block.index,
+                block_number,
                 ordinal + 1
             ));
+            if let Some(part) = part {
+                if part.split {
+                    row["Session_Group_ID"] = json!(part.group_id);
+                    row["Part_Session_ID"] = json!(session_id);
+                }
+                row["Part_Number"] = json!(part.number);
+                row["Part_Block_Number"] = json!(block_number);
+                row["Global_Block_Index"] = json!(part.global_start + block_number);
+                row["Phase"] = json!(part.phase);
+                row["Phase_Label"] = json!(part.phase_label);
+                row["Participant_Block_Position"] = json!(block_number);
+                row["Source_Block_Index"] = json!(block.index);
+                row["Source_Block_Label"] = json!(block.label);
+                row["Block_Label"] = json!(format!("Block {block_number:02}"));
+                row["Native_Approved_Run_Order_SHA256"] = json!(part.order_sha256);
+            }
             row["Trial_Type"] = json!(match planned.family.as_str() {
                 "audio_tactile" => "Audio-Tactile",
                 "baseline" => "Baseline",
@@ -986,13 +1478,41 @@ pub fn prepare_accepted_session(
         }
         let csv_hash = write_csv_new(&root.join(&csv_relative), &prepared_rows, cancelled)?;
         let wav_hash = hash_file(&root.join(&wav_relative), cancelled)?;
-        manifests.push(json!({"index":block.index,"label":block.label,"manifest_path":csv_relative,"wav_path":wav_relative,"trial_count":block.rows.len(),"duration_s":block.frames as f64/f64::from(rate),
-            "metadata":{"source_block_csv_path":source_relative,"source_block_csv_sha256":source_hash,"sample_rate_hz":rate,"channels":3,"frames":block.frames,
-                "prepared_csv_sha256":csv_hash,"prepared_wav_sha256":wav_hash,"approved_preview_sha256":plan.preview_sha256,"physical_timing_qualified":false}}));
+        let mut block_manifest = json!({"index":block_number,"label":block.label,"manifest_path":csv_relative,"wav_path":wav_relative,"trial_count":block.rows.len(),"duration_s":block.frames as f64/f64::from(rate),
+            "metadata":{"source_block_csv_path":root.join(&source_relative),"source_block_csv_sha256":source_hash,"sample_rate_hz":rate,"channels":3,"frames":block.frames,
+                "prepared_csv_sha256":csv_hash,"prepared_wav_sha256":wav_hash,"approved_preview_sha256":plan.preview_sha256,"physical_timing_qualified":false}});
+        if let Some(part) = part {
+            let metadata = &mut block_manifest["metadata"];
+            if part.split {
+                metadata["session_group_id"] = json!(part.group_id);
+                metadata["part_session_id"] = json!(session_id);
+            }
+            metadata["part_number"] = json!(part.number);
+            metadata["part_block_number"] = json!(block_number);
+            metadata["global_block_index"] = json!(part.global_start + block_number);
+            metadata["phase"] = json!(part.phase);
+            metadata["phase_label"] = json!(part.phase_label);
+            metadata["participant_block_position"] = json!(block_number);
+            metadata["source_block_index"] = json!(block.index);
+            metadata["source_block_label"] = json!(block.label);
+        }
+        manifests.push(block_manifest);
     }
-    let manifest = json!({"schema":"pps-run-session.v1","participant_id":participant_id,"session_id":session_id,"session_dir":root,
+    let mut manifest = json!({"schema":"pps-run-session.v1","participant_id":participant_id,"session_id":session_id,"session_dir":root,
         "execution_mode":"participant_block_wavs","source_run_setup_manifest_path":setup_path,"source_run_setup_sha256":setup_hash,"blocks":manifests,
-        "native_assembly_policy":"verified_pcm_exact_rate_no_hidden_normalization.v1","approved_preview_sha256":plan.preview_sha256,"qualification":"unqualified_exact_verified_assets"});
+        "instruction_profile":instruction_profile,"native_assembly_policy":"verified_pcm_exact_rate_no_hidden_normalization.v1","approved_preview_sha256":plan.preview_sha256,"qualification":"unqualified_exact_verified_assets"});
+    if let Some(part) = part {
+        if part.split {
+            manifest["session_group_id"] = json!(part.group_id);
+            manifest["part_number"] = json!(part.number);
+            manifest["part_session_id"] = json!(session_id);
+            manifest["part_folder_name"] = json!(format!("part_{:02}", part.number));
+            manifest["part_split_schema"] = json!("pps-runner-part-split.v1");
+            manifest["sibling_part_manifest_paths"] = json!(part.siblings);
+        }
+        manifest["approved_run_order_sha256"] = json!(part.order_sha256);
+        manifest["full_experiment_completed"] = json!(false);
+    }
     let manifest_path = root.join("session_manifest.json");
     write_json_new(&manifest_path, &manifest, cancelled)?;
     check_cancelled(cancelled)?;
@@ -1002,6 +1522,68 @@ pub fn prepare_accepted_session(
         block_count: manifests.len(),
         trial_count: trial_total,
     })
+}
+
+fn new_output_directory(path: &std::path::Path) -> Result<std::path::PathBuf, GenerationError> {
+    let parent = path
+        .parent()
+        .ok_or(GenerationError::Invalid("assembly_output_parent"))?
+        .canonicalize()
+        .map_err(|_| GenerationError::Io)?;
+    let name = path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .filter(|n| safe_identity(n))
+        .ok_or(GenerationError::Invalid("assembly_output_name"))?;
+    let root = parent.join(name);
+    std::fs::create_dir(&root)
+        .map_err(|_| GenerationError::Invalid("assembly_output_must_be_new"))?;
+    Ok(root)
+}
+
+fn materialize_instruction_assets(
+    profile: &Value,
+    root: &std::path::Path,
+    assets: &BTreeMap<String, &VerifiedAssemblyAsset>,
+    cancelled: &AtomicBool,
+) -> Result<Value, GenerationError> {
+    let mut result = profile.clone();
+    for slot in result["slots"]
+        .as_array_mut()
+        .ok_or(GenerationError::Invalid("assembly_instruction_slots"))?
+    {
+        if slot["enabled"] != true {
+            continue;
+        }
+        check_cancelled(cancelled)?;
+        let asset = assets
+            .get(string(&slot["path"])?)
+            .ok_or(GenerationError::Invalid(
+                "assembly_instruction_asset_required",
+            ))?;
+        let directory = root.join("instructions");
+        if !directory.exists() {
+            std::fs::create_dir(&directory).map_err(|_| GenerationError::Io)?;
+        }
+        let path = directory.join(format!("{}.wav", string(&slot["slot"])?));
+        let mut writer = hound::WavWriter::new(
+            std::io::BufWriter::new(new_file(&path)?),
+            hound::WavSpec {
+                channels: asset.channels as u16,
+                sample_rate: asset.rate,
+                bits_per_sample: 32,
+                sample_format: hound::SampleFormat::Float,
+            },
+        )
+        .map_err(|_| GenerationError::Io)?;
+        write_pcm(&mut writer, &asset.pcm, cancelled)?;
+        writer.finalize().map_err(|_| GenerationError::Io)?;
+        sync_file(&path)?;
+        slot["source_asset_sha256"] = json!(asset.sha256);
+        slot["path"] = json!(path);
+        slot["sha256"] = json!(hash_file(&path, cancelled)?);
+    }
+    Ok(result)
 }
 
 fn compose_trial(
