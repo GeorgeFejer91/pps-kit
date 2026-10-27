@@ -80,6 +80,24 @@ export function evidenceSummary(counts = {}) {
   return `${counts.reported_complete || 0} reported complete · ${counts.derived_complete || 0} derived complete · ${total} contracts`;
 }
 
+export function inventoryAuditSummary(audit) {
+  if (!audit) return "Methods inventory audit is unavailable in this snapshot.";
+  return `${audit.registeredInventories} of ${audit.publications} inventories registered · ${audit.methodsReviewedInventories} Methods inventories reviewed · ${audit.auditedAccessBlockers} documented access blockers · ${audit.inventoryAndContractsAudited} inventory and contract audits complete · ${audit.remainingInventoryOrContractAudit} remaining`;
+}
+
+export function inventoryEvidenceLabel(status) {
+  return {
+    primary_methods_reviewed: "Primary Methods reviewed",
+    retained_primary_methods_review: "Retained primary Methods review",
+    author_version_methods_reviewed_final_comparison_pending: "Author-version Methods reviewed; final-version comparison pending",
+    abstract_or_metadata_inventory: "Abstract or metadata only; Methods inventory unresolved",
+    partial_methods_inventory: "Partial Methods inventory; boundaries unresolved",
+    audited_source_access_gap: "Documented source-access blocker; Methods unavailable",
+    not_registered: "No registered inventory",
+    inventory_evidence_not_classified: "Inventory evidence not classified",
+  }[status] || "Inventory evidence unavailable in this snapshot";
+}
+
 function makeBadge(text, className = "") {
   return element("span", { className: `publication-network-badge ${className}`.trim(), text, attributes: { "data-pretext": true } });
 }
@@ -556,6 +574,7 @@ export async function initializePublicationNetwork(root) {
     ]));
     const content = element("div", { className: "publication-network-detail-section" }, [
       element("p", { text: `Evidence scope: ${titleCase(study.evidenceScope)} · Native qualification: ${titleCase(study.nativeQualification)}` }),
+      element("p", { text: `Study inventory: ${titleCase(study.inventoryStatus || "not_assessed")}` }),
     ]);
     for (const contract of study.contracts) {
       const disclosure = element("details", { className: "publication-network-parameter-segment",
@@ -580,8 +599,12 @@ export async function initializePublicationNetwork(root) {
       if (contract.derivationNote) fields.append(element("p", { text: `Derivation: ${contract.derivationNote}` }));
       const location = [contract.pageOrSection, contract.reviewedOn ? `Reviewed ${contract.reviewedOn}` : ""].filter(Boolean).join(" · ");
       if (location) fields.append(element("small", { text: location }));
-      const source = safeExternalLink("Evidence source", contract.sourceUrl);
-      if (source) fields.append(source);
+      if (contract.sourceType) fields.append(element("p", { text: `Review source type: ${titleCase(contract.sourceType)}` }));
+      const sources = [
+        safeExternalLink("Reviewed source / access record", contract.evidenceSourceUrl),
+        safeExternalLink("Publication DOI", contract.sourceUrl),
+      ].filter(Boolean);
+      if (sources.length) fields.append(element("div", { className: "publication-network-detail-links" }, sources));
       disclosure.append(fields);
       content.append(disclosure);
     }
@@ -634,11 +657,14 @@ export async function initializePublicationNetwork(root) {
     const classification = makeSection("Evidence and availability", [
       element("p", { text: inclusionBasis }),
       element("dl", { className: "publication-network-readiness" }, [
+        ["Inventory registry", review.inventoryAudit ? (review.inventoryAudit.registered ? "Registered" : "Not registered") : "Unavailable in this snapshot"],
+        ["Methods inventory / access audit", inventoryEvidenceLabel(review.inventoryAudit?.evidenceStatus)],
+        ["Contract review coverage", review.inventoryAudit ? `${review.inventoryAudit.rowsWithElevenSourceDispositions} of ${review.inventoryAudit.studyRowCount} rows have eleven explicit source dispositions` : "Unavailable in this snapshot"],
         ["Publication evidence", evidenceSummary(review.parameterStatusCounts)],
         ["Template availability", toolkitStatusLabel(node)],
         ["Native qualification", titleCase(review.nativeQualification)],
       ].map(([label, value]) => element("div", {}, [element("dt", { text: label }), element("dd", { text: value, attributes: { "data-pretext": true } })]))),
-      element("p", { className: "publication-network-detail-muted", text: "A linked template supports preparation and preview. Publication evidence and native acquisition qualification are separate checks." }),
+      element("p", { className: "publication-network-detail-muted", text: "Registry presence does not establish a complete Methods inventory. An audited contract can remain unresolved. A linked template supports preparation and preview; native acquisition qualification is a separate check." }),
     ]);
     const templateIds = review.templateIds;
     const templateSection = templateIds.length
@@ -830,6 +856,11 @@ export async function initializePublicationNetwork(root) {
   root.dataset.publicationNetworkRecords = String(data.counts.toolkitRecordJoins);
   root.dataset.publicationNetworkStudies = String(reviews.counts.studies);
   root.dataset.publicationNetworkRenderer = "inline-svg";
+  const inventoryNote = root.querySelector("#publication-network-inventory-note");
+  if (inventoryNote) {
+    inventoryNote.textContent = inventoryAuditSummary(reviews.inventoryAudit);
+    inventoryNote.title = reviews.inventoryAudit?.interpretation || "";
+  }
   updateLayout();
   updateSearch({ syncLink: false });
   const initialStudy = initialUrl.searchParams.get("study");
@@ -844,7 +875,7 @@ export async function initializePublicationNetwork(root) {
       if (studyDetails) studyDetails.open = true;
       if (studyAliases.length && studyDetails) detailBody.prepend(element("p", {
         className: "publication-network-detail-muted", attributes: { role: "status", "data-study-alias-notice": true },
-        text: `This earlier study record was split into ${selectedStudyIds.length} reviewed records. Both are shown below.`,
+        text: `This earlier study record was split into ${selectedStudyIds.length} reviewed records. The current records are shown below.`,
       }));
       else if (initialStudy && !studyDetails) detailBody.prepend(element("p", { attributes: { role: "status" },
         text: "The linked study record is unavailable in this publication. Its current reviews are shown below." }));
