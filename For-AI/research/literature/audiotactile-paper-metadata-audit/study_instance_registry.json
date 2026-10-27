@@ -3823,6 +3823,177 @@
         "Experiment 1 describes a constant-current stimulator and constant-voltage electrical pulse; device operating mode needs clarification."
       ],
       "source_sha256": "f1cde7e7bc5cfca0ace69737ae1f6a2e52877620d742240308888321c97d483b"
+    },
+    {
+      "network_node_id": "doi:10.1007/s10548-021-00826-4",
+      "doi": "10.1007/s10548-021-00826-4",
+      "inventory_status": "confirmed_one_cohort_two_stimulus_protocols",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Full-publication Methods inventory: one cohort, two stimulus protocols; resting acquisition and computational/median-split analyses retained as context. Demographics and behavioral allocation match Ferri2015 main cohort. Neither full Sancristóbal text nor science owner retained notes explicitly establish dataset identity. Possible overlap remains unverified; do not count new independent recruitment or assert reuse. Ferri separate control cohorts are not imported.",
+      "evidence_pointer": "https://www.georgnorthoff.com/s/Sancristobal2021_Article_SlowRestingStateFluctuationsEn.pdf",
+      "source_version": "Publisher online-first2021 article; final issue35:121–141(2022) is same DOI, not an independent publication/cohort. Source pointers use downloaded PDF page numbers.",
+      "source_review_limit": "Full author-hosted primary typeset paper plus official SI; journal PDF route returned subscription HTML. No final-issue-layout comparison claimed.",
+      "source_lineage": "Demographics and behavioral allocation match Ferri2015 main cohort. Neither full Sancristóbal text nor science owner retained notes explicitly establish dataset identity. Possible overlap remains unverified; do not count new independent recruitment or assert reuse. Ferri separate control cohorts are not imported.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.georgnorthoff.com/s/Sancristobal2021_Article_SlowRestingStateFluctuationsEn.pdf",
+          "outcome": "Full paper downloaded and Methods read; actual PDF retained privately. SHA256 72660dc7c4d7e441e7b315afe5c69e010577303c2b28e9f8c87bef8f1967aa26"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs10548-021-00826-4/MediaObjects/10548_2021_826_MOESM1_ESM.pdf",
+          "outcome": "Full supplement downloaded/read. S1/S2 are analysis figures, not added task protocols. SHA256 7cfd2459ccc2859068888331217b2f13c3648e7ef0e762c2d3a6165307e07ffa"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "behavioral_protocol",
+          "experiment_label": "Day 1 behavioral audiotactile protocol",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Demographics and behavioral allocation match Ferri2015 main cohort. Neither full Sancristóbal text nor science owner retained notes explicitly establish dataset identity. Possible overlap remains unverified; do not count new independent recruitment or assert reuse. Ferri separate control cohorts are not imported."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "adjacent_auditory_protocol",
+          "experiment_label": "Day 2 passive auditory EEG/fMRI protocol",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_or_commentary",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Demographics and behavioral allocation match Ferri2015 main cohort. Neither full Sancristóbal text nor science owner retained notes explicitly establish dataset identity. Possible overlap remains unverified; do not count new independent recruitment or assert reuse. Ferri separate control cohorts are not imported."
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "id": "R1",
+          "type": "resting-state-acquisition",
+          "description": "Same participants, day2, two5min no-stimulus eyes-closed runs; EEG recorded with fMRI. Not an additional AT experiment or tactile baseline trial.",
+          "pointer": "S1 abstract; PDFpp4–5 EEG Acquisition / Resting State Session"
+        },
+        {
+          "id": "A1",
+          "type": "analysis",
+          "description": "RT-gain median split creates analysis groups withinN38, not independent cohorts. Channel removal1109/2356 is electrode-level exclusion, not1109participants.",
+          "pointer": "S1 PDFp4 overview; p5 Resting State Session; pp7–9 analyses"
+        },
+        {
+          "id": "M1",
+          "type": "computational-model",
+          "description": "Low-pass/Ornstein–Uhlenbeck noise model constrained by EEG properties; no extra human sample or generated stimulus protocol.",
+          "pointer": "S1 PDFp4 overview; computational Methods/Results; S2 analysis figures"
+        }
+      ],
+      "cohort": {
+        "recruited": 38,
+        "female": 12,
+        "mean_age_years": 21.8,
+        "age_range_years": [
+          20,
+          31
+        ],
+        "handedness": "all right-handed",
+        "pointer": "S1 PDFp4 Participants"
+      },
+      "source_sha256": "72660dc7c4d7e441e7b315afe5c69e010577303c2b28e9f8c87bef8f1967aa26"
+    },
+    {
+      "network_node_id": "doi:10.1016/j.neuropsychologia.2021.107823",
+      "doi": "10.1016/j.neuropsychologia.2021.107823",
+      "inventory_status": "provisional_behavioral_meg_inventory_with_access_gap",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Provisional one AT protocol with restingMEG support; complete inventory cannot be closed from truncated Methods. lPM seed coordinates are attributed to prior Ferri work, not evidence of participant reuse. Six delays differ from Sancristóbal/Ferri five; do not pool protocols or assume independence from demographics alone.",
+      "evidence_pointer": "https://www.sciencedirect.com/science/article/abs/pii/S0028393221000749",
+      "source_version": "Final Neuropsychologia156:107823(2021); indexed primary final-article preview, not an author-manuscript full text.",
+      "source_review_limit": "Primary abstract/Introduction and selected Methods/Results snippets. Full publisher and institution PDF not accessible; exact printed Methods pages not verified.",
+      "source_lineage": "lPM seed coordinates are attributed to prior Ferri work, not evidence of participant reuse. Six delays differ from Sancristóbal/Ferri five; do not pool protocols or assume independence from demographics alone.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0028393221000749",
+          "outcome": "Indexed primary abstract, Introduction, Participants, ANOVA on RTs and Discussion snippets read; direct fetch403. Full Methods unavailable; section pointers only, no invented printed page."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://ricerca.unich.it/handle/11564/749641",
+          "outcome": "Indexed record describes 1.29MB publisher PDF as restricted to archive managers. Direct route403; no restricted file accessed."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "behavioral_protocol",
+          "experiment_label": "Audiotactile behavior and resting MEG; provisional inventory",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort_relation": "lPM seed coordinates are attributed to prior Ferri work, not evidence of participant reuse. Six delays differ from Sancristóbal/Ferri five; do not pool protocols or assume independence from demographics alone."
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "id": "R1",
+          "type": "restingMEG",
+          "description": "Same participants rest after behavioral testing; beta-band connectivity with lPM examined. No evoked-AT EEG protocol established by available source.",
+          "pointer": "D1 Introduction / Participants"
+        }
+      ],
+      "cohort": {
+        "recruited": 30,
+        "female": 13,
+        "mean_age_years": 21.4,
+        "age_sd_years": 1.3,
+        "handedness": "right-handed",
+        "pointer": "D1 Participants",
+        "analyzed_sample_note": "ANOVA denominators28/140 suggest29complete cases under ordinary repeated-measuresANOVA; this is derived and exclusion reason remains access-blocked, not a newly recruited cohort."
+      }
+    },
+    {
+      "network_node_id": "doi:10.1016/j.tics.2016.01.005",
+      "doi": "10.1016/j.tics.2016.01.005",
+      "inventory_status": "provisional_context_with_access_gap",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Provisional non-acquisition/context publication boundary:0new human protocols supported. Category and abstract justify context classification; final full-text check remains open. Comments on recent variability/PPS findings. Full reference/content comparison pending; do not assign a cited experiment dataset or inherit its methods to this publication.",
+      "evidence_pointer": "https://www.sciencedirect.com/science/article/abs/pii/S1364661316000231",
+      "source_version": "Trends in Cognitive Sciences20(3):169–170, March2016; online29January2016; publisher Spotlight.",
+      "source_review_limit": "Primary publisher category/abstract and EPFL metadata-only public record. No full main text downloaded; do not call this a full Methods review.",
+      "source_lineage": "Comments on recent variability/PPS findings. Full reference/content comparison pending; do not assign a cited experiment dataset or inherit its methods to this publication.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S1364661316000231",
+          "outcome": "Publisher category/abstract/reference preview read through public index. Main text unavailable; direct Cell and ScienceDirect403."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://infoscience.epfl.ch/server/api/core/items/e77711de-ab19-4e14-bc56-7a7907978879/bundles",
+          "outcome": "Public title-search metadata marks metadata-only; bundle inventory contains LICENSE only, no article PDF. Legacy record429. No hidden or restricted endpoint used."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "provisional_context",
+          "experiment_label": "Spotlight commentary; provisional non-acquisition boundary",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_or_commentary",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort_relation": "Comments on recent variability/PPS findings. Full reference/content comparison pending; do not assign a cited experiment dataset or inherit its methods to this publication."
+        }
+      ],
+      "supporting_task_boundaries": []
     }
   ],
   "corpus_freeze": {
@@ -4385,6 +4556,16 @@
       ],
       "reason": "One cohort of 35 healthy participants, 12 male, mean age 22.77 years (SE 0.51). All complete all three tasks on the same day in randomized task order. No separate recruitment or task-specific exclusion cohort is established. Experiment 1 Classic: speeded electrical-touch detection during looming/flat sound. Experiment 2 Discriminative: speeded auditory beep during sequential neutral vibration. Experiment 3 Affective: speeded auditory beep during manual stroking. End-of-task verbal pleasantness ratings (0–100) are a shared secondary measure, not a separately recruited protocol. Gender/order tests, PSE/DL and trimmed-mean models are analyses.",
       "evidence_pointer": "https://osf.io/download/gnv46/",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1007/s10548-021-00826-4",
+      "child_study_row_ids": [
+        "doi:10.1007/s10548-021-00826-4::a",
+        "doi:10.1007/s10548-021-00826-4::b"
+      ],
+      "reason": "Full-publication Methods inventory: one cohort, two stimulus protocols; resting acquisition and computational/median-split analyses retained as context. Demographics and behavioral allocation match Ferri2015 main cohort. Neither full Sancristóbal text nor science owner retained notes explicitly establish dataset identity. Possible overlap remains unverified; do not count new independent recruitment or assert reuse. Ferri separate control cohorts are not imported.",
+      "evidence_pointer": "https://www.georgnorthoff.com/s/Sancristobal2021_Article_SlowRestingStateFluctuationsEn.pdf",
       "review_date": "2026-10-27"
     }
   ]
