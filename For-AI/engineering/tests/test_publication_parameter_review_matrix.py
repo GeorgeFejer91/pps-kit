@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 28)
+        self.assertEqual(len(registry["entries"]), 29)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 60)
+        self.assertEqual(registered_instance_count, 61)
         network = json.loads(
             (
                 ROOT
@@ -1008,6 +1008,20 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         inventory = next(row for row in registry["entries"] if row["network_node_id"] == study["networkNodeId"])
         self.assertEqual(len(inventory["instances"]), 1)
         self.assertEqual(len(inventory["supporting_task_boundaries"]), 3)
+
+    def test_moving_sound_tms_boundary_is_not_a_tactile_detection_delay(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        study = next(row for row in data["studies"] if row["studyRowId"] == "doi:10.1016/j.neuropsychologia.2014.09.043")
+        self.assertEqual(study["parameterStatusCounts"], {"not_applicable": 11})
+        self.assertEqual(study["templateIds"], [])
+        self.assertEqual(study["nativeQualification"], "not_assessed")
+        soa = next(row for row in study["contracts"] if row["key"] == "soa_schedule")
+        self.assertIn("sound-position-to-TMS", soa["evidenceNote"])
+        self.assertIn("not a tactile-detection SOA", soa["evidenceNote"])
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        inventory = next(row for row in registry["entries"] if row["network_node_id"] == study["networkNodeId"])
+        self.assertEqual(len(inventory["instances"]), 1)
+        self.assertEqual(inventory["supporting_task_boundaries"][0]["disposition"], "supporting_localization_validation")
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

@@ -21,6 +21,19 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
+Current checkpoint (2026-10-27): 94 frozen publications, 126 study/context rows,
+29 registered publication inventories and 65 publication inventories still
+unassessed. The earlier counts below describe individual historical checkpoints.
+Tonelli (2019) now separates neck PPS assessment from echolocation training,
+time-bisection training and distance validation; manual trial starts, endpoint
+SOA derivations and source contradictions remain explicit. Finisguerra (2015)
+is a source-backed auditory-TMS/MEP boundary with a supporting localization task.
+Its primary Methods text confirms that the 50-ms interval is sound-position to
+TMS, not tactile-detection timing. Existing detailed source evidence remains
+available for future mechanistic work. The map preserves this frozen member
+independently from its current out-of-scope task classification; expected-outcome
+and full-pipeline ledgers use the same decision. No qualification status changed.
+
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the
 publisher's Methods and readable Figure 1 caption. Three contracts resolve as

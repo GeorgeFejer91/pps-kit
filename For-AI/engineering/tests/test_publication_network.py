@@ -597,7 +597,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
 
     data = _load_network()
     assert data["schema"] == "pps-publication-citation-network.v3"
-    assert data["generatorVersion"] == "3.4.0"
+    assert data["generatorVersion"] == "3.4.1"
     assert data["sourceCounts"] == {
         "nodes": 1712,
         "edges": 10109,
@@ -611,14 +611,14 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "audiotactileConfirmed": 90,
         "laterAuditAdditions": 4,
         "toolkitRecordJoins": 69,
-        "toolkitInScopeRecordJoins": 67,
+        "toolkitInScopeRecordJoins": 66,
         "toolkitNodeJoins": 65,
-        "toolkitInScopeNodeJoins": 63,
+        "toolkitInScopeNodeJoins": 62,
         "toolkitRunnableNodes": 16,
         "toolkitRunnableRecords": 18,
-        "toolkitSupportedIncompleteNodes": 47,
+        "toolkitSupportedIncompleteNodes": 46,
         "toolkitNotAssessedNodes": 29,
-        "toolkitAdjacentConflictNodes": 2,
+        "toolkitAdjacentConflictNodes": 3,
         "toolkitManualReviewRecords": 25,
         "toolkitManualReviewNodes": 22,
         "connectedNodes": 91,
@@ -681,7 +681,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
             and (
                 node["modality"]["audiotactile"]["verified"]
                 or any(
-                    _record_is_in_scope(record)
+                    _record_is_in_scope(record) or record.get("retained_frozen_corpus_boundary") is True
                     for record in records_by_doi.get(_normalize_doi(node["doi"]), [])
                 )
             )
@@ -690,6 +690,13 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     )
     assert len(expected_nodes) == 94
     assert node_ids == [node["id"] for node in expected_nodes]
+    retained_boundary = next(node for node in nodes if node["doi"] == "10.1016/j.neuropsychologia.2014.09.043")
+    assert source_by_id[retained_boundary["id"]]["modality"]["audiotactile"]["verified"] is False
+    assert retained_boundary["toolkit"]["status"] == "adjacent_scope_conflict"
+    assert retained_boundary["toolkit"]["inScopeRecordCount"] == 0
+    assert retained_boundary["toolkit"]["records"][0]["retainedFrozenCorpusBoundary"] is True
+    assert retained_boundary["toolkit"]["records"][0]["recreatable"] is False
+    assert "frozen corpus" in retained_boundary["scope"]["basis"]
 
     expected_later_dois = {
         "10.1016/j.neuroimage.2012.06.063",
@@ -709,9 +716,9 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     }
     assert Counter(node["toolkit"]["status"] for node in nodes) == {
         "runnable": 16,
-        "supported_incomplete": 47,
+        "supported_incomplete": 46,
         "not_assessed": 29,
-        "adjacent_scope_conflict": 2,
+        "adjacent_scope_conflict": 3,
     }
     assert Counter(node["corpus"]["documentRole"] for node in nodes) == {
         "empirical": 62,
@@ -762,7 +769,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
 
     toolkit_records = [record for node in nodes for record in node["toolkit"]["records"]]
     assert len(toolkit_records) == 69
-    assert sum(record["inScope"] for record in toolkit_records) == 67
+    assert sum(record["inScope"] for record in toolkit_records) == 66
     assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 18
     assert sum(record["manualReview"] is not None for record in toolkit_records) == 25
     assert sum(
@@ -780,10 +787,10 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "legacy_confirmed": 90,
     }
     assert data["facets"]["toolkitStatuses"] == {
-        "adjacent_scope_conflict": 2,
+        "adjacent_scope_conflict": 3,
         "not_assessed": 29,
         "runnable": 16,
-        "supported_incomplete": 47,
+        "supported_incomplete": 46,
     }
     assert data["facets"]["edgeProvenance"]["openalex_live_20260808"] == 127
     assert data["facets"]["edgeProvenance"]["primary_source_audit_20260808"] == 52
@@ -832,7 +839,7 @@ def test_publication_network_edges_are_the_complete_tracked_snapshot_overlay_uni
         and (
             node["modality"]["audiotactile"]["verified"]
             or any(
-                _record_is_in_scope(record)
+                _record_is_in_scope(record) or record.get("retained_frozen_corpus_boundary") is True
                 for record in records_by_doi.get(_normalize_doi(node["doi"]), [])
             )
         )

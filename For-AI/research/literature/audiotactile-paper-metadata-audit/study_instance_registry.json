@@ -531,6 +531,35 @@
         }
       ],
       "source_review_limit": "Main article and Figure 1 inspected. Supplement not inspected in this checkpoint. Main text has contradictory recruitment/exclusion wording and REST duration (30 min in Procedure versus 15 min in Figure 2 caption); no silent resolution."
+    },
+    {
+      "network_node_id": "doi:10.1016/j.neuropsychologia.2014.09.043",
+      "doi": "10.1016/j.neuropsychologia.2014.09.043",
+      "inventory_status": "confirmed_one_adjacent_mechanistic_experiment",
+      "instance_count_basis": "Primary Methods sections 2.3.1-2.3.2: main outcome is TMS-evoked MEP amplitude. Rare tactile probes are separated from TMS by 4-5 s and serve attention; subsequent sound-localization judgments validate the apparatus.",
+      "evidence_pointer": "https://www.researchgate.net/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system::2.3.1 Main experiment;2.3.2 Sound-localization judgments",
+      "review_date": "2026-10-27",
+      "framework_disposition": "adjacent_auditory_motor_tms_with_intertrial_tactile_attention",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Moving-sound auditory/TMS motor-excitability experiment",
+          "record_id": "finisguerra_2015_moving_sounds_motor",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_mechanistic_context",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "label": "Subsequent sound-localization judgments",
+          "disposition": "supporting_localization_validation",
+          "basis": "The same participants rated sound position after the TMS experiment; this validates localization and does not measure tactile-detection facilitation.",
+          "evidence_pointer": "https://www.researchgate.net/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system::2.3.2 Sound-localization judgments"
+        }
+      ],
+      "source_review_limit": "Current author-posted primary Methods text inspected; publisher route returned403 and its linked PDF route404. Existing2026-06-16 critical PDF review independently documents the same endpoint. No renewed PDF figure inspection or native qualification claimed."
     }
   ],
   "corpus_freeze": {

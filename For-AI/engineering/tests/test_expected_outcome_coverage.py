@@ -34,7 +34,6 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "ferri_2015_jneurosci_itv",
     "ferroni_2020_tool_observation",
     "ferroni_2026_pps_plasticity",
-    "finisguerra_2015_moving_sounds_motor",
     "footsole_vibration_2019",
     "galli_2015_wheelchair",
     "hobeika_2018_anisotropy",
@@ -147,22 +146,27 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert mechanistic["runnable_status"] == "adjacent_not_applicable"
     assert "TMS-evoked MEP" in mechanistic["expected_outcome"]["observable_metric"]
     assert mechanistic["current_template_ids"] == []
+    moving_sound = records["finisguerra_2015_moving_sounds_motor"]
+    assert moving_sound["expected_outcome_status"] == "adjacent_out_of_scope"
+    assert moving_sound["runnable_status"] == "adjacent_not_applicable"
+    assert "MEP" in moving_sound["expected_outcome"]["observable_metric"]
+    assert moving_sound["current_template_ids"] == []
     assert outcome["summary"] == {
         "literature_record_count": 75,
-        "structured_expected_outcome_record_count": 70,
+        "structured_expected_outcome_record_count": 69,
         "pending_expected_outcome_record_count": 0,
-        "adjacent_or_out_of_scope_record_count": 5,
+        "adjacent_or_out_of_scope_record_count": 6,
         "runnable_profile_parameter_record_count": 18,
         "observed_behavioral_comparison_record_count": 0,
         "mouse_click_simulated_participant_like_comparison_record_count": 17,
         "synthetic_profile_contrast_comparison_record_count": 17,
         "parameter_run_evidence_only_record_count": 1,
-        "not_runnable_no_observed_comparison_record_count": 52,
-        "adjacent_not_applicable_record_count": 5,
+        "not_runnable_no_observed_comparison_record_count": 51,
+        "adjacent_not_applicable_record_count": 6,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
-            "not_applicable_adjacent_out_of_scope": 5,
-            "not_yet_templated_missing_publication_parameters": 47,
+            "not_applicable_adjacent_out_of_scope": 6,
+            "not_yet_templated_missing_publication_parameters": 46,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
             "template_present_blocked_missing_publication_parameters": 5,
             "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,

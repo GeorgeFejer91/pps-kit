@@ -41,14 +41,14 @@ const NETWORK_EXPECTED = Object.freeze({
   audiotactileConfirmed: 90,
   laterAuditAdditions: 4,
   toolkitRecordJoins: 69,
-  toolkitInScopeRecordJoins: 67,
+  toolkitInScopeRecordJoins: 66,
   toolkitNodeJoins: 65,
-  toolkitInScopeNodeJoins: 63,
+  toolkitInScopeNodeJoins: 62,
   toolkitRunnableNodes: 16,
   toolkitRunnableRecords: 18,
-  toolkitSupportedIncompleteNodes: 47,
+  toolkitSupportedIncompleteNodes: 46,
   toolkitNotAssessedNodes: 29,
-  toolkitAdjacentConflictNodes: 2,
+  toolkitAdjacentConflictNodes: 3,
   toolkitManualReviewRecords: 25,
   toolkitManualReviewNodes: 22,
   connectedNodes: 91,
@@ -64,7 +64,7 @@ const ASSET_SCHEMA = "pps-publication-citation-network.v3";
 const OVERLAY_SCHEMA = "pps-publication-citation-overlay.v1";
 const SNAPSHOT_ID = "pps-citation-network-20260807";
 const SNAPSHOT_DATE = "2026-08-07";
-const GENERATOR_VERSION = "3.4.0";
+const GENERATOR_VERSION = "3.4.1";
 const LAYOUT_MARGIN = 0.045;
 const NODE_RADIUS_MIN = 0.009;
 const NODE_RADIUS_MAX = 0.024;
@@ -910,6 +910,8 @@ function toolkitForNode(node, audits) {
       recordId: record.record_id,
       citationShort: record.citation_short || "",
       coverageCategory: record.coverage_category || "",
+      ...(record.retained_frozen_corpus_boundary === true
+        ? { retainedFrozenCorpusBoundary: true } : {}),
       inScope: Boolean(record.coverage_category)
         && record.coverage_category !== "adjacent_out_of_scope",
       taskFamily: record.audiotactile_task_family || "",
@@ -949,7 +951,8 @@ function isInScopeToolkitRecord(record) {
 function isCandidateNetworkPublication(node) {
   return node.corpus.documentRole !== "review"
     && (node.modality.audiotactile.verified
-      || node.toolkit.records.some(isInScopeToolkitRecord));
+      || node.toolkit.records.some((record) =>
+        isInScopeToolkitRecord(record) || record.retainedFrozenCorpusBoundary === true));
 }
 
 function hasVerifiedDoiUrl(node) {
@@ -999,6 +1002,12 @@ function scopeForNode(node) {
     return {
       provenance: "legacy_confirmed",
       basis: "Manually confirmed as audiotactile in the citation-corpus audit.",
+    };
+  }
+  if (node.toolkit.records.some((record) => record.retainedFrozenCorpusBoundary === true)) {
+    return {
+      provenance: "later_exact_doi_audit",
+      basis: "Previously added by an exact-DOI literature audit and retained in the frozen corpus as a reviewed adjacent boundary. Map membership does not establish direct audiotactile task eligibility.",
     };
   }
   return {
@@ -1191,7 +1200,7 @@ function buildAsset(snapshot) {
     methodology: {
       edgeDirection: snapshot.sourceMethodology.edgeDirection,
       edgeCoverage: "Every directed citation captured between eligible displayed publications is retained from the frozen multi-source snapshot, the dated exact-DOI OpenAlex overlay, and the primary-source reference-list audit of provider-isolated records. Missing lines can still reflect provider coverage, reference-resolution gaps, or unavailable reference lists.",
-      selection: "Starts with every non-review publication manually confirmed as audiotactile in the legacy citation audit, plus non-review publications added by an exact-DOI Toolkit literature audit with at least one non-adjacent audiotactile PPS task record. A paper is displayed only when its normalized DOI, DOI-keyed source identity, and canonical https://doi.org URL agree, the dated exact-DOI resolver audit confirms every DOI-bearing candidate, and at least one identified metadata provider supplies a finite citation count, including a valid count of zero. Toolkit readiness is an encoding, never an inclusion gate.",
+      selection: "Starts with every non-review publication manually confirmed as audiotactile in the legacy citation audit, plus non-review publications added by an exact-DOI Toolkit literature audit with at least one non-adjacent audiotactile PPS task record. Explicit reviewed boundary records retain their frozen corpus membership independently of current task eligibility. A paper is displayed only when its normalized DOI, DOI-keyed source identity, and canonical https://doi.org URL agree, the dated exact-DOI resolver audit confirms every DOI-bearing candidate, and at least one identified metadata provider supplies a finite citation count, including a valid count of zero. Toolkit readiness is an encoding, never an inclusion gate.",
       scopeProvenance: {
         legacyConfirmed: "Manually confirmed audiotactile in the legacy citation-corpus audit.",
         laterExactDoiAudit: "Added by an exact normalized DOI join to a non-adjacent Toolkit literature record.",
@@ -1302,7 +1311,8 @@ function validateAsset(asset) {
   assert(asset.selectionAudit?.excludedMissingCitationMetadata === 0, "Missing-citation-metadata exclusion count is stale");
   assert(asset.nodes.every((node) => node.modality.audiotactile.verified
     || (node.scope.provenance === "later_exact_doi_audit"
-      && node.toolkit.records.some(isInScopeToolkitRecord))), "Every network node needs legacy confirmation or a later exact-DOI in-scope audit basis");
+      && node.toolkit.records.some((record) => isInScopeToolkitRecord(record)
+        || record.retainedFrozenCorpusBoundary === true))), "Every network node needs legacy confirmation, a later exact-DOI in-scope audit, or an explicit retained frozen boundary");
   assert(asset.nodes.filter((node) => node.scope.provenance === "legacy_confirmed").length
     === NETWORK_EXPECTED.audiotactileConfirmed, "Legacy scope provenance count is stale");
   assert(asset.nodes.filter((node) => node.scope.provenance === "later_exact_doi_audit").length

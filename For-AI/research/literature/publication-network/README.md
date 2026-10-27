@@ -25,9 +25,14 @@ publications after review removal) or a later exact-DOI Toolkit literature audit
 internally consistent canonical DOI link and provider-backed citation metadata, leaving 90
 legacy-confirmed records plus the 4 later additions. A finite provider count of
 zero is valid metadata. Toolkit readiness is an encoding, not an inclusion gate.
+The frozen publication set also retains reviewed adjacent boundaries. The
+coverage source explicitly marks Finisguerra (2015) as a retained frozen boundary:
+its auditory-TMS/MEP endpoint is outside direct audio-tactile replication, while
+its publication identity and citation links remain in the map. That flag only
+preserves membership; the record stays out of scope and gains no readiness.
 
 The legacy Toolkit assessment contains 16 publication nodes labelled runnable,
-47 supported but parameter-incomplete, 29 not yet assessed, and 2 adjacent/scope-
+46 supported but parameter-incomplete, 29 not yet assessed, and 3 adjacent/scope-
 conflict publications. These are coarse template/encoding labels, not scientific parameter
 completion or native qualification. The 2026-10-27 regeneration incorporates the
 existing Canzoneri tool-use review (10.1007/s00221-013-3532-2; review dated
