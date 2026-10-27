@@ -87,12 +87,14 @@ function contractStatusDescription(status, legend = {}) {
 
 export function inventoryAuditSummary(audit) {
   if (!audit) return "Methods inventory audit is unavailable in this snapshot.";
-  return `${audit.registeredInventories} of ${audit.publications} inventories registered · ${audit.methodsReviewedInventories} Methods inventories reviewed · ${audit.auditedAccessBlockers} documented access blockers · ${audit.inventoryAndContractsAudited} inventory and contract audits complete · ${audit.remainingInventoryOrContractAudit} remaining`;
+  const projectLineage = audit.projectLineageReviews > 0 ? ` · ${audit.projectLineageReviews} project lineage reviews` : "";
+  return `${audit.registeredInventories} of ${audit.publications} inventories registered · ${audit.methodsReviewedInventories} Methods inventories reviewed${projectLineage} · ${audit.auditedAccessBlockers} documented access blockers · ${audit.inventoryAndContractsAudited} inventory and contract audits complete · ${audit.remainingInventoryOrContractAudit} remaining`;
 }
 
 export function inventoryEvidenceLabel(status) {
   return {
     primary_methods_reviewed: "Primary Methods reviewed",
+    primary_project_lineage_reviewed: "Primary project lineage reviewed",
     retained_primary_methods_review: "Retained primary Methods review",
     author_version_methods_reviewed_final_comparison_pending: "Author-version Methods reviewed; final-version comparison pending",
     abstract_or_metadata_inventory: "Abstract or metadata only; Methods inventory unresolved",

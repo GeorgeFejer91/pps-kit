@@ -23,3 +23,10 @@ test("registry coverage never implies Methods review or final-publication equiva
   assert.match(inventoryEvidenceLabel("audited_source_access_gap"), /Methods unavailable/);
   assert.match(inventoryEvidenceLabel("not_registered"), /No registered inventory/);
 });
+
+test("project lineage reviews remain separate from experimental Methods inventory", () => {
+  const audit = { publications: 9, registeredInventories: 8, methodsReviewedInventories: 4, projectLineageReviews: 2, auditedAccessBlockers: 1, inventoryAndContractsAudited: 3, remainingInventoryOrContractAudit: 6 };
+  assert.match(inventoryAuditSummary(audit), /4 Methods inventories reviewed · 2 project lineage reviews/);
+  assert.equal(inventoryEvidenceLabel("primary_project_lineage_reviewed"), "Primary project lineage reviewed");
+  assert.doesNotMatch(inventoryAuditSummary({ ...audit, projectLineageReviews: 0 }), /project lineage/);
+});

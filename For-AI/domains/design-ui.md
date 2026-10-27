@@ -104,6 +104,8 @@ The mapper distinguishes registry presence, Methods inventory/access review,
 explicit contract dispositions, template availability and native qualification.
 Generated audit counts never imply replication readiness. Review-source links
 remain separate from DOI identity, including author-version comparison gaps.
+Project-lineage reviews have their own generated count and label; they do not
+increase the Methods inventory count or imply a separate experiment.
 
 New static block previews preserve the selected baseline strategy and include
 instruction/jitter prefixes in looming and tactile onset times. Catch/audio-only
