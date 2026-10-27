@@ -5,7 +5,7 @@ doi:10.1007/s00221-013-3532-2,yes,retained_primary_methods_review,confirmed_audi
 doi:10.1007/s00221-013-3574-5,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1007/s00221-017-5158-2,yes,audited_source_access_gap,source_access_blocked_experiment_inventory_unresolved,1,1,yes,yes,https://link.springer.com/article/10.1007/s00221-017-5158-2::abstract and subscription preview; HAL hal-01712036 metadata,2026-10-27
 doi:10.1007/s00221-019-05469-3,yes,primary_methods_reviewed,confirmed_main_audio_tactile_experiment,1,1,yes,yes,https://link.springer.com/content/pdf/10.1007/s00221-019-05469-3.pdf::Methods pp.856-859; Figure 1 p.857,2026-10-27
-doi:10.1007/s00221-020-05771-5,yes,abstract_or_metadata_inventory,confirmed_total,4,4,yes,no,paper_audits/holmes_2020_four_experiments.md; publication_network.v3.json::doi:10.1007/s00221-020-05771-5,2026-10-27
+doi:10.1007/s00221-020-05771-5,yes,primary_methods_reviewed,confirmed_four_main_supplementary_pilot_and_failed_experiment,6,6,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML::whole text; published supplementary protocol pp. 24-26,2026-10-27
 doi:10.1007/s00221-024-06782-2,yes,primary_methods_reviewed,confirmed_one_pps_experiment_with_two_supporting_tasks,1,1,yes,yes,"https://muroran-it.repo.nii.ac.jp/record/2000223/files/Comparison%20of%20peripersonal%20space%20in%20front%20and%20rear%20spaces.pdf::Methods, manuscript pp. 7-11 (PDF pp. 8-12); Figure 1 p. 8",2026-10-27
 doi:10.1007/s00426-020-01365-6,yes,author_version_methods_reviewed_final_comparison_pending,author_version_inventory_assessed_final_comparison_pending,3,3,yes,yes,https://backoffice.biblio.ugent.be/download/8673877/8673880::publication list p.13; chapter3 Participants/design/task pp.70-74,2026-10-27
 doi:10.1007/s10548-021-00826-4,no,not_registered,not_assessed,1,0,no,no,,
@@ -77,7 +77,7 @@ doi:10.1250/ast.41.345,yes,primary_methods_reviewed,confirmed_three_reported_soc
 doi:10.1371/journal.pone.0006582,yes,primary_methods_reviewed,confirmed_two_adjacent_mechanistic_experiments,2,2,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML::Methods/Procedure; Tactile stimulation; Figure1,2026-10-27
 doi:10.1371/journal.pone.0044306,yes,primary_methods_reviewed,confirmed_audio_tactile_pps_task_with_supporting_localizer,1,0,no,no,https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0044306#sec002,2026-10-27
 doi:10.1523/jneurosci.1696-15.2015,yes,primary_methods_reviewed,confirmed_five_pps_protocol_instances_in_three_cohorts,5,5,yes,yes,https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf::Materials and Methods pp. 2-3 of author-hosted article copy,2026-10-27
-doi:10.17605/osf.io/73x59,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.17605/osf.io/73x59,yes,primary_project_lineage_reviewed,primary_project_identity_no_independent_acquisition,1,1,yes,yes,"https://api.osf.io/v2/nodes/73x59/::node category, description and registration flags; Holmes article data/code link",2026-10-27
 doi:10.31234/osf.io/etvb6_v1,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.31234/osf.io/t8h6a,yes,primary_methods_reviewed,one_main_pps_protocol_with_mtt_supporting_task_supplement_context_conflicted,1,1,yes,yes,https://osf.io/download/86j4g/::mainMethods pp.5-6;SIpp.23-24,2026-10-27
 doi:10.3233/rnn-120286,no,not_registered,not_assessed,1,0,no,no,,

@@ -5,17 +5,102 @@
     {
       "network_node_id": "doi:10.1007/s00221-020-05771-5",
       "doi": "10.1007/s00221-020-05771-5",
-      "inventory_status": "confirmed_total",
-      "inventory_evidence_status": "abstract_or_metadata_inventory",
+      "inventory_status": "confirmed_four_main_supplementary_pilot_and_failed_experiment",
+      "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "The publication title, network abstract, and audit citation explicitly say four experiments; the current automated record is combined.",
-      "evidence_pointer": "paper_audits/holmes_2020_four_experiments.md; publication_network.v3.json::doi:10.1007/s00221-020-05771-5",
+      "instance_count_basis": "Four numbered main experiments plus named Supplementary Experiment 5 and one additional auditory experiment declared unusable after a coding confound. The supplementary pilot has three observers and a later follow-up in the same author, retained as an explicit protocol variant rather than a newly recruited fourth observer. Review/meta-analysis and OSF project do not add acquisitions.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML::whole text; published supplementary protocol pp. 24-26",
       "instances": [
-        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1", "record_id": "holmes_2020_four_experiments", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2", "record_id": "holmes_2020_four_experiments", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3", "record_id": "holmes_2020_four_experiments", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "d", "instance_kind": "experiment", "experiment_label": "Experiment 4", "record_id": "holmes_2020_four_experiments", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
-      ]
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1",
+          "record_id": "holmes_2020_four_experiments",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2",
+          "record_id": "holmes_2020_four_experiments",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 3",
+          "record_id": "holmes_2020_four_experiments",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "d",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 4",
+          "record_id": "holmes_2020_four_experiments",
+          "toolkit_scope": "in_scope_pending_disaggregation",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "e",
+          "instance_kind": "supplementary_control",
+          "experiment_label": "Supplementary Experiment 5 — tactile task-feasibility pilot",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_tactile_detection_discrimination",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "protocol_variants": [
+            {
+              "label": "Three-observer feasibility check",
+              "n": 3,
+              "sessions": "Two one-hour sessions",
+              "factors": [
+                "one- versus two-interval tasks",
+                "detection versus discrimination",
+                "continuous versus discrete white noise"
+              ],
+              "discriminationTrialsPerTask": 44
+            },
+            {
+              "label": "Highly trained author intensity-ratio follow-up",
+              "n": 1,
+              "sameParticipantAsPilot": true,
+              "session": "Separate session",
+              "factors": [
+                "continuous versus discrete white noise",
+                "strong/weak ratio 1.2,1.4,1.6,1.8,2.0,2.2,2.4"
+              ],
+              "blocks": 14
+            }
+          ]
+        },
+        {
+          "suffix": "f",
+          "instance_kind": "failed_experiment",
+          "experiment_label": "Additional auditory stimulus/localizability experiment — unusable coding-confounded data",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "attempted_audio_tactile_scientifically_invalid",
+          "disaggregation_status": "record_already_experiment_specific",
+          "scientific_status": "authors_declare_unusable_due_to_distance_type_confound"
+        }
+      ],
+      "review_date": "2026-10-27",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "outcome": "Primary whole article XML retrieved; main Methods, experiment boundaries and additional unusable experiment reviewed."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "outcome": "Published supplementary protocol DOC retrieved; pages 24-26 extracted and rendered for Supplementary Experiment 5. SHA256 64a988419cea07aa11dd0c4ee36c0681e19aeb89e445bc1ad24adde02adea0dd."
+        }
+      ],
+      "source_review_limit": "All six protocol units and the pilot follow-up variant are explicit. Additional experiment data are declared unusable; exact executed allocation and sample size are not reported. No participant records or spreadsheets reviewed."
     },
     {
       "network_node_id": "doi:10.1007/s00221-013-3532-2",
@@ -2104,6 +2189,41 @@
         "relationship": "model_fits_prior_behavioral_data_not_new_acquisition",
         "basis": "Methods identifies the Di Cosmo dataset. Ferroni 2020 is discussed as related/future work, not fitted data."
       }
+    },
+    {
+      "network_node_id": "doi:10.17605/osf.io/73x59",
+      "doi": "10.17605/osf.io/73x59",
+      "inventory_status": "primary_project_identity_no_independent_acquisition",
+      "inventory_evidence_status": "primary_project_lineage_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "framework_disposition": "research_project_provenance_no_new_acquisition",
+      "instance_count_basis": "Official OSF node metadata identifies a public project, not a preprint or registration, linking four experiments plus review/meta-analysis to Holmes. Retain this frozen identity as project/code/data provenance without duplicating participants or treating it as another acquisition.",
+      "evidence_pointer": "https://api.osf.io/v2/nodes/73x59/::node category, description and registration flags; Holmes article data/code link",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "research_project_context",
+          "experiment_label": "OSF project provenance for Holmes; no independent acquisition",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_project_provenance",
+          "disaggregation_status": "not_applicable_no_new_human_experiment"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://api.osf.io/v2/nodes/73x59/",
+          "outcome": "Official public node metadata retrieved; category project, registration false, preprint false. SHA256 118f9c96ac2eee2896ac466bde0724ecb54a2c0e7b5be9af49b7624cb0d37965. No participant files acquired."
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.1007/s00221-020-05771-5",
+        "relationship": "research_project_supports_publication_not_independent_experiment",
+        "basis": "Primary project description and article code/data link identify the same research lineage."
+      },
+      "source_review_limit": "Identity/lineage audit only, not another Methods review or independent study. Raw participant records and spreadsheets were not downloaded."
     }
   ],
   "corpus_freeze": {

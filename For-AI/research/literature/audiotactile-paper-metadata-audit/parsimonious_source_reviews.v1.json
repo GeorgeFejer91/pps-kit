@@ -483,8 +483,8 @@
     },
     {
       "study_row_id": "doi:10.1007/s00221-020-05771-5::a",
-      "source_type": "publication_pdf",
-      "source_file": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1007_s00221-020-05771-5__45ba48c3a23a.pdf",
+      "source_type": "primary_article_and_published_protocol_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
       "contracts": {
         "auditory_stimulus": {
           "status": "reported_complete",
@@ -570,7 +570,8 @@
               "status": "not_reported",
               "value": ""
             }
-          }
+          },
+          "evidence_note": "The 2.25-second response period belongs to two-interval QUEST training, not the main task. Main signals share a waveform; far sound leads by 2.9 ms for propagation compensation."
         },
         "jitter_iti_policy": {
           "status": "reported_complete",
@@ -623,7 +624,8 @@
               "status": "reported",
               "value": "125-ms white-noise vibration through an Oticon bone-conducting vibrator; weak threshold target and strong stimulus at 150% of weak intensity."
             }
-          }
+          },
+          "evidence_note": "Experiment 1 counterbalances dominant/non-dominant stimulation/response hands and blindfolded/not-blindfolded subgroups; Experiment 2 retains the other details. These factors are not extra independently recruited experiments."
         },
         "baseline_trial_contract": {
           "status": "explicitly_absent",
@@ -688,7 +690,8 @@
               "status": "reported",
               "value": "Four 40-trial blocks (160 total): per block 8 no-vibration, 16 weak-target, and 16 strong-nontarget trials, each balanced near/far."
             }
-          }
+          },
+          "evidence_note": "Experiment 1 counterbalances dominant/non-dominant stimulation/response hands and blindfolded/not-blindfolded subgroups; Experiment 2 retains the other details. These factors are not extra independently recruited experiments."
         },
         "block_order_contract": {
           "status": "reported_complete",
@@ -705,12 +708,27 @@
             }
           }
         }
-      }
+      },
+      "review_date": "2026-10-27",
+      "review_scope": "Whole-publication primary review confirms main experiment and additional-unit boundaries; preserve main-task/training distinction and known condition factors.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ]
     },
     {
       "study_row_id": "doi:10.1007/s00221-020-05771-5::b",
-      "source_type": "publication_pdf",
-      "source_file": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1007_s00221-020-05771-5__45ba48c3a23a.pdf",
+      "source_type": "primary_article_and_published_protocol_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
       "contracts": {
         "auditory_stimulus": {
           "status": "reported_complete",
@@ -796,7 +814,8 @@
               "status": "not_reported",
               "value": ""
             }
-          }
+          },
+          "evidence_note": "The 2.25-second response period belongs to two-interval QUEST training, not the main task. Main signals share a waveform; far sound leads by 2.9 ms for propagation compensation."
         },
         "jitter_iti_policy": {
           "status": "reported_complete",
@@ -849,7 +868,8 @@
               "status": "reported",
               "value": "Weak/strong 125-ms Oticon vibration; target assignment counterbalanced across participants."
             }
-          }
+          },
+          "evidence_note": "Experiment 1 counterbalances dominant/non-dominant stimulation/response hands and blindfolded/not-blindfolded subgroups; Experiment 2 retains the other details. These factors are not extra independently recruited experiments."
         },
         "baseline_trial_contract": {
           "status": "explicitly_absent",
@@ -914,7 +934,8 @@
               "status": "reported",
               "value": "Ten repetitions per near/far x target/non-target cell in each of four 40-trial blocks; 160 total."
             }
-          }
+          },
+          "evidence_note": "Experiment 1 counterbalances dominant/non-dominant stimulation/response hands and blindfolded/not-blindfolded subgroups; Experiment 2 retains the other details. These factors are not extra independently recruited experiments."
         },
         "block_order_contract": {
           "status": "reported_complete",
@@ -931,12 +952,27 @@
             }
           }
         }
-      }
+      },
+      "review_date": "2026-10-27",
+      "review_scope": "Whole-publication primary review confirms main experiment and additional-unit boundaries; preserve main-task/training distinction and known condition factors.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ]
     },
     {
       "study_row_id": "doi:10.1007/s00221-020-05771-5::c",
-      "source_type": "publication_pdf",
-      "source_file": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1007_s00221-020-05771-5__45ba48c3a23a.pdf",
+      "source_type": "primary_article_and_published_protocol_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
       "contracts": {
         "auditory_stimulus": {
           "status": "reported_complete",
@@ -1022,7 +1058,8 @@
               "status": "not_reported",
               "value": ""
             }
-          }
+          },
+          "evidence_note": "The 2.25-second response period belongs to two-interval QUEST training, not the main task. Main signals share a waveform; far sound leads by 2.9 ms for propagation compensation."
         },
         "jitter_iti_policy": {
           "status": "reported_complete",
@@ -1157,12 +1194,27 @@
             }
           }
         }
-      }
+      },
+      "review_date": "2026-10-27",
+      "review_scope": "Whole-publication primary review confirms main experiment and additional-unit boundaries; preserve main-task/training distinction and known condition factors.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ]
     },
     {
       "study_row_id": "doi:10.1007/s00221-020-05771-5::d",
-      "source_type": "publication_pdf",
-      "source_file": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1007_s00221-020-05771-5__45ba48c3a23a.pdf",
+      "source_type": "primary_article_and_published_protocol_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
       "contracts": {
         "auditory_stimulus": {
           "status": "approximation_required",
@@ -1252,21 +1304,21 @@
           }
         },
         "jitter_iti_policy": {
-          "status": "source_unavailable",
+          "status": "not_reported",
           "value": "Within-trial jitter/ITI is not reported in the reviewed Experiment 4 methods.",
           "page_or_section": "PDF pp.7-8, Experiment 4",
           "component_reviews": {
             "policy_type": {
-              "status": "source_unavailable",
-              "value": ""
+              "status": "not_reported",
+              "value": "Primary Methods is accessible; within-trial ITI/jitter is not specified."
             },
             "timing_scope_and_anchor": {
-              "status": "source_unavailable",
-              "value": ""
+              "status": "not_reported",
+              "value": "Primary Methods is accessible; within-trial ITI/jitter is not specified."
             },
             "values_or_range": {
-              "status": "source_unavailable",
-              "value": ""
+              "status": "not_reported",
+              "value": "Primary Methods is accessible; within-trial ITI/jitter is not specified."
             }
           }
         },
@@ -1371,7 +1423,7 @@
         },
         "block_order_contract": {
           "status": "reported_complete",
-          "value": "Away, Passive and Active 60-trial condition blocks; condition order counterbalanced.",
+          "value": "Three counterbalanced Away/Passive/Active blocks, 60 targets each. Of 44 retained participants, 17 had five-minute inter-block breaks; 27 had self-paced breaks with no stated limit.",
           "page_or_section": "PDF pp.7-8, Experiment 4",
           "component_reviews": {
             "block_count": {
@@ -1381,10 +1433,30 @@
             "block_composition": {
               "status": "reported",
               "value": "Away, Passive and Active 60-trial condition blocks; condition order counterbalanced."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Three conditions counterbalanced. Inter-block breaks: 17 participants fixed five minutes; 27 self-paced, limit unspecified."
             }
-          }
+          },
+          "evidence_note": "Break policy varies across participants; it is not a within-trial ITI or an added acquisition condition."
         }
-      }
+      },
+      "review_date": "2026-10-27",
+      "review_scope": "Whole-publication primary review confirms main experiment and additional-unit boundaries; preserve main-task/training distinction and known condition factors.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ]
     },
     {
       "study_row_id": "doi:10.1016/j.cognition.2015.07.012::a",
@@ -25147,6 +25219,722 @@
               "value": "Adjacent tactile-only body-representation task; no direct auditory-tactile PPS contract."
             }
           }
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1007/s00221-020-05771-5::e",
+      "source_type": "primary_article_and_published_protocol_supplement",
+      "source_file": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+      "review_date": "2026-10-27",
+      "review_scope": "Supplementary feasibility pilot plus same-observer follow-up variant.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Continuous background white noise versus discrete noise pulses, described as those in the main experiments. No near-versus-far manipulation is reported for the feasibility pilot. Do not promote it into a direct PPS effect test.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "No auditory distance or motion manipulation is reported. The purpose is tactile detection/discrimination feasibility, with one- and two-interval tasks.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Detection thresholds established before discrimination. In two-interval discrimination one interval contains the threshold stimulus and one a 1.5-times stronger stimulus; one-interval discrimination presents either weak or strong. Exact timings are not restated for the new apparatus.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Identify the interval containing the stronger target in two-interval discrimination, or identify weak versus strong in one-interval trials. This is task-feasibility accuracy, not a near–far tactile RT comparison.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "No pilot-specific jitter or ITI is reported. The supplement says the original computers/peripherals were unavailable, so main-experiment timing and calibration cannot be inherited without evidence.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "No distance-dependent auditory–tactile SOA schedule applies. Continuous versus discrete noise is a masking/context factor.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Same type of vibrotactile stimulator as the main experiments, with new generation/amplification hardware. Authors explicitly cannot establish intensity comparability. Threshold training targets 90% detection; main pilot strong stimulus is 1.5 times threshold. The separate same-observer follow-up tests strong/weak ratios 1.2, 1.4, 1.6, 1.8, 2.0, 2.2 and 2.4 in both noise contexts; it does not reuse the pilot 1.5 ratio throughout.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "No direct-PPS tactile-only baseline family is reported. Continuous and discrete noise are task context, not baseline trial substitutions.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Do not copy main Experiment 1 no-vibration catches. The supplementary discrimination procedures require classifying weak/strong stimuli; exact pilot catch allocation is not given.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Main pilot has three observers in two one-hour sessions and 44 trials per reported discrimination task. The same highly trained author completes a separate 14-block follow-up crossing two noise contexts with seven intensity ratios. Do not count the author twice as an independently recruited cohort.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Detection procedures precede discrimination. Exact task order/counterbalance is not supplied. Retain the later single-observer session as a protocol variant, not a fourth recruited observer.",
+          "page_or_section": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1007/s00221-020-05771-5::f",
+      "source_type": "primary_article_and_published_protocol_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "Attempted audio-tactile experiment explicitly invalidated by coding confound; all eleven source dispositions retain missing details.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "conflicting_evidence",
+          "value": "The intended contrast was amplitude-modulated white noise versus pure tones, but stimulus type was confounded with auditory distance by a coding error. This is a reported invalid design, not a valid source recipe.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "stimulus_identity_or_asset": {
+              "status": "conflicting_evidence",
+              "value": "The intended contrast was amplitude-modulated white noise versus pure tones, but stimulus type was confounded with auditory distance by a coding error. This is a reported invalid design, not a valid source recipe."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "missing_required_components": [
+            "source_mode",
+            "source_recipe_or_asset_provenance"
+          ]
+        },
+        "trajectory_kinematics": {
+          "status": "conflicting_evidence",
+          "value": "Auditory distance and source type were confounded. Exact positions and the executed assignment are not documented in the inspected article paragraph.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "geometry": {
+              "status": "conflicting_evidence",
+              "value": "Auditory distance and source type were confounded. Exact positions and the executed assignment are not documented in the inspected article paragraph."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "missing_required_components": [
+            "motion_mode",
+            "coordinate_frame_body_anchor",
+            "timing_constraint"
+          ]
+        },
+        "trial_sequence": {
+          "status": "not_reported",
+          "value": "No complete trial timeline is printed for this additional invalid experiment. Do not inherit the numbered experiment schedule.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment."
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "The aim was to test whether more localizable sounds improved auditory-distance effects on tactile perception. Exact response rules and windows are not described in the paragraph.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {},
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "missing_required_components": [
+            "target_and_nontarget_rule",
+            "response_mode_or_device",
+            "response_mapping_or_expected_action",
+            "response_window_and_anchor"
+          ]
+        },
+        "jitter_iti_policy": {
+          "status": "not_reported",
+          "value": "No experiment-specific jitter or ITI is reported.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment."
+        },
+        "soa_schedule": {
+          "status": "not_reported",
+          "value": "No experiment-specific onset or propagation-compensation schedule is reported.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment."
+        },
+        "tactile_target": {
+          "status": "not_reported",
+          "value": "No additional-experiment tactile waveform, location or calibration is specified.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "modality": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "body_site_and_side": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "waveform_and_duration": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment."
+        },
+        "baseline_trial_contract": {
+          "status": "not_reported",
+          "value": "A baseline family is not described; absence is not established.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "timing_and_anchor": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment."
+        },
+        "catch_trial_contract": {
+          "status": "not_reported",
+          "value": "Catch/no-target allocation is not described; absence is not established.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment."
+        },
+        "repetition_allocation": {
+          "status": "not_reported",
+          "value": "Sample size, cell repetitions and total trials are not printed for this invalid additional experiment.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment."
+        },
+        "block_order_contract": {
+          "status": "not_reported",
+          "value": "No complete block or trial-order policy is printed; the distance/type confound is explicit.",
+          "page_or_section": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            },
+            "block_composition": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment."
+            }
+          },
+          "evidence_note": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.17605/osf.io/73x59",
+      "source_type": "primary_project_identity_and_publication_lineage",
+      "source_file": "https://api.osf.io/v2/nodes/73x59/",
+      "review_date": "2026-10-27",
+      "review_scope": "Project identity and relation to Holmes audited; eleven non-acquisition scope dispositions, no duplicated empirical evidence.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
+          "page_or_section": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol."
+            }
+          },
+          "evidence_note": "Project/dataset lineage identity rather than an independent PPS experiment."
         }
       }
     }
