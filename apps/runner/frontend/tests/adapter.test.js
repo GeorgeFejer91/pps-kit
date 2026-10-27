@@ -70,6 +70,9 @@ test("Tauri adapter sends exact remote-owner DTOs and keeps LAN activation expli
 
   await adapter.configureRemote({ enabled: true, allowAbort: false, lanListener: false });
   await adapter.selectPreparedSession();
+  await adapter.selectPreparedGroup();
+  await adapter.nativeGroupStatus();
+  await adapter.advancePreparedGroupPart({ expectedRevision: 9, path: "ignored" });
   await adapter.inspectPreparedExecution();
   await adapter.prepareFirstAudioBlock();
   await adapter.remoteSessionClaim({
@@ -97,6 +100,9 @@ test("Tauri adapter sends exact remote-owner DTOs and keeps LAN activation expli
   assert.deepEqual(calls, [
     ["configure_remote", { enabled: true, allowAbort: false, lanListener: false }],
     ["select_prepared_session", undefined],
+    ["select_prepared_group", undefined],
+    ["native_group_status", undefined],
+    ["advance_prepared_group_part", { expectedRevision: 9 }],
     ["inspect_prepared_execution", undefined],
     ["prepare_first_audio_block", undefined],
     ["remote_session_claim", { request: {

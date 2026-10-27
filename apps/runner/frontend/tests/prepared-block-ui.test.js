@@ -22,6 +22,7 @@ function harness() {
     preparedExecution: { blockCount: 2 }, preparedPlan: { sessionId: "session" },
     api: { kind: "tauri-native" }, participantResponse: { refresh() {} }, participantSetupDraft: { refresh() {} },
     nativeOutputSetup: { update() {} }, updateInboundPolicyUi() {}, inboundPrivateTarget: null,
+    sessionProgress: { update() {} },
     document: { querySelectorAll: () => [], createElement: () => ({}) },
   });
   vm.runInContext([extract("text", "titleCase"), extract("titleCase", "formatDuration"), extract("formatDuration", "showToast"),
@@ -47,7 +48,7 @@ test("native block completion retires prior media, clears progress and unlocks n
   render(snapshot("prepared", 3));
   assert.equal(context.preparedAudio, null);
   assert.equal(elements["prepare-first-audio-block"].disabled, false);
-  assert.equal(elements["prepare-first-audio-block"].textContent, "Prepare next block");
+  assert.equal(elements["prepare-first-audio-block"].textContent, "Prepare next audio occurrence");
   assert.equal(elements["block-progress"].style.width, "0%");
   prepare(prepared(1));
   render(snapshot("prepared", 3));
@@ -56,4 +57,21 @@ test("native block completion retires prior media, clears progress and unlocks n
   render(snapshot("completed", 4, 2));
   assert.equal(context.preparedAudio, null);
   assert.equal(elements["prepare-first-audio-block"].disabled, true);
+});
+
+test("native instruction summaries require their own scope and retire at the waiting gate", () => {
+  const { context, elements, render, prepare } = harness();
+  const instruction = { ...prepared(2), mediaKind: "instruction", stageOrdinal: 7,
+    preparationScope: "instruction-pcm-and-output-plan-cache", instructionLabel: "Post-block rest",
+    instructionContinueMode: "delay", instructionNeedsContinue: true };
+  assert.equal(prepare(instruction), true, "trailing instruction is not a nonexistent block");
+  assert.match(elements["prepared-audio-status"].textContent, /Instruction: Post-block rest/);
+  assert.match(elements["prepared-audio-detail"].textContent, /native timed wait/);
+  render({ ...snapshot("instruction_gate", 2), instruction_gate: { waiting: false, next_action: "continue-delay" } });
+  assert.equal(context.preparedAudio, null);
+  assert.equal(elements["prepare-first-audio-block"].disabled, true);
+  assert.match(elements["run-progress"].textContent, /native instruction timer/);
+  assert.equal(prepare({ ...instruction, preparationScope: "pcm-and-output-plan-cache" }), false);
+  assert.equal(prepare({ ...instruction, mediaKind: "unrecognized" }), false);
+  assert.equal(prepare({ ...instruction, instructionContinueMode: "automatic" }), false);
 });

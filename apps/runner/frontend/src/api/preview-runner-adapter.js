@@ -72,6 +72,15 @@ export function createPreviewRunnerAdapter() {
     async selectPreparedSession() {
       throw new Error("Prepared-session selection is available only in the native Tauri runner.");
     },
+    async selectPreparedGroup() {
+      throw new Error("Session-group selection is available only in the native Tauri runner.");
+    },
+    async nativeGroupStatus() {
+      throw new Error("Session-group status is available only in the native Tauri runner.");
+    },
+    async advancePreparedGroupPart() {
+      throw new Error("Session-group advancement is available only in the native Tauri runner.");
+    },
     async inspectPreparedExecution() {
       throw new Error("Rust schedule inspection is available only in the native Tauri runner.");
     },

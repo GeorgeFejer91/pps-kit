@@ -18,6 +18,7 @@ import { initializeTextLayout } from "./ui/text-layout.js";
 import { bindParticipantResponse } from "./ui/participant-response.js";
 import { bindParticipantSetupDraft } from "./ui/participant-setup-draft.js";
 import { bindNativeOutputSetup } from "./ui/native-output-setup.js";
+import { bindSessionProgress } from "./ui/session-progress.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 
 initializeTextLayout();
@@ -37,6 +38,14 @@ const nativeOutputSetup = bindNativeOutputSetup({ elements, api,
   onRetireMedia: () => {
     renderPreparedAudio(null);
     if (snapshot) renderSnapshot(snapshot);
+  },
+});
+const sessionProgress = bindSessionProgress({ elements, api,
+  onError: error => showToast(error.message, { error: true }),
+  onAdvance: next => {
+    renderPreparedPlan(null);
+    renderSnapshot(next);
+    showToast("Next part loaded. Inspect its schedule, then prepare its first audio occurrence.");
   },
 });
 const outboundActionButtons = [...document.querySelectorAll("[data-controller-action]")];
@@ -106,6 +115,11 @@ function renderPreparedAudio(nextPreparation) {
     planValue(candidate, "scheduledEventCount", "scheduled_event_count"),
   );
   const blockOrdinal = Number(planValue(candidate, "blockOrdinal", "block_ordinal"));
+  const mediaKind = planValue(candidate, "mediaKind", "media_kind") ?? "block";
+  const stageOrdinal = Number(planValue(candidate, "stageOrdinal", "stage_ordinal") ?? blockOrdinal);
+  const instructionLabel = planValue(candidate, "instructionLabel", "instruction_label");
+  const continueMode = planValue(candidate, "instructionContinueMode", "instruction_continue_mode");
+  const needsContinue = planValue(candidate, "instructionNeedsContinue", "instruction_needs_continue");
   const sampleRate = Number(planValue(candidate, "sampleRateHz", "sample_rate_hz"));
   const channels = Number(planValue(candidate, "sourceChannels", "source_channels"));
   const layout = planValue(candidate, "sourceChannelLayout", "source_channel_layout");
@@ -115,12 +129,18 @@ function renderPreparedAudio(nextPreparation) {
   const byteBudget = Number(planValue(candidate, "cacheByteBudget", "cache_byte_budget"));
   const valid = Boolean(candidate)
     && schema === "pps-runner-prepared-audio-summary.v1"
-    && scope === "pcm-and-output-plan-cache"
+    && (mediaKind === "block" ? scope === "pcm-and-output-plan-cache"
+      : mediaKind === "instruction" && scope === "instruction-pcm-and-output-plan-cache"
+        && typeof instructionLabel === "string" && instructionLabel.length > 0
+        && (continueMode === null || ["click", "button", "delay"].includes(continueMode))
+        && typeof needsContinue === "boolean" && channels === 3)
     && qualification === "unqualified"
     && candidate.executable === false
     && outputPlanPrepared === true
     && Number.isSafeInteger(blockOrdinal) && blockOrdinal >= 0
-    && blockOrdinal < Number(planValue(preparedExecution, "blockCount", "block_count"))
+    && (mediaKind === "instruction" || blockOrdinal < Number(planValue(preparedExecution, "blockCount", "block_count")))
+    && Number.isSafeInteger(stageOrdinal) && stageOrdinal >= 0
+    && Boolean(preparedExecution)
     && Number.isSafeInteger(sampleRate) && sampleRate > 0
     && [2, 3].includes(channels)
     && ["legacy-study5-tactile-audio", "binaural-left-right-tactile"].includes(layout)
@@ -136,13 +156,14 @@ function renderPreparedAudio(nextPreparation) {
     && decodedBytes <= byteBudget;
   preparedAudio = valid ? candidate : null;
   nativeOutputSetup.update(snapshot, preparedAudio);
-  text("prepared-audio-status", preparedAudio ? `Block ${blockOrdinal + 1} prepared · output disabled` : "Not prepared");
+  const mediaLabel = mediaKind === "instruction" ? `Instruction: ${instructionLabel}` : `Block ${blockOrdinal + 1}`;
+  text("prepared-audio-status", preparedAudio ? `${mediaLabel} prepared · output disabled` : "Not prepared");
   text(
     "prepared-audio-detail",
     preparedAudio
-      ? `Block ${blockOrdinal + 1} is content-bound in the one-block native PCM and renderer-plan cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB, ${scheduledEventCount.toLocaleString()} scheduled events, proposed route ${outputRoute}. Output qualification: ${qualification}; executable: no.`
+      ? `${mediaLabel} · occurrence ${stageOrdinal + 1} is content-bound in the one-block native PCM and renderer-plan cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB, ${scheduledEventCount.toLocaleString()} scheduled events, proposed route ${outputRoute}.${mediaKind === "instruction" ? ` After playback: ${needsContinue ? continueMode === "delay" ? "native timed wait" : `${continueMode} to continue` : "continue without a response"}.` : ""} Output qualification: ${qualification}; executable: no.`
       : preparedExecution
-        ? "Prepare the next unfinished block in manifest order. This fills the bounded native cache; device selection, local arm and start remain separate actions."
+        ? "Prepare the next instruction or block in native order. This fills the bounded native cache; device selection, local arm and start remain separate actions."
         : "Native PCM and output-plan preparation is unavailable until the first schedule is inspected.",
   );
   return !candidate || valid;
@@ -268,6 +289,7 @@ function renderSnapshot(next) {
   const previous = snapshot;
   snapshot = next;
   participantResponse.refresh(next);
+  sessionProgress.update(next);
   const phase = next.run?.phase ?? "unknown";
   const participant = next.setup?.participant_code || next.identity?.participant_id || "Not set";
   text("participant-chip", participant);
@@ -306,6 +328,10 @@ function renderSnapshot(next) {
   const allowed = new Set(next.allowed_actions || []);
   document.querySelectorAll("[data-action]").forEach((button) => {
     button.disabled = !allowed.has(button.dataset.action);
+    if (button.dataset.action === "instruction.continue") {
+      button.hidden = next.instruction_gate?.waiting !== true || next.instruction_gate?.next_action !== "continue-button";
+      button.textContent = next.instruction_gate?.button_label || "Continue instruction";
+    }
   });
   elements["allowed-actions"].replaceChildren(...[...allowed].map((action) => {
     const token = document.createElement("span");
@@ -322,10 +348,11 @@ function renderSnapshot(next) {
     || !preparedExecution;
   if (preparedAudio && invalidatesPreparedAudio) renderPreparedAudio(null);
   elements["select-session-manifest"].disabled = api.kind !== "tauri-native" || active;
+  elements["select-session-group"].disabled = api.kind !== "tauri-native" || active;
   elements["select-session-manifest"].title = api.kind === "tauri-native"
     ? "Select and verify a pps-run-session.v1 manifest locally"
     : "Prepared-session selection is available in the native Tauri app";
-  elements["inspect-prepared-execution"].disabled = api.kind !== "tauri-native" || !preparedPlan || active;
+  elements["inspect-prepared-execution"].disabled = api.kind !== "tauri-native" || !next.package_verified || active;
   elements["inspect-prepared-execution"].title = api.kind === "tauri-native"
     ? "Reverify the retained package and compile a path-free schedule inspection"
     : "Rust schedule inspection is available in the native Tauri app";
@@ -334,13 +361,21 @@ function renderSnapshot(next) {
     || active
     || terminal
     || Boolean(preparedAudio);
-  text("prepare-first-audio-block", betweenBlocks ? "Prepare next block" : "Prepare first audio block");
+  text("prepare-first-audio-block", "Prepare next audio occurrence");
   elements["prepare-first-audio-block"].title = api.kind === "tauri-native"
-    ? "Content-bind the next unfinished manifest block in the one-block native cache"
+    ? "Content-bind the next instruction or block selected by the native owner"
     : "Native audio preparation is available in the Tauri app";
   if (betweenBlocks) {
-    text("run-progress", `Block ${completedBlockIndex} complete. ${preparedAudio ? "Choose its output device, then arm and start the prepared next block." : "Prepare the next block to continue."}`);
-    text("block-label", preparedAudio ? `Block ${Number(planValue(preparedAudio, "blockOrdinal", "block_ordinal")) + 1} prepared` : "Next block awaits preparation");
+    text("run-progress", `Block ${completedBlockIndex} complete. ${preparedAudio ? "Choose its output device, then arm and start the prepared audio." : "Prepare the next audio occurrence to continue."}`);
+    text("block-label", preparedAudio ? (planValue(preparedAudio, "mediaKind", "media_kind") === "instruction"
+      ? `Instruction: ${planValue(preparedAudio, "instructionLabel", "instruction_label")}`
+      : `Block ${Number(planValue(preparedAudio, "blockOrdinal", "block_ordinal")) + 1} prepared`) : "Next audio awaits preparation");
+  }
+  if (phase === "instruction_gate") {
+    text("run-heading", next.instruction_gate?.instruction_label || "Instruction");
+    text("run-progress", next.instruction_gate?.next_action === "continue-delay" ? "Waiting for the native instruction timer."
+      : next.instruction_gate?.next_action === "continue-click" ? "Activate the response area to continue."
+      : "Use the instruction continue button when ready.");
   }
   nativeOutputSetup.update(next, preparedAudio);
   updateInboundPolicyUi();
@@ -991,17 +1026,19 @@ function bindLocalActions() {
     });
   });
 
-  elements["select-session-manifest"].addEventListener("click", async () => {
-    const button = elements["select-session-manifest"];
+  for (const [id, select] of [["select-session-manifest", () => api.selectPreparedSession()],
+    ["select-session-group", () => api.selectPreparedGroup()]]) elements[id].addEventListener("click", async () => {
+    const button = elements[id];
     button.disabled = true;
     try {
-      const selection = await api.selectPreparedSession();
+      const selection = await select();
       renderSnapshot(normalizedSnapshot(selection));
       if (selection?.cancelled) {
         showToast("Prepared-session selection cancelled.");
         return;
       }
       renderPreparedPlan(selection?.summary);
+      sessionProgress.setAssessment(selection?.resultsAssessment ?? null);
       await refreshRemote();
       showToast("Prepared session verified and adopted by the native Rust authority.");
     } catch (error) {
@@ -1036,7 +1073,7 @@ function bindLocalActions() {
       if (!renderPreparedAudio(prepared)) {
         throw new Error("The native runner returned an invalid prepared-audio summary.");
       }
-      showToast("Audio block prepared. Choose its output device next.");
+      showToast("Next audio occurrence prepared. Choose its output device next.");
     } catch (error) {
       renderPreparedAudio(null);
       showToast(error.message, { error: true });
