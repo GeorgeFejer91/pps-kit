@@ -675,7 +675,9 @@
           "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "full trial counts, tactile calibration, and response mapping need extraction"
+            "Original white-noise asset and exact electrical pulse waveform; source nominal sensory period does not establish tactile pulse width",
+            "Experiment 2 complete mirrored geometry and online voice-relay response cutoff unresolved",
+            "Exact within-block ordering and full counterbalancing assignment unavailable; Experiment 2 active-use block is last"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -708,9 +710,11 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "full trial counts, tactile calibration, and response mapping need extraction"
+        "Original white-noise asset and exact electrical pulse waveform; source nominal sensory period does not establish tactile pulse width",
+        "Experiment 2 complete mirrored geometry and online voice-relay response cutoff unresolved",
+        "Exact within-block ordering and full counterbalancing assignment unavailable; Experiment 2 active-use block is last"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: full trial counts, tactile calibration, and response mapping need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: Original white-noise asset and exact electrical pulse waveform; source nominal sensory period does not establish tactile pulse width; Experiment 2 complete mirrored geometry and online voice-relay response cutoff unresolved; Exact within-block ordering and full counterbalancing assignment unavailable; Experiment 2 active-use block is last",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -3365,16 +3369,18 @@
     },
     {
       "audiotactile_task_family": "bilateral lateral peri-head PPS trajectory profile",
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+      ],
       "citation_short": "Pfeiffer et al. (2018)",
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "pfeiffer_2018_lateral_perihead_left_to_right"
       ],
       "doi": "10.1111/ejn.13872",
       "expected_effect_direction": "congruent_audio_vestibular_motion_expands_pps",
       "expected_outcome_status": "structured_expected_outcome_extracted",
-      "full_emulated_pipeline_validated": true,
+      "full_emulated_pipeline_validated": false,
       "gates": {
         "expected_outcome_extraction": {
           "evidence": "Structured expected effect direction is available.",
@@ -3382,33 +3388,39 @@
           "passed": true,
           "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#pfeiffer_2018_vestibular",
-            "Consensus MCP 2026-07-15 query: audiotactile peripersonal space auditory tactile integration boundary looming"
+            "https://noel-lab.org/wp-content/uploads/2024/05/pfeiffer_et_al-2018-european_journal_of_neuroscience.pdf"
           ],
           "status": "structured_expected_outcome_extracted"
         },
         "observed_emulated_expected_match": {
-          "evidence": "Runner-produced analysis rows are recorded as matching the extracted expected direction in the mouse-click audit.",
-          "evidence_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim.",
-          "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
-          "passed": true,
-          "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
-          "status": "emulated_observed_direction_matches_expected"
+          "evidence": "No observed emulated comparison exists for this record.",
+          "evidence_boundary": "",
+          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "passed": false,
+          "source_report": "",
+          "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
-          "passed": true,
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
+          "passed": false,
           "profile_completion_statuses": [
             "finished_segment_6_launchable"
           ],
-          "status": "parsimonious_profile_complete",
+          "status": "profile_scaffold_present_but_incomplete",
           "template_ids": [
             "pfeiffer_2018_lateral_perihead_left_to_right"
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [],
-          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
-          "missing_parameters": [],
+          "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters"
+          ],
+          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
+          "missing_parameters": [
+            "Experiment 1 repetition and baseline allocation wording is unresolved; no independent E1 ITI or original audio/filter/calibration asset",
+            "Existing MATLAB-example template has a different path/speed from the paper\u2019s initial hold, approach-to-head and final hold; it is a related proxy, not demonstrated source equivalence",
+            "Experiment 3 rotation congruency, physical-direction allocation and catches remain unresolved; audio-only E1 proxy does not reproduce vestibular apparatus or localizers"
+          ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
             "extraction_status": "pending_pdf",
@@ -3420,11 +3432,13 @@
             "pdf_status": "needs_user_download",
             "supplement_status": "paywalled"
           },
-          "passed": true,
-          "status": "minimum_source_parameters_captured"
+          "passed": false,
+          "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [],
+          "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters"
+          ],
           "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
           "passed": true,
           "profile_readiness": [
@@ -3439,17 +3453,21 @@
           "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
-          "evidence": "Ready profile was materialized and evaluated through SessionRunnerController with deterministic mouse clicks.",
-          "passed": true,
-          "runnable_status": "runnable_profile_parameters_ready",
-          "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
-          "status": "wav_runner_mouse_click_emulation_available"
+          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
+          "passed": false,
+          "runnable_status": "template_present_but_blocked",
+          "source_report": "",
+          "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
-      "missing_publication_parameters": [],
-      "next_required_action": "Emulated source-to-runner pipeline is available; collect participant and physical timing/loopback evidence before making a scientific replication claim.",
-      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
+      "missing_publication_parameters": [
+        "Experiment 1 repetition and baseline allocation wording is unresolved; no independent E1 ITI or original audio/filter/calibration asset",
+        "Existing MATLAB-example template has a different path/speed from the paper\u2019s initial hold, approach-to-head and final hold; it is a related proxy, not demonstrated source equivalence",
+        "Experiment 3 rotation congruency, physical-direction allocation and catches remain unresolved; audio-only E1 proxy does not reproduce vestibular apparatus or localizers"
+      ],
+      "next_required_action": "Extract or source the missing paper parameters: Experiment 1 repetition and baseline allocation wording is unresolved; no independent E1 ITI or original audio/filter/calibration asset; Existing MATLAB-example template has a different path/speed from the paper\u2019s initial hold, approach-to-head and final hold; it is a related proxy, not demonstrated source equivalence; Experiment 3 rotation congruency, physical-direction allocation and catches remain unresolved; audio-only E1 proxy does not reproduce vestibular apparatus or localizers",
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
         "extraction_status": "pending_pdf",
@@ -3461,9 +3479,9 @@
         "pdf_status": "needs_user_download",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "full_emulated_source_to_runner_pipeline_validated",
+      "pipeline_status": "profile_present_but_source_parameters_missing",
       "record_id": "pfeiffer_2018_vestibular",
-      "runnable_status": "runnable_profile_parameters_ready",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13",
@@ -5879,7 +5897,9 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "source PDF reports a trimodal audiovisuotactile Experiment 2 with 2 m virtual-ball approach, 75 cm/s matched dynamic sound, right-cheek 10 ms tactile taps, five delay levels, 540 total trials, and a PPS boundary between D3 and D4/central point near 105 cm; row-level audiovisual/MR provenance metadata are now runner-supported, but exact delay table, original video/3D assets, ExpyVR/RealiSM scripts, binaural source tracks, and physical HMD/audio synchronization remain unresolved before a full runnable profile is honest"
+            "Experiment 2 requires synchronous audiovisual motion and 10 ms cheek touch; row-level audiovisual/MR provenance metadata are now runner-supported, but source assets and physical HMD/audio synchronization remain unresolved",
+            "Five timing labels lack numeric SOAs; 540 reported trials conflicts with 180 from named cells; catch composition and exact allocation unresolved",
+            "Nominal 2 m at 0.75 m/s conflicts with 2.6 s movement; original video/3D assets, binaural tracks and ExpyVR/RealiSM scripts are unavailable"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -5915,9 +5935,11 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "source PDF reports a trimodal audiovisuotactile Experiment 2 with 2 m virtual-ball approach, 75 cm/s matched dynamic sound, right-cheek 10 ms tactile taps, five delay levels, 540 total trials, and a PPS boundary between D3 and D4/central point near 105 cm; row-level audiovisual/MR provenance metadata are now runner-supported, but exact delay table, original video/3D assets, ExpyVR/RealiSM scripts, binaural source tracks, and physical HMD/audio synchronization remain unresolved before a full runnable profile is honest"
+        "Experiment 2 requires synchronous audiovisual motion and 10 ms cheek touch; row-level audiovisual/MR provenance metadata are now runner-supported, but source assets and physical HMD/audio synchronization remain unresolved",
+        "Five timing labels lack numeric SOAs; 540 reported trials conflicts with 180 from named cells; catch composition and exact allocation unresolved",
+        "Nominal 2 m at 0.75 m/s conflicts with 2.6 s movement; original video/3D assets, binaural tracks and ExpyVR/RealiSM scripts are unavailable"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: source PDF reports a trimodal audiovisuotactile Experiment 2 with 2 m virtual-ball approach, 75 cm/s matched dynamic sound, right-cheek 10 ms tactile taps, five delay levels, 540 total trials, and a PPS boundary between D3 and D4/central point near 105 cm; row-level audiovisual/MR provenance metadata are now runner-supported, but exact delay table, original video/3D assets, ExpyVR/RealiSM scripts, binaural source tracks, and physical HMD/audio synchronization remain unresolved before a full runnable profile is honest",
+      "next_required_action": "Extract or source the missing paper parameters: Experiment 2 requires synchronous audiovisual motion and 10 ms cheek touch; row-level audiovisual/MR provenance metadata are now runner-supported, but source assets and physical HMD/audio synchronization remain unresolved; Five timing labels lack numeric SOAs; 540 reported trials conflicts with 180 from named cells; catch composition and exact allocation unresolved; Nominal 2 m at 0.75 m/s conflicts with 2.6 s movement; original video/3D assets, binaural tracks and ExpyVR/RealiSM scripts are unavailable",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -7593,27 +7615,27 @@
   },
   "summary": {
     "adjacent_not_applicable_record_count": 8,
-    "full_emulated_pipeline_validated_record_count": 12,
+    "full_emulated_pipeline_validated_record_count": 11,
     "gate_status_counts": {
       "expected_outcome_extraction": {
         "not_applicable_adjacent_record": 8,
         "structured_expected_outcome_extracted": 67
       },
       "observed_emulated_expected_match": {
-        "emulated_observed_direction_matches_expected": 12,
-        "no_observed_emulated_comparison": 55,
+        "emulated_observed_direction_matches_expected": 11,
+        "no_observed_emulated_comparison": 56,
         "not_applicable_adjacent_record": 8
       },
       "parsimonious_profile_saved": {
         "not_applicable_adjacent_record": 8,
-        "parsimonious_profile_complete": 13,
+        "parsimonious_profile_complete": 12,
         "profile_not_yet_created": 44,
-        "profile_scaffold_present_but_incomplete": 10
+        "profile_scaffold_present_but_incomplete": 11
       },
       "source_parameter_extraction": {
-        "minimum_source_parameters_captured": 13,
+        "minimum_source_parameters_captured": 12,
         "not_applicable_adjacent_record": 8,
-        "source_parameters_missing_or_unresolved": 54
+        "source_parameters_missing_or_unresolved": 55
       },
       "toolkit_gui_implementation": {
         "blocked_by_missing_profile_parameters": 49,
@@ -7622,8 +7644,8 @@
       },
       "wav_generation_and_runner_execution": {
         "not_applicable_adjacent_record": 8,
-        "runner_execution_not_available_for_record": 55,
-        "wav_runner_mouse_click_emulation_available": 12
+        "runner_execution_not_available_for_record": 56,
+        "wav_runner_mouse_click_emulation_available": 11
       }
     },
     "human_behavioral_observed_record_count": 0,
@@ -7632,13 +7654,13 @@
     "physical_loopback_observed_record_count": 0,
     "pipeline_status_counts": {
       "adjacent_not_applicable": 8,
-      "full_emulated_source_to_runner_pipeline_validated": 12,
+      "full_emulated_source_to_runner_pipeline_validated": 11,
       "pipeline_incomplete": 1,
-      "profile_present_but_source_parameters_missing": 10,
+      "profile_present_but_source_parameters_missing": 11,
       "source_parameters_missing_before_profile_creation": 44
     },
     "primary_gap_counts": {
-      "profile_present_but_source_parameters_missing": 10,
+      "profile_present_but_source_parameters_missing": 11,
       "source_parameters_missing_before_profile_creation": 44,
       "toolkit_structure_or_response_contract_missing": 0
     }

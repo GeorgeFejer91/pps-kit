@@ -557,16 +557,89 @@
     {
       "network_node_id": "doi:10.1111/ejn.13872",
       "doi": "10.1111/ejn.13872",
-      "inventory_status": "confirmed_total",
-      "inventory_evidence_status": "abstract_or_metadata_inventory",
+      "inventory_status": "confirmed_protocol_and_control_inventory",
+      "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "The network abstract says 46 participants completed three experiments; the current audit record is not experiment-specific.",
-      "evidence_pointer": "publication_network.v3.json::doi:10.1111/ejn.13872; metadata_audit.jsonl::pfeiffer_2018_vestibular",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Three main protocols and two localization validations: 16 Experiment 1 participants, 16 Experiment 2 participants and 14 Experiment 3 RT participants total 46. Experiment 1 localization reuses its 16; Experiment 3 localization reuses 11 from Experiment 2, not the 14-person RT cohort.",
+      "evidence_pointer": "https://noel-lab.org/wp-content/uploads/2024/05/pfeiffer_et_al-2018-european_journal_of_neuroscience.pdf",
+      "source_version": "Published article; primary Methods reviewed through the identified source route",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://noel-lab.org/wp-content/uploads/2024/05/pfeiffer_et_al-2018-european_journal_of_neuroscience.pdf",
+          "outcome": "Primary full text reviewed. SHA256 d85dfa7a93371288eca67d5ccb5a169943fa1cda6ad8c1d1dd84aabd244bcc04"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://onlinelibrary.wiley.com/doi/10.1111/ejn.13872",
+          "outcome": "Indexed bibliographic/supporting-information entry only; direct request failed."
+        }
+      ],
       "instances": [
-        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1", "record_id": "pfeiffer_2018_vestibular", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2", "record_id": "pfeiffer_2018_vestibular", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "c", "instance_kind": "experiment", "experiment_label": "Experiment 3", "record_id": "pfeiffer_2018_vestibular", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
-      ]
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1: static-head audio-tactile interaction",
+          "record_id": "pfeiffer_2018_vestibular",
+          "template_ids": [
+            "pfeiffer_2018_lateral_perihead_left_to_right"
+          ],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three main protocols and two localization validations: 16 Experiment 1 participants, 16 Experiment 2 participants and 14 Experiment 3 RT participants total 46. Experiment 1 localization reuses its 16; Experiment 3 localization reuses 11 from Experiment 2, not the 14-person RT cohort."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "adjacent_control",
+          "experiment_label": "Experiment 2: vestibular-tactile control without task sound",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_non_audiotactile_or_localization",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three main protocols and two localization validations: 16 Experiment 1 participants, 16 Experiment 2 participants and 14 Experiment 3 RT participants total 46. Experiment 1 localization reuses its 16; Experiment 3 localization reuses 11 from Experiment 2, not the 14-person RT cohort."
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 3: vestibular–audio-tactile congruency interaction",
+          "record_id": "pfeiffer_2018_vestibular",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three main protocols and two localization validations: 16 Experiment 1 participants, 16 Experiment 2 participants and 14 Experiment 3 RT participants total 46. Experiment 1 localization reuses its 16; Experiment 3 localization reuses 11 from Experiment 2, not the 14-person RT cohort."
+        },
+        {
+          "suffix": "d",
+          "instance_kind": "adjacent_control",
+          "experiment_label": "Experiment 1 supporting sound-distance estimation",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_non_audiotactile_or_localization",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three main protocols and two localization validations: 16 Experiment 1 participants, 16 Experiment 2 participants and 14 Experiment 3 RT participants total 46. Experiment 1 localization reuses its 16; Experiment 3 localization reuses 11 from Experiment 2, not the 14-person RT cohort."
+        },
+        {
+          "suffix": "e",
+          "instance_kind": "adjacent_control",
+          "experiment_label": "Experiment 3 supporting sound-distance estimation during rotation",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_non_audiotactile_or_localization",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three main protocols and two localization validations: 16 Experiment 1 participants, 16 Experiment 2 participants and 14 Experiment 3 RT participants total 46. Experiment 1 localization reuses its 16; Experiment 3 localization reuses 11 from Experiment 2, not the 14-person RT cohort."
+        }
+      ],
+      "supporting_task_boundaries": [
+        "Three main protocols and two localization validations: 16 Experiment 1 participants, 16 Experiment 2 participants and 14 Experiment 3 RT participants total 46. Experiment 1 localization reuses its 16; Experiment 3 localization reuses 11 from Experiment 2, not the 14-person RT cohort."
+      ],
+      "source_limits": [
+        "Exact sound samples/filter and levels unavailable.",
+        "Experiment1 repetitions are textually ambiguous; no guessed total.",
+        "Experiment3 direction collapsing and catch/baseline allocations need clarification.",
+        "Trial-relative sampling includes initial/end stationary phases; ordinal D labels should not be converted to seven equally spaced physical distances."
+      ],
+      "supplement_audit": "Publisher lists reviewer-comments PDF. It was not retrieved; no supplementary protocol claim."
     },
     {
       "network_node_id": "doi:10.1162/089892902320474481",
@@ -584,15 +657,62 @@
     {
       "network_node_id": "doi:10.3389/fict.2017.00031",
       "doi": "10.3389/fict.2017.00031",
-      "inventory_status": "at_least_two_experiments",
-      "inventory_evidence_status": "partial_methods_inventory",
+      "inventory_status": "confirmed_protocol_and_control_inventory",
+      "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "The audit known-prior-gaps section explicitly names Experiment 2 as the trimodal audiovisual-tactile mixed-reality task; Experiment 1 is retained as unreviewed pending full inventory.",
-      "evidence_pointer": "paper_audits/serino_2018_mixed_reality_pps.md",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Two datasets: 27 participants in Experiment 1 visuotactile acquisition and 26 in Experiment 2 audiovisuotactile acquisition. Real, virtual and mixed reality are apparatus contexts, not three cohorts.",
+      "evidence_pointer": "https://www.frontiersin.org/journals/ict/articles/10.3389/fict.2017.00031/full",
+      "source_version": "Published article; primary Methods reviewed through the identified source route",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.frontiersin.org/journals/ict/articles/10.3389/fict.2017.00031/full",
+          "outcome": "Primary full text reviewed."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.frontiersin.org/journals/ict/articles/10.3389/fict.2017.00031/pdf",
+          "outcome": "publisher PDF SHA256 ba7185f2b764de000bf8ecf0e0f1abbced8d7c657ae23b7af419d9cc61405df1"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.frontiersin.org/journals/ict/articles/10.3389/fict.2017.00031/xml",
+          "outcome": "publisher XML SHA256 36d4a44ae5706d00758bcbea6fc35f90deca52e7863a7f56303ec7b86f01028b"
+        }
+      ],
       "instances": [
-        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — scope not disaggregated", "record_id": "", "toolkit_scope": "scope_not_assessed", "disaggregation_status": "experiment_record_not_available"},
-        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — trimodal audiovisual-tactile mixed reality", "record_id": "serino_2018_mixed_reality_pps", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
-      ]
+        {
+          "suffix": "a",
+          "instance_kind": "adjacent_control",
+          "experiment_label": "Experiment 1: mixed-reality visuotactile PPS",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_non_audiotactile_or_localization",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Two datasets: 27 participants in Experiment 1 visuotactile acquisition and 26 in Experiment 2 audiovisuotactile acquisition. Real, virtual and mixed reality are apparatus contexts, not three cohorts."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2: mixed-reality audiovisuotactile PPS",
+          "record_id": "serino_2018_mixed_reality_pps",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Two datasets: 27 participants in Experiment 1 visuotactile acquisition and 26 in Experiment 2 audiovisuotactile acquisition. Real, virtual and mixed reality are apparatus contexts, not three cohorts."
+        }
+      ],
+      "supporting_task_boundaries": [
+        "Two reported datasets. Real, virtual and mixed realities describe the technology/context, not three independently acquired experimental cohorts. Historical two/16-speaker systems describe apparatus lineage, not additional experiments in this publication."
+      ],
+      "source_conflicts": [
+        "Experiment1 exact allocation72%/16%/12% differs from generic70%/20%/10%.",
+        "Experiment2 named-cell arithmetic yields180 whereas reported total/block product is540; unresolved family or repetition factor.",
+        "Nominal2m at0.75m/s implies2.6667s, while Procedure says2.6s. Preserve as approximation/conflict; no corrected geometry inferred.",
+        "Distance labels are ordinal, and numeric SOAs are absent. Published boundary conversions are analysis summaries, not an acquisition schedule."
+      ],
+      "supplement_audit": "Publisher XML contains no supplementary-material element. Project links describe software availability, not a verified set of original experiment scripts and recordings."
     },
     {
       "network_node_id": "doi:10.3389/fpsyg.2015.00639",
@@ -4314,6 +4434,143 @@
         }
       ],
       "source_sha256": "2f681d2ba0aeade44632ea77f3986847442152866cbd29c03be48c364a911c48"
+    },
+    {
+      "network_node_id": "doi:10.1016/j.neuropsychologia.2009.11.009",
+      "doi": "10.1016/j.neuropsychologia.2009.11.009",
+      "inventory_status": "confirmed_protocol_and_control_inventory",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Two independent 16-person cohorts. Experiment 1 has right-hand testing; Experiment 2 has left-hand testing with added tactile-only trials and a different condition order.",
+      "evidence_pointer": "https://www.researchgate.net/profile/Michela-Bassolino/publication/40024976_Everyday_use_of_the_computer_mouse_extends_peripersonal_space_representation/links/5b03dd15aca2720ba0995e4d/Everyday-use-of-the-computer-mouse-extends-peripersonal-space-representation.pdf",
+      "source_version": "Published article; primary Methods reviewed through the identified source route",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/profile/Michela-Bassolino/publication/40024976_Everyday_use_of_the_computer_mouse_extends_peripersonal_space_representation/links/5b03dd15aca2720ba0995e4d/Everyday-use-of-the-computer-mouse-extends-peripersonal-space-representation.pdf",
+          "outcome": "Published full text read through web; local PDF download HTTP 403, without retained PDF hash or rendered inspection."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1: right hand",
+          "record_id": "bassolino_2010_mouse_use",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Two independent 16-person cohorts. Experiment 1 has right-hand testing; Experiment 2 has left-hand testing with added tactile-only trials and a different condition order."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2: left hand",
+          "record_id": "bassolino_2010_mouse_use",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Two independent 16-person cohorts. Experiment 1 has right-hand testing; Experiment 2 has left-hand testing with added tactile-only trials and a different condition order."
+        }
+      ],
+      "supporting_task_boundaries": [
+        "Calibration, visual-letter attention checks, and usage questionnaire are embedded support."
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1007/s00221-013-3574-5",
+      "doi": "10.1007/s00221-013-3574-5",
+      "inventory_status": "confirmed_protocol_and_control_inventory",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Two 18-person tactile spatial-discrimination experiments. Participant overlap is unstated; no 36-person unique total is inferred. Three practice tasks are embedded support, not temporal-order experiments.",
+      "evidence_pointer": "https://www.researchgate.net/profile/Kaoru-Sekiyama/publication/236934043_Audiotactile_interactions_beyond_the_space_and_body_parts_around_the_head/links/53daf5d00cf2e38c63397d44/Audiotactile-interactions-beyond-the-space-and-body-parts-around-the-head.pdf",
+      "source_version": "Published article; primary Methods reviewed through the identified source route",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/profile/Kaoru-Sekiyama/publication/236934043_Audiotactile_interactions_beyond_the_space_and_body_parts_around_the_head/links/53daf5d00cf2e38c63397d44/Audiotactile-interactions-beyond-the-space-and-body-parts-around-the-head.pdf",
+          "outcome": "Published full text read through web; local PDF download HTTP 403, without retained PDF hash or rendered inspection."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1: four body sites",
+          "record_id": "teramoto_2013_beyond_head_audiotactile",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Two 18-person tactile spatial-discrimination experiments. Participant overlap is unstated; no 36-person unique total is inferred. Three practice tasks are embedded support, not temporal-order experiments."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2: hand/sound positions",
+          "record_id": "teramoto_2013_beyond_head_audiotactile",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Two 18-person tactile spatial-discrimination experiments. Participant overlap is unstated; no 36-person unique total is inferred. Three practice tasks are embedded support, not temporal-order experiments."
+        }
+      ],
+      "supporting_task_boundaries": [
+        "Three practice blocks: auditory-only, tactile-only, then AT. TOJ appears in cited literature only."
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1111/j.1460-9568.2010.07210.x",
+      "doi": "10.1111/j.1460-9568.2010.07210.x",
+      "inventory_status": "provisional_full_inventory_access_blocked",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "One unresolved publication boundary. The primary abstract describes body-view conditions and audiotactile elevation discrimination, but participant counts and experiment/control boundaries remain inaccessible.",
+      "evidence_pointer": "https://onlinelibrary.wiley.com/doi/10.1111/j.1460-9568.2010.07210.x",
+      "source_version": "Primary abstract with documented full-source access gap",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://onlinelibrary.wiley.com/doi/10.1111/j.1460-9568.2010.07210.x",
+          "outcome": "Primary publisher abstract read; full Methods unavailable."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.zora.uzh.ch/handle/20.500.14742/132532",
+          "outcome": "HTTP200 bot challenge; no article"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://infoscience.epfl.ch/entities/publication/629caa08-c84b-4206-8dce-e68bd233e055",
+          "outcome": "HTTP202 empty body"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.academia.edu/100215212/doi_10_1111_j_1460_9568_2010_07210_x_Seeing_the_body_modulates_audiotactile_integration",
+          "outcome": "timeout/unavailable; linked attachment restricted"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/publication/44805885_Seeing_the_body_modulates_audiotactile_integration",
+          "outcome": "No public full text; no author request sent"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "provisional_protocol",
+          "experiment_label": "Audiotactile elevation task; inventory unresolved",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort_relation": "One unresolved publication boundary. The primary abstract describes body-view conditions and audiotactile elevation discrimination, but participant counts and experiment/control boundaries remain inaccessible."
+        }
+      ],
+      "source_review_limit": "One unresolved publication boundary. The primary abstract describes body-view conditions and audiotactile elevation discrimination, but participant counts and experiment/control boundaries remain inaccessible."
     }
   ],
   "corpus_freeze": {
@@ -4918,6 +5175,26 @@
       ],
       "reason": "Three protocols with 15, 12 and nine participants. Authors NK and AV contribute across experiments; one additional participant overlaps Experiments 1 and 2. Other overlap is unstated, so these counts do not establish 36 independent participants.",
       "evidence_pointer": "https://cibm.ch/wp-content/uploads/1-s2.0-S0028393208003266-main.pdf",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1016/j.neuropsychologia.2009.11.009",
+      "child_study_row_ids": [
+        "doi:10.1016/j.neuropsychologia.2009.11.009::a",
+        "doi:10.1016/j.neuropsychologia.2009.11.009::b"
+      ],
+      "reason": "Two independent 16-person cohorts. Experiment 1 has right-hand testing; Experiment 2 has left-hand testing with added tactile-only trials and a different condition order.",
+      "evidence_pointer": "https://www.researchgate.net/profile/Michela-Bassolino/publication/40024976_Everyday_use_of_the_computer_mouse_extends_peripersonal_space_representation/links/5b03dd15aca2720ba0995e4d/Everyday-use-of-the-computer-mouse-extends-peripersonal-space-representation.pdf",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1007/s00221-013-3574-5",
+      "child_study_row_ids": [
+        "doi:10.1007/s00221-013-3574-5::a",
+        "doi:10.1007/s00221-013-3574-5::b"
+      ],
+      "reason": "Two 18-person tactile spatial-discrimination experiments. Participant overlap is unstated; no 36-person unique total is inferred. Three practice tasks are embedded support, not temporal-order experiments.",
+      "evidence_pointer": "https://www.researchgate.net/profile/Kaoru-Sekiyama/publication/236934043_Audiotactile_interactions_beyond_the_space_and_body_parts_around_the_head/links/53daf5d00cf2e38c63397d44/Audiotactile-interactions-beyond-the-space-and-body-parts-around-the-head.pdf",
       "review_date": "2026-10-27"
     }
   ]

@@ -33,22 +33,31 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 174 study/context rows,
-91 registered publication inventories and 3 unregistered publications.
+Current checkpoint (2026-10-27): 94 frozen publications, 178 study/context rows,
+94 registered publication inventories and 0 unregistered publications.
 Registry presence alone does not certify a Methods-confirmed inventory.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive evidence categories and finalized eleven-contract
-source dispositions. The current audit records 70 Methods-backed inventories
-(55 current primary reviews, 8 retained primary reviews and
+source dispositions. The current audit records 74 Methods-backed inventories
+(59 current primary reviews, 8 retained primary reviews and
 7 identified author versions whose final comparison is pending),
-1 abstract/metadata and 1 partial Methods inventories,
-18 audited access blockers and 1 project-lineage boundary.
-Only 89 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 5 still need inventory
+0 abstract/metadata and 0 partial Methods inventories,
+19 audited access blockers and 1 project-lineage boundary.
+Only 94 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 0 still need inventory
 or contract review. A partial value counts as reviewed when its missing parts
 are explicit; an inherited coarse field or unassessed child does not.
 These are audit counts, not runnable or scientifically qualified study counts.
 The earlier counts below describe individual historical checkpoints.
+All frozen publications now have a Methods-backed inventory or a documented
+access/context disposition, with eleven reviewed contracts for every retained
+row. Mixed-reality trimodal requirements and trial-count conflicts remain;
+vestibular controls and localization protocols do not inherit the E1 proxy.
+Pfeiffer’s ambiguous counts and script-to-paper path mismatch remove its
+source-ready eligibility. Bassolino’s two independent cohorts preserve their
+different baseline/order rules, Teramoto remains spatial discrimination, and
+Aspell retains an unresolved full-source access gap.
+
 The early spatial and temporal-order lineage now distinguishes all eleven
 retained protocols across six publications. Three publications have documented
 full-Methods access gaps; Murray retains Advance Access evidence with final
