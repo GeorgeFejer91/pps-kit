@@ -64,6 +64,8 @@ test("caller-supplied native limits reject the whole variant map before partial 
   const strips = [{ elements: [jitter([0, 1, 2])] }, { elements: [audio(["A", "B"])] }];
   assert.equal(assertSequenceLimit(strips, 5), 5);
   assert.throws(() => assertSequenceLimit(strips, 4), /limit.*4/i);
+  for (const count of [-1, NaN, Infinity, -Infinity, 0.5]) assert.throws(() => assertCountLimit(count), RangeError);
+  assert.equal(assertCountLimit(0, 0), 0);
   for (const limit of [-1, NaN, Infinity, 0.5]) {
     assert.throws(() => previewStripVariants(strips[0], limit), /limit/i);
     assert.throws(() => assertSequenceLimit(strips, limit), /limit/i);
