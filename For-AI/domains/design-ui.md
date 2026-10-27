@@ -85,3 +85,13 @@ rows have no tactile onset. Existing restored snapshots remain unchanged and
 require native timing enrichment and operator review before acceptance. The
 actual 204-row Study 5 browser preview is a regression fixture; native assembly
 receives complete rows plus the existing strip planner's explicit variant choices.
+
+The Tauri Designer composes the same HTML/local planner with explicit native
+commands for generation, file picking, portable import/export and draft storage.
+Native failures stay native. Source algorithms require explicit opt-in; a
+revision change cancels pending generation and completed ingredients invalidate
+later previews. `apps/designer/src-tauri/README.md` records the connected slice,
+local verification and proposed identity. Hosted Segment 6 is descriptive;
+complete participant/phase order must come from the sealed native planner and
+be reviewed before acceptance. Physical output remains unmeasured; existing
+calibration validation and level ceilings remain enforced.

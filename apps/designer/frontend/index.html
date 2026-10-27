@@ -130,6 +130,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 0</span>
           <h2 id="study-segment-title">Choose or Create Study</h2>
+          <button id="native-import-profile" type="button" hidden>Open portable profile</button>
           <button class="segment-info-button" type="button" data-segment-info="study" aria-label="About Segment 0: Choose or Create Study">About</button>
         </div>
         <div class="main-column">
@@ -322,6 +323,13 @@
             <div id="loudness-derived" class="loudness-derived"></div>
           </details>
 
+          <div id="native-generation-controls" hidden>
+            <label><input id="native-source-opt-in" type="checkbox"> Use the native noise algorithm (seeds differ from legacy NumPy audio)</label>
+            <label for="native-source-seed">Native source seed</label>
+            <input id="native-source-seed" type="number" min="0" max="4294967295" step="1" value="0">
+            <button id="native-cancel-generation" type="button" disabled>Cancel generation</button>
+            <p id="native-generation-status" class="decision-note" role="status">Native preparation supports noise, dry WAV and endpoint trajectories. Output levels use the selected estimate; physical output has not been measured.</p>
+          </div>
           <div class="bake-action-row stimulus-commit-row">
             <button id="bake-stimulus" type="button" class="primary">Create Stimulus</button>
             <span id="bake-status" class="status-label required">Choose a stimulus type</span>

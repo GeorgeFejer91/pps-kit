@@ -3,6 +3,7 @@ import {
   refreshDocumentationTypography,
 } from "./documentation_typography.js";
 import { DesignerApiError, createDesignerApi } from "./designer_api.js";
+import { nativeDesigner } from "./native_designer.js";
 import {
   NEXT_STEP,
   STEP_SEGMENT_FOLDERS,
@@ -660,6 +661,7 @@ let staticModeActive = false;
 let designerDirty = false;
 let workflowSaveInFlight = false;
 let hostedFinalizationInFlight = false;
+let nativeGenerationInFlight = false;
 let staticModeReason = "";
 let staticPreloadInventory = null;
 let staticTemplatesCache = null;
@@ -681,6 +683,7 @@ const PAGE_ROUTE_SEGMENTS = {
 };
 
 async function api(path, options = {}) {
+  if (nativeDesigner.enabled) throw new Error("This action is not available in the native preparation build.");
   const { skipStaticGuard = false, rawResponse = false, ...fetchOptions } = options;
   if (staticModeActive && !skipStaticGuard) {
     throw new Error(STATIC_COMPANION_REQUIRED_MESSAGE);
@@ -731,12 +734,13 @@ function apiUrl(path) {
 function staticResourceUrl(path) {
   const cleanPath = String(path || "").trim().replace(/\\/g, "/").replace(/^\/+/, "");
   if (!cleanPath) return "";
+  if (nativeDesigner.enabled) return nativeDesigner.resourceUrl(cleanPath);
   if (/^https?:\/\//i.test(cleanPath)) return cleanPath;
   return new URL(cleanPath, STATIC_REPO_ROOT).href;
 }
 
 async function fetchStaticJson(path) {
-  const url = new URL(path, STATIC_REPO_ROOT);
+  const url = new URL(nativeDesigner.enabled ? nativeDesigner.resourceUrl(path) : new URL(path, STATIC_REPO_ROOT).href);
   url.searchParams.set("v", STATIC_RESOURCE_VERSION);
   const response = await fetch(url.href, { headers: { "Accept": "application/json" } });
   if (!response.ok) {
@@ -921,6 +925,7 @@ function initializeHostedDesignerProgress(editStep = "stimulus") {
 
 function markDesignerDirty() {
   stopActiveSourcePreview();
+  if (nativeDesigner.enabled && state && editModeActive) nativeDesigner.invalidate();
   if (!state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive || designerDirty) return;
   designerDirty = true;
   document.dispatchEvent(new CustomEvent("pps-designer-dirty"));
@@ -1054,7 +1059,7 @@ function renderEditModePanel() {
 // fields are locked (read-only profile or a not-yet-reached custom step), the
 // preview can still be viewed but the trajectory cannot be changed.
 function trajectoryEditingEnabled() {
-  if (staticModeActive) return false;
+  if (staticModeActive && !nativeDesigner.enabled) return false;
   const input = $("start-distance");
   const dynamicDraft = Boolean(pendingBakeRecipe && pendingBakeRecipe.kind !== "fixed_audio");
   return Boolean(dynamicDraft && input && !input.disabled);
@@ -2568,7 +2573,9 @@ function staticRunSetupPreview(design, status) {
   }
   return {
     ready: Boolean(status.finished_profile),
-    prepared: Boolean(status.finished_profile),
+    prepared: false,
+    execution_plan_accepted: false,
+    preview_scope: "descriptive_summary",
     experiment_structure: experimentStructure,
     participant_count: participantCount,
     parts_per_participant: partCount,
@@ -2577,7 +2584,7 @@ function staticRunSetupPreview(design, status) {
     seed: runSetup.seed || design.protocol?.random_seed || 0,
     instruction_profile: runSetup.instruction_profile || {},
     message: status.finished_profile
-      ? "Static profile loaded; start the local companion to materialize and open the runner."
+      ? "Descriptive summary only. Review and accept the complete participant and phase order in the native Designer before preparing a run."
       : (status.message || "This static profile is not launchable yet.")
   };
 }
@@ -2921,6 +2928,15 @@ async function applyStaticProfileInspectionPreview() {
 
 async function loadState(options = {}) {
   const resetMode = options.resetEditMode === true;
+  if (nativeDesigner.enabled) {
+    const response = await nativeDesigner.load();
+    staticModeActive = true; // Shared local planner; native generation is routed explicitly below.
+    state = response.snapshot || await staticStateForTemplate(DEFAULT_STUDY_TEMPLATE_ID);
+    if (resetMode) resetEditMode();
+    renderAll(); updateViewer();
+    setConnectionStatus(true, "native preparation");
+    return;
+  }
   if (forceStaticPreviewEnabled()) {
     if (resetMode) resetEditMode();
     await loadStaticState(new Error("Forced static preview audit mode."));
@@ -2987,6 +3003,8 @@ function renderCapabilityLocks() {
     "export-output-folder", "prepare-experiment",
   ];
   for (const id of unavailable) {
+    if (nativeDesigner.enabled && ["start-distance", "end-distance", "start-rotation", "end-rotation", "movement-duration",
+      "start-hold", "end-hold", "generated-noise-select", "bake-stimulus", "import-audio-spatialize"].includes(id)) continue;
     const control = $(id);
     if (!control) continue;
     control.disabled = true;
@@ -3718,7 +3736,7 @@ function renderBakePanel() {
   const hasAudio = !isManual || Boolean(sourcePath);
   status.textContent = !hasName ? "Stimulus name is required" : !hasAudio ? "Choose an audio file" : `${remake ? "Ready to remake" : "Ready to create"}: ${kind}`;
   status.className = `status-label ${hasName && hasAudio ? "ready" : "required"}`;
-  button.disabled = controlsLocked || !hasName || !hasAudio;
+  button.disabled = controlsLocked || !hasName || !hasAudio || nativeGenerationInFlight;
   const activeSourceKind = pendingBakeRecipe.kind === "fixed_audio"
     ? "fixed_clip"
     : pendingBakeRecipe.kind === "imported_audio"
@@ -3788,7 +3806,8 @@ function renderAudioTable() {
 function compactTrajectorySummary(snapshot = {}) {
   if (!snapshot || snapshot.start_distance_cm === undefined) return "Trajectory saved with source";
   const duration = Number(snapshot.movement_duration_s || 0);
-  return `${Number(snapshot.start_distance_cm)} → ${Number(snapshot.end_distance_cm)} cm · ${Number(snapshot.start_rotation_deg || 0)}° → ${Number(snapshot.end_rotation_deg || 0)}° · ${duration.toFixed(1)} s`;
+  const spatial = value => Number(Number(value || 0).toFixed(2));
+  return `${spatial(snapshot.start_distance_cm)} → ${spatial(snapshot.end_distance_cm)} cm · ${spatial(snapshot.start_rotation_deg)}° → ${spatial(snapshot.end_rotation_deg)}° · ${duration.toFixed(1)} s`;
 }
 
 function renderAudioInventoryCard(audio, role) {
@@ -7085,6 +7104,7 @@ async function loadTemplate() {
     const loadedState = await staticStateForTemplate(id);
     if (workflowSaveInFlight || state !== previousState) return;
     state = loadedState;
+    if (nativeDesigner.enabled) nativeDesigner.invalidate();
     staticModeActive = true;
     resetEditMode();
     setConnectionStatus(false, "static profile");
@@ -7600,6 +7620,7 @@ async function customizeAsNewProject(name) {
 }
 
 async function startBakeStimulus() {
+  if (nativeGenerationInFlight) return;
   if (!ensureEditableProject()) return;
   const recipe = collectBakeRecipe();
   if (!recipe) {
@@ -7607,6 +7628,25 @@ async function startBakeStimulus() {
     return;
   }
   if (!confirmDownstreamInvalidation(recipe.action === "remake" ? "Remaking a Segment 1 ingredient" : "Creating a Segment 1 ingredient", "stimulus")) return;
+  if (nativeDesigner.enabled && recipe.kind !== "fixed_audio") {
+    const optIn = { source_algorithm: recipe.kind === "imported_audio" ? "wav-pcm-dry.v1" : "rand-0.8.8-std-rng-box-muller.v1",
+      accept_non_legacy_source_algorithm: $("native-source-opt-in").checked, seed: recipe.kind === "imported_audio" ? 0 : numberValue("native-source-seed", 0) };
+    const payload = collectPayload({ includeIngredientDraft: true });
+    payload.bake_recipe = recipe;
+    const snapshot = { ...clone(state), design: payload.design, trajectory_controls: payload.trajectory_controls };
+    $("native-cancel-generation").disabled = false;
+    nativeGenerationInFlight = true;
+    $("bake-stimulus").disabled = true;
+    try {
+      const generated = await nativeDesigner.generate(snapshot, payload, optIn);
+      state = generated.snapshot;
+      selectedIngredientLabel = generated.result.source_label;
+      ingredientEditorDirty = false; ingredientEditorMode = "inspect"; pendingBakeRecipe = null;
+      markDesignerSaved(); renderAll(); updateViewer();
+      showToast("Native ingredient created. Review later segments before preparing a run.");
+    } finally { nativeGenerationInFlight = false; $("native-cancel-generation").disabled = true; renderBakePanel(); }
+    return;
+  }
   if (staticModeActive) {
     if (recipe.kind !== "fixed_audio" || recipe.action === "remake") {
       showToast(STATIC_COMPANION_REQUIRED_MESSAGE);
@@ -8802,13 +8842,61 @@ function audioRoleTitle(role) {
 function openAudioPicker(renderMode) {
   pendingInstructionSlot = "";
   pendingAudioImportMode = ["spatialize", "prestimulus"].includes(renderMode) ? renderMode : "preserve";
+  if (nativeDesigner.enabled) { importNativeAudio().catch(reportError); return; }
   $("audio-file-input").click();
 }
 
 function openInstructionAudioPicker(slot) {
   pendingInstructionSlot = slot;
   pendingAudioImportMode = "instruction";
+  if (nativeDesigner.enabled) { importNativeAudio().catch(reportError); return; }
   $("audio-file-input").click();
+}
+
+async function importNativeAudio() {
+  if (!ensureEditableProject() || workflowSaveInFlight) return;
+  const owner = state;
+  const audio = await nativeDesigner.pickAudio();
+  if (!audio || state !== owner || workflowSaveInFlight || !editModeActive) return;
+  audio.target_duration_s = audio.duration_s;
+  if (pendingInstructionSlot) {
+    const parameters = state.design.study_profile_reference_parameters;
+    parameters.dashboard_run_setup ||= {};
+    const profile = parameters.dashboard_run_setup.instruction_profile ||= { slots: [] };
+    profile.slots = profile.slots.filter(item => item.slot !== pendingInstructionSlot);
+    profile.slots.push({ slot: pendingInstructionSlot, label: audio.label, path: audio.path });
+    pendingInstructionSlot = ""; markDesignerDirty(); renderRunInstructions(profile);
+  } else stageImportedAudioForBake(audio, pendingAudioImportMode === "spatialize" ? "spatialize" : "preserve");
+  state.preload_inventory.assets.push({ ...audio, source_kind: "imported_audio" });
+  showToast("Verified local WAV selected; create the ingredient to commit it.");
+}
+
+async function importNativeProfile() {
+  if (workflowSaveInFlight || !confirmDiscardUnsaved("open a portable profile")) return;
+  workflowSaveInFlight = true;
+  const shell = document.querySelector(".app-shell");
+  shell.inert = true;
+  try {
+    const imported = await nativeDesigner.importProfile();
+    if (!imported) return;
+    state.design = imported.design;
+    state.selected_template = CUSTOM_TEMPLATE_ID;
+    state.project = { project_id: "native_import", project_kind: "native_draft", display_name: imported.display_name };
+    state.preload_inventory = { ...state.preload_inventory, assets: imported.assets };
+    state.custom_workflow = { is_custom: true, is_finalized: false, edit_step: "stimulus", confirmed_steps: ["study"], needs_review_steps: [] };
+    state.trajectory_controls = staticTrajectoryControls(state.design);
+    const previewStatus = { finished_profile: true, profile_checks_passed: true };
+    state.trial_file_bake = staticTrialFileBakePayload(state.design, previewStatus);
+    state.trial_pool_bake = staticTrialPoolBakePayload(state.design, state.trial_file_bake);
+    state.block_csv_preview = staticBlockCsvPreviewPayload(state.design, state.trial_pool_bake, previewStatus);
+    state.block_csv_preview.accepted = false;
+    state.project_segments = staticProjectSegments(previewStatus, state.trial_file_bake, state.trial_pool_bake, state.block_csv_preview);
+    state.session = null; state.run_package = null;
+    editModeActive = false;
+    await nativeDesigner.save(state);
+    markDesignerSaved(); renderAll(); updateViewer();
+    showToast("Portable audio verified locally. Review the imported design and schedule before native acceptance.");
+  } finally { workflowSaveInFlight = false; shell.inert = false; }
 }
 
 async function importAudioFromPicker() {
@@ -9617,6 +9705,13 @@ initializePageTabs();
 initializeDocumentationTypography();
 initializeLazySurfaces();
 initializePublicationNetworkSurface();
+if (nativeDesigner.enabled) {
+  $("native-generation-controls").hidden = false;
+  $("native-import-profile").hidden = false;
+  $("native-import-profile").addEventListener("click", () => importNativeProfile().catch(reportError));
+  $("native-cancel-generation").addEventListener("click", () => nativeDesigner.cancel().catch(reportError));
+  document.addEventListener("pps-native-status", event => { $("native-generation-status").textContent = event.detail; });
+}
 window.PPSDesignerApp = Object.freeze({
   preloadAssetUrl: staticResourceUrl,
   getState: () => clone(state),
@@ -9628,9 +9723,11 @@ window.PPSDesignerApp = Object.freeze({
     return api(`/api/profiles/export-${format}`, { method: "POST", rawResponse: true,
       body: JSON.stringify({ expected_revision: normalizedDesignerProgress().revision }) });
   },
-  isHosted: () => staticModeActive,
+  isHosted: () => staticModeActive && !nativeDesigner.enabled,
+  isNative: () => nativeDesigner.enabled,
   restoreHostedDraft: (snapshot) => {
     if (workflowSaveInFlight || !snapshot?.design) return false;
+    if (nativeDesigner.enabled) nativeDesigner.invalidate();
     state = clone(snapshot);
     staticModeActive = true;
     editModeActive = false;

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-designer-invalidate"
+description = "Enables the designer_invalidate command without any pre-configured scope."
+commands.allow = ["designer_invalidate"]
+
+[[permission]]
+identifier = "deny-designer-invalidate"
+description = "Denies the designer_invalidate command without any pre-configured scope."
+commands.deny = ["designer_invalidate"]

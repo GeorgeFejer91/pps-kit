@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-designer-job"
+description = "Enables the designer_job command without any pre-configured scope."
+commands.allow = ["designer_job"]
+
+[[permission]]
+identifier = "deny-designer-job"
+description = "Denies the designer_job command without any pre-configured scope."
+commands.deny = ["designer_job"]

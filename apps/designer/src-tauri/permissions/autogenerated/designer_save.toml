@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-designer-save"
+description = "Enables the designer_save command without any pre-configured scope."
+commands.allow = ["designer_save"]
+
+[[permission]]
+identifier = "deny-designer-save"
+description = "Denies the designer_save command without any pre-configured scope."
+commands.deny = ["designer_save"]

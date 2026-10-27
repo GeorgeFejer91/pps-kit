@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "PPS Experiment Designer Preview",
+  "version": "0.1.0",
+  "identifier": "org.peripersonalspace.designer.preview",
+  "build": {
+    "beforeBuildCommand": "npm --prefix frontend run build",
+    "frontendDist": "../frontend/compiled"
+  },
+  "app": {
+    "windows": [{
+      "label": "main",
+      "visible": false,
+      "title": "PPS Experiment Designer — Native Preview",
+      "width": 1440,
+      "height": 1000,
+      "minWidth": 900,
+      "minHeight": 620,
+      "resizable": true
+    }],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost http://pps-resource.localhost; img-src 'self' data: blob:; media-src 'self' blob: http://pps-resource.localhost; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'"
+    }
+  },
+  "bundle": {
+    "active": false,
+    "resources": {
+      "../../../packages/pps-resources/assets/preloads/": "resources/assets/preloads/",
+      "../../../packages/pps-resources/assets/breathing/": "resources/assets/breathing/",
+      "../../../packages/pps-resources/assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa": "resources/assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa",
+      "../../../packages/pps-resources/study_templates/": "resources/study_templates/",
+      "../../../LICENSE": "LICENSE",
+      "../../../THIRD_PARTY_LICENSES.md": "THIRD_PARTY_LICENSES.md"
+    },
+    "icon": ["../../../packages/pps-resources/assets/app/pps_toolkit_icon.ico"]
+  }
+}

@@ -7323,6 +7323,43 @@ body.desktop-applet .topbar {
   display: none;
 }
 
+body.native-designer .legacy-session-action {
+  display: none;
+}
+
+#native-generation-controls:not([hidden]) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding-block: 12px;
+}
+
+#native-generation-controls > label:first-child,
+#native-generation-status {
+  flex-basis: 100%;
+  min-width: 0;
+}
+
+#native-generation-controls > label:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#native-source-opt-in {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+}
+
+#native-source-seed {
+  width: 10ch;
+}
+
 body.desktop-applet .workspace {
   padding-top: var(--layout-gutter);
 }
