@@ -10,8 +10,8 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 158,
-    "contracts": 1738,
+    "studies": 162,
+    "contracts": 1782,
     "reportedComplete": 298,
     "derivedComplete": 102,
     "parameterStatusCounts": {
@@ -21,8 +21,8 @@
       "derived_complete": 102,
       "explicitly_absent": 22,
       "low_confidence": 10,
-      "not_applicable": 288,
-      "not_assessed": 187,
+      "not_applicable": 365,
+      "not_assessed": 154,
       "not_reported": 59,
       "partial": 437,
       "reported_complete": 298,
@@ -49,6 +49,12 @@
       "doi:10.1007/s00426-020-01365-6::a",
       "doi:10.1007/s00426-020-01365-6::b",
       "doi:10.1007/s00426-020-01365-6::c"
+    ],
+    "doi:10.1016/j.actpsy.2011.01.003": [
+      "doi:10.1016/j.actpsy.2011.01.003::a",
+      "doi:10.1016/j.actpsy.2011.01.003::b",
+      "doi:10.1016/j.actpsy.2011.01.003::c",
+      "doi:10.1016/j.actpsy.2011.01.003::d"
     ],
     "doi:10.1016/j.cortex.2017.08.033": [
       "doi:10.1016/j.cortex.2017.08.033::a",
@@ -88,6 +94,10 @@
     "doi:10.1101/2024.10.25.619776": [
       "doi:10.1101/2024.10.25.619776::a",
       "doi:10.1101/2024.10.25.619776::b"
+    ],
+    "doi:10.1101/2025.09.02.673729": [
+      "doi:10.1101/2025.09.02.673729::a",
+      "doi:10.1101/2025.09.02.673729::b"
     ],
     "doi:10.1152/jn.00652.2017": [
       "doi:10.1152/jn.00652.2017::a",
@@ -373,21 +383,24 @@
     {
       "networkNodeId": "doi:10.1016/j.actpsy.2011.01.003",
       "studyIds": [
-        "doi:10.1016/j.actpsy.2011.01.003"
+        "doi:10.1016/j.actpsy.2011.01.003::a",
+        "doi:10.1016/j.actpsy.2011.01.003::b",
+        "doi:10.1016/j.actpsy.2011.01.003::c",
+        "doi:10.1016/j.actpsy.2011.01.003::d"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 44
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
-        "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "registered": true,
+        "evidenceStatus": "audited_source_access_gap",
+        "inventoryStatus": "minimum_numbered_inventory_with_full_source_access_gap",
+        "studyRowCount": 4,
+        "rowsWithElevenSourceDispositions": 4,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -1387,17 +1400,17 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
+        "registered": true,
+        "evidenceStatus": "audited_source_access_gap",
+        "inventoryStatus": "provisional_chapter_context_with_full_source_access_gap",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -1496,21 +1509,22 @@
     {
       "networkNodeId": "doi:10.1101/2025.09.02.673729",
       "studyIds": [
-        "doi:10.1101/2025.09.02.673729"
+        "doi:10.1101/2025.09.02.673729::a",
+        "doi:10.1101/2025.09.02.673729::b"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 22
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
-        "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_same_cohort_two_acquisition_phases",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -8961,238 +8975,1490 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1016/j.actpsy.2011.01.003",
+      "studyRowId": "doi:10.1016/j.actpsy.2011.01.003::a",
       "networkNodeId": "doi:10.1016/j.actpsy.2011.01.003",
-      "label": "Performance in haptic geometrical matching tasks depends on movement and position of the arms.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Performance in haptic geometrical matching tasks depends on movement and position of the arms. (a)",
+      "experimentLabel": "Provisional Experiment 1 — haptic geometry/acoustic context",
+      "inventoryStatus": "minimum_numbered_inventory_with_full_source_access_gap",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Acoustic pointing/cue tasks occur in this publication; exact experiment-specific sound implementation unresolved. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
-            "source_recipe_or_asset_provenance"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Experiment 1 is one of the two initial haptic-matching/acoustic-pointing experiments; the abstract does not assign these tasks separately to Experiments 1 and 2. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Experiment 1 is one of the two initial haptic-matching/acoustic-pointing experiments; the abstract does not assign these tasks separately to Experiments 1 and 2. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Spatial matching/pointing acquisition; no speeded tactile-detection PPS task established. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. No tactile-detection SOA schedule is established for the represented geometric judgment. Acoustic-cue timing, if applicable, remains an inaccessible procedure detail; no zero-SOA default. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Active haptic geometry is distinct from a timed cutaneous detection pulse. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "H 1 abstract, Experiment 1; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "block_count",
-            "block_composition"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1016/j.actpsy.2011.01.003::b",
+      "networkNodeId": "doi:10.1016/j.actpsy.2011.01.003",
+      "label": "Performance in haptic geometrical matching tasks depends on movement and position of the arms. (b)",
+      "experimentLabel": "Provisional Experiment 2 — haptic geometry/acoustic context",
+      "inventoryStatus": "minimum_numbered_inventory_with_full_source_access_gap",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "not_applicable": 11
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Acoustic pointing/cue tasks occur in this publication; exact experiment-specific sound implementation unresolved. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Experiment 2 is one of the two initial haptic-matching/acoustic-pointing experiments; the abstract does not assign these tasks separately to Experiments 1 and 2. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Experiment 2 is one of the two initial haptic-matching/acoustic-pointing experiments; the abstract does not assign these tasks separately to Experiments 1 and 2. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Spatial matching/pointing acquisition; no speeded tactile-detection PPS task established. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. No tactile-detection SOA schedule is established for the represented geometric judgment. Acoustic-cue timing, if applicable, remains an inaccessible procedure detail; no zero-SOA default. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Active haptic geometry is distinct from a timed cutaneous detection pulse. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 2; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1016/j.actpsy.2011.01.003::c",
+      "networkNodeId": "doi:10.1016/j.actpsy.2011.01.003",
+      "label": "Performance in haptic geometrical matching tasks depends on movement and position of the arms. (c)",
+      "experimentLabel": "Provisional Experiment 3 — haptic geometry/acoustic context",
+      "inventoryStatus": "minimum_numbered_inventory_with_full_source_access_gap",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "not_applicable": 11
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Acoustic alignment cues are explicitly included. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Experiment 3 adds acoustic cues with different alignments to reference and test bars. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Experiment 3 adds acoustic cues with different alignments to reference and test bars. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Spatial matching/pointing acquisition; no speeded tactile-detection PPS task established. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. No tactile-detection SOA schedule is established for the represented geometric judgment. Acoustic-cue timing, if applicable, remains an inaccessible procedure detail; no zero-SOA default. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Active haptic geometry is distinct from a timed cutaneous detection pulse. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 3; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1016/j.actpsy.2011.01.003::d",
+      "networkNodeId": "doi:10.1016/j.actpsy.2011.01.003",
+      "label": "Performance in haptic geometrical matching tasks depends on movement and position of the arms. (d)",
+      "experimentLabel": "Provisional Experiment 4 — haptic geometry/acoustic context",
+      "inventoryStatus": "minimum_numbered_inventory_with_full_source_access_gap",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "not_applicable": 11
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. An auditory condition is not established for rear-space matching by the abstract. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Experiment 4 tests geometric matching in rear peripersonal space. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Experiment 4 tests geometric matching in rear peripersonal space. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Spatial matching/pointing acquisition; no speeded tactile-detection PPS task established. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. No tactile-detection SOA schedule is established for the represented geometric judgment. Acoustic-cue timing, if applicable, remains an inaccessible procedure detail; no zero-SOA default. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Active haptic geometry is distinct from a timed cutaneous detection pulse. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. The primary abstract does not provide this experiment’s full component specification. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
+          "compositeValue": "",
+          "pageOrSection": "H 1 abstract, Experiment 4; article pp.382–389 (no experiment-specific page recovered)",
+          "evidenceNote": "Primary abstract only, not a full Methods review. Numbered experiments are explicit, but cohort sizes, overlap and complete procedure remain inaccessible. No parameters copied from citing haptics papers.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+          "evidenceSourceUrl": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -39309,236 +40575,372 @@
     {
       "studyRowId": "doi:10.1093/oso/9780198851738.003.0005",
       "networkNodeId": "doi:10.1093/oso/9780198851738.003.0005",
-      "label": "Visuo-tactile predictive mechanisms of peripersonal space",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Visuo-tactile predictive mechanisms of peripersonal space (a)",
+      "experimentLabel": "Predictive visuo-tactile book chapter — provisional context",
+      "inventoryStatus": "provisional_chapter_context_with_full_source_access_gap",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
-            "source_recipe_or_asset_provenance"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Contextual predictive-mechanism synthesis, with no new acquisition identified in the available primary abstract. Full chapter access is blocked, so this classification is provisional; cited experiments are not chapter-owned protocols. Full Methods/chapter access is blocked; this boundary is provisional and does not establish a complete acquisition inventory.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "CH 1 chapter abstract, pp.81–100; CH 2 author-institution metadata",
+          "evidenceNote": "Primary chapter abstract and author-institution metadata establish a synthesis chapter. Full main text unavailable; no-new-acquisition classification remains provisional, not a complete Methods audit.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/oso/9780198851738.003.0005",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "block_count",
-            "block_composition"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "sourceType": "primary_abstract_with_documented_full_source_access_gap",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -42335,238 +43737,746 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1101/2025.09.02.673729",
+      "studyRowId": "doi:10.1101/2025.09.02.673729::a",
       "networkNodeId": "doi:10.1101/2025.09.02.673729",
-      "label": "The Proximity Prediction Hypothesis: How predictive coding of CT-touch explains Autonomous Sensory Meridian Response and its therapeutic applications",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "The Proximity Prediction Hypothesis: How predictive coding of CT-touch explains Autonomous Sensory Meridian Response and its therapeutic applications (a)",
+      "experimentLabel": "Same-cohort EEG listening context",
+      "inventoryStatus": "confirmed_same_cohort_two_acquisition_phases",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. 18 full recordings: 13 creator ASMR sounds plus 5 experimenter-recorded ambient traffic controls.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "S 1 PDFpp.11–12 §4.1.2",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
-            "source_recipe_or_asset_provenance"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Full headphone recordings, participant supine on massage table in sound-attenuated room.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. One randomized listening block precedes retrospective questionnaire; EEG is contextual acquisition.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2–4.1.3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Listening/EEG phase; subjective ratings are deferred to the later questionnaire.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "S 1 PDFpp.11–12 §4.1",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Reported 5-second ISI between 30-second sound trials; no jitter given.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. No programmed touch is described in the EEG listening protocol. Theoretical touch prediction is not an AT onset schedule.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "S 1 §4.1.2",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. No delivered tactile target in the described listening acquisition; scalp tingles are an experience to report later.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "S 1 §4.1.2–4.1.3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Ambient traffic recordings are auditory controls within the initial listening block.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Traffic controls are listening conditions, not tactile no-target catches.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "Five controls are already part of 18; no added catch rows.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Single block 18 stimuli, 13 experimental+5 control; same 64 subsequent survey participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "S 1 PDFpp.11–12 §4.1.1–4.1.2",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "Do not turn 1152 planned presentations into usable EEG epochs or sum 64 EEG+64 survey as 128 people.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. One randomized 18-sound block, then the questionnaire.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2–4.1.3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "block_count",
-            "block_composition"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1101/2025.09.02.673729::b",
+      "networkNodeId": "doi:10.1101/2025.09.02.673729",
+      "label": "The Proximity Prediction Hypothesis: How predictive coding of CT-touch explains Autonomous Sensory Meridian Response and its therapeutic applications (b)",
+      "experimentLabel": "Same-cohort retrospective ASMR questionnaire",
+      "inventoryStatus": "confirmed_same_cohort_two_acquisition_phases",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "not_applicable": 11
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. First 5 seconds of 13 ASMR experimental recordings replayed as questionnaire reminders.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 PDFpp.11–12 §4.1.2–4.1.3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Headphone recordings evoke proximity; no metric trajectory is specified.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2–4.1.3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Immediately after EEG listening, randomized 5-second reminders followed by subjective ratings.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Retrospective ASMR classification, optional intensity and pleasantness/arousal sliders.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.3; p.16 Table 2",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Questionnaire ITI is not specified; do not transfer the preceding EEG’s 5-second ISI.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2–4.1.3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. No delivered tactile stimulus is paired with survey sound; imagined/predicted CT touch supplies no executable AT SOA.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 §4.1.2–4.1.3; theoretical §§2–3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. No delivered tactile cue in this questionnaire. Tingles are subjective outcomes; proposed CT-fibre activation is not a programmed tactile stimulus.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 §4.1.2–4.1.3; theoretical §§2–3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. Traffic controls belong to initial EEG listening; preprint questionnaire explicitly describes 13 experimental reminders only.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2–4.1.3; Abstract",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. No go/no-go catch family in the survey; non-ASMR responses remain rated outcomes.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "Survey questions solicit a response for each sound; a No answer is not a catch trial.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. 13 experimental sound items per person; 64 same participants from earlier EEG.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 PDFpp.11–12 §4.1; p.15 Fig 3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "832 is an opportunity count only, not asserted observed dataset size. Final-version 18-item survey is separate evidence.",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_applicable",
+          "value": "Outside direct audiotactile PPS reconstruction. One post-EEG questionnaire with randomized reminder items.",
+          "compositeValue": "",
+          "pageOrSection": "S 1 PDFp.12 §4.1.2–4.1.3",
+          "evidenceNote": "Full primary bioRxiv v 1 posted 7 September 2025, 29-page PDF. Only this version supplies these values; later final changes are recorded separately. Exact bioRxiv v1 reviewed, posted 2025-09-07. Later final survey includes 18 clips; this is not imported into v1. No external tactile stimulus or original neural result is reported for this manuscript.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1101/2025.09.02.673729",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "sourceType": "exact_primary_preprint_v1_with_final_version_comparison",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent or provisional context; source facts and access limits retained in contract value.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -60890,20 +62800,20 @@
   ],
   "inventoryAudit": {
     "publications": 94,
-    "registeredInventories": 70,
-    "methodsReviewedInventories": 59,
-    "auditedAccessBlockers": 8,
+    "registeredInventories": 73,
+    "methodsReviewedInventories": 60,
+    "auditedAccessBlockers": 10,
     "projectLineageReviews": 1,
-    "publicationsWithAllContractDispositions": 67,
-    "inventoryAndContractsAudited": 67,
-    "remainingInventoryOrContractAudit": 27,
+    "publicationsWithAllContractDispositions": 70,
+    "inventoryAndContractsAudited": 70,
+    "remainingInventoryOrContractAudit": 24,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 1,
-      "audited_source_access_gap": 8,
+      "audited_source_access_gap": 10,
       "author_version_methods_reviewed_final_comparison_pending": 6,
-      "not_registered": 24,
+      "not_registered": 21,
       "partial_methods_inventory": 1,
-      "primary_methods_reviewed": 45,
+      "primary_methods_reviewed": 46,
       "primary_project_lineage_reviewed": 1,
       "retained_primary_methods_review": 8
     },

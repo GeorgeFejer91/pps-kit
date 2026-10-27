@@ -3078,6 +3078,203 @@
           "cohort": "Same longitudinal case; 26 tactile controls, 20-subset pressure/body-image tasks and 16 usable body-image controls after four technical exclusions. These are overlapping samples."
         }
       ]
+    },
+    {
+      "network_node_id": "doi:10.1016/j.actpsy.2011.01.003",
+      "doi": "10.1016/j.actpsy.2011.01.003",
+      "inventory_status": "minimum_numbered_inventory_with_full_source_access_gap",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Four numbered experiments explicit in abstract; protocol/cohort inventory provisional until full Methods. N, sex/age, exclusions and participant overlap across all four experiments inaccessible. Four experiments do not establish four independent cohorts.",
+      "evidence_pointer": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+      "source_review_limit": "Accessible primary abstract/identity reviewed. Complete Methods/text inaccessible after documented routes; unknown cohorts and unsupported parameters remain gaps.",
+      "supporting_task_boundaries": [
+        "Experiments 1/2 collectively concern haptic matching and acoustic pointing; exact task-to-number mapping unresolved.",
+        "Experiment 3 adds acoustic alignment cues; Experiment 4 concerns rear-space geometric matching.",
+        "No direct tactile-RT PPS acquisition established; do not borrow methods from later haptic studies cited in search results."
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+          "outcome": "Indexed author abstract read. Direct PubMed returned browser-check page; ScienceDirect 403 and public XML metadata-only. Full Methods unavailable."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0001691811000047",
+          "outcome": "HTTP 403 response retained; no participant/Methods text. ElsevierXML 1836 bytes metadata-only; no repository PDF in OpenAlex locations."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "adjacent_protocol",
+          "experiment_label": "Provisional Experiment 1 — haptic geometry/acoustic context",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_context_audited_access_gap",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort": "N, sex/age, exclusions and participant overlap across all four experiments inaccessible. Four experiments do not establish four independent cohorts."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "adjacent_protocol",
+          "experiment_label": "Provisional Experiment 2 — haptic geometry/acoustic context",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_context_audited_access_gap",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort": "N, sex/age, exclusions and participant overlap across all four experiments inaccessible. Four experiments do not establish four independent cohorts."
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "adjacent_protocol",
+          "experiment_label": "Provisional Experiment 3 — haptic geometry/acoustic context",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_context_audited_access_gap",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort": "N, sex/age, exclusions and participant overlap across all four experiments inaccessible. Four experiments do not establish four independent cohorts."
+        },
+        {
+          "suffix": "d",
+          "instance_kind": "adjacent_protocol",
+          "experiment_label": "Provisional Experiment 4 — haptic geometry/acoustic context",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_context_audited_access_gap",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort": "N, sex/age, exclusions and participant overlap across all four experiments inaccessible. Four experiments do not establish four independent cohorts."
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1093/oso/9780198851738.003.0005",
+      "doi": "10.1093/oso/9780198851738.003.0005",
+      "inventory_status": "provisional_chapter_context_with_full_source_access_gap",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Provisional no-new-acquisition classification from primary abstract and institutional metadata; full chapter inaccessible. No original sample established in accessible material; absence not confirmed by a full main-text audit.",
+      "evidence_pointer": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+      "source_review_limit": "Accessible primary abstract/identity reviewed. Complete Methods/text inaccessible after documented routes; unknown cohorts and unsupported parameters remain gaps.",
+      "supporting_task_boundaries": [
+        "Cited visual/auditory–tactile experiments remain source-owned; no chapter-level composite stimulus contract."
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://academic.oup.com/book/39433/chapter-abstract/339163366",
+          "outcome": "Primary abstract available through index; direct main chapter 403/minimal page. Legacy public PDF route redirects to generic blocked page."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://research-portal.uu.nl/en/publications/visuo-tactile-predictive-mechanisms-of-peripersonal-space/",
+          "outcome": "Author-institution record corroborates chapter identity and abstract; no downloadable full chapter found."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://repository.ubn.ru.nl/handle/2066/234290",
+          "outcome": "Primary institutional handle identified from OpenAlex; web 403, direct read timed out. No full-text claim."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.pageplace.de/preview/DT0400.9780192592606_A41359643/preview-9780192592606_A41359643.pdf",
+          "outcome": "Public 36-page retailer preview includes TOC and early chapters; requested chapter 5 is not included. Not evidence of its Methods. SHA256 c81c10f029d641554ec996f680ebb29cf0cd791e193e937556dfb944d1ac4b29."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "publication_context",
+          "experiment_label": "Predictive visuo-tactile book chapter — provisional context",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_context_audited_access_gap",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort": "No original sample established in accessible material; absence not confirmed by a full main-text audit."
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1101/2025.09.02.673729",
+      "doi": "10.1101/2025.09.02.673729",
+      "inventory_status": "confirmed_same_cohort_two_acquisition_phases",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Full v 1 primary Methods read; two linked acquisition phases of one cohort, no direct externally stimulated AT experiment. 64 York undergraduates, over 18, no required previous ASMR experience; no known negative ASMR reaction. Same people complete EEG then survey, not 128 people. Sex/age distribution/exclusion flow beyond these criteria not given.",
+      "evidence_pointer": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+      "source_review_limit": "Full exact v1 Methods reviewed; final is a version comparison, not another frozen publication or an independent replication.",
+      "supporting_task_boundaries": [
+        "Paper reports behavioral rating models; no original EEG/MEG analysis, heart-rate measurement, vagal measurement or physical CT-touch intervention is established in its own dataset.",
+        "Neural/autonomic cascade and clinical applications are hypotheses. Cited studies and proposed future tests are not new current cohorts.",
+        "136 ASMR-positive intensity responses are a conditional analysis subset, not recruited participants or the total presentation schedule."
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
+          "outcome": "Full primary PDF retrieved by normal HTTPS and read. Web reader initially 403; successful direct response/hash retained. SHA256 d21577726bc342414380448f6771e85ed782e2ead8aa208fca161fae25c2d7d4."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.biorxiv.org/details/biorxiv/10.1101/2025.09.02.673729",
+          "outcome": "Official metadata identifies singlev 1, date 2025-09-07 and type new results. published field NA; do not infer no final from that field. SHA256 4ae1627d68361f287fd0d3b519e069e3b26468070721060fd800502f8b230fb8."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2025.1688172/pdf",
+          "outcome": "Downloaded for narrow same-title/version comparison only; not a new assigned corpus entry. SHA256 5f42a2adbdaac2af27515cacdd09a441ad2c17007961e329e404e9715b06c656."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "adjacent_protocol",
+          "experiment_label": "Same-cohort EEG listening context",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_subjective_context",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "cohort": "64 York undergraduates, over 18, no required previous ASMR experience; no known negative ASMR reaction. Same people complete EEG then survey, not 128 people. Sex/age distribution/exclusion flow beyond these criteria not given."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "adjacent_protocol",
+          "experiment_label": "Same-cohort retrospective ASMR questionnaire",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_auditory_subjective_context",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "cohort": "64 York undergraduates, over 18, no required previous ASMR experience; no known negative ASMR reaction. Same people complete EEG then survey, not 128 people. Sex/age distribution/exclusion flow beyond these criteria not given."
+        }
+      ],
+      "source_lineage": {
+        "candidate_final_doi": "10.3389/fnbeh.2025.1688172",
+        "status": "Strong same-report lineage: same title/coauthors/N 64/materials and identical primary model estimates; official bioRxiv published link field remains NA.",
+        "source": "S 1 pp 11–16; F 1 pp 8–11",
+        "differences": [
+          "Preprint authors listed Flockton, McCall, Preston; final lists Flockton, Preston, McCall.",
+          "Preprint questionnaire explicitly 13 experimental 5 sreminders; final Methods explicitly 13 experimental+5 traffic 5 sclips. Keep final 18 out of v 1 contract.",
+          "Preprint details preceding 30 s/5 sEEG block and supine posture; final reframes main Methods around survey and does not repeat all initial EEG parameters.",
+          "Final explicitly says no original neural analyses reported and future EEG/MEG work planned. It retains Methods 0–10 versusTable 2 caption 1–10 discrepancy."
+        ],
+        "independence": "Not an independent replication or additional 64 participants. Do not declare exact data-file identity without data access; none retrieved."
+      },
+      "source_conflicts": [
+        {
+          "field": "intensity_scale",
+          "source": "S 1 p 12§4.1.3 versus p.  16 Table 2",
+          "value": "Methods 0–10; table caption 1–10. Do not choose one by convenience."
+        },
+        {
+          "field": "survey_controls",
+          "source": "S 1 Abstract versus p.  12§4.1.2–4.1.3",
+          "value": "Abstract describes comparison with controls, but v 1 questionnaire procedure names 13 experimental reminders only; 5 traffic controls are explicitly in the preceding EEG block. Exact interpretation of abstract controls unresolved."
+        }
+      ]
     }
   ],
   "corpus_freeze": {
@@ -3576,6 +3773,28 @@
       ],
       "reason": "Whole-source inventory separates direct AT acquisition from adjacent body-representation protocol. Old publication row is an alias, not an additional experiment.",
       "evidence_pointer": "https://journals.sagepub.com/doi/pdf/10.3233/RNN-120286?download=true",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1016/j.actpsy.2011.01.003",
+      "child_study_row_ids": [
+        "doi:10.1016/j.actpsy.2011.01.003::a",
+        "doi:10.1016/j.actpsy.2011.01.003::b",
+        "doi:10.1016/j.actpsy.2011.01.003::c",
+        "doi:10.1016/j.actpsy.2011.01.003::d"
+      ],
+      "reason": "Separate numbered or explicitly linked source protocols; no extra recruitment inferred from child rows.",
+      "evidence_pointer": "https://pubmed.ncbi.nlm.nih.gov/21295763/",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1101/2025.09.02.673729",
+      "child_study_row_ids": [
+        "doi:10.1101/2025.09.02.673729::a",
+        "doi:10.1101/2025.09.02.673729::b"
+      ],
+      "reason": "Separate numbered or explicitly linked source protocols; no extra recruitment inferred from child rows.",
+      "evidence_pointer": "https://www.biorxiv.org/content/10.1101/2025.09.02.673729v1.full.pdf",
       "review_date": "2026-10-27"
     }
   ]
