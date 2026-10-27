@@ -38,6 +38,41 @@ fn request() -> GenerationRequest {
 }
 
 #[test]
+fn explicit_peak_normalization_reports_gain_and_leaves_tactile_unchanged() {
+    let mut input = request();
+    let target = 20.0 * 0.9_f64.log10();
+    input.level = LevelPolicy::PeakNormalize {
+        target_peak_dbfs: target,
+        peak_ceiling_dbfs: target,
+    };
+    let cancel = AtomicBool::new(false);
+    let prepared = prepare(&input, &cancel).unwrap();
+    let tactile = prepared.tactile_pcm().to_vec();
+    let mut stereo = vec![0.1; prepared.dry_pcm().len() * 2];
+    stereo[123] = -0.3;
+    let generated = compose_spatial_output(prepared, stereo, &cancel).unwrap();
+    assert_eq!(generated.level_qc.kind, "peak_normalize");
+    assert_eq!(generated.level_qc.target_peak_dbfs, Some(target));
+    assert!((generated.level_qc.audio_peak_dbfs - target).abs() < 0.00001);
+    assert!((generated.interleaved_pcm[0] - 0.3).abs() < 0.000001);
+    assert!((generated.interleaved_pcm[61 * 3 + 1] + 0.9).abs() < 0.000001);
+    for (frame, expected) in generated.interleaved_pcm.chunks_exact(3).zip(tactile) {
+        assert_eq!(frame[2], expected);
+    }
+    assert!(!generated.level_qc.physical_spl_qualified);
+    assert!(generated.level_qc.calibration_window_frames.is_none());
+    assert!(matches!(
+        compose_spatial_output(prepare(&input, &cancel).unwrap(), vec![0.0; 16000], &cancel),
+        Err(GenerationError::Invalid("silent_peak_normalization"))
+    ));
+    input.level = LevelPolicy::PeakNormalize {
+        target_peak_dbfs: 0.0,
+        peak_ceiling_dbfs: -1.0,
+    };
+    assert!(prepare(&input, &cancel).is_err());
+}
+
+#[test]
 fn deterministic_white_is_real_pcm_and_explicitly_not_numpy_seed_compatible() {
     let prepared = prepare(&request(), &AtomicBool::new(false)).unwrap();
     let repeated = prepare(&request(), &AtomicBool::new(false)).unwrap();

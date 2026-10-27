@@ -1,5 +1,6 @@
 //! Bounded offline stimulus preparation. No playback, job authority or Python runtime.
 pub mod assembly;
+pub mod baseline;
 pub mod design;
 mod imported;
 mod level;
@@ -34,7 +35,7 @@ pub fn generation_capabilities() -> serde_json::Value {
         "trajectory_modes":["fixed","linear","polar"],
         "imported_wav":{"encodings":["pcm16","pcm24","pcm32","float32"],"channels":["mono","stereo_mean"],
             "length_policies":["exact","trim_or_zero_pad"],"sample_rate_policy":"exact_match","sha256_required":true},
-        "level_modes":["preserve","linear_db_ramp"],"physical_spl_qualified":false,
+        "level_modes":["preserve","linear_db_ramp","peak_normalize"],"physical_spl_qualified":false,
         "designer_adapter":{"input":"collectPayload plus bake_recipe","ingredient_kinds":["generated_noise","imported_audio"],
             "source_profile_ids":["continuous_noise","dynaspace_gaussian_burst_train"],"output_channels":2,
             "source_algorithm_opt_in_required":true,"fixed_audio_preservation":false,"measured_calibration_receipt":false,
@@ -48,6 +49,8 @@ pub fn generation_capabilities() -> serde_json::Value {
             "order_algorithms":["legacy",run_order::FACTORADIC_ALGORITHM,"fixed","counterbalanced_rotation","seeded_random_permutation"],
             "order_compatibility":run_order::ORDER_COMPATIBILITY,"runner_instruction_execution_qualified":false},
         "renderer_contract":"pps-3dti-spatialize.v2","near_field_ild":false,"far_distance_filter":false,
+        "stationary_comparator":{"policy":baseline::BASELINE_POLICY,"source_algorithm_opt_in_required":true,"seed_policy":baseline::BASELINE_SEED_POLICY,
+            "source_kinds":["generated_noise"],"position":"saved_source_t0","absent_loudness_policy":"explicit_digital_peak_0_90","inherits_moving_validation":false},
         "max_frames":MAX_FRAMES,"max_spectral_frames":MAX_SPECTRAL_FRAMES,"max_tactile_cues":MAX_TACTILE_CUES})
 }
 
@@ -187,6 +190,10 @@ pub struct TactileCue {
 pub enum LevelPolicy {
     Preserve {
         gain_db: f64,
+        peak_ceiling_dbfs: f64,
+    },
+    PeakNormalize {
+        target_peak_dbfs: f64,
         peak_ceiling_dbfs: f64,
     },
     LinearDbRamp {
