@@ -2805,6 +2805,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "pps-experiment-designer"
+version = "0.1.0"
+dependencies = [
+ "hound",
+ "percent-encoding",
+ "pps-designer-core",
+ "pps-session-package",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "pps-experiment-runner"
 version = "0.1.0"
 dependencies = [
