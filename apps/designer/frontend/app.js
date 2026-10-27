@@ -4,6 +4,7 @@ import {
 } from "./documentation_typography.js";
 import { DesignerApiError, createDesignerApi } from "./designer_api.js";
 import { nativeDesigner } from "./native_designer.js";
+import { audioBoxLabels, countStripVariants, iterateStripVariants, previewStripVariants, assertSequenceLimit, assertCountLimit, variantCountLabel } from "./sequence_variants.js";
 import {
   NEXT_STEP,
   STEP_SEGMENT_FOLDERS,
@@ -902,9 +903,12 @@ function refreshHostedWorkflowSteps() {
     } else if (stepId === "stimulus" && !sources.length) {
       complete = false;
       missing = ["Add at least one stimulus or instruction source."];
-    } else if (stepId === "trials" && (!strips.length || strips.some((strip) => stripPreviewVariants(strip).length < 1))) {
+    } else if (stepId === "trials" && (!strips.length || strips.some((strip) => countStripVariants(strip) < 1))) {
       complete = false;
       missing = ["Add at least one complete trial family."];
+    } else if (stepId === "trials" && !Number.isSafeInteger(strips.reduce((total, strip) => total + countStripVariants(strip), 0))) {
+      complete = false;
+      missing = ["Too many variants to count exactly. Reduce choices before generating; your draft is preserved."];
     } else if (stepId === "baseline" && !(protocol.soa_values_ms || []).length) {
       complete = false;
       missing = ["Add at least one SOA value."];
@@ -1609,7 +1613,23 @@ function staticTrialFileRow({
   };
 }
 
-function staticTrialFileBakePayload(design, status) {
+function staticTrialFileCount(design) {
+  const protocol = design.protocol || {};
+  const soas = (protocol.soa_values_ms || []).filter(value => Number.isFinite(Number(value)));
+  const baselines = staticBaselineSoaValues(protocol, soas).length;
+  return (protocol.trial_strips || []).reduce((total, strip) => {
+    const variants = countStripVariants(strip);
+    const crossed = enabled => enabled !== false ? variants : Math.min(1, variants);
+    return total + variants * staticStripSoaValues(strip, soas).length
+      + (baselines ? crossed(protocol.baseline_crosses_sequence_variants) * baselines : 0)
+      + (protocol.include_catch_trials ? crossed(protocol.catch_crosses_sequence_variants) : 0)
+      + (protocol.include_auditory_only_trials ? crossed(protocol.auditory_only_crosses_sequence_variants) : 0);
+  }, 0);
+}
+
+function staticTrialFileBakePayload(design, status, limit = Number.MAX_SAFE_INTEGER) {
+  assertSequenceLimit(design.protocol?.trial_strips || [], limit);
+  assertCountLimit(staticTrialFileCount(design), limit);
   const protocol = design.protocol || {};
   const sourceInventory = staticSourceInventory(design);
   const soaValues = (protocol.soa_values_ms || []).filter((value) => Number.isFinite(Number(value))).map((value) => Number(value));
@@ -1622,9 +1642,11 @@ function staticTrialFileBakePayload(design, status) {
   const files = [];
   let variantCounter = 1;
   for (const [rowIndex, strip] of (protocol.trial_strips || []).entries()) {
-    const variants = stripPreviewVariants(strip);
+    const variants = iterateStripVariants(strip);
     const rowLabel = strip.label || `Trial type ${rowIndex + 1}`;
-    for (const [variantListIndex, variant] of variants.entries()) {
+    let variantListIndex = -1;
+    for (const variant of variants) {
+      variantListIndex++;
       const durationMs = staticVariantDurationMs(variant, sourceInventory);
       const loomingOnsetMs = staticVariantLoomingOnsetMs(variant, sourceInventory);
       const noiseType = staticVariantNoiseType(variant, sourceInventory);
@@ -1830,7 +1852,7 @@ function applyTrialPoolExactFamilyCounts(records, settings = {}, warnings = []) 
   return exactCounts;
 }
 
-function staticTrialPoolRows(files, settings) {
+function staticTrialPoolRows(files, settings, limit = Number.MAX_SAFE_INTEGER) {
   const records = files.map((file, index) => {
     const configured = staticConfiguredRepetitions(file, settings);
     const baseRepetitions = Math.floor(configured);
@@ -1867,6 +1889,7 @@ function staticTrialPoolRows(files, settings) {
     for (const record of rotated.slice(0, extraCount)) record.fractionalExtra = true;
   }
   applyTrialPoolExactFamilyCounts(records, settings);
+  assertCountLimit(records.reduce((total, record) => total + record.baseRepetitions + (record.fractionalExtra ? 1 : 0), 0), limit);
   const rows = [];
   let trialPoolIndex = 1;
   for (const record of records) {
@@ -1908,10 +1931,10 @@ function staticTrialPoolRows(files, settings) {
   return rows;
 }
 
-function staticTrialPoolBakePayload(design, trialFileBake) {
+function staticTrialPoolBakePayload(design, trialFileBake, limit = Number.MAX_SAFE_INTEGER) {
   const protocol = design.protocol || {};
   const settings = staticTrialPoolSettings(protocol);
-  const poolRows = staticTrialPoolRows(trialFileBake.files || [], settings);
+  const poolRows = staticTrialPoolRows(trialFileBake.files || [], settings, limit);
   const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0, auditory_only: 0 };
   for (const row of poolRows) {
     if (Object.prototype.hasOwnProperty.call(familyCounts, row.family)) familyCounts[row.family] += 1;
@@ -2705,11 +2728,14 @@ function auditSourceSnapshot() {
 }
 
 function auditTrialStripSnapshot(strip, index) {
-  const variants = stripPreviewVariants(strip);
+  const total = countStripVariants(strip);
+  const variants = previewStripVariants(strip, TRIAL_PREVIEW_LIMIT);
   return {
     index: index + 1,
     label: strip?.label || `Trial type ${index + 1}`,
-    variant_count: variants.length,
+    variant_count: Number.isFinite(total) ? total : null,
+    variant_count_overflow: !Number.isFinite(total),
+    variants_truncated: total > variants.length,
     variants: variants.map((variant) => variant.map((choice) => ({
       kind: choice.kind || "",
       label: choice.label || "",
@@ -5300,24 +5326,23 @@ function tactileSiteCount() {
 }
 
 function rowSourceCount(row) {
-  let count = 1;
-  for (const card of row.querySelectorAll(".filmstrip-element")) {
+  const lengths = [...row.querySelectorAll(".filmstrip-element")].map(card => {
     if (card.dataset.elementKind === "jitter") {
-      count *= Math.max(0, parseIntegerList(card.querySelector('[data-element-field="jitter_values_ms"]')?.value).length);
-    } else {
-      const hidden = card.querySelectorAll('input[data-element-field="source_labels"][type="hidden"]');
-      const checked = card.querySelectorAll('input[data-element-field="source_labels"]:checked');
-      const selectedOptions = card.querySelectorAll('select[data-element-field="source_labels"] option:checked');
-      count *= Math.max(0, hidden.length || checked.length || selectedOptions.length);
+      return parseIntegerList(card.querySelector('[data-element-field="jitter_values_ms"]')?.value).length;
     }
-  }
-  return count;
+    return card.querySelectorAll('input[data-element-field="source_labels"][type="hidden"]').length
+      || card.querySelectorAll('input[data-element-field="source_labels"]:checked').length
+      || card.querySelectorAll('select[data-element-field="source_labels"] option:checked').length;
+  });
+  if (!lengths.length || lengths.includes(0)) return 0;
+  const count = lengths.reduce((total, length) => total * length, 1);
+  return Number.isSafeInteger(count) ? count : Infinity;
 }
 
 function rowAudioCountPerBlock(row) {
   const soaCount = currentSoaValues().length;
   const repetitions = Math.max(1, Math.round(numberValue("repetitions", 1)));
-  return rowSourceCount(row) * Math.max(soaCount, 0) * repetitions * tactileSiteCount();
+  return soaCount ? rowSourceCount(row) * soaCount * repetitions * tactileSiteCount() : 0;
 }
 
 function defaultRowMix() {
@@ -5564,7 +5589,7 @@ function renderTrialStripRow(strip, index, options = {}) {
       </div>
       <div class="filmstrip-row-summary" aria-live="polite">
         <span class="filmstrip-row-expression">${escapeHtml(trialStripExpression(strip))}</span>
-        <span class="status-label optional filmstrip-row-variant-count">${stripPreviewVariants(strip).length} ${stripPreviewVariants(strip).length === 1 ? "variant" : "variants"}</span>
+        <span class="status-label optional filmstrip-row-variant-count">${variantCountLabel(strip)}</span>
       </div>
       <div class="filmstrip-sequence"></div>
     </div>
@@ -5634,14 +5659,6 @@ function renderFixedBlock(element) {
   return renderAudioPoolBlock(element);
 }
 
-function audioBoxLabels(element = {}) {
-  const labels = (element.source_labels || []).filter(Boolean);
-  if (!labels.length && element.source_label) labels.push(element.source_label);
-  const fallback = String(element.label || "").trim();
-  if (!labels.length && fallback && !genericAudioBoxLabel(fallback)) labels.push(fallback);
-  return Array.from(new Set(labels));
-}
-
 function trialStripExpression(strip = {}) {
   const expressions = (strip.elements || []).map((element) => {
     if (element.kind === "jitter") {
@@ -5653,10 +5670,6 @@ function trialStripExpression(strip = {}) {
     return labels.length === 1 ? labels[0] : `(${labels.join(" | ")})`;
   });
   return expressions.length ? expressions.join(" → ") : "Add an audio or jitter box to define this trial family.";
-}
-
-function genericAudioBoxLabel(label = "") {
-  return new Set(["Audio box", "Looming Stimulus", "Fixed audio clip", "Audio pool"]).has(String(label || "").trim());
 }
 
 function renderAudioPoolBlock(element) {
@@ -5906,11 +5919,10 @@ function updateFilmstripCounts() {
     const mixValid = Math.abs(rowCounts.mix.total - 100) <= 0.5 && rowCounts.mix.audioTactile > 0;
     row.classList.toggle("mix-warning", !mixValid);
     const strip = strips[index] || {};
-    const variants = stripPreviewVariants(strip).length;
     const expression = row.querySelector(".filmstrip-row-expression");
     const count = row.querySelector(".filmstrip-row-variant-count");
     if (expression) expression.textContent = trialStripExpression(strip);
-    if (count) count.textContent = `${variants} ${variants === 1 ? "variant" : "variants"}`;
+    if (count) count.textContent = variantCountLabel(strip);
   }
   renderProtocolSummary();
   renderLiveTrialPreviewTables();
@@ -6451,12 +6463,13 @@ async function performNativeExecution(action) {
     } else if (action === "review") {
       const snapshot = clone(state);
       snapshot.design = collectPayload().design;
+      const limit = nativeAssemblyLimit(snapshot.design);
       const previewStatus = { finished_profile: true, profile_checks_passed: true };
       // Reuse the existing source-block planner only on this explicit new-review action.
-      snapshot.trial_file_bake = staticTrialFileBakePayload(snapshot.design, previewStatus);
-      snapshot.trial_pool_bake = staticTrialPoolBakePayload(snapshot.design, snapshot.trial_file_bake);
+      snapshot.trial_file_bake = staticTrialFileBakePayload(snapshot.design, previewStatus, limit);
+      snapshot.trial_pool_bake = staticTrialPoolBakePayload(snapshot.design, snapshot.trial_file_bake, limit);
       snapshot.block_csv_preview = staticBlockCsvPreviewPayload(snapshot.design, snapshot.trial_pool_bake, previewStatus);
-      const variants = (snapshot.design.protocol?.trial_strips || []).flatMap((strip, index) => stripPreviewVariants(strip).map(choices => ({ row_label: strip.label || `Trial type ${index + 1}`, sequence_variant_key: previewVariantKey(choices), choices })));
+      const variants = assemblyVariants(snapshot.design, limit);
       result = await nativeDesigner.review(snapshot, variants);
       nativeReviewPage = 0;
       nativeExecutionMessage = "Full native review ready. Review Segment 5 rows, every participant/part occurrence, and instruction policy before acceptance.";
@@ -6834,27 +6847,23 @@ function renderTrialPreviewTable(trialRows, totalRows = trialRows.length) {
   fillTable("trial-table", trialRows, ["index", "family", "row", "folder", "file", "repetition", "duration", "soa_ms", "sequence"]);
 }
 
-function cartesianProduct(factors) {
-  return factors.reduce((acc, factor) => acc.flatMap((prefix) => factor.map((choice) => [...prefix, choice])), [[]]);
+function assemblyVariants(design, limit = Number.MAX_SAFE_INTEGER) {
+  const strips = design?.protocol?.trial_strips || [];
+  assertSequenceLimit(strips, limit);
+  return strips.flatMap((strip, index) => Array.from(iterateStripVariants(strip), choices => ({
+    row_label: strip.label || `Trial type ${index + 1}`, sequence_variant_key: previewVariantKey(choices), choices,
+  })));
 }
 
-function stripPreviewVariants(strip) {
-  const factors = [];
-  for (const element of strip.elements || []) {
-    if (element.kind === "jitter") {
-      const values = (element.jitter_values_ms || []).filter((value) => Number.isFinite(Number(value)));
-      factors.push(values.map((value) => ({
-        kind: "jitter",
-        label: `${element.label || "Jitter"} (${value} ms)`,
-        value,
-      })));
-    } else {
-      const labels = audioBoxLabels(element);
-      factors.push(labels.map((label) => ({ kind: "audio", label })));
-    }
+function nativeAssemblyLimit(design) {
+  const limits = nativeDesigner.capabilities?.assembly;
+  if (!Number.isSafeInteger(limits?.max_rows) || limits.max_rows < 1 || !Number.isSafeInteger(limits?.max_blocks)) {
+    throw new Error("Native assembly limits are unavailable. Reload Designer before building a review.");
   }
-  if (!factors.length || factors.some((factor) => !factor.length)) return [];
-  return cartesianProduct(factors);
+  assertSequenceLimit(design.protocol?.trial_strips || [], limits.max_rows);
+  assertCountLimit(staticTrialFileCount(design), limits.max_rows);
+  assertCountLimit(Math.max(1, Math.round(Number(design.protocol?.blocks || 1))), limits.max_blocks);
+  return limits.max_rows;
 }
 
 function previewVariantLabel(variant, family = "Audio-Tactile") {
@@ -9010,16 +9019,26 @@ async function importNativeProfile() {
     state.custom_workflow = { is_custom: true, is_finalized: false, edit_step: "stimulus", confirmed_steps: ["study"], needs_review_steps: [] };
     state.trajectory_controls = staticTrajectoryControls(state.design);
     const previewStatus = { finished_profile: true, profile_checks_passed: true };
-    state.trial_file_bake = staticTrialFileBakePayload(state.design, previewStatus);
-    state.trial_pool_bake = staticTrialPoolBakePayload(state.design, state.trial_file_bake);
-    state.block_csv_preview = staticBlockCsvPreviewPayload(state.design, state.trial_pool_bake, previewStatus);
+    let planNotice = "";
+    try {
+      const limit = nativeAssemblyLimit(state.design);
+      state.trial_file_bake = staticTrialFileBakePayload(state.design, previewStatus, limit);
+      state.trial_pool_bake = staticTrialPoolBakePayload(state.design, state.trial_file_bake, limit);
+      state.block_csv_preview = staticBlockCsvPreviewPayload(state.design, state.trial_pool_bake, previewStatus);
+    } catch (error) {
+      // Keep the verified editable import; no partial or truncated schedule is accepted.
+      state.trial_file_bake = { files: [], status: "missing" };
+      state.trial_pool_bake = { preview_rows: [], status: "missing" };
+      state.block_csv_preview = {};
+      planNotice = error.message || String(error);
+    }
     state.block_csv_preview.accepted = false;
     state.project_segments = staticProjectSegments(previewStatus, state.trial_file_bake, state.trial_pool_bake, state.block_csv_preview);
     state.session = null; state.run_package = null;
     editModeActive = false;
     await nativeDesigner.save(state);
     markDesignerSaved(); renderAll(); updateViewer();
-    showToast("Portable audio verified locally. Review the imported design and schedule before native acceptance.");
+    showToast(planNotice || "Portable audio verified locally. Review the imported design and schedule before native acceptance.");
   } finally { workflowSaveInFlight = false; shell.inert = false; }
 }
 
@@ -9850,9 +9869,7 @@ if (nativeDesigner.enabled) {
 window.PPSDesignerApp = Object.freeze({
   preloadAssetUrl: staticResourceUrl,
   getState: () => clone(state),
-  getAssemblyVariants: () => (state?.design?.protocol?.trial_strips || []).flatMap((strip, index) =>
-    stripPreviewVariants(strip).map(choices => ({ row_label: strip.label || `Trial type ${index + 1}`,
-      sequence_variant_key: previewVariantKey(choices), choices }))),
+  getAssemblyVariants: () => assemblyVariants(state?.design, nativeDesigner.enabled ? nativeAssemblyLimit(state.design) : Number.MAX_SAFE_INTEGER),
   exportProfile: (format) => {
     if (!["json", "bundle"].includes(format)) throw new Error("Unsupported profile export.");
     return api(`/api/profiles/export-${format}`, { method: "POST", rawResponse: true,

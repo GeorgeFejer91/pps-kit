@@ -19,7 +19,8 @@ def test_segments_expose_one_clear_decision_model_each():
 
     assert 'class="sequence-grammar"' in html
     assert "filmstrip-row-expression" in app_js
-    assert "stripPreviewVariants(strip).length" in app_js
+    # Exact sequence counts/order/overflow are exercised by sequence-variants.test.js.
+    assert "variantCountLabel(strip)" in app_js
     assert "Add first trial family" in app_js
 
     assert 'type="radio" name="baseline-option" value="min_max"' in html

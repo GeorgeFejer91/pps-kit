@@ -77,3 +77,15 @@ test("cancellation requested while a native start is pending reaches the newly a
   await assert.rejects(running,/Cancelled before publication/);
   assert.deepEqual(calls,["designer_review","designer_cancel","designer_job"]);
 });
+
+
+test("native assembly bounds come from the current host snapshot", async () => {
+  let capabilities = { assembly: { max_rows: 10000, max_blocks: 128 } };
+  const adapter = createNativeDesigner(async () => ({ revision: 1, capabilities }), true);
+  assert.equal(adapter.capabilities, null);
+  await adapter.load();
+  assert.deepEqual(adapter.capabilities, capabilities);
+  capabilities = undefined;
+  await adapter.load();
+  assert.equal(adapter.capabilities, null, "missing capabilities cannot reuse stale authority");
+});

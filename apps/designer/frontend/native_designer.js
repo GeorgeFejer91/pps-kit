@@ -3,6 +3,7 @@ import { convertFileSrc, invoke, isTauri } from "@tauri-apps/api/core";
 // Deliberate native adapter. A native failure is surfaced; it never retries HTTP/Python.
 export function createNativeDesigner(call = invoke, enabled = typeof window !== "undefined" && isTauri()) {
   let revision = 0;
+  let capabilities = null;
   let epoch = 0;
   let queue = Promise.resolve();
   let activeJob = null;
@@ -16,11 +17,13 @@ export function createNativeDesigner(call = invoke, enabled = typeof window !== 
   const status = message => document.dispatchEvent(new CustomEvent("pps-native-status", { detail: message }));
   return {
     enabled,
+    get capabilities() { return capabilities; },
     resourceUrl: path => convertFileSrc(String(path).replace(/^\/+/, ""), "pps-resource"),
     async load() {
       return enqueue(async () => {
         const response = await call("designer_snapshot");
         revision = response.revision;
+        capabilities = response.capabilities || null;
         return response;
       });
     },
