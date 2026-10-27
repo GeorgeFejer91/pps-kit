@@ -6318,7 +6318,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "determine PPS-task parameters separately from time-perception measures"
+            "Retained final review lacks exact PPSITI/jitter, repetitions/total, baseline/catch split, online deadline, detailed tactile calibration and original audio. Fresh official final/SIroutes returned403. The preprintSIhas incompatible study context and arithmetic; it cannot repair missing final values or establish final contradictions."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -6353,9 +6353,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "determine PPS-task parameters separately from time-perception measures"
+        "Retained final review lacks exact PPSITI/jitter, repetitions/total, baseline/catch split, online deadline, detailed tactile calibration and original audio. Fresh official final/SIroutes returned403. The preprintSIhas incompatible study context and arithmetic; it cannot repair missing final values or establish final contradictions."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: determine PPS-task parameters separately from time-perception measures",
+      "next_required_action": "Extract or source the missing paper parameters: Retained final review lacks exact PPSITI/jitter, repetitions/total, baseline/catch split, online deadline, detailed tactile calibration and original audio. Fresh official final/SIroutes returned403. The preprintSIhas incompatible study context and arithmetic; it cannot repair missing final values or establish final contradictions.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

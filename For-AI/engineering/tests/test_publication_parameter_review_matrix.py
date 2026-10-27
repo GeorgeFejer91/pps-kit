@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 51)
+        self.assertEqual(len(registry["entries"]), 53)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 95)
+        self.assertEqual(registered_instance_count, 97)
         network = json.loads(
             (
                 ROOT
@@ -813,9 +813,9 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
                 module._public_text(text)
         for text in ["https://doi.org/10.1016/j.cognition.2015.07.012", "Source https://publisher.example/artifacts/paper.pdf, Methods pp. 3–4", "10.1007/s00221-013-3532-2"]:
             self.assertEqual(module._public_text(text), text)
-        for pointer in [r"C:\Users\private\paper.pdf", "artifacts/paper.pdf", "file:///home/private/paper.pdf", "https://localhost/file", "https://127.0.0.1/paper", "https://user:secret@example.org/paper", "https://example.org/paper?token=private", "https://example.org/paper | artifacts/private.pdf"]:
+        for pointer in [r"C:\Users\private\paper.pdf", "artifacts/paper.pdf", "file:///home/private/paper.pdf", "https://localhost/file", "https://localhost./file", "https://127.0.0.1/paper", "https://127.0.0.1./paper", "https://[::ffff:127.0.0.1]/paper", "https://user:secret@example.org/paper", "https://example.org/paper?token=private", "https://example.org/paper?%74oken=private", "https://example.org/paper?%2574oken=private", "https://example.org/paper#access_token=private", "https://example.org/paper#section?api%5fkey=private", "https://example.org/paper | artifacts/private.pdf"]:
             self.assertEqual(module._public_evidence_url(pointer), "")
-        for pointer in ["https://backoffice.biblio.ugent.be/download/8673877/8673880", "https://doi.org/10.1007/s00426-020-01365-6", "https://publisher.example/article?id=123"]:
+        for pointer in ["https://backoffice.biblio.ugent.be/download/8673877/8673880", "https://doi.org/10.1007/s00426-020-01365-6", "https://publisher.example/article?id=123", "https://publisher.example/article?design=123#sec002"]:
             self.assertEqual(module._public_evidence_url(pointer), pointer)
 
     def test_corpus_freeze_preserves_identities_and_explicit_boundaries(self) -> None:
@@ -1342,8 +1342,8 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(rows), 94)
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         summary = data["inventoryAudit"]
-        self.assertEqual(summary["registeredInventories"], 51)
-        self.assertEqual(summary["methodsReviewedInventories"], 42)
+        self.assertEqual(summary["registeredInventories"], 53)
+        self.assertEqual(summary["methodsReviewedInventories"], 44)
         self.assertEqual(summary["auditedAccessBlockers"], 1)
         self.assertEqual(summary["inventoryEvidenceCounts"], dict(Counter(row["inventory_evidence_status"] for row in rows)))
         self.assertEqual(summary["inventoryAndContractsAudited"], sum(row["inventory_and_contracts_audited"] == "yes" for row in rows))
@@ -1385,6 +1385,43 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         preprint = next(row for row in registry["entries"] if row["network_node_id"] == "doi:10.1101/249078")
         self.assertEqual(preprint["source_lineage"]["relationship"], "preprint_of_final_same_experiment_methods_compared")
+
+    def test_inventory_gate_rejects_unreviewed_components_in_partial_override(self) -> None:
+        spec = importlib.util.spec_from_file_location("compact_inventory_builder", BUILDER.with_name("build_parsimonious_publication_matrix.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        node = "doi:10.1007/s00221-017-5158-2"
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        registry["entries"] = [row for row in registry["entries"] if row["network_node_id"] == node]
+        studies = [row for row in read_csv(self.output_dir / "study_instance_index.csv")[1] if row["network_node_id"] == node]
+        cells = [row for row in read_csv(self.output_dir / "parsimonious_contract_evidence.csv")[1] if row["network_node_id"] == node]
+        _, baseline = module.inventory_review_audit(registry, studies, cells)
+        self.assertEqual(baseline["inventoryAndContractsAudited"], 1)
+        for unreviewed in ("not_assessed", "composite_requires_split"):
+            changed = [dict(row) for row in cells]
+            changed[0]["evidence_status"] = "partial"
+            changed[0]["component_status_json"] = json.dumps({"source_mode": unreviewed})
+            _, result = module.inventory_review_audit(registry, studies, changed)
+            self.assertEqual(result["inventoryAndContractsAudited"], 0)
+            self.assertEqual(result["remainingInventoryOrContractAudit"], 1)
+
+    def test_depersonalisation_versions_do_not_transfer_conflicted_supplement(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        final = {row["key"]: row for row in studies["doi:10.1177/17470218241261645"]["contracts"]}
+        pre = {row["key"]: row for row in studies["doi:10.31234/osf.io/t8h6a"]["contracts"]}
+        self.assertIn("44.1", final["auditory_stimulus"]["value"])
+        self.assertNotIn("44.1", pre["auditory_stimulus"]["value"])
+        self.assertEqual(final["auditory_stimulus"]["sourceType"], "retained_primary_pdf_review_fresh_access_blocked")
+        self.assertEqual(final["jitter_iti_policy"]["status"], "not_reported")
+        self.assertEqual(pre["jitter_iti_policy"]["status"], "conflicting_evidence")
+        self.assertIn("1000", pre["jitter_iti_policy"]["value"])
+        self.assertEqual(pre["repetition_allocation"]["status"], "conflicting_evidence")
+        self.assertIn("180", pre["repetition_allocation"]["components"]["repetitions_or_exact_counts"]["value"])
+        self.assertIn("120", pre["repetition_allocation"]["value"])
+        self.assertEqual(final["repetition_allocation"]["status"], "partial")
+        self.assertEqual(pre["tactile_target"]["status"], "conflicting_evidence")
+        self.assertEqual(pre["auditory_stimulus"]["evidenceSourceUrl"], "https://osf.io/download/86j4g/")
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:
