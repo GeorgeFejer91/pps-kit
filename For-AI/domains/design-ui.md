@@ -56,6 +56,14 @@ the projection. A template link opens preparation/preview, not a qualification
 claim. Failed data loads expose a retry. The detail grid reflows using its
 available container width, including when text is enlarged.
 
+Hosted preparation loads directly without probing a localhost companion.
+Connection controls and the Qt launcher note appear only on the explicit V1
+loopback `/dashboard/` route; Tauri keeps native IPC and surfaces native failures.
+Hosted guidance points to Windows Designer for generation and session preparation.
+Mapper status descriptions explain missing protocol evidence rather than internal
+audit-field aggregation. The compiled browser check covers hosted controls and
+the retained V1 route; its mocked V1 response is not installed-app evidence.
+
 Hosted finalization holds authoring controls inert until browser storage
 settles. Project restores and late preview/audio results cannot change that
 pending snapshot. Failed storage releases the editable draft; successful

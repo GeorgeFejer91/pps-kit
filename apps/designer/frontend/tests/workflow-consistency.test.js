@@ -34,6 +34,57 @@ function handler(name, next) {
   return app.slice(app.indexOf(`async function ${name}(`), app.indexOf(`\n${next}`));
 }
 
+test("only the explicit V1 loopback dashboard enables companion controls", () => {
+  const nodes = [{ hidden: false }, { hidden: false }];
+  const context = vm.createContext({
+    window: { location: { hostname: "example.org", pathname: "/dashboard/" } },
+    nativeDesigner: { enabled: false }, forced: false,
+    forceStaticPreviewEnabled: () => context.forced,
+    document: { querySelectorAll: () => nodes },
+  });
+  vm.runInContext(app.slice(app.indexOf("function isLocalDashboardOrigin("), app.indexOf("function loadApiBase(")), context);
+  const cases = [
+    ["example.org", "/dashboard/", false, false, false],
+    ["127.0.0.1", "/apps/designer/frontend/compiled/index.html", false, false, false],
+    ["127.0.0.1", "/dashboard/", false, false, true],
+    ["127.0.0.1", "/dashboard/", true, false, false],
+    ["127.0.0.1", "/dashboard/", false, true, false],
+  ];
+  for (const [hostname, pathname, native, forced, expected] of cases) {
+    Object.assign(context.window.location, { hostname, pathname });
+    context.nativeDesigner.enabled = native;
+    context.forced = forced;
+    assert.equal(context.companionModeEnabled(), expected);
+    context.renderAdapterChrome();
+    assert.ok(nodes.every(node => node.hidden === !expected));
+  }
+});
+
+test("hosted startup never probes HTTP and a native failure never falls back", async () => {
+  const calls = [];
+  const context = vm.createContext({
+    state: null, staticModeActive: false, staticModeReason: "", DEFAULT_STUDY_TEMPLATE_ID: "default",
+    nativeDesigner: { enabled: false, load: async () => { calls.push("native"); throw new Error("native unavailable"); } },
+    companionModeEnabled: () => false, forceStaticPreviewEnabled: () => false,
+    designerApi: { state: async () => { calls.push("http"); return { templates: [] }; } },
+    loadStaticState: async () => calls.push("hosted"), resetEditMode() {},
+    pendingInitialTemplateRequest: () => ({}), applyStaticProfileInspectionPreview: async () => {},
+    renderAll() {}, updateViewer() {},
+  });
+  vm.runInContext(handler("loadState", "function renderAll"), context);
+  await context.loadState();
+  assert.deepEqual(calls, ["hosted"]);
+  calls.length = 0;
+  context.nativeDesigner.enabled = true;
+  await assert.rejects(context.loadState(), /native unavailable/);
+  assert.deepEqual(calls, ["native"]);
+  calls.length = 0;
+  context.nativeDesigner.enabled = false;
+  context.companionModeEnabled = () => true;
+  await context.loadState();
+  assert.deepEqual(calls, ["http"]);
+});
+
 function previewHarness() {
   const requests = [];
   const initial = { design: { name: "Current project" } };

@@ -14,8 +14,8 @@
       }
     }
   </script>
-  <script type="module" crossorigin src="./assets/index-CINB8rRE.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-Bjf6Dhp1.css">
+  <script type="module" crossorigin src="./assets/index-Bgymefs-.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CPrmCk_U.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -105,13 +105,13 @@
         <a href="#downloads-source" data-page-section-link="downloads-source" data-page-section-page="downloads"><span>Source</span></a>
         <a href="#downloads-companion" data-page-section-link="downloads-companion" data-page-section-page="downloads"><span>Companion</span></a>
       </nav>
-      <button id="mobile-companion-toggle" class="mobile-rail-toggle mobile-companion-toggle" type="button" aria-expanded="false" aria-controls="companion-panel">
+      <button id="mobile-companion-toggle" class="mobile-rail-toggle mobile-companion-toggle" type="button" aria-expanded="false" aria-controls="companion-panel" data-companion-only hidden>
         <span>Connection</span>
         <strong>Local Companion</strong>
         <span class="mobile-disclosure-chevron" aria-hidden="true"></span>
       </button>
-      <div id="companion-panel" class="companion-panel" aria-label="Local companion backend">
-        <div class="layout-title">Local Companion</div>
+      <div id="companion-panel" class="companion-panel" aria-label="V1 local companion backend" data-companion-only hidden>
+        <div class="layout-title">V1 Local Companion</div>
         <span id="connection-status" class="status-label required">checking</span>
         <label for="backend-url">Backend URL</label>
         <input id="backend-url" type="url" autocomplete="off">
@@ -119,7 +119,7 @@
         <input id="companion-token" type="password" autocomplete="off">
         <button id="connect-backend" type="button">Connect</button>
       </div>
-      <div class="rail-note">
+      <div class="rail-note" data-companion-only hidden>
         <span>Qt UI remains available as</span>
         <code>pps-design</code>
       </div>
@@ -885,7 +885,7 @@
                   <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
                   <span class="arch-node-kicker">UI Layer</span>
                   <strong>Dashboard</strong>
-                  <p>Researcher-facing browser interface for study profile, trajectory, timing, SOA, and trial-structure decisions, connected to the local backend via localhost.</p>
+                  <p>Prepare profiles and preview premade audio online. Windows Designer uses the same interface for custom audio generation and local session preparation.</p>
                   <div class="arch-hw-dep">
                     <a class="arch-hw-dep-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
                   </div>
@@ -896,13 +896,13 @@
             <div class="arch-vconnect"><div></div><div class="arch-vconnect-line"></div></div>
 
             <div class="arch-tier">
-              <div class="arch-tier-label">Local Backend</div>
+              <div class="arch-tier-label">Native Desktop</div>
               <div class="arch-tier-nodes">
                 <article class="arch-node">
                   <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
                   <span class="arch-node-kicker">Orchestration</span>
-                  <strong>Python Companion</strong>
-                  <p>Validates researcher decisions, writes project folders and manifests, and calls render and session preparation routines. Runs entirely on the lab PC and is not accessible externally.</p>
+                  <strong>Rust and Tauri</strong>
+                  <p>Windows Designer generates audio and prepares reviewed session files. Native Runner executes those sessions locally. The V1 Python companion remains a separate loopback mode; hosted and native Designer do not connect to it.</p>
                   <div class="arch-hw-dep">
                     <a class="arch-hw-dep-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
                   </div>
@@ -1299,8 +1299,9 @@
               <h3>Runner Browser Companion</h3>
               <p>Open the no-install controller and exploratory smartphone experiment interface. GitHub Pages hosts the interface only; remote control requires a compatible BRSP transport.</p>
               <a id="open-runner-companion" class="button-link primary-link" href="https://ppskit.qzz.io/experiment-runner/" target="_blank" rel="noopener noreferrer">Open Runner Companion</a>
-              <p>For local Designer actions, start the separately trusted local companion after installation.</p>
-              <code>apps\designer\launchers\Start_Website_Companion.bat</code>
+              <p>Use Windows Designer for custom audio generation and local session preparation.</p>
+              <p data-companion-only hidden>For the separate V1 Designer, start its trusted loopback companion.</p>
+              <code data-companion-only hidden>apps\designer\launchers\Start_Website_Companion.bat</code>
             </article>
           </div>
         </section>

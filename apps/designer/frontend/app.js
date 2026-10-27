@@ -760,6 +760,15 @@ function isCompanionDashboardOrigin() {
   return isLocalDashboardOrigin() && window.location.pathname.replace(/\\/g, "/").startsWith("/dashboard/");
 }
 
+function companionModeEnabled() {
+  return !nativeDesigner.enabled && isCompanionDashboardOrigin() && !forceStaticPreviewEnabled();
+}
+
+function renderAdapterChrome() {
+  const enabled = companionModeEnabled();
+  for (const element of document.querySelectorAll("[data-companion-only]")) element.hidden = !enabled;
+}
+
 function loadApiBase() {
   const companionOrigin = isCompanionDashboardOrigin();
   const stored = localStorage.getItem("ppsDashboard.apiBase");
@@ -995,6 +1004,7 @@ async function restorePersistedDraftForView() {
 }
 
 async function reconnectBackendFromControls({ includeToken = true } = {}) {
+  if (!companionModeEnabled()) return;
   if (!confirmDiscardUnsaved("reconnect to the companion")) return;
   saveApiBase($("backend-url").value);
   if (includeToken) saveCompanionToken($("companion-token")?.value || "");
@@ -1348,7 +1358,7 @@ function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory
     catalog_segments: clone(entry.catalog_segments || []),
     message: status === "ready"
       ? "Static GitHub preload assets are available for browser inspection."
-      : (entry.message || "This profile is indexed, but its assets require the local companion.")
+      : (entry.message || "This profile is indexed, but its audio assets are not available for online preview.")
   };
 }
 
@@ -1430,7 +1440,7 @@ function staticCslJson(data) {
 async function staticStateForTemplate(templateId) {
   const cleanId = String(templateId || DEFAULT_STUDY_TEMPLATE_ID).trim();
   if (!cleanId || cleanId === CUSTOM_TEMPLATE_ID) {
-    throw new Error("Start the local companion backend before creating custom studies.");
+    throw new Error("Choose Create study to begin a custom profile.");
   }
   const inventory = await loadStaticInventory();
   const templates = await loadStaticTemplates();
@@ -2421,7 +2431,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "1_core_audio_ingredients": segment(
       "1_core_audio_ingredients",
       Boolean(status.ready),
-      status.ready ? "Static source assets are available online." : "Profile source assets require the local companion."
+      status.ready ? "Premade source audio is available for preview." : "This profile's source audio is not available for online preview."
     ),
     "2_trial_sequence_designs": segment(
       "2_trial_sequence_designs",
@@ -2457,7 +2467,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "5_block_csv_preview": segment(
       "5_block_csv_preview",
       launchable,
-      launchable ? "Block CSVs are materialized by the local companion when the profile is launched." : "This profile is not Segment 6 launchable yet.",
+      launchable ? "Review and prepare executable blocks in Windows Designer." : "This profile still needs block review.",
       {
         accepted: launchable,
         block_count: blockCsvPreview.block_count || 0,
@@ -2468,7 +2478,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "6_experiment_run_setup": segment(
       "6_experiment_run_setup",
       launchable,
-      launchable ? "Start the local companion to materialize and open this finished profile." : "This profile is not Segment 6 launchable yet."
+      launchable ? "Open this profile in Windows Designer to review and prepare the participant session." : "This profile still needs participant-session review."
     )
   };
 }
@@ -2898,7 +2908,7 @@ async function loadStaticState(fallbackError = null) {
     request.error
       || (request.id
         ? "Opened the paper's Toolkit template in Experiment Designer."
-        : "Loaded committed preload assets from GitHub. Start the local companion for local generation or runner launch.")
+         : "Premade audio is ready to prepare and preview. Use Windows Designer to generate custom audio and prepare Runner sessions.")
   );
   return true;
 }
@@ -2950,9 +2960,9 @@ async function loadState(options = {}) {
     setConnectionStatus(true, "native preparation");
     return;
   }
-  if (forceStaticPreviewEnabled()) {
+  if (!companionModeEnabled()) {
     if (resetMode) resetEditMode();
-    await loadStaticState(new Error("Forced static preview audit mode."));
+    await loadStaticState(forceStaticPreviewEnabled() ? new Error("Forced static preview audit mode.") : null);
     return;
   }
   try {
@@ -7199,7 +7209,7 @@ async function loadTemplate() {
   if (staticModeActive) {
     if (choice.kind === "manual") {
       renderStudy();
-      showToast("Start the local companion backend before creating custom studies.");
+      showToast("Choose Create study to begin a custom profile.");
       return;
     }
     const previousState = state;
@@ -9800,6 +9810,7 @@ function reportError(error) {
   showToast(error.message || String(error));
 }
 
+renderAdapterChrome();
 loadApiBase();
 loadCompanionToken();
 loadResizableLayoutSettings();
