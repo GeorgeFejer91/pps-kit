@@ -25,6 +25,7 @@ METADATA_AUDIT_PATH = AUDIT_DIR / "metadata_audit.jsonl"
 MANUAL_REVIEW_DIR = AUDIT_DIR / "manual_reviews"
 CURRENT_INPUT_SCHEMA_PATH = REPO_ROOT / "For-AI" / "research" / "literature" / "tools" / "current_toolkit_input_schema.json"
 SOURCE_REVIEW_PATH = AUDIT_DIR / "parsimonious_source_reviews.v1.json"
+STUDY_REGISTRY_PATH = AUDIT_DIR / "study_instance_registry.json"
 
 
 EXPECTED_CONTRACT_KEYS = (
@@ -828,7 +829,7 @@ def _public_text(value: Any) -> str:
 
 
 def public_projection(
-    study_index: list[dict[str, Any]], evidence_rows: list[dict[str, Any]]
+    study_index: list[dict[str, Any]], evidence_rows: list[dict[str, Any]], corpus_id: str
 ) -> dict[str, Any]:
     """Project finalized component-gated evidence; never infer from templates."""
     by_study: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -893,7 +894,7 @@ def public_projection(
     return {
         "schema": "pps-publication-study-reviews.v1",
         "scope": {
-            "corpusId": "pps-audiotactile-publication-freeze-20261027",
+            "corpusId": corpus_id,
             "onlineActions": ["prepare", "preview"],
             "nativeQualification": "not_assessed",
         },
@@ -1486,7 +1487,8 @@ def build(output_dir: Path, public_output: Path | None = None) -> dict[str, Any]
     )
 
     if public_output is not None:
-        projection = public_projection(study_index, evidence_rows)
+        registry = json.loads(STUDY_REGISTRY_PATH.read_text(encoding="utf-8"))
+        projection = public_projection(study_index, evidence_rows, registry["corpus_freeze"]["id"])
         public_output.parent.mkdir(parents=True, exist_ok=True)
         public_output.write_text(json.dumps(projection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 

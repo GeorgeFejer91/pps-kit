@@ -1,8 +1,8 @@
 # Publication-to-Toolkit Input Review Matrix
 
-Generated 2026-08-12 from the tracked `pps-publication-citation-network.v3` asset, exact-DOI audit joins, manual-review overrides, current profile manifests, and the repository's code/schema surfaces.
+Generated 2026-10-27 from the tracked `pps-publication-citation-network.v3` asset, exact-DOI audit joins, manual-review overrides, current profile manifests, and the repository's code/schema surfaces.
 
-The primary paper-review deliverable is a **124-row × 11-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the 94 citation-network publications is represented, and a strict 94-row aggregate is supplied. The registered view has 124 rows because 16 publications have tracked multi-experiment or multi-profile splits.
+The primary paper-review deliverable is a **124-row × 11-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the 94 citation-network publications is represented, and a strict 94-row aggregate is supplied. The registered view has 124 rows because 17 publications have tracked experiment inventories (including single-task inventories).
 
 The exact **124-row × 115-input** current design/profile matrices remain the implementation crosswalk. The broader **124-row × 281-leaf** target matrix remains a scientific-method and validation-gap inventory—not claims about fields accepted by the current serializer. Publications without a registry entry remain one review unit and are explicitly marked `experiment_count_not_assessed`; do not infer that they contain only one experiment. Only 37 of 94 nodes have tracked abstract text, and 26 have neither abstract text nor an exact-DOI audit record, so 124 is an evidence-backed review-row count rather than an exhaustive true experiment count.
 
@@ -86,18 +86,18 @@ These implementation matrices describe the exact current **design/profile serial
 | Publication nodes without an audit record | 29 |
 | Publication nodes with tracked abstract text | 37 |
 | Publication nodes with neither abstract text nor an audit record | 26 |
-| Manual-review records joined to nodes | 24 |
-| Manual-review records with structured orientation ledgers | 7 |
+| Manual-review records joined to nodes | 25 |
+| Manual-review records with structured orientation ledgers | 8 |
 | Experiment-specific rows with a directly scoped orientation ledger | 4 |
-| Split rows inheriting a combined-record orientation ledger | 8 |
+| Split rows inheriting a combined-record orientation ledger | 10 |
 | Automated visualization candidates needing visual verification | 173 |
 | Study-level visualization candidate rows after experiment splitting | 247 |
 | Confirmed structured visualization rows | 0 |
 | Audit records outside focused network | 6 |
 
-Toolkit publication states: `adjacent_scope_conflict` 1, `not_assessed` 29, `runnable` 15, `supported_incomplete` 49.
+Toolkit publication states: `adjacent_scope_conflict` 1, `not_assessed` 29, `runnable` 16, `supported_incomplete` 48.
 
-Study-instance evidence stages: `current_audit_without_manual_review` 58, `manual_review` 34, `no_exact_doi_audit_join` 32.
+Study-instance evidence stages: `current_audit_without_manual_review` 56, `manual_review` 36, `no_exact_doi_audit_join` 32.
 
 ## Multi-Experiment Publication Labels
 
@@ -254,7 +254,7 @@ The proposed target inventory is also not a superset of the current serializer. 
 
 ## Systematic Review Gaps
 
-- Only 7 of 24 manual-review records contain the current structured orientation ledger. Of the registered rows, 4 have an experiment-scoped ledger and 8 inherit a combined-record ledger that still needs experiment-specific checking. The orientation worksheet therefore keeps participant frame, apparatus frame, body-relative mapping, tactile anchor, movement implementation, evidence class, and visual-vector verification separate.
+- Only 8 of 25 manual-review records contain the current structured orientation ledger. Of the registered rows, 4 have an experiment-scoped ledger and 10 inherit a combined-record ledger that still needs experiment-specific checking. The orientation worksheet therefore keeps participant frame, apparatus frame, body-relative mapping, tactile anchor, movement implementation, evidence class, and visual-vector verification separate.
 - There are 173 automated visualization candidates in joined studies and **zero confirmed structured figure reviews**. Every candidate must be checked against the rendered figure/table/panel, axes, units, model, boundary/index definition, facets, and uncertainty display.
 - 61 proposed target method/validation leaves have no parent in the current 25-field extraction schema; these are not paper absences, just audit-schema gaps.
 - `source_unavailable` is overloaded in automated records: it can mean no candidate was mined from an available source, not necessarily that the publication itself is unavailable. Use PDF, extraction, and manual-review stage columns together.
@@ -265,14 +265,14 @@ The proposed target inventory is also not a superset of the current serializer. 
 |---|---:|---:|---|
 | `PUB.S2.response_window` | 2 | 84 | `acquire_or_open_source` |
 | `PUB.S4.total_trial_count` | 4 | 83 | `acquire_or_open_source` |
-| `PUB.S1.gain_envelope` | 1 | 79 | `acquire_or_open_source` |
-| `PUB.S2.iti_jitter_policy` | 2 | 79 | `acquire_or_open_source` |
-| `PUB.S1.source_provenance` | 1 | 77 | `acquire_or_open_source` |
+| `PUB.S1.gain_envelope` | 1 | 78 | `acquire_or_open_source` |
+| `PUB.S2.iti_jitter_policy` | 2 | 78 | `acquire_or_open_source` |
 | `PUB.S4.baseline_count` | 4 | 77 | `acquire_or_open_source` |
-| `PUB.S4.catch_count` | 4 | 77 | `acquire_or_open_source` |
+| `PUB.S1.source_provenance` | 1 | 76 | `acquire_or_open_source` |
 | `PUB.S1.stimulus_speed` | 1 | 76 | `acquire_or_open_source` |
-| `PUB.S1.stimulus_type` | 1 | 74 | `acquire_or_open_source` |
-| `PUB.S3.soa_table` | 3 | 74 | `acquire_or_open_source` |
+| `PUB.S4.catch_count` | 4 | 76 | `acquire_or_open_source` |
+| `PUB.S1.stimulus_type` | 1 | 73 | `acquire_or_open_source` |
+| `PUB.S3.soa_table` | 3 | 73 | `acquire_or_open_source` |
 
 ## Review Rules
 

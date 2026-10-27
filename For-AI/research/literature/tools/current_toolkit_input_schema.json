@@ -42,7 +42,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 256,
+      "source_line": 257,
       "traversal": [
         {
           "field": "name",
@@ -83,7 +83,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 257,
+      "source_line": 258,
       "traversal": [
         {
           "field": "study_profile_id",
@@ -124,7 +124,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 258,
+      "source_line": 259,
       "traversal": [
         {
           "field": "study_profile_title",
@@ -165,7 +165,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 259,
+      "source_line": 260,
       "traversal": [
         {
           "field": "study_profile_notes",
@@ -206,7 +206,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 260,
+      "source_line": 261,
       "traversal": [
         {
           "field": "study_profile_reference_parameters",
@@ -247,7 +247,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 261,
+      "source_line": 262,
       "traversal": [
         {
           "field": "sofa_file",
@@ -288,7 +288,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 140,
+      "source_line": 141,
       "traversal": [
         {
           "field": "noises",
@@ -334,7 +334,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 141,
+      "source_line": 142,
       "traversal": [
         {
           "field": "noises",
@@ -380,7 +380,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 142,
+      "source_line": 143,
       "traversal": [
         {
           "field": "noises",
@@ -426,7 +426,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 143,
+      "source_line": 144,
       "traversal": [
         {
           "field": "noises",
@@ -472,7 +472,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 144,
+      "source_line": 145,
       "traversal": [
         {
           "field": "noises",
@@ -518,7 +518,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 145,
+      "source_line": 146,
       "traversal": [
         {
           "field": "noises",
@@ -564,7 +564,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 146,
+      "source_line": 147,
       "traversal": [
         {
           "field": "noises",
@@ -610,7 +610,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 147,
+      "source_line": 148,
       "traversal": [
         {
           "field": "noises",
@@ -656,7 +656,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 148,
+      "source_line": 149,
       "traversal": [
         {
           "field": "noises",
@@ -702,7 +702,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 149,
+      "source_line": 150,
       "traversal": [
         {
           "field": "noises",
@@ -748,7 +748,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 150,
+      "source_line": 151,
       "traversal": [
         {
           "field": "noises",
@@ -794,7 +794,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 121,
+      "source_line": 122,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -840,7 +840,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 122,
+      "source_line": 123,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -886,7 +886,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 123,
+      "source_line": 124,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -932,7 +932,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 124,
+      "source_line": 125,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -978,7 +978,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 125,
+      "source_line": 126,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1024,7 +1024,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 126,
+      "source_line": 127,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1070,7 +1070,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 127,
+      "source_line": 128,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1116,7 +1116,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 128,
+      "source_line": 129,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1162,7 +1162,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 129,
+      "source_line": 130,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1208,7 +1208,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 130,
+      "source_line": 131,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1254,7 +1254,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 131,
+      "source_line": 132,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1300,7 +1300,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 132,
+      "source_line": 133,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1346,7 +1346,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 133,
+      "source_line": 134,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1392,7 +1392,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 134,
+      "source_line": 135,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1438,7 +1438,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 135,
+      "source_line": 136,
       "traversal": [
         {
           "field": "custom_looming_files",
@@ -1484,7 +1484,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 121,
+      "source_line": 122,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1530,7 +1530,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 122,
+      "source_line": 123,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1576,7 +1576,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 123,
+      "source_line": 124,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1622,7 +1622,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 124,
+      "source_line": 125,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1668,7 +1668,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 125,
+      "source_line": 126,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1714,7 +1714,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 126,
+      "source_line": 127,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1760,7 +1760,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 127,
+      "source_line": 128,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1806,7 +1806,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 128,
+      "source_line": 129,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1852,7 +1852,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 129,
+      "source_line": 130,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1898,7 +1898,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 130,
+      "source_line": 131,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1944,7 +1944,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 131,
+      "source_line": 132,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -1990,7 +1990,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 132,
+      "source_line": 133,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -2036,7 +2036,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 133,
+      "source_line": 134,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -2082,7 +2082,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 134,
+      "source_line": 135,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -2128,7 +2128,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 135,
+      "source_line": 136,
       "traversal": [
         {
           "field": "prestimulus_files",
@@ -2174,7 +2174,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 185,
+      "source_line": 186,
       "traversal": [
         {
           "field": "trajectory",
@@ -2220,7 +2220,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 186,
+      "source_line": 187,
       "traversal": [
         {
           "field": "trajectory",
@@ -2266,7 +2266,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 187,
+      "source_line": 188,
       "traversal": [
         {
           "field": "trajectory",
@@ -2312,7 +2312,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 188,
+      "source_line": 189,
       "traversal": [
         {
           "field": "trajectory",
@@ -2358,7 +2358,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 189,
+      "source_line": 190,
       "traversal": [
         {
           "field": "trajectory",
@@ -2404,7 +2404,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 190,
+      "source_line": 191,
       "traversal": [
         {
           "field": "trajectory",
@@ -2450,7 +2450,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 191,
+      "source_line": 192,
       "traversal": [
         {
           "field": "trajectory",
@@ -2496,7 +2496,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 192,
+      "source_line": 193,
       "traversal": [
         {
           "field": "trajectory",
@@ -2542,7 +2542,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 193,
+      "source_line": 194,
       "traversal": [
         {
           "field": "trajectory",
@@ -2588,7 +2588,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 194,
+      "source_line": 195,
       "traversal": [
         {
           "field": "trajectory",
@@ -2634,7 +2634,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 195,
+      "source_line": 196,
       "traversal": [
         {
           "field": "trajectory",
@@ -2680,7 +2680,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 196,
+      "source_line": 197,
       "traversal": [
         {
           "field": "trajectory",
@@ -2726,7 +2726,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 197,
+      "source_line": 198,
       "traversal": [
         {
           "field": "trajectory",
@@ -2772,7 +2772,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 198,
+      "source_line": 199,
       "traversal": [
         {
           "field": "trajectory",
@@ -2818,7 +2818,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 199,
+      "source_line": 200,
       "traversal": [
         {
           "field": "trajectory",
@@ -2864,7 +2864,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 200,
+      "source_line": 201,
       "traversal": [
         {
           "field": "trajectory",
@@ -2910,7 +2910,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 201,
+      "source_line": 202,
       "traversal": [
         {
           "field": "trajectory",
@@ -2956,7 +2956,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 202,
+      "source_line": 203,
       "traversal": [
         {
           "field": "trajectory",
@@ -3002,7 +3002,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 203,
+      "source_line": 204,
       "traversal": [
         {
           "field": "trajectory",
@@ -3048,7 +3048,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 218,
+      "source_line": 219,
       "traversal": [
         {
           "field": "protocol",
@@ -3094,7 +3094,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 219,
+      "source_line": 220,
       "traversal": [
         {
           "field": "protocol",
@@ -3140,7 +3140,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 220,
+      "source_line": 221,
       "traversal": [
         {
           "field": "protocol",
@@ -3186,7 +3186,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 221,
+      "source_line": 222,
       "traversal": [
         {
           "field": "protocol",
@@ -3232,7 +3232,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 222,
+      "source_line": 223,
       "traversal": [
         {
           "field": "protocol",
@@ -3278,7 +3278,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 223,
+      "source_line": 224,
       "traversal": [
         {
           "field": "protocol",
@@ -3324,7 +3324,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 224,
+      "source_line": 225,
       "traversal": [
         {
           "field": "protocol",
@@ -3370,7 +3370,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 225,
+      "source_line": 226,
       "traversal": [
         {
           "field": "protocol",
@@ -3416,7 +3416,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 226,
+      "source_line": 227,
       "traversal": [
         {
           "field": "protocol",
@@ -3462,7 +3462,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 227,
+      "source_line": 228,
       "traversal": [
         {
           "field": "protocol",
@@ -3508,7 +3508,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 228,
+      "source_line": 229,
       "traversal": [
         {
           "field": "protocol",
@@ -3554,7 +3554,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 229,
+      "source_line": 230,
       "traversal": [
         {
           "field": "protocol",
@@ -3600,7 +3600,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 230,
+      "source_line": 231,
       "traversal": [
         {
           "field": "protocol",
@@ -3646,7 +3646,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 231,
+      "source_line": 232,
       "traversal": [
         {
           "field": "protocol",
@@ -3692,7 +3692,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 232,
+      "source_line": 233,
       "traversal": [
         {
           "field": "protocol",
@@ -3738,7 +3738,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 233,
+      "source_line": 234,
       "traversal": [
         {
           "field": "protocol",
@@ -3784,7 +3784,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 234,
+      "source_line": 235,
       "traversal": [
         {
           "field": "protocol",
@@ -3830,7 +3830,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 235,
+      "source_line": 236,
       "traversal": [
         {
           "field": "protocol",
@@ -3876,7 +3876,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 236,
+      "source_line": 237,
       "traversal": [
         {
           "field": "protocol",
@@ -3922,7 +3922,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 237,
+      "source_line": 238,
       "traversal": [
         {
           "field": "protocol",
@@ -3968,7 +3968,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 238,
+      "source_line": 239,
       "traversal": [
         {
           "field": "protocol",
@@ -4014,7 +4014,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 239,
+      "source_line": 240,
       "traversal": [
         {
           "field": "protocol",
@@ -4060,7 +4060,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 240,
+      "source_line": 241,
       "traversal": [
         {
           "field": "protocol",
@@ -4106,7 +4106,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 241,
+      "source_line": 242,
       "traversal": [
         {
           "field": "protocol",
@@ -4152,7 +4152,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 155,
+      "source_line": 156,
       "traversal": [
         {
           "field": "protocol",
@@ -4203,7 +4203,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 156,
+      "source_line": 157,
       "traversal": [
         {
           "field": "protocol",
@@ -4254,7 +4254,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 243,
+      "source_line": 244,
       "traversal": [
         {
           "field": "protocol",
@@ -4300,7 +4300,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 244,
+      "source_line": 245,
       "traversal": [
         {
           "field": "protocol",
@@ -4346,7 +4346,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 172,
+      "source_line": 173,
       "traversal": [
         {
           "field": "protocol",
@@ -4397,7 +4397,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 173,
+      "source_line": 174,
       "traversal": [
         {
           "field": "protocol",
@@ -4448,7 +4448,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 174,
+      "source_line": 175,
       "traversal": [
         {
           "field": "protocol",
@@ -4499,7 +4499,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 175,
+      "source_line": 176,
       "traversal": [
         {
           "field": "protocol",
@@ -4550,7 +4550,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 176,
+      "source_line": 177,
       "traversal": [
         {
           "field": "protocol",
@@ -4601,7 +4601,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 177,
+      "source_line": 178,
       "traversal": [
         {
           "field": "protocol",
@@ -4652,7 +4652,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 178,
+      "source_line": 179,
       "traversal": [
         {
           "field": "protocol",
@@ -4703,7 +4703,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 179,
+      "source_line": 180,
       "traversal": [
         {
           "field": "protocol",
@@ -4754,7 +4754,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 161,
+      "source_line": 162,
       "traversal": [
         {
           "field": "protocol",
@@ -4810,7 +4810,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 162,
+      "source_line": 163,
       "traversal": [
         {
           "field": "protocol",
@@ -4866,7 +4866,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 163,
+      "source_line": 164,
       "traversal": [
         {
           "field": "protocol",
@@ -4922,7 +4922,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 164,
+      "source_line": 165,
       "traversal": [
         {
           "field": "protocol",
@@ -4978,7 +4978,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 165,
+      "source_line": 166,
       "traversal": [
         {
           "field": "protocol",
@@ -5034,7 +5034,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 166,
+      "source_line": 167,
       "traversal": [
         {
           "field": "protocol",
@@ -5090,7 +5090,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 167,
+      "source_line": 168,
       "traversal": [
         {
           "field": "protocol",
@@ -5146,7 +5146,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 246,
+      "source_line": 247,
       "traversal": [
         {
           "field": "protocol",
@@ -5192,7 +5192,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 247,
+      "source_line": 248,
       "traversal": [
         {
           "field": "protocol",
@@ -5238,7 +5238,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 248,
+      "source_line": 249,
       "traversal": [
         {
           "field": "protocol",
@@ -5284,7 +5284,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 249,
+      "source_line": 250,
       "traversal": [
         {
           "field": "protocol",
@@ -5330,7 +5330,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 250,
+      "source_line": 251,
       "traversal": [
         {
           "field": "protocol",
@@ -5376,7 +5376,7 @@
       "contract_scope": "current parser/serializer input contract",
       "runtime_consumer_trace": "not_traced_by_schema_exporter",
       "source_file": "packages/pps-runtime/src/peripersonal_space_toolkit/design.py",
-      "source_line": 251,
+      "source_line": 252,
       "traversal": [
         {
           "field": "protocol",

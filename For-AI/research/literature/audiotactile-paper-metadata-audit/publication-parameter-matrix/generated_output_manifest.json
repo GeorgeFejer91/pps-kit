@@ -1,6 +1,6 @@
 {
   "schema": "pps-publication-parameter-matrix-output.v1",
-  "generated_on": "2026-08-12",
+  "generated_on": "2026-10-27",
   "generator": "For-AI/research/literature/tools/build_publication_parameter_review_matrix.mjs",
   "files": [
     "README.md",
