@@ -27736,6 +27736,498 @@
           "evidence_note": "Final and preprint v1 share one cohort. Electrical stimulation and physiological recording are source apparatus, not a native audio-preview capability."
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.cortex.2017.08.033::a",
+      "source_type": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+      "source_file": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+      "review_date": "2026-10-27",
+      "review_scope": "Primary headings identify adjacent visual–tactile acquisition; actual failed full-text attempts retained. Two experiments are a minimum, not a verified complete inventory.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.cortex.2017.08.033::b",
+      "source_type": "primary_publisher_indexed_visuotactile_boundary_access_gap",
+      "source_file": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+      "review_date": "2026-10-27",
+      "review_scope": "Primary headings identify adjacent visual–tactile acquisition; actual failed full-text attempts retained. Two experiments are a minimum, not a verified complete inventory.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent visuo-tactile protocol; direct-AT parameters are not applicable. Full-method access remains unresolved. No direct audiotactile acquisition contract is assigned to this unit.",
+          "page_or_section": "Publisher indexed section snippets: Experiment 1 (social visuo-tactile task), Experiment 2 (social modulation); full Methods blocked",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Identified visual–tactile task lies outside direct audiotactile contract; full inventory access gap remains explicit."
+            }
+          },
+          "evidence_note": "Scope-based disposition is not a claim that full Methods or complete experiment inventory was reviewed."
+        }
+      }
     }
   ]
 }
