@@ -16,7 +16,7 @@ import re
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, unquote, urlsplit
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -839,17 +839,20 @@ def _public_evidence_url(value: Any) -> str:
         parsed = urlsplit(text)
         if not parsed.hostname or parsed.username or parsed.password:
             return ""
+        hostname = parsed.hostname.rstrip(".").lower()
         # Reviewed publication URLs have DNS names; omit local hosts and literal IPs.
-        if "." not in parsed.hostname or parsed.hostname.lower().endswith((".local", ".localhost")):
+        if "." not in hostname or hostname.endswith((".local", ".localhost")):
             return ""
         try:
-            ipaddress.ip_address(parsed.hostname)
+            ipaddress.ip_address(hostname)
         except ValueError:
             pass
         else:
             return ""
-        if re.search(r"(?:token|signature|credential|password|secret|api[_-]?key)=", parsed.query, re.I):
-            return ""
+        for parameters in (parsed.query, parsed.fragment.rsplit("?", 1)[-1]):
+            for key, _ in parse_qsl(unquote(parameters), keep_blank_values=True):
+                if re.search(r"(?:token|signature|credential|password|secret|api[_-]?key|access[_-]?key(?:id)?|authorization)$|^sig$", unquote(key), re.I):
+                    return ""
     except ValueError:
         return ""
     return text
@@ -888,6 +891,7 @@ def inventory_review_audit(
             if len(cells) == 11 and all(
                 cell["experiment_scoped_source_override"] == "yes"
                 and cell["evidence_status"] not in {"not_assessed", "composite_requires_split"}
+                and not {"not_assessed", "composite_requires_split"}.intersection(json.loads(cell["component_status_json"]).values())
                 for cell in cells
             ):
                 reviewed += 1

@@ -1437,6 +1437,107 @@
         }
       ],
       "source_review_limit": "Explicitly reviewed source version; original binaural recording, SPL/calibration and detailed ordering remain unavailable. The source2500m time-unit typo remains a documented interpretation. Device specifications are not measured tactile traces or PPS Kit qualification."
+    },
+    {
+      "network_node_id": "doi:10.1177/17470218241261645",
+      "doi": "10.1177/17470218241261645",
+      "inventory_status": "one_main_pps_protocol_with_mtt_supporting_task_retained_review_current_access_blocked",
+      "inventory_evidence_status": "retained_primary_methods_review",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "One PPS protocol is identified; High/Lowdepersonalisation groups are comparison groups. Mental Time Travel is a separate supporting task, not a second PPSexperiment. Inventory relies on the retainedJune16renderedprimaryPDFreview; fresh final/SItext was not obtained.",
+      "evidence_pointer": "manual_reviews/depersonalisation_2024.json::source_checks;segment_field_audit",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_depersonalisation_group_comparison",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Depersonalisation PPS comparison (retained final review)",
+          "record_id": "depersonalisation_2024",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/pdf/10.1177/17470218241261645",
+          "outcome": "HTTP403HTMLchallenge; no current final PDF obtained."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/suppl/10.1177/17470218241261645/suppl_file/sj-docx-1-qjp-10.1177_17470218241261645.docx",
+          "outcome": "HTTP403HTMLchallenge, not a usable DOCX."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://cris.unibo.it/handle/11585/1019212",
+          "outcome": "Institutional metadata record exposed no attachment; bounded primary-route attempts did not yield current final Methods. Retained June16review remains evidence."
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.31234/osf.io/t8h6a",
+        "relationship": "probable_preprint_final_pair_exact_data_equivalence_unverified",
+        "basis": "Shared authors/title/design support a version relationship, but inaccessible current final Methods prevents complete version/data comparison. Do not count independent replication or transfer parameters automatically."
+      },
+      "supporting_task_boundaries": [
+        {
+          "label": "Mental Time Travel and questionnaires",
+          "disposition": "non_pps_supporting_assessment",
+          "basis": "PPSandMTTare separate same-day tasks; their trial counts and time intervals must not be conflated.",
+          "evidence_pointer": "manual_reviews/depersonalisation_2024.json::source_checks;segment_field_audit"
+        }
+      ],
+      "source_review_limit": "All11contracts have explicit reviewed dispositions; unreported values, fresh access blockers and version-specific contradictions remain open scientific gaps. No native electrical hardware qualification or final/preprint parameter equivalence is claimed."
+    },
+    {
+      "network_node_id": "doi:10.31234/osf.io/t8h6a",
+      "doi": "10.31234/osf.io/t8h6a",
+      "inventory_status": "one_main_pps_protocol_with_mtt_supporting_task_supplement_context_conflicted",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "One PPS protocol is identified; High/Lowdepersonalisation groups are comparison groups. Mental Time Travel is a separate supporting task, not a second PPSexperiment. Incompatible extra experiment/session labels occur only in context-conflicted preprint SI and cannot establish additional main-study PPSexperiments.",
+      "evidence_pointer": "https://osf.io/download/86j4g/::mainMethods pp.5-6;SIpp.23-24",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_depersonalisation_group_comparison",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Depersonalisation PPS comparison (preprint v1; conflicted SI)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "experiment",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://api.osf.io/v2/preprints/t8h6a/",
+          "outcome": "Primary API identifies v1posted2023-05-19; versions API returned one version."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://osf.io/download/86j4g/",
+          "outcome": "Primary26-pagePDFretrieved; SHA25621127792dea573055756b4f75219a69a9a70ad2cdefc5a5133b4a312a0a6e21f matches OSFmetadata; Methods and embeddedSIrendered."
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.1177/17470218241261645",
+        "relationship": "probable_preprint_final_pair_exact_data_equivalence_unverified",
+        "basis": "Shared authors/title/design support a version relationship, but inaccessible current final Methods prevents complete version/data comparison. Do not count independent replication or transfer parameters automatically."
+      },
+      "supporting_task_boundaries": [
+        {
+          "label": "Mental Time Travel and questionnaires",
+          "disposition": "non_pps_supporting_assessment",
+          "basis": "PPSandMTTare separate same-day tasks; their trial counts and time intervals must not be conflated.",
+          "evidence_pointer": "https://osf.io/download/86j4g/::mainMethods pp.5-6;SIpp.23-24"
+        }
+      ],
+      "source_review_limit": "All11contracts have explicit reviewed dispositions; unreported values, fresh access blockers and version-specific contradictions remain open scientific gaps. No native electrical hardware qualification or final/preprint parameter equivalence is claimed."
     }
   ],
   "corpus_freeze": {

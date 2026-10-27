@@ -12,20 +12,20 @@
     "publications": 94,
     "studies": 138,
     "contracts": 1518,
-    "reportedComplete": 291,
+    "reportedComplete": 293,
     "derivedComplete": 60,
     "parameterStatusCounts": {
       "approximation_required": 22,
       "composite_requires_split": 146,
-      "conflicting_evidence": 25,
+      "conflicting_evidence": 34,
       "derived_complete": 60,
       "explicitly_absent": 20,
       "low_confidence": 21,
       "not_applicable": 77,
-      "not_assessed": 286,
+      "not_assessed": 275,
       "not_reported": 41,
       "partial": 319,
-      "reported_complete": 291,
+      "reported_complete": 293,
       "source_unavailable": 210
     }
   },
@@ -1704,17 +1704,18 @@
       "templateIds": [],
       "parameterStatusCounts": {
         "not_reported": 2,
-        "partial": 9
+        "partial": 7,
+        "reported_complete": 2
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "one_main_pps_protocol_with_mtt_supporting_task_retained_review_current_access_blocked",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -1860,17 +1861,18 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "conflicting_evidence": 9,
+        "partial": 2
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "one_main_pps_protocol_with_mtt_supporting_task_supplement_context_conflicted",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -35648,14 +35650,15 @@
     {
       "studyRowId": "doi:10.1177/17470218241261645",
       "networkNodeId": "doi:10.1177/17470218241261645",
-      "label": "Lost in time and space? Multisensory processing of peripersonal space and time perception in people with frequent experiences of depersonalisation.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Lost in time and space? Multisensory processing of peripersonal space and time perception in people with frequent experiences of depersonalisation. (a)",
+      "experimentLabel": "Depersonalisation PPS comparison (retained final review)",
+      "inventoryStatus": "one_main_pps_protocol_with_mtt_supporting_task_retained_review_current_access_blocked",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
         "not_reported": 2,
-        "partial": 9
+        "partial": 7,
+        "reported_complete": 2
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -35663,213 +35666,391 @@
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
           "status": "partial",
-          "value": "Stimulus type: Pink-noise (1/f noise) auditory samples, presented either as a static flat sound or a dynamic looming sound. | Source provenance: Auditory stimuli were pink-noise samples sampled at 44.1 kHz; exact source file, noise seed, or waveform asset is not provided in the main PDF. | Auditory conditions: Flat sound with constant intensity and looming sound with increasing perceived approach; participants ignored the auditory stimulus while detecting tactile targets. | Gain envelope: Looming intensity rose exponentially from 55 to 70 dB; flat sounds stayed at 62.5 dB. For looming, far speaker decreased to silence while near speaker increased to maximum. | Renderer or apparatus: Two physical loudspeakers delivered the auditory stimuli, one near the right hand and one far from the participant; no HRTF or headphone renderer was used.",
+          "value": "Retained final-paper review (2026-06-16): 3000-ms pink-noise flat/looming samples at44.1kHz; exponential55-70dBlooming level and62.5dBflat level.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.4-5, The PPS task and Figure 1 | PDF p.4, The PPS task | PDF pp.4-5, The PPS task",
-          "evidenceNote": "The PPS methods identify pink-noise stimuli and flat versus looming sound classes. | Sampling rate and stimulus class are reported; original files are not supplied. | The two auditory conditions and ignore-sound instruction are reported. | Main methods give dB endpoints and the two-speaker cross-intensity pattern. | The speaker geometry is shown in Figure 1 and described in the PPS task text.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. Original waveform/noise seed, complete gain recipe and file identity remain missing. These values are not present in the retrieved preprint and are not transferred to it.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
           "missingComponents": [
-            "source_recipe_or_asset_provenance",
-            "level_envelope_calibration"
+            "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Reported exponential55-70dBlooming level and62.5dBflat level; original calibration not reproduced.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink-noise samples,3000ms,44.1kHz; two physical loudspeakers with opposed fades for looming.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "partial",
-          "value": "Trajectory path: Two-speaker hand/body-centered path: near speaker about 10 cm from the right hand and far speaker 1 m from the participant's body; looming was implemented by far-speaker fade-out and near-speaker fade-in. | Stimulus duration: Auditory pink-noise stimuli lasted 3000 ms. | Stimulus speed: Approximate physical path length is about 90 cm over 3000 ms, implying about 30 cm/s if treated as a continuous looming path; the paper does not state speed directly. | Trajectory count: Two auditory condition families: static/flat sound and dynamic/looming approaching sound. | Gain envelope: Looming intensity rose exponentially from 55 to 70 dB; flat sounds stayed at 62.5 dB. For looming, far speaker decreased to silence while near speaker increased to maximum. | Renderer or apparatus: Two physical loudspeakers delivered the auditory stimuli, one near the right hand and one far from the participant; no HRTF or headphone renderer was used.",
+          "value": "Retained final-paper review (2026-06-16): Two physical speakers: near about10cm from right hand, far1m from body; apparent approach by opposed fades versus stationary flat comparator.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.4-5, The PPS task and Figure 1 | PDF p.4, The PPS task | PDF pp.4-5, The PPS task",
-          "evidenceNote": "Near/far speaker locations and opposite intensity changes are reported. | Duration is explicitly reported in the PPS methods. | Derived from reported 1 m far position, about 10 cm near position, and 3000 ms duration. | The task contrasts flat rectangular and looming triangular sound conditions. | Main methods give dB endpoints and the two-speaker cross-intensity pattern. | The speaker geometry is shown in Figure 1 and described in the PPS task text.",
-          "derivationNote": "Derived from reported 1 m far position, about 10 cm near position, and 3000 ms duration.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. Different distance anchors and a crossfade do not establish a continuous90-cm metric path or constant30-cm/smotion. The older nominal-speed interpretation is not adopted.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
           "missingComponents": [
             "coordinate_frame_body_anchor",
             "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Near distance referenced to right hand; far distance referenced to body.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near approximately10cm from right hand; far1m from participant body.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "gain_only_proxy through two fixed speakers",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3000-ms auditory stimulus.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "partial",
-          "value": "Trial rows families: PPS trial families included audio-tactile target trials, auditory-only catch trials with flat or looming sound, and unimodal tactile baseline trials. | Task sequence rules: Participants responded as fast as possible to tactile targets with the left index finger on a keyboard, ignored auditory stimuli, and repeated a trial if they failed to answer. | Condition intermixing: The PPS task mixed audio-tactile targets with auditory-only catches and unimodal tactile baselines within one PPS task; exact trial-order algorithm is not reported.",
+          "status": "reported_complete",
+          "value": "Retained final-paper review (2026-06-16): Intermixed audio-tactile targets, auditory-only flat/looming catches and tactile-only baseline; missed target trials repeated.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.5, The PPS task | PDF pp.4-5, The PPS task | PDF pp.4-5, Design and The PPS task",
-          "evidenceNote": "The PPS methods define the 60% target family and the 40% catch/baseline remainder. | The response rule, ignore-sound instruction, and failed-answer repetition rule are reported. | Trial-family proportions are reported, but not the internal schedule algorithm.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. Exact repeat insertion/order and D0sound-following policy remain unspecified.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Selected flat/looming sound with touch at D1-D5, or auditory-only event; D0touch in silence before sound administration. Repeated trial after omitted tactile response.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Audio-tactile targets; auditory-only catches; unimodal tactile baselines.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
           "status": "partial",
-          "value": "Task sequence rules: Participants responded as fast as possible to tactile targets with the left index finger on a keyboard, ignored auditory stimuli, and repeated a trial if they failed to answer.",
+          "value": "Retained final-paper review (2026-06-16): Respond quickly to right-index electrical target with left-index keyboard press; ignore sound; repeat missed-target trials.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.4-5, The PPS task | PDF pp.4-6; publisher supplement route checked 2026-06-16",
-          "evidenceNote": "The response rule, ignore-sound instruction, and failed-answer repetition rule are reported. | Fast keyboard response is reported, but no PPS timeout, response deadline, or scoring window was found.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. Exact key, online deadline, repeat insertion and duplicate-response handling are unresolved.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
           "missingComponents": [
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Left-index keypress; omitted response causes trial repetition.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Keyboard.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Detect touch and ignore sound; auditory-only trials have no tactile target.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
           "status": "not_reported",
-          "value": "",
+          "value": "Retained final-paper review (2026-06-16): No PPS ITI, jitter distribution or event anchor was recovered from the reviewed final main article.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.4-6; publisher supplement route checked 2026-06-16",
-          "evidenceNote": "No PPS ITI, jitter value, jitter range, or distribution was found; the 1000 ms interval belongs to the separate MTT task.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. The PPS supplement was blocked in June and again in October. Do not import the separate MTT timing or the context-conflicted preprint SI1000-mscandidate.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "partial",
-          "value": "Soa table: D1-D5 tactile delays after auditory onset: 300, 800, 1500, 2200, and 2700 ms.",
+          "status": "reported_complete",
+          "value": "Retained final-paper review (2026-06-16): Sound-onset D1-D5touch delays+300,+800,+1500,+2200,+2700ms.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.5, The PPS task",
-          "evidenceNote": "The five PPS tactile delays are explicitly listed.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. The historical final review directly records these delays; preprint SI applicability remains a separate unresolved question.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "+300,+800,+1500,+2200,+2700ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive touch delay after auditory onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "partial",
-          "value": "Tactile stimulus: Single constant-voltage rectangular monophasic pulse via DS3 Digitimer electrical stimulators and electrode pairs on the hairy surface of the right index finger.",
+          "value": "Retained final-paper review (2026-06-16): DS3Digitimer rectangular monophasic electrical pulse to hairy right-index surface; the retained review describes constant-voltage stimulation.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.4, The PPS task",
-          "evidenceNote": "Main methods report tactile modality, stimulator model, waveform class, and body site.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. Exact duration, delivered current/voltage mode and threshold procedure need the final supplement or original apparatus specification. The preprint terminology conflict is not asserted to persist in the inaccessible final.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
           "missingComponents": [
-            "waveform_and_duration",
-            "intensity_or_calibration"
+            "pulse_duration_and_final_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Hairy surface of right index finger.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Electrical pulse via DS3Digitimer and electrode pair.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Rectangular monophasic pulse; duration and detailed calibration were not recovered in the retained main-PDF review.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
           "status": "partial",
-          "value": "Baseline strategy: Unimodal tactile baseline trials were delivered during silence periods before sound administration to control expectancy. | Baseline timing: D0 tactile-only baseline occurred at -700 ms, preceding sound administration during silence.",
+          "value": "Retained final-paper review (2026-06-16): Tactile-only D0baseline at-700ms in silence before sound administration; flat-sound comparator is separate.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.5, The PPS task | PDF p.5 and PPS results; publisher supplement route checked 2026-06-16",
-          "evidenceNote": "The paper states the baseline purpose and no-sound context. | The D0 baseline timing is explicitly reported. | Baseline trials are reported, but the exact baseline count or baseline-specific percentage is not.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. The main review does not establish baseline count or whether the subsequent sound always occurs; no count inferred from the percentage alone.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
           "missingComponents": [
-            "timing_and_anchor",
-            "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Tactile-only baselines share the40%non-ATremainder with auditory catches; exact split unknown.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_endpoint_pre_post plus flat/static auditory comparator",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "D0touch700ms before sound onset during silence.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
           "status": "partial",
-          "value": "Catch trial type: Auditory-only catch trials used either looming or flat sounds, with no tactile target.",
+          "value": "Retained final-paper review (2026-06-16): Auditory-only looming/flat catch events with no tactile target; exact allocation not recovered.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.5, The PPS task | PDF p.5 and PPS results; publisher supplement route checked 2026-06-16",
-          "evidenceNote": "Catch trials are described as auditory stimulation only. | Auditory-only catches are reported as part of the 40% remainder, but exact catch count/split is not.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. No exact catch count or condition split is available from the retained main review.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
           "missingComponents": [
-            "target_role_and_expected_action",
-            "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Part of the40%non-ATremainder, shared with tactile-only baseline.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Ignore sound; no target touch.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_reported",
-          "value": "",
+          "status": "partial",
+          "value": "Retained final-paper review (2026-06-16): 60%ATtargets and40%remainder containing auditory catches plus tactile baselines; exact PPS total/repetitions unknown.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.4-6 and PPS results; publisher supplement route checked 2026-06-16",
-          "evidenceNote": "No exact repetition count per D1-D5 tactile delay and flat/looming condition was found. | No PPS total trial count was found; the 72-trial count belongs to the separate MTT task.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. MTT24/72trial counts are not PPS counts. Do not repair the missing final allocation using contradictory preprint SI values.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
           "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
+            "repetitions_or_exact_counts"
           ],
-          "components": {}
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Missed tactile target trials repeated; denominator/count and makeup placement unresolved.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Flat/looming sound x five target delays, plus D0baseline and auditory-only catches.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "partial",
-          "value": "Block count: The study had two same-day sessions, the PPS task and MTT task, with task order balanced across participants; no internal PPS block count is reported. | Condition intermixing: The PPS task mixed audio-tactile targets with auditory-only catches and unimodal tactile baselines within one PPS task; exact trial-order algorithm is not reported.",
+          "status": "not_reported",
+          "value": "Retained final-paper review (2026-06-16): PPS and mental-time-travel tasks occur in two same-day sessions with task order balanced; internal PPS blocks are unknown.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.4-6; publisher supplement route checked 2026-06-16 | PDF p.4, Design and experimental procedure | PDF pp.4-5, Design and The PPS task | PDF pp.4-6 and PPS results; publisher supplement route checked 2026-06-16",
-          "evidenceNote": "PPS-versus-MTT task order was balanced, but no PPS block count, block order, or trial randomization rule was found. | Session count and task-order balancing are reported. | Trial-family proportions are reported, but not the internal schedule algorithm. | No PPS total trial count was found; the 72-trial count belongs to the separate MTT task.",
+          "pageOrSection": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
+          "evidenceNote": "Fresh final/SI verification was blocked on2026-10-27; historical source-backed claims are retained, not replaced by preprint details. Two different tasks do not imply two PPS blocks. Main-PDF review found no PPS-specific block count, composition or randomization algorithm.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/17470218241261645",
           "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "sourceType": "retained_primary_pdf_review_fresh_access_blocked",
           "missingComponents": [
-            "block_composition",
-            "block_order_or_counterbalancing"
+            "block_count",
+            "block_composition"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "PPSversusMTT order balanced across participants.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -40265,236 +40446,426 @@
     {
       "studyRowId": "doi:10.31234/osf.io/t8h6a",
       "networkNodeId": "doi:10.31234/osf.io/t8h6a",
-      "label": "Lost in time and space? Multisensory processing of peripersonal space and time perception in Depersonalisation",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Lost in time and space? Multisensory processing of peripersonal space and time perception in Depersonalisation (a)",
+      "experimentLabel": "Depersonalisation PPS comparison (preprint v1; conflicted SI)",
+      "inventoryStatus": "one_main_pps_protocol_with_mtt_supporting_task_supplement_context_conflicted",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "conflicting_evidence": 9,
+        "partial": 2
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Main preprint describes flat/static and dynamic/looming sound through two physical loudspeakers; no acoustic recipe or sound duration recovered.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Full preprint search and renderedMethods/SI found no noise colour, sample rate, source file, sound duration, SPL or complete envelope. Do not borrow final-review pink noise/44.1kHz/3000ms/55-70dB.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
             "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two physical speakers, no headphone/HRTFclaim.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Flat and looming sounds; Figure2two table-mounted speakers approximately1m apart.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Looming toward seated right-hand/body region versus flat comparator; Figure2labels1m between speakers.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Exact body-relative endpoints, speed, duration and crossfade/distance law are unavailable; speaker spacing does not define metric acoustic motion.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Blindfolded seated participant, right palm on table.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Figure2one-metre speaker separation; this is not one metre from the body.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "looming versus static/flat",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "conflicting_evidence",
+          "value": "Main task detects touch during flat/looming sound; SI additionally lists ATtargets, auditory catches and tactile-only baselines in an incompatible study context.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Embedded SI describes schizophrenia groups, motor training and extra sessions inconsistent with the main depersonalisation PPS/MTT study. SI-only details are candidates with unresolved applicability; no inferred extra experiments or copied final-paper settings.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
+            "trial_families"
           ],
-          "components": {}
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Main participants detect touch and ignore sound.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "conflicting_evidence",
+              "value": "Main flat/looming tactile detection is clear; SI catch/baseline family applicability is unresolved.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "conflicting_evidence",
+          "value": "Main says respond quickly to right-index touch and ignore sound; SI adds left-index laptop press and repeated misses in its incompatible protocol.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Embedded SI describes schizophrenia groups, motor training and extra sessions inconsistent with the main depersonalisation PPS/MTT study. SI-only details are candidates with unresolved applicability; no inferred extra experiments or copied final-paper settings. Exact key and online window are not specified.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
-            "target_and_nontarget_rule",
             "response_mode_or_device",
             "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "conflicting_evidence",
+              "value": "SI left-index press and repeat omitted tactile trials, applicability unresolved.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "conflicting_evidence",
+              "value": "SI laptop-button response, applicability unresolved.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Quick tactile detection; ignore auditory stimulus.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "conflicting_evidence",
+          "value": "SI explicitly prints1000-msITIafter each PPS trial, but its study applicability is unresolved; no PPS jitter distribution given.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Embedded SI describes schizophrenia groups, motor training and extra sessions inconsistent with the main depersonalisation PPS/MTT study. SI-only details are candidates with unresolved applicability; no inferred extra experiments or copied final-paper settings.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "conflicting_evidence",
+              "value": "SI fixed1000-msITIcandidate.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "conflicting_evidence",
+              "value": "After each PPS trial; exact trial-end event not defined.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "conflicting_evidence",
+              "value": "1000mscandidate from PPS SI, not from MTT.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "conflicting_evidence",
+          "value": "SI gives auditory-onset+300,+800,+1500,+2200,+2700-ms targets and-700-msbaseline; numerical applicability to the main depersonalisation study is unresolved.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Embedded SI describes schizophrenia groups, motor training and extra sessions inconsistent with the main depersonalisation PPS/MTT study. SI-only details are candidates with unresolved applicability; no inferred extra experiments or copied final-paper settings.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
             "reference_event_and_sign",
             "ordered_soa_values_or_derivable_distance_anchors"
           ],
-          "components": {}
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "conflicting_evidence",
+              "value": "SI targets300,800,1500,2200,2700ms; baseline-700ms. Main results usesD1-D5labels but does not independently settle numerical timing.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "conflicting_evidence",
+              "value": "SI auditory-onset anchor, positive after/negative before.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "conflicting_evidence",
+          "value": "Main specifies DS3electrode pair on hairy right-index surface and a rectangular monophasic pulse, while mixing constant-current apparatus with constant-voltage pulse terminology.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Embedded SI describes schizophrenia groups, motor training and extra sessions inconsistent with the main depersonalisation PPS/MTT study. SI-only details are candidates with unresolved applicability; no inferred extra experiments or copied final-paper settings. Do not assign the SI5.2-9.6/5.5-10.3mAranges to High/Lowdepersonalisation groups.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
             "modality",
-            "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Hairy surface of right index finger.",
+              "note": ""
+            },
+            "modality": {
+              "status": "conflicting_evidence",
+              "value": "DS3constant-current apparatus versus constant-voltage pulse wording.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "conflicting_evidence",
+              "value": "Main rectangular monophasic pulse; SI100-microsecond candidate and threshold values occur under incompatible schizophrenia/control group labels.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "conflicting_evidence",
+          "value": "Main includes flat auditory comparator; SI adds a tactile-only baseline at-700msduring silence with unresolved applicability/count.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Embedded SI describes schizophrenia groups, motor training and extra sessions inconsistent with the main depersonalisation PPS/MTT study. SI-only details are candidates with unresolved applicability; no inferred extra experiments or copied final-paper settings. SI also calls baseline vibration despite the electrical apparatus; these modalities are not silently equated.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
             "family_or_explicit_none",
             "timing_and_anchor",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "conflicting_evidence",
+              "value": "SI baseline shares unspecified40%remainder with auditory catches.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "conflicting_evidence",
+              "value": "Flat comparator supported in main; SI tactile-only baseline applicability unresolved.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "conflicting_evidence",
+              "value": "SI-700ms before sound; sound-following policy unclear.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "conflicting_evidence",
+          "value": "SI lists auditory-only looming/flat trials without touch; exact count and applicability remain unresolved.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Embedded SI describes schizophrenia groups, motor training and extra sessions inconsistent with the main depersonalisation PPS/MTT study. SI-only details are candidates with unresolved applicability; no inferred extra experiments or copied final-paper settings.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "conflicting_evidence",
+              "value": "Unspecified share of SI40%remainder, split with tactile baseline.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "conflicting_evidence",
+              "value": "SI auditory-only candidate.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "No unambiguous value recovered in the specified source scope.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "conflicting_evidence",
+              "value": "Withhold follows main tactile-target instruction if SI family applies.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "conflicting_evidence",
+          "value": "SI simultaneously states18targets x5delays x2sounds,60%ATtargets and120total trials; these quantities cannot all hold.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Embedded SI describes schizophrenia groups, motor training and extra sessions inconsistent with the main depersonalisation PPS/MTT study. SI-only details are candidates with unresolved applicability; no inferred extra experiments or copied final-paper settings. Arithmetic180/300 is a contradiction diagnostic, not executable trial counts.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
-            "factor_dimensions",
             "repetitions_or_exact_counts",
             "exceptions_or_overrides"
           ],
-          "components": {}
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "conflicting_evidence",
+              "value": "SI mixed population/session context; no accepted repaired allocation.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Main flat/looming sound conditions; SI five numerical delays.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "conflicting_evidence",
+              "value": "18x5x2=180targets; at60%that would require300total, inconsistent with printed120total.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "conflicting_evidence",
+          "value": "Main has same-day PPS and MTT tasks in balanced order; SI describes two PPS blocks plus motor-training Session2and PPSbefore/after.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
+          "evidenceNote": "Embedded SI describes schizophrenia groups, motor training and extra sessions inconsistent with the main depersonalisation PPS/MTT study. SI-only details are candidates with unresolved applicability; no inferred extra experiments or copied final-paper settings. SIextra experiment/session labels do not establish extra main-study PPSinstances.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.31234/osf.io/t8h6a",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://osf.io/download/86j4g/",
+          "sourceType": "primary_preprint_v1_with_context_conflicted_supplement",
           "missingComponents": [
             "block_count",
-            "block_composition"
+            "block_composition",
+            "within_block_randomization"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "conflicting_evidence",
+              "value": "SI counts contradictory; no accepted block allocation.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "conflicting_evidence",
+              "value": "SI two equal PPSblocks, about8minutes each; applicability unresolved.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Main balances PPSversusMTTtask order.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "conflicting_evidence",
+              "value": "SI randomized target/catch statement in incompatible context.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -45405,20 +45776,20 @@
   ],
   "inventoryAudit": {
     "publications": 94,
-    "registeredInventories": 51,
-    "methodsReviewedInventories": 42,
+    "registeredInventories": 53,
+    "methodsReviewedInventories": 44,
     "auditedAccessBlockers": 1,
-    "publicationsWithAllContractDispositions": 38,
-    "inventoryAndContractsAudited": 36,
-    "remainingInventoryOrContractAudit": 58,
+    "publicationsWithAllContractDispositions": 40,
+    "inventoryAndContractsAudited": 38,
+    "remainingInventoryOrContractAudit": 56,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 4,
       "audited_source_access_gap": 1,
       "author_version_methods_reviewed_final_comparison_pending": 1,
-      "not_registered": 43,
+      "not_registered": 41,
       "partial_methods_inventory": 4,
-      "primary_methods_reviewed": 31,
-      "retained_primary_methods_review": 10
+      "primary_methods_reviewed": 32,
+      "retained_primary_methods_review": 11
     },
     "interpretation": "Audited means inventory evidence or documented access blocker plus eleven explicit source dispositions per retained row. It does not mean all values are reported, final-version equivalence is proven, a template exists, or native hardware is qualified."
   }
