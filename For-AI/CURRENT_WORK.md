@@ -53,12 +53,14 @@ This file is the active checklist and handoff owner; replace state, do not appen
   to initialize (kernel assets path not found); no substitute UI driver was used.
   Primary-source extraction continues independently. Pages assembly now includes
   referenced Study 5 instruction audio with its checked manifest hashes.
-- **Local validation:** the prior Standard run had 666 passed, ten skipped and
-  two stale scientific-eligibility failures. Their fixtures now follow reviewed
-  source eligibility. The corrected sample-paced Canzoneri response audit passes
+- **Local validation:** the latest Standard run finished with 686 passed, ten
+  skipped and twelve catalogue failures caused by changing source inputs during
+  the run. A subsequent stable six-suite catalogue check passes 104 tests with
+  one skip, including all twelve failed cases and byte-deterministic rebuilding.
+  This is resolved targeted evidence, not a fresh entirely green Standard run.
+  The corrected sample-paced Canzoneri response audit passes
   three checks in 951.25 s, including complete planned/click/marker/analysis joins,
-  six distance/motion bins and extended Windows paths. The integrated Standard
-  rerun is in progress; do not report it as passing yet. Actual preset baking
+  six distance/motion bins and extended Windows paths. Actual preset baking
   exposed clipped/missing tactile cues: the writer and cached-manifest validator
   now reject them. Reported silence and explicitly derived margins are encoded
   in affected templates. Canzoneri and Taffou silence-window baselines retain
@@ -74,10 +76,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Ordinary catalogue rebuilding now preserves and verifies native asset provenance;
   stale audio/template receipts and Python force-regeneration are rejected. Thirteen
   focused native-catalogue/profile/release checks pass. The canonical Designer has
-  20 passing frontend tests and fresh actual-browser/Pages assembly checks.
-  Review found premade native generation receipts were dropped by portable export;
-  UI owns a narrow fix carrying/verifying inline provenance in the existing design
-  while keeping the ZIP format and audio-only asset inventory unchanged.
+  23 passing frontend tests and fresh actual-browser/Pages assembly checks.
+  Portable export now retains exact native premade receipts inside the existing
+  design and verifies their hashes against the embedded WAV. Ten package-import
+  checks, strict Clippy and an actual Chromium export → offline re-export → Rust
+  import pass; a corrupted receipt produces a recoverable export error. Independent
+  review found no blocking trust/re-export defect. The existing ZIP format and
+  audio-only asset inventory remain unchanged.
   The integrated Rust selection (Designer, Runner, Designer core
   and package verifier) passes 230 checks with 16 opt-in skips and strict Clippy.
   PCM cancellation now uses a deterministic writer-boundary check, replacing a
@@ -113,10 +118,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   interaction, clean-Windows prerequisites and deployed routes remain open. New physical calibration
   is deferred by the user, not reported as measured.
 - **Scientific coverage:** frozen 94-publication corpus; the latest integrated
-  projection has 151 study rows and 1,661 compact contracts. After the accepted
-  body-ownership, inaccessible-plasticity and Canzoneri batches, 60 publications
-  pass inventory/access plus all eleven source-disposition checks; 34 remain.
-  There are 68 registered entries, 57 Methods-backed inventories, eight audited
+  projection has 158 study rows and 1,738 compact contracts. After the cane-use,
+  newborn supplement, social/walking and tool-observation batches, 67 publications
+  pass inventory/access plus all eleven source-disposition checks; 27 remain.
+  There are 70 registered entries, 59 Methods-backed inventories, eight audited
   access blockers and one project-lineage record, with source-version and
   overlapping-cohort limitations retained.
   Abstract-only and partial inventories do not pass by registration alone.

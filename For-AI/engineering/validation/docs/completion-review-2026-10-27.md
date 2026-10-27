@@ -19,7 +19,11 @@ bounded Rust source generation and corrected 3DTI bridge. Native portable
 import verifies inventories and media hashes in a temporary directory, then
 publishes and rebinds all four authoring audio groups; original bundle records
 remain unchanged alongside a local rebinding receipt. A real nine-asset browser
-export passes this offline path. Pages assembly now includes only referenced
+export passes this offline path. Premade native generation receipts also survive
+the existing profile design unchanged, with exact UTF-8/hash/WAV checks before
+export and native adoption. Actual browser export, offline re-export and native
+import pass; this preserves provenance without asserting source equivalence.
+Pages assembly now includes only referenced
 spoken assets and their checked manifests. Native immutable participant/part
 assembly, ordered instruction/block execution and durable group receipts now
 have software evidence. Installed journeys remain separate. The native preview
