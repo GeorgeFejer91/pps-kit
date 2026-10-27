@@ -2792,7 +2792,10 @@ dependencies = [
 name = "pps-designer-core"
 version = "0.1.0"
 dependencies = [
+ "csv",
  "hound",
+ "pps-runner-execution",
+ "pps-session-package",
  "rand 0.8.8",
  "rustfft",
  "serde",

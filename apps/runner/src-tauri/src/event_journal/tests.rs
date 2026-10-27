@@ -357,7 +357,11 @@ fn process_termination_at_write_sync_and_publication_boundaries_is_read_only_rec
         let before = snapshot();
         let assessment = serde_json::to_value(crate::result_recovery::assess_directory(
             &root,
-            &"a".repeat(64),
+            &crate::result_recovery::ExpectedResultContext {
+                package_hash: "a".repeat(64), scored_trial_count: Some(3),
+                identity: serde_json::json!({"participantId":"fixture","sessionId":"S1","partSessionId":"S1P2",
+                    "partNumber":2,"executionMode":"participant_block_wavs"}),
+            },
         ))
         .unwrap();
         assert_eq!(assessment["attempts"][0]["status"], expected, "{stage}");

@@ -77,7 +77,14 @@ impl Fixture {
         .unwrap();
     }
     fn assess(&self) -> NativeResultsAssessment {
-        assess_directory(&self.root, &"a".repeat(64))
+        assess_directory(&self.root, &self.expected())
+    }
+    fn expected(&self) -> ExpectedResultContext {
+        ExpectedResultContext {
+            package_hash: "a".repeat(64),
+            identity: self.header.clone(),
+            scored_trial_count: Some(1),
+        }
     }
 }
 impl Drop for Fixture {
@@ -153,7 +160,9 @@ fn changed_complete_bytes_wrong_package_and_unsafe_member_are_invalid() {
             fs::write(path, serde_json::to_vec(&manifest).unwrap()).unwrap();
         }
         let a = if mode == 1 {
-            assess_directory(&f.root, &"b".repeat(64))
+            let mut expected = f.expected();
+            expected.package_hash = "b".repeat(64);
+            assess_directory(&f.root, &expected)
         } else {
             f.assess()
         };
@@ -172,4 +181,32 @@ fn missing_pair_and_oversized_file_remain_visible_failures() {
         .unwrap();
     file.set_len(MAX_BYTES as u64 + 1).unwrap();
     assert_eq!(f.assess().attempts[0].reason, "resource_limit");
+}
+
+#[test]
+fn verified_package_expectations_override_self_consistent_result_claims() {
+    for field in [
+        "trial_count",
+        "participantId",
+        "sessionId",
+        "partSessionId",
+        "partNumber",
+        "executionMode",
+    ] {
+        let f = Fixture::new();
+        f.publish();
+        let mut expected = ExpectedResultContext {
+            package_hash: "a".repeat(64),
+            identity: f.header.clone(),
+            scored_trial_count: Some(1),
+        };
+        if field == "trial_count" {
+            expected.scored_trial_count = Some(2);
+        } else {
+            expected.identity[field] = json!("different");
+        }
+        let result = assess_directory(&f.root, &expected);
+        assert_eq!(result.attempts[0].status, "invalid", "{field}");
+        assert_eq!(result.attempts[0].common_dataset_rows, 1);
+    }
 }

@@ -41,8 +41,24 @@ struct AttemptAssessment {
     common_dataset_rows: u64,
 }
 
+// Native verified expectations are not inferred from the result being assessed.
+pub(crate) struct ExpectedResultContext {
+    pub package_hash: String,
+    pub identity: Value,
+    pub scored_trial_count: Option<u64>,
+}
+
 pub(crate) fn assess_native_results(verified: &VerifiedPreparedSession) -> NativeResultsAssessment {
-    assess_directory(verified.session_dir(), verified.manifest_sha256())
+    let summary = verified.summary();
+    let expected = ExpectedResultContext {
+        package_hash: verified.manifest_sha256().to_owned(),
+        identity: serde_json::json!({"participantId":summary.participant_id,"sessionId":summary.session_id,
+            "partSessionId":summary.part_session_id,"partNumber":summary.part_number,"executionMode":summary.execution_mode}),
+        scored_trial_count: summary.blocks.iter().try_fold(0_u64, |sum, block| {
+            sum.checked_add(u64::try_from(block.trial_count).ok()?)
+        }),
+    };
+    assess_directory(verified.session_dir(), &expected)
 }
 
 fn artifact(name: &str) -> Option<(&str, &'static str)> {
@@ -76,7 +92,10 @@ fn artifact(name: &str) -> Option<(&str, &'static str)> {
     None
 }
 
-pub(crate) fn assess_directory(directory: &Path, package_hash: &str) -> NativeResultsAssessment {
+pub(crate) fn assess_directory(
+    directory: &Path,
+    expected: &ExpectedResultContext,
+) -> NativeResultsAssessment {
     let mut summary = NativeResultsAssessment {
         schema: "pps.native-result-assessment.v1",
         inspection_scope: "read-only-file-prefix",
@@ -131,14 +150,9 @@ pub(crate) fn assess_directory(directory: &Path, package_hash: &str) -> NativeRe
             common_event_records: 0,
             common_dataset_rows: 0,
         };
-        if let Err(reason) = assess_attempt(
-            &directory,
-            &id,
-            &files,
-            package_hash,
-            &mut budget,
-            &mut result,
-        ) {
+        if let Err(reason) =
+            assess_attempt(&directory, &id, &files, expected, &mut budget, &mut result)
+        {
             result.reason = reason;
             result.status = if committed || reason != "missing_pair" {
                 "invalid"
@@ -193,10 +207,11 @@ fn assess_attempt(
     directory: &Path,
     id: &str,
     files: &BTreeSet<&str>,
-    package_hash: &str,
+    expected: &ExpectedResultContext,
     budget: &mut usize,
     out: &mut AttemptAssessment,
 ) -> Result<(), &'static str> {
+    let package_hash = expected.package_hash.as_str();
     let committed = files.contains(".results.json");
     let event_name = format!(
         "native_events_{id}{}",
@@ -331,9 +346,12 @@ fn assess_attempt(
         "partNumber",
         "executionMode",
     ] {
-        if manifest["identity"][key] != header[key] {
+        if manifest["identity"][key] != header[key] || header[key] != expected.identity[key] {
             return Err("identity_mismatch");
         }
+    }
+    if expected.scored_trial_count != Some(scored) {
+        return Err("verified_package_trial_count_mismatch");
     }
     let receipt = &manifest["receipt"];
     if interrupted
