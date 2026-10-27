@@ -66,6 +66,7 @@ struct PreparedSessionSelection {
     summary: Option<PreparedSessionSummary>,
     snapshot: RunnerSnapshot,
     results_assessment: Option<result_recovery::NativeResultsAssessment>,
+    group_results_assessment: Option<result_recovery::NativeGroupResultsAssessment>,
 }
 
 #[tauri::command]
@@ -125,7 +126,7 @@ async fn configure_remote(
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<RemoteStatus, String> {
     if enabled && lan_listener {
-        remote::ensure_started(state.inner().clone(), companion_web_root(&app))?;
+        remote::ensure_started(state.inner().clone(), companion_web_root(&app)?)?;
     }
     state.configure_remote_async(enabled, allow_abort).await
 }
@@ -201,6 +202,7 @@ async fn select_prepared_package(
             cancelled: true,
             summary: None,
             results_assessment: None,
+            group_results_assessment: None,
             snapshot: runtime
                 .snapshot_async()
                 .await
@@ -214,7 +216,7 @@ async fn select_prepared_package(
         )
     })?;
 
-    let (verified, verified_group, results_assessment) =
+    let (verified, verified_group, results_assessment, group_results_assessment) =
         tauri::async_runtime::spawn_blocking(move || {
             let verified_group = if group {
                 Some(verify_prepared_group(&manifest_path)?)
@@ -226,7 +228,15 @@ async fn select_prepared_package(
                 None => verify_prepared_session(VerificationRequest::new(&manifest_path))?,
             };
             let assessment = result_recovery::assess_native_results(&verified);
-            Ok::<_, pps_session_package::VerificationError>((verified, verified_group, assessment))
+            let group_assessment = verified_group
+                .as_ref()
+                .map(result_recovery::assess_native_group_results);
+            Ok::<_, pps_session_package::VerificationError>((
+                verified,
+                verified_group,
+                assessment,
+                group_assessment,
+            ))
         })
         .await
         .map_err(|_| PreparedSessionCommandError::runtime())?
@@ -243,6 +253,7 @@ async fn select_prepared_package(
         summary: Some(summary),
         snapshot,
         results_assessment: Some(results_assessment),
+        group_results_assessment,
     })
 }
 
@@ -681,12 +692,17 @@ pub fn run() {
         .expect("error while running PPS Experiment Runner preview");
 }
 
-fn companion_web_root(app: &tauri::AppHandle) -> PathBuf {
-    if cfg!(debug_assertions) {
-        return PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../compiled");
+fn companion_web_root(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    #[cfg(debug_assertions)]
+    {
+        let _ = app;
+        Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../compiled"))
     }
-    app.path()
-        .resource_dir()
-        .map(|root| root.join("web"))
-        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../compiled"))
+    #[cfg(not(debug_assertions))]
+    {
+        app.path()
+            .resource_dir()
+            .map(|root| root.join("web"))
+            .map_err(|_| "The installed browser companion resources are unavailable.".to_owned())
+    }
 }

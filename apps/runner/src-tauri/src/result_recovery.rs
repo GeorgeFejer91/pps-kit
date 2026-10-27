@@ -41,6 +41,158 @@ struct AttemptAssessment {
     common_dataset_rows: u64,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct NativeGroupResultsAssessment {
+    schema: &'static str,
+    timing_qualification: &'static str,
+    complete_scan: bool,
+    reason: &'static str,
+    parts: Vec<PartResultsAssessment>,
+    groups: Vec<GroupAttemptAssessment>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PartResultsAssessment {
+    part_number: usize,
+    assessment: NativeResultsAssessment,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct GroupAttemptAssessment {
+    group_attempt_id: String,
+    status: &'static str,
+    reason: &'static str,
+    part_count: Option<usize>,
+    scored_trial_count: Option<u64>,
+    dataset_row_count: Option<u64>,
+}
+
+/// Inspect saved evidence only; this does not restore progress or replay a run.
+pub(crate) fn assess_native_group_results(
+    group: &pps_session_package::VerifiedPreparedGroup,
+) -> NativeGroupResultsAssessment {
+    let parts: Vec<_> = group
+        .parts()
+        .iter()
+        .enumerate()
+        .map(|(index, part)| PartResultsAssessment {
+            part_number: index + 1,
+            assessment: assess_native_results(part),
+        })
+        .collect();
+    let mut result = NativeGroupResultsAssessment {
+        schema: "pps.native-group-result-assessment.v1",
+        timing_qualification: "unqualified",
+        complete_scan: parts.iter().all(|part| part.assessment.complete_scan),
+        reason: "inspected",
+        parts,
+        groups: Vec::new(),
+    };
+    let Some(root) = group.manifest().path().parent() else {
+        result.complete_scan = false;
+        result.reason = "group_directory_unavailable";
+        return result;
+    };
+    let Ok(entries) = fs::read_dir(root) else {
+        result.complete_scan = false;
+        result.reason = "group_directory_unreadable";
+        return result;
+    };
+    let mut candidates = BTreeMap::new();
+    for (index, entry) in entries.enumerate() {
+        if index >= MAX_DIRECTORY_ENTRIES || candidates.len() >= MAX_ATTEMPTS {
+            result.complete_scan = false;
+            result.reason = "group_scan_limit";
+            break;
+        }
+        let Ok(entry) = entry else {
+            result.complete_scan = false;
+            result.reason = "group_directory_unreadable";
+            continue;
+        };
+        let name = entry.file_name();
+        let Some(name) = name.to_str() else { continue };
+        let Some(stem) = name.strip_prefix("native_group_") else {
+            continue;
+        };
+        let (id, pending) = match stem.strip_suffix(".results.json") {
+            Some(id) => (id, false),
+            None => match stem.strip_suffix(".results.pending.json") {
+                Some(id) => (id, true),
+                None => continue,
+            },
+        };
+        if id.len() != 32
+            || !id
+                .bytes()
+                .all(|c| c.is_ascii_alphanumeric() || b"_-".contains(&c))
+        {
+            continue;
+        }
+        let candidate = candidates.entry(id.to_owned()).or_insert(None);
+        if !pending {
+            *candidate = Some(entry.path());
+        }
+    }
+    let mut remaining = MAX_SCAN_BYTES;
+    for (id, path) in candidates {
+        if remaining == 0 {
+            result.complete_scan = false;
+            result.reason = "group_scan_limit";
+            break;
+        }
+        let mut attempt = GroupAttemptAssessment {
+            group_attempt_id: id,
+            status: if path.is_none() {
+                "interrupted"
+            } else {
+                "invalid"
+            },
+            reason: if path.is_none() {
+                "group_receipt_not_published"
+            } else {
+                "group_receipt_failed_verification"
+            },
+            part_count: None,
+            scored_trial_count: None,
+            dataset_row_count: None,
+        };
+        if let Some(path) = path {
+            match crate::event_journal::group_results::verify_published_group_result_with_budget(
+                group,
+                &path,
+                &mut remaining,
+            ) {
+                Ok(receipt) => {
+                    attempt.status = "complete";
+                    attempt.reason = "matching_group_receipt";
+                    attempt.part_count = Some(receipt.part_count);
+                    attempt.scored_trial_count = Some(receipt.scored_trial_count);
+                    attempt.dataset_row_count = Some(receipt.dataset_row_count);
+                }
+                Err(crate::event_journal::group_results::GroupResultError::BudgetExceeded) => {
+                    attempt.status = "not_assessed";
+                    attempt.reason = "group_scan_limit";
+                    remaining = 0;
+                }
+                Err(_) => {}
+            }
+        }
+        result.groups.push(attempt);
+    }
+    if remaining == 0 {
+        result.complete_scan = false;
+        result.reason = "group_scan_limit";
+    }
+    if !result.complete_scan && result.reason == "inspected" {
+        result.reason = "part_scan_incomplete";
+    }
+    result
+}
+
 // Native verified expectations are not inferred from the result being assessed.
 pub(crate) struct ExpectedResultContext {
     pub package_hash: String,

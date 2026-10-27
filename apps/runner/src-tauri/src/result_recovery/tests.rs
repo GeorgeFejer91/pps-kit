@@ -210,3 +210,26 @@ fn verified_package_expectations_override_self_consistent_result_claims() {
         assert_eq!(result.attempts[0].common_dataset_rows, 1);
     }
 }
+#[test]
+#[ignore = "requires PPS_NATIVE_GROUP_RESULT_FIXTURE with a real native completed group"]
+fn actual_native_group_result_assessment_is_path_free_and_read_only() {
+    let path =
+        std::path::PathBuf::from(std::env::var_os("PPS_NATIVE_GROUP_RESULT_FIXTURE").unwrap());
+    let group = pps_session_package::verify_prepared_group(&path).unwrap();
+    let summary = super::assess_native_group_results(&group);
+    assert!(summary.complete_scan);
+    assert_eq!(summary.parts.len(), 2);
+    assert!(summary
+        .groups
+        .iter()
+        .any(|attempt| attempt.status == "complete" && attempt.part_count == Some(2)));
+    assert!(summary.parts.iter().all(|part| part
+        .assessment
+        .attempts
+        .iter()
+        .any(|attempt| attempt.status == "complete")));
+    let serialized = serde_json::to_string(&summary).unwrap();
+    assert!(!serialized.contains(&path.to_string_lossy().replace('\\', "\\\\")));
+    assert_eq!(summary.timing_qualification, "unqualified");
+    assert_eq!(summary, super::assess_native_group_results(&group));
+}
