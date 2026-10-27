@@ -48,8 +48,10 @@ def _read_compiled() -> tuple[str, str, str]:
 def _at_rule_blocks(css: str, header: str) -> list[str]:
     blocks: list[str] = []
     cursor = 0
-    while (start := css.find(header, cursor)) >= 0:
-        opening = css.find("{", start + len(header))
+    header_pattern = re.compile(re.escape(header).replace(r"\ ", r"\s*"))
+    while match := header_pattern.search(css, cursor):
+        start = match.start()
+        opening = css.find("{", match.end())
         assert opening >= 0
         depth = 0
         for index in range(opening, len(css)):
@@ -467,9 +469,10 @@ def test_collapse_and_noise_choice_states_are_exposed_to_assistive_technology() 
         ".segment-collapse-button{",
         ".segment-collapse-icon{",
         ".decision-segment.collapsed .segment-collapse-icon{transform:rotate(180deg)}",
-        "@media (prefers-reduced-motion: reduce)",
     ):
         assert contract in _compiled_css
+    reduced_motion_css = "\n".join(_at_rule_blocks(_compiled_css, "@media (prefers-reduced-motion: reduce)"))
+    assert _selector_has(reduced_motion_css, ".segment-collapse-icon", r"transition:\s*none")
 
 
 def test_compiled_dashboard_and_public_wrappers_share_one_cache_token() -> None:

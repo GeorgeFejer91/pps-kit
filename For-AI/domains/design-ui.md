@@ -62,3 +62,10 @@ pending snapshot. Failed storage releases the editable draft; successful
 storage releases the locked profile and export action. Keep delayed-storage
 and request-order regression checks alongside real browser interaction checks
 in `apps/designer/frontend/tests/verify-browser-workflows.mjs`.
+
+Runner audio preparation follows the native unfinished-block selection through
+the compatibility command `prepare_first_audio_block`. Accept bounded ordinals
+from the inspected manifest, retire prior media at completion, and show an
+explicit next-block preparation action with cleared elapsed progress. The UI
+does not choose or skip native blocks; device preparation, arm and start remain
+separate local actions.
