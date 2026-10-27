@@ -9,7 +9,7 @@ Each status applies to its stated surface, not to the whole product.
 
 | Item | Implemented / observed surface | Remaining gate |
 | --- | --- | --- |
-| 1 | VERIFIED at the linked baseline: locked Core/Desktop fmt, Clippy and tests on three CI platforms; later native changes have Windows checks | Repeat exact-revision CI before source promotion |
+| 1 | VERIFIED source at `0f76534d`: locked Core/Desktop fmt, Clippy, tests and Python/Rust oracle checks pass on all three CI platforms | Full Standard and installed evidence remain separate |
 | 2 | PARTIAL: Standard finished 686 passed/10 skipped/12 catalogue failures during source mutation; final stable source/profile checks pass 123/1 skipped including all failed cases | Fresh stable Standard run before structural merge/release |
 | 3 | VERIFIED catalogue/source separation: 94 assessed publications, 178 study rows, 1,958 dispositions; separate source/template/native capability records and explicit hosted/Tauri adapters | Installed evidence; disclosed scientific gaps withhold readiness |
 | 4 | VERIFIED: shared profile/limits/scoring/text/job owners; concise For-AI routing; one native actor/scheduler/file worker | Extract only seams changed by further work |
@@ -45,10 +45,12 @@ Each status applies to its stated surface, not to the whole product.
   Desktop passes 169/seven skips, with formatting, compilation and strict Clippy.
   Browser mode passes 79 Runner/23 Designer tests, frozen installs with zero
   reported advisories and canonical build-drift checks. These are local Windows
-  results. The first draft-PR CI run passes all three Core platforms; Desktop
-  exposed a missing shared PNG icon on non-Windows and Browser exposed CRLF
-  in the shared text module's source map. The scoped corrections reuse the
-  existing icon and LF rules. Final expanded CI remains pending.
+  results. [CI run 40593624592](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40593624592)
+  at product revision `0f76534d` passes Core, Desktop and Python/Rust oracle
+  checks on all three platforms plus Browser, optional Quest and all three
+  validation bundles (14/14 jobs passed). The prior missing shared PNG and CRLF source-map failures
+  are fixed using existing assets and a scoped LF rule. CI package builds do
+  not establish installed behavior or supported macOS/Linux qualification.
 - Integrated provenance checkpoint `c389449a`: 23 Designer frontend tests,
   ten native bundle tests, actual Chromium export/offline re-export/native import,
   strict package Clippy and inspected mapper/Pages checks pass. The subsequent

@@ -33,7 +33,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   The native Designer host and explicit frontend adapter are now integrated;
   actual WebView controls generate and preview through Rust/C++ without HTTP fallback.
   B1–B3/C1 fixes and the sanitized study projection are integrated
-  on the review branch; mapper, catalogue and release work continue.
+  on the review branch; the bounded catalogue audit and browser source checks
+  are complete. Installed and publication gates remain open.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
@@ -43,8 +44,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   automatic approval review rejected the fresh launch check at the new revision
   ("blocked by policy", without a more specific reason). No alternate launch
   was attempted. Complete installed execution remains unverified.
-- **Next action:** run a fresh stable Standard suite when storage permits and obtain
-  exact-revision CI evidence. The final corpus projection, canonical frontend
+- **Next action:** run a fresh stable Standard suite when storage permits, then
+  finish the approved-identity installed journey. Exact product-revision CI
+  passes all 14 jobs. The final corpus projection, canonical frontend
   and local Pages assembly agree. Installed operation and package identity
   remain separate gates. The first Runner NSIS payload and
   installed native WebView startup passed without Python or checkout paths on
@@ -57,7 +59,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   skipped and twelve catalogue failures caused by changing source inputs during
   the run. The final stable corpus/profile/synthetic-eligibility checks pass
   123 tests with one skip, including all twelve failed cases and deterministic
-  rebuilding. Independent whole-projection review passes 32 checks.
+  rebuilding. Independent whole-projection review passes 32 checks, and final
+  primary-source review of the Pfeiffer/mixed-reality records found no concrete
+  discrepancies in their disclosed proxy/count/geometry boundaries. Quick
+  validation passes 38 tests and the release/privacy audit.
   This is resolved targeted evidence, not a fresh entirely green Standard run.
   The corrected sample-paced Canzoneri response audit passes
   three checks in 951.25 s, including complete planned/click/marker/analysis joins,
@@ -92,7 +97,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   import pass; a corrupted receipt produces a recoverable export error. Independent
   review found no blocking trust/re-export defect. The existing ZIP format and
   audio-only asset inventory remain unchanged.
-  The integrated Rust selection (Designer, Runner, Designer core
+  The earlier integrated Rust selection (Designer, Runner, Designer core
   and package verifier) passes 230 checks with 16 opt-in skips and strict Clippy.
   PCM cancellation now uses a deterministic writer-boundary check, replacing a
   five-second polling race; production cancellation behavior was unchanged.
@@ -105,7 +110,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   reselection preserving prior files. Independent audits found 92/81 events and
   two/two scored rows in the two tiny callback fixtures; instruction channel,
   sample boundaries and saved delays pass. These are software checks.
-  Designer/Runner: 96 frontend tests and canonical Pages assembly pass. Actual
+  Designer/Runner frontend tests and canonical Pages assembly pass. Actual
   WebView generation/review/acceptance has 204 source trial rows and 600 participant
   occurrences; the 2 GiB, two-part native preparation passes strict verification,
   forged acceptance rejection, edit cancellation cleanup and restart revocation.
@@ -177,13 +182,15 @@ This file is the active checklist and handoff owner; replace state, do not appen
   baseline: B1–B3, C1, G1–G2, H1–H2; add truthful public study-review projection.
 - [x] M2 — Execute one real single-block package through native authority (A1),
   verified with a silent synthetic fixture; installed/physical gates stay open.
-- [ ] M2G — Freeze scientific generation contracts; implement and verify Rust
+- [x] M2G — Freeze scientific generation contracts; implement and verify Rust
   generation and the corrected dry-source 3DTI wrapper, without Python runtime.
   The corrected prepared-input bridge, polar arcs, five noise colours and verified
   imported WAV policies and design/recipe conversion are integrated; 21 pure
   generation checks passed at that checkpoint. Participant/session assembly and
   full captured order parity and stationary comparators now pass. Legacy RNG IDs remain
   rejected explicitly; customized source provenance stays explicit.
+  Source/software evidence closes this kernel checkpoint; installed and
+  physical qualification are separate M3/M5 gates.
 - [ ] M3 — Complete native profile assembly, all-block execution and the
   Windows Tauri Designer journey (A2–A3, C2); browser bundle assets materialize
   offline; Python/Rust handoff and result parity pass. Manifest-order progression
@@ -202,13 +209,15 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - [ ] M6 — Review all finish criteria, supported-scope claims and release
   artifacts; publish only under the matching release authorization.
 
-Current blockers are a fresh full Standard run, final CI, missing installed
+Current blockers are a fresh full Standard run, missing installed
 evidence and pending Designer package identity approval.
 Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
 skips and strict Clippy; final Designer/Runner frontend checks pass 25/79 tests.
-The first PR CI run passes all three Rust Core platforms, but found a missing
-non-Windows Designer PNG icon and shared text-module CRLF source-map drift.
-Both use existing assets/scoped LF rules in the correction; final CI is pending.
+At product revision `0f76534d`, [CI run 40593624592](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40593624592)
+passes all three Core, Desktop and Python/Rust oracle platforms, Browser,
+optional Quest and all three validation bundles (14/14 jobs). The earlier non-Windows icon and
+shared-module source-map drift failures are resolved with existing assets and
+a scoped LF rule. CI artifacts are not installed/qualified release evidence.
 The pinned-toolchain checks accumulated approximately 15.6 GB of regenerable
 Rust incremental cache, leaving less than 7 GB free. Automatic approval review
 rejected the exact compiler-cache cleanup as "blocked by policy" without a
