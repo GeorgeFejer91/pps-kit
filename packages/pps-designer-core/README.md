@@ -155,13 +155,70 @@ revision/cancellation fence. Do not rename an already verified candidate because
 V1 source paths bind that directory. Failed partial candidates remain private
 for host cleanup. WAV/CSV/JSON files are flushed before the manifest is returned.
 
-This checkpoint assembles reviewed **source blocks once**. Pre/post phases,
-counterbalanced participant order and instruction-slot execution require the
-existing participant planner contract and are explicitly gated; they are not
-flattened into one invented part. Tests verify two real source blocks through
+That original entry point assembles reviewed **source blocks once** and rejects
+participant randomization or pre/post designs. Tests verify two source blocks through
 the production package verifier and event scheduler, exact audio/tactile samples,
 preserved row order, missing/stale inputs, and cancellation during WAV writing
 without a session manifest. Output remains physically unqualified.
+
+## Participant order and separate parts
+
+`run_order::preview_run_order(design, source_preview, cancelled)` is the narrow
+Rust replacement of `participant_orders.py` and
+`dashboard_app._run_setup_preview_rows`. It emits complete summaries and
+occurrences, without changing Segment 5 trial order. An absent/empty explicit
+participant policy uses the existing shuffled permutation pool, not the older
+`block_order_randomization` field. Explicit fixed, counterbalanced rotation,
+seeded random permutation, factoradic cycle, and phase membership policies
+preserve their established algorithms. Inputs are bounded to 20 source blocks,
+100 participants, and integer seeds; unsupported types/policies fail.
+
+Locked `rand_mt = 6.1.0` with default features disabled supplies MT19937.
+The small integer-seed/getrandbits/shuffle adapter reproduces the CPython path
+used by these ordering functions. This is **separate from audio generation**
+and does not imply NumPy waveform seed parity. `run_order_oracle.py` captures
+the existing pure functions only, records their source hashes and Python
+version, and is development-only. Full oracle cases cover negative/large seeds,
+cycle boundaries, memberships, and both permutation-pool branches. The actual
+browser design's 100 summaries and 600 occurrences also match its independent
+Python capture exactly (2026-10-27).
+
+Execution acceptance uses the native assembly receipts, not that descriptive
+projection alone:
+
+- `plan_run_order_preview(&AssemblyPreview, assets, cancelled)` binds the complete
+  occurrence list to the enriched source-block/design hashes and all enabled
+  instruction asset hashes, actual rates/durations/channels, and continuation
+  policy. Missing enabled assets, different rates, unknown slots, and unsupported
+  continuation modes fail before acceptance.
+- `accept_participant_assembly(source_preview, run_order_preview, design_hash,
+  assembly_hash, run_order_hash, revision)` creates one native-only receipt.
+  Browser flags or modified projections cannot create acceptance authority.
+- `prepare_accepted_participant(plan, assets, tactile, new_private_dir,
+  participant_index, session_group_id, cancelled)` writes the selected reviewed
+  participant. Single-session output keeps its existing single identity.
+  Pre/post produces `part_01` and `part_02`, each with its own
+  `pps-run-session.v1`, part session ID, part-local block indices, global block
+  indices, and sibling manifest links. A shared hashed run-setup manifest binds
+  both reviews. `pps-run-session-group.v1` is written last with
+  `full_experiment_completed: false`; preparing files never proves completion.
+
+Enabled instruction slots materialize exact decoded source PCM as float WAVs,
+retaining original asset SHA plus output WAV SHA, channel count, rate, duration,
+and click/delay/button policy. No source level change or hidden resampling is
+applied to these standalone instruction slots. This is file preparation only:
+Runner instruction verification/playback/continuation and group completion
+remain separate activation capabilities. The native host must verify every part
+and instruction asset, then publish manifest references only after its current
+revision/cancellation fence. No hardware calibration is performed here.
+
+Tests prepare two real parts, verify both with the production package verifier,
+compile every block with the production scheduler, and assert source pool row
+order, part identity, global indices, instruction samples/hashes, and tactile
+onsets. A separate single-session membership test checks there is no fabricated
+split identity. Stale/modified previews and cancelled work cannot return a
+publishable receipt. Set `PPS_KEEP_PARTICIPANT_FIXTURE=1` only for an explicit
+local test evidence run to retain that small synthetic file fixture.
 
 ## Verification
 
@@ -186,6 +243,7 @@ versus Cartesian waveform differences, passed in 67 s.
 Evidence remains in ignored `artifacts/`. No audio device is opened or qualified.
 
 Unavailable: legacy NumPy generation; resampled or compressed imported sources;
-additional trajectory/burst policies; ILD near-field correction; complete
-participant/phase profile assembly and instruction slots; physical calibration.
+additional trajectory/burst policies; ILD near-field correction; automatic
+stationary comparator generation; Runner instruction/group execution qualification;
+physical calibration.
 This subset is not full catalogue replication.

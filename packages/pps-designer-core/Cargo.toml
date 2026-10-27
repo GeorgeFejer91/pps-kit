@@ -12,6 +12,7 @@ sha2.workspace = true
 rand = "=0.8.8"
 hound = "=3.5.1"
 rustfft = "=6.4.1"
+rand_mt = { version = "=6.1.0", default-features = false }
 csv.workspace = true
 
 [dev-dependencies]
