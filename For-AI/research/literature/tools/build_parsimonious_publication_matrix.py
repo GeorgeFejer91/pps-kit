@@ -974,7 +974,13 @@ def public_projection(
             "label": _public_text(study["study_label"]),
             "experimentLabel": _public_text(study.get("experiment_label")),
             "inventoryStatus": study["instance_inventory_status"],
-            "evidenceScope": study["parameter_evidence_scope"],
+            # Compact source reviews can resolve a child without promoting the
+            # legacy coarse record's fields or establishing final-version parity.
+            "evidenceScope": (
+                "study_specific_source_review"
+                if all(row["experiment_scoped_source_override"] == "yes" for row in rows)
+                else study["parameter_evidence_scope"]
+            ),
             "templateIds": templates,
             "parameterStatusCounts": counts,
             "nativeQualification": "not_assessed",
