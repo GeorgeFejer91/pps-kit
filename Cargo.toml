@@ -28,7 +28,8 @@ hmac = "0.12"
 hound = "=3.5.1"
 rand = "0.8"
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+# Accepted design/order hashes require exact binary64 recovery after JSON reload.
+serde_json = { version = "1", features = ["float_roundtrip"] }
 sha2 = "0.10"
 thiserror = "2"
 

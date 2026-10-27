@@ -282,7 +282,10 @@ fn group_receipt_requires_both_distinct_ordered_parts_and_shared_provenance() {
         serde_json::from_slice(&fs::read(&fixture.manifest_path).unwrap()).unwrap();
     let hash_json =
         |value: &Value| format!("{:x}", Sha256::digest(serde_json::to_vec(value).unwrap()));
-    let design = json!({"participant_count":1});
+    // Computed timing values must survive persisted JSON without changing the
+    // accepted snapshot digest. Exercise binary64 values between easy decimals.
+    let timings: Vec<_> = (1..100).map(|i| f64::from(i) / 44100.0).collect();
+    let design = json!({"participant_count":1,"timing_boundaries":timings});
     let design_hash = hash_json(&design);
     let mut source = json!({"accepted":false,"blocks":[{"block_index":1,"block_label":"Prepared block","trial_count":2}]});
     let source_hash = hash_json(&source);
