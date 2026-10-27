@@ -600,14 +600,14 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "audiotactileConfirmed": 90,
         "laterAuditAdditions": 4,
         "toolkitRecordJoins": 69,
-        "toolkitInScopeRecordJoins": 68,
+        "toolkitInScopeRecordJoins": 67,
         "toolkitNodeJoins": 65,
-        "toolkitInScopeNodeJoins": 64,
+        "toolkitInScopeNodeJoins": 63,
         "toolkitRunnableNodes": 16,
         "toolkitRunnableRecords": 18,
-        "toolkitSupportedIncompleteNodes": 48,
+        "toolkitSupportedIncompleteNodes": 47,
         "toolkitNotAssessedNodes": 29,
-        "toolkitAdjacentConflictNodes": 1,
+        "toolkitAdjacentConflictNodes": 2,
         "toolkitManualReviewRecords": 25,
         "toolkitManualReviewNodes": 22,
         "connectedNodes": 91,
@@ -698,9 +698,9 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     }
     assert Counter(node["toolkit"]["status"] for node in nodes) == {
         "runnable": 16,
-        "supported_incomplete": 48,
+        "supported_incomplete": 47,
         "not_assessed": 29,
-        "adjacent_scope_conflict": 1,
+        "adjacent_scope_conflict": 2,
     }
     assert Counter(node["corpus"]["documentRole"] for node in nodes) == {
         "empirical": 62,
@@ -751,7 +751,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
 
     toolkit_records = [record for node in nodes for record in node["toolkit"]["records"]]
     assert len(toolkit_records) == 69
-    assert sum(record["inScope"] for record in toolkit_records) == 68
+    assert sum(record["inScope"] for record in toolkit_records) == 67
     assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 18
     assert sum(record["manualReview"] is not None for record in toolkit_records) == 25
     assert sum(
@@ -769,10 +769,10 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "legacy_confirmed": 90,
     }
     assert data["facets"]["toolkitStatuses"] == {
-        "adjacent_scope_conflict": 1,
+        "adjacent_scope_conflict": 2,
         "not_assessed": 29,
         "runnable": 16,
-        "supported_incomplete": 48,
+        "supported_incomplete": 47,
     }
     assert data["facets"]["edgeProvenance"]["openalex_live_20260808"] == 127
     assert data["facets"]["edgeProvenance"]["primary_source_audit_20260808"] == 52

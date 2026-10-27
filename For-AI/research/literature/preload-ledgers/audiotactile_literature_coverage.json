@@ -271,9 +271,9 @@
       "covered_blocked_missing_publication_parameters": 5,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 48,
+      "not_yet_templated_missing_publication_parameters": 47,
       "candidate_needs_full_text_task_audit": 0,
-      "adjacent_out_of_scope": 4
+      "adjacent_out_of_scope": 5
     },
     "current_template_count": 30,
     "current_profile_check_pass_count": 25,
@@ -938,13 +938,14 @@
         "holmes_2020_systematic_review"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "audio-tactile PPS stimulation with TMS/MEP endpoint",
+      "coverage_category": "adjacent_out_of_scope",
+      "audiotactile_task_family": "auditory-TMS/MEP PPS mechanism with separate intertrial tactile attention",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": [
-        "extract audio-tactile task timing, tactile stimulation, MEP/TMS timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
-      ]
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML",
+      "scope_review_basis": "Primary Methods and Figure1: sound-to-TMS delays50/100/200/300 ms; tactile attention separately4-5 s from TMS. Retain as mechanistic context, not direct audio-tactile replication."
     },
     {
       "record_id": "tajadura_jimenez_2009_visual_deprivation",
