@@ -33,25 +33,33 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 158 study/context rows,
-61 registered publication inventories, eight access-audited publications,
+Current checkpoint (2026-10-27): 94 frozen publications, 162 study/context rows,
+62 registered publication inventories, ten access-audited publications,
 one audited project-lineage identity,
-and 24 publication inventories still unassessed. Registry presence alone
+and 21 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 59 Methods-backed inventories (45 current primary
+The current audit records 60 Methods-backed inventories (46 current primary
 reviews, eight retained primary reviews, and six identified author versions whose
 final comparison is pending), one abstract/metadata inventory, one partial
-Methods inventories, eight audited access blockers, one project-lineage boundary, and 24 unregistered publications.
-Only 67 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 27 still need inventory
+Methods inventories, ten audited access blockers, one project-lineage boundary, and 21 unregistered publications.
+Only 70 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 24 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Haptic geometric matching retains four minimum numbered adjacent experiments
+with a documented full-Methods access gap and unresolved Exp1/2 assignment.
+The predictive visuo-tactile chapter remains provisional context after actual
+access attempts. The ASMR v1 contains two linked phases of one 64-person cohort:
+18-clip EEG listening and a 13-clip retrospective survey, without delivered
+touch. The later final survey says 18 clips; that version change is not imported
+into v1, and neither phase supplies direct AT replication parameters.
+
 The racket/observation/elongation checkpoint preserves Biggio’s dated full-source
 review separately from current access limits. Galigani has separate landmark
 and post-training AT cohorts; the accepted manuscript has a missing paragraph
