@@ -29054,6 +29054,990 @@
           }
         }
       }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2026.109490::a",
+      "source_type": "primary_abstract_graphical_caption_audited_methods_access_gap",
+      "source_file": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+      "review_date": "2026-10-27",
+      "review_scope": "Four abstract-confirmed experiment slots retained with all eleven explicit access dispositions. No complete Methods inventory or independent-cohort count is claimed.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific waveform, duration, spectral content, level and rendering are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "trajectory_kinematics": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific endpoints, trajectories and motion law are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific acquisition sequence and relation to experimental phases are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "task_response": {
+          "status": "source_unavailable",
+          "value": "Exact experiment-specific response task/device and online deadline are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific ITI/jitter policy is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific audio/visual-to-tactile timing values and onset anchors are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific site, device, waveform and calibration are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific baseline family/allocation is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific catch family/allocation is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "No experiment-specific sample or trial-cell counts obtained. 289 is the study-wide abstract participant total, not a trial count or verified per-experiment allocation.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "block_order_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific phases, ordering and counterbalancing are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2026.109490::b",
+      "source_type": "primary_abstract_graphical_caption_audited_methods_access_gap",
+      "source_file": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+      "review_date": "2026-10-27",
+      "review_scope": "Four abstract-confirmed experiment slots retained with all eleven explicit access dispositions. No complete Methods inventory or independent-cohort count is claimed.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific waveform, duration, spectral content, level and rendering are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "trajectory_kinematics": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific endpoints, trajectories and motion law are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific acquisition sequence and relation to experimental phases are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "task_response": {
+          "status": "source_unavailable",
+          "value": "Exact experiment-specific response task/device and online deadline are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific ITI/jitter policy is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific audio/visual-to-tactile timing values and onset anchors are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific site, device, waveform and calibration are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific baseline family/allocation is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific catch family/allocation is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "No experiment-specific sample or trial-cell counts obtained. 289 is the study-wide abstract participant total, not a trial count or verified per-experiment allocation.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "block_order_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific phases, ordering and counterbalancing are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2026.109490::c",
+      "source_type": "primary_abstract_graphical_caption_audited_methods_access_gap",
+      "source_file": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+      "review_date": "2026-10-27",
+      "review_scope": "Four abstract-confirmed experiment slots retained with all eleven explicit access dispositions. No complete Methods inventory or independent-cohort count is claimed.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific waveform, duration, spectral content, level and rendering are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "trajectory_kinematics": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific endpoints, trajectories and motion law are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific acquisition sequence and relation to experimental phases are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "task_response": {
+          "status": "source_unavailable",
+          "value": "Exact experiment-specific response task/device and online deadline are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific ITI/jitter policy is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific audio/visual-to-tactile timing values and onset anchors are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific site, device, waveform and calibration are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific baseline family/allocation is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific catch family/allocation is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "No experiment-specific sample or trial-cell counts obtained. 289 is the study-wide abstract participant total, not a trial count or verified per-experiment allocation.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "block_order_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific phases, ordering and counterbalancing are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2026.109490::d",
+      "source_type": "primary_abstract_graphical_caption_audited_methods_access_gap",
+      "source_file": "https://pubmed.ncbi.nlm.nih.gov/42128086/",
+      "review_date": "2026-10-27",
+      "review_scope": "Four abstract-confirmed experiment slots retained with all eleven explicit access dispositions. No complete Methods inventory or independent-cohort count is claimed.",
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific waveform, duration, spectral content, level and rendering are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "trajectory_kinematics": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific endpoints, trajectories and motion law are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific acquisition sequence and relation to experimental phases are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "task_response": {
+          "status": "source_unavailable",
+          "value": "Exact experiment-specific response task/device and online deadline are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific ITI/jitter policy is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific audio/visual-to-tactile timing values and onset anchors are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific site, device, waveform and calibration are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific baseline family/allocation is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific catch family/allocation is unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "No experiment-specific sample or trial-cell counts obtained. 289 is the study-wide abstract participant total, not a trial count or verified per-experiment allocation.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        },
+        "block_order_contract": {
+          "status": "source_unavailable",
+          "value": "Experiment-specific phases, ordering and counterbalancing are unavailable.",
+          "page_or_section": "Primary PubMed/publisher abstract and indexed graphical caption; publisher and institutional full-text requests HTTP 403; official publisher API contains bibliographic coredata only.",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Experiment-specific Methods unavailable after documented primary routes; no related-paper parameters substituted."
+            }
+          },
+          "evidence_note": "289 is the study-wide abstract participant total, not a trial count or verified cohort allocation. HTTP 200 metadata response is not access to Methods."
+        }
+      }
     }
   ]
 }

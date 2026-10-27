@@ -33,7 +33,7 @@ doi:10.1016/j.neuropsychologia.2017.07.018,yes,retained_primary_methods_review,c
 doi:10.1016/j.neuropsychologia.2020.107579,yes,audited_source_access_gap,two_experiments_from_primary_excerpt_full_methods_access_blocked,2,2,yes,yes,https://www.sciencedirect.com/science/article/pii/S0028393220302529::publisher abstract and selected Methods/analysis excerpt,2026-10-27
 doi:10.1016/j.neuropsychologia.2020.107622,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.neuropsychologia.2021.107823,no,not_registered,not_assessed,1,0,no,no,,
-doi:10.1016/j.neuropsychologia.2026.109490,yes,abstract_or_metadata_inventory,confirmed_total,4,0,no,no,paper_audits/ferroni_2026_pps_plasticity.md; publication_network.v3.json::doi:10.1016/j.neuropsychologia.2026.109490,2026-10-27
+doi:10.1016/j.neuropsychologia.2026.109490,yes,audited_source_access_gap,abstract_four_experiments_full_inventory_access_blocked,4,4,yes,yes,https://pubmed.ncbi.nlm.nih.gov/42128086/; https://www.sciencedirect.com/science/article/pii/S0028393226001363::abstract and indexed graphical-abstract caption,2026-10-27
 doi:10.1016/j.nicl.2019.101940,yes,retained_primary_methods_review,confirmed_total,2,2,yes,yes,manual_reviews/disorders_consciousness_2019.json,2026-10-27
 doi:10.1016/j.schres.2021.06.026,yes,author_version_methods_reviewed_final_comparison_pending,no_new_human_acquisition_computational_context,1,1,yes,yes,"https://www.pure.ed.ac.uk/ws/portalfiles/portal/219076432/Influence_of_EI_balance_PAREDES_DOA23062021_AFV.pdf::Methods 2.1-2.4, PDF pp. 6-10",2026-10-27
 doi:10.1016/j.tics.2016.01.005,no,not_registered,not_assessed,1,0,no,no,,
