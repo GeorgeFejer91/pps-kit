@@ -20,23 +20,31 @@ This file is the active checklist and handoff owner; replace state, do not appen
   3DTI/viewer, Segment 0–6, schemas, Rust authority and Python oracle.
 - **Product source:** existing generation, JSON/compatibility handoff,
   callback-confirmed controls, response scoring and journal safeguards remain.
-  Real native package activation, native profile assembly and multi-block
-  execution are incomplete. Four reproduced frontend consistency/portability
-  defects and release/documentation gaps are recorded in the completion review.
+  Single-block native activation now passes a real CPAL callback test using
+  silent synthetic PCM. Native profile assembly and multi-block execution remain
+  incomplete. B1–B3/C1 fixes and the sanitized study projection are integrated
+  on the review branch; mapper, catalogue and release work continue.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   Neither installed application nor public downloads changed in this task.
-- **Next action:** capture the A1 activation regression through normal IPC
-  while independent catalogue, generation and UI workers implement their
-  bounded checkpoints. A1 acceptance is one real single-block package
-  with existing stale-state, safety and durable-result denials preserved.
-  Do not bypass readiness flags to make a demo appear executable.
-- **Local validation:** the previous storage blocker is no longer observed:
-  approximately 65.5 GiB is free on the workspace volume as of 2026-10-27,
-  above the 15 GiB working allowance. Full native builds, installed verification
-  and the complete Standard tier were not rerun during this documentation task.
-  Recheck free space, then resume those existing validation gates when selected.
+- **Next action:** finish independent A1/UI review, then enforce manifest-order
+  block progression with the existing one-block cache and journal. Generation,
+  mapper/Tauri and primary-source extraction continue in parallel.
+- **Local validation:** 24 Runner core and 140 desktop tests pass; one hardware
+  test is opt-in and separately passed on this Windows host using a silent
+  four-frame fixture. It exercises normal native dispatch, callback confirmation,
+  scoring and durable result publication, not physical timing or installed IPC.
+  UI worker: 4 Designer, 68 Runner and 2 Pages tests pass, canonical builds and
+  Chromium controls checked (storage failure/retry, reversed preview replies,
+  participant draft/submit, instruction export). Science worker: 27 matrix/network
+  tests pass, including source freshness and frozen identities; the coordinator
+  independently reran the preceding 25-test projection checkpoint.
+  Complete Standard, clean installation and physical qualification remain open.
+- **Scientific coverage:** frozen 94-publication corpus, 124 study rows and 1,364
+  compact contracts; 156 reported-complete and 38 derived-complete cells after
+  the first publisher-source timing batch. 77 inventories remain unassessed.
+  Templates and reviewed evidence do not confer tested native qualification.
 - **Installed agent baseline:** updated For-AI, 23 GSD skills/35 converted roles,
   15 prefixed Superpowers skills and three Agents Inc companions. Existing
   RTK/Ponytail/Tauri/Pretext retained. See [provenance](skills/baseline-lock.json).
@@ -60,7 +68,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   evidence-linked domain review and conflict-safe multi-agent plan.
 - [ ] M1 — Fix authoring/participant defects and complete the validation/build
   baseline: B1–B3, C1, G1–G2, H1–H2; add truthful public study-review projection.
-- [ ] M2 — Execute one real single-block package through native authority (A1).
+- [x] M2 — Execute one real single-block package through native authority (A1),
+  verified with a silent synthetic fixture; installed/physical gates stay open.
 - [ ] M2G — Freeze scientific generation contracts; implement and verify Rust
   generation and the corrected dry-source 3DTI wrapper, without Python runtime.
 - [ ] M3 — Complete native profile assembly, all-block execution and the

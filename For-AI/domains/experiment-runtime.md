@@ -113,8 +113,9 @@ The main window may listen/unlisten but cannot emit authority snapshots.
 
 The local output view uses the existing main-window-only native preflight
 commands. It lists configurations matching prepared channels/sample rate,
-requires an explicit choice, and preserves decimal generation fences. Silent
-preparation never enables Start. Disable remains available during a pending
+requires an explicit choice, and preserves decimal generation fences. Cache preparation stays silent. A successful current output reservation binds
+verified media and its durable journal, enabling local Arm for a whole
+single-block package; only the subsequent Arm/Start sequence requests playback. Disable remains available during a pending
 operation; stale replies cannot restore its UI. Suspension clears the view's
 inventory; resume reads fresh native state without replay. The Rust owner keeps
 the device/port authority. Release/disable clears the displayed media summary
@@ -122,7 +123,7 @@ as the Rust owner retires its cache; audio preparation is required again.
 Desktop notifications remain in their owning panel
 and use the shared bounded-text helper.
 
-Preparation and these source seams do not enable execution. Native activation,
-whole profiles/multiple blocks, an installed
-complete experiment, calibration and physical qualification remain gates.
+Single-block activation is source-verified through normal native dispatch and
+a real silent CPAL callback fixture. Whole profiles/multiple blocks, installed
+complete experiments, calibration and physical qualification remain gates.
 Wire completion is denied for real packages; Stop preserves partial results.
