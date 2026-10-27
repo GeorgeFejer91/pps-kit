@@ -17,7 +17,11 @@ drift with tolerance; cross-platform bit identity is not claimed.
 Sources: continuous Gaussian white noise or Gaussian white bursts with
 duration-derived count, symmetric fitting, and raised-cosine edges. Burst seeds
 are `seed + 37 * burst_index` (wrapping u64). Timing rounds ties to even. Fixed
-and linear paths include holds; PPS coordinates are X right, Y front, Z up.
+and linear/polar paths include holds; PPS coordinates are X right, Y front, Z up.
+Polar radius and unwrapped azimuth interpolate directly at constant elevation,
+matching the reference arc (170→-170 goes through the front). They are not
+converted to Cartesian chords. Burst edges use the reference endpoint-exclusive
+cosine, with an explicit envelope algorithm in QC and all samples fixture-tested.
 Paths inside the listener head fail.
 
 Tactile cues preserve the reference 20 ms frequency switch, half-Hann envelope,
@@ -79,7 +83,8 @@ The explicit native test measures input/output PCM hashes, no hidden
 normalization, attenuation at identical geometry, moving left/right cues,
 propagation delay, rate rejection, tactile preservation, and actual/target RMS
 within ±0.02 dB. A too-loud burst ramp deliberately fails the ceiling and a
-lower explicit target succeeds. The 2026-10-27 MSVC/FABIAN run passed in 55 s.
+lower explicit target succeeds. The 2026-10-27 MSVC/FABIAN run, including polar
+versus Cartesian waveform differences, passed in 67 s.
 Evidence remains in ignored `artifacts/`. No audio device is opened or qualified.
 
 Unavailable: legacy NumPy generation; colored/imported/resampled sources;
