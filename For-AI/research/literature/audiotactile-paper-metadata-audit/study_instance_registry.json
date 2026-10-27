@@ -2480,6 +2480,115 @@
       ],
       "source_review_limit": "Scope-based not-applicable cells do not establish complete Methods inventory or protocol replication. Do not inherit timing from later papers citing this task. Additional units may be present in inaccessible text. Accepted manuscript listed but unread; final publisher text limited to abstract and indexed section snippets.",
       "supporting_measures": "Attitudes, identification and intention-to-interact measures accompany the social manipulation; no additional independent AT experiment is confirmed."
+    },
+    {
+      "network_node_id": "doi:10.1016/j.neuropsychologia.2014.10.027",
+      "doi": "10.1016/j.neuropsychologia.2014.10.027",
+      "inventory_status": "confirmed_single_repeated_measures_protocol_author_version",
+      "inventory_evidence_status": "author_version_methods_reviewed_final_comparison_pending",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Sixteen healthy women, mean age 21.4 years, range 19-23; one participant left-handed. One repeated-measures experiment, not four independent pre/post studies. Two consecutive blocks, each pre-IMS AT assessment, two-minute IMS, post-IMS AT assessment, questionnaire. Different confederate for each block. IMS order and confederate identity counterbalanced across participants.",
+      "evidence_pointer": "https://ndownloader.figshare.com/files/42193836::complete accepted Methods; pp. 7–11",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Audio-tactile PPS before and after synchronous/asynchronous interpersonal stimulation",
+          "record_id": "maister_2015_shared_sensory",
+          "template_ids": [],
+          "toolkit_scope": "in_scope_direct_audiotactile",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://ndownloader.figshare.com/files/42193836",
+          "outcome": "Official institutional accepted manuscript retrieved; whole Methods reviewed and critical parameter page rendered. SHA256 7dff11164cb3d577e5360a0f836a58ac6591912cfdc2f5812c89e8c38b571f67."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://aru.figshare.com/articles/journal_contribution/Your_place_or_mine_Shared_sensory_experiences_elicit_a_remapping_of_peripersonal_space/23753877",
+          "outcome": "Repository metadata confirms accepted author version."
+        }
+      ],
+      "source_review_limit": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
+      "supporting_tasks": [
+        {
+          "label": "Interpersonal multisensory stimulation (IMS)",
+          "scope": "Experimental manipulation within the same protocol: synchronous/asynchronous cheek touch, not another recruited cohort or AT acquisition task."
+        },
+        {
+          "label": "Enfacement questionnaire",
+          "scope": "Twelve statements after each post-IMS AT assessment, rated -3 to +3. Supporting manipulation measure."
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1177/1362361319838950",
+      "doi": "10.1177/1362361319838950",
+      "inventory_status": "confirmed_at_and_adjacent_fbi_shared_recruitment_author_version",
+      "inventory_evidence_status": "author_version_methods_reviewed_final_comparison_pending",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "22 participants with ASD and 29 without ASD. Forty-seven completed all parts; four neurotypical participants completed PPS only. These are overlapping samples, not independently recruited studies. The audio-tactile PPS task was performed before the full-body illusion experiment. It is not a pre/post-illusion PPS design.",
+      "evidence_pointer": "https://ndownloader.figshare.com/files/42197946::complete accepted Methods; pp. 8–11",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Audio-tactile PPS assessment before the full-body illusion",
+          "record_id": "autism_2019",
+          "template_ids": [],
+          "toolkit_scope": "in_scope_direct_audiotactile",
+          "disaggregation_status": "record_already_experiment_specific"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "adjacent_experiment",
+          "experiment_label": "Full-body illusion: body/object display and synchronous/asynchronous back stroking",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_visuotactile",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "contextual_protocol": {
+            "display": "Oculus Rift CV1 shows rear-view camera feed of the body or body-sized cardboard box. Camera is 2.3 m behind the viewed body/object. Participant stands 1 m beside the box in the object condition, outside camera view.",
+            "conditions": "Four conditions, random order: body synchronous, body asynchronous, object synchronous, object asynchronous.",
+            "visualDelayMs": {
+              "synchronous": "<50",
+              "asynchronous": 400
+            },
+            "stimulation": "Two minutes of back stroking with a stick; object conditions add simultaneous spatially congruent stroking of the box.",
+            "outcomes": "After each condition, blind return-to-origin following backward displacement estimates self-location drift. Seven questionnaire items rated -3 to +3 assess illusion and controls; item order random.",
+            "scope": "Visuo-tactile illusion plus proprioceptive localisation; no auditory approach or AT SOA task. PPS was assessed beforehand, not after each condition."
+          },
+          "cohort_relation": "The 47 participants completing all parts belong to the same recruitment as the 51-person PPS sample."
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://ndownloader.figshare.com/files/42197946",
+          "outcome": "Official institutional accepted manuscript retrieved; whole Methods reviewed and critical parameter page rendered. SHA256 c2db7cb5397f849891a035e29ad661991ae4194b804eb0479d784ebcb0fac8f0."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://aru.figshare.com/articles/journal_contribution/Altered_bodily_self-consciousness_and_peripersonal_space_in_autism/23762289",
+          "outcome": "Repository metadata confirms accepted author version."
+        }
+      ],
+      "source_review_limit": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
+      "supporting_tasks": [
+        "AQ, TAS20, QCAE and MAIA questionnaires",
+        "WASI-II IQ and diagnostic interview/clinical ascertainment",
+        "Self-location drift and seven-item questionnaire are outcome components of the FBI, not separately recruited PPS experiments."
+      ],
+      "analysis_boundaries": [
+        "Two neurotypical PPS records excluded for equipment malfunction: 51 recruited for PPS minus two gives 49 at this stage; not 47, which refers to all-task completion.",
+        "For fitted slopes, p. 18 states six exclusions in each group but reports t(33). Starting from 49, subtracting 12 yields 37, so those statements do not independently establish one consistent final slope sample. Retain the printed analysis ambiguity; no raw-data reconciliation was attempted.",
+        "Offline trimming outside 2.5 SD and fit-quality threshold adjusted R-squared <0.2 do not establish an online response deadline."
+      ]
     }
   ],
   "corpus_freeze": {
@@ -2938,6 +3047,16 @@
       "review_date": "2026-10-27",
       "reason": "Publisher indexed headings identify two visual–tactile experiments; full Methods inventory remains access-blocked. Neither child alone equals the old publication placeholder.",
       "evidence_pointer": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903"
+    },
+    {
+      "old_study_row_id": "doi:10.1177/1362361319838950",
+      "child_study_row_ids": [
+        "doi:10.1177/1362361319838950::a",
+        "doi:10.1177/1362361319838950::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Accepted Methods separates prior AT assessment from adjacent full-body illusion within overlapping recruitment. Neither child alone equals the original publication placeholder.",
+      "evidence_pointer": "https://ndownloader.figshare.com/files/42197946"
     }
   ]
 }

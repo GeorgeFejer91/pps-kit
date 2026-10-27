@@ -33,25 +33,31 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 149 study/context rows,
-58 registered publication inventories, seven access-audited publications,
+Current checkpoint (2026-10-27): 94 frozen publications, 150 study/context rows,
+60 registered publication inventories, seven access-audited publications,
 one audited project-lineage identity,
-and 28 publication inventories still unassessed. Registry presence alone
+and 26 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 55 Methods-backed inventories (42 current primary
-reviews, eleven retained primary reviews, and two identified author versions whose
+The current audit records 57 Methods-backed inventories (42 current primary
+reviews, eleven retained primary reviews, and four identified author versions whose
 final comparison is pending), two abstract/metadata inventories, one partial
-Methods inventories, seven audited access blockers, one project-lineage boundary, and 28 unregistered publications.
-Only 56 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 38 still need inventory
+Methods inventories, seven audited access blockers, one project-lineage boundary, and 26 unregistered publications.
+Only 58 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 36 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Accepted author manuscripts now distinguish Maister’s repeated pre/post IMS
+protocol (200 derived AT targets, 2700 ms final delay, electrical stimulation)
+from Mul’s single prior PPS assessment (65 trials, 2500 ms final delay, mechanical
+tapper) and subsequent adjacent full-body illusion. Mul’s recruitment overlaps
+across tasks; neither source is claimed equivalent to the final published text.
+
 Pellencin (2017) is retained as a visual–tactile boundary: two numbered units
 identified in primary publisher headings, with a documented full-Methods access
 gap. Citation ancestry does not turn these tasks into auditory acquisition; the

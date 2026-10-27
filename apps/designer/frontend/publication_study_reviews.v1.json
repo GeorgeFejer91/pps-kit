@@ -10,23 +10,23 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 149,
-    "contracts": 1639,
-    "reportedComplete": 298,
-    "derivedComplete": 74,
+    "studies": 150,
+    "contracts": 1650,
+    "reportedComplete": 301,
+    "derivedComplete": 77,
     "parameterStatusCounts": {
       "approximation_required": 37,
       "composite_requires_split": 113,
       "conflicting_evidence": 48,
-      "derived_complete": 74,
+      "derived_complete": 77,
       "explicitly_absent": 22,
       "low_confidence": 10,
-      "not_applicable": 187,
+      "not_applicable": 198,
       "not_assessed": 187,
-      "not_reported": 53,
-      "partial": 397,
-      "reported_complete": 298,
-      "source_unavailable": 213
+      "not_reported": 57,
+      "partial": 409,
+      "reported_complete": 301,
+      "source_unavailable": 191
     }
   },
   "statusLegend": {
@@ -87,6 +87,10 @@
     "doi:10.1152/jn.00652.2017": [
       "doi:10.1152/jn.00652.2017::a",
       "doi:10.1152/jn.00652.2017::b"
+    ],
+    "doi:10.1177/1362361319838950": [
+      "doi:10.1177/1362361319838950::a",
+      "doi:10.1177/1362361319838950::b"
     ],
     "doi:10.1250/ast.41.345": [
       "doi:10.1250/ast.41.345::a",
@@ -733,17 +737,20 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "source_unavailable": 11
+        "derived_complete": 1,
+        "not_reported": 3,
+        "partial": 6,
+        "reported_complete": 1
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
+        "registered": true,
+        "evidenceStatus": "author_version_methods_reviewed_final_comparison_pending",
+        "inventoryStatus": "confirmed_single_repeated_measures_protocol_author_version",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -1724,21 +1731,26 @@
     {
       "networkNodeId": "doi:10.1177/1362361319838950",
       "studyIds": [
-        "doi:10.1177/1362361319838950"
+        "doi:10.1177/1362361319838950::a",
+        "doi:10.1177/1362361319838950::b"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "source_unavailable": 11
+        "derived_complete": 2,
+        "not_applicable": 11,
+        "not_reported": 1,
+        "partial": 6,
+        "reported_complete": 2
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
-        "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "registered": true,
+        "evidenceStatus": "author_version_methods_reviewed_final_comparison_pending",
+        "inventoryStatus": "confirmed_at_and_adjacent_fbi_shared_recruitment_author_version",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -17563,236 +17575,463 @@
     {
       "studyRowId": "doi:10.1016/j.neuropsychologia.2014.10.027",
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2014.10.027",
-      "label": "Your place or mine: shared sensory experiences elicit a remapping of peripersonal space.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Your place or mine: shared sensory experiences elicit a remapping of peripersonal space. (a)",
+      "experimentLabel": "Audio-tactile PPS before and after synchronous/asynchronous interpersonal stimulation",
+      "inventoryStatus": "confirmed_single_repeated_measures_protocol_author_version",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "source_unavailable": 11
+        "derived_complete": 1,
+        "not_reported": 3,
+        "partial": 6,
+        "reported_complete": 1
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Pink noise at 44.1 kHz, duration 3.000 s. Two identical samples crossfaded across near/far loudspeakers; near level rises, far level falls to silence. Ear-position measurement reports 55-70 dB SPL and an exponentially rising acoustic intensity. Exact digital envelope, source samples and calibration transfer are unavailable; this does not establish a linear-dB or HRTF renderer.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 8, section 2.3.1",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Ear-position range 55–70 dB SPL; exponentially rising acoustic intensity, numeric transfer function absent.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Near/far loudspeakers; near rises as far decreases to silence.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Pink noise crossfaded between two loudspeakers.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "Original samples/random realization and exact digital envelope not supplied.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink noise, 44.1 kHz, 3.000 s; two identical samples.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Apparent approach from the speaker near the confederate toward the speaker near the participant's hand. Confederate is 100 cm away. Exact speaker coordinates and perceived distance-versus-time law are not specified.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript pp. 8-10",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "geometry"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Participant right hand and confederate facing them.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Confederate 100 cm away; exact speaker coordinates and perceived path endpoints not specified.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Apparent approach through level modulation.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Sound duration 3.000 s; perceived distance/time law not supplied.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "A three-second sound accompanies one electrical target at one of five delays; participant responds rapidly. Four 50-trial AT assessments occur within two IMS blocks. Intertrial timing, acquisition timeout and inter-block recovery are not specified.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Random ordering of the five delays.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Three-second sound and one delayed electrical target per described trial; pre/post AT around IMS manipulation.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Described AT targets at five delays; no separately reported catch/baseline trial allocation.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Exact pre/post-source padding, response deadline and ITI absent.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Press a key with the unstimulated left hand as quickly as possible after right-hand electrical stimulation. Exact response device and acquisition deadline are absent. Reported omission/outlier exclusions are analysis rules, not an online response window.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 9 and Results",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press a key after right-hand target.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Keypress using unstimulated left hand; exact device unspecified.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No online response window or timeout specified.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond as quickly as possible to electrical stimulation.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_reported",
+          "value": "Trial order is random, but no ITI or temporal-jitter distribution is given in the complete Methods.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript pp. 7-11",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Tactile onset follows sound onset by 0.300, 0.800, 1.500, 2.200 or 2.700 seconds.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 9, visually checked",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "300, 800, 1500, 2200, 2700 ms.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tactile onset relative to sound onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Digitimer DS7A square-wave current for 0.2 ms on the right-hand dorsum, using the reported two electrode pairs; intensity 1.4 times detection threshold. Staircase starts at 0 mA, increases by 10 mA, decreases by 5 mA after three consecutive detections, then uses smaller unspecified steps until 55-60% detection. Mean intensity 44.5 mA (SD 17.8) is retained as printed, not converted into a default. Final staircase step sizes and electrode geometry remain incomplete.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 9, visually checked",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
+            "waveform_and_duration",
+            "intensity_or_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right-hand dorsum; two couples of surface electrodes. Exact electrode geometry unspecified.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Trigger interface and measured latency not reported.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "reported",
+              "value": "1.4 times individual sensory threshold; printed mean 44.5 mA, SD 17.8 mA.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "Starts at 0 mA, +10 mA increments, −5 mA after three detections, progressively smaller unspecified steps until 55–60% detection. Complete final staircase unavailable.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "DS7A electrical square-wave current.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Square-wave pulse current for 0.2 ms.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_reported",
+          "value": "Pre-IMS assessments are within-person temporal baselines, not tactile-only baseline trials. No separate tactile-only acquisition allocation is described.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
             "family_or_explicit_none",
             "timing_and_anchor",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_reported",
+          "value": "No explicit no-target catch family is described. Do not infer a separate catch schedule from later papers or convert omission rates into catch counts.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
             "family_or_explicit_none",
             "target_role_and_expected_action",
             "allocation_rule",
             "resolved_trial_count"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "derived_complete",
+          "value": "Ten targets per SOA produce 50 trials per AT assessment. Two assessment phases times two IMS blocks imply 200 AT target trials per participant. This arithmetic does not create four independent experiments.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Accepted manuscript pp. 9 and 11",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
+          "derivationNote": "10 targets × 5 SOAs = 50 per assessment; 2 phases × 2 IMS blocks × 50 = 200 AT target trials. All assessments share the same cohort.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "10 × 5 × 2 phases × 2 IMS blocks = 200 AT targets.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Same 16-person repeated-measures cohort; pre/post assessments are not independent studies.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five SOAs; two pre/post phases within two IMS synchrony blocks.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "Ten targets per SOA; 50 per AT assessment.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Two consecutive blocks use different female confederates. Within each: pre-AT, IMS, post-AT, questionnaire. IMS synchrony and confederate assignment are counterbalanced, and AT trials randomised. Exact assignment table and randomisation algorithm/seed are not supplied. IMS lasts two minutes, cheek touch every two seconds; asynchronous offset is not quantified.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript pp. 10-11",
+          "evidenceNote": "Author-accepted version is explicitly labelled in repository metadata and manuscript p. 1. Final-published Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42193836",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "block_count",
-            "block_composition"
+            "block_composition",
+            "block_order_or_counterbalancing"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "Pre-AT → two-minute IMS → post-AT → questionnaire; different confederate for each block.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "reported",
+              "value": "Two IMS blocks, each with pre/post AT assessments.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "IMS synchrony and confederate assignment counterbalanced across participants.",
+              "note": ""
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Each AT assessment has 50 target trials.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact counterbalancing table and shuffle constraints not supplied.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "AT delays presented in random order.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -42842,238 +43081,825 @@
       ]
     },
     {
-      "studyRowId": "doi:10.1177/1362361319838950",
+      "studyRowId": "doi:10.1177/1362361319838950::a",
       "networkNodeId": "doi:10.1177/1362361319838950",
-      "label": "Altered bodily self-consciousness and peripersonal space in autism.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Altered bodily self-consciousness and peripersonal space in autism. (a)",
+      "experimentLabel": "Audio-tactile PPS assessment before the full-body illusion",
+      "inventoryStatus": "confirmed_at_and_adjacent_fbi_shared_recruitment_author_version",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "source_unavailable": 11
+        "derived_complete": 2,
+        "not_reported": 1,
+        "partial": 6,
+        "reported_complete": 2
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Pink noise in every trial, volume modulated across two loudspeakers. No sample rate, source duration, exact envelope or level is given in these Methods. A citation to Maister does not transfer its complete stimulus.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 11",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Numeric source level and gain law absent.",
+              "note": ""
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "One speaker next to right hand and one 1 m farther away.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "reported",
+              "value": "Pink noise modulated between two speakers.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No sampling rate, duration, digital envelope or exact asset provided.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink noise present in every trial.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "One loudspeaker next to the right hand, another one metre farther away; volume modulation creates apparent approach. Exact coordinates, duration and physical/perceptual speed law are missing.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 11",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
             "timing_constraint"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Seated blindfolded participant, right hand.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "One loudspeaker next to right hand, second 1 m farther away; exact full coordinates unspecified.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Apparent approach produced by volume modulation.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_reported",
+              "value": "Sound duration and physical/perceptual speed law not specified.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Seated, blindfolded participants receive one of five sound-to-tap delays, or a no-tap catch. One randomised 65-trial PPS task precedes the FBI. Detailed ITI, response deadline and sound offsets are absent.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 11",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "trial_families",
             "ordered_elements_and_source_selection"
           ],
-          "components": {}
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Targets and catches within 65 randomized trials.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "One randomized 65-trial PPS assessment before full-body illusion; each trial contains pink noise.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Sound-plus-tap targets at five delays and auditory-only no-tap catches.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Sound offsets, trial length and online response window absent.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "Respond to the right-middle-finger tap as quickly as possible with a left-hand button; ignore the pink noise. Arduino and LabVIEW 8 control timing and record RT. Device and online deadline are not fully specified. Offline exclusion beyond 2.5 SD per delay is not a capture-window contract.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript pp. 11 and 16",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Press after right middle-finger tap, withhold without tap.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Button pressed with left hand; exact device not fully specified.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "No online capture window or deadline specified.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Offline RT exclusions beyond 2.5 SD per delay; not online deadline.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond quickly to tap; ignore noise. No-tap trials are catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "not_reported",
+          "value": "No intertrial interval or jitter distribution is specified for the 65-trial PPS task.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 11",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
             "values_or_range"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "Not specified in the complete accepted Methods; no later or cited protocol substituted.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Tap onset follows sound onset by 0.300, 0.800, 1.500, 2.200 or 2.500 seconds; the last value differs from the cited Maister protocol.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 11, visually checked",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "300, 800, 1500, 2200, 2500 ms; final delay differs from Maister.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Positive tap onset relative to sound onset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "A custom tapper attached to the right middle finger delivers a tap using the drop of a 4 mm magnet. That number describes the magnet, not an established travel distance or pulse duration. Exact force, pulse length and calibration are not provided. Do not substitute the electrical stimulation used by Maister.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 11, visually checked",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
             "waveform_and_duration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right middle finger.",
+              "note": ""
+            },
+            "external_trigger": {
+              "status": "reported",
+              "value": "Arduino and LabVIEW 8 control sound, tap-onset delay and RT recording; interface latency not measured.",
+              "note": ""
+            },
+            "frequency_or_amplitude": {
+              "status": "not_reported",
+              "value": "Tap force/amplitude not specified.",
+              "note": ""
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "No measured force calibration or participant threshold procedure reported.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Mechanical tap from custom tapper, not electrical current.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_reported",
+              "value": "Drop of a 4 mm magnet described; that is not a reported travel distance, pulse duration or force waveform.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "derived_complete",
+          "value": "All trials contain pink noise and the complete 65-trial allocation is 50 sound-plus-tap targets and 15 no-tap catches. Thus no additional tactile-only baseline trials are in this described allocation; the earlier PPS task is not a pre/post FBI pair.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Accepted manuscript p. 11",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
+          "derivationNote": "All trials contain pink noise; 65 total − 50 AT targets − 15 auditory-only catches = 0 extra tactile-only trials in this described allocation.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "derived",
+              "value": "65 total = 50 sound-plus-tap targets + 15 auditory-only catches.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "derived",
+              "value": "No additional tactile-only trials within described allocation; every trial has sound.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "Zero additional tactile-only trials in the described 65-trial task.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "No tactile-only baseline family.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Fifteen no-tap catch trials occur among the 65 randomised trials; sound remains present. No catch-specific timing beyond the shared task is supplied.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Accepted manuscript p. 11",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "15 randomly intermingled catches in the 65-trial task.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Sound remains present but tap is omitted.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "15 catches.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No tap, no response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "derived_complete",
+          "value": "Ten tap trials at each of five delays (50 targets) and 15 catches; 65 trials total per participant for this one PPS assessment.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Accepted manuscript p. 11",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
+          "derivationNote": "Five delays × ten tap targets plus fifteen catches = 65 main PPS trials.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "5 × 10 + 15 = 65.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "FBI conditions are separate later contextual task, not PPS blocks or pre/post measurements.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five sound-to-tap delays; one PPS assessment before FBI.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "Ten targets per delay, 50 targets plus 15 catches; 65 trials total.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "source_unavailable",
-          "value": "",
+          "status": "partial",
+          "value": "The 65 PPS trials are randomised and occur before the FBI. Randomisation algorithm, seed and any task subdivision are absent. The four random-order FBI conditions are not PPS blocks.",
           "compositeValue": "",
-          "pageOrSection": "",
+          "pageOrSection": "Accepted manuscript pp. 9 and 11",
+          "evidenceNote": "Repository identifies the PDF as accepted version; its pages are headed Autism (in press). Final publisher Methods comparison remains pending.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [
+            "block_count"
+          ],
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "50 targets and 15 catches in PPS task.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_reported",
+              "value": "One 65-trial task; any subdivision into acquisition blocks is not stated.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "PPS precedes FBI. Four randomly ordered FBI conditions are not PPS acquisition blocks.",
+              "note": ""
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "Exact PPS shuffle algorithm/constraints absent.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "65 randomized trials.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1177/1362361319838950::b",
+      "networkNodeId": "doi:10.1177/1362361319838950",
+      "label": "Altered bodily self-consciousness and peripersonal space in autism. (b)",
+      "experimentLabel": "Full-body illusion: body/object display and synchronous/asynchronous back stroking",
+      "inventoryStatus": "confirmed_at_and_adjacent_fbi_shared_recruitment_author_version",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "not_applicable": 11
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1177/1362361319838950",
-          "evidenceSourceUrl": "",
-          "sourceType": "metadata_audit",
-          "missingComponents": [
-            "block_count",
-            "block_composition"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit. Four conditions cross body/object display with synchronous (<50 ms) or asynchronous (400 ms) back stroking for two minutes, in random order. PPS occurs beforehand.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit. Forty-seven participants completed all tasks within the same 51-person recruitment; four additional neurotypical participants completed PPS only. No independent second cohort.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_applicable",
+          "value": "This is the visuo-tactile full-body illusion protocol, outside the direct-AT parameter contract. No direct audiotactile acquisition contract is assigned to this unit.",
+          "compositeValue": "",
+          "pageOrSection": "Accepted manuscript pp. 8-11",
+          "evidenceNote": "",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1177/1362361319838950",
+          "evidenceSourceUrl": "https://ndownloader.figshare.com/files/42197946",
+          "sourceType": "accepted_author_manuscript_final_comparison_pending",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Full-body illusion is adjacent visual–tactile context; no direct AT acquisition contract.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -54247,18 +55073,18 @@
   ],
   "inventoryAudit": {
     "publications": 94,
-    "registeredInventories": 66,
-    "methodsReviewedInventories": 55,
+    "registeredInventories": 68,
+    "methodsReviewedInventories": 57,
     "auditedAccessBlockers": 7,
     "projectLineageReviews": 1,
-    "publicationsWithAllContractDispositions": 56,
-    "inventoryAndContractsAudited": 56,
-    "remainingInventoryOrContractAudit": 38,
+    "publicationsWithAllContractDispositions": 58,
+    "inventoryAndContractsAudited": 58,
+    "remainingInventoryOrContractAudit": 36,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 2,
       "audited_source_access_gap": 7,
-      "author_version_methods_reviewed_final_comparison_pending": 2,
-      "not_registered": 28,
+      "author_version_methods_reviewed_final_comparison_pending": 4,
+      "not_registered": 26,
       "partial_methods_inventory": 1,
       "primary_methods_reviewed": 42,
       "primary_project_lineage_reviewed": 1,

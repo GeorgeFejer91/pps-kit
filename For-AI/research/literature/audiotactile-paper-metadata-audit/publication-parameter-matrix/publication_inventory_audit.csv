@@ -27,7 +27,7 @@ doi:10.1016/j.neuropsychologia.2009.07.025,yes,primary_methods_reviewed,confirme
 doi:10.1016/j.neuropsychologia.2009.11.009,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.neuropsychologia.2014.08.030,yes,retained_primary_methods_review,confirmed_total,2,1,no,no,manual_reviews/noel_2015_walking.json,2026-10-27
 doi:10.1016/j.neuropsychologia.2014.09.043,yes,primary_methods_reviewed,confirmed_one_adjacent_mechanistic_experiment,1,1,yes,yes,https://www.researchgate.net/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system::2.3.1 Main experiment;2.3.2 Sound-localization judgments,2026-10-27
-doi:10.1016/j.neuropsychologia.2014.10.027,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1016/j.neuropsychologia.2014.10.027,yes,author_version_methods_reviewed_final_comparison_pending,confirmed_single_repeated_measures_protocol_author_version,1,1,yes,yes,https://ndownloader.figshare.com/files/42193836::complete accepted Methods; pp. 7–11,2026-10-27
 doi:10.1016/j.neuropsychologia.2015.03.001,yes,retained_primary_methods_review,confirmed_total,2,2,yes,yes,"artifacts/paper_metadata_audit/publication_pdfs/doi_10.1016_j.neuropsychologia.2015.03.001__8a3e82fe7431.pdf::PDF pp.1,8-13; parsimonious_source_reviews.v1.json::doi:10.1016/j.neuropsychologia.2015.03.001::a,b",2026-10-27
 doi:10.1016/j.neuropsychologia.2017.07.018,yes,retained_primary_methods_review,confirmed_main_audio_tactile_experiment,1,0,no,no,https://doi.org/10.1016/j.neuropsychologia.2017.07.018::Methods; manual_reviews/biggio_2017_racket_tool_use.json::segment_2_sequence_and_intermixing;segment_4_counts,2026-10-27
 doi:10.1016/j.neuropsychologia.2020.107579,yes,audited_source_access_gap,two_experiments_from_primary_excerpt_full_methods_access_blocked,2,2,yes,yes,https://www.sciencedirect.com/science/article/pii/S0028393220302529::publisher abstract and selected Methods/analysis excerpt,2026-10-27
@@ -71,7 +71,7 @@ doi:10.1162/089892902320474481,yes,retained_primary_methods_review,confirmed_tot
 doi:10.1162/jocn_a_00006,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1163/22134808-000s0136,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1177/0956797619869337,yes,audited_source_access_gap,source_access_blocked_experiment_inventory_unresolved,1,1,yes,yes,https://journals.sagepub.com/doi/10.1177/0956797619869337::abstract; dated failed primary full-text routes,2026-10-27
-doi:10.1177/1362361319838950,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1177/1362361319838950,yes,author_version_methods_reviewed_final_comparison_pending,confirmed_at_and_adjacent_fbi_shared_recruitment_author_version,2,2,yes,yes,https://ndownloader.figshare.com/files/42197946::complete accepted Methods; pp. 8–11,2026-10-27
 doi:10.1177/17470218241261645,yes,retained_primary_methods_review,one_main_pps_protocol_with_mtt_supporting_task_retained_review_current_access_blocked,1,1,yes,yes,manual_reviews/depersonalisation_2024.json::source_checks;segment_field_audit,2026-10-27
 doi:10.1250/ast.41.345,yes,primary_methods_reviewed,confirmed_three_reported_social_context_experiments,3,3,yes,yes,"https://www.jstage.jst.go.jp/article/ast/41/1/41_E19280/_pdf::sections 2-3, pp. 345-347; Table 1",2026-10-27
 doi:10.1371/journal.pone.0006582,yes,primary_methods_reviewed,confirmed_two_adjacent_mechanistic_experiments,2,2,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML::Methods/Procedure; Tactile stimulation; Figure1,2026-10-27
