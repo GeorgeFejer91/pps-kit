@@ -132,24 +132,66 @@
     {
       "network_node_id": "doi:10.1016/j.neuropsychologia.2014.08.030",
       "doi": "10.1016/j.neuropsychologia.2014.08.030",
-      "inventory_status": "confirmed_total",
-      "inventory_evidence_status": "retained_primary_methods_review",
+      "inventory_status": "confirmed_main_and_supporting_protocol_inventory",
+      "inventory_evidence_status": "author_version_methods_reviewed_final_comparison_pending",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "The critical review explicitly covers Experiment 1 and the Experiment 2 optic-flow control.",
-      "evidence_pointer": "manual_reviews/noel_2015_walking.json",
+      "instance_count_basis": "Two mutually exclusive main AT cohorts of 18 each, without versus with optic flow. A separate 12-person postural-sway validation has unknown overlap with those cohorts; do not infer 48 unique participants. Embedded five-person tracking uses main participants, with inconsistent 2/3 versus 3/2 attribution across Methods and Figure 2. Identified article-in-press source, final-version comparison pending.",
+      "evidence_pointer": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
       "instances": [
-        {"suffix": "a", "instance_kind": "experiment", "experiment_label": "Experiment 1 — locomotion task", "record_id": "noel_2015_walking", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "b", "instance_kind": "experiment", "experiment_label": "Experiment 2 — optic-flow control", "record_id": "noel_2015_walking", "toolkit_scope": "in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1 — locomotion task",
+          "record_id": "noel_2015_walking",
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "18 participants without optic flow; standing/walking repeated."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2 — optic-flow control",
+          "record_id": "noel_2015_walking",
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "18 new participants with optic flow; explicitly no overlap with Experiment 1."
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "supporting_control",
+          "experiment_label": "Optic-flow postural-sway validation",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_visual_postural_control",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "cohort": "N=12; One female; 10 randomized 2-minute trials, 5 optic flow/5 absent; Wii Balance Board at 60 Hz, filtered to 10 Hz. Overlap with main cohorts not stated, so do not assert 48 unique participants."
+        }
+      ],
+      "review_date": "2026-10-27",
+      "source_review_limit": "Complete 10-page author-hosted publisher-layout ARTICLE IN PRESS PDF; final paginated version comparison remains pending. Physical 2 m path at 0.75 m/s implies 8/3 seconds; 2.22 seconds is the latest touch probe, not the sound's full duration. Text prints D2=0.66 cm and D5=1.66 cm; Figure 3 labels 66 and 166 cm and the explicit velocity/timing agree with those larger distances. Retain the typographical discrepancy with the derivation. Silent baselines are trial-relative 440/2220 ms, and the source formula retains both nominal direction labels. Randomized 1–1.5 s inter-stimulus interval does not establish a uniform distribution or exact onset/offset anchor. Two locomotion condition groups are reported; eight product blocks are not a reported source block count.",
+      "supporting_task_boundaries": [
+        {
+          "label": "Supporting activity or lineage limit",
+          "disposition": "explicit_context_not_additional_invented_cohort",
+          "basis": "Embedded optical motion tracking uses five main-task participants, not a new cohort. Methods says 2 from Experiment 1 and 3 from Experiment 2; Figure 2 caption says 3 and 2. Plot labels show three Optic Flow and two No Optic Flow. Preserve the contradiction, do not silently repair caption or sample attribution."
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://noel-lab.org/wp-content/uploads/2024/05/nsy_5279_pps-walking.pdf",
+          "outcome": "Primary source retrieved and Methods reviewed. SHA256 17f425375936e9eed93236730cc9e107a75cd55bb55d6f31d2c22df48efdfc3a. Complete 10-page author-hosted publisher-layout ARTICLE IN PRESS PDF; final paginated version comparison remains pending."
+        }
       ]
     },
     {
       "network_node_id": "doi:10.1016/j.cub.2013.01.043",
       "doi": "10.1016/j.cub.2013.01.043",
-      "inventory_status": "confirmed_total",
-      "inventory_evidence_status": "retained_primary_methods_review",
+      "inventory_status": "confirmed_main_and_supporting_protocol_inventory",
+      "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "The reviewed main PDF explicitly describes three audio-tactile PPS experiments: social presence/mannequin, cooperative versus noncooperative interaction, and cooperative interaction before/after. Their sound durations and condition structures differ, so the prior single review row was not lossless.",
-      "evidence_pointer": "artifacts/paper_metadata_audit/publication_pdfs/doi_10.1016_j.cub.2013.01.043__105d921e527a.pdf::PDF pp.1-5; metadata_audit.jsonl::teneggi_2013_social_face",
+      "instance_count_basis": "Three main AT experiments plus S1 localization (18 naive participants), wider-range localization (new 7 participants), and S2 audiovisual control (new 14 women). Table S2b further localization cohort/count are unknown and remain an explicit supporting activity. Main analyzed samples are 18/32/20; two Experiment 2 exclusions were replaced. Main PDF current reaccess is blocked, but the complete original supplement supplies Methods and supporting protocol inventory.",
+      "evidence_pointer": "https://ars.els-cdn.com/content/image/1-s2.0-S096098221300078X-mmc1.pdf",
       "instances": [
         {
           "suffix": "a",
@@ -157,8 +199,9 @@
           "experiment_label": "Experiment 1 — mannequin versus other-person PPS",
           "record_id": "teneggi_2013_social_face",
           "template_ids": [],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "18 analyzed; repeated Other/Mannequin conditions."
         },
         {
           "suffix": "b",
@@ -166,8 +209,9 @@
           "experiment_label": "Experiment 2 — cooperative versus noncooperative interaction",
           "record_id": "teneggi_2013_social_face",
           "template_ids": [],
-          "toolkit_scope": "in_scope_pending_disaggregation",
-          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort": "32 analyzed, 16 cooperative/16 noncooperative; two initial exclusions were replaced."
         },
         {
           "suffix": "c",
@@ -177,9 +221,66 @@
           "template_ids": [
             "teneggi_2013_social_face_pps"
           ],
-          "toolkit_scope": "in_scope_pending_disaggregation",
+          "toolkit_scope": "in_scope",
           "disaggregation_status": "combined_record_requires_experiment_specific_review",
-          "template_association_basis": "Existing template explicitly scoped to Experiment 3 by implementation checkpoint c6c92728: IN only, seven reported SOAs and 500 ms pre/post sound silence. Missing original Experiment 3 repetition/catch allocation and source/stimulus substitutions remain blocking; association does not certify source completeness or native qualification."
+          "template_association_basis": "Existing template explicitly scoped to Experiment 3 by implementation checkpoint c6c92728: IN only, seven reported SOAs and 500 ms pre/post sound silence. Missing original Experiment 3 repetition/catch allocation and source/stimulus substitutions remain blocking; association does not certify source completeness or native qualification.",
+          "cohort": "20 analyzed; repeated pre/post fair cooperation."
+        },
+        {
+          "suffix": "d",
+          "instance_kind": "supporting_control",
+          "experiment_label": "Experiment S1 sound localization",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_localization_control",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "cohort": "N=18; 80 randomized IN/OUT trials; right-cheek touch marks 5 possible times; verbal 1–100 distance report. Main-cohort overlap unstated."
+        },
+        {
+          "suffix": "e",
+          "instance_kind": "supporting_control",
+          "experiment_label": "Experiment 3 sound-localization validation",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_localization_control",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "cohort": "N=7; Explicit new group; IN only and seven delays over the wider geometry. Exact trial count and main-cohort overlap not stated."
+        },
+        {
+          "suffix": "f",
+          "instance_kind": "supporting_control",
+          "experiment_label": "Experiment S2 audiovisual control",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_audiovisual_control",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "cohort": "N=14; New female volunteers; 100 ms LED at 60 cm, no touch, Other/Mannequin within participant. Reported n14 conflicts with F(1,12)/F(4,48); no exclusion supplied, so do not replace n14 with inferred n13."
+        }
+      ],
+      "review_date": "2026-10-27",
+      "source_review_limit": "Whole publisher supplement, including Methods and all supporting captions, freshly reviewed. Current main PDF routes remain inaccessible; no new complete-main-PDF claim. Exp3 repetitions, exact catches and subblock count remain unresolved. No inheritance of 8 repetitions, 24 catches or 104 trials is justified after the changed 7-SOA, IN-only design. No separate tactile-only baseline family is enumerated in the main acquisition. 100 microsecond electrical pulse differs from the toolkit's 100 millisecond haptic substitute.",
+      "supporting_task_boundaries": [
+        {
+          "label": "Supporting activity or lineage limit",
+          "disposition": "explicit_context_not_additional_invented_cohort",
+          "basis": "Table S2b reports a localization check described as following Figure S1 procedure. Its means differ from the Figure S1 display, but no N, trial count or cohort linkage is given. Retain this unresolved activity rather than invent another recruited sample or assign it to the n14 group."
+        },
+        {
+          "label": "Supporting activity or lineage limit",
+          "disposition": "explicit_context_not_additional_invented_cohort",
+          "basis": "Bargaining game, four-question 1–7 ratings and suspicion debrief are manipulations/checks within Experiments 2/3, not additional PPS acquisitions."
+        },
+        {
+          "label": "Supporting activity or lineage limit",
+          "disposition": "explicit_context_not_additional_invented_cohort",
+          "basis": "Repeated calibration trials are not included in main-task counts."
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://ars.els-cdn.com/content/image/1-s2.0-S096098221300078X-mmc1.pdf",
+          "outcome": "Primary source retrieved and Methods reviewed. SHA256 21802b38c43e618eb1a04daf717391b662a915818427ca5addf6ccc2cc80934f. Whole publisher supplement, including Methods and all supporting captions, freshly reviewed. Current main PDF routes remain inaccessible; no new complete-main-PDF claim."
         }
       ]
     },
@@ -877,11 +978,11 @@
     {
       "network_node_id": "doi:10.1038/s41598-021-90784-5",
       "doi": "10.1038/s41598-021-90784-5",
-      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "inventory_status": "confirmed_single_main_experiment_whole_article_reviewed",
       "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "One experiment with four direction blocks. The participant rotates relative to two loudspeakers; the chest actuator remains in place.",
-      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8163804/fullTextXML::Methods",
+      "instance_count_basis": "Whole article identifies one 20-male cohort with four repeated direction blocks. Perceptibility checks are embedded; no separate localization or additional acquisition cohort is reported.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8163804/fullTextXML",
       "review_date": "2026-10-27",
       "instances": [
         {
@@ -889,12 +990,29 @@
           "instance_kind": "experiment",
           "experiment_label": "Four-direction body-rotation audio-tactile experiment",
           "record_id": "matsuda_2021_four_directions",
-          "template_ids": ["matsuda_2021_four_directions"],
+          "template_ids": [
+            "matsuda_2021_four_directions"
+          ],
           "toolkit_scope": "in_scope",
-          "disaggregation_status": "record_already_experiment_specific"
+          "disaggregation_status": "study_specific_source_reviewed",
+          "cohort": "20 male participants; four repeated body-relative direction blocks."
         }
       ],
-      "supporting_task_boundaries": []
+      "supporting_task_boundaries": [
+        {
+          "label": "Supporting activity or lineage limit",
+          "disposition": "explicit_context_not_additional_invented_cohort",
+          "basis": "Perceptibility confirmation is embedded; no separately recruited localization, pilot or supporting experiment appears in the complete article."
+        }
+      ],
+      "source_review_limit": "Fresh complete Europe PMC publisher XML, matching article identity. Nature PDF request returned non-PDF bytes; no local PDF claim. Methods explicitly says no audio in the 40 unimodal control trials per block; this differs from other papers' pre/post-sound controls retaining sound elsewhere. Exact source recipe/envelope, tactile frequency/amplitude, response device and online deadline, and ITI policy remain incomplete. 100–1300 ms are offline analysis exclusions, not an online response window. Four blocks of 200 trials = 800; pauses every 50 trials do not establish another main experiment.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8163804/fullTextXML",
+          "outcome": "Primary source retrieved and Methods reviewed. SHA256 7527315376987ae921ba80ad2aab7bea567255d5e8edc81459d356d070e989a2. Fresh complete Europe PMC publisher XML, matching article identity. Nature PDF request returned non-PDF bytes; no local PDF claim."
+        }
+      ]
     },
     {
       "network_node_id": "doi:10.1073/pnas.2024548118",

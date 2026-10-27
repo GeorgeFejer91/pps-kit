@@ -1177,7 +1177,8 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "exact distance/timing table from supplement"
+        "Experiment 3 exact repetition, catch and subblock allocation",
+        "Original waveform/exponential fade and electrical-to-vibrotactile substitution; source 100 microsecond pulse"
       ]
     },
     {

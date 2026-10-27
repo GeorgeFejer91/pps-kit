@@ -33,7 +33,7 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 152 study/context rows,
+Current checkpoint (2026-10-27): 94 frozen publications, 156 study/context rows,
 59 registered publication inventories, eight access-audited publications,
 one audited project-lineage identity,
 and 26 publication inventories still unassessed. Registry presence alone
@@ -42,16 +42,24 @@ inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 57 Methods-backed inventories (43 current primary
-reviews, ten retained primary reviews, and four identified author versions whose
+The current audit records 57 Methods-backed inventories (44 current primary
+reviews, eight retained primary reviews, and five identified author versions whose
 final comparison is pending), one abstract/metadata inventory, one partial
 Methods inventories, eight audited access blockers, one project-lineage boundary, and 26 unregistered publications.
-Only 62 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 32 still need inventory
+Only 64 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 30 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Teneggi now includes three main AT experiments, two identified localization
+groups and an audiovisual control; further Table S2b cohort linkage remains
+unresolved. Only Experiment 3 retains the existing template, and its counts
+stay unreported. Noel walking includes two independent main cohorts and an
+additional postural control with unknown overlap; the reviewed source is an
+article-in-press version, not a verified final comparison. Matsuda has one
+20-person cohort and four repeated direction blocks, with fully silent controls.
+
 Ronga (2021) fresh original SI establishes 4–6 s random ITI, with distribution
 and anchor still unspecified, and a separate five-newborn adequacy pilot. Main
 enrollment is 30 newborns with 25 analyzed; the adult variant has 25. Unisensory
