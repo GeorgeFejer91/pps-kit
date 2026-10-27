@@ -4,6 +4,7 @@ const DATABASE_NAME = "pps-designer";
 const DATABASE_VERSION = 1;
 const DRAFT_STORE = "drafts";
 const ASSET_STORE = "assets";
+const MAX_PORTABLE_AUDIO_BYTES = 64 * 1024 * 1024;
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
@@ -56,7 +57,9 @@ const drafts = {
     return (await get(DRAFT_STORE, "active"))?.snapshot || null;
   },
   async storeAudio(file) {
+    if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > MAX_PORTABLE_AUDIO_BYTES) throw new Error("Audio exceeds the 64 MiB portable asset limit.");
     const bytes = await file.arrayBuffer();
+    if (bytes.byteLength !== file.size || bytes.byteLength > MAX_PORTABLE_AUDIO_BYTES) throw new Error("Audio byte count does not match the selected file.");
     const digest = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))]
       .map((value) => value.toString(16).padStart(2, "0")).join("");
     const id = `${digest}.${String(file.name).split(".").pop()?.toLowerCase() || "wav"}`;
@@ -222,14 +225,14 @@ async function exportBundle(snapshot) {
         if (!url) throw new Error("Preloaded audio cannot be resolved in this Designer.");
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Preloaded audio download failed (${response.status}): ${item.label || reference}`);
-        bytes = await readPortableBytes(response, 64 * 1024 * 1024, "Audio");
+        bytes = await readPortableBytes(response, MAX_PORTABLE_AUDIO_BYTES, "Audio");
         digest = await sha256(bytes);
         if (digest !== asset.sha256) throw new Error(`Preloaded audio checksum mismatch: ${item.label || reference}`);
         id = `${digest}.wav`;
         mediaType = "audio/wav";
         sourceName = reference.split("/").pop();
       }
-      if (bytes.length > 64 * 1024 * 1024) throw new Error("Audio exceeds the 64 MiB portable asset limit.");
+      if (bytes.length > MAX_PORTABLE_AUDIO_BYTES) throw new Error("Audio exceeds the 64 MiB portable asset limit.");
       digest ||= await sha256(bytes);
       const existing = assetRecords.find(asset => asset.logical_id === id);
       if (existing && existing.sha256 !== digest) throw new Error("Conflicting portable audio identities.");

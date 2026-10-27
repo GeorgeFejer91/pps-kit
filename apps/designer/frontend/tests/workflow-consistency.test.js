@@ -58,6 +58,41 @@ test("instruction preview debounce preserves form values while native review inv
   assert.equal(previewed, 1);
 });
 
+test("instruction rendering initializes defaults and replaces hidden metadata or lock state without leaving an old menu", () => {
+  let html = "", renders = 0, closed = 0;
+  const container = { children: [], dataset: {}, contains: () => true,
+    get innerHTML() { return html; }, set innerHTML(value) { html = value; renders++; this.children = [{}]; } };
+  const context = vm.createContext({ profile: {}, finalized: false, activeBoundedSelect: null,
+    $: id => id === "run-instruction-slots" ? container : {},
+    restoreFocusAfterRender: () => () => {}, isProfileFinalized: () => context.finalized,
+    collectRunInstructionProfile: () => context.profile, upgradeBoundedSelects() {}, escapeHtml: value => String(value),
+    closeBoundedSelect: () => { closed++; context.activeBoundedSelect = null; },
+  });
+  const constants = app.slice(app.indexOf("const RUN_INSTRUCTION_SLOTS ="), app.indexOf("const RUN_INSTRUCTION_CONTINUE_MODES ="));
+  const modeStart = app.indexOf("const RUN_INSTRUCTION_CONTINUE_MODES =");
+  vm.runInContext(constants + app.slice(modeStart, app.indexOf("\n];", modeStart) + 3)
+    + app.slice(app.indexOf("function normalizedRunInstructionSlots("), app.indexOf("function collectRunInstructionProfile(")), context);
+  context.renderRunInstructions({});
+  assert.equal(renders, 1, "empty DOM renders even when defaults equal collected defaults");
+  assert.equal((html.match(/<article /g) || []).length, context.normalizedRunInstructionSlots({}).length);
+  context.activeBoundedSelect = {};
+  context.renderRunInstructions({});
+  assert.equal(renders, 1, "an identical profile preserves its active menu");
+  assert.equal(closed, 0);
+  context.profile = { slots: [{ slot: "before_experiment", path: "clip.wav", sha256: "old" }] };
+  const changed = structuredClone(context.profile);
+  changed.slots[0].sha256 = "new";
+  context.renderRunInstructions(changed);
+  assert.equal(renders, 2);
+  assert.equal(closed, 1, "a changed hidden media identity closes the old menu");
+  assert.match(html, /data-instruction-field="sha256"[^>]*value="new"/);
+  context.profile = changed;
+  context.finalized = true;
+  context.renderRunInstructions(changed);
+  assert.equal(renders, 3);
+  assert.match(html, /data-instruction-field="label"[^>]*disabled/);
+});
+
 test("only the explicit V1 loopback dashboard enables companion controls", () => {
   const nodes = [{ hidden: false }, { hidden: false }];
   const context = vm.createContext({
@@ -191,7 +226,8 @@ test("audio imports already pending cannot mutate a finalizing or replaced hoste
     const original = { design: { name: "original" } };
     const context = vm.createContext({
       state: original, staticModeActive: true, editModeActive: true, workflowSaveInFlight: false,
-      pendingAudioImportMode: "instruction", pendingInstructionSlot: "welcome", showToast() {},
+      pendingAudioImportMode: "instruction", pendingInstructionSlot: "welcome", pendingDisplayColorHex: "", showToast() {},
+      audioImportRequestId: 0, audioImportHttpQueue: Promise.resolve(), URL: { revokeObjectURL() {} },
       $: () => ({ files: [{ name: "welcome.wav" }], value: "" }),
       window: { PPSDesigner: { drafts: { storeAudio: () => storage.promise } } },
     });
@@ -214,6 +250,7 @@ test("hosted instruction selection replaces old media in both design and form wi
   const context = vm.createContext({
     state: original, staticModeActive: true, editModeActive: true, workflowSaveInFlight: false,
     pendingAudioImportMode: "instruction", pendingInstructionSlot: "before_experiment", pendingDisplayColorHex: "#112233",
+    audioImportRequestId: 0, audioImportHttpQueue: Promise.resolve(), URL: { revokeObjectURL() {} },
     $: () => ({ files: [{ name: "New.wav" }], value: "" }),
     window: { PPSDesigner: { drafts: { storeAudio: async () => ({ id: "new.wav", url: "blob:new", sha256: "new-hash" }) } } },
     collectRunInstructionProfile: () => ({ slots: [structuredClone(old)] }),
@@ -229,6 +266,152 @@ test("hosted instruction selection replaces old media in both design and form wi
     browser_asset_id: "new.wav", sha256: "new-hash", duration_s: 0, sample_rate: 0, channels: 0, source: "browser_upload" });
   assert.equal(dirty, 1);
   assert.equal(previews, 1);
+});
+
+function importHarness(hosted = true) {
+  const pending = [], revoked = [], staged = [], calls = [];
+  const state = { design: { study_profile_reference_parameters: { dashboard_run_setup: { instruction_profile: {
+    slots: [{ slot: "before_experiment", path: "old.wav", enabled: true }, { slot: "after_experiment", path: "end.wav", enabled: true }],
+  } } } }, preload_inventory: { assets: [] } };
+  const context = vm.createContext({ state, staticModeActive: hosted, editModeActive: true, workflowSaveInFlight: false,
+    audioImportRequestId: 0, audioImportHttpQueue: Promise.resolve(), pendingInstructionSlot: "before_experiment",
+    pendingAudioImportMode: "instruction", pendingDisplayColorHex: "#123456", pendingBakeRecipe: null,
+    file: { name: "First.wav" }, URL: { revokeObjectURL: url => revoked.push(url) },
+    $: () => ({ files: [context.file], value: "" }), ensureEditableProject: () => true,
+    window: { PPSDesigner: { drafts: { storeAudio: () => { const job = deferred(); pending.push(job); return job.promise; } } } },
+    nativeDesigner: { pickAudio: () => { const job = deferred(); pending.push(job); return job.promise; } },
+    designerApi: { importRunInstructions: args => { const job = deferred(); calls.push({ args, job }); return job.promise; },
+      importAudio: args => { const job = deferred(); calls.push({ args, job }); return job.promise; } },
+    fileToBase64: async file => file.name, collectRunInstructionProfile: () => structuredClone(context.state.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile),
+    renderRunInstructions() {}, markDesignerDirty() {}, scheduleRunSequencePreview() {}, showToast() {},
+    renderBakePanel() {}, markDesignerSaved() {}, renderAll() {}, stageImportedAudioForBake: (audio, mode) => staged.push({ audio, mode }),
+  });
+  vm.runInContext(handler("importNativeAudio", "async function importNativeProfile") + handler("importAudioFromPicker", "function fileToBase64"), context);
+  return { context, pending, revoked, staged, calls, run: () => vm.runInContext("importAudioFromPicker()", context), native: () => vm.runInContext("importNativeAudio()", context) };
+}
+
+test("latest hosted selection wins reversed storage completion and unused URLs are revoked", async () => {
+  const h = importHarness();
+  const first = h.run();
+  h.context.file = { name: "Second.wav" };
+  const second = h.run();
+  h.pending[1].resolve({ id: "second.wav", sha256: "second", url: "blob:second" });
+  await second;
+  h.pending[0].resolve({ id: "first.wav", sha256: "first", url: "blob:first" });
+  await first;
+  assert.equal(h.context.state.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots[0].path, "browser-asset:second.wav");
+  assert.deepEqual(h.revoked, ["blob:second", "blob:first"]);
+  const ingredient = importHarness();
+  ingredient.context.pendingInstructionSlot = "";
+  ingredient.context.pendingAudioImportMode = "preserve";
+  const active = ingredient.run();
+  ingredient.pending[0].resolve({ id: "live.wav", url: "blob:live" });
+  await active;
+  assert.deepEqual(ingredient.revoked, [], "live ingredient preview URL remains usable");
+  assert.equal(ingredient.staged[0].audio.browser_preview_url, "blob:live");
+  const changedRecipe = importHarness();
+  changedRecipe.context.pendingInstructionSlot = "";
+  changedRecipe.context.pendingAudioImportMode = "preserve";
+  const obsolete = changedRecipe.run();
+  changedRecipe.context.pendingBakeRecipe = { action: "create" };
+  changedRecipe.pending[0].resolve({ id: "obsolete.wav", url: "blob:obsolete" });
+  await obsolete;
+  assert.equal(changedRecipe.staged.length, 0);
+  assert.deepEqual(changedRecipe.revoked, ["blob:obsolete"]);
+});
+
+test("native picks capture their target and discard an older completion without publishing its asset", async () => {
+  const h = importHarness();
+  const first = h.native();
+  h.context.pendingInstructionSlot = "";
+  h.context.pendingAudioImportMode = "spatialize";
+  const second = h.native();
+  h.pending[1].resolve({ label: "Second", path: "native-assets/second.wav", duration_s: 1 });
+  await second;
+  h.pending[0].resolve({ label: "First", path: "native-assets/first.wav", duration_s: 1 });
+  await first;
+  assert.equal(h.staged.length, 1);
+  assert.equal(h.staged[0].mode, "spatialize");
+  assert.deepEqual(h.context.state.preload_inventory.assets.map(asset => asset.label), ["Second"]);
+  const target = importHarness();
+  const pick = target.native();
+  target.context.pendingInstructionSlot = "after_experiment";
+  target.pending[0].resolve({ label: "Selected", path: "native-assets/selected.wav", duration_s: 1 });
+  await pick;
+  const slots = target.context.state.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots;
+  assert.equal(slots.find(slot => slot.slot === "before_experiment").path, "native-assets/selected.wav");
+  assert.equal(slots.find(slot => slot.slot === "after_experiment").path, "end.wav");
+  assert.equal(target.context.pendingInstructionSlot, "after_experiment", "an already opened different target is not cleared");
+  for (const boundary of ["saving", "replaced", "locked"]) {
+    const fenced = importHarness(), owner = fenced.context.state;
+    const awaiting = fenced.native();
+    if (boundary === "saving") fenced.context.workflowSaveInFlight = true;
+    if (boundary === "replaced") fenced.context.state = { design: {} };
+    if (boundary === "locked") fenced.context.editModeActive = false;
+    fenced.pending[0].resolve({ label: "Late", path: "native-assets/late.wav", duration_s: 1 });
+    await awaiting;
+    assert.equal(owner.preload_inventory.assets.length, 0, boundary);
+  }
+});
+
+test("superseded storage errors stay obsolete while current failures remain retryable", async () => {
+  const h = importHarness();
+  const old = h.run(), latest = h.run();
+  h.pending[1].resolve({ id: "latest.wav", url: "blob:latest" });
+  await latest;
+  h.pending[0].reject(new Error("Obsolete storage failure"));
+  await old;
+  h.context.pendingInstructionSlot = "before_experiment";
+  const failed = h.run();
+  h.pending[2].reject(new Error("Current quota failure"));
+  await assert.rejects(failed, /Current quota failure/);
+  const retry = h.run();
+  h.pending[3].resolve({ id: "retry.wav", url: "blob:retry" });
+  await retry;
+  assert.equal(h.context.state.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots[0].path, "browser-asset:retry.wav");
+});
+
+test("V1 import mutations serialize; stale replies and stale file reads never adopt or dispatch", async () => {
+  const h = importHarness(false);
+  const first = h.run();
+  await new Promise(setImmediate);
+  h.context.file = { name: "Second.wav" };
+  const second = h.run();
+  await new Promise(setImmediate);
+  assert.equal(h.calls.length, 1, "the next server mutation waits for the prior import");
+  h.calls[0].job.resolve({ marker: "old" });
+  await first;
+  await new Promise(setImmediate);
+  assert.equal(h.context.state.marker, undefined);
+  assert.equal(h.calls[1].args.filename, "Second.wav");
+  h.calls[1].job.resolve({ marker: "latest" });
+  await second;
+  assert.equal(h.context.state.marker, "latest");
+  const reads = importHarness(false), encodings = [];
+  reads.context.fileToBase64 = () => { const job = deferred(); encodings.push(job); return job.promise; };
+  const oldRead = reads.run();
+  const latestRead = reads.run();
+  encodings[1].resolve("new");
+  await new Promise(setImmediate);
+  encodings[0].resolve("old");
+  await oldRead;
+  assert.equal(reads.calls.length, 1);
+  assert.equal(reads.calls[0].args.content_base64, "new");
+  reads.calls[0].job.resolve({ marker: "new" });
+  await latestRead;
+});
+
+test("browser audio checks the existing 64 MiB budget before reading and rejects changed byte lengths before hashing", async () => {
+  let reads = 0, hashes = 0, writes = 0;
+  const context = vm.createContext({ window: {}, Blob, TextEncoder, Uint8Array, structuredClone,
+    crypto: { subtle: { digest: async () => { hashes++; return new ArrayBuffer(32); } } } });
+  vm.runInContext(chrome.replace(/initializeChrome\(\);\s*$/, ""), context);
+  context.write = () => writes++;
+  vm.runInContext("put = async () => write();", context);
+  await assert.rejects(context.window.PPSDesigner.drafts.storeAudio({ size: 64 * 1024 * 1024 + 1, arrayBuffer: async () => { reads++; } }), /64 MiB/);
+  assert.deepEqual([reads, hashes, writes], [0, 0, 0]);
+  await assert.rejects(context.window.PPSDesigner.drafts.storeAudio({ size: 1, arrayBuffer: async () => { reads++; return new ArrayBuffer(2); } }), /byte count/);
+  assert.deepEqual([reads, hashes, writes], [1, 0, 0]);
 });
 
 test("storage failure leaves finalization editable and retryable", async () => {
