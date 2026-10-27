@@ -72,6 +72,7 @@ CONFIDENCE_LABELS = (
     "high_confidence_extraction",
     "high_confidence_extraction_with_source_count_caveat",
     "high_confidence_extraction_with_count_derivation_caveat",
+    "high_confidence_extraction_with_protocol_lineage",
 )
 
 ADJACENT_CATEGORY = "adjacent_out_of_scope"
@@ -1750,6 +1751,7 @@ def schema_payload() -> dict[str, Any]:
             "index": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_review_index.csv",
             "schema": "pps-paper-metadata-manual-review.v1",
             "rule": "Manual reviews promote auto-mined candidates only after repeated critical passes; store normalized values, an orientation ledger, field statuses, confidence scores, and short source pointers, not full text.",
+            "confidence_rule": "High-confidence labels describe the reviewed extraction, not replication readiness. The protocol-lineage label retains predecessor-derived fields as protocol_lineage_derived; it does not promote them to directly reported evidence or qualified execution.",
         },
         "pdf_retrieval_inventory": {
             "path": "For-AI/research/literature/audiotactile-paper-metadata-audit/pdf_retrieval_inventory.csv",
