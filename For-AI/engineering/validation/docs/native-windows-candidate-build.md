@@ -23,6 +23,10 @@ lock. Its signed embedded cabinet contains `F_CENTRAL_msvcr120_x64`, copied as
 `VC2013-license.rtf`. Extracting these inputs does not run an installer. The
 reviewed DLLs have valid Microsoft Authenticode signatures. The builder checks
 every DLL/license hash before copying any into the candidate.
+The builder stages writable copies without modifying those inputs. CAB-extracted
+read-only notices otherwise make a subsequent Tauri resource copy fail. Identical
+read-only outputs from the old builder are normalized only after hash and
+ancestor-link checks; differing or linked outputs fail explicitly.
 
 The retained SOFA dependency DLLs require the legacy VC2013 runtime; Microsoft
 no longer supports that runtime. This build preserves the tested renderer ABI
@@ -58,6 +62,18 @@ the check does not establish clean-Windows prerequisite installation.
 Evidence is retained under ignored `artifacts/native-candidate-runner-20261027/`,
 `artifacts/native-runner-payload-report.json` and
 `artifacts/ui-workflow-check/runner-actual-native-startup-report.json`.
+An updated Runner candidate at `468c8241d7979f1e02aec35f9f3102f46988e6aa`
+also built and installed successfully after correcting the repeat-build notice
+failure. Its installer is 220,510,559 bytes, SHA256
+`5db890862e29b9bf7b6cede9a3abfc29420b2635b807941eef390b7ca5e0a23a`.
+All ten canonical web files and pinned runtime files match the 24-file payload;
+the installed executable matches the extracted executable. A fresh launch/IPC
+check was rejected by automatic approval review with only "blocked by policy";
+startup at this updated revision remains unverified. See ignored
+`artifacts/native-candidate-runner-20261027-r3/` and
+`artifacts/native-runner-r3-payload-report.json`. The earlier startup evidence
+above belongs only to `b8e0e789`, not to this replacement package.
+
 Later source/UI changes need their own rebuilt candidate. Designer packaging,
 native file dialogs, clean-Windows operation and the complete installed
 import/generate/execute/result journey remain release checks. Keep those states

@@ -149,9 +149,16 @@ the existing Python planner. `pps-session-package` verifies instruction WAV
 hashes, actual frames/rate/channels, finite PCM and contained paths; its native
 group receipt binds both ordered parts and their shared provenance. Neither
 receipt nor source completion flags establish that the experiment ran.
-The Runner currently refuses playback of instruction-bearing/split packages
-until the corresponding native consumer lands; inspection is still available.
-Complete installed experiments and native instruction/group execution remain
-gates. The user deferred new physical calibration on 2026-10-27; hardware
+The native consumer now executes verified instruction-bearing/split packages,
+including click/button/delay gates and ordered-part result receipts, with real
+silent callback and independent result-audit evidence. Complete installed
+experiments remain a separate gate. The user deferred new physical calibration on 2026-10-27; hardware
 operation is assumed, never recorded as measured qualification.
 Wire completion is denied for real packages; Stop preserves partial results.
+
+Negative sound-relative SOAs are valid only when an explicit sequence prefix
+contains them. Rust rounds the offset magnitude with the established ties-to-even
+policy, uses checked subtraction/addition from sound onset, and requires the
+complete cue within existing trial frames. It never inserts implicit padding.
+Actual cue PCM, signed CSV and verified schedule checks cover -700 ms after a
+1000-ms prefix, both trial boundaries, overflow and half-sample rounding.
