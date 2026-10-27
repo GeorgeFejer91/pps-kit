@@ -669,13 +669,11 @@ mod tests {
 
     #[test]
     fn owned_import_directory_is_removed_on_early_return() {
-        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../../../artifacts")
-            .join(format!(
-                "designer-import-cleanup-{}-{}",
-                std::process::id(),
-                SEQUENCE.fetch_add(1, Ordering::Relaxed)
-            ));
+        let path = std::env::temp_dir().join(format!(
+            "designer-import-cleanup-{}-{}",
+            std::process::id(),
+            SEQUENCE.fetch_add(1, Ordering::Relaxed)
+        ));
         fs::create_dir(&path).unwrap();
         fs::write(path.join("verified.wav"), b"temporary extraction").unwrap();
         let failed_copy = || -> Result<()> {
