@@ -12,20 +12,20 @@
     "publications": 94,
     "studies": 126,
     "contracts": 1386,
-    "reportedComplete": 193,
-    "derivedComplete": 43,
+    "reportedComplete": 197,
+    "derivedComplete": 44,
     "parameterStatusCounts": {
       "approximation_required": 24,
       "composite_requires_split": 146,
-      "conflicting_evidence": 6,
-      "derived_complete": 43,
+      "conflicting_evidence": 7,
+      "derived_complete": 44,
       "explicitly_absent": 15,
       "low_confidence": 64,
       "not_applicable": 45,
       "not_assessed": 341,
       "not_reported": 23,
-      "partial": 209,
-      "reported_complete": 193,
+      "partial": 203,
+      "reported_complete": 197,
       "source_unavailable": 277
     }
   },
@@ -124,7 +124,10 @@
         "tonelli_2019_echolocation"
       ],
       "parameterStatusCounts": {
-        "partial": 11
+        "conflicting_evidence": 1,
+        "derived_complete": 1,
+        "partial": 5,
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed"
     },
@@ -2857,15 +2860,18 @@
     {
       "studyRowId": "doi:10.1007/s00221-019-05469-3",
       "networkNodeId": "doi:10.1007/s00221-019-05469-3",
-      "label": "Enhanced audio-tactile multisensory interaction in a peripersonal task after echolocation.",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Enhanced audio-tactile multisensory interaction in a peripersonal task after echolocation. (a)",
+      "experimentLabel": "Pre/post neck PPS assessment with echolocation and control groups",
+      "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+      "evidenceScope": "experiment_specific",
       "templateIds": [
         "tonelli_2019_echolocation"
       ],
       "parameterStatusCounts": {
-        "partial": 11
+        "conflicting_evidence": 1,
+        "derived_complete": 1,
+        "partial": 5,
+        "reported_complete": 4
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -2873,189 +2879,367 @@
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
           "status": "partial",
-          "value": "Stimulus type: Task-irrelevant looming auditory stimuli were white noise. | Source provenance: White noise was delivered through a custom seven-loudspeaker array controlled by custom Matlab code; exact file, seed, or source script is not supplied. | Auditory conditions: PPS trials included looming white-noise audio-tactile trials, auditory-only catch trials, and no-sound tactile baseline trials. | Renderer or apparatus: Custom device with seven serially connected loudspeakers, custom Matlab code, an 18 mm2 neck vibration motor, and microphone voice-response capture.",
+          "value": "Approaching white noise delivered by seven serial loudspeakers, controlled in MATLAB.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, PPS task | PDF pp.3-4, PPS task | PDF pp.3-4; supplement checked",
-          "evidenceNote": "The PPS task identifies the acoustic stimulus class as white noise. | Apparatus and software provenance are reported, but not a reusable audio asset. | The task rows define the auditory and no-audio conditions. | No SPL, gain, cross-fade, speaker-switch law, or calibration curve was found after main PDF, rendered-page, fallback, supplement, and source-route checks. | The apparatus elements and control/recording path are reported.",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "Exact source generation, transition envelope and sound level are unresolved; 53 dB is the vocal-response trigger threshold, not stimulus calibration.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
           "missingComponents": [
+            "source_mode",
             "source_recipe_or_asset_provenance",
             "level_envelope_calibration"
           ],
-          "components": {}
+          "components": {
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Seven custom serial loudspeakers.",
+              "note": ""
+            },
+            "source_mode": {
+              "status": "not_reported",
+              "value": "White noise through physical speakers; generated versus prerecorded source unresolved.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White noise, 3000-ms approach.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "partial",
-          "value": "Trajectory path: Seven loudspeakers on a table to the participant's left at head elevation; sound approached from 119 cm to 17 cm from the head/neck in 17 cm steps. | Stimulus duration: The moving sound covered the speaker array in 3 s. | Stimulus speed: Sound moved along 102 cm in 3 s, corresponding to 34 cm/s. | Trajectory count: One lateral approaching trajectory toward the participant's left side/head, sampled at seven speaker distances. | Renderer or apparatus: Custom device with seven serially connected loudspeakers, custom Matlab code, an 18 mm2 neck vibration motor, and microphone voice-response capture.",
+          "value": "Seven speakers to the left of the head at head height: 119 to 17 cm over 3000 ms; 17-cm spacing, reported speed 34 cm/s.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Fig. 1 and PPS task | PDF p.3, PPS task | PDF pp.3-4; supplement checked | PDF pp.3-4, PPS task",
-          "evidenceNote": "Rendered Fig. 1 confirms the path is lateral left-of-head, not frontal. | Duration is reported directly with the path length and speed. | Speed, duration, and path length are directly reported. | Figure and methods show one left-side approach trajectory. | No SPL, gain, cross-fade, speaker-switch law, or calibration curve was found after main PDF, rendered-page, fallback, supplement, and source-route checks. | The apparatus elements and control/recording path are reported.",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "Figure 1A pixels inspected. Exact metric Cartesian/azimuth layout and loudspeaker switching envelope are not recovered; do not substitute the frontal 34-cm training object.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
           "missingComponents": [
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "geometry"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Head-centred array on the left, at head elevation; touch on left neck.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "Approach through ordered physical sources.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "102-cm travel over 3 s, 34 cm/s.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "partial",
-          "value": "Trial rows families: Three PPS trial families: audio-tactile target trials, unimodal tactile-only trials, and auditory-only catch trials. | Task sequence rules: Participants were blindfolded, ignored the sound, said TAH quickly to neck vibration, and withheld responses during auditory-only catch trials. | Condition intermixing: Audio-tactile, unimodal tactile, and catch trials were randomized within the PPS experimental block.",
+          "status": "reported_complete",
+          "value": "Randomly intermixed bimodal target, tactile-only baseline and auditory-only catch families.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.3-4, PPS task | PDF p.4, PPS task",
-          "evidenceNote": "The three rows are listed with percentages and counts. | Task instructions and catch response rule are reported. | The paper states trial types were randomized in the experimental block.",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
-          "missingComponents": [
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "Three families randomized within the assessment.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Bimodal: approaching white noise with one neck vibration at a speaker position. Baseline: neck vibration outside the nominal sound interval. Catch: sound without touch.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "84 bimodal,28 tactile-only and 28 auditory-only catches per PPS assessment.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "reported",
+              "value": "Seven bimodal positions; baseline 500 ms before onset or 500 ms after offset.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "partial",
-          "value": "Task sequence rules: Participants were blindfolded, ignored the sound, said TAH quickly to neck vibration, and withheld responses during auditory-only catch trials.",
+          "status": "conflicting_evidence",
+          "value": "Say TAH promptly to neck vibration, withhold on auditory-only catches; microphone trigger at 53 dB.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.3-4, PPS task | PDF pp.3-4; supplement checked",
-          "evidenceNote": "Task instructions and catch response rule are reported. | Participants responded as fast as possible by saying TAH, but no numeric timeout or scoring response window was found.",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "No PPS response deadline is reported. The 20-s allowance belongs to echolocation training; the printed RT subtraction order is retained as a conflict rather than silently corrected.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
           "missingComponents": [
             "response_window_and_anchor"
           ],
-          "components": {}
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Say TAH as quickly as possible.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Vocal response recorded by microphone with 53-dB threshold.",
+              "note": ""
+            },
+            "scoring_rule": {
+              "status": "conflicting_evidence",
+              "value": "Printed Methods subtract vocal-trigger time from tactile time, opposite to conventional positive RT; raw scoring sign remains unresolved.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to touch; ignore sound; withhold on no-touch catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "partial",
-          "value": "Iti jitter policy: Inter-trial interval was not fixed because each trial was started by the experimenter.",
+          "status": "reported_complete",
+          "value": "Each PPS trial is started by the experimenter; no fixed intertrial interval.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.4, PPS task",
-          "evidenceNote": "The ITI policy is explicit, but no numeric distribution is provided.",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "A manual start is a reported policy, not missing numerical jitter. Timing distributions from the separate TIME training must not be imported.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
-          "missingComponents": [
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "manual_or_event_driven",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Experimenter initiates the next trial.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "No numeric ITI: explicitly not fixed.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "partial",
-          "value": "Soa table: Tactile timings corresponded to seven sound positions at 17, 34, 51, 68, 85, 102, and 119 cm; 17 cm spacing at 34 cm/s implies 500 ms timing steps over the 3 s sound.",
+          "status": "derived_complete",
+          "value": "Onset-relative tactile times 0,500,1000,1500,2000,2500,3000 ms map respectively to 119,102,85,68,51,34,17 cm.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.3-4, Fig. 1 and PPS task",
-          "evidenceNote": "Distance positions are reported; onset-indexed timing is derived from reported spacing, speed, and duration.",
-          "derivationNote": "Distance positions are reported; onset-indexed timing is derived from reported spacing, speed, and duration.",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "",
+          "derivationNote": "Time at distance d is (119-d)/34 seconds;17/34 =0.5 s between adjacent positions. Figure 1A confirms the endpoint anchors.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Approach only; Figure 1A locates onset at D 1 and offset at D 7.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "Seven positions from 119 to 17 cm, separated by 17 cm at 34 cm/s.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Auditory onset at farthest speaker; positive values delay tactile stimulation.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "partial",
-          "value": "Tactile stimulus: A custom vibration motor with 18 mm2 surface delivered 20 ms vibrotactile stimulation on the left side of the participant's neck.",
+          "value": "20-ms vibration from an 18 mm² custom motor on the left side of the neck.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, PPS task",
-          "evidenceNote": "Tactile device size, duration, and body site are reported.",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "Motor surface area does not establish vibration amplitude or calibration.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
           "missingComponents": [
             "waveform_and_duration",
+            "frequency_or_amplitude",
             "intensity_or_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Left neck.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Vibrotactile motor.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
           "status": "partial",
-          "value": "Baseline strategy: Unimodal tactile-only trials without auditory stimulation were used as baseline correction; the fastest pre/post unimodal RT average was subtracted from bimodal RTs. | Baseline timing: Unimodal tactile trials occurred at two delays: 500 ms before sound onset and 500 ms after sound offset. | Baseline count: Each PPS session had 28 unimodal tactile-only trials.",
+          "value": "28 tactile-only controls at -500 ms before onset or +3500 ms from onset (500 ms after offset); per-endpoint split unresolved.",
           "compositeValue": "",
-          "pageOrSection": "PDF pp.4-5, PPS task and RT processing | PDF p.4, PPS task",
-          "evidenceNote": "The baseline correction rule is described in the task/analysis sections. | Baseline timing values are directly reported. | Unimodal tactile count is directly reported.",
-          "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "Do not assume 14 at each endpoint.",
+          "derivationNote": "3000-ms sound duration +500-ms post-offset delay =+3500 ms onset-relative.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
           "missingComponents": [
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
+            "crossing_rule"
           ],
-          "components": {}
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "28 controls across two timings; exact allocation between timings unspecified.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Tactile-only controls outside the sound interval.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "28 total per assessment.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "-500 ms onset-relative and+500 ms offset-relative for 3000-ms sound.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "partial",
-          "value": "Catch trial type: Catch trials presented the auditory stimulus only and no tactile stimulus; participants were expected not to respond. | Catch count: Each PPS session had 28 auditory-only catch trials.",
+          "status": "reported_complete",
+          "value": "28 auditory-only catch trials per 140-trial assessment; do not respond.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.4, PPS task",
-          "evidenceNote": "Catch trials were included to reduce automatic/expected responses. | Catch count is directly reported.",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
-          "missingComponents": [
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Exact 28 catches, approximately 20% of the assessment.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Auditory-only withhold catches.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "28 per assessment.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Sound without neck touch; no response.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "partial",
-          "value": "Repetitions per tactile soa condition: Each PPS session had 12 trials for each audio-tactile sound-position/tactile-delay combination across seven distances, giving 84 audio-tactile trials. | Total trial count: Each PPS session had 140 trials: 84 audio-tactile, 28 tactile-only baseline, and 28 auditory-only catch; pre/post PPS implies 280 PPS trials.",
+          "status": "reported_complete",
+          "value": "12 repetitions at each of 7 positions:84 bimodal +28 tactile-only +28 catch =140 trials per PPS assessment.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.4, PPS task",
-          "evidenceNote": "The paper reports 12 repetitions for each audio-tactile combination. | Total count and component counts are directly reported.",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts"
-          ],
-          "components": {}
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "reported",
+              "value": "7 x 12 +28 +28 =140 per assessment; two assessments per participant.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Supporting 40-trial echolocation,80-trial TIME and 49-trial distance tasks excluded.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Seven approaching-sound positions; PRE and POST assessments in ECHO/TIME/REST groups.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "12 bimodal per position;28 baseline;28 catches.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "partial",
-          "value": "Blocked or random order: All participants completed PPS pre-test, group-specific ECHO/TIME/REST intervention, and PPS post-test; group assignment for TIME/REST was pseudo-random. | Block count: The PPS task was administered twice, once before and once after the ECHO/TIME/REST intervention; each session contained one randomized experimental block. | Condition intermixing: Audio-tactile, unimodal tactile, and catch trials were randomized within the PPS experimental block. | Total trial count: Each PPS session had 140 trials: 84 audio-tactile, 28 tactile-only baseline, and 28 auditory-only catch; pre/post PPS implies 280 PPS trials.",
+          "value": "PPS assessed PRE then POST training/rest; trial families randomized. Subdivision of each 140-trial assessment into blocks is unresolved.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.4, Procedure | PDF p.4, PPS task and Procedure | PDF p.4, PPS task",
-          "evidenceNote": "PPS sessions bracket the intervention; this is a pre/post design. | Pre/post PPS structure and within-session block organization are reported. | The paper states trial types were randomized in the experimental block. | Total count and component counts are directly reported.",
+          "pageOrSection": "Methods pp.856-859, Peripersonal space task; Procedure; Figure 1 p.857",
+          "evidenceNote": "The two blocks described for echolocation training are not PPS blocks. REST duration is contradictory: Procedure 30 min, Figure 2 caption 15 min.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-019-05469-3",
           "missingComponents": [
-            "block_composition",
-            "block_order_or_counterbalancing"
+            "block_count"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "140 trials per PPS assessment.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Fixed PRE/intervention/POST sequence.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Random intermixing of the three trial families.",
+              "note": ""
+            }
+          }
         }
       ]
     },
