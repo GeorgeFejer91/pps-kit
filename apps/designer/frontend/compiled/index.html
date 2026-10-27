@@ -14,8 +14,8 @@
       }
     }
   </script>
-  <script type="module" crossorigin src="./assets/index-D8Y8-uGD.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CEeqwuqi.css">
+  <script type="module" crossorigin src="./assets/index-QZNRfomI.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-Bjf6Dhp1.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -707,6 +707,36 @@
               <button id="prepare-experiment" type="button" class="state-only" hidden aria-hidden="true" tabindex="-1">Legacy: Save and Open Runner</button>
             </div>
           </section>
+        </section>
+        <section id="native-execution" class="panel" aria-labelledby="native-execution-title" hidden>
+          <h3 id="native-execution-title">Native participant preparation</h3>
+          <p>Review the complete blocks, participant order and instruction policy before accepting. Prepared files have not been executed or physically qualified.</p>
+          <div id="native-baseline-controls" class="native-execution-actions" hidden>
+            <label>Stationary control source <select id="native-baseline-source" data-preview-view-control></select></label>
+            <label><input id="native-baseline-opt-in" type="checkbox" data-preview-view-control> Use the native noise algorithm for this custom control; seeds differ from legacy NumPy audio.</label>
+            <button id="native-generate-baseline" type="button">Create stationary control</button>
+            <span id="native-baseline-help"></span>
+          </div>
+          <div class="native-execution-actions">
+            <button id="native-build-review" type="button">Build full native review</button>
+            <button id="native-download-review" type="button" disabled>Download full review</button>
+            <button id="native-cancel-work" type="button" disabled>Cancel native work</button>
+          </div>
+          <p id="native-execution-status" role="status" aria-live="polite">Build a native review to verify audio and exact timing.</p>
+          <div id="native-review-detail" hidden>
+            <p id="native-instruction-summary"></p>
+            <p>Segment 5 shows the verified trial rows. This table lists every participant/part block occurrence.</p>
+            <table id="native-occurrence-table" class="data-table mobile-card-table"><thead><tr><th>Participant</th><th>Part</th><th>Position</th><th>Source block</th><th>Trials</th></tr></thead><tbody></tbody></table>
+            <div class="native-execution-actions"><button id="native-order-previous" type="button">Previous</button><span id="native-order-page"></span><button id="native-order-next" type="button">Next</button></div>
+            <label class="native-review-confirm"><input id="native-review-confirm" type="checkbox" data-preview-view-control> I reviewed the full blocks, participant order and instruction policy.</label>
+            <button id="native-accept-review" type="button" disabled>Accept this native review</button>
+          </div>
+          <div class="native-execution-actions">
+            <label>Participant index <input id="native-participant" type="number" min="1" max="100" value="1" step="1" data-preview-view-control></label>
+            <label>Session identifier <input id="native-session-identity" value="session_001" maxlength="80" data-preview-view-control></label>
+            <button id="native-prepare-participant" type="button" disabled>Choose folder and prepare participant</button>
+            <button id="native-open-output" type="button" hidden>Open prepared folder</button>
+          </div>
         </section>
       </section>
       </div>

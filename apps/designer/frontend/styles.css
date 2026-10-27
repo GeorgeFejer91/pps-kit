@@ -8273,3 +8273,13 @@ body.desktop-applet .segment-heading {
   white-space: normal;
   height: auto;
 }
+
+#native-execution { margin-top: 16px; min-width: 0; }
+.native-execution-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-block: 12px; min-width: 0; }
+.native-execution-actions label { display: flex; flex-direction: column; gap: 6px; min-width: 0; max-width: 100%; }
+.native-execution-actions label:has(input[type="checkbox"]), .native-review-confirm { display: flex; flex-direction: row; align-items: start; gap: 8px; }
+#native-execution input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 18px; }
+#native-execution input[type="number"] { width: 100px; }
+#native-execution button, #native-execution select { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+#native-occurrence-table { table-layout: fixed; width: 100%; }
+#native-occurrence-table td, #native-occurrence-table th { overflow-wrap: anywhere; }

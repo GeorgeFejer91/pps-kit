@@ -18,7 +18,7 @@ const server = createServer(async (request, response) => {
   if (path.startsWith("/study_templates/")) path = `/packages/pps-resources${path}`;
   const target = resolve(root, `.${path}`);
   if (!target.startsWith(root.endsWith(sep) ? root : root + sep)) { response.writeHead(403).end(); return; }
-  try { response.writeHead(200, { "Content-Type": types[extname(target)] || "application/octet-stream" }).end(await readFile(target)); }
+  try { const bytes = await readFile(target); response.writeHead(200, { "Content-Type": types[extname(target)] || "application/octet-stream" }).end(bytes); }
   catch { response.writeHead(404).end(); }
 });
 await new Promise(done => server.listen(0, "127.0.0.1", done));

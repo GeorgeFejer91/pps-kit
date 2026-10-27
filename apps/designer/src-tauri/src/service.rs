@@ -40,6 +40,9 @@ struct Stored {
 
 pub struct DesignerService {
     pub jobs: JobOwner,
+    pub(crate) review: Option<crate::assembly_host::Review>,
+    pub(crate) accepted: Option<Arc<crate::assembly_host::Accepted>>,
+    pub(crate) prepared_directory: Option<PathBuf>,
     stored: Stored,
     root: PathBuf,
     resources: PathBuf,
@@ -57,6 +60,9 @@ impl DesignerService {
         };
         Ok(Self {
             jobs: JobOwner::default(),
+            review: None,
+            accepted: None,
+            prepared_directory: None,
             stored,
             root: fs::canonicalize(root).map_err(|_| "storage_unavailable")?,
             resources,
@@ -65,11 +71,20 @@ impl DesignerService {
     }
 
     pub fn snapshot(&self) -> Value {
-        json!({"revision":self.jobs.revision(), "snapshot":self.stored.snapshot, "capabilities":pps_designer_core::generation_capabilities()})
+        let mut snapshot = self.stored.snapshot.clone();
+        if let Some(value) = snapshot.as_mut() {
+            if value["native_execution_review"].is_object() {
+                value["native_execution_review"]["available"] = json!(self.review.is_some());
+                value["native_execution_review"]["accepted"] = json!(self.accepted.is_some());
+            }
+        }
+        json!({"revision":self.jobs.revision(), "snapshot":snapshot, "capabilities":pps_designer_core::generation_capabilities()})
     }
 
     pub fn invalidate(&mut self, expected: u64) -> Result<u64> {
-        self.jobs.revise(expected).map_err(str::to_owned)
+        let revision = self.jobs.revise(expected).map_err(str::to_owned)?;
+        self.clear_authority();
+        Ok(revision)
     }
 
     pub fn save(&mut self, expected: u64, snapshot: Value) -> Result<u64> {
@@ -79,8 +94,65 @@ impl DesignerService {
         }
         self.persist(&snapshot, &self.stored.assets)?;
         self.jobs.revise(expected).map_err(str::to_owned)?;
+        self.clear_authority();
         self.stored.snapshot = Some(snapshot);
         Ok(self.jobs.revision())
+    }
+
+    fn clear_authority(&mut self) {
+        self.review = None;
+        self.accepted = None;
+        self.prepared_directory = None;
+    }
+
+    pub(crate) fn publish_snapshot(&mut self, snapshot: Value) -> Result<()> {
+        self.persist(&snapshot, &self.stored.assets)?;
+        self.stored.snapshot = Some(snapshot);
+        Ok(())
+    }
+
+    pub(crate) fn authorize_assembly_asset(&self, reference: &str) -> Result<(PathBuf, String)> {
+        if let Some(asset) = self.stored.assets.get(reference) {
+            return Ok((
+                safe_join(&self.root, &asset.relative_path)?,
+                asset.sha256.clone(),
+            ));
+        }
+        let key = reference.trim_start_matches('/');
+        let path = safe_join(&self.resources, key)?;
+        let expected = if key.starts_with("assets/preloads/") {
+            let inventory: Value = serde_json::from_slice(&read_bounded(
+                &self
+                    .resources
+                    .join("assets/preloads/preload_inventory.json"),
+                MAX_JSON as u64,
+            )?)
+            .map_err(|_| "preload_inventory_invalid")?;
+            inventory["profiles"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .flat_map(|p| p["assets"].as_array().into_iter().flatten())
+                .find(|asset| asset["path"] == key)
+                .and_then(|asset| asset["sha256"].as_str())
+                .map(str::to_owned)
+        } else if key.starts_with("assets/breathing/") {
+            let manifest = path
+                .parent()
+                .ok_or("asset_not_authorized")?
+                .join("spoken_assets_manifest.json");
+            let value: Value = serde_json::from_slice(&read_bounded(&manifest, MAX_JSON as u64)?)
+                .map_err(|_| "spoken_inventory_invalid")?;
+            value["files"][path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .ok_or("asset_not_authorized")?]["sha256"]
+                .as_str()
+                .map(str::to_owned)
+        } else {
+            None
+        };
+        Ok((path, expected.ok_or("assembly_asset_not_authorized")?))
     }
 
     fn persist(&self, snapshot: &Value, assets: &BTreeMap<String, AssetRecord>) -> Result<()> {
@@ -235,6 +307,7 @@ impl DesignerService {
         }
         replace_references(&mut design, &replacements);
         self.jobs.revise(expected).map_err(str::to_owned)?;
+        self.clear_authority();
         Ok(
             json!({"revision":self.jobs.revision(),"design":design,"assets":assets,"display_name":receipt.display_name()}),
         )
@@ -264,6 +337,38 @@ impl DesignerService {
         }
         let plan = design::plan_ingredient_generation(&payload, &opt_in)
             .map_err(|error| format!("{} ({}): {}", error.code, error.field, error.message))?;
+        self.begin_plan(expected, snapshot, NativePlan::Ingredient(plan))
+    }
+
+    pub fn begin_baseline(
+        &mut self,
+        expected: u64,
+        snapshot: Value,
+        source: &str,
+        opt_in: &pps_designer_core::baseline::BaselineGenerationOptIn,
+    ) -> Result<(JobSnapshot, Work)> {
+        bound_snapshot(&snapshot)?;
+        if snapshot["custom_workflow"]["is_custom"] != true
+            || snapshot["custom_workflow"]["is_finalized"] == true
+        {
+            return Err("editable_custom_draft_required".into());
+        }
+        let plan = pps_designer_core::baseline::plan_stationary_baseline(
+            &snapshot["design"],
+            source,
+            opt_in,
+        )
+        .map_err(|error| format!("{} ({}): {}", error.code, error.field, error.message))?;
+        self.begin_plan(expected, snapshot, NativePlan::Baseline(plan))
+    }
+
+    fn begin_plan(
+        &mut self,
+        expected: u64,
+        snapshot: Value,
+        native_plan: NativePlan,
+    ) -> Result<(JobSnapshot, Work)> {
+        let plan = native_plan.generation();
         if plan.request.duration_s * f64::from(plan.request.sample_rate_hz)
             > ((MAX_AUDIO - 4096) / 8) as f64
         {
@@ -296,6 +401,7 @@ impl DesignerService {
             None
         };
         let ticket = self.jobs.start(expected).map_err(str::to_owned)?;
+        self.clear_authority();
         let directory = self.root.join(format!(
             "generation-{}-{}",
             std::process::id(),
@@ -318,7 +424,7 @@ impl DesignerService {
             job,
             Work {
                 ticket,
-                plan,
+                plan: native_plan,
                 snapshot,
                 directory,
                 executable: self.renderer.clone(),
@@ -331,36 +437,70 @@ impl DesignerService {
 
 pub struct Work {
     ticket: JobTicket,
-    plan: IngredientGenerationPlan,
+    plan: NativePlan,
     snapshot: Value,
     directory: PathBuf,
     executable: PathBuf,
     hrtf: PathBuf,
     imported: Option<Vec<u8>>,
 }
+enum NativePlan {
+    Ingredient(IngredientGenerationPlan),
+    Baseline(pps_designer_core::baseline::StationaryBaselineGenerationPlan),
+}
+impl NativePlan {
+    fn generation(&self) -> &IngredientGenerationPlan {
+        match self {
+            Self::Ingredient(plan) => plan,
+            Self::Baseline(plan) => &plan.generation,
+        }
+    }
+}
+pub(crate) fn fail_job(shared: &Shared, ticket: &JobTicket, error: String) {
+    if let Ok(mut owner) = shared.lock() {
+        owner.jobs.finish(
+            ticket,
+            "failed",
+            "Native work failed; no output published",
+            Some(json!({"error":error})),
+        );
+    }
+}
 pub fn execute(shared: Shared, work: Work) {
-    let result = generation::render(&work.plan, &work.directory, &work.executable, &work.hrtf, work.imported.as_deref(), &work.ticket.cancel)
+    let plan = work.plan.generation();
+    let result = generation::render(plan, &work.directory, &work.executable, &work.hrtf, work.imported.as_deref(), &work.ticket.cancel)
         .and_then(|(bytes, stimulus, report)| {
             let key = format!("native-assets/{}.wav", sha(&bytes));
-            let entry = design::generated_ingredient_entry(&work.plan, &key, &bytes, &stimulus, &report, &work.ticket.cancel).map_err(|e| e.to_string())?;
-            let publication = design::apply_generated_ingredient(&work.plan, &entry).map_err(|e| e.to_string())?;
+            let (design, asset, source, minimum_invalidated) = match &work.plan {
+                NativePlan::Ingredient(plan) => {
+                    let entry = design::generated_ingredient_entry(plan, &key, &bytes, &stimulus, &report, &work.ticket.cancel).map_err(|e|e.to_string())?;
+                    let publication = design::apply_generated_ingredient(plan, &entry).map_err(|e|e.to_string())?;
+                    (publication.design, publication.asset, entry.source().clone(), 2)
+                },
+                NativePlan::Baseline(plan) => {
+                    let entry = pps_designer_core::baseline::generated_stationary_baseline_entry(plan, &key, &bytes, &stimulus, &report, &work.ticket.cancel).map_err(|e|e.to_string())?;
+                    let publication = pps_designer_core::baseline::apply_generated_stationary_baseline(plan, &entry).map_err(|e|e.to_string())?;
+                    (publication.design, publication.asset, Value::Null, 3)
+                },
+            };
             let mut owner = shared.lock().map_err(|_| "host_unavailable")?;
             owner.jobs.publish(&work.ticket, || Ok(())).map_err(str::to_owned)?;
-            let (_, record) = owner.store_audio(&bytes, &format!("{}.wav", work.plan.source_label), false)?;
+            let (_, record) = owner.store_audio(&bytes, &format!("{}.wav", plan.source_label), false)?;
             let mut next = work.snapshot.clone();
-            next["design"] = publication.design;
+            next["design"] = design;
+            next["native_execution_review"] = Value::Null;
             next["run_package"] = Value::Null;
             next["session"] = Value::Null;
-            for field in ["trial_sequence_bake", "trial_file_bake", "trial_pool_bake", "block_csv_preview"] { next[field] = json!({}); }
+            for (index, field) in [(2,"trial_sequence_bake"), (3,"trial_file_bake"), (4,"trial_pool_bake"), (5,"block_csv_preview")] { if index >= minimum_invalidated { next[field] = json!({}); } }
             if let Some(segments) = next["project_segments"].as_object_mut() {
-                for (name, segment) in segments { if !name.starts_with("1_") { segment["status"] = json!("stale"); segment["accepted"] = json!(false); } }
+                for (name, segment) in segments { if name.split('_').next().and_then(|v|v.parse::<u8>().ok()).is_some_and(|n|n >= minimum_invalidated) { segment["status"] = json!("stale"); segment["accepted"] = json!(false); } }
             }
-            if let Some(assets) = next["preload_inventory"]["assets"].as_array_mut() { assets.retain(|asset| asset["label"] != work.plan.original_label); assets.push(publication.asset.clone()); }
+            if let Some(assets) = next["preload_inventory"]["assets"].as_array_mut() { assets.retain(|item| if minimum_invalidated == 2 { item["label"] != plan.original_label } else { item["label"] != asset["label"] }); assets.push(asset.clone()); }
             let mut records = owner.stored.assets.clone(); records.insert(key, record);
             if work.ticket.cancel.load(Ordering::Acquire) { return Err("generation_cancelled".into()); }
             owner.persist(&next, &records)?;
             owner.stored = Stored { snapshot: Some(next), assets: records };
-            let result = json!({"source_kind":work.plan.source_kind,"source_label":work.plan.source_label,"source":entry.source(),"asset":publication.asset});
+            let result = json!({"source_kind":plan.source_kind,"source_label":plan.source_label,"source":source,"asset":asset});
             owner.jobs.finish(&work.ticket, "succeeded", "Native ingredient generated; downstream plans need review", Some(result));
             owner.jobs.revise(work.ticket.revision).map_err(str::to_owned)?;
             Ok(())
@@ -379,7 +519,7 @@ pub fn execute(shared: Shared, work: Work) {
     }
 }
 
-fn bound_snapshot(snapshot: &Value) -> Result<()> {
+pub(crate) fn bound_snapshot(snapshot: &Value) -> Result<()> {
     if !snapshot["design"].is_object()
         || serde_json::to_vec(snapshot)
             .map_err(|_| "invalid_snapshot")?
@@ -421,10 +561,10 @@ fn replace_references(value: &mut Value, replacements: &BTreeMap<String, String>
         _ => {}
     }
 }
-fn sha(bytes: &[u8]) -> String {
+pub(crate) fn sha(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
-fn read_bounded(path: &Path, maximum: u64) -> Result<Vec<u8>> {
+pub(crate) fn read_bounded(path: &Path, maximum: u64) -> Result<Vec<u8>> {
     use std::io::Read;
     let file = fs::File::open(path).map_err(|_| "asset_unavailable")?;
     if file.metadata().map_err(|_| "asset_unavailable")?.len() > maximum {
@@ -474,13 +614,162 @@ mod tests {
     }
     #[test]
     fn projection_replaces_only_verified_references() {
-        let mut value = json!({"path":"C:/verified.wav","source_input_path":"C:/untrusted.wav"});
+        let mut value = json!({"path":"C:/verified.wav","source_input_path":"C:/untrusted.wav","native_stationary_baseline_asset":"C:/control.wav","browser_asset_id":"moving.wav"});
         replace_references(
             &mut value,
-            &BTreeMap::from([("C:/verified.wav".into(), "native-assets/receipt.wav".into())]),
+            &BTreeMap::from([
+                ("C:/verified.wav".into(), "native-assets/receipt.wav".into()),
+                ("C:/control.wav".into(), "native-assets/control.wav".into()),
+            ]),
         );
         assert_eq!(value["path"], "native-assets/receipt.wav");
         assert_eq!(value["source_input_path"], "C:/untrusted.wav");
+        assert_eq!(
+            value["native_stationary_baseline_asset"],
+            "native-assets/control.wav"
+        );
+        assert_eq!(value["browser_asset_id"], "moving.wav");
+    }
+
+    #[test]
+    fn saved_browser_flags_cannot_authorize_participant_preparation() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../artifacts")
+            .join(format!("designer-forged-review-{}", std::process::id()));
+        let mut owner =
+            DesignerService::open(root.clone(), PathBuf::new(), PathBuf::new()).unwrap();
+        owner.save(0,json!({"design":{},"native_execution_review":{"accepted":true,"available":true,"hashes":{"design_sha256":"forged"}}})).unwrap();
+        assert_eq!(
+            owner.snapshot()["snapshot"]["native_execution_review"]["accepted"],
+            false
+        );
+        assert_eq!(
+            owner
+                .begin_prepare(1, 1, "fake".into(), root.join("candidate"))
+                .err()
+                .unwrap(),
+            "native_acceptance_required"
+        );
+        assert!(!root.join("candidate").exists());
+    }
+
+    #[test]
+    #[ignore = "requires the retained real Study5 participant group"]
+    fn actual_retained_group_conforms_to_verifier() {
+        let fixture =
+            PathBuf::from(std::env::var_os("PPS_STUDY5_FIXTURE").expect("set PPS_STUDY5_FIXTURE"));
+        let result = pps_session_package::verify_prepared_group(
+            &fixture.join("participant/session_group_manifest.json"),
+        );
+        assert!(result.is_ok(), "{result:?}");
+    }
+
+    #[test]
+    #[ignore = "requires retained real Study5 controls and browser full-plan fixture"]
+    fn actual_study5_review_accept_and_prepare_are_revision_bound() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../..");
+        let fixture =
+            PathBuf::from(std::env::var_os("PPS_STUDY5_FIXTURE").expect("set PPS_STUDY5_FIXTURE"));
+        let output = root
+            .join("artifacts")
+            .join(format!("designer-assembly-{}", std::process::id()));
+        fs::create_dir(&output).unwrap();
+        let mut owner = DesignerService::open(
+            output.clone(),
+            root.join("packages/pps-resources"),
+            PathBuf::new(),
+        )
+        .unwrap();
+        let captured: Value = serde_json::from_slice(
+            &fs::read(root.join("artifacts/ui-workflow-check/browser-full-block-plan.json"))
+                .unwrap(),
+        )
+        .unwrap();
+        let setup: Value = serde_json::from_slice(
+            &fs::read(fixture.join("participant/run_setup_manifest.json")).unwrap(),
+        )
+        .unwrap();
+        for label in ["Pink-frontal", "White-frontal"] {
+            let bytes = fs::read(fixture.join(label).join("baseline.wav")).unwrap();
+            let (key, record) = owner.store_audio(&bytes, label, false).unwrap();
+            owner.stored.assets.insert(key, record);
+        }
+        let snapshot = json!({"design":setup["design"],"block_csv_preview":captured["block_csv_preview"],"preload_inventory":{"assets":[]}});
+        assert!(owner.accept_review(0, &json!({"accepted":true})).is_err());
+        let (job, work) = owner
+            .begin_review(0, snapshot.clone(), captured["variants"].clone())
+            .unwrap();
+        let shared = Arc::new(Mutex::new(owner));
+        crate::assembly_host::review(shared.clone(), work);
+        let mut owner = shared.lock().unwrap();
+        let status = owner.jobs.snapshot(&job.job_id).unwrap();
+        assert_eq!(status.status, "succeeded", "{:?}", status.result);
+        let projection = owner.snapshot();
+        assert_eq!(
+            projection["snapshot"]["run_sequence_setup"]["csv_rows"]
+                .as_array()
+                .unwrap()
+                .len(),
+            600
+        );
+        let hashes = projection["snapshot"]["native_execution_review"]["hashes"].clone();
+        assert!(owner
+            .accept_review(0, &json!({"design_sha256":"forged"}))
+            .is_err());
+        assert!(
+            owner.review.is_some(),
+            "rejected browser hashes must not consume the sealed review"
+        );
+        owner.accept_review(0, &hashes).unwrap();
+        let (job, work) = owner
+            .begin_prepare(
+                0,
+                1,
+                "host_actual_study5".into(),
+                output.join("participant"),
+            )
+            .unwrap();
+        drop(owner);
+        crate::assembly_host::prepare(shared.clone(), work);
+        let mut owner = shared.lock().unwrap();
+        let status = owner.jobs.snapshot(&job.job_id).unwrap();
+        assert_eq!(status.status, "succeeded", "{:?}", status.result);
+        assert_eq!(status.result.unwrap()["part_count"], 2);
+        let (cancelled, work) = owner
+            .begin_prepare(0, 1, "host_cancelled".into(), output.join("cancelled"))
+            .unwrap();
+        owner.invalidate(0).unwrap();
+        assert!(owner.accepted.is_none());
+        assert!(owner.prepared_directory.is_none());
+        drop(owner);
+        crate::assembly_host::prepare(shared.clone(), work);
+        assert_eq!(
+            shared
+                .lock()
+                .unwrap()
+                .jobs
+                .snapshot(&cancelled.job_id)
+                .unwrap()
+                .status,
+            "cancelled"
+        );
+        assert!(!output.join("cancelled").exists());
+        // Persisted browser flags cannot restore native acceptance after restarting the host.
+        let restored = DesignerService::open(
+            output.clone(),
+            root.join("packages/pps-resources"),
+            PathBuf::new(),
+        )
+        .unwrap();
+        assert_eq!(
+            restored.snapshot()["snapshot"]["native_execution_review"]["available"],
+            false
+        );
+        assert_eq!(
+            restored.snapshot()["snapshot"]["native_execution_review"]["accepted"],
+            false
+        );
+        eprintln!("Actual host participant evidence: {}", output.display());
     }
 
     #[test]

@@ -95,3 +95,12 @@ local verification and proposed identity. Hosted Segment 6 is descriptive;
 complete participant/phase order must come from the sealed native planner and
 be reviewed before acceptance. Physical output remains unmeasured; existing
 calibration validation and level ceilings remain enforced.
+
+Native execution acceptance is separate from portable profile locking. Build a
+full native review, inspect verified Segment 5 timing and paged participant/part
+occurrences, then explicitly accept the sealed revision. Editing or restarting
+revokes native acceptance. Preparation verifies every immutable part and the
+group before exposing its folder; split runs hand off the group manifest.
+Stationary control generation preserves moving audio, uses explicit V2 opt-in,
+and invalidates later review. Preserve source hash/loudness/comparator metadata
+through form collection and embed comparator bytes separately in portable export.

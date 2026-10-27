@@ -1,3 +1,4 @@
+mod assembly_host;
 mod generation;
 mod jobs;
 mod service;
@@ -76,6 +77,125 @@ async fn designer_generate(
     })
     .await
     .map_err(|_| "generation_worker_failed")?
+}
+
+#[tauri::command]
+async fn designer_baseline(
+    window: tauri::WebviewWindow,
+    owner: tauri::State<'_, Shared>,
+    expected_revision: u64,
+    snapshot: Value,
+    source: String,
+    opt_in: pps_designer_core::baseline::BaselineGenerationOptIn,
+) -> Result<jobs::JobSnapshot, String> {
+    main_window(&window)?;
+    let owner = owner.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let (job, work) =
+            lock(&owner)?.begin_baseline(expected_revision, snapshot, &source, &opt_in)?;
+        tauri::async_runtime::spawn_blocking(move || service::execute(owner, work));
+        Ok(job)
+    })
+    .await
+    .map_err(|_| "baseline_worker_failed")?
+}
+
+#[tauri::command]
+async fn designer_review(
+    window: tauri::WebviewWindow,
+    owner: tauri::State<'_, Shared>,
+    expected_revision: u64,
+    snapshot: Value,
+    variants: Value,
+) -> Result<jobs::JobSnapshot, String> {
+    main_window(&window)?;
+    let owner = owner.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let (job, work) = lock(&owner)?.begin_review(expected_revision, snapshot, variants)?;
+        tauri::async_runtime::spawn_blocking(move || assembly_host::review(owner, work));
+        Ok(job)
+    })
+    .await
+    .map_err(|_| "review_worker_failed")?
+}
+
+#[tauri::command]
+async fn designer_accept_review(
+    window: tauri::WebviewWindow,
+    owner: tauri::State<'_, Shared>,
+    expected_revision: u64,
+    hashes: Value,
+) -> Result<Value, String> {
+    main_window(&window)?;
+    let owner = owner.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        lock(&owner)?.accept_review(expected_revision, &hashes)
+    })
+    .await
+    .map_err(|_| "acceptance_worker_failed")?
+}
+
+#[tauri::command]
+async fn designer_prepare(
+    window: tauri::WebviewWindow,
+    app: tauri::AppHandle,
+    owner: tauri::State<'_, Shared>,
+    expected_revision: u64,
+    participant: usize,
+    identity: String,
+) -> Result<Option<jobs::JobSnapshot>, String> {
+    main_window(&window)?;
+    let owner = owner.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let Some(folder) = app
+            .dialog()
+            .file()
+            .set_title("Choose a folder for immutable participant files")
+            .blocking_pick_folder()
+        else {
+            return Ok(None);
+        };
+        let parent =
+            std::fs::canonicalize(folder.into_path().map_err(|_| "local_folder_required")?)
+                .map_err(|_| "local_folder_required")?;
+        // The identifier is checked by begin_prepare before this native-generated child is created.
+        let sequence = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|_| "clock_unavailable")?
+            .as_nanos();
+        let directory = parent.join(format!("pps-participant-{}-{sequence}", std::process::id()));
+        let (job, work) =
+            lock(&owner)?.begin_prepare(expected_revision, participant, identity, directory)?;
+        tauri::async_runtime::spawn_blocking(move || assembly_host::prepare(owner, work));
+        Ok(Some(job))
+    })
+    .await
+    .map_err(|_| "preparation_worker_failed")?
+}
+
+#[tauri::command]
+async fn designer_open_prepared(
+    window: tauri::WebviewWindow,
+    owner: tauri::State<'_, Shared>,
+) -> Result<(), String> {
+    main_window(&window)?;
+    let path = lock(owner.inner())?
+        .prepared_directory
+        .clone()
+        .ok_or("prepared_output_required")?;
+    #[cfg(windows)]
+    {
+        std::process::Command::new("explorer.exe")
+            .arg(path)
+            .spawn()
+            .map_err(|_| "folder_open_failed")?;
+        Ok(())
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = path;
+        Err("windows_required".into())
+    }
 }
 #[tauri::command]
 async fn designer_job(
@@ -183,28 +303,64 @@ async fn designer_export_profile(
             return Ok(false);
         };
         let path = file.into_path().map_err(|_| "local_file_required")?;
-        // The save dialog authorizes this exact destination; write a sibling and replace atomically.
-        let temporary = path.with_extension("pps-profile.partial");
-        use std::io::Write;
-        let mut output = std::fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&temporary)
-            .map_err(|_| "export_staging_unavailable")?;
-        let result = output.write_all(&bytes).and_then(|_| output.sync_all());
-        drop(output);
-        if result.is_err() {
-            let _ = std::fs::remove_file(&temporary);
-            return Err("export_write_failed".into());
-        }
-        if std::fs::rename(&temporary, &path).is_err() {
-            let _ = std::fs::remove_file(&temporary);
-            return Err("export_commit_failed".into());
-        }
+        write_selected_file(&path, &bytes, "pps-profile.partial")?;
         Ok(true)
     })
     .await
     .map_err(|_| "export_worker_failed")?
+}
+
+#[tauri::command]
+async fn designer_export_audio(
+    window: tauri::WebviewWindow,
+    app: tauri::AppHandle,
+    owner: tauri::State<'_, Shared>,
+    reference: String,
+) -> Result<bool, String> {
+    main_window(&window)?;
+    let owner = owner.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let (bytes, mime) = lock(&owner)?.resource(&reference)?;
+        if mime != "audio/wav" {
+            return Err("audio_receipt_required".into());
+        }
+        let Some(file) = app
+            .dialog()
+            .file()
+            .add_filter("WAV audio", &["wav"])
+            .set_file_name("stimulus.wav")
+            .blocking_save_file()
+        else {
+            return Ok(false);
+        };
+        let path = file.into_path().map_err(|_| "local_file_required")?;
+        write_selected_file(&path, &bytes, "wav.partial")?;
+        Ok(true)
+    })
+    .await
+    .map_err(|_| "audio_export_worker_failed")?
+}
+
+// Called only with the exact destination returned by a native save dialog.
+fn write_selected_file(
+    path: &std::path::Path,
+    bytes: &[u8],
+    staging_extension: &str,
+) -> Result<(), String> {
+    use std::io::Write;
+    let temporary = path.with_extension(staging_extension);
+    let mut output = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&temporary)
+        .map_err(|_| "export_staging_unavailable")?;
+    let result = output.write_all(bytes).and_then(|_| output.sync_all());
+    drop(output);
+    if result.is_err() || std::fs::rename(&temporary, path).is_err() {
+        let _ = std::fs::remove_file(&temporary);
+        return Err("export_commit_failed".into());
+    }
+    Ok(())
 }
 
 pub fn run() {
@@ -274,11 +430,17 @@ pub fn run() {
             designer_invalidate,
             designer_save,
             designer_generate,
+            designer_baseline,
+            designer_review,
+            designer_accept_review,
+            designer_prepare,
+            designer_open_prepared,
             designer_job,
             designer_cancel,
             designer_pick_audio,
             designer_import_profile,
-            designer_export_profile
+            designer_export_profile,
+            designer_export_audio
         ])
         .build(tauri::generate_context!())
         .expect("error while building PPS Experiment Designer");
