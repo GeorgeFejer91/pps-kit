@@ -8,6 +8,10 @@ use std::{
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
+#[path = "instruction.rs"]
+pub(crate) mod instruction;
+use instruction::NativeStage;
+
 use pps_brsp::{is_newer_sequence, PairingSecret};
 use pps_contracts::{
     Action, Applied, ClockStamp, CommandRequest, RunnerPhase, RunnerSnapshot, Scope, TimingTier,
@@ -18,7 +22,7 @@ use pps_runner_core::{DispatchMilestone, DispatchOrigin, RunnerCore, VerifiedPac
 use pps_runner_execution::{
     EventLedger, LedgerEventInput, LedgerReserve, ParticipantResponse, DEFAULT_LEDGER_CAPACITY,
 };
-use pps_session_package::VerifiedPreparedSession;
+use pps_session_package::{VerifiedPreparedGroup, VerifiedPreparedSession};
 use serde_json::Value;
 use tokio::sync::{broadcast, oneshot};
 
@@ -321,6 +325,23 @@ impl RemoteOwner {
 }
 
 #[derive(Debug)]
+struct RetainedGroup {
+    receipt: Arc<VerifiedPreparedGroup>,
+    current_part: usize,
+    completed_parts: usize,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct NativeGroupStatus {
+    pub revision: u64,
+    pub part_count: usize,
+    pub current_part: usize,
+    pub completed_parts: usize,
+    pub experiment_complete: bool,
+}
+
+#[derive(Debug)]
 struct RetainedPreparedSession {
     generation: u64,
     receipt: Arc<VerifiedPreparedSession>,
@@ -349,6 +370,7 @@ struct NativeFinalization {
 struct NativeSessionProgress {
     run_generation: u64,
     completed_blocks: u32,
+    completed_stages: u32,
     scored_trials: u64,
 }
 
@@ -370,6 +392,7 @@ impl NativeSessionProgress {
         }
         Ok(Self {
             run_generation: self.run_generation,
+            completed_stages: self.completed_stages,
             completed_blocks: self
                 .completed_blocks
                 .checked_add(1)
@@ -387,6 +410,7 @@ struct OwnerState {
     remote: RemoteConfig,
     remote_owner: Option<RemoteOwner>,
     retained_session: Option<RetainedPreparedSession>,
+    retained_group: Option<RetainedGroup>,
     compiled_execution: Option<CompiledPreparedExecution>,
     prepared_audio: Option<CachedPreparedAudio>,
     prepared_audio_reservation: Option<Arc<PreparedAudioSourceReceipt>>,
@@ -396,6 +420,7 @@ struct OwnerState {
     native_output: NativeOutputAuthority,
     native_playback: Option<NativePreparedPlayback>,
     native_control: Option<NativeControlIntent>,
+    native_instruction_wait: Option<Option<u64>>,
     owner_generation: u64,
     ledger: EventLedger,
     event_journal: Option<(u64, u64, NativeEventJournal)>,
@@ -454,6 +479,25 @@ impl OwnerState {
         if !request.valid() {
             return Err("native_response_invalid");
         }
+        if self.core.snapshot().run.phase == RunnerPhase::InstructionGate
+            && self
+                .native_playback
+                .as_ref()
+                .and_then(|p| p.source.receipt.instruction())
+                .is_some_and(|item| {
+                    item.continue_mode() == pps_session_package::InstructionContinueMode::Click
+                })
+        {
+            let gate = self.core.snapshot().instruction_gate.gate_id;
+            self.dispatch_local_traced(
+                Action::InstructionContinue,
+                serde_json::json!({"gate_id": gate}),
+                AdmissionClass::Normal,
+                None,
+            )
+            .map_err(|_| "native_instruction_continue_failed")?;
+            return Ok(self.ledger.summary().last_sequence.unwrap_or(0));
+        }
         if self.core.snapshot().run.phase != RunnerPhase::Running || !self.native_journal_current()
         {
             return Err("native_participant_capture_inactive");
@@ -486,6 +530,9 @@ impl OwnerState {
         ) || status.fault.is_some()
             || status.callback_retired
         {
+            return Err("native_participant_capture_inactive");
+        }
+        if playback.source.receipt.instruction().is_some() {
             return Err("native_participant_capture_inactive");
         }
         let response = ParticipantResponse {
@@ -627,6 +674,27 @@ impl OwnerState {
             return;
         }
         let stamp = self.clock.stamp();
+        if self
+            .native_instruction_wait
+            .is_some_and(|deadline| deadline.is_some_and(|deadline| stamp.monotonic_ns >= deadline))
+        {
+            let mut candidate = self.core.clone();
+            if candidate
+                .native_instruction_timer_elapsed(stamp.clone())
+                .is_err()
+            {
+                self.fail_stop_unavailable("instruction.timer.invalid", "evidence_unavailable");
+                return;
+            }
+            let event = Self::ledger_input("instruction.timer.elapsed", "native", &stamp);
+            if self
+                .commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
+                .is_ok()
+            {
+                self.finish_native_stage(true, stamp);
+            }
+            return;
+        }
         let started = self.clock.started;
         let Some(playback) = self.native_playback.as_mut() else {
             return;
@@ -687,15 +755,14 @@ impl OwnerState {
             && playback
                 .final_submission_estimate_ns
                 .is_some_and(|end| end <= stamp.monotonic_ns)
-            && playback
-                .capture
-                .complete(playback.source.receipt.schedule().summary().trial_row_count)
+            && (playback.source.receipt.instruction().is_some()
+                || playback
+                    .capture
+                    .complete(playback.source.receipt.schedule().summary().trial_row_count))
             && playback.source.receipt.run_generation() == self.run_generation
             && snapshot.run.phase == RunnerPhase::Running
             && pending_responses.load(Ordering::Acquire) == 0
             && (self.native_control.is_none() || control_acknowledged == Ok(true));
-        let expected_trials =
-            u64::from(playback.source.receipt.schedule().summary().trial_row_count);
         let reserve = LedgerReserve::new(LEDGER_SAFETY_RECORD_RESERVE, LEDGER_SAFETY_BYTE_RESERVE);
         match inputs {
             Ok(inputs) if inputs.is_empty() => {}
@@ -742,45 +809,123 @@ impl OwnerState {
         if !reservation_available || status.fault.is_some() || status.callback_retired {
             self.fail_stop_unavailable("native.media.callback-unavailable", "evidence_unavailable");
         } else if completion_ready {
-            self.finish_native_block(expected_trials, stamp);
+            self.finish_native_stage(false, stamp);
         }
     }
 
-    fn finish_native_block(&mut self, expected_trials: u64, stamp: ClockStamp) {
+    fn finish_native_stage(&mut self, continued: bool, stamp: ClockStamp) {
         let Some(playback) = self.native_playback.as_ref() else {
             return;
         };
-        let ordinal = playback.source.plan.fence().audio().block_ordinal();
-        let block_count = playback.source.receipt.verified_session().blocks().len();
-        let fingerprint = playback
-            .source
-            .receipt
-            .verified_session()
-            .manifest_sha256()
-            .to_owned();
-        let next = self.native_progress.for_run(self.run_generation).advance(
-            ordinal,
-            block_count,
-            expected_trials,
-        );
-        let Ok(next) = next else {
-            self.fail_stop_unavailable("native.block.order-invalid", "evidence_unavailable");
+        let receipt = &playback.source.receipt;
+        let stage = receipt.stage();
+        let session = receipt.verified_session();
+        let fingerprint = session.manifest_sha256().to_owned();
+        let Ok(stages) = instruction::stages(session) else {
+            self.fail_stop_unavailable("native.stage.invalid", "evidence_unavailable");
             return;
         };
-        let final_block = next.completed_blocks as usize == block_count;
-        let mut candidate = self.core.clone();
-        if !final_block
-            && candidate
-                .await_next_native_block(&fingerprint, ordinal, stamp.clone())
-                .is_err()
-        {
-            self.fail_stop_unavailable("native.block.scope-invalid", "evidence_unavailable");
+        let progress = self.native_progress.for_run(self.run_generation);
+        if stages.get(progress.completed_stages as usize) != Some(&stage) {
+            self.fail_stop_unavailable("native.stage.order-invalid", "evidence_unavailable");
             return;
         }
-        let mut event = Self::ledger_input("native.block.finished", "native", &stamp);
-        event.payload = serde_json::json!({"blockOrdinal": ordinal, "completedBlocks": next.completed_blocks,
-            "scoredTrials": expected_trials, "sessionScoredTrials": next.scored_trials,
-            "timingQualification": "unqualified", "sessionComplete": false});
+        if let Some(item) = receipt
+            .instruction()
+            .filter(|_| stage.needs_continue && !continued)
+        {
+            if self.native_instruction_wait.is_some() {
+                return;
+            }
+            let mode = item.continue_mode();
+            let delay = mode == pps_session_package::InstructionContinueMode::Delay;
+            let deadline = if delay {
+                stamp
+                    .monotonic_ns
+                    .checked_add(item.delay_ns())
+                    .filter(|v| *v <= JSON_MAX_SAFE_INTEGER)
+            } else {
+                None
+            };
+            if delay && deadline.is_none() {
+                self.fail_stop_unavailable("instruction.timer.invalid", "evidence_unavailable");
+                return;
+            }
+            let mut candidate = self.core.clone();
+            let gate = pps_contracts::InstructionGateSnapshot {
+                waiting: !delay,
+                gate_id: format!(
+                    "instruction-{}-{}-{}",
+                    self.package_generation, self.run_generation, stage.ordinal
+                ),
+                part2_start_gate: false,
+                instruction_label: item.label().to_owned(),
+                button_label: item.button_label().to_owned(),
+                next_action: match mode {
+                    pps_session_package::InstructionContinueMode::Click => "continue-click",
+                    pps_session_package::InstructionContinueMode::Button => "continue-button",
+                    _ => "continue-delay",
+                }
+                .to_owned(),
+            };
+            if candidate
+                .native_instruction_gate(gate, delay, stamp.clone())
+                .is_err()
+            {
+                self.fail_stop_unavailable("instruction.gate.invalid", "evidence_unavailable");
+                return;
+            }
+            let mut event = Self::ledger_input("instruction.continue-wait", "native", &stamp);
+            event.payload = serde_json::json!({"stageOrdinal": stage.ordinal, "mode": format!("{mode:?}"), "delayNs": item.delay_ns(), "timingQualification": "unqualified"});
+            if self
+                .commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
+                .is_ok()
+            {
+                self.native_instruction_wait = Some(deadline);
+            }
+            return;
+        }
+        if continued && self.native_instruction_wait.is_none() {
+            self.fail_stop_unavailable("instruction.gate.invalid", "evidence_unavailable");
+            return;
+        }
+        let mut next = if receipt.instruction().is_none() {
+            let trials = u64::from(receipt.schedule().summary().trial_row_count);
+            match progress.advance(stage.block_ordinal, session.blocks().len(), trials) {
+                Ok(value) => value,
+                Err(_) => {
+                    self.fail_stop_unavailable(
+                        "native.block.order-invalid",
+                        "evidence_unavailable",
+                    );
+                    return;
+                }
+            }
+        } else {
+            progress
+        };
+        next.completed_stages += 1;
+        let final_stage = next.completed_stages as usize == stages.len();
+        let mut candidate = self.core.clone();
+        if !final_stage
+            && candidate
+                .await_next_native_stage(&fingerprint, stage.block_ordinal, stamp.clone())
+                .is_err()
+        {
+            self.fail_stop_unavailable("native.stage.scope-invalid", "evidence_unavailable");
+            return;
+        }
+        let mut event = Self::ledger_input(
+            if stage.instruction.is_some() {
+                "instruction.finished"
+            } else {
+                "native.block.finished"
+            },
+            "native",
+            &stamp,
+        );
+        event.payload = serde_json::json!({"stageOrdinal": stage.ordinal, "blockOrdinal": stage.block_ordinal, "completedBlocks": next.completed_blocks,
+            "sessionScoredTrials": next.scored_trials, "timingQualification": "unqualified", "sessionComplete": false});
         if self
             .commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
             .is_err()
@@ -788,7 +933,8 @@ impl OwnerState {
             return;
         }
         self.native_progress = next;
-        if final_block {
+        self.native_instruction_wait = None;
+        if final_stage {
             let total_trials = self.compiled_execution.as_ref().and_then(|compiled| {
                 compiled
                     .schedules()
@@ -803,8 +949,6 @@ impl OwnerState {
             }
             self.begin_native_finalization(next.scored_trials, stamp);
         } else {
-            // Keep the same journal/run generation across a successful block
-            // boundary; retire only the exhausted one-block media reservation.
             self.invalidate_prepared_audio();
             self.native_output.invalidate_for_runner_change();
         }
@@ -855,6 +999,9 @@ impl OwnerState {
             action
         };
         match effect {
+            Action::InstructionContinue if self.native_instruction_wait.is_some() => {
+                self.finish_native_stage(true, self.clock.stamp());
+            }
             Action::PartStart | Action::RunPause | Action::RunResume => {
                 if self.native_playback.is_none() {
                     return Ok(());
@@ -1020,7 +1167,16 @@ impl OwnerState {
         let mut input = Self::ledger_input("native.results.published", "native", &stamp);
         input.payload =
             serde_json::json!({"receipt": receipt, "timingQualification": "unqualified"});
-        let _ = self.commit_candidate(candidate, input, CommitPolicy::Ordinary, true);
+        if self
+            .commit_candidate(candidate, input, CommitPolicy::Ordinary, true)
+            .is_ok()
+        {
+            if let Some(group) = self.retained_group.as_mut() {
+                if group.completed_parts == group.current_part {
+                    group.completed_parts += 1;
+                }
+            }
+        }
     }
 
     fn commit_evidence(
@@ -1061,6 +1217,7 @@ impl OwnerState {
         // Dropping the sole native port irreversibly silences this callback.
         self.native_playback = None;
         self.native_control = None;
+        self.native_instruction_wait = None;
         self.prepared_audio = None;
         self.prepared_audio_reservation = None;
     }
@@ -1461,7 +1618,7 @@ impl OwnerState {
             package_generation,
             package_fingerprint,
             verified_session,
-            schedule,
+            _schedule,
             expected_sample_rate_hz,
         ) = {
             let retained = self
@@ -1470,10 +1627,11 @@ impl OwnerState {
                 .ok_or("prepared_session_missing")?;
             // Verification permits inspection; playback must not silently omit
             // saved instructions or promote one split part to a whole session.
-            if !retained.receipt.instructions().is_empty() {
-                return Err("prepared_instruction_execution_required");
-            }
-            if retained.receipt.is_split_part() {
+            if retained.receipt.is_split_part()
+                && !self.retained_group.as_ref().is_some_and(|group| {
+                    group.receipt.parts().get(group.current_part) == Some(retained.receipt.as_ref())
+                })
+            {
                 return Err("prepared_group_execution_required");
             }
             let compiled = self
@@ -1508,6 +1666,28 @@ impl OwnerState {
                 expected_sample_rate_hz,
             )
         };
+        let stage = if verified_session.instructions().is_empty() {
+            NativeStage {
+                ordinal: block_ordinal,
+                block_ordinal,
+                instruction: None,
+                needs_continue: false,
+            }
+        } else {
+            let progress = self.native_progress.for_run(self.run_generation);
+            *instruction::stages(&verified_session)?
+                .get(progress.completed_stages as usize)
+                .ok_or("native_stages_complete")?
+        };
+        let block_ordinal = stage.block_ordinal;
+        let schedule = self
+            .compiled_execution
+            .as_ref()
+            .ok_or("prepared_execution_missing")?
+            .schedules()
+            .get(block_ordinal as usize)
+            .cloned()
+            .ok_or("prepared_audio_block_missing")?;
         let ordinal = usize::try_from(block_ordinal).map_err(|_| "prepared_audio_block_missing")?;
         let current_wav = verified_session
             .blocks()
@@ -1515,10 +1695,15 @@ impl OwnerState {
             .map(|block| block.block_wav())
             .ok_or("prepared_audio_block_missing")?;
 
+        let current_wav = stage
+            .instruction
+            .map(|index| verified_session.instructions()[index].wav())
+            .unwrap_or(current_wav);
         if let Some(cached) = self.prepared_audio.as_ref() {
             let candidate = &cached.candidate;
             let fence = candidate.media().fence();
-            let cache_is_current = fence.block_ordinal() == block_ordinal
+            let cache_is_current = candidate.source_receipt().stage() == stage
+                && fence.block_ordinal() == block_ordinal
                 && fence.package_generation() == package_generation
                 && fence.package_fingerprint() == package_fingerprint
                 && candidate.run_generation() == self.run_generation
@@ -1543,13 +1728,16 @@ impl OwnerState {
             .ok_or("runtime_unavailable")?;
         self.prepared_audio_preparation_generation = next_preparation_generation;
         self.invalidate_prepared_audio();
-        let receipt = Arc::new(PreparedAudioSourceReceipt::new(
-            next_preparation_generation,
-            AudioFence::new(package_generation, package_fingerprint, block_ordinal),
-            self.run_generation,
-            verified_session,
-            schedule,
-        ));
+        let receipt = Arc::new(
+            PreparedAudioSourceReceipt::new(
+                next_preparation_generation,
+                AudioFence::new(package_generation, package_fingerprint, block_ordinal),
+                self.run_generation,
+                verified_session,
+                schedule,
+            )
+            .with_stage(stage),
+        );
         self.prepared_audio_reservation = Some(Arc::clone(&receipt));
 
         Ok(PreparedAudioLookup::Decode(PreparedAudioSource::new(
@@ -1601,6 +1789,10 @@ impl OwnerState {
             .ok()
             .filter(|rate| *rate > 0)
             .ok_or("prepared_audio_sample_rate_invalid")?;
+        let current_wav = source_receipt
+            .instruction()
+            .map(|item| item.wav())
+            .unwrap_or(current_wav);
         if !Arc::ptr_eq(schedule, candidate.schedule()) {
             return Err("prepared_execution_replaced");
         }
@@ -1671,6 +1863,10 @@ impl OwnerState {
         let stamp = self.clock.stamp();
         let mut candidate = self.core.clone();
         candidate.adopt_verified_package(package, stamp.clone())?;
+        candidate.set_native_more_parts(
+            verified.is_split_part() && verified.summary().part_number == Some(1),
+            stamp.clone(),
+        );
         candidate.rotate_epoch(next_epoch, stamp.clone());
         candidate.set_controller_lease(None, None, stamp.clone());
         candidate.set_connection_state(
@@ -1694,6 +1890,7 @@ impl OwnerState {
             // authority. A replacement writer cannot start until it retires.
             journal.close();
         }
+        self.retained_group = None;
         self.retained_session = Some(RetainedPreparedSession {
             generation: next_generation,
             receipt: Arc::new(verified),
@@ -2318,11 +2515,11 @@ impl OwnerState {
                     "Prepare the current package and its event journal before binding media.",
                 ));
             }
-            if cached.candidate.media().fence().block_ordinal()
+            if cached.candidate.source_receipt().stage().ordinal
                 != self
                     .native_progress
                     .for_run(self.run_generation)
-                    .completed_blocks
+                    .completed_stages
             {
                 return Err(NativeOutputCommandError::new(
                     "native_block_order_invalid",
@@ -2385,11 +2582,11 @@ impl OwnerState {
         };
         let stamp = self.clock.stamp();
         let mut candidate = self.core.clone();
-        let executable = prepared.source.plan.fence().audio().block_ordinal()
+        let executable = prepared.source.receipt.stage().ordinal
             == self
                 .native_progress
                 .for_run(self.run_generation)
-                .completed_blocks;
+                .completed_stages;
         if !executable {
             self.native_output.invalidate_for_runner_change();
             return Err(NativeOutputCommandError::changed());
@@ -2398,6 +2595,9 @@ impl OwnerState {
             let ordinal = block.block_ordinal;
             let fingerprint = prepared.source.receipt.verified_session().manifest_sha256();
             candidate.prepare_native_block(fingerprint, block, stamp.clone())?;
+            if prepared.source.receipt.instruction().is_some() {
+                candidate.mark_native_instruction(stamp.clone())?;
+            }
             if executable {
                 candidate.activate_native_block(fingerprint, ordinal, stamp.clone())?;
             }
@@ -2409,6 +2609,17 @@ impl OwnerState {
         }
         let mut event = Self::ledger_input("native.media.prepared", "native", &stamp);
         event.payload = serde_json::json!({
+            "stageOrdinal": prepared.source.receipt.stage().ordinal,
+            "mediaKind": if prepared.source.receipt.instruction().is_some() { "instruction" } else { "block" },
+            "mediaSha256": prepared.source.plan.media().identity().sha256(),
+            "sourceFrames": prepared.source.plan.media().frames(),
+            "sampleRateHz": prepared.source.plan.media().sample_rate_hz(),
+            "instruction": prepared.source.receipt.instruction().map(|item| serde_json::json!({
+                "slot": format!("{:?}", item.slot()), "label": item.label(),
+                "continueMode": format!("{:?}", item.continue_mode()),
+                "needsContinue": prepared.source.receipt.stage().needs_continue,
+                "delayNs": item.delay_ns(),
+            })),
             "blockOrdinal": prepared.source.plan.fence().audio().block_ordinal(),
             "runGeneration": prepared.source.receipt.run_generation().to_string(),
             "renderState": "Prepared",
@@ -2608,6 +2819,7 @@ impl ExecutionOwner {
                     remote,
                     remote_owner: None,
                     retained_session: None,
+                    retained_group: None,
                     compiled_execution: None,
                     prepared_audio: None,
                     prepared_audio_reservation: None,
@@ -2617,6 +2829,7 @@ impl ExecutionOwner {
                     native_output,
                     native_playback: None,
                     native_control: None,
+                    native_instruction_wait: None,
                     owner_generation: 0,
                     ledger,
                     event_journal: None,
@@ -2929,6 +3142,133 @@ impl ExecutionOwner {
         })
     }
 
+    pub(crate) async fn adopt_verified_group(
+        &self,
+        group: VerifiedPreparedGroup,
+        package: VerifiedPackageSummary,
+        secret: PairingSecret,
+        session_id: String,
+        epoch: u64,
+    ) -> Result<Result<RunnerSnapshot, &'static str>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "adopt_verified_group",
+            move |state| {
+                let first = group.parts().first().ok_or("prepared_group_empty")?.clone();
+                let snapshot =
+                    state.adopt_verified_session(first, package, secret, session_id, epoch)?;
+                state.retained_group = Some(RetainedGroup {
+                    receipt: Arc::new(group),
+                    current_part: 0,
+                    completed_parts: 0,
+                });
+                Ok(snapshot)
+            },
+        )
+        .await
+    }
+
+    pub(crate) async fn group_status(&self) -> Result<NativeGroupStatus, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "native_group_status",
+            |state| match state.retained_group.as_ref() {
+                Some(group) => NativeGroupStatus {
+                    revision: state.core.revision(),
+                    part_count: group.receipt.parts().len(),
+                    current_part: group.current_part + 1,
+                    completed_parts: group.completed_parts,
+                    experiment_complete: group.completed_parts == group.receipt.parts().len(),
+                },
+                None => NativeGroupStatus {
+                    revision: state.core.revision(),
+                    part_count: 0,
+                    current_part: 0,
+                    completed_parts: 0,
+                    experiment_complete: false,
+                },
+            },
+        )
+        .await
+    }
+
+    pub(crate) async fn group_advance_source(
+        &self,
+        revision: u64,
+    ) -> Result<Result<Arc<VerifiedPreparedGroup>, &'static str>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "group_advance_source",
+            move |state| {
+                if revision != state.core.revision() {
+                    return Err("stale_revision");
+                }
+                let group = state
+                    .retained_group
+                    .as_ref()
+                    .ok_or("prepared_group_missing")?;
+                if state.core.snapshot().run.phase != RunnerPhase::Completed
+                    || group.completed_parts != group.current_part + 1
+                    || group.completed_parts >= group.receipt.parts().len()
+                    || state.native_finalization.is_some()
+                    || state.event_journal.is_some()
+                {
+                    return Err("prepared_group_part_incomplete");
+                }
+                Ok(Arc::clone(&group.receipt))
+            },
+        )
+        .await
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) async fn advance_verified_group(
+        &self,
+        revision: u64,
+        source: Arc<VerifiedPreparedGroup>,
+        verified: VerifiedPreparedGroup,
+        package: VerifiedPackageSummary,
+        secret: PairingSecret,
+        session_id: String,
+        epoch: u64,
+    ) -> Result<Result<RunnerSnapshot, &'static str>, OwnerSubmitError> {
+        self.asynchronous(
+            AdmissionClass::Normal,
+            "advance_verified_group",
+            move |state| {
+                if revision != state.core.revision() {
+                    return Err("stale_revision");
+                }
+                let group = state
+                    .retained_group
+                    .as_ref()
+                    .ok_or("prepared_group_missing")?;
+                if !Arc::ptr_eq(&source, &group.receipt)
+                    || source.as_ref() != &verified
+                    || group.completed_parts != group.current_part + 1
+                    || state.core.snapshot().run.phase != RunnerPhase::Completed
+                {
+                    return Err("prepared_group_replaced");
+                }
+                let next = group.completed_parts;
+                let part = verified
+                    .parts()
+                    .get(next)
+                    .ok_or("prepared_group_complete")?
+                    .clone();
+                let snapshot =
+                    state.adopt_verified_session(part, package, secret, session_id, epoch)?;
+                state.retained_group = Some(RetainedGroup {
+                    receipt: Arc::new(verified),
+                    current_part: next,
+                    completed_parts: next,
+                });
+                Ok(snapshot)
+            },
+        )
+        .await
+    }
+
     pub(crate) async fn cache_compiled(
         &self,
         compiled: CompiledPreparedExecution,
@@ -2958,10 +3298,15 @@ impl ExecutionOwner {
             AdmissionClass::Normal,
             "prepared_audio_source",
             move |state| {
-                let ordinal = state
-                    .native_progress
-                    .for_run(state.run_generation)
-                    .completed_blocks;
+                let progress = state.native_progress.for_run(state.run_generation);
+                let ordinal = if let Some(session) = state.retained_session.as_ref() {
+                    instruction::stages(&session.receipt)?
+                        .get(progress.completed_stages as usize)
+                        .ok_or("native_stages_complete")?
+                        .block_ordinal
+                } else {
+                    progress.completed_blocks
+                };
                 state.prepared_audio_source(ordinal)
             },
         )

@@ -249,6 +249,8 @@ pub enum AudioPreparationError {
     DecodedAllocationFailed,
     #[error("prepared WAV bytes changed after package verification")]
     DigestMismatch,
+    #[error("instruction WAV samples must be finite and within digital full scale")]
+    InvalidInstructionSample,
 }
 
 /// Hash and decode exactly one already-verified WAV through one opened handle.
@@ -258,6 +260,22 @@ pub enum AudioPreparationError {
 /// bytes also contribute to the digest. No encoded-file-sized buffer is held.
 pub fn bind_and_decode_verified_wav(
     request: VerifiedWavRequest<'_>,
+) -> Result<PreparedPcmBlock, AudioPreparationError> {
+    decode_verified(request, false)
+}
+
+/// Decode a verified mono/stereo instruction without a resampling or gain
+/// fallback. Mono is duplicated to left/right; tactile is always exactly zero.
+/// Hashing covers the same opened bytes used for decoding, including trailers.
+pub fn bind_and_decode_verified_instruction(
+    request: VerifiedWavRequest<'_>,
+) -> Result<PreparedPcmBlock, AudioPreparationError> {
+    decode_verified(request, true)
+}
+
+fn decode_verified(
+    request: VerifiedWavRequest<'_>,
+    instruction: bool,
 ) -> Result<PreparedPcmBlock, AudioPreparationError> {
     validate_request(&request)?;
 
@@ -279,15 +297,25 @@ pub fn bind_and_decode_verified_wav(
     let mut wav = WavReader::new(bounded)
         .map_err(|error| map_hound_error(error, request.limits.maximum_encoded_bytes))?;
     let spec = wav.spec();
-    if spec.sample_format != SampleFormat::Int {
+    let native_float = spec.channels == 3
+        && spec.sample_format == SampleFormat::Float
+        && spec.bits_per_sample == 32;
+    if !instruction && !native_float && spec.sample_format != SampleFormat::Int {
         return Err(AudioPreparationError::UnsupportedSampleFormat);
     }
-    if spec.bits_per_sample != 16 {
+    if (!instruction && !native_float && spec.bits_per_sample != 16)
+        || (instruction
+            && !matches!(
+                (spec.sample_format, spec.bits_per_sample),
+                (SampleFormat::Int, 16 | 24 | 32) | (SampleFormat::Float, 32)
+            ))
+    {
         return Err(AudioPreparationError::UnsupportedBitsPerSample);
     }
-    let layout = match spec.channels {
-        2 => PpsChannelLayout::LegacyStudy5TactileAudio,
-        3 => PpsChannelLayout::BinauralLeftRightTactile,
+    let layout = match (instruction, spec.channels) {
+        (true, 1 | 2) => PpsChannelLayout::BinauralLeftRightTactile,
+        (false, 2) => PpsChannelLayout::LegacyStudy5TactileAudio,
+        (false, 3) => PpsChannelLayout::BinauralLeftRightTactile,
         _ => return Err(AudioPreparationError::UnsupportedChannelCount),
     };
     if spec.sample_rate != request.expected_sample_rate_hz {
@@ -302,8 +330,13 @@ pub fn bind_and_decode_verified_wav(
         return Err(AudioPreparationError::DeclaredDataExceedsFile);
     }
     let (frames, _) = decoded_shape(sample_count, spec.channels, request.limits)?;
+    let output_channels = if instruction { 3 } else { spec.channels };
+    let output_samples = frames
+        .checked_mul(u64::from(output_channels))
+        .ok_or(AudioPreparationError::DecodedShapeOverflow)?;
+    decoded_shape(output_samples, output_channels, request.limits)?;
     let sample_capacity =
-        usize::try_from(sample_count).map_err(|_| AudioPreparationError::DecodedShapeOverflow)?;
+        usize::try_from(output_samples).map_err(|_| AudioPreparationError::DecodedShapeOverflow)?;
 
     // The file-controlled count has passed the frame, multiplication, and
     // decoded-byte ceilings above. Reserve exactly once so Vec's geometric
@@ -312,9 +345,20 @@ pub fn bind_and_decode_verified_wav(
     decoded
         .try_reserve_exact(sample_capacity)
         .map_err(|_| AudioPreparationError::DecodedAllocationFailed)?;
-    for sample in wav.samples::<i16>() {
-        let sample =
-            sample.map_err(|error| map_hound_error(error, request.limits.maximum_encoded_bytes))?;
+    for index in 0..sample_count {
+        let sample = match spec.sample_format {
+            SampleFormat::Float => wav.samples::<f32>().next().transpose(),
+            SampleFormat::Int => wav.samples::<i32>().next().transpose().map(|value| {
+                value.map(|value| {
+                    (f64::from(value) / (1u64 << (spec.bits_per_sample - 1)) as f64) as f32
+                })
+            }),
+        }
+        .map_err(|error| map_hound_error(error, request.limits.maximum_encoded_bytes))?
+        .ok_or(AudioPreparationError::DecodedShapeOverflow)?;
+        if !sample.is_finite() || ((instruction || native_float) && sample.abs() > 1.0) {
+            return Err(AudioPreparationError::InvalidInstructionSample);
+        }
         let next_count = (decoded.len() as u64)
             .checked_add(1)
             .ok_or(AudioPreparationError::DecodedShapeOverflow)?;
@@ -326,9 +370,15 @@ pub fn bind_and_decode_verified_wav(
                 limit: request.limits.maximum_decoded_bytes,
             });
         }
-        decoded.push(f32::from(sample) / 32768.0);
+        decoded.push(sample);
+        if instruction && spec.channels == 1 {
+            decoded.push(sample);
+        }
+        if instruction && (index + 1) % u64::from(spec.channels) == 0 {
+            decoded.push(0.0);
+        }
     }
-    if decoded.len() as u64 != sample_count {
+    if decoded.len() as u64 != output_samples {
         return Err(AudioPreparationError::DecodedShapeOverflow);
     }
 
@@ -352,7 +402,7 @@ pub fn bind_and_decode_verified_wav(
         },
         layout,
         sample_rate_hz: spec.sample_rate,
-        channels: spec.channels,
+        channels: output_channels,
         frames,
         interleaved_f32: Arc::new(decoded),
     })

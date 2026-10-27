@@ -7,8 +7,8 @@ use std::{
 
 use hound::{SampleFormat, WavSpec, WavWriter};
 use pps_runner_audio::{
-    bind_and_decode_verified_wav, AudioFence, AudioLoadLimits, AudioPreparationError,
-    PpsChannelLayout, VerifiedWavRequest,
+    bind_and_decode_verified_instruction, bind_and_decode_verified_wav, AudioFence,
+    AudioLoadLimits, AudioPreparationError, PpsChannelLayout, VerifiedWavRequest,
 };
 use sha2::{Digest, Sha256};
 
@@ -116,6 +116,104 @@ fn bind(
 
 fn default_fence() -> AudioFence {
     AudioFence::new(7, "package-fingerprint", 2)
+}
+
+#[test]
+fn instruction_decode_preserves_mono_stereo_samples_and_never_drives_tactile() {
+    let root = TestDirectory::new();
+    for channels in [1, 2] {
+        for bits in [16, 24, 32] {
+            let path = root.join(format!("instruction-{channels}-{bits}.wav"));
+            let amplitude = 1i32 << (bits - 2);
+            write_i32_wav(&path, channels, bits, &[amplitude, -amplitude]);
+            let prepared = bind_and_decode_verified_instruction(VerifiedWavRequest {
+                fence: &default_fence(),
+                path: &path,
+                expected_sha256: &digest(&path),
+                expected_encoded_byte_count: fs::metadata(&path).unwrap().len(),
+                expected_sample_rate_hz: 48000,
+                limits: AudioLoadLimits::default(),
+            })
+            .unwrap();
+            let expected = if channels == 1 {
+                vec![0.5, 0.5, 0.0, -0.5, -0.5, 0.0]
+            } else {
+                vec![0.5, -0.5, 0.0]
+            };
+            assert_eq!(prepared.interleaved_f32(), expected);
+            assert_eq!(prepared.channels(), 3);
+        }
+    }
+    let path = root.join("floating.wav");
+    write_float_wav(&path, 2, &[0.123, -0.345]);
+    let prepared = bind_and_decode_verified_instruction(VerifiedWavRequest {
+        fence: &default_fence(),
+        path: &path,
+        expected_sha256: &digest(&path),
+        expected_encoded_byte_count: fs::metadata(&path).unwrap().len(),
+        expected_sample_rate_hz: 48000,
+        limits: AudioLoadLimits::default(),
+    })
+    .unwrap();
+    assert_eq!(prepared.interleaved_f32(), [0.123, -0.345, 0.0]);
+}
+
+#[test]
+fn native_float_blocks_and_instruction_expansion_fail_closed_on_shape_hash_and_pcm() {
+    let root = TestDirectory::new();
+    let path = root.join("native.wav");
+    write_float_wav(&path, 3, &[0.25, -0.5, 0.75]);
+    let prepared = bind(
+        &path,
+        &default_fence(),
+        &digest(&path),
+        fs::metadata(&path).unwrap().len(),
+        48000,
+        AudioLoadLimits::default(),
+    )
+    .unwrap();
+    assert_eq!(prepared.interleaved_f32(), [0.25, -0.5, 0.75]);
+    write_float_wav(&path, 1, &[0.5]);
+    let digest_value = digest(&path);
+    let fence = default_fence();
+    let mut request = VerifiedWavRequest {
+        fence: &fence,
+        path: &path,
+        expected_sha256: &digest_value,
+        expected_encoded_byte_count: fs::metadata(&path).unwrap().len(),
+        expected_sample_rate_hz: 48000,
+        limits: AudioLoadLimits::default(),
+    };
+    request.limits.maximum_decoded_bytes = 8;
+    assert!(matches!(
+        bind_and_decode_verified_instruction(request),
+        Err(AudioPreparationError::DecodedBytesTooLarge { .. })
+    ));
+    request.limits = AudioLoadLimits::default();
+    request.expected_sample_rate_hz = 44100;
+    assert!(matches!(
+        bind_and_decode_verified_instruction(request),
+        Err(AudioPreparationError::SampleRateMismatch)
+    ));
+    request.expected_sample_rate_hz = 48000;
+    let wrong = "a".repeat(64);
+    request.expected_sha256 = &wrong;
+    assert!(matches!(
+        bind_and_decode_verified_instruction(request),
+        Err(AudioPreparationError::DigestMismatch)
+    ));
+    for sample in [f32::NAN, f32::INFINITY, 1.01] {
+        write_float_wav(&path, 1, &[sample]);
+        let digest_value = digest(&path);
+        let request = VerifiedWavRequest {
+            expected_sha256: &digest_value,
+            ..request
+        };
+        assert!(matches!(
+            bind_and_decode_verified_instruction(request),
+            Err(AudioPreparationError::InvalidInstructionSample)
+        ));
+    }
 }
 
 #[test]
