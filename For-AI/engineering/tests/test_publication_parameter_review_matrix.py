@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 23)
+        self.assertEqual(len(registry["entries"]), 24)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 54)
+        self.assertEqual(registered_instance_count, 55)
         network = json.loads(
             (
                 ROOT
@@ -921,6 +921,22 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             inventory = next(row for row in registry["entries"] if row["network_node_id"] == study["networkNodeId"])
             self.assertEqual(len(inventory["instances"]), 1)
             self.assertTrue(inventory["supporting_task_boundaries"])
+
+    def test_computational_review_is_a_retained_publication_boundary(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        node = "doi:10.3389/fpsyg.2011.00077"
+        study = studies[node]
+        self.assertEqual({row["status"] for row in study["contracts"]}, {"not_applicable"})
+        self.assertEqual(study["templateIds"], [])
+        self.assertEqual(study["nativeQualification"], "not_assessed")
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        entry = next(row for row in registry["entries"] if row["network_node_id"] == node)
+        self.assertEqual(entry["instances"][0]["instance_kind"], "publication_scope_boundary")
+        self.assertEqual(len(data["publications"]), 94)
+        # Apparently adjacent titles can still contain audio-tactile tasks.
+        for retained in ("doi:10.1016/j.bodyim.2024.101777", "doi:10.1016/j.actpsy.2011.01.003", "doi:10.3758/app.72.4.885"):
+            self.assertNotEqual({row["status"] for row in studies[retained]["contracts"]}, {"not_applicable"})
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:
