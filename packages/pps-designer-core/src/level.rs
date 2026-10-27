@@ -10,6 +10,7 @@ pub struct LevelQc {
     pub physical_spl_qualified: bool,
     pub applied_gain_db: f64,
     pub audio_peak_dbfs: f64,
+    pub target_peak_dbfs: Option<f64>,
     pub calibration_window_frames: Option<[usize; 2]>,
     pub target_window_rms_dbfs: Option<f64>,
     pub actual_window_rms_dbfs: Option<f64>,
@@ -93,6 +94,7 @@ fn level_gain(
         physical_spl_qualified: false,
         applied_gain_db: 0.0,
         audio_peak_dbfs: -300.0,
+        target_peak_dbfs: None,
         calibration_window_frames: None,
         target_window_rms_dbfs: None,
         actual_window_rms_dbfs: None,
@@ -104,6 +106,20 @@ fn level_gain(
         } => {
             qc.applied_gain_db = gain_db;
             Ok((db_to_linear(gain_db), peak_ceiling_dbfs, qc))
+        }
+        LevelPolicy::PeakNormalize {
+            target_peak_dbfs,
+            peak_ceiling_dbfs,
+        } => {
+            let measured = peak(stereo);
+            if measured <= 0.0 {
+                return Err(GenerationError::Invalid("silent_peak_normalization"));
+            }
+            let gain = db_to_linear(target_peak_dbfs) / measured;
+            qc.kind = "peak_normalize";
+            qc.applied_gain_db = linear_to_db(gain);
+            qc.target_peak_dbfs = Some(target_peak_dbfs);
+            Ok((gain, peak_ceiling_dbfs, qc))
         }
         LevelPolicy::LinearDbRamp {
             start_rms_dbfs,
@@ -160,6 +176,14 @@ pub(crate) fn validate_level(policy: &LevelPolicy, duration: f64) -> Result<(), 
             peak_ceiling_dbfs,
         } => {
             gain_db.is_finite() && (-180.0..=24.0).contains(&gain_db) && valid_db(peak_ceiling_dbfs)
+        }
+        LevelPolicy::PeakNormalize {
+            target_peak_dbfs,
+            peak_ceiling_dbfs,
+        } => {
+            valid_db(target_peak_dbfs)
+                && valid_db(peak_ceiling_dbfs)
+                && target_peak_dbfs <= peak_ceiling_dbfs
         }
         LevelPolicy::LinearDbRamp {
             start_rms_dbfs,
