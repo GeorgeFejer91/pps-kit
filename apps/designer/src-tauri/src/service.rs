@@ -38,6 +38,24 @@ struct Stored {
     assets: BTreeMap<String, AssetRecord>,
 }
 
+// Constructed only after the importer successfully created this new app-owned
+// directory. Never used to clean up a caller's existing directory.
+struct ImportDirectory(Option<PathBuf>);
+impl ImportDirectory {
+    fn remove(&mut self) -> Result<()> {
+        if let Some(path) = self.0.as_ref() {
+            fs::remove_dir_all(path).map_err(|_| "import_cleanup_failed")?;
+            self.0 = None;
+        }
+        Ok(())
+    }
+}
+impl Drop for ImportDirectory {
+    fn drop(&mut self) {
+        let _ = self.remove();
+    }
+}
+
 pub struct DesignerService {
     pub jobs: JobOwner,
     pub(crate) review: Option<crate::assembly_host::Review>,
@@ -247,18 +265,41 @@ impl DesignerService {
         name: &str,
         dry_source: bool,
     ) -> Result<(String, AssetRecord)> {
+        self.store_audio_using(bytes, name, dry_source, |file| file.write_all(bytes))
+    }
+
+    fn store_audio_using(
+        &self,
+        bytes: &[u8],
+        name: &str,
+        dry_source: bool,
+        write: impl FnOnce(&mut fs::File) -> std::io::Result<()>,
+    ) -> Result<(String, AssetRecord)> {
         let digest = sha(bytes);
         let relative = format!("assets/{digest}.wav");
         let path = self.root.join(&relative);
-        match fs::OpenOptions::new()
+        let staging = self.root.join("assets").join(format!(
+            ".{digest}-{}-{}.pending",
+            std::process::id(),
+            SEQUENCE.fetch_add(1, Ordering::Relaxed)
+        ));
+        let mut file = fs::OpenOptions::new()
             .write(true)
             .create_new(true)
-            .open(&path)
-        {
-            Ok(mut file) => file
-                .write_all(bytes)
-                .and_then(|_| file.sync_all())
-                .map_err(|_| "asset_write_failed")?,
+            .open(&staging)
+            .map_err(|_| "asset_write_failed")?;
+        let written = write(&mut file).and_then(|_| file.sync_all());
+        drop(file);
+        if written.is_err() {
+            let _ = fs::remove_file(&staging);
+            return Err("asset_write_failed".into());
+        }
+        // Exclusive publication cannot replace another valid content-addressed
+        // asset. A failed write never occupies the final digest path.
+        let published = fs::hard_link(&staging, &path);
+        let _ = fs::remove_file(&staging);
+        match published {
+            Ok(()) => (),
             Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
                 if sha(&read_bounded(&path, MAX_AUDIO)?) != digest {
                     return Err("asset_hash_mismatch".into());
@@ -292,8 +333,10 @@ impl DesignerService {
             &AtomicBool::new(false),
         )
         .map_err(|error| format!("profile_{error}"))?;
+        let mut extracted = ImportDirectory(Some(target));
         let mut design = receipt.rebased_design().clone();
         let mut replacements = BTreeMap::new();
+        let mut records = BTreeMap::new();
         let mut assets = Vec::new();
         for asset in receipt.assets() {
             let bytes = read_bounded(&asset.path, MAX_AUDIO)?;
@@ -302,11 +345,13 @@ impl DesignerService {
             }
             let (key, record) = self.store_audio(&bytes, &asset.source_name, false)?;
             replacements.insert(asset.path.to_string_lossy().into_owned(), key.clone());
-            self.stored.assets.insert(key.clone(), record);
+            records.insert(key.clone(), record);
             assets.push(json!({"path":key,"sha256":asset.sha256,"label":asset.source_name}));
         }
         replace_references(&mut design, &replacements);
+        extracted.remove()?;
         self.jobs.revise(expected).map_err(str::to_owned)?;
+        self.stored.assets.extend(records);
         self.clear_authority();
         Ok(
             json!({"revision":self.jobs.revision(),"design":design,"assets":assets,"display_name":receipt.display_name()}),
@@ -598,6 +643,49 @@ fn safe_join(root: &Path, relative: &str) -> Result<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn partial_asset_write_does_not_poison_digest_path_and_retry_succeeds() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../artifacts")
+            .join(format!(
+                "designer-asset-retry-{}-{}",
+                std::process::id(),
+                SEQUENCE.fetch_add(1, Ordering::Relaxed)
+            ));
+        let owner = DesignerService::open(root.clone(), PathBuf::new(), PathBuf::new()).unwrap();
+        let bytes = b"complete verified input bytes";
+        let failure = owner.store_audio_using(bytes, "example.wav", false, |file| {
+            file.write_all(&bytes[..4])?;
+            Err(std::io::Error::other("injected write failure"))
+        });
+        assert_eq!(failure.err().unwrap(), "asset_write_failed");
+        assert_eq!(fs::read_dir(root.join("assets")).unwrap().count(), 0);
+        let (key, record) = owner.store_audio(bytes, "example.wav", false).unwrap();
+        assert_eq!(fs::read(root.join(&record.relative_path)).unwrap(), bytes);
+        assert_eq!(key, format!("native-assets/{}.wav", sha(bytes)));
+        owner.store_audio(bytes, "retry.wav", false).unwrap();
+        assert_eq!(fs::read_dir(root.join("assets")).unwrap().count(), 1);
+    }
+
+    #[test]
+    fn owned_import_directory_is_removed_on_early_return() {
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../artifacts")
+            .join(format!(
+                "designer-import-cleanup-{}-{}",
+                std::process::id(),
+                SEQUENCE.fetch_add(1, Ordering::Relaxed)
+            ));
+        fs::create_dir(&path).unwrap();
+        fs::write(path.join("verified.wav"), b"temporary extraction").unwrap();
+        let failed_copy = || -> Result<()> {
+            let _owned = ImportDirectory(Some(path.clone()));
+            Err("asset_write_failed".into())
+        };
+        assert!(failed_copy().is_err());
+        assert!(!path.exists());
+    }
+
     #[test]
     fn traversal_and_windows_absolute_paths_never_grant_authority() {
         for path in [
@@ -905,5 +993,47 @@ mod tests {
                 );
             }
         }
+        let no_extraction = |service: &DesignerService| {
+            assert!(fs::read_dir(&service.root).unwrap().all(|entry| !entry
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .starts_with("import-")));
+        };
+        no_extraction(&service);
+        let (key, record) = service.stored.assets.iter().next().unwrap();
+        let (original, _) = service.resource(key).unwrap();
+        let cached_path = service.root.join(&record.relative_path);
+        let authority = serde_json::to_value(&service.stored.assets).unwrap();
+        service.stored.snapshot = Some(json!({"design":{"name":"previous draft"}}));
+        fs::write(&cached_path, b"corrupt existing cache").unwrap();
+        assert_eq!(
+            service
+                .import_bundle(
+                    1,
+                    &root.join("artifacts/ui-workflow-check/browser-finalized.pps-profile")
+                )
+                .err()
+                .unwrap(),
+            "asset_hash_mismatch"
+        );
+        no_extraction(&service);
+        assert_eq!(service.jobs.revision(), 1);
+        assert_eq!(
+            serde_json::to_value(&service.stored.assets).unwrap(),
+            authority
+        );
+        assert_eq!(
+            service.stored.snapshot.as_ref().unwrap()["design"]["name"],
+            "previous draft"
+        );
+        fs::write(cached_path, original).unwrap();
+        assert!(service
+            .import_bundle(
+                1,
+                &root.join("artifacts/ui-workflow-check/browser-finalized.pps-profile")
+            )
+            .is_ok());
+        no_extraction(&service);
     }
 }
