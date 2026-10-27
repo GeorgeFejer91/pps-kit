@@ -57,3 +57,23 @@ test("native cancellation sends only the bounded cancellation command", async ()
   await assert.rejects(pending, /Cancelled/);
   assert.deepEqual(calls, ["designer_generate", "designer_cancel", "designer_job"]);
 });
+
+test("cancellation requested while a native start is pending reaches the newly allocated job", async () => {
+  let completeStart, started;
+  const ready = new Promise(resolve => { started = resolve; });
+  const calls=[];
+  const adapter=createNativeDesigner(async command=>{
+    calls.push(command);
+    if(command === "designer_review") { started(); return new Promise(resolve=>{completeStart=resolve;}); }
+    if(command === "designer_cancel") return;
+    if(command === "designer_job") return {status:"cancelled",message:"Cancelled before publication"};
+    throw new Error(command);
+  },true);
+  const running=adapter.review({design:{}},[]);
+  await ready;
+  const cancellation=adapter.cancel();
+  completeStart({job_id:"pending-start"});
+  await cancellation;
+  await assert.rejects(running,/Cancelled before publication/);
+  assert.deepEqual(calls,["designer_review","designer_cancel","designer_job"]);
+});

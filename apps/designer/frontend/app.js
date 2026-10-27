@@ -662,6 +662,9 @@ let designerDirty = false;
 let workflowSaveInFlight = false;
 let hostedFinalizationInFlight = false;
 let nativeGenerationInFlight = false;
+let nativeReviewPage = 0;
+let nativePreparedResult = null;
+let nativeExecutionMessage = "Build a native review to verify audio and exact timing.";
 let staticModeReason = "";
 let staticPreloadInventory = null;
 let staticTemplatesCache = null;
@@ -923,9 +926,19 @@ function initializeHostedDesignerProgress(editStep = "stimulus") {
   });
 }
 
+function invalidateNativeAuthoring() {
+  if (nativeDesigner.enabled && state && editModeActive) {
+    nativeDesigner.invalidate();
+    state.native_execution_review = null;
+    nativePreparedResult = null;
+    nativeExecutionMessage = "The design changed. Build and accept a new native review.";
+    renderNativeExecution();
+  }
+}
+
 function markDesignerDirty() {
   stopActiveSourcePreview();
-  if (nativeDesigner.enabled && state && editModeActive) nativeDesigner.invalidate();
+  invalidateNativeAuthoring();
   if (!state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive || designerDirty) return;
   designerDirty = true;
   document.dispatchEvent(new CustomEvent("pps-designer-dirty"));
@@ -2991,6 +3004,7 @@ function renderAll() {
   renderSegmentRegistryOutputs();
   renderWorkflow();
   renderCapabilityLocks();
+  renderNativeExecution();
   upgradeBoundedSelects();
 }
 
@@ -4040,6 +4054,7 @@ function readJsonField(field) {
 
 function sourceFolderAction(path, label = "source") {
   if (!path) return "";
+  if (nativeDesigner.enabled) return `<button type="button" class="source-folder-link" data-export-native-source="${escapeAttr(path)}" aria-label="Save ${escapeAttr(label)} WAV">Save WAV</button>`;
   if (staticModeActive) {
     return `<a class="source-folder-link" href="${escapeAttr(staticResourceUrl(path))}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeAttr(label)} asset">Open Asset</a>`;
   }
@@ -6365,6 +6380,91 @@ function renderRun() {
   renderProtocolSummary();
 }
 
+function renderNativeExecution() {
+  if (!nativeDesigner.enabled || !state) return;
+  $("native-execution").hidden = false;
+  const review = state.native_execution_review;
+  const hasReview = Boolean(review?.hashes && (review.available || review.accepted));
+  const rows = hasReview ? state.run_sequence_setup?.csv_rows || [] : [];
+  const pageCount = Math.max(1, Math.ceil(rows.length / 12));
+  nativeReviewPage = Math.min(nativeReviewPage, pageCount - 1);
+  $("native-review-detail").hidden = !hasReview;
+  $("native-order-page").textContent = `Page ${nativeReviewPage + 1} of ${pageCount} · ${rows.length} block occurrences`;
+  $("native-order-previous").disabled = nativeReviewPage === 0;
+  $("native-order-next").disabled = nativeReviewPage + 1 >= pageCount;
+  fillTable("native-occurrence-table", rows.slice(nativeReviewPage * 12, (nativeReviewPage + 1) * 12), ["participant_id", "phase_label", "participant_block_position", "source_block_index", "trial_count"]);
+  const slots = state.run_sequence_setup?.instruction_profile?.slots || [];
+  $("native-instruction-summary").textContent = `Instruction policy: ${slots.filter(s => s.enabled).map(s => `${s.label || s.slot}: ${s.continue_mode || "click"}`).join("; ") || "No standalone instruction slots enabled"}.`;
+  $("native-build-review").disabled = nativeGenerationInFlight;
+  $("native-cancel-work").disabled = !nativeGenerationInFlight;
+  $("native-download-review").disabled = !hasReview;
+  $("native-accept-review").disabled = nativeGenerationInFlight || !review?.available || !$("native-review-confirm").checked;
+  $("native-accept-review").textContent = review?.accepted ? "Native review accepted" : "Accept this native review";
+  $("native-review-confirm").disabled = Boolean(review?.accepted);
+  $("native-prepare-participant").disabled = nativeGenerationInFlight || !review?.accepted;
+  $("native-open-output").hidden = !nativePreparedResult;
+  $("native-execution-status").textContent = nativeExecutionMessage;
+  const needsBaseline = state.design.protocol?.baseline_strategy === "stationary_burst";
+  $("native-baseline-controls").hidden = !needsBaseline;
+  const select = $("native-baseline-source");
+  const selected = select.value;
+  select.innerHTML = (state.design.noises || []).map(source => `<option value="${escapeAttr(source.label)}">${escapeHtml(source.label)}${source.native_stationary_baseline_asset ? " (control available)" : " (control required)"}</option>`).join("");
+  if ([...select.options].some(option => option.value === selected)) select.value = selected;
+  const editable = isCustomMode() && !isProfileFinalized() && editModeActive;
+  $("native-generate-baseline").disabled = nativeGenerationInFlight || !editable || !select.value;
+  $("native-baseline-help").textContent = editable ? "Creates a separate control and invalidates later review. The moving ingredient is preserved." : "Use Edit to create an editable custom copy before generating a control.";
+}
+
+async function performNativeExecution(action) {
+  if (nativeGenerationInFlight) return;
+  nativeGenerationInFlight = true;
+  nativePreparedResult = null;
+  if (["review", "baseline"].includes(action)) $("native-review-confirm").checked = false;
+  renderNativeExecution(); renderBakePanel();
+  try {
+    let result;
+    if (action === "baseline") {
+      if (!ensureEditableProject()) return;
+      result = await nativeDesigner.baseline({ ...clone(state), design: collectPayload().design }, $("native-baseline-source").value,
+        { source_algorithm: "rand-0.8.8-std-rng-box-muller.v1", accept_non_legacy_source_algorithm: $("native-baseline-opt-in").checked });
+      nativeExecutionMessage = "Stationary control created. Build a new native review before accepting.";
+    } else if (action === "review") {
+      const snapshot = clone(state);
+      snapshot.design = collectPayload().design;
+      const previewStatus = { finished_profile: true, profile_checks_passed: true };
+      // Reuse the existing source-block planner only on this explicit new-review action.
+      snapshot.trial_file_bake = staticTrialFileBakePayload(snapshot.design, previewStatus);
+      snapshot.trial_pool_bake = staticTrialPoolBakePayload(snapshot.design, snapshot.trial_file_bake);
+      snapshot.block_csv_preview = staticBlockCsvPreviewPayload(snapshot.design, snapshot.trial_pool_bake, previewStatus);
+      const variants = (snapshot.design.protocol?.trial_strips || []).flatMap((strip, index) => stripPreviewVariants(strip).map(choices => ({ row_label: strip.label || `Trial type ${index + 1}`, sequence_variant_key: previewVariantKey(choices), choices })));
+      result = await nativeDesigner.review(snapshot, variants);
+      nativeReviewPage = 0;
+      nativeExecutionMessage = "Full native review ready. Review Segment 5 rows, every participant/part occurrence, and instruction policy before acceptance.";
+    } else if (action === "accept") {
+      const response = await nativeDesigner.accept(state.native_execution_review.hashes);
+      result = { snapshot: response.snapshot };
+      nativeExecutionMessage = "This revision is accepted. Choose a participant and destination to prepare immutable files.";
+    } else {
+      result = await nativeDesigner.prepare(Number($("native-participant").value), $("native-session-identity").value.trim());
+      if (!result) return;
+      nativePreparedResult = result.result;
+      nativeExecutionMessage = `Participant ${result.result.participant_index}: ${result.result.part_count} part(s) verified. Open the folder and select ${result.result.handoff_file} in Runner. Files have not been executed.`;
+    }
+    if (result?.snapshot) state = result.snapshot;
+    markDesignerSaved(); renderAll(); updateViewer();
+  } catch (error) {
+    const detail = error.message || String(error);
+    nativeExecutionMessage = detail.includes("assembly_stationary_comparator_required")
+      ? "Stationary controls are missing. Use an editable custom copy to create a control for each moving source, then rebuild the review."
+      : detail.includes("assembly_tactile_outside_trial")
+        ? "A tactile cue extends beyond its trial. Check the SOA and audio duration before rebuilding the review."
+        : /native_(review|acceptance)_required|revision_conflict|review_hash_mismatch/.test(detail)
+          ? "The native review is no longer current. Build and accept a new review."
+          : detail;
+    throw new Error(nativeExecutionMessage);
+  } finally { nativeGenerationInFlight = false; renderNativeExecution(); renderBakePanel(); }
+}
+
 function renderProfileValidationChecklist(profileValid = false, finalized = false) {
   const container = $("profile-validation-checklist");
   const summary = $("profile-validation-summary");
@@ -6890,6 +6990,7 @@ function collectNoises() {
   return [...$("noise-list").querySelectorAll(".noise-source-card")].map((card) => {
     const field = (name) => card.querySelector(`[data-field="${name}"]`);
     return {
+      ...clone((state.design.noises || []).find(source => source.label === card.dataset.selectIngredient || source.label === field("label").value.trim()) || {}),
       label: field("label").value.trim() || "Noise",
       noise_type: field("noise_type").value,
       azimuth_deg: Number(field("azimuth_deg").value || 0),
@@ -6915,6 +7016,7 @@ function collectAudioFiles() {
     const field = (name) => card.querySelector(`[data-field="${name}"]`);
     const role = field("audio_role").value;
     const item = {
+      ...clone([...(state.design.custom_looming_files || []), ...(state.design.prestimulus_files || [])].find(source => source.label === card.dataset.selectIngredient || source.label === field("label").value.trim()) || {}),
       label: field("label").value.trim() || "Audio file",
       path: field("path").value.trim(),
       target_duration_s: Number(field("target_duration_s").value || 4),
@@ -7636,6 +7738,7 @@ async function startBakeStimulus() {
     const snapshot = { ...clone(state), design: payload.design, trajectory_controls: payload.trajectory_controls };
     $("native-cancel-generation").disabled = false;
     nativeGenerationInFlight = true;
+    renderNativeExecution();
     $("bake-stimulus").disabled = true;
     try {
       const generated = await nativeDesigner.generate(snapshot, payload, optIn);
@@ -7644,7 +7747,7 @@ async function startBakeStimulus() {
       ingredientEditorDirty = false; ingredientEditorMode = "inspect"; pendingBakeRecipe = null;
       markDesignerSaved(); renderAll(); updateViewer();
       showToast("Native ingredient created. Review later segments before preparing a run.");
-    } finally { nativeGenerationInFlight = false; $("native-cancel-generation").disabled = true; renderBakePanel(); }
+    } finally { nativeGenerationInFlight = false; $("native-cancel-generation").disabled = true; renderBakePanel(); renderNativeExecution(); }
     return;
   }
   if (staticModeActive) {
@@ -8401,6 +8504,7 @@ function applyTrajectoryControlUpdate(controls) {
     $(id).value = formatTrajectoryValue(key, controls[key]);
   }
   ingredientEditorDirty = true;
+  invalidateNativeAuthoring();
   updateViewer();
 }
 
@@ -9616,6 +9720,7 @@ function wireEvents() {
   document.addEventListener("input", (event) => {
     if (event.target.closest?.(".ingredient-editor") || event.target.closest?.("#trajectory-settings")) {
       if (pendingBakeRecipe) ingredientEditorDirty = true;
+      invalidateNativeAuthoring();
       return;
     }
     const card = event.target.closest?.(".source-card");
@@ -9633,6 +9738,7 @@ function wireEvents() {
   document.addEventListener("change", (event) => {
     if (event.target.closest?.(".ingredient-editor") || event.target.closest?.("#trajectory-settings")) {
       if (pendingBakeRecipe) ingredientEditorDirty = true;
+      invalidateNativeAuthoring();
       return;
     }
     const sourceLabelCard = event.target.closest?.(".source-card");
@@ -9710,7 +9816,15 @@ if (nativeDesigner.enabled) {
   $("native-import-profile").hidden = false;
   $("native-import-profile").addEventListener("click", () => importNativeProfile().catch(reportError));
   $("native-cancel-generation").addEventListener("click", () => nativeDesigner.cancel().catch(reportError));
-  document.addEventListener("pps-native-status", event => { $("native-generation-status").textContent = event.detail; });
+  $("native-cancel-work").addEventListener("click", () => nativeDesigner.cancel().catch(reportError));
+  for (const [id, action] of [["native-generate-baseline", "baseline"], ["native-build-review", "review"], ["native-accept-review", "accept"], ["native-prepare-participant", "prepare"]]) $(id).addEventListener("click", () => performNativeExecution(action).catch(reportError));
+  $("native-review-confirm").addEventListener("change", renderNativeExecution);
+  $("native-order-previous").addEventListener("click", () => { nativeReviewPage--; renderNativeExecution(); });
+  $("native-order-next").addEventListener("click", () => { nativeReviewPage++; renderNativeExecution(); });
+  $("native-open-output").addEventListener("click", () => nativeDesigner.openPrepared().catch(reportError));
+  document.addEventListener("click", event => { const button=event.target.closest?.("[data-export-native-source]"); if(button) nativeDesigner.exportAudio(button.dataset.exportNativeSource).then(saved=>{ if(saved) showToast("Verified WAV saved."); }).catch(reportError); });
+  $("native-download-review").addEventListener("click", () => downloadTextFile("native-execution-review.json", JSON.stringify({ ...state.native_execution_review, blocks: state.block_csv_preview, run_order: state.run_sequence_setup }, null, 2), "application/json"));
+  document.addEventListener("pps-native-status", event => { $("native-generation-status").textContent = event.detail; nativeExecutionMessage = event.detail; $("native-execution-status").textContent = event.detail; });
 }
 window.PPSDesignerApp = Object.freeze({
   preloadAssetUrl: staticResourceUrl,

@@ -12,7 +12,8 @@ the final identity and a separately verified renderer/resource package.
 ## Connected scope
 
 - Offline bundled templates and premade audio; native-picked WAVs; verified
-  `.pps-profile` import and portable export through native save dialogs.
+  `.pps-profile` import, portable export and ingredient WAV export through
+  native save dialogs. Stationary controls travel as separate bundle assets.
 - Explicit native source algorithm opt-in and seed, existing endpoint/polar
   trajectory semantics, and supported loudness policies from the Rust core.
 - Revision changes cancel work. The host kills/reaps renderer processes on
@@ -24,9 +25,24 @@ the final identity and a separately verified renderer/resource package.
 - Output qualification remains unmeasured. Existing level ceilings and
   calibration validation remain in the core.
 
-Participant assembly and immutable run-order acceptance are a subsequent
-connection to the core's sealed preview APIs. Hosted Segment 6 remains a
-descriptive summary. This checkpoint does not qualify a complete native run.
+The native review action reuses the existing source-block planner, verifies
+actual audio/tactile samples and enriches timing, then retains the core's sealed
+block and complete participant-order receipts. The UI pages every occurrence
+and requires explicit review acceptance. Saved browser flags cannot recreate
+this authority; edits and restart require a new native review.
+
+Preparation selects a native output folder, claims one new child directory and
+writes the selected participant's immutable parts there. The host verifies the
+single package or complete group before exposing an Open folder action. Split
+participants hand off `session_group_manifest.json`; paths are never rebased.
+Cancellation removes only the job-owned candidate. Prepared files are not
+execution or physical qualification evidence. Hosted Segment 6 remains a
+descriptive summary.
+
+Stationary controls use the core's explicit V2 opt-in and saved source geometry,
+timing and loudness policy. They preserve moving audio and invalidate later
+review. Source form collection retains their independent hash/provenance; the
+portable exporter never replaces the moving source's browser asset identity.
 
 ## Local verification
 
@@ -38,6 +54,10 @@ renderer (with its DLLs). Release builds accept only the packaged renderer.
 `cargo test -p pps-experiment-designer --lib` checks owner fencing, path authority
 and actual child cancellation. The ignored `actual_renderer` test requires the
 renderer and verifies real generated WAV publication plus obsolete-work discard.
+The ignored `actual_study5` test uses the retained native fixture selected by
+`PPS_STUDY5_FIXTURE` plus the real browser full-plan capture. It verifies 600
+reviewed occurrences, two actual participant parts, forged acceptance rejection,
+revision cancellation and restart without restored acceptance authority.
 
 `PPS_DESIGNER_TEST_DATA` is a debug-only isolated data directory; it keeps the
 window hidden and captures the exact test generation request there. For a
@@ -46,3 +66,6 @@ port and muted audio, then run `frontend/tests/verify-native-webview.mjs` with
 `PPS_PLAYWRIGHT_MODULE` and `PPS_DESIGNER_TEST_CDP`. These environment overrides
 are unavailable in release behavior. Screenshots/reports belong in ignored
 `artifacts/`. Stop the test process afterward.
+`verify-native-assembly.mjs` uses an isolated fixture draft with the real Study 5
+assets to check a missing comparator, actual control generation, the complete
+204-trial/600-occurrence review, explicit acceptance and edit invalidation.

@@ -120,6 +120,7 @@ async function exportBundle(snapshot) {
   const instructions = design.study_profile_reference_parameters?.dashboard_run_setup?.instruction_profile?.slots || [];
   const references = [
     ...(design.noises || []).map(item => ({ item, key: "prebaked_path" })),
+    ...(design.noises || []).map(item => ({ item, key: "native_stationary_baseline_asset", secondary: true })),
     ...[...(design.custom_looming_files || []), ...(design.prestimulus_files || []), ...instructions].map(item => ({ item, key: "path" })),
   ];
   const inventory = new Map((snapshot.preload_inventory?.assets || []).map(asset => [asset.path, asset]));
@@ -128,9 +129,9 @@ async function exportBundle(snapshot) {
   const assetRecords = [];
   const files = [];
   let totalBytes = 0;
-  for (const { item, key } of references) {
+  for (const { item, key, secondary } of references) {
     const reference = String(item[key] || "");
-    const browserId = reference.startsWith("browser-asset:") ? reference.slice("browser-asset:".length) : reference.startsWith("native-assets/") ? null : item.browser_asset_id;
+    const browserId = reference.startsWith("browser-asset:") ? reference.slice("browser-asset:".length) : secondary || reference.startsWith("native-assets/") ? null : item.browser_asset_id;
     if (!reference && !browserId) continue;
     const sourceKey = browserId ? `browser-asset:${browserId}` : reference;
     let id = resolved.get(sourceKey);
@@ -204,8 +205,8 @@ async function exportBundle(snapshot) {
       resolved.set(sourceKey, id);
     }
     item[key] = `browser-asset:${id}`;
-    item.browser_asset_id = id;
-    delete item.browser_preview_url;
+    if (secondary && item.native_stationary_baseline_sha256 && assetRecords.find(asset => asset.logical_id === id)?.sha256 !== item.native_stationary_baseline_sha256) throw new Error("Stationary control checksum mismatch.");
+    if (!secondary) { item.browser_asset_id = id; delete item.browser_preview_url; }
   }
   const profileId = `custom_${String(design.name || "profile").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 32) || "profile"}`;
   const profile = { schema: "pps-study-profile.v1", profile_id: profileId, profile_kind: "custom", display_name: design.name, design, assets: assetRecords };

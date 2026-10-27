@@ -6,6 +6,7 @@ export function createNativeDesigner(call = invoke, enabled = typeof window !== 
   let epoch = 0;
   let queue = Promise.resolve();
   let activeJob = null;
+  let pendingJob = false;
   let invalidationPending = false;
   const enqueue = operation => {
     const next = queue.then(operation);
@@ -51,12 +52,32 @@ export function createNativeDesigner(call = invoke, enabled = typeof window !== 
       });
     },
     async generate(snapshot, payload, optIn) {
+      return this.runJob("designer_generate", { snapshot: structuredClone(snapshot), payload, optIn }, "Generating native audio…");
+    },
+    async baseline(snapshot, source, optIn) {
+      return this.runJob("designer_baseline", { snapshot: structuredClone(snapshot), source, optIn }, "Generating a stationary control…");
+    },
+    async review(snapshot, variants) {
+      return this.runJob("designer_review", { snapshot: structuredClone(snapshot), variants }, "Verifying full blocks and participant order…");
+    },
+    async accept(hashes) {
+      await enqueue(() => call("designer_accept_review", { expectedRevision: revision, hashes }));
+      return this.load();
+    },
+    async prepare(participant, identity) {
+      return this.runJob("designer_prepare", { participant, identity }, "Preparing immutable participant files…");
+    },
+    openPrepared: () => call("designer_open_prepared"),
+    exportAudio: reference => call("designer_export_audio", { reference }),
+    async runJob(command, args, message) {
+      if (pendingJob || activeJob) throw new Error("Native work is already running.");
       const origin = epoch;
-      const captured = structuredClone(snapshot);
-      const job = await enqueue(() => call("designer_generate", { expectedRevision: revision, snapshot: captured, payload, optIn }));
-      activeJob = job.job_id;
-      status("Generating native audio…");
+      pendingJob = true;
       try {
+        const job = await enqueue(() => call(command, { expectedRevision: revision, ...args }));
+        if (!job) return null;
+        activeJob = job.job_id;
+        status(message);
         for (;;) {
           await new Promise(done => setTimeout(done, 250));
           const current = await call("designer_job", { jobId: job.job_id });
@@ -64,14 +85,14 @@ export function createNativeDesigner(call = invoke, enabled = typeof window !== 
           if (current.status !== "succeeded") throw new Error(current.result?.error || current.message || current.status);
           const response = await this.load();
           if (origin !== epoch) throw new Error("The draft changed. Obsolete generation was discarded.");
-          status("Native audio ready; later segments need review.");
+          status(current.message || "Native work complete.");
           return { snapshot: response.snapshot, result: current.result };
         }
-      } finally { activeJob = null; }
+      } finally { activeJob = null; pendingJob = false; }
     },
     async cancel() {
       epoch++;
-      if (activeJob) { await call("designer_cancel"); status("Cancelling native generation…"); }
+      if (activeJob || pendingJob) { await enqueue(() => call("designer_cancel")); status("Cancelling native work…"); }
     },
   };
 }

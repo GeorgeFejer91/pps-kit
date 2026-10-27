@@ -244,3 +244,42 @@ test("stopped source preview cannot start after its delayed audio decode finishe
   assert.equal(await pending, false);
   assert.equal(starts, 0);
 });
+
+test("portable stationary controls retain distinct bytes and never replace the moving source identity", async () => {
+  const moving = new Uint8Array([82,73,70,70,1,2,3]);
+  const control = new Uint8Array([82,73,70,70,8,9,10]);
+  const hash = bytes => webcrypto.subtle.digest("SHA-256", bytes).then(value => Buffer.from(value).toString("hex"));
+  const controlHash = await hash(control);
+  const context = vm.createContext({window:{}, Blob, TextEncoder, Uint8Array, structuredClone, crypto:webcrypto});
+  vm.runInContext(chrome.replace(/initializeChrome\(\);\s*$/, ""), context);
+  vm.runInContext("saveProfileDownload = async blob => { globalThis.download = blob; };", context);
+  context.window.PPSDesigner.drafts.asset = async id => ({bytes:id === "moving.wav" ? moving : control, type:"audio/wav", name:id});
+  const snapshot = {design:{name:"Distinct controls",noises:[{label:"Moving",prebaked_path:"browser-asset:moving.wav",browser_asset_id:"moving.wav",native_stationary_baseline_asset:"browser-asset:control.wav",native_stationary_baseline_sha256:controlHash,native_stationary_baseline_provenance:{qualification:"unqualified"}}]}};
+  await context.window.PPSDesigner.exportBundle(snapshot);
+  const files = zipEntries(new Uint8Array(await context.download.arrayBuffer()));
+  const source = JSON.parse(new TextDecoder().decode(files.get("profile.json"))).design.noises[0];
+  assert.equal(source.browser_asset_id,"moving.wav");
+  assert.equal(source.prebaked_path,"browser-asset:moving.wav");
+  assert.equal(source.native_stationary_baseline_asset,"browser-asset:control.wav");
+  assert.equal(source.native_stationary_baseline_sha256,controlHash);
+  assert.deepEqual(files.get("assets/moving.wav"),moving);
+  assert.deepEqual(files.get("assets/control.wav"),control);
+  context.window.PPSDesigner.drafts.asset = async id => id === "moving.wav" ? {bytes:moving,type:"audio/wav",name:id} : null;
+  context.download = null;
+  await assert.rejects(context.window.PPSDesigner.exportBundle(snapshot),/audio is missing: control.wav/);
+  assert.equal(context.download,null);
+});
+
+test("collecting rendered sources retains native comparator, hash and loudness receipts", () => {
+  const original={label:"Pink",noise_type:"pink",gain:1,prebaked_path:"native-assets/moving.wav",native_stationary_baseline_asset:"native-assets/control.wav",native_stationary_baseline_sha256:"c".repeat(64),loudness_policy:{kind:"linear_db_ramp"},native_stationary_baseline_provenance:{qualification:"unqualified"}};
+  const fields={label:"Pink",noise_type:"pink",gain:"1",prebaked_path:original.prebaked_path};
+  const card={dataset:{selectIngredient:"Pink"},querySelector(selector){const name=selector.match(/data-field="([^"]+)"/)[1];return {value:fields[name] || ""};}};
+  const context=vm.createContext({state:{design:{noises:[original]}},clone:structuredClone,$:()=>({querySelectorAll:()=>[card]}),readJsonField:()=>null,GOLD_STANDARD_SOURCE_PROFILE:"gaussian"});
+  const start=app.indexOf("function collectNoises(");
+  vm.runInContext(app.slice(start,app.indexOf("\nfunction ",start+1)),context);
+  const result=vm.runInContext("collectNoises()[0]",context);
+  assert.equal(result.native_stationary_baseline_asset,original.native_stationary_baseline_asset);
+  assert.equal(result.native_stationary_baseline_sha256,original.native_stationary_baseline_sha256);
+  assert.equal(result.loudness_policy.kind,"linear_db_ramp");
+  assert.notEqual(result.native_stationary_baseline_provenance,original.native_stationary_baseline_provenance);
+});

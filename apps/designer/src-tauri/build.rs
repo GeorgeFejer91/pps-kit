@@ -5,11 +5,17 @@ fn main() {
             "designer_invalidate",
             "designer_save",
             "designer_generate",
+            "designer_baseline",
+            "designer_review",
+            "designer_accept_review",
+            "designer_prepare",
+            "designer_open_prepared",
             "designer_job",
             "designer_cancel",
             "designer_pick_audio",
             "designer_import_profile",
             "designer_export_profile",
+            "designer_export_audio",
         ]),
     ))
     .expect("failed to build the Designer command manifest");
