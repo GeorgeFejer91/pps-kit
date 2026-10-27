@@ -33,20 +33,20 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 138 study/context rows,
-53 registered publication inventories, three access-audited unresolved publication
-units, and 38 publication inventories still unassessed. Registry presence alone
+Current checkpoint (2026-10-27): 94 frozen publications, 141 study/context rows,
+54 registered publication inventories, four access-audited publications,
+and 36 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 45 Methods-backed inventories (33 current primary
+The current audit records 47 Methods-backed inventories (35 current primary
 reviews, eleven retained primary reviews, and one identified author version whose
-final comparison is pending), four abstract/metadata inventories, four partial
-Methods inventories, three audited access blockers, and 38 unregistered publications.
-Only 41 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 53 still need inventory
+final comparison is pending), four abstract/metadata inventories, three partial
+Methods inventories, four audited access blockers, and 36 unregistered publications.
+Only 44 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 50 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
@@ -154,6 +154,14 @@ not replace the inaccessible journal Methods. It distinguishes150-Hz chest
 targets from heel contexts and a no-heel baseline from target-absent catches.
 The corpus identity audit now retains the conference7989970/7989907duplicate
 identifier and page discrepancy; frozen membership is unchanged.
+
+The consciousness final and exact preprint v1 now have independently reviewed
+healthy and clinical protocols. The final explicitly supplies healthy synchrony
+and ear-pressure matching; those details are not backfilled into v1. Both retain
+the reversed tactile-matching rule, and sleep allocation remains unresolved.
+The tool-use ERP paper has three abstract-identified rows with all eleven exact
+contracts access-blocked after actual primary-source attempts. These reported
+experiment labels do not establish three independent cohorts.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the

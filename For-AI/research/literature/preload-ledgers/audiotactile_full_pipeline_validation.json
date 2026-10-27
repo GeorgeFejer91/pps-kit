@@ -5093,7 +5093,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract PPS task timing, distances, tactile settings, response rules, and trial repetition counts separately from electrophysiology; electrophysiology context is non-blocking unless trigger timing changes task execution"
+            "Primary abstract identifies three experiments, but full Methods inventory/cohort linkage and all eleven exact acquisition contracts remain inaccessible after repository/publisher attempts.20-minute145-cm-rake or visual training is a manipulation, not a trial-count specification."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -5128,9 +5128,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract PPS task timing, distances, tactile settings, response rules, and trial repetition counts separately from electrophysiology; electrophysiology context is non-blocking unless trigger timing changes task execution"
+        "Primary abstract identifies three experiments, but full Methods inventory/cohort linkage and all eleven exact acquisition contracts remain inaccessible after repository/publisher attempts.20-minute145-cm-rake or visual training is a manipulation, not a trial-count specification."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract PPS task timing, distances, tactile settings, response rules, and trial repetition counts separately from electrophysiology; electrophysiology context is non-blocking unless trigger timing changes task execution",
+      "next_required_action": "Extract or source the missing paper parameters: Primary abstract identifies three experiments, but full Methods inventory/cohort linkage and all eleven exact acquisition contracts remain inaccessible after repository/publisher attempts.20-minute145-cm-rake or visual training is a manipulation, not a trial-count specification.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -6622,7 +6622,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract near/far audiotactile stimulus distances, tactile settings, timing, trial counts, response/trigger settings, and apparatus details independently of sleep or clinical endpoint"
+            "Original white-noise waveform/audio rate/envelope; healthy intensity-matching contradiction and40%quantity basis; precise awake/sleep ITI support/anchor and overnight allocation; clinical electrical pulse width/train waveform and exact breaks. Primary final/SI now confirms two formal experiments and final-specific healthy synchrony/ear-pressure equalization; no calibration inferred."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -6657,9 +6657,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract near/far audiotactile stimulus distances, tactile settings, timing, trial counts, response/trigger settings, and apparatus details independently of sleep or clinical endpoint"
+        "Original white-noise waveform/audio rate/envelope; healthy intensity-matching contradiction and40%quantity basis; precise awake/sleep ITI support/anchor and overnight allocation; clinical electrical pulse width/train waveform and exact breaks. Primary final/SI now confirms two formal experiments and final-specific healthy synchrony/ear-pressure equalization; no calibration inferred."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract near/far audiotactile stimulus distances, tactile settings, timing, trial counts, response/trigger settings, and apparatus details independently of sleep or clinical endpoint",
+      "next_required_action": "Extract or source the missing paper parameters: Original white-noise waveform/audio rate/envelope; healthy intensity-matching contradiction and40%quantity basis; precise awake/sleep ITI support/anchor and overnight allocation; clinical electrical pulse width/train waveform and exact breaks. Primary final/SI now confirms two formal experiments and final-specific healthy synchrony/ear-pressure equalization; no calibration inferred.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

@@ -16,7 +16,7 @@ doi:10.1016/j.cognition.2015.07.012,yes,retained_primary_methods_review,confirme
 doi:10.1016/j.cognition.2018.04.001,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.cortex.2017.08.033,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.cortex.2020.11.021,yes,primary_methods_reviewed,confirmed_one_audiotactile_group_comparison,1,1,yes,yes,"https://arodes.hes-so.ch/nanna/record/7034/files/Published%20version.pdf::section 2.2.3, journal pp. 60-61",2026-10-27
-doi:10.1016/j.cortex.2021.08.004,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1016/j.cortex.2021.08.004,yes,audited_source_access_gap,source_access_blocked_three_abstract_reported_experiments,3,3,yes,yes,"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:34666298%20AND%20SRC:MED&format=json&resultType=core::primary author abstract, PubMed34666298",2026-10-27
 doi:10.1016/j.cortex.2025.11.015,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.cub.2013.01.043,yes,retained_primary_methods_review,confirmed_total,3,3,yes,yes,artifacts/paper_metadata_audit/publication_pdfs/doi_10.1016_j.cub.2013.01.043__105d921e527a.pdf::PDF pp.1-5; metadata_audit.jsonl::teneggi_2013_social_face,2026-10-27
 doi:10.1016/j.jneumeth.2019.108534,yes,primary_methods_reviewed,confirmed_one_two_session_audiotactile_experiment,1,1,yes,yes,"https://hal.science/hal-02418179/document::sections 2.1-2.3, manuscript pp. 3-7; Table 2 p. 5",2026-10-27
@@ -37,7 +37,7 @@ doi:10.1016/j.neuropsychologia.2026.109490,yes,abstract_or_metadata_inventory,co
 doi:10.1016/j.nicl.2019.101940,yes,retained_primary_methods_review,confirmed_total,2,2,yes,yes,manual_reviews/disorders_consciousness_2019.json,2026-10-27
 doi:10.1016/j.schres.2021.06.026,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1016/j.tics.2016.01.005,no,not_registered,not_assessed,1,0,no,no,,
-doi:10.1016/j.xcrm.2026.102705,yes,partial_methods_inventory,formal_experiment_numbering_unverified,2,2,yes,no,publication_network.v3.json::doi:10.1016/j.xcrm.2026.102705; manual_reviews/cell_reports_medicine_2026_consciousness.json::profile_recreation_assessment; manual_reviews/cell_reports_medicine_2026_consciousness.json::segment_field_audit,2026-10-27
+doi:10.1016/j.xcrm.2026.102705,yes,primary_methods_reviewed,confirmed_two_cohort_specific_pps_experiments,2,2,yes,yes,"https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/fullTextXML::STARMethods, participant/protocol sections; publisherPDFpp.15-18/e1-e4",2026-10-27
 doi:10.1038/s41598-019-45084-4,yes,primary_methods_reviewed,confirmed_pilot_and_main_experiment,2,2,yes,yes,https://pure-oai.bham.ac.uk/ws/portalfiles/portal/70592622/Orioli_et_al_Identifying_peripersonal_space_Scientific_Reports_2019.pdf::Results/Pilot study and Study 1; Methods pp. 8-9; Table 4 and Figure 3,2026-10-27
 doi:10.1038/s41598-019-45224-w,yes,primary_methods_reviewed,confirmed_longitudinal_audio_tactile_task,1,1,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6565702/fullTextXML::Methods/Procedure,2026-10-27
 doi:10.1038/s41598-020-79767-0,yes,primary_methods_reviewed,confirmed_main_audio_tactile_experiment,1,1,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7806762/fullTextXML::Methods/Design,2026-10-27
@@ -57,7 +57,7 @@ doi:10.1093/neucas/7.2.97,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1093/oso/9780198851738.003.0005,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1093/schbul/sbac067,yes,primary_methods_reviewed,confirmed_one_group_comparison_experiment,1,1,yes,yes,https://www.unipr.it/sites/default/files/2022-06/Ferroni%20et%20al%202022_0.pdf::Procedure p. 3; publisher Supplementary Materials section 1.2 Apparatus and Procedure,2026-10-27
 doi:10.1098/rsos.181878,yes,primary_methods_reviewed,confirmed_three_social_context_experiments,3,3,yes,yes,https://pmc.ncbi.nlm.nih.gov/articles/PMC6731720/::sections 2.1-2.4,2026-10-27
-doi:10.1101/2024.10.25.619776,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1101/2024.10.25.619776,yes,primary_methods_reviewed,confirmed_two_cohort_specific_pps_protocols_preprint_v1,2,2,yes,yes,https://www.biorxiv.org/content/10.1101/2024.10.25.619776v1.full.pdf::Methodspp.17-21,2026-10-27
 doi:10.1101/2025.06.25.660685,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1101/2025.09.02.673729,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1101/249078,yes,primary_methods_reviewed,confirmed_one_passive_trunk_ieeg_experiment,1,1,yes,yes,https://www.biorxiv.org/content/10.1101/249078v1.full.pdf::Methods pp.4-5,2026-10-27
