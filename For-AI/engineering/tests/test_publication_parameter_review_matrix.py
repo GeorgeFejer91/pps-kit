@@ -59,9 +59,9 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(summary["targetConfigurationCandidates"], 275)
         self.assertEqual(summary["targetValidationLeaves"], 6)
         self.assertEqual(summary["targetMethodReviewCells"], 34_844)
-        self.assertEqual(summary["structuredOrientationReviewRecords"], 7)
+        self.assertEqual(summary["structuredOrientationReviewRecords"], 8)
         self.assertEqual(summary["experimentSpecificOrientationRows"], 4)
-        self.assertEqual(summary["combinedOrientationRows"], 8)
+        self.assertEqual(summary["combinedOrientationRows"], 10)
         self.assertEqual(summary["automatedVisualizationCandidates"], 173)
         self.assertEqual(summary["studyVisualizationCandidateRows"], 247)
         self.assertEqual(summary["confirmedVisualizationRows"], 0)
@@ -359,8 +359,15 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(orientation_counts["structured_orientation_review_present"], 4)
         self.assertEqual(
             orientation_counts["combined_record_orientation_requires_experiment_check"],
-            8,
+            10,
         )
+
+        # The existing Canzoneri tool-use review covers two experiments jointly;
+        # neither inherits a false experiment-specific orientation confirmation.
+        tool_use = [row for row in orientation if row["record_id"] == "canzoneri_2013_tool_use_reshaping"]
+        self.assertEqual(len(tool_use), 2)
+        self.assertEqual({row["orientation_review_status"] for row in tool_use},
+                         {"combined_record_orientation_requires_experiment_check"})
 
         visualization_header, visualizations = read_csv(
             self.output_dir / "study_visualizations.csv"
