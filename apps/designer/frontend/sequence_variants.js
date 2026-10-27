@@ -30,6 +30,7 @@ export function countStripVariants(strip = {}) {
 
 export function assertCountLimit(count, limit = Number.MAX_SAFE_INTEGER) {
   if (!Number.isSafeInteger(limit) || limit < 0) throw new RangeError("Invalid sequence limit.");
+  if (count < 0) throw new RangeError("Sequence count must be nonnegative.");
   if (!Number.isSafeInteger(count)) throw new RangeError("This plan exceeds the safe integer count. Reduce its choices before generating; the draft is preserved.");
   if (count > limit) throw new RangeError(`This plan exceeds the limit of ${limit}. Reduce its choices before generating; the draft is preserved.`);
   return count;
