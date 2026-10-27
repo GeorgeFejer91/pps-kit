@@ -17,7 +17,9 @@ const reviews = JSON.parse(bytes);
 assert.ok(reviews.inventoryAudit, "The fixture must contain generated inventory audit evidence");
 const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
 const server = createServer(async (request, response) => {
-  const path = resolve(root, `.${decodeURIComponent(new URL(request.url, "http://localhost").pathname)}`);
+  let pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+  if (["/assets/preloads/", "/assets/breathing/", "/study_templates/"].some(prefix => pathname.startsWith(prefix))) pathname = `/packages/pps-resources${pathname}`;
+  const path = resolve(root, `.${pathname}`);
   if (!path.startsWith(root.endsWith(sep) ? root : root + sep)) { response.writeHead(403).end(); return; }
   try { const bytes = await readFile(path); response.writeHead(200, { "Content-Type": types[extname(path)] || "application/octet-stream" }).end(bytes); }
   catch { response.writeHead(404).end(); }
