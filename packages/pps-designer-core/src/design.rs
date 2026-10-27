@@ -647,7 +647,27 @@ fn trajectory_from_payload(
     controls: Option<&Value>,
 ) -> Result<(TrajectorySpec, f64, f64, f64), CapabilityError> {
     let t = &design["trajectory"];
-    let mode = text(t, "coordinate_mode")?;
+    // design_from_dict defaults old radius-only payloads to polar, but infers
+    // Cartesian mode when any endpoint field exists. Do not force the HTML
+    // adapter to invent a field absent from the saved Python schema.
+    let cartesian_fields = [
+        "start_x_m",
+        "start_y_m",
+        "start_z_m",
+        "end_x_m",
+        "end_y_m",
+        "end_z_m",
+    ];
+    let inferred_mode = if cartesian_fields.iter().any(|key| t.get(key).is_some()) {
+        "cartesian"
+    } else {
+        "polar"
+    };
+    let mode = t
+        .get("coordinate_mode")
+        .map(|_| text(t, "coordinate_mode"))
+        .transpose()?
+        .unwrap_or(inferred_mode);
     if !["polar", "cartesian"].contains(&mode) {
         return Err(error(
             "unsupported_trajectory_mode",
@@ -667,7 +687,11 @@ fn trajectory_from_payload(
         ));
     }
     let movement = if speed > 0.0 { length / speed } else { 0.0 };
-    let trajectory = if mode == "cartesian" {
+    let trajectory = if mode == "cartesian"
+        || cartesian_fields
+            .iter()
+            .any(|key| t.get(key).is_some_and(|v| !v.is_null()))
+    {
         let point = |prefix: &str| -> Result<Position, CapabilityError> {
             Ok(Position {
                 x_m: number(t, &format!("{prefix}_x_m"), None)?,
