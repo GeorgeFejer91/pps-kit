@@ -1320,6 +1320,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         studies = {row["studyRowId"]: row for row in data["studies"]}
         for study_id in ids:
             self.assertEqual(studies[study_id]["inventoryStatus"], "author_version_inventory_assessed_final_comparison_pending")
+            self.assertEqual(studies[study_id]["evidenceScope"], "study_specific_source_review")
             self.assertNotIn("not_assessed", studies[study_id]["parameterStatusCounts"])
             for contract in studies[study_id]["contracts"]:
                 self.assertEqual(contract["evidenceSourceUrl"], "https://backoffice.biblio.ugent.be/download/8673877/8673880")
@@ -1336,6 +1337,12 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(pilot["catch_trial_contract"]["status"], "not_reported")
         self.assertIn("source_recipe_or_asset_provenance", main["auditory_stimulus"]["missingComponents"])
         self.assertEqual(main["jitter_iti_policy"]["status"], "partial")
+        self.assertIn("50-ms 784-Hz tone with 50-Hz", main["auditory_stimulus"]["value"])
+        self.assertIn("and 5-ms", main["auditory_stimulus"]["value"])
+        # Resolving the compact review must not promote the coarse composite
+        # record or imply equivalence with the inaccessible final article.
+        index = read_csv(self.output_dir / "study_instance_index.csv")[1]
+        self.assertEqual(next(row for row in index if row["study_row_id"] == ids[0])["parameter_evidence_scope"], "composite_requires_split")
 
     def test_inventory_audit_does_not_count_registry_presence_as_methods_review(self) -> None:
         rows = read_csv(self.output_dir / "publication_inventory_audit.csv")[1]
