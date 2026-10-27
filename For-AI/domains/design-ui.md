@@ -92,6 +92,16 @@ Native status distinguishes supported durable event/result recording from active
 trial-response capture. This preview explicitly marks LSL mirroring, audio
 recording and physical capture unsupported; playback is not capture evidence.
 
+Premade native proxy receipts retain their advertised sidecar hash and policy
+through static source hydration. Portable export embeds the exact UTF-8 JSON in
+`native_premade_provenance` after verifying its hash and binding it to the actual
+WAV checksum. Offline re-export and native import repeat those checks; malformed,
+stale or oversized receipts fail before publication. The receipt limit is 256 KiB
+and total profile JSON remains within the native 8 MiB limit. Preserved evidence
+does not confer source conformance or physical qualification. A canonical Chromium
+export/re-export of both Serino Exp3 assets and native offline materialization
+passed; installed application behavior remains a separate gate.
+
 Portable hosted exports embed referenced premade WAVs, spoken instruction clips
 and browser uploads. Resolve premades from their existing inventory/colocated
 spoken manifest and verify SHA-256 before rebinding audio references into the

@@ -1273,6 +1273,11 @@ function studyProtocolPriority(templateId) {
   return 100;
 }
 
+function staticPremadeProvenance(asset) {
+  return Object.fromEntries(["native_generation_provenance", "native_generation_provenance_sha256", "proxy_policy"]
+    .filter(key => asset[key] !== undefined).map(key => [key, asset[key]]));
+}
+
 function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory) {
   const entry = staticInventoryProfile(templateId, inventory);
   if (!entry) {
@@ -1323,6 +1328,7 @@ function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory
       motion_mode: asset.motion_mode || "",
       render_mode: asset.render_mode || "",
       include_tactile: asset.include_tactile,
+      ...staticPremadeProvenance(asset),
       trajectory_snapshot: asset.trajectory_snapshot || {}
     };
   });
@@ -2332,6 +2338,7 @@ function hydrateStaticSourceAssets(design, status) {
     if (!asset) continue;
     consumed.add(key);
     noise.prebaked_path = noise.prebaked_path || asset.path;
+    if (noise.prebaked_path === asset.path) Object.assign(noise, staticPremadeProvenance(asset));
     noise.noise_type = noise.noise_type || asset.noise_type || asset.tone_type || "pink";
     noise.motion_mode = noise.motion_mode || asset.motion_mode || "looming";
     noise.trajectory_snapshot = Object.keys(noise.trajectory_snapshot || {}).length
@@ -2344,6 +2351,7 @@ function hydrateStaticSourceAssets(design, status) {
     if (!asset) continue;
     consumed.add(key);
     source.path = source.path || asset.path;
+    if (source.path === asset.path) Object.assign(source, staticPremadeProvenance(asset));
     source.tone_type = source.tone_type || asset.tone_type || asset.noise_type || "custom_audio";
     source.motion_mode = source.motion_mode || asset.motion_mode || "looming";
     source.trajectory_snapshot = Object.keys(source.trajectory_snapshot || {}).length
@@ -2363,6 +2371,7 @@ function hydrateStaticSourceAssets(design, status) {
       tone_type: asset.noise_type || asset.tone_type || "custom_audio",
       gain: 1.0,
       motion_mode: asset.motion_mode || "looming",
+      ...staticPremadeProvenance(asset),
       trajectory_snapshot: clone(asset.trajectory_snapshot || {}),
     });
   }
@@ -2575,6 +2584,7 @@ function staticRenderStatus(status) {
       sample_rate: asset.sample_rate,
       channels: asset.channels,
       source_kind: asset.source_kind,
+      ...staticPremadeProvenance(asset),
       noise_type: asset.noise_type,
       tone_type: asset.tone_type,
       trajectory_snapshot: asset.trajectory_snapshot || {}

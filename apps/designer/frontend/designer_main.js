@@ -114,6 +114,49 @@ async function sha256(bytes) {
     .map((value) => value.toString(16).padStart(2, "0")).join("");
 }
 
+async function readPortableBytes(response, limit, label) {
+  const reader = response.body.getReader();
+  const chunks = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > limit) throw new Error(`${label} exceeds its portable size limit.`);
+      chunks.push(value);
+    }
+  } finally { await reader.cancel(); }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  return bytes;
+}
+
+async function embedPremadeProvenance(source, audioHash) {
+  const limit = 256 * 1024;
+  let receipt = source.native_premade_provenance;
+  if (receipt === undefined && source.native_generation_provenance === undefined && source.native_generation_provenance_sha256 === undefined) return;
+  if (receipt === undefined) {
+    const path = source.native_generation_provenance;
+    const digest = source.native_generation_provenance_sha256;
+    if (typeof path !== "string" || !/^assets\/preloads\/[a-zA-Z0-9_./-]+\.json$/.test(path) || path.split("/").some(part => !part || part === "." || part === "..") || !/^[a-f0-9]{64}$/.test(digest || "")) throw new Error("Invalid premade provenance reference.");
+    const url = window.PPSDesignerApp?.preloadAssetUrl(path);
+    if (!url) throw new Error("Premade provenance cannot be resolved in this Designer.");
+    const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (!response.ok) throw new Error(`Premade provenance download failed (${response.status}).`);
+    const bytes = await readPortableBytes(response, limit, "Premade provenance");
+    receipt = { json_utf8: new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes), sha256: digest };
+  }
+  if (!receipt || typeof receipt.json_utf8 !== "string" || !/^[a-f0-9]{64}$/.test(receipt.sha256 || "") || Object.keys(receipt).some(key => !["json_utf8", "sha256"].includes(key))) throw new Error("Invalid embedded premade provenance.");
+  const bytes = new TextEncoder().encode(receipt.json_utf8);
+  if (bytes.length > limit) throw new Error("Premade provenance exceeds its portable size limit.");
+  if (await sha256(bytes) !== receipt.sha256 || (source.native_generation_provenance_sha256 !== undefined && source.native_generation_provenance_sha256 !== receipt.sha256)) throw new Error("Premade provenance checksum mismatch.");
+  const evidence = JSON.parse(receipt.json_utf8);
+  if (evidence?.asset?.sha256 !== audioHash || (source.proxy_policy !== undefined && evidence?.proxy_policy !== source.proxy_policy)) throw new Error("Premade provenance does not match this audio or proxy policy.");
+  source.native_premade_provenance = receipt;
+}
+
 async function exportBundle(snapshot) {
   const encoder = new TextEncoder();
   const design = structuredClone(snapshot.design);
@@ -131,8 +174,17 @@ async function exportBundle(snapshot) {
   let totalBytes = 0;
   for (const { item, key, secondary } of references) {
     const reference = String(item[key] || "");
+    if (!secondary) {
+      const listed = inventory.get(reference);
+      for (const field of ["native_generation_provenance", "native_generation_provenance_sha256", "proxy_policy"]) {
+        if (item[field] === undefined && listed?.[field] !== undefined) item[field] = listed[field];
+      }
+    }
     const browserId = reference.startsWith("browser-asset:") ? reference.slice("browser-asset:".length) : secondary || reference.startsWith("native-assets/") ? null : item.browser_asset_id;
-    if (!reference && !browserId) continue;
+    if (!reference && !browserId) {
+      if (!secondary && ["native_premade_provenance", "native_generation_provenance", "native_generation_provenance_sha256"].some(field => item[field] !== undefined)) throw new Error("Premade provenance has no audio reference.");
+      continue;
+    }
     const sourceKey = browserId ? `browser-asset:${browserId}` : reference;
     let id = resolved.get(sourceKey);
     if (!id) {
@@ -170,21 +222,7 @@ async function exportBundle(snapshot) {
         if (!url) throw new Error("Preloaded audio cannot be resolved in this Designer.");
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Preloaded audio download failed (${response.status}): ${item.label || reference}`);
-        const reader = response.body.getReader();
-        const chunks = [];
-        let size = 0;
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            size += value.byteLength;
-            if (size > 64 * 1024 * 1024) throw new Error("Audio exceeds the 64 MiB portable asset limit.");
-            chunks.push(value);
-          }
-        } finally { await reader.cancel(); }
-        bytes = new Uint8Array(size);
-        let offset = 0;
-        for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+        bytes = await readPortableBytes(response, 64 * 1024 * 1024, "Audio");
         digest = await sha256(bytes);
         if (digest !== asset.sha256) throw new Error(`Preloaded audio checksum mismatch: ${item.label || reference}`);
         id = `${digest}.wav`;
@@ -205,12 +243,14 @@ async function exportBundle(snapshot) {
       resolved.set(sourceKey, id);
     }
     item[key] = `browser-asset:${id}`;
+    if (!secondary) await embedPremadeProvenance(item, assetRecords.find(asset => asset.logical_id === id).sha256);
     if (secondary && item.native_stationary_baseline_sha256 && assetRecords.find(asset => asset.logical_id === id)?.sha256 !== item.native_stationary_baseline_sha256) throw new Error("Stationary control checksum mismatch.");
     if (!secondary) { item.browser_asset_id = id; delete item.browser_preview_url; }
   }
   const profileId = `custom_${String(design.name || "profile").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 32) || "profile"}`;
   const profile = { schema: "pps-study-profile.v1", profile_id: profileId, profile_kind: "custom", display_name: design.name, design, assets: assetRecords };
   const profileBytes = encoder.encode(`${JSON.stringify(profile, null, 2)}\n`);
+  if (profileBytes.length > 8 * 1024 * 1024) throw new Error("Profile metadata exceeds the 8 MiB portable limit.");
   files.unshift({ name: "profile.json", bytes: profileBytes });
   const fileInventory = [];
   for (const file of files) fileInventory.push({ path: file.name, sha256: await sha256(file.bytes), bytes: file.bytes.length });

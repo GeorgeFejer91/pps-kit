@@ -281,7 +281,60 @@ fn audio_header(bytes: &[u8]) -> bool {
         || (bytes.len() >= 12 && &bytes[4..8] == b"ftyp")
 }
 
-fn rebind_group(group: &mut Value, field: &str, assets: &BTreeMap<String, PathBuf>) -> Result<()> {
+fn validate_premade_provenance(
+    item: &serde_json::Map<String, Value>,
+    audio_hash: Option<&str>,
+) -> Result<()> {
+    let Some(receipt) = item.get("native_premade_provenance") else {
+        return if item.contains_key("native_generation_provenance")
+            || item.contains_key("native_generation_provenance_sha256")
+        {
+            Err(ProfileBundleError::InvalidProfile)
+        } else {
+            Ok(())
+        };
+    };
+    let receipt = receipt
+        .as_object()
+        .ok_or(ProfileBundleError::InvalidProfile)?;
+    let text = receipt
+        .get("json_utf8")
+        .and_then(Value::as_str)
+        .ok_or(ProfileBundleError::InvalidProfile)?;
+    let hash = receipt
+        .get("sha256")
+        .and_then(Value::as_str)
+        .ok_or(ProfileBundleError::InvalidProfile)?;
+    if text.len() > 256 * 1024 {
+        return Err(ProfileBundleError::ResourceLimit);
+    }
+    if receipt.len() != 2
+        || !digest_valid(hash)
+        || format!("{:x}", Sha256::digest(text.as_bytes())) != hash
+        || item
+            .get("native_generation_provenance_sha256")
+            .is_some_and(|advertised| advertised.as_str() != Some(hash))
+    {
+        return Err(ProfileBundleError::InvalidProfile);
+    }
+    let evidence: Value =
+        serde_json::from_str(text).map_err(|_| ProfileBundleError::InvalidProfile)?;
+    if audio_hash.is_none()
+        || evidence.pointer("/asset/sha256").and_then(Value::as_str) != audio_hash
+        || item
+            .get("proxy_policy")
+            .is_some_and(|policy| evidence.get("proxy_policy") != Some(policy))
+    {
+        return Err(ProfileBundleError::InvalidProfile);
+    }
+    Ok(())
+}
+
+fn rebind_group(
+    group: &mut Value,
+    field: &str,
+    assets: &BTreeMap<String, (PathBuf, String)>,
+) -> Result<()> {
     if group.is_null() {
         return Ok(());
     }
@@ -309,10 +362,16 @@ fn rebind_group(group: &mut Value, field: &str, assets: &BTreeMap<String, PathBu
             return Err(ProfileBundleError::MissingAsset);
         }
         if path.is_empty() && id.is_none() {
+            if primary {
+                validate_premade_provenance(item, None)?;
+            }
             continue;
         }
         let key = id.or(path_id).unwrap_or(&path);
-        let bound = assets.get(key).ok_or(ProfileBundleError::MissingAsset)?;
+        let (bound, hash) = assets.get(key).ok_or(ProfileBundleError::MissingAsset)?;
+        if primary {
+            validate_premade_provenance(item, Some(hash))?;
+        }
         item.insert(
             field.to_owned(),
             Value::String(
@@ -525,8 +584,11 @@ pub fn materialize_profile_bundle(
     let mut assets = Vec::new();
     for asset in profile.assets {
         let path = destination.join(&asset.path);
-        bindings.insert(asset.logical_id.clone(), path.clone());
-        bindings.insert(asset.path.clone(), path.clone());
+        bindings.insert(
+            asset.logical_id.clone(),
+            (path.clone(), asset.sha256.clone()),
+        );
+        bindings.insert(asset.path.clone(), (path.clone(), asset.sha256.clone()));
         assets.push(VerifiedProfileAsset {
             logical_id: asset.logical_id,
             source_name: asset.source_name,
