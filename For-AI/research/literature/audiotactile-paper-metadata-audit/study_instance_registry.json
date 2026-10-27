@@ -214,15 +214,46 @@
     {
       "network_node_id": "doi:10.1016/j.xcrm.2026.102705",
       "doi": "10.1016/j.xcrm.2026.102705",
-      "inventory_status": "formal_experiment_numbering_unverified",
-      "inventory_evidence_status": "partial_methods_inventory",
+      "inventory_status": "confirmed_two_cohort_specific_pps_experiments",
+      "inventory_evidence_status": "primary_methods_reviewed",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "The publication abstract and critical STAR Methods review distinguish two incompatible audio-tactile PPS protocol variants: healthy wake/sleep chest EEG and disorders-of-consciousness arm clinical EEG. Tracked evidence does not establish formal Experiment 1/2 numbering.",
-      "evidence_pointer": "publication_network.v3.json::doi:10.1016/j.xcrm.2026.102705; manual_reviews/cell_reports_medicine_2026_consciousness.json::profile_recreation_assessment; manual_reviews/cell_reports_medicine_2026_consciousness.json::segment_field_audit",
+      "instance_count_basis": "Fresh full final Methods explicitly labels Experiment1 healthy wake/sleep and Experiment2clinicalDoC.15healthy and72clinical recruits are two cohorts; sleep stages, dreaming categories, diagnoses and repeated sessions do not add independent experiments.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/fullTextXML::STARMethods, participant/protocol sections; publisherPDFpp.15-18/e1-e4",
       "instances": [
-        {"suffix": "a", "instance_kind": "profile_variant", "experiment_label": "Healthy wake/sleep chest EEG PPS variant", "record_id": "cell_reports_medicine_2026_consciousness", "template_ids": [], "toolkit_scope": "profile_variant_in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"},
-        {"suffix": "b", "instance_kind": "profile_variant", "experiment_label": "Disorders-of-consciousness arm clinical PPS variant", "record_id": "cell_reports_medicine_2026_consciousness", "template_ids": [], "toolkit_scope": "profile_variant_in_scope_pending_disaggregation", "disaggregation_status": "combined_record_requires_experiment_specific_review"}
-      ]
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 1: healthy wake/sleep chest EEG",
+          "record_id": "cell_reports_medicine_2026_consciousness",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Experiment 2: clinical DoC arm EEG",
+          "record_id": "cell_reports_medicine_2026_consciousness",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "review_date": "2026-10-27",
+      "source_review_limit": "Final and exactpreprintv1independently reviewed. Same two cohorts; explicit source-version differences retained. No new hardware qualification or executable calibration derived from contradictory printed update rule.",
+      "supporting_task_boundaries": [
+        {
+          "label": "Awakening interviews, clinical recovery and imaging",
+          "disposition": "supporting_assessments_not_extra_pps_experiments",
+          "basis": "Awakening questions classify recent experience; clinical scales/recovery/MRI are supporting endpoints, not per-trial responses or new acquisition cohorts.",
+          "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/fullTextXML::STARMethods/Protocol"
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.1101/2024.10.25.619776",
+        "relationship": "preprint_final_same_two_cohorts_methods_compared",
+        "basis": "bioRxiv API explicitly links final DOI; independently reviewed participant counts/protocols agree. Final adds healthy synchrony/ear-pressure wording and fills clinical Protocol placeholders already resolved elsewhere in v1."
+      }
     },
     {
       "network_node_id": "doi:10.1371/journal.pone.0044306",
@@ -1675,6 +1706,118 @@
         }
       ],
       "source_review_limit": "Full summarized protocol reviewed but many exact parameters not reported. The150-Hz chest target, heel walking context, no-heel baseline and auditory approach must remain separate. No original journal inventory, independent replication or native hardware qualification is inferred."
+    },
+    {
+      "network_node_id": "doi:10.1101/2024.10.25.619776",
+      "doi": "10.1101/2024.10.25.619776",
+      "inventory_status": "confirmed_two_cohort_specific_pps_protocols_preprint_v1",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "Exact preprint v1 Methods identifies healthy wake/sleep and clinical DoC acquisition protocols in two cohorts. Repeated states, diagnostic groups and sessions are not extra independent experiments. Primary API and Methods comparison establish lineage to the final publication.",
+      "evidence_pointer": "https://www.biorxiv.org/content/10.1101/2024.10.25.619776v1.full.pdf::Methodspp.17-21",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Healthy wake/sleep chest EEG (preprintv1)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Clinical DoC arm EEG (preprintv1)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "review_date": "2026-10-27",
+      "source_review_limit": "Final and exactpreprintv1independently reviewed. Same two cohorts; explicit source-version differences retained. No new hardware qualification or executable calibration derived from contradictory printed update rule.",
+      "supporting_task_boundaries": [
+        {
+          "label": "Awakening interviews, clinical recovery and imaging",
+          "disposition": "supporting_assessments_not_extra_pps_experiments",
+          "basis": "Awakening questions classify recent experience; clinical scales/recovery/MRI are supporting endpoints, not per-trial responses or new acquisition cohorts.",
+          "evidence_pointer": "https://www.biorxiv.org/content/10.1101/2024.10.25.619776v1.full.pdf::Methodspp.17-21"
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.1016/j.xcrm.2026.102705",
+        "relationship": "preprint_final_same_two_cohorts_methods_compared",
+        "basis": "Primary bioRxiv API and independent Methods comparison; two underlying cohorts, not four replications."
+      }
+    },
+    {
+      "network_node_id": "doi:10.1016/j.cortex.2021.08.004",
+      "doi": "10.1016/j.cortex.2021.08.004",
+      "inventory_status": "source_access_blocked_three_abstract_reported_experiments",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "Primary author abstract explicitly identifies three experiments, but full Methods cohort boundaries, counts and exact acquisition parameters remain inaccessible. Three abstract-reported units are not three Methods-confirmed independent cohorts.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:34666298%20AND%20SRC:MED&format=json&resultType=core::primary author abstract, PubMed34666298",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_behavioural_and_eeg_tool_use_scope_from_abstract",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Experiment1: Behavioral spatial-congruency control independent of auditory intensity. (abstract only)",
+          "record_id": "seeming_confines_2021",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "abstract_reported_experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "b",
+          "experiment_label": "Experiment2: EEG demonstration of greater near than far multisensory super-additivity. (abstract only)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "abstract_reported_experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        },
+        {
+          "suffix": "c",
+          "experiment_label": "Experiment3: Main experiment comparing after tool-use training versus after far-space visual discrimination training. (abstract only)",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "abstract_reported_experiment",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/b89b0a5e-9c83-4590-899d-ea49e5a68efd/Seeming%20confines.pdf",
+          "outcome": "Initial web indexing returned42page abstract/intro. Subsequent webopen/screenshot,urllib and PowerShell normalTLS requests403; no fullMethods audit claimed."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945221002835/pdf",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945221002835",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/handle/2318/1812511/1536696/Seeming%20confines.pdf",
+          "outcome": "web andnative403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.openalex.org/works/https://doi.org/10.1016/j.cortex.2021.08.004",
+          "outcome": "metadata supplied only same UniTo/publisher/PubMed routes; no independent fulltext found"
+        }
+      ],
+      "source_review_limit": "Repository/publisher403 and Elsevier bibliographic-coredata-only response do not establish full Methods access. Primary abstract scope retained; no borrowed protocol/defaults. Dataset landing-page metadata inspected, participant files not acquired."
     }
   ],
   "corpus_freeze": {
@@ -2073,6 +2216,27 @@
       "review_date": "2026-10-27",
       "reason": "Identified author thesis explicitly separates main musicians, baseline-only nonmusician controls and a power pilot. Final-article equivalence is unverified, and pilot-specific parameters are retained as missing rather than borrowed. No child alone is equivalent to the former publication placeholder.",
       "evidence_pointer": "https://backoffice.biblio.ugent.be/download/8673877/8673880::chapter3 Participants/design pp.70-74"
+    },
+    {
+      "old_study_row_id": "doi:10.1101/2024.10.25.619776",
+      "child_study_row_ids": [
+        "doi:10.1101/2024.10.25.619776::a",
+        "doi:10.1101/2024.10.25.619776::b"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Primary v1Methods distinguishes healthy wake/sleep and clinical cohorts; same underlying cohorts as final, not independent replications.",
+      "evidence_pointer": "https://www.biorxiv.org/content/10.1101/2024.10.25.619776v1.full.pdf::Methodspp.17-21"
+    },
+    {
+      "old_study_row_id": "doi:10.1016/j.cortex.2021.08.004",
+      "child_study_row_ids": [
+        "doi:10.1016/j.cortex.2021.08.004::a",
+        "doi:10.1016/j.cortex.2021.08.004::b",
+        "doi:10.1016/j.cortex.2021.08.004::c"
+      ],
+      "review_date": "2026-10-27",
+      "reason": "Primary abstract explicitly identifies three experiments. Cohort/Methods inventory remains access-audited and unresolved; no child alone equals the former publication placeholder.",
+      "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:34666298%20AND%20SRC:MED&format=json&resultType=core::abstract"
     }
   ]
 }

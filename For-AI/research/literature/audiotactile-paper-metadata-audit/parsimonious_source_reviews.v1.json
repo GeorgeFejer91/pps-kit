@@ -4471,459 +4471,562 @@
     },
     {
       "study_row_id": "doi:10.1016/j.xcrm.2026.102705::a",
-      "source_type": "manual_review_disaggregation",
-      "source_file": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/cell_reports_medicine_2026_consciousness.json",
+      "source_type": "primary_final_xml_and_rendered_publisher_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "All11compact contracts and whole-publication inventory reviewed independently across primary versions; retain calibration contradiction, source-specific synchrony/level evidence and incomplete sleep/clinical timing.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/fullTextXML",
+          "outcome": "Primary full text retrieved; Methods and rendered calibration pages inspected."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/supplementaryFiles",
+          "outcome": "Final publisher main-plus-SI PDFs retrieved and inspected."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
       "contracts": {
         "auditory_stimulus": {
-          "status": "approximation_required",
-          "value": "100-ms E-Prime-generated white-noise burst through two commercial loudspeakers; level was individual threshold +40% (mean 51 dB), equalized at the ear; original asset/code unavailable.",
-          "page_or_section": "STAR Methods; manual review Segment 1",
+          "status": "partial",
+          "value": "100-ms E-Prime2-generated white noise through commercial loudspeakers; auditory threshold plus40% (mean51dB).",
           "component_reviews": {
             "source_mode": {
               "status": "reported",
-              "value": "100-ms E-Prime-generated white-noise burst through two commercial loudspeakers; level was individual threshold +40% (mean 51 dB), equalized at the ear; original asset/code unavailable."
+              "value": "generated"
             },
             "stimulus_identity_or_asset": {
               "status": "reported",
-              "value": "100-ms E-Prime-generated white-noise burst through two commercial loudspeakers; level was individual threshold +40% (mean 51 dB), equalized at the ear; original asset/code unavailable."
+              "value": "100 ms white-noise burst."
             },
             "source_recipe_or_asset_provenance": {
-              "status": "approximation_required",
-              "value": "100-ms E-Prime-generated white-noise burst through two commercial loudspeakers; level was individual threshold +40% (mean 51 dB), equalized at the ear; original asset/code unavailable."
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Three30-trial threshold blocks starting46dB, heard decreases2dB and not heard increases2dB; average last10 per block then three block estimates. The40% quantity basis is unspecified. Final explicitly equalizes near/far sound pressure at the ear."
             }
-          }
+          },
+          "evidence_note": "Original waveform, audio sample rate, RNG/seed, bandwidth/filter and ramp are absent. EEG sampling frequency is not an audio rate.",
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "trajectory_kinematics": {
           "status": "reported_complete",
-          "value": "Geometry: Static near/far sources 30 cm and 130 cm above the chest. Kinematics: Static 100-ms burst; no looming motion or speed applies.",
-          "page_or_section": "STAR Methods; manual review Segment 1",
+          "value": "Static near/far speakers 30 and130cm above chest.",
           "component_reviews": {
             "motion_mode": {
               "status": "reported",
-              "value": "Geometry: Static near/far sources 30 cm and 130 cm above the chest. Kinematics: Static 100-ms burst; no looming motion or speed applies."
+              "value": "static"
             },
             "coordinate_frame_body_anchor": {
               "status": "reported",
-              "value": "Geometry: Static near/far sources 30 cm and 130 cm above the chest. Kinematics: Static 100-ms burst; no looming motion or speed applies."
+              "value": "chest"
             },
             "geometry": {
               "status": "reported",
-              "value": "Geometry: Static near/far sources 30 cm and 130 cm above the chest. Kinematics: Static 100-ms burst; no looming motion or speed applies."
+              "value": "30/130cm above chest; Figure1 shows30cm plus100cm speaker separation."
             },
             "timing_constraint": {
               "status": "reported",
-              "value": "Geometry: Static near/far sources 30 cm and 130 cm above the chest. Kinematics: Static 100-ms burst; no looming motion or speed applies."
+              "value": "100 ms static auditory burst; no moving-source duration/speed."
             }
-          }
+          },
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "trial_sequence": {
           "status": "partial",
-          "value": "Trial-sequence evidence recoverable from the prior combined review: Task-free randomized EEG stimulation with five condition rows and an explicit no-response rule; sleep additionally alternates stimulation/no-stimulation blocks.",
-          "page_or_section": "STAR Methods; manual review Segment 2",
-          "missing_required_components": [
-            "ordered_elements_and_source_selection"
-          ],
+          "value": "Five interleaved families: T, auditory near AN, auditory far AF, combined ANT and AFT; passive EEG acquisition.",
           "component_reviews": {
             "trial_families": {
               "status": "reported",
-              "value": "Trial-sequence evidence recoverable from the prior combined review: Task-free randomized EEG stimulation with five condition rows and an explicit no-response rule; sleep additionally alternates stimulation/no-stimulation blocks."
+              "value": "T,AN,AF,ANT,AFT."
             },
             "ordered_elements_and_source_selection": {
-              "status": "not_reported",
-              "value": ""
+              "status": "reported",
+              "value": "Five families fully randomized within awake blocks; sleep uses the same randomized family types."
             }
-          }
+          },
+          "evidence_note": "Full leading/trailing-silence and event implementation are not provided. Healthy sleep timing/counts must not be copied automatically from wakefulness.",
+          "missing_required_components": [
+            "full_trial_timeline"
+          ],
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "task_response": {
           "status": "reported_complete",
-          "value": "Task-free randomized EEG stimulation with five condition rows and an explicit no-response rule; sleep additionally alternates stimulation/no-stimulation blocks.",
-          "page_or_section": "STAR Methods; manual review Segment 2",
+          "value": "No overt response required during PPS acquisition; EEG endpoint.",
           "component_reviews": {
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Task-free randomized EEG stimulation with five condition rows and an explicit no-response rule; sleep additionally alternates stimulation/no-stimulation blocks."
+              "value": "Passive acquisition, no per-trial detection or no-go scoring."
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Task-free randomized EEG stimulation with five condition rows and an explicit no-response rule; sleep additionally alternates stimulation/no-stimulation blocks."
+              "value": "No participant response device."
             },
             "response_mapping_or_expected_action": {
               "status": "reported",
-              "value": "Task-free randomized EEG stimulation with five condition rows and an explicit no-response rule; sleep additionally alternates stimulation/no-stimulation blocks."
+              "value": "No overt PPS response."
             },
             "response_window_and_anchor": {
               "status": "not_applicable",
-              "value": "No response window applies because the experiment explicitly required no behavioral response."
+              "value": "No behavioral response deadline applies."
             }
-          }
+          },
+          "evidence_note": "Healthy awakenings/questionnaires and clinical scales are supporting assessments, not per-trial RT responses.",
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "jitter_iti_policy": {
           "status": "partial",
-          "value": "Awake ITI is 2.5-3.0 s in random 100-ms steps; the tracked review does not recover an experiment-wide ITI policy for all sleep/no-stimulation blocks.",
-          "page_or_section": "STAR Methods; manual review Segment 2",
-          "missing_required_components": [
-            "values_or_range"
-          ],
+          "value": "Awake ITI2.5-3s, described as five random100-ms steps; exact support/anchor and sleep timing unresolved.",
           "component_reviews": {
             "policy_type": {
               "status": "reported",
-              "value": "Awake ITI is 2.5-3.0 s in random 100-ms steps; the tracked review does not recover an experiment-wide ITI policy for all sleep/no-stimulation blocks."
+              "value": "Random discrete steps."
             },
             "timing_scope_and_anchor": {
-              "status": "reported",
-              "value": "Awake ITI is 2.5-3.0 s in random 100-ms steps; the tracked review does not recover an experiment-wide ITI policy for all sleep/no-stimulation blocks."
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
             },
             "values_or_range": {
-              "status": "not_reported",
-              "value": ""
+              "status": "reported",
+              "value": "2.5-3s and five100-ms steps."
+            },
+            "distribution": {
+              "status": "reported",
+              "value": "Five random steps, probabilities/endpoints unresolved."
             }
-          }
+          },
+          "evidence_note": "Both endpoints would give six values; five increments may span those endpoints, but the sampling support is not uniquely specified. Sleep only inherits condition types explicitly.",
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "soa_schedule": {
           "status": "reported_complete",
-          "value": "Audio-tactile near and far trials use synchronous auditory/tactile onset (0-ms SOA).",
-          "page_or_section": "STAR Methods; manual review Segment 3",
+          "value": "Auditory and tactile onsets synchronized, nominal0-msSOA.",
           "component_reviews": {
             "reference_event_and_sign": {
               "status": "reported",
-              "value": "Audio-tactile near and far trials use synchronous auditory/tactile onset (0-ms SOA)."
+              "value": "Simultaneous auditory/tactile onset."
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
               "status": "reported",
-              "value": "Audio-tactile near and far trials use synchronous auditory/tactile onset (0-ms SOA)."
+              "value": "0ms for near and far combined trials."
             }
-          }
+          },
+          "evidence_note": "This is the source command-level rule, not measured physical output synchrony.",
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "tactile_target": {
-          "status": "reported_complete",
-          "value": "5-ms electrical pulse below the manubrium through Digitimer DS7AH; task-free/no response.",
-          "page_or_section": "STAR Methods; manual review Segment 3",
+          "status": "conflicting_evidence",
+          "value": "5-ms rectangular monophasic electrical pulse2cm below manubrium, DigitimerDS7AH; printed intensity-matching update direction contradicts its aim.",
           "component_reviews": {
             "modality": {
               "status": "reported",
-              "value": "5-ms electrical pulse below the manubrium through Digitimer DS7AH; task-free/no response."
+              "value": "Electrical stimulation viaDS7AH, described as constant voltage."
             },
             "body_site_and_side": {
               "status": "reported",
-              "value": "5-ms electrical pulse below the manubrium through Digitimer DS7AH; task-free/no response."
+              "value": "Chest2cm below manubrium sternum."
             },
             "waveform_and_duration": {
               "status": "reported",
-              "value": "5-ms electrical pulse below the manubrium through Digitimer DS7AH; task-free/no response."
+              "value": "5-ms single rectangular monophasic pulse."
+            },
+            "intensity_or_calibration": {
+              "status": "conflicting_evidence",
+              "value": "Starts5mA and changes0.5mA; requesting higher intensity decreases current, while requesting lower intensity increases it. Mean experimental8.7mA is descriptive."
             }
-          }
+          },
+          "evidence_note": "Both rendered versions contain the reversed adjustment wording. Preserve the conflict; do not silently reverse it into an implementation or treat the reported current as a transferable calibration.",
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "baseline_trial_contract": {
           "status": "partial",
-          "value": "Tactile-only and auditory-only unisensory controls are explicit; sleep adds 5-min no-stimulation blocks, but overnight block totals are not fixed.",
-          "page_or_section": "STAR Methods; manual review Segments 3-4",
-          "missing_required_components": [
-            "resolved_trial_count"
-          ],
+          "value": "Actual T-only and near/far A-only unisensory controls; sleep additionally has5-min no-stimulation blocks.",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Tactile-only and auditory-only unisensory controls are explicit; sleep adds 5-min no-stimulation blocks, but overnight block totals are not fixed."
+              "value": "unisensory_factorial_control plus sleep no_stimulation_control"
             },
             "timing_and_anchor": {
               "status": "reported",
-              "value": "Tactile-only and auditory-only unisensory controls are explicit; sleep adds 5-min no-stimulation blocks, but overnight block totals are not fixed."
+              "value": "Control events use the corresponding acquisition timeline; EEG prestimulus normalization is not a generated trial."
             },
             "allocation_rule": {
               "status": "reported",
-              "value": "Tactile-only and auditory-only unisensory controls are explicit; sleep adds 5-min no-stimulation blocks, but overnight block totals are not fixed."
+              "value": "Awake22per family per block across3blocks; overnight control/no-stimulation totals unresolved."
             },
             "resolved_trial_count": {
-              "status": "not_reported",
-              "value": ""
+              "status": "reported",
+              "value": "Awake66T and132A-only controls; overnight counts unknown."
             }
-          }
+          },
+          "evidence_note": "Separate no-stimulation acquisition blocks from EEG baseline correction; no analysis window creates extra trial rows.",
+          "missing_required_components": [
+            "overnight_control_allocation"
+          ],
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "catch_trial_contract": {
           "status": "explicitly_absent",
-          "value": "No catch/no-go family; auditory-only rows are planned unisensory controls.",
-          "page_or_section": "STAR Methods; manual review Segment 3",
+          "value": "No behavioral catch/no-go family in passive exhaustive five-family acquisition; A-only rows are unisensory controls.",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "explicitly_absent",
-              "value": "No catch/no-go family; auditory-only rows are planned unisensory controls."
+              "value": "No response-contingent catch family."
             },
             "target_role_and_expected_action": {
-              "status": "not_applicable",
-              "value": "Not applicable because the family is explicitly absent."
+              "status": "reported",
+              "value": "No overt response in any family."
             },
             "allocation_rule": {
-              "status": "not_applicable",
-              "value": "Not applicable because the family is explicitly absent."
+              "status": "reported",
+              "value": "Zero additional behavioral catches."
             },
             "resolved_trial_count": {
-              "status": "not_applicable",
-              "value": "Not applicable because the family is explicitly absent."
+              "status": "reported",
+              "value": "0."
             }
-          }
+          },
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "repetition_allocation": {
           "status": "partial",
-          "value": "Awake protocol is exact (22 trials per each of five rows x three 110-trial blocks = 330), but fixed overnight sleep/no-stimulation block repetitions and totals are not reported.",
-          "page_or_section": "STAR Methods; manual review Segment 4",
-          "missing_required_components": [
-            "exceptions_or_overrides"
-          ],
+          "value": "Awake3x110trials,22per family per block, giving330awake rows; exact overnight allocation unresolved.",
           "component_reviews": {
             "factor_dimensions": {
               "status": "reported",
-              "value": "Awake protocol is exact (22 trials per each of five rows x three 110-trial blocks = 330), but fixed overnight sleep/no-stimulation block repetitions and totals are not reported."
+              "value": "Five sensory families. Wake/sleep states are repeated conditions of the same cohort."
             },
             "repetitions_or_exact_counts": {
               "status": "reported",
-              "value": "Awake protocol is exact (22 trials per each of five rows x three 110-trial blocks = 330), but fixed overnight sleep/no-stimulation block repetitions and totals are not reported."
+              "value": "Awake22x5x3=330; sleep stimulation blocks5min with no exact family counts."
             },
             "exceptions_or_overrides": {
-              "status": "not_reported",
-              "value": ""
+              "status": "reported",
+              "value": "Do not infer overnight totals from time in bed."
             }
-          }
+          },
+          "missing_required_components": [
+            "sleep_trial_allocation"
+          ],
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         },
         "block_order_contract": {
           "status": "partial",
-          "value": "Awake: three randomized 110-trial blocks. Sleep: randomized 5-min stimulation/no-stimulation blocks, but a fixed overnight count is not reported.",
-          "page_or_section": "STAR Methods; manual review Segments 2 and 4",
-          "missing_required_components": [
-            "block_composition"
-          ],
+          "value": "Wake blocks precede sleep;5-min stimulation/no-stimulation blocks alternate during stableN2/N3/REM, with randomized order described but not fully specified.",
           "component_reviews": {
             "block_count": {
               "status": "reported",
-              "value": "Awake: three randomized 110-trial blocks. Sleep: randomized 5-min stimulation/no-stimulation blocks, but a fixed overnight count is not reported."
+              "value": "Three awake blocks; overnight count depends on sleep and is not fixed."
             },
             "block_composition": {
-              "status": "not_reported",
-              "value": ""
+              "status": "reported",
+              "value": "Awake22of each family; sleep five-family stimulation versus no-stimulation blocks."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Families randomized."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Wake first, then sleep; avoidN1 and stimulate stableN2/N3/REM. Alternation/randomization rule not uniquely specified."
             }
-          }
+          },
+          "evidence_note": "No exact RNG, break timing or sleep-stage gate implementation is supplied. Sleep stage is not a separate cohort.",
+          "page_or_section": "Final STARMethods, PDFpp.16-17/e2-e3, healthy Experiment1"
         }
       }
     },
     {
       "study_row_id": "doi:10.1016/j.xcrm.2026.102705::b",
-      "source_type": "manual_review_disaggregation",
-      "source_file": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/cell_reports_medicine_2026_consciousness.json",
+      "source_type": "primary_final_xml_and_rendered_publisher_supplement",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/fullTextXML",
+      "review_date": "2026-10-27",
+      "review_scope": "All11compact contracts and whole-publication inventory reviewed independently across primary versions; retain calibration contradiction, source-specific synchrony/level evidence and incomplete sleep/clinical timing.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/fullTextXML",
+          "outcome": "Primary full text retrieved; Methods and rendered calibration pages inspected."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/supplementaryFiles",
+          "outcome": "Final publisher main-plus-SI PDFs retrieved and inspected."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
       "contracts": {
         "auditory_stimulus": {
-          "status": "approximation_required",
-          "value": "50-ms white-noise bursts through Logitech Z120 near/far speakers at 65.2/64.1 dB SPL; original sound asset unavailable.",
-          "page_or_section": "STAR Methods; manual review Segment 1",
+          "status": "partial",
+          "value": "50-ms white noise through LogitechZ120 speakers, near65.2 and far64.1dBSPL.",
           "component_reviews": {
             "source_mode": {
               "status": "reported",
-              "value": "50-ms white-noise bursts through Logitech Z120 near/far speakers at 65.2/64.1 dB SPL; original sound asset unavailable."
+              "value": "generated"
             },
             "stimulus_identity_or_asset": {
               "status": "reported",
-              "value": "50-ms white-noise bursts through Logitech Z120 near/far speakers at 65.2/64.1 dB SPL; original sound asset unavailable."
+              "value": "50 ms white-noise burst."
             },
             "source_recipe_or_asset_provenance": {
-              "status": "approximation_required",
-              "value": "50-ms white-noise bursts through Logitech Z120 near/far speakers at 65.2/64.1 dB SPL; original sound asset unavailable."
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Reported near/far SPL values are descriptive; original calibration/asset is unavailable."
             }
-          }
+          },
+          "evidence_note": "Original waveform, audio sample rate, RNG/seed, bandwidth/filter and ramp are absent. EEG sampling frequency is not an audio rate.",
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "trajectory_kinematics": {
           "status": "reported_complete",
-          "value": "Geometry: Static near/far sources 5 cm and 75 cm from the extended arm. Kinematics: Static 50-ms burst; no looming motion or speed applies.",
-          "page_or_section": "STAR Methods; manual review Segment 1",
+          "value": "Static near/far speakers 5 and75cm from extended arm in depth.",
           "component_reviews": {
             "motion_mode": {
               "status": "reported",
-              "value": "Geometry: Static near/far sources 5 cm and 75 cm from the extended arm. Kinematics: Static 50-ms burst; no looming motion or speed applies."
+              "value": "static"
             },
             "coordinate_frame_body_anchor": {
               "status": "reported",
-              "value": "Geometry: Static near/far sources 5 cm and 75 cm from the extended arm. Kinematics: Static 50-ms burst; no looming motion or speed applies."
+              "value": "extended arm"
             },
             "geometry": {
               "status": "reported",
-              "value": "Geometry: Static near/far sources 5 cm and 75 cm from the extended arm. Kinematics: Static 50-ms burst; no looming motion or speed applies."
+              "value": "Near5cm and far75cm from extended arm."
             },
             "timing_constraint": {
               "status": "reported",
-              "value": "Geometry: Static near/far sources 5 cm and 75 cm from the extended arm. Kinematics: Static 50-ms burst; no looming motion or speed applies."
+              "value": "50 ms static auditory burst; no moving-source duration/speed."
             }
-          }
+          },
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "trial_sequence": {
           "status": "partial",
-          "value": "Trial-sequence evidence recoverable from the prior combined review: Task-free randomized clinical-EEG sequence with five condition rows and an explicit no-response rule.",
-          "page_or_section": "STAR Methods; manual review Segment 2",
-          "missing_required_components": [
-            "ordered_elements_and_source_selection"
-          ],
+          "value": "Five interleaved families: T, auditory near AN, auditory far AF, combined ANT and AFT; passive EEG acquisition.",
           "component_reviews": {
             "trial_families": {
               "status": "reported",
-              "value": "Trial-sequence evidence recoverable from the prior combined review: Task-free randomized clinical-EEG sequence with five condition rows and an explicit no-response rule."
+              "value": "T,AN,AF,ANT,AFT."
             },
             "ordered_elements_and_source_selection": {
-              "status": "not_reported",
-              "value": ""
+              "status": "reported",
+              "value": "Five families fully randomized within250-trial blocks."
             }
-          }
+          },
+          "evidence_note": "Full leading/trailing-silence and event implementation are not provided. Healthy sleep timing/counts must not be copied automatically from wakefulness.",
+          "missing_required_components": [
+            "full_trial_timeline"
+          ],
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "task_response": {
           "status": "reported_complete",
-          "value": "Task-free randomized clinical-EEG sequence with five condition rows and an explicit no-response rule.",
-          "page_or_section": "STAR Methods; manual review Segment 2",
+          "value": "No overt response required during PPS acquisition; EEG endpoint.",
           "component_reviews": {
             "target_and_nontarget_rule": {
               "status": "reported",
-              "value": "Task-free randomized clinical-EEG sequence with five condition rows and an explicit no-response rule."
+              "value": "Passive acquisition, no per-trial detection or no-go scoring."
             },
             "response_mode_or_device": {
               "status": "reported",
-              "value": "Task-free randomized clinical-EEG sequence with five condition rows and an explicit no-response rule."
+              "value": "No participant response device."
             },
             "response_mapping_or_expected_action": {
               "status": "reported",
-              "value": "Task-free randomized clinical-EEG sequence with five condition rows and an explicit no-response rule."
+              "value": "No overt PPS response."
             },
             "response_window_and_anchor": {
               "status": "not_applicable",
-              "value": "No response window applies because the experiment explicitly required no behavioral response."
+              "value": "No behavioral response deadline applies."
             }
-          }
+          },
+          "evidence_note": "Healthy awakenings/questionnaires and clinical scales are supporting assessments, not per-trial RT responses.",
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "jitter_iti_policy": {
-          "status": "reported_complete",
-          "value": "Uniform ITI from 1.5 to 2.0 s.",
-          "page_or_section": "STAR Methods; manual review Segment 2",
+          "status": "partial",
+          "value": "Uniform1.5-2s intertrial interval; exact event anchor and sampling precision unspecified.",
           "component_reviews": {
             "policy_type": {
               "status": "reported",
-              "value": "Uniform ITI from 1.5 to 2.0 s."
+              "value": "uniform_range"
             },
             "timing_scope_and_anchor": {
-              "status": "reported",
-              "value": "Uniform ITI from 1.5 to 2.0 s."
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
             },
             "values_or_range": {
               "status": "reported",
-              "value": "Uniform ITI from 1.5 to 2.0 s."
+              "value": "1.5-2s."
+            },
+            "distribution": {
+              "status": "reported",
+              "value": "Uniform."
             }
-          }
+          },
+          "evidence_note": "No generator/seed, discretization or exact interval-endpoint convention is stated.",
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "soa_schedule": {
           "status": "reported_complete",
-          "value": "Audio-tactile near and far trials use synchronous auditory/tactile onset (0-ms SOA).",
-          "page_or_section": "STAR Methods; manual review Segment 3",
+          "value": "Auditory and tactile onsets synchronized, nominal0-msSOA.",
           "component_reviews": {
             "reference_event_and_sign": {
               "status": "reported",
-              "value": "Audio-tactile near and far trials use synchronous auditory/tactile onset (0-ms SOA)."
+              "value": "Simultaneous auditory/tactile onset."
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
               "status": "reported",
-              "value": "Audio-tactile near and far trials use synchronous auditory/tactile onset (0-ms SOA)."
+              "value": "0ms for near and far combined trials."
             }
-          }
+          },
+          "evidence_note": "This is the source command-level rule, not measured physical output synchrony.",
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "tactile_target": {
-          "status": "reported_complete",
-          "value": "50-ms, 35-Hz arm-extensor FES at 70% motor threshold using MEDEL Motionstim 8.",
-          "page_or_section": "STAR Methods; manual review Segment 3",
+          "status": "partial",
+          "value": "50-ms,35-Hz FES near elbow/extensor digitorum communis, MEDELMotionstim8, at70%individual motor threshold (5-11mA).",
           "component_reviews": {
             "modality": {
               "status": "reported",
-              "value": "50-ms, 35-Hz arm-extensor FES at 70% motor threshold using MEDEL Motionstim 8."
+              "value": "Functional electrical stimulation using FlextrodePlus electrodes and Motionstim8."
             },
             "body_site_and_side": {
               "status": "reported",
-              "value": "50-ms, 35-Hz arm-extensor FES at 70% motor threshold using MEDEL Motionstim 8."
+              "value": "Dorsal arm near elbow, extensor digitorum communis; right-shoulder ground."
             },
             "waveform_and_duration": {
               "status": "reported",
-              "value": "50-ms, 35-Hz arm-extensor FES at 70% motor threshold using MEDEL Motionstim 8."
+              "value": "50-ms stimulation at35Hz; individual motor threshold determined before experiment."
             }
-          }
+          },
+          "evidence_note": "Exact pulse width, polarity and train realization within50ms are not supplied; this is not a speaker tactile cue.",
+          "missing_required_components": [
+            "pulse_width_and_exact_train_waveform"
+          ],
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "baseline_trial_contract": {
           "status": "reported_complete",
-          "value": "Per 250-trial block: 50 tactile-only, 50 auditory-near and 50 auditory-far unisensory controls; EEG baseline -100 to 0 ms.",
-          "page_or_section": "STAR Methods; manual review Segments 3-4",
+          "value": "Actual T-only and near/far A-only unisensory controls; 50trials of each control per250-trial block.",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Per 250-trial block: 50 tactile-only, 50 auditory-near and 50 auditory-far unisensory controls; EEG baseline -100 to 0 ms."
+              "value": "unisensory_factorial_control"
             },
             "timing_and_anchor": {
               "status": "reported",
-              "value": "Per 250-trial block: 50 tactile-only, 50 auditory-near and 50 auditory-far unisensory controls; EEG baseline -100 to 0 ms."
+              "value": "Control events use the corresponding acquisition timeline; EEG prestimulus normalization is not a generated trial."
             },
             "allocation_rule": {
               "status": "reported",
-              "value": "Per 250-trial block: 50 tactile-only, 50 auditory-near and 50 auditory-far unisensory controls; EEG baseline -100 to 0 ms."
+              "value": "50T,50AN,50AF per250-trial block."
             },
             "resolved_trial_count": {
               "status": "reported",
-              "value": "Per 250-trial block: 50 tactile-only, 50 auditory-near and 50 auditory-far unisensory controls; EEG baseline -100 to 0 ms."
+              "value": "150unisensory controls per block (50T+50AN+50AF)."
             }
-          }
+          },
+          "evidence_note": "Separate no-stimulation acquisition blocks from EEG baseline correction; no analysis window creates extra trial rows.",
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "catch_trial_contract": {
           "status": "explicitly_absent",
-          "value": "No catch/no-go family; auditory-only rows are planned unisensory controls.",
-          "page_or_section": "STAR Methods; manual review Segment 3",
+          "value": "No behavioral catch/no-go family in passive exhaustive five-family acquisition; A-only rows are unisensory controls.",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "explicitly_absent",
-              "value": "No catch/no-go family; auditory-only rows are planned unisensory controls."
+              "value": "No response-contingent catch family."
             },
             "target_role_and_expected_action": {
-              "status": "not_applicable",
-              "value": "Not applicable because the family is explicitly absent."
+              "status": "reported",
+              "value": "No overt response in any family."
             },
             "allocation_rule": {
-              "status": "not_applicable",
-              "value": "Not applicable because the family is explicitly absent."
+              "status": "reported",
+              "value": "Zero additional behavioral catches."
             },
             "resolved_trial_count": {
-              "status": "not_applicable",
-              "value": "Not applicable because the family is explicitly absent."
+              "status": "reported",
+              "value": "0."
             }
-          }
+          },
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "repetition_allocation": {
           "status": "reported_complete",
-          "value": "Fifty trials per each of five condition rows, 250 trials per block; one to three blocks per session.",
-          "page_or_section": "STAR Methods; manual review Segment 4",
+          "value": "250trials per block,50of each family;1-3blocks per session (mean2.8), with only first session analyzed.",
           "component_reviews": {
             "factor_dimensions": {
               "status": "reported",
-              "value": "Fifty trials per each of five condition rows, 250 trials per block; one to three blocks per session."
+              "value": "Five sensory families.Clinical diagnostic groups are classifications of the same acquisition cohort."
             },
             "repetitions_or_exact_counts": {
               "status": "reported",
-              "value": "Fifty trials per each of five condition rows, 250 trials per block; one to three blocks per session."
+              "value": "50x5=250per block;1-3blocks per session."
             },
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "Fifty trials per each of five condition rows, 250 trials per block; one to three blocks per session."
+              "value": "Repeated sessions mean2.5,range1-10; first session analyzed, not new independent cohorts."
             }
-          }
+          },
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         },
         "block_order_contract": {
-          "status": "reported_complete",
-          "value": "One to three randomized 250-trial blocks per session (mean 2.8).",
-          "page_or_section": "STAR Methods; manual review Segments 2 and 4",
+          "status": "partial",
+          "value": "1-3randomized250-trial blocks per session with brief breaks; exact breaks/order implementation unspecified.",
           "component_reviews": {
             "block_count": {
               "status": "reported",
-              "value": "One to three randomized 250-trial blocks per session (mean 2.8)."
+              "value": "1-3per session, mean2.8."
             },
             "block_composition": {
               "status": "reported",
-              "value": "One to three randomized 250-trial blocks per session (mean 2.8)."
+              "value": "50of each five families per block."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Families randomized."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Brief breaks; patient availability determines block/session count."
             }
-          }
+          },
+          "evidence_note": "No exact RNG, break timing or sleep-stage gate implementation is supplied. Sleep stage is not a separate cohort.",
+          "page_or_section": "Final STARMethods, PDFpp.17-18/e3-e4, clinical Experiment2"
         }
       }
     },
@@ -19965,6 +20068,1387 @@
             }
           },
           "evidence_note": "Subjective walking ratings and an Open House motorized-chair demonstration are supporting contexts, not additional PPS blocks or experiments."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1101/2024.10.25.619776::a",
+      "source_type": "primary_preprint_v1_with_embedded_supplement",
+      "source_file": "https://www.biorxiv.org/content/10.1101/2024.10.25.619776v1.full.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "All11compact contracts and whole-publication inventory reviewed independently across primary versions; retain calibration contradiction, source-specific synchrony/level evidence and incomplete sleep/clinical timing.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.biorxiv.org/content/10.1101/2024.10.25.619776v1.full.pdf",
+          "outcome": "Primary full text retrieved; Methods and rendered calibration pages inspected."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.biorxiv.org/details/biorxiv/10.1101/2024.10.25.619776",
+          "outcome": "API explicitly links final DOI; exact v1posted2024-10-26 with embedded supplement reviewed."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "100-ms E-Prime2-generated white noise through commercial loudspeakers; auditory threshold plus40% (mean51dB).",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "generated"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "100 ms white-noise burst."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Three30-trial threshold blocks starting46dB, heard decreases2dB and not heard increases2dB; average last10 per block then three block estimates. The40% quantity basis is unspecified. V1 does not explicitly state near/far pressure equalization; final statement not imported."
+            }
+          },
+          "evidence_note": "Original waveform, audio sample rate, RNG/seed, bandwidth/filter and ramp are absent. EEG sampling frequency is not an audio rate.",
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "trajectory_kinematics": {
+          "status": "reported_complete",
+          "value": "Static near/far speakers 30 and130cm above chest.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "static"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "chest"
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "30/130cm above chest; Figure1 shows30cm plus100cm speaker separation."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "100 ms static auditory burst; no moving-source duration/speed."
+            }
+          },
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "Five interleaved families: T, auditory near AN, auditory far AF, combined ANT and AFT; passive EEG acquisition.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "T,AN,AF,ANT,AFT."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Five families fully randomized within awake blocks; sleep uses the same randomized family types."
+            }
+          },
+          "evidence_note": "Full leading/trailing-silence and event implementation are not provided. Healthy sleep timing/counts must not be copied automatically from wakefulness.",
+          "missing_required_components": [
+            "full_trial_timeline"
+          ],
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "task_response": {
+          "status": "reported_complete",
+          "value": "No overt response required during PPS acquisition; EEG endpoint.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Passive acquisition, no per-trial detection or no-go scoring."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "No participant response device."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "No overt PPS response."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "No behavioral response deadline applies."
+            }
+          },
+          "evidence_note": "Healthy awakenings/questionnaires and clinical scales are supporting assessments, not per-trial RT responses.",
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Awake ITI2.5-3s, described as five random100-ms steps; exact support/anchor and sleep timing unresolved.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Random discrete steps."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "2.5-3s and five100-ms steps."
+            },
+            "distribution": {
+              "status": "reported",
+              "value": "Five random steps, probabilities/endpoints unresolved."
+            }
+          },
+          "evidence_note": "Both endpoints would give six values; five increments may span those endpoints, but the sampling support is not uniquely specified. Sleep only inherits condition types explicitly.",
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "soa_schedule": {
+          "status": "not_reported",
+          "value": "V1 healthy protocol reports combined audio-tactile trials but does not explicitly specify onset synchrony or numerical SOA.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
+            }
+          },
+          "evidence_note": "Clinical synchrony and final healthy synchrony do not establish the v1 healthy value; inspected Methods/Figure1 do not quantify it.",
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "tactile_target": {
+          "status": "conflicting_evidence",
+          "value": "5-ms rectangular monophasic electrical pulse2cm below manubrium, DigitimerDS7AH; printed intensity-matching update direction contradicts its aim.",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrical stimulation viaDS7AH, described as constant voltage."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Chest2cm below manubrium sternum."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "5-ms single rectangular monophasic pulse."
+            },
+            "intensity_or_calibration": {
+              "status": "conflicting_evidence",
+              "value": "Starts5mA and changes0.5mA; requesting higher intensity decreases current, while requesting lower intensity increases it. Mean experimental8.7mA is descriptive."
+            }
+          },
+          "evidence_note": "Both rendered versions contain the reversed adjustment wording. Preserve the conflict; do not silently reverse it into an implementation or treat the reported current as a transferable calibration.",
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "Actual T-only and near/far A-only unisensory controls; sleep additionally has5-min no-stimulation blocks.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "unisensory_factorial_control plus sleep no_stimulation_control"
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Control events use the corresponding acquisition timeline; EEG prestimulus normalization is not a generated trial."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Awake22per family per block across3blocks; overnight control/no-stimulation totals unresolved."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "Awake66T and132A-only controls; overnight counts unknown."
+            }
+          },
+          "evidence_note": "Separate no-stimulation acquisition blocks from EEG baseline correction; no analysis window creates extra trial rows.",
+          "missing_required_components": [
+            "overnight_control_allocation"
+          ],
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "catch_trial_contract": {
+          "status": "explicitly_absent",
+          "value": "No behavioral catch/no-go family in passive exhaustive five-family acquisition; A-only rows are unisensory controls.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No response-contingent catch family."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No overt response in any family."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Zero additional behavioral catches."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "0."
+            }
+          },
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "repetition_allocation": {
+          "status": "partial",
+          "value": "Awake3x110trials,22per family per block, giving330awake rows; exact overnight allocation unresolved.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five sensory families. Wake/sleep states are repeated conditions of the same cohort."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "Awake22x5x3=330; sleep stimulation blocks5min with no exact family counts."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Do not infer overnight totals from time in bed."
+            }
+          },
+          "missing_required_components": [
+            "sleep_trial_allocation"
+          ],
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Wake blocks precede sleep;5-min stimulation/no-stimulation blocks alternate during stableN2/N3/REM, with randomized order described but not fully specified.",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Three awake blocks; overnight count depends on sleep and is not fixed."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "Awake22of each family; sleep five-family stimulation versus no-stimulation blocks."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Families randomized."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Wake first, then sleep; avoidN1 and stimulate stableN2/N3/REM. Alternation/randomization rule not uniquely specified."
+            }
+          },
+          "evidence_note": "No exact RNG, break timing or sleep-stage gate implementation is supplied. Sleep stage is not a separate cohort.",
+          "page_or_section": "Preprintv1Methods pp.17-19, healthy wake/sleep"
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1101/2024.10.25.619776::b",
+      "source_type": "primary_preprint_v1_with_embedded_supplement",
+      "source_file": "https://www.biorxiv.org/content/10.1101/2024.10.25.619776v1.full.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "All11compact contracts and whole-publication inventory reviewed independently across primary versions; retain calibration contradiction, source-specific synchrony/level evidence and incomplete sleep/clinical timing.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.biorxiv.org/content/10.1101/2024.10.25.619776v1.full.pdf",
+          "outcome": "Primary full text retrieved; Methods and rendered calibration pages inspected."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.biorxiv.org/details/biorxiv/10.1101/2024.10.25.619776",
+          "outcome": "API explicitly links final DOI; exact v1posted2024-10-26 with embedded supplement reviewed."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "50-ms white noise through LogitechZ120 speakers, near65.2 and far64.1dBSPL.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "reported",
+              "value": "generated"
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "50 ms white-noise burst."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Reported near/far SPL values are descriptive; original calibration/asset is unavailable."
+            }
+          },
+          "evidence_note": "Original waveform, audio sample rate, RNG/seed, bandwidth/filter and ramp are absent. EEG sampling frequency is not an audio rate.",
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "trajectory_kinematics": {
+          "status": "reported_complete",
+          "value": "Static near/far speakers 5 and75cm from extended arm in depth.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "static"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "extended arm"
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Near5cm and far75cm from extended arm."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "50 ms static auditory burst; no moving-source duration/speed."
+            }
+          },
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "Five interleaved families: T, auditory near AN, auditory far AF, combined ANT and AFT; passive EEG acquisition.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "T,AN,AF,ANT,AFT."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Five families fully randomized within250-trial blocks."
+            }
+          },
+          "evidence_note": "Full leading/trailing-silence and event implementation are not provided. Healthy sleep timing/counts must not be copied automatically from wakefulness.",
+          "missing_required_components": [
+            "full_trial_timeline"
+          ],
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "task_response": {
+          "status": "reported_complete",
+          "value": "No overt response required during PPS acquisition; EEG endpoint.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Passive acquisition, no per-trial detection or no-go scoring."
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "No participant response device."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "No overt PPS response."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "No behavioral response deadline applies."
+            }
+          },
+          "evidence_note": "Healthy awakenings/questionnaires and clinical scales are supporting assessments, not per-trial RT responses.",
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "Uniform1.5-2s intertrial interval; exact event anchor and sampling precision unspecified.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "uniform_range"
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Not specified in this source-version protocol."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "1.5-2s."
+            },
+            "distribution": {
+              "status": "reported",
+              "value": "Uniform."
+            }
+          },
+          "evidence_note": "No generator/seed, discretization or exact interval-endpoint convention is stated.",
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "soa_schedule": {
+          "status": "reported_complete",
+          "value": "Auditory and tactile onsets synchronized, nominal0-msSOA.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Simultaneous auditory/tactile onset."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "0ms for near and far combined trials."
+            }
+          },
+          "evidence_note": "This is the source command-level rule, not measured physical output synchrony.",
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "50-ms,35-Hz FES near elbow/extensor digitorum communis, MEDELMotionstim8, at70%individual motor threshold (5-11mA).",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Functional electrical stimulation using FlextrodePlus electrodes and Motionstim8."
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Dorsal arm near elbow, extensor digitorum communis; right-shoulder ground."
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "50-ms stimulation at35Hz; individual motor threshold determined before experiment."
+            }
+          },
+          "evidence_note": "Exact pulse width, polarity and train realization within50ms are not supplied; this is not a speaker tactile cue.",
+          "missing_required_components": [
+            "pulse_width_and_exact_train_waveform"
+          ],
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "baseline_trial_contract": {
+          "status": "reported_complete",
+          "value": "Actual T-only and near/far A-only unisensory controls; 50trials of each control per250-trial block.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "unisensory_factorial_control"
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Control events use the corresponding acquisition timeline; EEG prestimulus normalization is not a generated trial."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "50T,50AN,50AF per250-trial block."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "150unisensory controls per block (50T+50AN+50AF)."
+            }
+          },
+          "evidence_note": "Separate no-stimulation acquisition blocks from EEG baseline correction; no analysis window creates extra trial rows.",
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "catch_trial_contract": {
+          "status": "explicitly_absent",
+          "value": "No behavioral catch/no-go family in passive exhaustive five-family acquisition; A-only rows are unisensory controls.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No response-contingent catch family."
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No overt response in any family."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Zero additional behavioral catches."
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "0."
+            }
+          },
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "repetition_allocation": {
+          "status": "reported_complete",
+          "value": "250trials per block,50of each family;1-3blocks per session (mean2.8), with only first session analyzed.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five sensory families.Clinical diagnostic groups are classifications of the same acquisition cohort."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "50x5=250per block;1-3blocks per session."
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Repeated sessions mean2.5,range1-10; first session analyzed, not new independent cohorts."
+            }
+          },
+          "evidence_note": "V1 Protocol has blank mean/range fields, but its Participants section already reports mean2.8/range1-3; these values are not borrowed from final.",
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "1-3randomized250-trial blocks per session with brief breaks; exact breaks/order implementation unspecified.",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "1-3per session, mean2.8."
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "50of each five families per block."
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Families randomized."
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Brief breaks; patient availability determines block/session count."
+            }
+          },
+          "evidence_note": "No exact RNG, break timing or sleep-stage gate implementation is supplied. Sleep stage is not a separate cohort.",
+          "page_or_section": "Preprintv1Methods pp.19-21, clinical protocol and Participants"
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.cortex.2021.08.004::a",
+      "source_type": "audited_source_access_gap_with_primary_abstract_inventory",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:34666298%20AND%20SRC:MED&format=json&resultType=core",
+      "review_date": "2026-10-27",
+      "review_scope": "Primary abstract explicitly distinguishes three experiments; all eleven exact contracts remain access-blocked pending Methods. No participant data downloaded.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/b89b0a5e-9c83-4590-899d-ea49e5a68efd/Seeming%20confines.pdf",
+          "outcome": "Initial web indexing returned42page abstract/intro. Subsequent webopen/screenshot,urllib and PowerShell normalTLS requests403; no fullMethods audit claimed."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945221002835/pdf",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945221002835",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/handle/2318/1812511/1536696/Seeming%20confines.pdf",
+          "outcome": "web andnative403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.openalex.org/works/https://doi.org/10.1016/j.cortex.2021.08.004",
+          "outcome": "metadata supplied only same UniTo/publisher/PubMed routes; no independent fulltext found"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "trajectory_kinematics": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "task_response": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "block_order_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Behavioral spatial-congruency control independent of auditory intensity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.cortex.2021.08.004::b",
+      "source_type": "audited_source_access_gap_with_primary_abstract_inventory",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:34666298%20AND%20SRC:MED&format=json&resultType=core",
+      "review_date": "2026-10-27",
+      "review_scope": "Primary abstract explicitly distinguishes three experiments; all eleven exact contracts remain access-blocked pending Methods. No participant data downloaded.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/b89b0a5e-9c83-4590-899d-ea49e5a68efd/Seeming%20confines.pdf",
+          "outcome": "Initial web indexing returned42page abstract/intro. Subsequent webopen/screenshot,urllib and PowerShell normalTLS requests403; no fullMethods audit claimed."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945221002835/pdf",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945221002835",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/handle/2318/1812511/1536696/Seeming%20confines.pdf",
+          "outcome": "web andnative403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.openalex.org/works/https://doi.org/10.1016/j.cortex.2021.08.004",
+          "outcome": "metadata supplied only same UniTo/publisher/PubMed routes; no independent fulltext found"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "trajectory_kinematics": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "task_response": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "block_order_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: EEG demonstration of greater near than far multisensory super-additivity.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.cortex.2021.08.004::c",
+      "source_type": "audited_source_access_gap_with_primary_abstract_inventory",
+      "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:34666298%20AND%20SRC:MED&format=json&resultType=core",
+      "review_date": "2026-10-27",
+      "review_scope": "Primary abstract explicitly distinguishes three experiments; all eleven exact contracts remain access-blocked pending Methods. No participant data downloaded.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/b89b0a5e-9c83-4590-899d-ea49e5a68efd/Seeming%20confines.pdf",
+          "outcome": "Initial web indexing returned42page abstract/intro. Subsequent webopen/screenshot,urllib and PowerShell normalTLS requests403; no fullMethods audit claimed."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945221002835/pdf",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0010945221002835",
+          "outcome": "web403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/handle/2318/1812511/1536696/Seeming%20confines.pdf",
+          "outcome": "web andnative403"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.openalex.org/works/https://doi.org/10.1016/j.cortex.2021.08.004",
+          "outcome": "metadata supplied only same UniTo/publisher/PubMed routes; no independent fulltext found"
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "source_mode": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "trajectory_kinematics": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "geometry": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "timing_constraint": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "trial_sequence": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "trial_families": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "task_response": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "response_mode_or_device": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "response_window_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "jitter_iti_policy": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "policy_type": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "timing_scope_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "values_or_range": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "soa_schedule": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "tactile_target": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "modality": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "body_site_and_side": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "waveform_and_duration": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "baseline_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "timing_and_anchor": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "catch_trial_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "target_role_and_expected_action": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "allocation_rule": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "resolved_trial_count": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "repetition_allocation": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "exceptions_or_overrides": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
+        },
+        "block_order_contract": {
+          "status": "source_unavailable",
+          "value": "Full Methods unavailable through the documented source routes; exact replication contract unresolved. Abstract scope: Main experiment comparing after tool-use training versus after far-space visual discrimination training.",
+          "page_or_section": "Primary author abstract and dated access audit; no full Methods inspected",
+          "component_reviews": {
+            "block_count": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            },
+            "block_composition": {
+              "status": "source_unavailable",
+              "value": "Methods inaccessible; no numeric or apparatus settings inferred from the abstract."
+            }
+          },
+          "evidence_note": "The abstract identifies task scope, not a complete parameter specification.20-minute rake/visual training is a manipulation, not an extra acquisition block."
         }
       }
     }
