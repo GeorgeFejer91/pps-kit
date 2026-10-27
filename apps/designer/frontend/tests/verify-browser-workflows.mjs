@@ -1,5 +1,6 @@
 import { verifyDesignerControlNames, verifyRunnerNavigation } from "./accessibility-browser.mjs";
 import { verifySequenceScaling } from "./sequence-scaling-browser.mjs";
+import { verifyAbortedBrowserWrites } from "./indexeddb-browser.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
@@ -137,6 +138,8 @@ try {
   await designer.unroute("**/*.wav");
   assert.equal(await designer.evaluate(() => window.previewStarts), 1);
   assert.equal(await designer.locator("[data-preview-source-label].playing").count(), 0);
+  await verifyAbortedBrowserWrites(designer, resolve(output, "indexeddb-abort.json"));
+  report.checks.push("Real IndexedDB abort after successful put rejects draft/audio writes, closes connections, retains prior data and permits retry");
   await designer.evaluate(async () => {
     const snapshot = window.PPSDesignerApp.getState();
     const asset = snapshot.preload_inventory.assets[0];

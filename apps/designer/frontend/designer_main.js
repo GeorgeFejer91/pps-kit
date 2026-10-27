@@ -26,6 +26,7 @@ async function put(storeName, key, value) {
     transaction.objectStore(storeName).put(value, key);
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error || new Error("Browser storage transaction aborted."));
   }).finally(() => database.close());
 }
 
