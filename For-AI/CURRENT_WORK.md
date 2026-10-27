@@ -25,8 +25,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Single- and two-block native activation/progression pass real CPAL callback
   tests using silent synthetic PCM. Native portable-profile extraction now verifies
   and rebinds embedded media offline. Immutable source-block and participant
-  assembly now preserve ordered pre/post parts and instruction media; native
-  instruction/group execution and full desktop preparation remain incomplete.
+  assembly preserve ordered pre/post parts and instruction media. Native instruction
+  playback and distinct ordered-part execution now pass callback and journal
+  checks. Full native preparation passes on the actual 408-trial fixture; durable
+  cross-part completion receipts and Runner group/recovery UI are in progress.
   The native Designer host and explicit frontend adapter are now integrated;
   actual WebView controls generate and preview through Rust/C++ without HTTP fallback.
   B1–B3/C1 fixes and the sanitized study projection are integrated
@@ -35,72 +37,43 @@ This file is the active checklist and handoff owner; replace state, do not appen
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   Neither installed application nor public downloads changed in this task.
-- **Next action:** connect native instructions and all-part execution, complete
-  the desktop preparation workflow, then verify
-  the complete offline browser-profile journey and build native packages.
+- **Next action:** bind both exact part attempts in one durable completion receipt,
+  finish Runner group/recovery controls, and verify the complete offline
+  browser-profile journey through installed native packages.
   Primary-source extraction continues independently. Pages assembly now includes
   referenced Study 5 instruction audio with its checked manifest hashes.
-- **Local validation:** 25 Runner core and 150 desktop tests pass; two hardware
-  tests are opt-in and separately passed on this Windows host using silent
-  one-/two-block fixtures. Independent file audits pass for both (16/30 events,
-  1/2 scored rows). Strict Clippy passes. Independent source review found no
-  blocking A1/A3 or output-policy race defect after the fixes. It exercises normal native dispatch, callback confirmation,
-  scoring and durable result publication, not physical timing or installed IPC.
-  UI worker: 5 Designer, 70 Runner and 2 Pages tests pass, canonical builds and
-  Chromium controls checked (storage failure/retry, reversed preview replies,
-  participant draft/submit, instruction export). Science worker: 44 parser/matrix/network
-  tests pass, including source freshness and frozen identities. Independent review
-  also passes the five finalization checks and finds no further actionable race.
-  Integrated Rust workspace: 299 tests pass, three opt-in tests skipped by
-  default; the native 3DTI waveform test separately passes on actual generated
-  PCM (91.82 s). Go downloader tests pass with verified task-local Go 1.27.3.
-  Standard completed with 626 passes, 10 skips and seven failures. Parent
-  repairs now pass focused regressions: synchronous accepted-plan mutation
-  rejection, Windows long-path file checks, SVG LF parity and routed guidance.
-  UI/science parser/CSS repairs are integrated. The intermediate Standard run
-  found four stale scientific ledger assertions and one live registry/test
-  snapshot mismatch. After reconciliation the stable Standard run passes:
-  **647 passed, ten skipped**, with three runtime warnings retained in its log.
-  Native recovery assessment passes six prefix/corruption/package-context checks
-  and real process termination at six write/sync/publication boundaries. Independent
-  review found and closed a count/identity criterion gap: complete results now
-  match the selected verified package, not only their own receipt. UI display
-  remains. Native importer: seven contract/failure tests pass, plus a real browser-export
-  test independently materializing nine embedded assets offline. The combined
-  session-package/designer-core suites pass (35 tests; three opt-in tests skipped),
-  with strict Clippy. Independent import review found no blocking defect; disk
-  failure/mid-copy cancellation qualification remains. Release repairs pass 17
-  focused tests: obsolete distribution arguments and placeholder URLs fail
-  before build; downloader icon tooling is pinned and an actual smoke downloader
-  builds. Installation guides now distinguish V1 layouts from native candidates.
-  Native participant planning passes all 600 occurrences from the real browser
-  capture against the Python oracle. The integrated Designer core passes 32
-  pure checks; the independently rebuilt 3DTI passes all three waveform tests.
-  Instruction/group verification passes 15 checks including an actual assembled
-  two-part fixture. Strict core/package Clippy and the Runner split-part denial
-  pass. Both frontend toolchains now pin Vite 6.4.5 with repaired dependency
-  advisories; Designer's locked install reports zero vulnerabilities. The latest
-  catalogue integration passes 38 matrix/network checks.
-  The integrated native Designer passes seven host tests; thirteen frontend
-  tests and the complete existing real-browser workflow pass. All 29 canonical
-  Designer build files match Pages bytes. Runner now passes 152 desktop tests
-  with two opt-in callback checks skipped in that run; strict Clippy passes.
-  Group review additionally binds accepted design/Segment 5/6 digests, unique
-  part IDs, actual ordered block inventory and instruction settings. Portable
-  comparator import passes the distinct-primary/secondary identity regression.
-  The generation worker verified the complete actual browser fixture: two
-  six-block parts, 408 rows and 120 baselines with explicit native stationary
-  comparators. This is customized software evidence, not physical qualification.
-  Clean installation remains open; new physical calibration is deferred by user.
-- **Scientific coverage:** frozen 94-publication corpus, 127 study rows and 1,397
-  compact contracts; 218 reported-complete and 44 derived-complete cells after
-  the latest primary-source batches. 60 inventories remain unassessed. A bounded
-  foundational-reference check found 11 of 12 selected antecedents in the frozen
-  corpus; Occelli 2010 is recorded as an outside-map omission candidate, without
-  silently changing membership or claiming exhaustiveness. The
-  Cuppini 2011 computational review has a publication boundary row, not a
-  fabricated human experiment; its 11 contracts are explicitly not applicable.
-  Templates and reviewed evidence do not confer tested native qualification.
+- **Local validation:** the stable Standard checkpoint passed 647 tests with ten
+  skips; subsequent product changes have focused checks and still need a final
+  Standard run. Current integrated native applications pass 155 Runner and eight
+  Designer tests (six opt-in checks skipped), with strict Clippy. The core/package
+  numeric checkpoint passed 58 checks with nine opt-in skips. Exact binary64 JSON
+  reload now preserves accepted design/order hashes; all 15 verifier checks pass
+  including the full 408-trial group. No hash tolerance or verification bypass
+  was added. Native instruction/group worker evidence covers click/button/delay
+  gates, stop-at-gate, changed instruction rejection, part-specific receipts and
+  reselection preserving prior files. Independent audits found 92/81 events and
+  two/two scored rows in the two tiny callback fixtures; instruction channel,
+  sample boundaries and saved delays pass. These are software checks.
+  Designer: sixteen frontend tests and two Pages assembly checks pass. Actual
+  WebView generation/review/acceptance has 204 source trial rows and 600 participant
+  occurrences; the 2 GiB, two-part native preparation passes strict verification,
+  forged acceptance rejection, edit cancellation cleanup and restart revocation.
+  Portable bundles retain distinct stationary-control references and instruction
+  audio. Native remaking drops stale comparator receipts even at identical duration.
+  Recovery assessment remains read-only; six prior crash-boundary tests protect
+  existing evidence, without acquisition replay. Group result auditing is being
+  added against the producer's exact attempt/hash schema. Installation, deployed
+  routes and final cross-product interaction remain open. New physical calibration
+  is deferred by the user, not reported as measured.
+- **Scientific coverage:** frozen 94-publication corpus, 132 study rows and 1,452
+  compact contracts; 43 publications have assessed inventories containing 81
+  registered instances; 51 inventories remain unassessed. Original Ferri 2015
+  variants are separated and their conflicts with later reanalysis preserved.
+  Device-paper source conflicts reduce fully source-covered emulated records to
+  15; the 18 GUI-ready records remain separately labelled. A bounded foundational
+  check found 11 of 12 selected antecedents; Occelli 2010 is an outside-map
+  omission candidate. Do not silently change membership or claim exhaustiveness.
+  Templates and reviewed evidence do not confer native or physical qualification.
 - **Installed agent baseline:** updated For-AI, 23 GSD skills/35 converted roles,
   15 prefixed Superpowers skills and three Agents Inc companions. Existing
   RTK/Ponytail/Tauri/Pretext retained. See [provenance](skills/baseline-lock.json).
@@ -133,14 +106,15 @@ This file is the active checklist and handoff owner; replace state, do not appen
   The corrected prepared-input bridge, polar arcs, five noise colours and verified
   imported WAV policies and design/recipe conversion are integrated; 21 pure
   generation checks passed at that checkpoint. Participant/session assembly and
-  full captured order parity now pass; stationary comparator integration remains. Legacy RNG IDs remain
+  full captured order parity and stationary comparators now pass. Legacy RNG IDs remain
   rejected explicitly; customized source provenance stays explicit.
 - [ ] M3 — Complete native profile assembly, all-block execution and the
   Windows Tauri Designer journey (A2–A3, C2); browser bundle assets materialize
   offline; Python/Rust handoff and result parity pass. Manifest-order progression
   now passes source and real silent-callback checks, including next-block UI.
-  Browser bundle materialization and native participant assembly pass; host
-  integration, instruction/group execution and installed evidence remain.
+  Browser bundle materialization, native host preparation and instruction/group
+  execution pass software checks; durable group receipt, final Runner UI and
+  installed evidence remain.
 - [ ] M4 — Close supported acquisition/recovery, accessibility/performance and
   evidence-record gaps (D1–D2, F1–F2, I1); audit every included experiment's 11
   replication contracts and finish citation mapper/preset navigation.
