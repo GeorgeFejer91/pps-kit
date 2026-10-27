@@ -1,6 +1,6 @@
 # Current work
 
-Reviewed: 2026-10-27. Overall completion goal: **OPEN**.
+Reviewed: 2026-10-28. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
 - **Goal:** publish an audited audiotactile catalogue and citation mapper,
@@ -44,10 +44,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   automatic approval review rejected the fresh launch check at the new revision
   ("blocked by policy", without a more specific reason). No alternate launch
   was attempted. Complete installed execution remains unverified.
-- **Next action:** run the fresh stable Standard suite on the existing Windows
-  CI worker, repair the remaining variant-count expansion, then
-  finish the approved-identity installed journey. Exact product-revision CI
-  passes all 14 jobs. The final corpus projection, canonical frontend
+- **Next action:** verify the combined follow-up CI, rebuild the Runner candidate
+  from committed canonical bytes, then finish the approved-identity installed
+  journey. The baseline CI including full Standard passes all 14 jobs; the
+  final UI/import/storage follow-ups now need their integration run. The corpus projection, canonical frontend
   and local Pages assembly agree. Installed operation and package identity
   remain separate gates. The first Runner NSIS payload and
   installed native WebView startup passed without Python or checkout paths on
@@ -56,91 +56,55 @@ This file is the active checklist and handoff owner; replace state, do not appen
   to initialize (kernel assets path not found); no substitute UI driver was used.
   The bounded corpus audit is complete with disclosed gaps. Pages assembly includes
   referenced Study 5 instruction audio with its checked manifest hashes.
-- **Local validation:** the latest Standard run finished with 686 passed, ten
-  skipped and twelve catalogue failures caused by changing source inputs during
-  the run. The final stable corpus/profile/synthetic-eligibility checks pass
-  123 tests with one skip, including all twelve failed cases and deterministic
-  rebuilding. Independent whole-projection review passes 32 checks, and final
-  primary-source review of the Pfeiffer/mixed-reality records found no concrete
-  discrepancies in their disclosed proxy/count/geometry boundaries. Quick
-  validation passes 38 tests and the release/privacy audit.
-  This is resolved targeted evidence, not a fresh entirely green Standard run.
-  The opt-in native manifest-order fixture now executes three blocks; it passes
-  actual silent callbacks and the independent result-file audit (44 events,
-  three scored/dataset rows). Completion stays false at both earlier boundaries.
-  The instruction/group fixture also now uses three blocks per part, covering
-  click/button/delay gates and breaks; its independent whole-group audit passes
-  245 events and six scored/dataset rows. All three instruction regressions pass.
-  The existing Windows CI oracle job now selects the full Standard tier, with
-  web/GUI/XDF test dependencies, offscreen Qt and its native writer fixture.
-  YAML and Rust formatting checks pass; its first full Standard run is pending.
-  The corrected sample-paced Canzoneri response audit passes
-  three checks in 951.25 s, including complete planned/click/marker/analysis joins,
-  six distance/motion bins and extended Windows paths. Actual preset baking
-  exposed clipped/missing tactile cues: the writer and cached-manifest validator
-  now reject them. Reported silence and explicitly derived margins are encoded
-  in affected templates. Canzoneri and Taffou silence-window baselines retain
-  the sound elsewhere in the trial. Teneggi now targets Experiment 3 only and
-  stays blocked for undocumented counts and source substitutions. Serino hand
-  assets are regenerated as a versioned four-second continuous-pink Rust/3DTI
-  proxy with exact frames, channel/QC/hash evidence and explicit level choices.
-  Native FLOAT audio also exposed mixed-encoding FFmpeg stream-copy corruption;
-  incompatible streams now use the existing decoded concatenation path.
-  All 30 templates now pass actual cue-containment baking (29-profile rerun
-  plus the final native Serino/Taffou checks); 19 focused waveform, provenance
-  and release-audit checks pass. Independent runtime review verified the fixes.
-  Ordinary catalogue rebuilding now preserves and verifies native asset provenance;
-  stale audio/template receipts and Python force-regeneration are rejected. Thirteen
-  focused native-catalogue/profile/release checks pass. The canonical Designer has
-  25 passing frontend tests and fresh actual-browser/Pages assembly checks.
-  The final mapper verifies experiment-specific labels and preset ownership,
-  DOI search, stable links, keyboard focus, widths from 320 to 1920 px and
-  enlarged/spaced text. The complete Chromium hosted-workflow check now passes
-  with the final 94/178/1,958 projection: visible desktop/phone Edit controls,
-  premade playback/cancellation, failed/delayed save recovery, bundle export,
-  mapper retry/navigation and polled participant drafts. A misplaced hidden-
-  companion selector was corrected, and the legacy HTTP race test uses the
-  explicit V1 companion route. No native-to-hosted fallback was introduced.
-  Portable export now retains exact native premade receipts inside the existing
-  design and verifies their hashes against the embedded WAV. Ten package-import
-  checks, strict Clippy and an actual Chromium export → offline re-export → Rust
-  import pass; a corrupted receipt produces a recoverable export error. Independent
-  review found no blocking trust/re-export defect. The existing ZIP format and
-  audio-only asset inventory remain unchanged.
-  The earlier integrated Rust selection (Designer, Runner, Designer core
-  and package verifier) passes 230 checks with 16 opt-in skips and strict Clippy.
-  PCM cancellation now uses a deterministic writer-boundary check, replacing a
-  five-second polling race; production cancellation behavior was unchanged.
-  The core/package
-  numeric checkpoint passed 58 checks with nine opt-in skips. Exact binary64 JSON
-  reload now preserves accepted design/order hashes; all 15 verifier checks pass
-  including the full 408-trial group. No hash tolerance or verification bypass
-  was added. Native instruction/group worker evidence covers click/button/delay
-  gates, stop-at-gate, changed instruction rejection, part-specific receipts and
-  reselection preserving prior files. Independent audits found 92/81 events and
-  two/two scored rows in the two tiny callback fixtures; instruction channel,
-  sample boundaries and saved delays pass. These are software checks.
-  Designer/Runner frontend tests and canonical Pages assembly pass. Actual
-  WebView generation/review/acceptance has 204 source trial rows and 600 participant
-  occurrences; the 2 GiB, two-part native preparation passes strict verification,
-  forged acceptance rejection, edit cancellation cleanup and restart revocation.
-  Portable bundles retain distinct stationary-control references and instruction
-  audio. Native remaking drops stale comparator receipts even at identical duration.
-  Recovery assessment remains read-only; six prior crash-boundary tests protect
-  existing evidence, without acquisition replay. The independent group audit passes both actual parts (173 events/four rows)
-  and nine corruption/mixing contract checks. Native read-only group assessment
-  passes seven checks including actual saved receipts; strict Clippy passes.
-  Condition gates retain their button acknowledgement without
-  inventing instruction audio. Independent UI review found and closed epoch/
-  late-adoption races. Designer storage now stages
-  immutable assets and cleans import extraction on success/failure; ten host
-  checks and actual nine-asset failure/retry evidence pass. The integrated mapper's
-  source/version links and generated inventory counts pass actual Chromium checks
-  at 320/768/1440 px with measured readable labels. Installed Runner startup is
-  verified at `b8e0e789`; the `468c8241` rebuild is installed but its fresh launch
-  check was rejected by automatic approval review. Full installed
-  interaction, clean-Windows prerequisites and deployed routes remain open. New physical calibration
-  is deferred by the user, not reported as measured.
+- **Verification:** fresh Windows Standard at `d1b30ec6` passes 717 tests with
+  nine skips and one warning in 1950.39 s; Quick passes 38 tests and the
+  release/privacy audit. [CI 40597111467](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40597111467)
+  passes all 14 jobs, with web/GUI/XDF dependencies, offscreen Qt and native writer
+  files. This supersedes the earlier local snapshot whose twelve catalogue
+  failures arose during source mutation. Frozen final corpus/profile checks
+  pass 123 tests with one skip, including all those failed cases.
+  Independent projection review passes 32 checks; primary-source review of the
+  Pfeiffer/mixed-reality disclosures found no concrete discrepancy. The follow-up run prints skipped-test
+  reasons (`-rs`); baseline output did not identify its nine skip reasons.
+  No local compiler cache was removed; the hosted run had 235 GB free.
+  Native execution now has a three-block actual silent-callback fixture and an
+  independent audit of 44 events/three scored rows. The instruction/group fixture
+  uses three blocks per part, including click/button/delay gates and breaks; its
+  whole-group audit passes 245 events/six scored rows. Three instruction and
+  three durable-group regressions pass. Earlier full preparation/ordering proof
+  covers the 408-trial fixture and 600-occurrence parity, with stale acceptance,
+  edit cancellation, part identity and final group receipt checks.
+  Generation evidence covers all 30 templates' actual tactile-cue containment,
+  corrected FLOAT/PCM concatenation and hash-bound native premade provenance.
+  The Rust/3DTI kernel verifies actual frames/channels, seeded source policies and
+  applicable digital loudness tolerances; see [kernel evidence](../packages/pps-designer-core/README.md).
+  These are software checks; source equivalence and physical timing stay distinct.
+  Designer/Runner now pass 42/79 JS checks and canonical builds; 20 owning Python
+  UI checks and two Pages assembly checks pass. Actual Chromium 151 verifies hosted persistence/playback,
+  mapper/preset navigation, names, keyboard/focus and 320-1920 px/200% CSS zoom.
+  F2 uses arithmetic counts and ordered full enumeration, with explicitly bounded
+  audit examples and native allocation preflight. Independent review matched 150
+  cases; mixed-type SOA and negative-count boundaries have regressions. The local
+  six-by-six profile measured 262 to 212 ms rendering; export still has an observed
+  roughly 0.5-second long task. These observations establish no WebView budget.
+  Actual Load Audio selection, reversed completion, instruction edits, finalization,
+  reload and export retain exact WAV bytes/hash and continuation policy. Native
+  replacement uses the same adoption owner and retains verified metadata. HTTP
+  import mutations serialize; stale replies cannot overwrite newer selections.
+  The existing 64 MiB per-audio budget is checked before reading, unused Blob URLs
+  are revoked, and identical previews preserve the current instruction menu.
+  A deterministic real-IndexedDB test confirms successful-put/transaction-abort
+  rejects both save/import, closes connections, preserves old/live data and permits
+  retry. Final root browser checks pass. One earlier CDP promise-GC failure had no
+  transaction telemetry; its cause is unproven, distinct from the verified abort fix.
+  Previous actual browser export/offline re-export/native import verifies nine
+  embedded assets and exact premade receipt/WAV hashes. Read-only recovery retains
+  six process-crash boundary checks and explicit incomplete/orphaned classifications.
+  Installed startup evidence belongs only to `b8e0e789`; `468c8241` has installed
+  payload equality but its fresh launch check was rejected by automatic review.
+  Full installed interaction, clean Windows and public promotion remain open.
+  Revision-specific details are in the linked implementation record and domain
+  references; detailed logs, CPU profiles and captures stay in ignored artifacts.
 - **Scientific coverage:** the frozen 94-publication corpus audit is complete
   with disclosed gaps. The final projection has 178 study rows and 1,958 compact
   contracts; every publication has an assessed inventory or documented access
@@ -211,20 +175,20 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - [ ] M4 — Close supported acquisition/recovery, accessibility/performance and
   evidence-record gaps (D1–D2, F1–F2, I1); audit every included experiment's 11
   replication contracts and finish citation mapper/preset navigation.
-  The bounded catalogue audit and mapper/preset source checks are complete;
-  installed accessibility/acquisition evidence remains open.
+  The bounded catalogue audit, mapper/preset source checks, F1 browser semantics
+  and F2 bounded counts are complete. Installed WebView accessibility/performance
+  and acquisition evidence remain open.
 - [ ] M5 — Build and inspect exact-revision installed packages and advertised
   phone routes (G3, E1). New physical calibration (D3/I2) is deferred by the
   user; hardware operation is assumed, with no measured qualification claim.
 - [ ] M6 — Review all finish criteria, supported-scope claims and release
   artifacts; publish only under the matching release authorization.
 
-Current blockers are a fresh full Standard run, remaining F2 variant-count
-expansion, missing installed
-evidence and pending Designer package identity approval.
+Current blockers are final follow-up integration CI, missing installed evidence
+and pending Designer package identity approval.
 Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
-skips and strict Clippy; final Designer/Runner frontend checks pass 25/79 tests.
-At product revision `0f76534d`, [CI run 40593624592](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40593624592)
+skips and strict Clippy; current Designer/Runner frontend checks pass 42/79 tests.
+At revision `d1b30ec6`, [CI run 40597111467](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40597111467)
 passes all three Core, Desktop and Python/Rust oracle platforms, Browser,
 optional Quest and all three validation bundles (14/14 jobs). The earlier non-Windows icon and
 shared-module source-map drift failures are resolved with existing assets and
@@ -233,8 +197,8 @@ The pinned-toolchain checks accumulated approximately 15.6 GB of regenerable
 Rust incremental cache, leaving less than 7 GB free. Automatic approval review
 rejected the exact compiler-cache cleanup as "blocked by policy" without a
 more specific reason. No cleanup ran; explicit user approval remains pending.
-The full Standard tier will instead use the existing fresh Windows CI worker;
-actual free space is logged before the run. Smaller owning checks continue.
+The full Standard tier now passes on the existing Windows CI worker; final
+follow-ups use that same validation owner, with actual free space logged.
 New calibration is outside the current task
 per user steering; future measured-route claims still require evidence. No new participant study,
 optional XR work, MobX dependency or additional transport is implied.

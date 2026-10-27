@@ -1,6 +1,6 @@
 # Approved implementation status
 
-Updated 2026-10-27 during publication-plan implementation. Historical checkpoint
+Updated 2026-10-28 during publication-plan implementation. Historical checkpoint
 evidence below remains revision-specific; [CURRENT_WORK](../../../CURRENT_WORK.md)
 owns the active checklist and current catalogue totals.
 Current evidence for the 17 approved
@@ -10,7 +10,7 @@ Each status applies to its stated surface, not to the whole product.
 | Item | Implemented / observed surface | Remaining gate |
 | --- | --- | --- |
 | 1 | VERIFIED source at `0f76534d`: locked Core/Desktop fmt, Clippy, tests and Python/Rust oracle checks pass on all three CI platforms | Full Standard and installed evidence remain separate |
-| 2 | PARTIAL: Standard finished 686 passed/10 skipped/12 catalogue failures during source mutation; final stable source/profile checks pass 123/1 skipped including all failed cases | Fresh stable Standard run before structural merge/release |
+| 2 | VERIFIED baseline at `d1b30ec6`: full Standard 717 passed/9 skipped, Quick 38 passed and release/privacy audit passed on fresh Windows CI | Final UI follow-up integration run; print and assess skip reasons |
 | 3 | VERIFIED catalogue/source separation: 94 assessed publications, 178 study rows, 1,958 dispositions; separate source/template/native capability records and explicit hosted/Tauri adapters | Installed evidence; disclosed scientific gaps withhold readiness |
 | 4 | VERIFIED: shared profile/limits/scoring/text/job owners; concise For-AI routing; one native actor/scheduler/file worker | Extract only seams changed by further work |
 | 5 | VERIFIED browser source: planner disclosures/JSON action, phone Pair/state/action flow, participant response, local output picker and inline notifications | Installed UI inspection |
@@ -33,12 +33,21 @@ Each status applies to its stated surface, not to the whole product.
   backed inventories, 19 documented access blockers and one project-lineage
   entry. An independent review passes 32 projection/identity/privacy checks.
   Final mapper controls pass actual Chromium search, study ownership, preset
-  navigation, focus, narrow/enlarged-text checks. Designer has 25 passing JS
+  navigation, focus, narrow/enlarged-text checks. Designer has 42 passing JS
   tests; two Pages assembly tests and canonical staging pass. The complete
   Chromium hosted-workflow check also passes against the final projection,
   including desktop/phone Edit visibility, playback, save failure/retry,
   export, stale preview and participant-draft handling. The explicit V1 HTTP
   race case remains separate from hosted and native adapters.
+- Follow-up F1/F2 and import checks preserve exact variant order/counts while
+  bounding preview/allocation work. Actual chooser-to-export checks retain new
+  WAV bytes/hash and instruction policy after reversed imports, preview, lock
+  and reload. Shared native adoption preserves verified metadata and setup state.
+  Native request fences and serialized V1 mutations prevent stale replacement.
+  Real IndexedDB abort-after-put-success tests verify rejection, connection closure,
+  old/live data retention and retry; the production abort handler was missing.
+  Root passes 42 Designer/79 Runner JS checks, 20 Python UI checks and the complete
+  Chromium workflow. Installed WebView/picker and AT qualification remain open.
 - The existing validation owner now selects Designer core/host code and both
   frontends; its workflow also checks the six scientific projection suites on
   Windows. With pinned Rust 1.88, Core passes 183 tests/nine opt-in skips and
@@ -51,6 +60,11 @@ Each status applies to its stated surface, not to the whole product.
   validation bundles (14/14 jobs passed). The prior missing shared PNG and CRLF source-map failures
   are fixed using existing assets and a scoped LF rule. CI package builds do
   not establish installed behavior or supported macOS/Linux qualification.
+- [CI 40597111467](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40597111467)
+  at `d1b30ec6` also passes all 14 jobs and now runs the entire Windows Standard
+  tier: 717 passed, nine skipped, one warning in 1950.39 s; Quick passes 38.
+  Subsequent UI/import/storage follow-ups require their integration CI. The next
+  Standard run prints skip reasons; no measured or installed claim follows.
 - Integrated provenance checkpoint `c389449a`: 23 Designer frontend tests,
   ten native bundle tests, actual Chromium export/offline re-export/native import,
   strict package Clippy and inspected mapper/Pages checks pass. The subsequent
