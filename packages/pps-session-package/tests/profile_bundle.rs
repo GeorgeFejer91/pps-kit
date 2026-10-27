@@ -123,6 +123,99 @@ fn portable_audio_is_materialized_rebound_and_verifiable_offline() {
     assert!(f.destination().join("materialized-profile.json").is_file());
 }
 
+fn premade_receipt(profile: &mut Value) -> String {
+    let text =
+        format!("{}\r\n", serde_json::to_string_pretty(&json!({
+        "asset":{"sha256":profile["assets"][0]["sha256"]},
+        "proxy_policy":"explicit-proxy.v2", "provenance":{"scientific_source_conformance":false}
+    })).unwrap());
+    let hash = format!("{:x}", Sha256::digest(text.as_bytes()));
+    let source = &mut profile["design"]["noises"][0];
+    source["native_generation_provenance"] =
+        json!("assets/preloads/test/audio.native_generation.json");
+    source["native_generation_provenance_sha256"] = json!(hash);
+    source["proxy_policy"] = json!("explicit-proxy.v2");
+    source["native_premade_provenance"] = json!({"json_utf8":text,"sha256":hash});
+    text
+}
+
+#[test]
+fn premade_receipt_survives_verified_offline_rebinding_without_qualification() {
+    let f = Fixture::new();
+    let mut original = String::new();
+    f.bundle(|_, profile, _| original = premade_receipt(profile));
+    let receipt =
+        materialize_profile_bundle(&f.source(), &f.destination(), &AtomicBool::new(false)).unwrap();
+    let source = &receipt.rebased_design()["noises"][0];
+    assert_eq!(source["native_premade_provenance"]["json_utf8"], original);
+    assert_eq!(
+        source["prebaked_path"],
+        receipt.assets()[0].path.to_str().unwrap()
+    );
+    let evidence: Value = serde_json::from_str(&original).unwrap();
+    assert_eq!(evidence["asset"]["sha256"], receipt.assets()[0].sha256);
+    assert_eq!(
+        evidence["provenance"]["scientific_source_conformance"],
+        false
+    );
+}
+
+#[test]
+fn invalid_premade_receipts_never_publish_an_import() {
+    for case in [
+        "hash",
+        "audio",
+        "policy",
+        "oversized",
+        "json",
+        "missing",
+        "missing audio",
+        "advertised hash",
+        "unknown field",
+    ] {
+        let f = Fixture::new();
+        f.bundle(|_, profile, _| {
+            let text = premade_receipt(profile);
+            let source = &mut profile["design"]["noises"][0];
+            let mut evidence: Value = serde_json::from_str(&text).unwrap();
+            let changed = match case {
+                "audio" => {
+                    evidence["asset"]["sha256"] = json!("0".repeat(64));
+                    Some(evidence.to_string())
+                }
+                "oversized" => Some(" ".repeat(256 * 1024 + 1)),
+                "json" => Some("{broken".into()),
+                _ => None,
+            };
+            if let Some(text) = changed {
+                let hash = format!("{:x}", Sha256::digest(text.as_bytes()));
+                source["native_premade_provenance"] = json!({"json_utf8":text,"sha256":hash});
+                source["native_generation_provenance_sha256"] = json!(hash);
+            }
+            match case {
+                "hash" => source["native_premade_provenance"]["sha256"] = json!("0".repeat(64)),
+                "policy" => source["proxy_policy"] = json!("other"),
+                "advertised hash" => {
+                    source["native_generation_provenance_sha256"] = json!("0".repeat(64))
+                }
+                "missing" => {
+                    source
+                        .as_object_mut()
+                        .unwrap()
+                        .remove("native_premade_provenance");
+                }
+                "missing audio" => {
+                    source.as_object_mut().unwrap().remove("prebaked_path");
+                    source.as_object_mut().unwrap().remove("browser_asset_id");
+                }
+                "unknown field" => source["native_premade_provenance"]["unchecked"] = json!(true),
+                _ => (),
+            }
+        });
+        f.assert_rejected();
+    }
+}
+
 #[test]
 fn corrupted_asset_hash_and_missing_references_leave_no_published_tree() {
     for broken_hash in [true, false] {
