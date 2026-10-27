@@ -33,6 +33,7 @@ test("static trial timing includes instruction and jitter prefixes without inven
 function handler(name, next) {
   return app.slice(app.indexOf(`async function ${name}(`), app.indexOf(`\n${next}`));
 }
+const instructionAdoption = app.slice(app.indexOf("function adoptInstructionAudio("), app.indexOf("async function importNativeAudio("));
 
 test("instruction preview debounce preserves form values while native review invalidates immediately", async () => {
   let timer, invalidated = 0, previewed = 0;
@@ -231,7 +232,7 @@ test("audio imports already pending cannot mutate a finalizing or replaced hoste
       $: () => ({ files: [{ name: "welcome.wav" }], value: "" }),
       window: { PPSDesigner: { drafts: { storeAudio: () => storage.promise } } },
     });
-    vm.runInContext(handler("importAudioFromPicker", "function fileToBase64"), context);
+    vm.runInContext(instructionAdoption + handler("importAudioFromPicker", "function fileToBase64"), context);
     const pending = vm.runInContext("importAudioFromPicker()", context);
     if (boundary === "saving") context.workflowSaveInFlight = true;
     if (boundary === "replaced") context.state = { design: { name: "other" } };
@@ -257,7 +258,7 @@ test("hosted instruction selection replaces old media in both design and form wi
     renderRunInstructions: profile => { rendered = profile; }, markDesignerDirty: () => dirty++,
     scheduleRunSequencePreview: () => previews++, showToast() {}, renderBakePanel() { throw new Error("Instruction import must not stage an ingredient"); },
   });
-  vm.runInContext(handler("importAudioFromPicker", "function fileToBase64"), context);
+  vm.runInContext(instructionAdoption + handler("importAudioFromPicker", "function fileToBase64"), context);
   await vm.runInContext("importAudioFromPicker()", context);
   const profile = original.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile;
   assert.equal(profile, rendered);
@@ -286,7 +287,7 @@ function importHarness(hosted = true) {
     renderRunInstructions() {}, markDesignerDirty() {}, scheduleRunSequencePreview() {}, showToast() {},
     renderBakePanel() {}, markDesignerSaved() {}, renderAll() {}, stageImportedAudioForBake: (audio, mode) => staged.push({ audio, mode }),
   });
-  vm.runInContext(handler("importNativeAudio", "async function importNativeProfile") + handler("importAudioFromPicker", "function fileToBase64"), context);
+  vm.runInContext(instructionAdoption + handler("importNativeAudio", "async function importNativeProfile") + handler("importAudioFromPicker", "function fileToBase64"), context);
   return { context, pending, revoked, staged, calls, run: () => vm.runInContext("importAudioFromPicker()", context), native: () => vm.runInContext("importNativeAudio()", context) };
 }
 
@@ -352,6 +353,43 @@ test("native picks capture their target and discard an older completion without 
     await awaiting;
     assert.equal(owner.preload_inventory.assets.length, 0, boundary);
   }
+});
+
+test("native instruction replacement preserves continuation policy and publishes verified media to later run rendering", async () => {
+  const h = importHarness();
+  const old = h.context.state.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots[0];
+  Object.assign(old, { label: "Old", path: "browser-asset:old.wav", browser_asset_id: "old.wav", sha256: "old-hash",
+    duration_s: 85.7, sample_rate: 48000, channels: 2, source: "browser_upload", enabled: false,
+    continue_mode: "click", delay_s: 0, button_label: "Continue" });
+  h.context.state.run_sequence_setup = { message: "retained setup", instruction_profile: { slots: [structuredClone(old)] } };
+  const formProfile = structuredClone(h.context.state.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile);
+  Object.assign(formProfile.slots[0], { enabled: true, continue_mode: "button", delay_s: 2.5, button_label: "Begin" });
+  h.context.collectRunInstructionProfile = () => structuredClone(formProfile);
+  const older = h.native();
+  const latest = h.native();
+  const audio = { label: "Native clip", path: "native-assets/verified.wav", sha256: "a".repeat(64), duration_s: 0.1, sample_rate: 44100, channels: 1 };
+  let dirty = 0, previews = 0, rendered;
+  h.context.markDesignerDirty = () => dirty++;
+  h.context.scheduleRunSequencePreview = () => previews++;
+  h.context.renderRunInstructions = profile => { rendered = profile; };
+  h.pending[1].resolve(structuredClone(audio));
+  await latest;
+  h.pending[0].resolve({ ...audio, label: "Obsolete", path: "native-assets/obsolete.wav" });
+  await older;
+  const profile = h.context.state.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile;
+  assert.equal(profile, h.context.state.run_sequence_setup.instruction_profile);
+  assert.equal(h.context.state.run_sequence_setup.message, "retained setup");
+  assert.deepEqual(JSON.parse(JSON.stringify(profile.slots[0])), { ...formProfile.slots[0], ...audio, browser_asset_id: "", source: "native_import" });
+  assert.equal(dirty, 1);
+  assert.equal(previews, 1);
+  assert.equal(h.context.state.preload_inventory.assets.length, 1);
+  assert.equal(h.context.state.preload_inventory.assets[0].sha256, audio.sha256);
+  Object.assign(h.context, { $: () => null, document: { querySelectorAll: () => [] }, getWorkflowStep: () => null,
+    isProfileFinalized: () => false, renderProfileValidationChecklist() {}, renderRunSequenceTable() {}, renderProtocolSummary() {} });
+  vm.runInContext(app.slice(app.indexOf("function renderRun()"), app.indexOf("function renderNativeExecution()")), h.context);
+  rendered = null;
+  h.context.renderRun();
+  assert.equal(rendered, profile, "later run rendering sees the selected verified clip, never the old setup projection");
 });
 
 test("superseded storage errors stay obsolete while current failures remain retryable", async () => {

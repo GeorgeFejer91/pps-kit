@@ -9022,6 +9022,23 @@ function openInstructionAudioPicker(slot) {
   $("audio-file-input").click();
 }
 
+function adoptInstructionAudio(instructionSlot, audio, source) {
+  const profile = collectRunInstructionProfile();
+  const slot = profile.slots.find(item => item.slot === instructionSlot);
+  if (!slot) throw new Error("The selected instruction slot is no longer available.");
+  Object.assign(slot, { label: audio.label, path: audio.path, browser_asset_id: audio.browser_asset_id || "",
+    sha256: audio.sha256 || "", duration_s: audio.duration_s || 0, sample_rate: audio.sample_rate || 0,
+    channels: audio.channels || 0, source });
+  const parameters = state.design.study_profile_reference_parameters ||= {};
+  parameters.dashboard_run_setup ||= {};
+  parameters.dashboard_run_setup.instruction_profile = profile;
+  state.run_sequence_setup = { ...(state.run_sequence_setup || {}), instruction_profile: profile };
+  if (pendingInstructionSlot === instructionSlot) pendingInstructionSlot = "";
+  markDesignerDirty();
+  renderRunInstructions(profile);
+  scheduleRunSequencePreview();
+}
+
 async function importNativeAudio() {
   if (!ensureEditableProject() || workflowSaveInFlight) return;
   const owner = state;
@@ -9035,16 +9052,11 @@ async function importNativeAudio() {
   if (!audio || !current()) return;
   audio.target_duration_s = audio.duration_s;
   if (instructionSlot) {
-    const parameters = state.design.study_profile_reference_parameters;
-    parameters.dashboard_run_setup ||= {};
-    const profile = parameters.dashboard_run_setup.instruction_profile ||= { slots: [] };
-    profile.slots = profile.slots.filter(item => item.slot !== instructionSlot);
-    profile.slots.push({ slot: instructionSlot, label: audio.label, path: audio.path });
-    if (pendingInstructionSlot === instructionSlot) pendingInstructionSlot = "";
-    markDesignerDirty(); renderRunInstructions(profile);
+    adoptInstructionAudio(instructionSlot, audio, "native_import");
   } else stageImportedAudioForBake(audio, importMode === "spatialize" ? "spatialize" : "preserve");
   state.preload_inventory.assets.push({ ...audio, source_kind: "imported_audio" });
-  showToast("Verified local WAV selected; create the ingredient to commit it.");
+  showToast(instructionSlot ? "Verified instruction audio selected. Review and save the profile."
+    : "Verified local WAV selected; create the ingredient to commit it.");
 }
 
 async function importNativeProfile() {
@@ -9132,19 +9144,7 @@ async function importAudioFromPicker() {
     };
     if (instructionSlot) {
       URL.revokeObjectURL(stored.url); // Instructions use their stored asset ID, never this preview URL.
-      const profile = collectRunInstructionProfile();
-      const slot = profile.slots.find(item => item.slot === instructionSlot);
-      if (!slot) throw new Error("The selected instruction slot is no longer available.");
-      Object.assign(slot, { label: audio.label, path: audio.path, browser_asset_id: stored.id,
-        sha256: stored.sha256, duration_s: 0, sample_rate: 0, channels: 0, source: "browser_upload" });
-      const parameters = state.design.study_profile_reference_parameters ||= {};
-      parameters.dashboard_run_setup ||= {};
-      parameters.dashboard_run_setup.instruction_profile = profile;
-      state.run_sequence_setup = { ...(state.run_sequence_setup || {}), instruction_profile: profile };
-      if (pendingInstructionSlot === instructionSlot) pendingInstructionSlot = "";
-      markDesignerDirty();
-      renderRunInstructions(profile);
-      scheduleRunSequencePreview();
+      adoptInstructionAudio(instructionSlot, { ...audio, sha256: stored.sha256 }, "browser_upload");
       showToast("Instruction audio selected locally. Review and save the profile; exact WAV timing is checked on desktop.");
       return;
     } else {
