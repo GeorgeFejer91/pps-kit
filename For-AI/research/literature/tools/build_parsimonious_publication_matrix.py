@@ -1597,6 +1597,18 @@ def build(output_dir: Path, public_output: Path | None = None) -> dict[str, Any]
             raise ValueError("Duplicate superseded study-row identity")
         projection = public_projection(study_index, evidence_rows, registry["corpus_freeze"]["id"], aliases)
         projection["inventoryAudit"] = inventory_summary
+        inventory_by_node = {row["network_node_id"]: row for row in inventory_rows}
+        for publication in projection["publications"]:
+            row = inventory_by_node[publication["networkNodeId"]]
+            publication["inventoryAudit"] = {
+                "registered": row["inventory_registered"] == "yes",
+                "evidenceStatus": row["inventory_evidence_status"],
+                "inventoryStatus": row["inventory_status"],
+                "studyRowCount": row["study_row_count"],
+                "rowsWithElevenSourceDispositions": row["rows_with_eleven_source_dispositions"],
+                "allRowsHaveElevenSourceDispositions": row["all_rows_have_eleven_source_dispositions"] == "yes",
+                "inventoryAndContractsAudited": row["inventory_and_contracts_audited"] == "yes",
+            }
         public_output.parent.mkdir(parents=True, exist_ok=True)
         public_output.write_text(json.dumps(projection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 

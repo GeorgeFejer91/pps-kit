@@ -12,20 +12,20 @@
     "publications": 94,
     "studies": 138,
     "contracts": 1518,
-    "reportedComplete": 290,
-    "derivedComplete": 56,
+    "reportedComplete": 291,
+    "derivedComplete": 60,
     "parameterStatusCounts": {
       "approximation_required": 22,
       "composite_requires_split": 146,
       "conflicting_evidence": 25,
-      "derived_complete": 56,
-      "explicitly_absent": 19,
+      "derived_complete": 60,
+      "explicitly_absent": 20,
       "low_confidence": 21,
       "not_applicable": 77,
-      "not_assessed": 297,
+      "not_assessed": 286,
       "not_reported": 41,
-      "partial": 314,
-      "reported_complete": 290,
+      "partial": 319,
+      "reported_complete": 291,
       "source_unavailable": 210
     }
   },
@@ -94,7 +94,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1007/s00221-005-2393-8",
@@ -105,7 +114,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1007/s00221-013-3532-2",
@@ -121,7 +139,16 @@
         "partial": 12,
         "reported_complete": 2
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_audio_tactile_instances",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1007/s00221-013-3574-5",
@@ -132,7 +159,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1007/s00221-017-5158-2",
@@ -143,7 +179,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "audited_source_access_gap",
+        "inventoryStatus": "source_access_blocked_experiment_inventory_unresolved",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1007/s00221-019-05469-3",
@@ -159,7 +204,16 @@
         "partial": 5,
         "reported_complete": 4
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1007/s00221-020-05771-5",
@@ -177,7 +231,16 @@
         "reported_complete": 28,
         "source_unavailable": 1
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "abstract_or_metadata_inventory",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 4,
+        "rowsWithElevenSourceDispositions": 4,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1007/s00221-024-06782-2",
@@ -189,7 +252,16 @@
         "partial": 5,
         "reported_complete": 6
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_pps_experiment_with_two_supporting_tasks",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1007/s00426-020-01365-6",
@@ -205,7 +277,16 @@
         "partial": 10,
         "reported_complete": 12
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "author_version_methods_reviewed_final_comparison_pending",
+        "inventoryStatus": "author_version_inventory_assessed_final_comparison_pending",
+        "studyRowCount": 3,
+        "rowsWithElevenSourceDispositions": 3,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1007/s10548-021-00826-4",
@@ -216,7 +297,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.actpsy.2004.10.017",
@@ -227,7 +317,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.actpsy.2011.01.003",
@@ -238,7 +337,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.bodyim.2024.101777",
@@ -251,7 +359,16 @@
         "partial": 5,
         "reported_complete": 5
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_audiotactile_assessment_protocol",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.cognition.2015.07.012",
@@ -270,7 +387,16 @@
         "partial": 6,
         "reported_complete": 21
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_main_plus_supplemental_variant",
+        "studyRowCount": 3,
+        "rowsWithElevenSourceDispositions": 3,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.cognition.2018.04.001",
@@ -281,7 +407,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.cortex.2017.08.033",
@@ -292,7 +427,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.cortex.2020.11.021",
@@ -304,7 +448,16 @@
         "partial": 6,
         "reported_complete": 5
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_audiotactile_group_comparison",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.cortex.2021.08.004",
@@ -315,7 +468,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.cortex.2025.11.015",
@@ -326,7 +488,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.cub.2013.01.043",
@@ -343,7 +514,16 @@
         "reported_complete": 1,
         "source_unavailable": 9
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 3,
+        "rowsWithElevenSourceDispositions": 3,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.jneumeth.2019.108534",
@@ -356,7 +536,16 @@
         "partial": 4,
         "reported_complete": 5
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_two_session_audiotactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuroimage.2012.06.063",
@@ -367,7 +556,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2006.12.004",
@@ -378,7 +576,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2008.07.025",
@@ -389,7 +596,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2009.07.025",
@@ -405,7 +621,16 @@
         "partial": 5,
         "reported_complete": 5
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2009.11.009",
@@ -416,7 +641,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2014.08.030",
@@ -432,7 +666,16 @@
         "partial": 2,
         "reported_complete": 5
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2014.09.043",
@@ -443,7 +686,16 @@
       "parameterStatusCounts": {
         "not_applicable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_adjacent_mechanistic_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2014.10.027",
@@ -454,7 +706,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2015.03.001",
@@ -471,7 +732,16 @@
         "partial": 6,
         "reported_complete": 12
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2017.07.018",
@@ -488,7 +758,16 @@
         "partial": 6,
         "reported_complete": 4
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2020.107579",
@@ -499,7 +778,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2020.107622",
@@ -510,7 +798,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2021.107823",
@@ -521,7 +818,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.neuropsychologia.2026.109490",
@@ -535,7 +841,16 @@
       "parameterStatusCounts": {
         "composite_requires_split": 44
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "abstract_or_metadata_inventory",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 4,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.nicl.2019.101940",
@@ -548,7 +863,16 @@
         "explicitly_absent": 2,
         "reported_complete": 20
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.schres.2021.06.026",
@@ -559,7 +883,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.tics.2016.01.005",
@@ -570,7 +903,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1016/j.xcrm.2026.102705",
@@ -585,7 +927,16 @@
         "partial": 6,
         "reported_complete": 12
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "partial_methods_inventory",
+        "inventoryStatus": "formal_experiment_numbering_unverified",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1038/s41598-019-45084-4",
@@ -599,7 +950,16 @@
         "partial": 11,
         "reported_complete": 8
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_pilot_and_main_experiment",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1038/s41598-019-45224-w",
@@ -612,7 +972,16 @@
         "partial": 6,
         "reported_complete": 4
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_longitudinal_audio_tactile_task",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1038/s41598-020-79767-0",
@@ -625,7 +994,16 @@
         "partial": 4,
         "reported_complete": 6
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1038/s41598-021-00048-5",
@@ -639,7 +1017,16 @@
         "partial": 11,
         "reported_complete": 6
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_reanalysis_with_two_protocol_variants",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1038/s41598-021-90784-5",
@@ -655,7 +1042,16 @@
         "partial": 5,
         "reported_complete": 4
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1038/s41598-022-21469-w",
@@ -666,7 +1062,16 @@
       "parameterStatusCounts": {
         "not_applicable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_visuotactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1038/s41598-026-36796-5",
@@ -686,7 +1091,16 @@
         "partial": 2,
         "reported_complete": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1038/srep02844",
@@ -705,7 +1119,16 @@
         "partial": 4,
         "reported_complete": 10
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "partial_methods_inventory",
+        "inventoryStatus": "at_least_three_experiments",
+        "studyRowCount": 3,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1038/srep18603",
@@ -732,7 +1155,16 @@
         "partial": 38,
         "reported_complete": 9
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "partial_methods_inventory",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 7,
+        "rowsWithElevenSourceDispositions": 3,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1073/pnas.2024548118",
@@ -747,7 +1179,16 @@
         "partial": 1,
         "reported_complete": 5
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_cohort_specific_variants",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1073/pnas.2516229122",
@@ -758,7 +1199,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1080/17470210903068989",
@@ -769,7 +1219,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1093/braincomms/fcac179",
@@ -781,7 +1240,16 @@
         "partial": 6,
         "reported_complete": 5
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_audiotactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1093/cercor/bhh197",
@@ -792,7 +1260,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1093/cercor/bhy156",
@@ -801,11 +1278,21 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
+        "derived_complete": 2,
         "explicitly_absent": 1,
         "partial": 5,
-        "reported_complete": 5
+        "reported_complete": 3
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1093/neucas/7.2.97",
@@ -816,7 +1303,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1093/oso/9780198851738.003.0005",
@@ -827,7 +1323,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1093/schbul/sbac067",
@@ -840,7 +1345,16 @@
         "partial": 5,
         "reported_complete": 3
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_group_comparison_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1098/rsos.181878",
@@ -855,7 +1369,16 @@
         "partial": 15,
         "reported_complete": 15
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_three_social_context_experiments",
+        "studyRowCount": 3,
+        "rowsWithElevenSourceDispositions": 3,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1101/2024.10.25.619776",
@@ -866,7 +1389,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1101/2025.06.25.660685",
@@ -877,7 +1409,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1101/2025.09.02.673729",
@@ -888,7 +1429,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1101/249078",
@@ -897,9 +1447,21 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "derived_complete": 2,
+        "explicitly_absent": 1,
+        "partial": 5,
+        "reported_complete": 3
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_passive_trunk_ieeg_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1101/492017",
@@ -910,7 +1472,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1109/whc.2017.7989970",
@@ -921,7 +1492,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1111/ejn.13872",
@@ -934,7 +1514,16 @@
       "parameterStatusCounts": {
         "composite_requires_split": 33
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "abstract_or_metadata_inventory",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 3,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1111/j.1460-9568.2010.07210.x",
@@ -945,7 +1534,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1111/j.1467-9280.2007.01952.x",
@@ -960,7 +1558,16 @@
         "partial": 6,
         "reported_complete": 4
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1152/jn.00652.2017",
@@ -972,7 +1579,16 @@
         "low_confidence": 10,
         "source_unavailable": 1
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1162/089892902320474481",
@@ -989,7 +1605,16 @@
         "partial": 2,
         "reported_complete": 9
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "retained_primary_methods_review",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1162/jocn_a_00006",
@@ -1000,7 +1625,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1163/22134808-000s0136",
@@ -1011,7 +1645,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1177/0956797619869337",
@@ -1022,7 +1665,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1177/1362361319838950",
@@ -1033,7 +1685,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1177/17470218241261645",
@@ -1045,7 +1706,16 @@
         "not_reported": 2,
         "partial": 9
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1250/ast.41.345",
@@ -1060,7 +1730,16 @@
         "partial": 21,
         "reported_complete": 6
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_three_reported_social_context_experiments",
+        "studyRowCount": 3,
+        "rowsWithElevenSourceDispositions": 3,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1371/journal.pone.0006582",
@@ -1072,7 +1751,16 @@
       "parameterStatusCounts": {
         "not_applicable": 22
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_two_adjacent_mechanistic_experiments",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 2,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.1371/journal.pone.0044306",
@@ -1087,7 +1775,16 @@
         "partial": 7,
         "reported_complete": 3
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_audio_tactile_pps_task_with_supporting_localizer",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.1523/jneurosci.1696-15.2015",
@@ -1105,7 +1802,16 @@
         "partial": 28,
         "reported_complete": 13
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_five_pps_protocol_instances_in_three_cohorts",
+        "studyRowCount": 5,
+        "rowsWithElevenSourceDispositions": 5,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.17605/osf.io/73x59",
@@ -1116,7 +1822,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.31234/osf.io/etvb6_v1",
@@ -1127,7 +1842,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.31234/osf.io/t8h6a",
@@ -1138,7 +1862,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.3233/rnn-120286",
@@ -1149,7 +1882,16 @@
       "parameterStatusCounts": {
         "source_unavailable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.3389/fict.2017.00031",
@@ -1162,7 +1904,16 @@
         "composite_requires_split": 11,
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "partial_methods_inventory",
+        "inventoryStatus": "at_least_two_experiments",
+        "studyRowCount": 2,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.3389/fnbeh.2015.00004",
@@ -1177,7 +1928,16 @@
         "partial": 7,
         "reported_complete": 2
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.3389/fpsyg.2011.00077",
@@ -1188,7 +1948,16 @@
       "parameterStatusCounts": {
         "not_applicable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_publication_scope_boundary",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.3389/fpsyg.2015.00639",
@@ -1201,7 +1970,16 @@
       "parameterStatusCounts": {
         "composite_requires_split": 33
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "abstract_or_metadata_inventory",
+        "inventoryStatus": "confirmed_total",
+        "studyRowCount": 3,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.3389/fpsyg.2022.983189",
@@ -1212,7 +1990,16 @@
       "parameterStatusCounts": {
         "not_applicable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_adjacent_reaching_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.3389/fpsyt.2014.00122",
@@ -1227,7 +2014,16 @@
         "partial": 4,
         "reported_complete": 6
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.3389/frvir.2021.644214",
@@ -1243,7 +2039,16 @@
         "partial": 5,
         "reported_complete": 1
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_audiotactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.3390/bs14040306",
@@ -1256,7 +2061,16 @@
         "partial": 5,
         "reported_complete": 5
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_main_audio_tactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.3390/s25196072",
@@ -1272,7 +2086,16 @@
         "partial": 4,
         "reported_complete": 3
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_audiotactile_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.3758/app.72.4.885",
@@ -1283,7 +2106,16 @@
       "parameterStatusCounts": {
         "not_applicable": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": true,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_one_adjacent_haptic_bisection_experiment",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
+      }
     },
     {
       "networkNodeId": "doi:10.53829/ntr201911fa4",
@@ -1294,7 +2126,16 @@
       "parameterStatusCounts": {
         "not_assessed": 11
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     },
     {
       "networkNodeId": "doi:10.61782/fa.2025.0866",
@@ -1306,7 +2147,16 @@
         "low_confidence": 10,
         "source_unavailable": 1
       },
-      "nativeQualification": "not_assessed"
+      "nativeQualification": "not_assessed",
+      "inventoryAudit": {
+        "registered": false,
+        "evidenceStatus": "not_registered",
+        "inventoryStatus": "not_assessed",
+        "studyRowCount": 1,
+        "rowsWithElevenSourceDispositions": 0,
+        "allRowsHaveElevenSourceDispositions": false,
+        "inventoryAndContractsAudited": false
+      }
     }
   ],
   "studies": [
@@ -27642,9 +28492,10 @@
       "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
+        "derived_complete": 2,
         "explicitly_absent": 1,
         "partial": 5,
-        "reported_complete": 5
+        "reported_complete": 3
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -27652,40 +28503,69 @@
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
           "status": "partial",
-          "value": "Stimulus type: White-noise auditory stimulus simulating an approaching sound from the front. | Source provenance: Prerecorded using two 8-speaker arrays and a head-model binaural microphone; played back through insert earphones. | Auditory conditions: Unisensory auditory A and multisensory audio-tactile AT conditions used the same approaching sound. | Renderer or apparatus: Etymotic ER-4P insert earphones; sounds prerecorded from two 8-speaker arrays with Omni binaural microphones; ExpyVR controlled delivery.",
+          "value": "3000-ms approaching white-noise binaural recording made using two eight-speaker arrays over2m and a head-model microphone; ER-4P insert-earphone playback.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Material and Apparatus | PDF p.3, Procedures | PDF p.3 methods; OUP supplement route checked 2026-06-16",
-          "evidenceNote": "The auditory stimulus is identified as white noise approaching from the front. | The paper reports physical recording provenance but not the original audio files. | The condition families are listed in the procedure. | No SPL, gain law, or sound-file envelope parameters were found in accessible sources. | The apparatus is reported in enough detail for a binaural-rendered approximation.",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "Original audio PCM, sampling rate, source realization, level envelope and SPL/calibration are not provided. A generated HRTF substitute is not the original recording.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML",
+          "sourceType": "primary_article_xml",
           "missingComponents": [
-            "source_recipe_or_asset_provenance",
-            "level_envelope_calibration"
+            "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White noise prerecorded from two arrays of eight speakers,2m total length, Omni Binaural Microphone head model; Etymotic ER-4P earphones.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
           "status": "partial",
-          "value": "Trajectory path: Simulated front approach centered on the body from 2 m maximum distance; tactile samples correspond to 1.7, 1.0, and 0.3 m. | Stimulus duration: Approaching auditory stimulus lasted 3 s. | Stimulus speed: Simulated approach speed was 0.66 m/s. | Trajectory count: One front-centered approaching auditory trajectory used in unisensory A and multisensory AT trials. | Renderer or apparatus: Etymotic ER-4P insert earphones; sounds prerecorded from two 8-speaker arrays with Omni binaural microphones; ExpyVR controlled delivery.",
+          "value": "Frontal body-centred approach with maximal simulated distance2m, duration3s and reported nominal speed0.66m/s; nominal touch distances1.7,1.0,0.3m.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Procedures | PDF p.3, Material and Apparatus/Procedures | PDF p.3 methods; OUP supplement route checked 2026-06-16 | PDF p.3, Material and Apparatus",
-          "evidenceNote": "Distance-at-touch values define the effective trajectory anchors. | Duration is directly reported for auditory trials. | Speed is reported with the 2 m approach trajectory. | No receding or lateral trajectory is described. | No SPL, gain law, or sound-file envelope parameters were found in accessible sources. | The apparatus is reported in enough detail for a binaural-rendered approximation.",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "Do not infer a measured zero-distance endpoint or claim every jittered pulse occurs at the exact nominal distance. The original recording/transfer function remains unresolved.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML",
+          "sourceType": "primary_article_xml",
           "missingComponents": [
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "exact_recorded_path_and_endpoint_convention"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Patient body/trunk; upper body reclined approximately135degrees relative to the rest of the body, eyes closed.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Maximal simulated distance2m, approach from front; nominal pulse distance labels1.7,1.0,0.3m.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "approach via recorded physical-array acoustics",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3-s waveform with stated0.66m/s speed.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
@@ -27803,12 +28683,12 @@
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "reported_complete",
+          "status": "derived_complete",
           "value": "Three tactile events per T/AT trial at nominal 500,1500,2500 ms; in AT these are relative to sound onset.",
           "compositeValue": "",
           "pageOrSection": "Methods, Material and Apparatus; Procedures",
-          "evidenceNote": "The source contains isolated m/ms typographic inconsistencies; the repeated ms statements and 3000-ms trial establish the millisecond schedule.",
-          "derivationNote": "",
+          "evidenceNote": "Three nominal delays per trial, with discrete0-200-msjitter. Preserve the printed unit error and nominal distance labels; no exact per-jitter acoustic position mapping is supplied.",
+          "derivationNote": "Normalize the printed third delay2500m to2500ms from the parallel500/1500-ms timing syntax and3-s trial. The typo persists in preprint and final XML, so the final is not an independent textual correction.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
           "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML",
@@ -27821,7 +28701,7 @@
               "note": ""
             },
             "ordered_soa_values_or_derivable_distance_anchors": {
-              "status": "reported",
+              "status": "derived",
               "value": "500,1500,2500 ms, with 0-200-ms jitter in 50-ms steps.",
               "note": ""
             },
@@ -27836,20 +28716,35 @@
           "key": "tactile_target",
           "label": "Tactile target",
           "status": "partial",
-          "value": "Tactile stimulus: 100 ms vibrotactile stimulation on upper sternum using Precision MicroDrives 312-101 motor, 150 Hz, 3 V, 60 mA.",
+          "value": "Three100-ms vibrations per T/AT trial at upper sternum; Precision MicroDrives312-101 motor with nominal150Hz specification.",
           "compositeValue": "",
-          "pageOrSection": "PDF p.3, Material and Apparatus",
-          "evidenceNote": "Tactile site, motor model, duration, and device parameters are reported.",
+          "pageOrSection": "Methods, Material and Apparatus; Procedures",
+          "evidenceNote": "Motor specifications and command duration do not establish a measured150-Hz delivered waveform, trigger latency or participant-specific threshold calibration; no hardware qualification is inferred.",
           "derivationNote": "",
-          "reviewedOn": "2026-06-16",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
-          "evidenceSourceUrl": "",
-          "sourceType": "manual_review",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML",
+          "sourceType": "primary_article_xml",
           "missingComponents": [
-            "waveform_and_duration",
-            "intensity_or_calibration"
+            "delivered_waveform_and_threshold_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Upper sternum/chest.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Shaftless motor312-101; purpose-built Arduino with10kHzrefresh and ExpyVR serial control.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100-ms commanded pulse; motor specifications3V,60mA,9000rpm,150Hz,5g,113mm2,maximum speed reached in50ms.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
@@ -27928,12 +28823,12 @@
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "reported_complete",
+          "status": "derived_complete",
           "value": "85 trials each of A, T and AT; 255 total trials, with three touches inside each T/AT trial.",
           "compositeValue": "",
           "pageOrSection": "Methods, Material and Apparatus; Procedures",
           "evidenceNote": "",
-          "derivationNote": "",
+          "derivationNote": "85trials x3families=255trial rows; (85T+85AT) x3pulses=510scheduled tactile events. Trials and tactile events are different units.",
           "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1093/cercor/bhy156",
           "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML",
@@ -27941,7 +28836,7 @@
           "missingComponents": [],
           "components": {
             "derived_total_reconciliation": {
-              "status": "reported",
+              "status": "derived",
               "value": "3 x 85 =255 trials; 2 x 85 x 3 =510 tactile events.",
               "note": ""
             },
@@ -30674,236 +31569,405 @@
     {
       "studyRowId": "doi:10.1101/249078",
       "networkNodeId": "doi:10.1101/249078",
-      "label": "Audio-tactile and peripersonal space processing around the trunk in human parietal and temporal cortex: an intracranial EEG study",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Audio-tactile and peripersonal space processing around the trunk in human parietal and temporal cortex: an intracranial EEG study (a)",
+      "experimentLabel": "Passive trunk A/T/AT iEEG paradigm (preprint v1)",
+      "inventoryStatus": "confirmed_one_passive_trunk_ieeg_experiment",
+      "evidenceScope": "experiment_specific",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "derived_complete": 2,
+        "explicitly_absent": 1,
+        "partial": 5,
+        "reported_complete": 3
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "3000-ms approaching white-noise binaural recording made using two eight-speaker arrays over2m and a head-model microphone; ER-4P insert-earphone playback.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "evidenceNote": "Original audio PCM, sampling rate, source realization, level envelope and SPL/calibration are not provided. A generated HRTF substitute is not the original recording.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
           "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
             "source_recipe_or_asset_provenance"
           ],
-          "components": {}
+          "components": {
+            "source_mode": {
+              "status": "reported",
+              "value": "imported_asset",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White noise prerecorded from two arrays of eight speakers,2m total length, Omni Binaural Microphone head model; Etymotic ER-4P earphones.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Frontal body-centred approach with maximal simulated distance2m, duration3s and reported nominal speed0.66m/s; nominal touch distances1.7,1.0,0.3m.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "evidenceNote": "Do not infer a measured zero-distance endpoint or claim every jittered pulse occurs at the exact nominal distance. The original recording/transfer function remains unresolved.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
           "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
+            "exact_recorded_path_and_endpoint_convention"
           ],
-          "components": {}
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Patient body/trunk; upper body reclined approximately135degrees relative to the rest of the body, eyes closed.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "reported",
+              "value": "Maximal simulated distance2m, approach from front; nominal pulse distance labels1.7,1.0,0.3m.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "reported",
+              "value": "approach via recorded physical-array acoustics",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "3-s waveform with stated0.66m/s speed.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Three randomized trial families: A, T and AT. Each T/AT trial contains three successive tactile events.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "evidenceNote": "Three tactile events occur within each T/AT trial; do not expand them into three single-target trials.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
+          "missingComponents": [],
+          "components": {
+            "condition_intermixing": {
+              "status": "reported",
+              "value": "85 trials of each A/T/AT family presented randomly.",
+              "note": ""
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "A: 3000-ms approaching white noise; T: three touches without sound; AT: same three touches with sound.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "reported",
+              "value": "Auditory-only A control, tactile-only T control, and multisensory AT.",
+              "note": ""
+            },
+            "within_trial_timing_or_placement": {
+              "status": "reported",
+              "value": "Nominal tactile events at 500, 1500 and 2500 ms; each delay jittered by 0-200 ms in 50-ms steps.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "reported_complete",
+          "value": "Passive iEEG task: attend to sound and touch with eyes closed; no overt response requested.",
           "compositeValue": "",
-          "pageOrSection": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Attend to auditory and tactile stimulation while reclined, eyes closed.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "No overt response device/task.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Not applicable: electrophysiological acquisition without behavioral response deadline.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "No behavioral detection or catch-response rule.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Tactile-delay jitter 0-200 ms in 50-ms steps; ITI randomly selected/shuffled among 1.4, 1.7 and 1.9 s.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "evidenceNote": "Selection probabilities and the exact ITI endpoint convention are not specified; do not silently assert uniform draws.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
           "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
+            "distribution"
           ],
-          "components": {}
+          "components": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Discrete tactile-event jitter plus discrete intertrial intervals.",
+              "note": ""
+            },
+            "randomization": {
+              "status": "reported",
+              "value": "Randomized ITI choice/order.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "reported",
+              "value": "Each nominal tactile delay and interval between trials.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "Jitter 0,50,100,150,200 ms; ITI 1.4,1.7,1.9 s.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "derived_complete",
+          "value": "Three tactile events per T/AT trial at nominal 500,1500,2500 ms; in AT these are relative to sound onset.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "evidenceNote": "Three nominal delays per trial, with discrete0-200-msjitter. Preserve the printed unit error and nominal distance labels; no exact per-jitter acoustic position mapping is supplied.",
+          "derivationNote": "Normalize the printed third delay2500m to2500ms from the parallel500/1500-ms timing syntax and3-s trial. The typo persists in preprint and final XML, so the final is not an independent textual correction.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
+          "missingComponents": [],
+          "components": {
+            "direction_specific_pairing": {
+              "status": "reported",
+              "value": "Approach only; nominal far/middle/close distances 1.7,1.0,0.3 m.",
+              "note": ""
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "derived",
+              "value": "500,1500,2500 ms, with 0-200-ms jitter in 50-ms steps.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "reported",
+              "value": "Trial onset for T; common trial/sound onset for AT.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "Three100-ms vibrations per T/AT trial at upper sternum; Precision MicroDrives312-101 motor with nominal150Hz specification.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "evidenceNote": "Motor specifications and command duration do not establish a measured150-Hz delivered waveform, trigger latency or participant-specific threshold calibration; no hardware qualification is inferred.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
           "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
+            "delivered_waveform_and_threshold_calibration"
           ],
-          "components": {}
+          "components": {
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Upper sternum/chest.",
+              "note": ""
+            },
+            "modality": {
+              "status": "reported",
+              "value": "Shaftless motor312-101; purpose-built Arduino with10kHzrefresh and ExpyVR serial control.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "100-ms commanded pulse; motor specifications3V,60mA,9000rpm,150Hz,5g,113mm2,maximum speed reached in50ms.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "reported_complete",
+          "value": "85 tactile-only T control trials, each with three tactile events; separate A controls remain auditory-only.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "evidenceNote": "Prestimulus EEG baseline correction is an analysis operation, not an additional trial family.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "85 T trials in the global randomized pool.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "Unisensory tactile T control.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "85 tactile-only control trials.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "500,1500,2500 ms after T-trial onset, with reported jitter.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "explicitly_absent",
+          "value": "No behavioral catches; 85 auditory-only A trials are unisensory controls in a passive task.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "evidenceNote": "Auditory-only controls must not be relabeled no-target catches when participants perform no overt detection task.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Zero additional behavioral catches.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "explicitly_absent",
+              "value": "No behavioral catch family in exhaustive A/T/AT design.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "0.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "No overt response in any family; A trials provide an auditory control.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "derived_complete",
+          "value": "85 trials each of A, T and AT; 255 total trials, with three touches inside each T/AT trial.",
           "compositeValue": "",
-          "pageOrSection": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
           "evidenceNote": "",
-          "derivationNote": "",
-          "reviewedOn": "",
+          "derivationNote": "85trials x3families=255trial rows; (85T+85AT) x3pulses=510scheduled tactile events. Trials and tactile events are different units.",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
+          "missingComponents": [],
+          "components": {
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "3 x 85 =255 trials; 2 x 85 x 3 =510 tactile events.",
+              "note": ""
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Each T/AT trial contains three tactile events, not three independent trial rows.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Three trial families, A/T/AT.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "85 per family.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "partial",
+          "value": "A/T/AT trials randomized; about 20 minutes overall; block subdivisions not reported.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "Preprint v1 Methods pp.4-5; allocation/preprocessing distinction pp.5-6",
+          "evidenceNote": "No block count is inferred from the reported experiment duration.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1101/249078",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
+          "evidenceSourceUrl": "https://www.biorxiv.org/content/10.1101/249078v1.full.pdf",
+          "sourceType": "primary_preprint_v1_methods_compared_with_final",
           "missingComponents": [
-            "block_count",
-            "block_composition"
+            "block_count"
           ],
-          "components": {}
+          "components": {
+            "block_composition": {
+              "status": "reported",
+              "value": "85 trials per family in the experiment.",
+              "note": ""
+            },
+            "within_block_randomization": {
+              "status": "reported",
+              "value": "Trial families presented in randomized manner.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -44341,19 +45405,19 @@
   ],
   "inventoryAudit": {
     "publications": 94,
-    "registeredInventories": 50,
-    "methodsReviewedInventories": 41,
+    "registeredInventories": 51,
+    "methodsReviewedInventories": 42,
     "auditedAccessBlockers": 1,
-    "publicationsWithAllContractDispositions": 36,
-    "inventoryAndContractsAudited": 34,
-    "remainingInventoryOrContractAudit": 60,
+    "publicationsWithAllContractDispositions": 38,
+    "inventoryAndContractsAudited": 36,
+    "remainingInventoryOrContractAudit": 58,
     "inventoryEvidenceCounts": {
       "abstract_or_metadata_inventory": 4,
       "audited_source_access_gap": 1,
       "author_version_methods_reviewed_final_comparison_pending": 1,
-      "not_registered": 44,
+      "not_registered": 43,
       "partial_methods_inventory": 4,
-      "primary_methods_reviewed": 30,
+      "primary_methods_reviewed": 31,
       "retained_primary_methods_review": 10
     },
     "interpretation": "Audited means inventory evidence or documented access blocker plus eleven explicit source dispositions per retained row. It does not mean all values are reported, final-version equivalence is proven, a template exists, or native hardware is qualified."

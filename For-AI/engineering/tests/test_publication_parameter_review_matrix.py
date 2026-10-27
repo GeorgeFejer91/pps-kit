@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 50)
+        self.assertEqual(len(registry["entries"]), 51)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 94)
+        self.assertEqual(registered_instance_count, 95)
         network = json.loads(
             (
                 ROOT
@@ -1342,8 +1342,8 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(rows), 94)
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         summary = data["inventoryAudit"]
-        self.assertEqual(summary["registeredInventories"], 50)
-        self.assertEqual(summary["methodsReviewedInventories"], 41)
+        self.assertEqual(summary["registeredInventories"], 51)
+        self.assertEqual(summary["methodsReviewedInventories"], 42)
         self.assertEqual(summary["auditedAccessBlockers"], 1)
         self.assertEqual(summary["inventoryEvidenceCounts"], dict(Counter(row["inventory_evidence_status"] for row in rows)))
         self.assertEqual(summary["inventoryAndContractsAudited"], sum(row["inventory_and_contracts_audited"] == "yes" for row in rows))
@@ -1361,6 +1361,30 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(gap["inventory_evidence_status"], "audited_source_access_gap")
         self.assertEqual(gap["inventory_and_contracts_audited"], "yes")
         self.assertEqual(data["scope"]["nativeQualification"], "not_assessed")
+        for publication in data["publications"]:
+            row = by_node[publication["networkNodeId"]]
+            audit = publication["inventoryAudit"]
+            self.assertEqual(audit["evidenceStatus"], row["inventory_evidence_status"])
+            self.assertEqual(audit["studyRowCount"], len(publication["studyIds"]))
+            self.assertIs(audit["inventoryAndContractsAudited"], row["inventory_and_contracts_audited"] == "yes")
+            self.assertIs(audit["allRowsHaveElevenSourceDispositions"], row["all_rows_have_eleven_source_dispositions"] == "yes")
+
+    def test_ieeg_versions_preserve_trial_units_and_source_unit_interpretation(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        for node in ("doi:10.1093/cercor/bhy156", "doi:10.1101/249078"):
+            contracts = {row["key"]: row for row in studies[node]["contracts"]}
+            self.assertEqual(contracts["auditory_stimulus"]["status"], "partial")
+            self.assertEqual(contracts["tactile_target"]["status"], "partial")
+            self.assertEqual(contracts["soa_schedule"]["status"], "derived_complete")
+            self.assertIn("2500m", contracts["soa_schedule"]["derivationNote"])
+            self.assertIn("255", contracts["repetition_allocation"]["value"])
+            self.assertIn("510", contracts["repetition_allocation"]["derivationNote"])
+            self.assertEqual(contracts["task_response"]["status"], "reported_complete")
+            self.assertEqual(contracts["catch_trial_contract"]["status"], "explicitly_absent")
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        preprint = next(row for row in registry["entries"] if row["network_node_id"] == "doi:10.1101/249078")
+        self.assertEqual(preprint["source_lineage"]["relationship"], "preprint_of_final_same_experiment_methods_compared")
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

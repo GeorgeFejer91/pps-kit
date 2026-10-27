@@ -34,19 +34,19 @@ live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
 Current checkpoint (2026-10-27): 94 frozen publications, 138 study/context rows,
-49 registered publication inventories, one access-audited unresolved publication
-unit, and 44 publication inventories still unassessed. Registry presence alone
+50 registered publication inventories, one access-audited unresolved publication
+unit, and 43 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 41 Methods-backed inventories (30 current primary
+The current audit records 42 Methods-backed inventories (31 current primary
 reviews, ten retained primary reviews, and one identified author version whose
 final comparison is pending), four abstract/metadata inventories, four partial
-Methods inventories, one audited access blocker, and 44 unregistered publications.
-Only 34 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 60 still need inventory
+Methods inventories, one audited access blocker, and 43 unregistered publications.
+Only 36 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 58 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
@@ -135,6 +135,12 @@ final full text remains inaccessible and version equivalence is unproven. Main
 and control task schedules are extracted from pp.71-74; pilot-specific values
 remain missing. Public evidence links point to the actual reviewed version while
 retaining the publication DOI identity link.
+
+Bernasconi preprint v1 (2018) is explicitly linked to the final iEEG article,
+with Methods compared directly. Both now have all eleven compact contracts
+reviewed; the preprint is not an independent replication. The audit preserves
+255 trial rows versus510 tactile pulses, the printed2500m unit typo, and missing
+original audio, calibration and sequencing detail.
 
 The first bounded source batch (2026-10-27) adds four experiment-scoped timing/count
 reviews for Canzoneri et al. (2012), DOI `10.1371/journal.pone.0044306`, from the

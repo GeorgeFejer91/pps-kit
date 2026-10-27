@@ -105,6 +105,12 @@ gap; an inaccessible source requires dated actual attempts and an unresolved
 publication review unit. Neither disposition establishes runnable replication
 or native qualification. New registry entries need an explicit
 `inventory_evidence_status`; missing classification stays open.
+Each `publications[]` entry also exposes an `inventoryAudit` object with
+`registered`, `evidenceStatus`, `inventoryStatus`, `studyRowCount`,
+`rowsWithElevenSourceDispositions`, `allRowsHaveElevenSourceDispositions`, and
+`inventoryAndContractsAudited`. The three yes/no decisions are JSON booleans;
+the two row counts are integers. This public projection omits the private source
+paths that can appear in the internal inventory evidence pointers.
 
 The projection selects public fields explicitly and rejects local source/runtime
 paths in review text; it preserves HTTP source URLs and DOI strings. It includes
