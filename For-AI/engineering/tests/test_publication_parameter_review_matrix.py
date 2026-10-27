@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 53)
+        self.assertEqual(len(registry["entries"]), 56)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 97)
+        self.assertEqual(registered_instance_count, 100)
         network = json.loads(
             (
                 ROOT
@@ -1342,9 +1342,9 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(len(rows), 94)
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
         summary = data["inventoryAudit"]
-        self.assertEqual(summary["registeredInventories"], 53)
-        self.assertEqual(summary["methodsReviewedInventories"], 44)
-        self.assertEqual(summary["auditedAccessBlockers"], 1)
+        self.assertEqual(summary["registeredInventories"], 56)
+        self.assertEqual(summary["methodsReviewedInventories"], 45)
+        self.assertEqual(summary["auditedAccessBlockers"], 3)
         self.assertEqual(summary["inventoryEvidenceCounts"], dict(Counter(row["inventory_evidence_status"] for row in rows)))
         self.assertEqual(summary["inventoryAndContractsAudited"], sum(row["inventory_and_contracts_audited"] == "yes" for row in rows))
         self.assertEqual(summary["remainingInventoryOrContractAudit"], 94 - summary["inventoryAndContractsAudited"])
@@ -1422,6 +1422,29 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(final["repetition_allocation"]["status"], "partial")
         self.assertEqual(pre["tactile_target"]["status"], "conflicting_evidence")
         self.assertEqual(pre["auditory_stimulus"]["evidenceSourceUrl"], "https://osf.io/download/86j4g/")
+
+    def test_footsole_report_distinguishes_target_context_and_source_access(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        for node in ("doi:10.1109/whc.2017.7989970", "doi:10.1177/0956797619869337"):
+            self.assertEqual(studies[node]["inventoryStatus"], "source_access_blocked_experiment_inventory_unresolved")
+            self.assertEqual(studies[node]["parameterStatusCounts"], {"source_unavailable": 11})
+        report_id = "doi:10.53829/ntr201911fa4"
+        report = {row["key"]: row for row in studies[report_id]["contracts"]}
+        self.assertIn("removes heel vibration", report["baseline_trial_contract"]["value"])
+        self.assertIn("retaining", report["baseline_trial_contract"]["value"])
+        self.assertIn("150-Hz chest", report["tactile_target"]["value"])
+        self.assertEqual(report["catch_trial_contract"]["status"], "not_reported")
+        self.assertEqual(report["soa_schedule"]["status"], "partial")
+        self.assertEqual(report["jitter_iti_policy"]["status"], "not_reported")
+        self.assertEqual(report["auditory_stimulus"]["evidenceSourceUrl"], "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf")
+        registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        row = next(row for row in registry["entries"] if row["network_node_id"] == report_id)
+        self.assertEqual(row["instances"][0]["instance_kind"], "summary_of_existing_protocol")
+        self.assertEqual(row["source_lineage"]["network_node_id"], "doi:10.1177/0956797619869337")
+        exception = next(row for row in registry["corpus_freeze"]["identity_audit"]["known_identity_exceptions"] if row["network_node_id"] == "doi:10.1109/whc.2017.7989970")
+        self.assertEqual(exception["other_doi"], "10.1109/WHC.2017.7989907")
+        self.assertEqual(registry["corpus_freeze"]["publication_count"], 94)
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

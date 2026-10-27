@@ -1538,6 +1538,143 @@
         }
       ],
       "source_review_limit": "All11contracts have explicit reviewed dispositions; unreported values, fresh access blockers and version-specific contradictions remain open scientific gaps. No native electrical hardware qualification or final/preprint parameter equivalence is claimed."
+    },
+    {
+      "network_node_id": "doi:10.1109/whc.2017.7989970",
+      "doi": "10.1109/whc.2017.7989970",
+      "inventory_status": "source_access_blocked_experiment_inventory_unresolved",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "One retained unresolved publication review unit, not one confirmed experiment. Institutional digest confirms a seated chest-vibration RT task during looming sound with foot-sole context; full experiment/cohort count and numeric settings are not established.",
+      "evidence_pointer": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf::abstract; dated failed primary full-text routes",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_pps_with_footsole_context_from_abstract",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "2017 pseudo-walking conference report — Methods inventory unresolved",
+          "record_id": "amemiya_2017_pseudowalking_footsole",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "unresolved_publication_review_unit",
+          "disaggregation_status": "source_access_blocked_inventory_unresolved"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://ieeexplore.ieee.org/document/7989970/",
+          "outcome": "HTTP 202 empty direct response; browser route showed verification challenge, no Methods."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "http://xplorestaging.ieee.org/ielx7/7980535/7989835/07989970.pdf?arnumber=7989970",
+          "outcome": "Crossref-linked PDF route returned HTTP 418 script, not PDF."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf",
+          "outcome": "HTTP 200 institutional digest; PDF p.3 contains abstract only, not conference Methods."
+        }
+      ],
+      "source_review_limit": "Access-audited publication, not a Methods-confirmed experiment count. Abstract context is retained; all eleven exact replication contracts remain unsupported by the inaccessible Methods. No values borrowed from the 2019 technical report.",
+      "identity_note": {
+        "network_node_id": "doi:10.1109/whc.2017.7989970",
+        "disposition": "duplicate_identifier_and_page_metadata_unresolved",
+        "reviewed_on": "2026-10-27",
+        "other_doi": "10.1109/WHC.2017.7989907",
+        "basis": "Both publisher-deposited Crossref records have the same title/authors/date and pages605-610 with no explicit relation/update link. Author site and institutional2017digest instead print234-239, while the author hyperlink points to frozen7989970. OpenAlex joins both as one work but cannot settle the authoritative identity. Preserve the frozen DOI; do not add another experiment or silently change membership.",
+        "evidence_pointer": "https://api.crossref.org/works/10.1109/WHC.2017.7989970 ; https://api.crossref.org/works/10.1109/WHC.2017.7989907 ; https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf::p.3"
+      }
+    },
+    {
+      "network_node_id": "doi:10.1177/0956797619869337",
+      "doi": "10.1177/0956797619869337",
+      "inventory_status": "source_access_blocked_experiment_inventory_unresolved",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "One retained unresolved publication review unit, not one confirmed experiment. Publisher abstract confirms sole-versus-forearm comparison but cannot distinguish experiments/cohorts from within-participant conditions. The linked technical summary is not an exhaustive journal Methods inventory.",
+      "evidence_pointer": "https://journals.sagepub.com/doi/10.1177/0956797619869337::abstract; dated failed primary full-text routes",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_pps_with_footsole_context_from_abstract",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "2019 foot-sole/forearm journal report — Methods inventory unresolved",
+          "record_id": "footsole_vibration_2019",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "unresolved_publication_review_unit",
+          "disaggregation_status": "source_access_blocked_inventory_unresolved"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/pdf/10.1177/0956797619869337",
+          "outcome": "HTTP 403 challenge HTML, not PDF."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/suppl/10.1177/0956797619869337/suppl_file/amemiya_supplemental_material_rev.pdf",
+          "outcome": "HTTP 403 challenge HTML, not supplement."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/full-xml/10.1177/0956797619869337",
+          "outcome": "HTTP 403 challenge HTML; current publisher abstract accessible but no Methods. Author sites link only to publisher; no separate manuscript obtained."
+        }
+      ],
+      "source_review_limit": "Access-audited publication, not a Methods-confirmed experiment count. Abstract context is retained; all eleven exact replication contracts remain unsupported by the inaccessible Methods. No values borrowed from the 2019 technical report."
+    },
+    {
+      "network_node_id": "doi:10.53829/ntr201911fa4",
+      "doi": "10.53829/ntr201911fa4",
+      "inventory_status": "confirmed_summary_protocol_not_independent_experiment",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "instance_count_basis": "Complete author technical report describes one summarized PPS protocol; section3 explicitly attributes its findings to the2019journal paper (reference1). No new cohort or independent experiment is reported. This is a report-level protocol inventory, not the exhaustive journal experiment inventory.",
+      "evidence_pointer": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf::printed pp.24-25, section3/Figures2-3; reference1p.27",
+      "review_date": "2026-10-27",
+      "framework_disposition": "audiotactile_chest_pps_with_heel_vibration_context",
+      "instances": [
+        {
+          "suffix": "a",
+          "experiment_label": "Summarized heel-context PPS protocol; no new cohort",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "instance_kind": "summary_of_existing_protocol",
+          "disaggregation_status": "record_already_experiment_specific"
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf",
+          "outcome": "HTTP 200 primary five-page report, printed pp.23-27; Figures2-3 rendered. SHA2562cc27fc099ef6de39070393a928e670f9b44909fee40f4f2cdadd0cbb995c9e1. Retrieved with normal Windows certificate validation after Python certificate-chain failure; TLS verification not disabled."
+        }
+      ],
+      "source_lineage": {
+        "network_node_id": "doi:10.1177/0956797619869337",
+        "relationship": "author_summary_of_prior_reported_research_no_new_cohort",
+        "basis": "Section3 cites the journal as reference1; the technical report does not describe a new participant sample. Journal full Methods remains inaccessible and may contain additional protocol variants."
+      },
+      "supporting_task_boundaries": [
+        {
+          "label": "Subjective walking-sensation ratings",
+          "disposition": "supporting_context_measure",
+          "basis": "Figure4 reports subjective scores; cohort linkage and timing are not specified, so no extra PPS experiment is inferred.",
+          "evidence_pointer": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf::printed pp.25-26, Figure4"
+        },
+        {
+          "label": "Motorized-chair Open House demonstration",
+          "disposition": "demonstration_not_pps_boundary_experiment",
+          "basis": "Section4 describes a public demonstration rather than another PPS experiment.",
+          "evidence_pointer": "https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf::printed pp.26-27, Figure5"
+        }
+      ],
+      "source_review_limit": "Full summarized protocol reviewed but many exact parameters not reported. The150-Hz chest target, heel walking context, no-heel baseline and auditory approach must remain separate. No original journal inventory, independent replication or native hardware qualification is inferred."
     }
   ],
   "corpus_freeze": {
@@ -1659,6 +1796,14 @@
           "disposition": "legacy_record_label_preserved_correct_primary_authorship",
           "basis": "Primary PDF and PubMed 19666035 identify Collignon et al. (2009); legacy tajadura_jimenez record/template identifiers remain stable aliases, not authorship evidence.",
           "evidence_pointer": "study_instance_registry.json::doi:10.1016/j.neuropsychologia.2009.07.025::identity_note"
+        },
+        {
+          "network_node_id": "doi:10.1109/whc.2017.7989970",
+          "disposition": "duplicate_identifier_and_page_metadata_unresolved",
+          "reviewed_on": "2026-10-27",
+          "other_doi": "10.1109/WHC.2017.7989907",
+          "basis": "Both publisher-deposited Crossref records have the same title/authors/date and pages605-610 with no explicit relation/update link. Author site and institutional2017digest instead print234-239, while the author hyperlink points to frozen7989970. OpenAlex joins both as one work but cannot settle the authoritative identity. Preserve the frozen DOI; do not add another experiment or silently change membership.",
+          "evidence_pointer": "https://api.crossref.org/works/10.1109/WHC.2017.7989970 ; https://api.crossref.org/works/10.1109/WHC.2017.7989907 ; https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201708ext.pdf&mode=show_pdf::p.3"
         }
       ],
       "outside_map_identity_gaps": "Six identity-pending records remain explicitly listed in boundary_records; zero snapshot metadata-conflict flags does not resolve those outside-map identities."

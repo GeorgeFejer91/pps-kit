@@ -1702,8 +1702,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract the core audio-tactile PPS timing, distances, trial counts, and response settings separately from the foot-sole vibration manipulation"
-      ]
+        "Full Methods experiment inventory and all eleven exact replication contracts remain inaccessible after dated official source attempts. Abstract context is retained; the2019technical summary is not substituted as original Methods. Chest detection target and foot-sole context remain distinct."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://doi.org/10.1177/0956797619869337",
+      "scope_review_basis": "Audited source-access gap: IEEE empty202/PDF418 or SAGE main/SI/XML403. Single retained review unit does not establish one experiment. Conference duplicate DOI/page discrepancy is separately recorded in the corpus identity audit."
     },
     {
       "record_id": "hobeika_2020_methods",
@@ -1999,8 +2002,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract core looming-sound timing/distance profile, chest vibrotactile target timing, response settings, trial counts, and whether the foot-sole vibration context must be represented as a secondary tactile condition for exact task execution"
-      ]
+        "Full Methods experiment inventory and all eleven exact replication contracts remain inaccessible after dated official source attempts. Abstract context is retained; the2019technical summary is not substituted as original Methods. Chest detection target and foot-sole context remain distinct."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://doi.org/10.1109/WHC.2017.7989970",
+      "scope_review_basis": "Audited source-access gap: IEEE empty202/PDF418 or SAGE main/SI/XML403. Single retained review unit does not establish one experiment. Conference duplicate DOI/page discrepancy is separately recorded in the corpus identity audit."
     },
     {
       "record_id": "novel_two_phase_audio_tactile_2025",
