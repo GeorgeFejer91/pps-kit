@@ -6212,7 +6212,9 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved"
+            "Original MATLAB HRTF/right-lateral source assets, output levels and complete propagation law; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, which does not establish source equivalence",
+            "Pad dimensions and reported analyzed N versus test degrees of freedom conflict",
+            "Independent ITI, online response deadline and source-equivalence validation"
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -6247,9 +6249,11 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved"
+        "Original MATLAB HRTF/right-lateral source assets, output levels and complete propagation law; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, which does not establish source equivalence",
+        "Pad dimensions and reported analyzed N versus test degrees of freedom conflict",
+        "Independent ITI, online response deadline and source-equivalence validation"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved",
+      "next_required_action": "Extract or source the missing paper parameters: Original MATLAB HRTF/right-lateral source assets, output levels and complete propagation law; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, which does not establish source equivalence; Pad dimensions and reported analyzed N versus test degrees of freedom conflict; Independent ITI, online response deadline and source-equivalence validation",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -6415,7 +6419,9 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract front/rear sound-spatialization method, distance levels, tactile timing, and exact body-relative trajectory mappings; row-level auditory trajectory-family metadata is now runner-supported"
+            "Original burst recipe, LISTEN subject/HRTF and complete Spat level/room settings; row-level auditory trajectory-family metadata is now runner-supported, which does not establish source equivalence",
+            "3250 ms waveform versus 620 cm at 210 cm/s: exact movement timing unresolved",
+            "Post-sound jitter distribution, exact catch crossing, per-block balancing and online response window"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -6450,9 +6456,11 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract front/rear sound-spatialization method, distance levels, tactile timing, and exact body-relative trajectory mappings; row-level auditory trajectory-family metadata is now runner-supported"
+        "Original burst recipe, LISTEN subject/HRTF and complete Spat level/room settings; row-level auditory trajectory-family metadata is now runner-supported, which does not establish source equivalence",
+        "3250 ms waveform versus 620 cm at 210 cm/s: exact movement timing unresolved",
+        "Post-sound jitter distribution, exact catch crossing, per-block balancing and online response window"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract front/rear sound-spatialization method, distance levels, tactile timing, and exact body-relative trajectory mappings; row-level auditory trajectory-family metadata is now runner-supported",
+      "next_required_action": "Extract or source the missing paper parameters: Original burst recipe, LISTEN subject/HRTF and complete Spat level/room settings; row-level auditory trajectory-family metadata is now runner-supported, which does not establish source equivalence; 3250 ms waveform versus 620 cm at 210 cm/s: exact movement timing unresolved; Post-sound jitter distribution, exact catch crossing, per-block balancing and online response window",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

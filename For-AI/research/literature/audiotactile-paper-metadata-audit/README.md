@@ -33,25 +33,33 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 162 study/context rows,
-62 registered publication inventories, ten access-audited publications,
+Current checkpoint (2026-10-27): 94 frozen publications, 163 study/context rows,
+64 registered publication inventories, eleven access-audited publications,
 one audited project-lineage identity,
-and 21 publication inventories still unassessed. Registry presence alone
+and 18 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 60 Methods-backed inventories (46 current primary
+The current audit records 62 Methods-backed inventories (48 current primary
 reviews, eight retained primary reviews, and six identified author versions whose
 final comparison is pending), one abstract/metadata inventory, one partial
-Methods inventories, ten audited access blockers, one project-lineage boundary, and 21 unregistered publications.
-Only 71 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 23 still need inventory
+Methods inventories, eleven audited access blockers, one project-lineage boundary, and 18 unregistered publications.
+Only 74 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 20 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Amiel’s front/rear study uses one repeated-measures cohort and distinct fixed
+sound versus pre/post controls that retain sound elsewhere in the trial. Its
+waveform duration does not establish complete movement timing. Rahmani’s two
+duration protocols share thirteen participants and seven acquisition delays
+each; six plotted points are a later smoothing step. Pad-size and sample/df
+conflicts remain visible. Occelli’s motion-direction task is a provisional
+adjacent boundary with documented full-source access failures.
+
 Collignon’s one factorial experiment now has all eleven source dispositions:
 12 sighted, ten early-blind and eleven late-blind participants, with postures
 within person. The five-pulse/25 ms/nominal 100 ms electrical description has

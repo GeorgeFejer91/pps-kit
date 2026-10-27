@@ -17,7 +17,7 @@ doi:10.1016/j.cognition.2018.04.001,yes,audited_source_access_gap,one_cohort_sup
 doi:10.1016/j.cortex.2017.08.033,yes,audited_source_access_gap,minimum_two_visuotactile_experiments_full_inventory_access_blocked,2,2,yes,yes,https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903::indexed Experiment 1 and Experiment 2 Methods headings,2026-10-27
 doi:10.1016/j.cortex.2020.11.021,yes,primary_methods_reviewed,confirmed_one_audiotactile_group_comparison,1,1,yes,yes,"https://arodes.hes-so.ch/nanna/record/7034/files/Published%20version.pdf::section 2.2.3, journal pp. 60-61",2026-10-27
 doi:10.1016/j.cortex.2021.08.004,yes,audited_source_access_gap,source_access_blocked_three_abstract_reported_experiments,3,3,yes,yes,"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:34666298%20AND%20SRC:MED&format=json&resultType=core::primary author abstract, PubMed34666298",2026-10-27
-doi:10.1016/j.cortex.2025.11.015,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1016/j.cortex.2025.11.015,yes,primary_methods_reviewed,confirmed_single_front_rear_factorial_experiment,1,1,yes,yes,https://www.researchgate.net/publication/398471012_Functional_organization_of_distance-dependent_audio-tactile_integration_is_different_in_rear_and_front_spaces,2026-10-27
 doi:10.1016/j.cub.2013.01.043,yes,primary_methods_reviewed,confirmed_main_and_supporting_protocol_inventory,6,6,yes,yes,https://ars.els-cdn.com/content/image/1-s2.0-S096098221300078X-mmc1.pdf,2026-10-27
 doi:10.1016/j.jneumeth.2019.108534,yes,primary_methods_reviewed,confirmed_one_two_session_audiotactile_experiment,1,1,yes,yes,"https://hal.science/hal-02418179/document::sections 2.1-2.3, manuscript pp. 3-7; Table 2 p. 5",2026-10-27
 doi:10.1016/j.neuroimage.2012.06.063,no,not_registered,not_assessed,1,0,no,no,,
@@ -49,7 +49,7 @@ doi:10.1038/srep02844,yes,primary_methods_reviewed,confirmed_three_experiments_w
 doi:10.1038/srep18603,yes,primary_methods_reviewed,confirmed_seven_main_experiments_and_three_methodological_controls,10,10,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML::Participants; Results Experiments 1-7; Methods; supplementary Methods pp. 2-9,2026-10-27
 doi:10.1073/pnas.2024548118,yes,primary_methods_reviewed,confirmed_newborn_adult_variants_and_separate_newborn_pilot,3,3,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8000027/supplementaryFiles?includeInlineImage=false::original Methods sapp.pdf pp. 2–3,2026-10-27
 doi:10.1073/pnas.2516229122,yes,primary_methods_reviewed,confirmed_one_acquisition_shared_version_lineage,1,1,yes,yes,"https://www.ebi.ac.uk/europepmc/webservices/rest/PMC12704728/fullTextXML::Materials and Methods > Participants, Task and Stimuli, Experimental Procedure",2026-10-27
-doi:10.1080/17470210903068989,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.1080/17470210903068989,yes,audited_source_access_gap,provisional_adjacent_boundary_with_access_gap,1,1,yes,yes,https://www.tandfonline.com/doi/abs/10.1080/17470210903068989,2026-10-27
 doi:10.1093/braincomms/fcac179,yes,primary_methods_reviewed,confirmed_one_audiotactile_experiment,1,1,yes,yes,"https://arodes.hes-so.ch/nanna/record/11915/files/Bassolino_2022_Body_peripersonal_space.pdf::PPS task p. 4; Supplementary Methods, PPS task p. 7",2026-10-27
 doi:10.1093/cercor/bhh197,no,not_registered,not_assessed,1,0,no,no,,
 doi:10.1093/cercor/bhy156,yes,primary_methods_reviewed,confirmed_main_audio_tactile_experiment,1,1,yes,yes,https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML::Methods,2026-10-27
@@ -92,4 +92,4 @@ doi:10.3390/bs14040306,yes,primary_methods_reviewed,confirmed_main_audio_tactile
 doi:10.3390/s25196072,yes,primary_methods_reviewed,confirmed_one_audiotactile_experiment,1,1,yes,yes,"https://pmc.ncbi.nlm.nih.gov/articles/PMC12526932/::sections 3-7, especially 7.1.1 and 7.1.3-7.1.4",2026-10-27
 doi:10.3758/app.72.4.885,yes,primary_methods_reviewed,confirmed_one_adjacent_haptic_bisection_experiment,1,1,yes,yes,"https://link.springer.com/content/pdf/10.3758/APP.72.4.885.pdf::Method, Haptic Line Bisection Task, Number Presentation and Procedure pp. 886-887",2026-10-27
 doi:10.53829/ntr201911fa4,yes,primary_methods_reviewed,confirmed_summary_protocol_not_independent_experiment,1,1,yes,yes,"https://www.ntt-review.jp/archive/ntttechnical.php?contents=ntr201911fa4.pdf&mode=show_pdf::printed pp.24-25, section3/Figures2-3; reference1p.27",2026-10-27
-doi:10.61782/fa.2025.0866,no,not_registered,not_assessed,1,0,no,no,,
+doi:10.61782/fa.2025.0866,yes,primary_methods_reviewed,confirmed_one_cohort_two_duration_protocols,2,2,yes,yes,https://dael.euracoustics.org/confs/fa2025/data/articles/000866.pdf,2026-10-27

@@ -2132,7 +2132,9 @@
         "hrtf_database_or_binaural_engine_mismatch"
       ],
       "missing_publication_parameters": [
-        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved"
+        "Original MATLAB HRTF/right-lateral source assets, output levels and complete propagation law; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, which does not establish source equivalence",
+        "Pad dimensions and reported analyzed N versus test degrees of freedom conflict",
+        "Independent ITI, online response deadline and source-equivalence validation"
       ]
     },
     {
@@ -2171,7 +2173,9 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract front/rear sound-spatialization method, distance levels, tactile timing, and exact body-relative trajectory mappings; row-level auditory trajectory-family metadata is now runner-supported"
+        "Original burst recipe, LISTEN subject/HRTF and complete Spat level/room settings; row-level auditory trajectory-family metadata is now runner-supported, which does not establish source equivalence",
+        "3250 ms waveform versus 620 cm at 210 cm/s: exact movement timing unresolved",
+        "Post-sound jitter distribution, exact catch crossing, per-block balancing and online response window"
       ]
     },
     {
