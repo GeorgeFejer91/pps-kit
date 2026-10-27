@@ -80,6 +80,16 @@ export function evidenceSummary(counts = {}) {
   return `${counts.reported_complete || 0} reported complete · ${counts.derived_complete || 0} derived complete · ${total} contracts`;
 }
 
+export function studyDisplayLabel(study) {
+  const experiment = typeof study.experimentLabel === "string" ? study.experimentLabel.trim() : "";
+  return experiment || study.label || "Study details";
+}
+
+export function publicationInclusionBasis(node) {
+  const basis = typeof node.scope?.basis === "string" ? node.scope.basis.trim() : "";
+  return basis || "This record is included in the frozen publication map. Membership does not establish direct audiotactile task eligibility.";
+}
+
 function contractStatusDescription(status, legend = {}) {
   if (status === "partial") return "Some required stimulus, timing, or trial-structure details are missing or unresolved.";
   return legend[status] || "Evidence status unavailable.";
@@ -142,6 +152,7 @@ function designerTemplateLink(templateId) {
       rel: "noopener noreferrer",
       title: `Open ${titleCase(templateId)} in Experiment Designer`,
       "data-open-designer-template": templateId,
+      "data-pretext": true,
     },
   });
 }
@@ -576,13 +587,20 @@ export async function initializePublicationNetwork(root) {
     const details = element("details", { className: "publication-network-parameter-segment",
       attributes: { "data-study-id": study.studyRowId } });
     details.append(element("summary", {}, [
-      element("span", { text: study.label, attributes: { "data-pretext": true } }),
+      element("span", { text: studyDisplayLabel(study), attributes: { "data-pretext": true } }),
       element("small", { text: evidenceSummary(study.parameterStatusCounts) }),
     ]));
     const content = element("div", { className: "publication-network-detail-section" }, [
       element("p", { text: `Evidence scope: ${titleCase(study.evidenceScope)} · Native qualification: ${titleCase(study.nativeQualification)}` }),
       element("p", { text: `Study inventory: ${titleCase(study.inventoryStatus || "not_assessed")}` }),
     ]);
+    const templateIds = study.templateIds || [];
+    content.append(element("p", { className: "publication-network-detail-muted", text: templateIds.length
+      ? "Linked preset for this study. Prepare and preview in a new browser tab; review its evidence gaps before adapting it."
+      : "No linked Toolkit template for this study." }));
+    if (templateIds.length) content.append(element("div", {
+      className: "publication-network-detail-links publication-network-template-links",
+    }, templateIds.map(designerTemplateLink)));
     for (const contract of study.contracts) {
       const disclosure = element("details", { className: "publication-network-parameter-segment",
         attributes: { "data-contract-key": contract.key } });
@@ -658,11 +676,8 @@ export async function initializePublicationNetwork(root) {
       abstractChildren.push(element("p", { className: "publication-network-detail-muted", text: node.abstract?.caveat || "Abstract unavailable in this public snapshot." }));
     }
 
-    const inclusionBasis = provenance === "later_exact_doi_audit"
-      ? "This publication was added through a later exact-DOI literature-audit match identifying an in-scope audio–tactile PPS task."
-      : "This publication belongs to the manually verified legacy audio–tactile PPS citation set.";
     const classification = makeSection("Evidence and availability", [
-      element("p", { text: inclusionBasis }),
+      element("p", { text: publicationInclusionBasis(node) }),
       element("dl", { className: "publication-network-readiness" }, [
         ["Inventory registry", review.inventoryAudit ? (review.inventoryAudit.registered ? "Registered" : "Not registered") : "Unavailable in this snapshot"],
         ["Methods inventory / access audit", inventoryEvidenceLabel(review.inventoryAudit?.evidenceStatus)],
@@ -673,17 +688,6 @@ export async function initializePublicationNetwork(root) {
       ].map(([label, value]) => element("div", {}, [element("dt", { text: label }), element("dd", { text: value, attributes: { "data-pretext": true } })]))),
       element("p", { className: "publication-network-detail-muted", text: "Registry presence does not establish a complete Methods inventory. An audited contract can remain unresolved. A linked template supports preparation and preview; native acquisition qualification is a separate check." }),
     ]);
-    const templateIds = review.templateIds;
-    const templateSection = templateIds.length
-      ? makeSection("Open in Experiment Designer", [
-        element("p", {
-          className: "publication-network-detail-muted",
-          text: "Prepare and preview this paper's linked preset in a new browser tab. Review its evidence gaps before adapting it.",
-        }),
-        element("div", { className: "publication-network-detail-links publication-network-template-links" }, templateIds.map(designerTemplateLink)),
-      ])
-      : null;
-
     const parameterChildren = review.studyIds.length
       ? review.studyIds.map(id => studyRecord(studyById.get(id)))
       : [element("p", {
@@ -694,7 +698,6 @@ export async function initializePublicationNetwork(root) {
     detailBody.replaceChildren(
       overview,
       classification,
-      ...(templateSection ? [templateSection] : []),
       makeSection("Study-level parameter review", parameterChildren),
       makeSection("Abstract", abstractChildren),
       makeSection("Citation metrics", [makeMetricGrid(node), element("small", { text: "Displayed-network metrics determine this map's size and topology. Broader source counts are provided for context. Neither is a study-quality score." })]),

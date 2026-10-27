@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { publicationMatches, evidenceSummary, inventoryAuditSummary, inventoryEvidenceLabel } from "../publication_network.js";
+import { publicationMatches, evidenceSummary, inventoryAuditSummary, inventoryEvidenceLabel, studyDisplayLabel, publicationInclusionBasis } from "../publication_network.js";
 
 test("publication search accepts DOI URLs, author accents and unordered title terms", () => {
   const node = { title: "Audio tactile space", authors: ["Ana García"], doi: "10.1007/example", year: 2013 };
@@ -29,4 +29,20 @@ test("project lineage reviews remain separate from experimental Methods inventor
   assert.match(inventoryAuditSummary(audit), /4 Methods inventories reviewed · 2 project lineage reviews/);
   assert.equal(inventoryEvidenceLabel("primary_project_lineage_reviewed"), "Primary project lineage reviewed");
   assert.doesNotMatch(inventoryAuditSummary({ ...audit, projectLineageReviews: 0 }), /project lineage/);
+});
+
+test("study names expose the protocol variant while older records keep their label", () => {
+  assert.equal(studyDisplayLabel({ experimentLabel: "Newborn stimulus-adequacy pilot", label: "Article title (c)" }), "Newborn stimulus-adequacy pilot");
+  for (const experimentLabel of [undefined, null, "", "  "]) {
+    assert.equal(studyDisplayLabel({ experimentLabel, label: "Earlier study label" }), "Earlier study label");
+  }
+});
+
+test("frozen inclusion preserves reviewed adjacent boundaries without inferring task eligibility", () => {
+  const basis = "Retained in the frozen corpus as a reviewed adjacent sound-to-MEP boundary.";
+  assert.equal(publicationInclusionBasis({ scope: { provenance: "later_exact_doi_audit", basis } }), basis);
+  for (const scope of [undefined, { provenance: "later_exact_doi_audit" }, { basis: "  " }]) {
+    assert.match(publicationInclusionBasis({ scope }), /Membership does not establish direct audiotactile task eligibility/);
+    assert.doesNotMatch(publicationInclusionBasis({ scope }), /identifying an in-scope/);
+  }
 });
