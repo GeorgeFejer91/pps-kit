@@ -11,7 +11,6 @@ use std::{
 #[path = "instruction.rs"]
 pub(crate) mod instruction;
 use crate::event_journal::group_results::{GroupPublication, VerifiedGroupResult};
-use instruction::NativeStage;
 
 use pps_brsp::{is_newer_sequence, PairingSecret};
 use pps_contracts::{
@@ -491,6 +490,7 @@ impl OwnerState {
             return Err("native_response_invalid");
         }
         if self.core.snapshot().run.phase == RunnerPhase::InstructionGate
+            && self.core.snapshot().instruction_gate.next_action == "continue-click"
             && self
                 .native_playback
                 .as_ref()
@@ -851,19 +851,20 @@ impl OwnerState {
             self.fail_stop_unavailable("native.stage.order-invalid", "evidence_unavailable");
             return;
         }
-        if let Some(item) = receipt
-            .instruction()
-            .filter(|_| stage.needs_continue && !continued)
-        {
+        let instruction = receipt.instruction().filter(|_| stage.needs_continue);
+        if !continued && (instruction.is_some() || stage.transition_without_audio) {
             if self.native_instruction_wait.is_some() {
                 return;
             }
-            let mode = item.continue_mode();
+            let mode = instruction
+                .map(|item| item.continue_mode())
+                .unwrap_or(pps_session_package::InstructionContinueMode::Button);
+            let delay_ns = instruction.map(|item| item.delay_ns()).unwrap_or(0);
             let delay = mode == pps_session_package::InstructionContinueMode::Delay;
             let deadline = if delay {
                 stamp
                     .monotonic_ns
-                    .checked_add(item.delay_ns())
+                    .checked_add(delay_ns)
                     .filter(|v| *v <= JSON_MAX_SAFE_INTEGER)
             } else {
                 None
@@ -880,8 +881,21 @@ impl OwnerState {
                     self.package_generation, self.run_generation, stage.ordinal
                 ),
                 part2_start_gate: false,
-                instruction_label: item.label().to_owned(),
-                button_label: item.button_label().to_owned(),
+                instruction_label: instruction
+                    .map(|item| item.label())
+                    .unwrap_or("Between Conditions")
+                    .to_owned(),
+                button_label: instruction
+                    .map(|item| item.button_label().to_owned())
+                    .unwrap_or_else(|| {
+                        let part = session
+                            .blocks()
+                            .get(stage.block_ordinal as usize + 1)
+                            .and_then(|block| block.metadata().get("part_number"))
+                            .and_then(|v| v.as_i64())
+                            .unwrap_or(2);
+                        format!("Start Part {part}")
+                    }),
                 next_action: match mode {
                     pps_session_package::InstructionContinueMode::Click => "continue-click",
                     pps_session_package::InstructionContinueMode::Button => "continue-button",
@@ -889,15 +903,22 @@ impl OwnerState {
                 }
                 .to_owned(),
             };
-            if candidate
-                .native_instruction_gate(gate, delay, stamp.clone())
-                .is_err()
-            {
+            let opened = if stage.transition_without_audio {
+                candidate.native_condition_transition_gate(
+                    &fingerprint,
+                    stage.block_ordinal,
+                    gate,
+                    stamp.clone(),
+                )
+            } else {
+                candidate.native_instruction_gate(gate, delay, stamp.clone())
+            };
+            if opened.is_err() {
                 self.fail_stop_unavailable("instruction.gate.invalid", "evidence_unavailable");
                 return;
             }
             let mut event = Self::ledger_input("instruction.continue-wait", "native", &stamp);
-            event.payload = serde_json::json!({"stageOrdinal": stage.ordinal, "mode": format!("{mode:?}"), "delayNs": item.delay_ns(), "timingQualification": "unqualified"});
+            event.payload = serde_json::json!({"stageOrdinal": stage.ordinal, "mode": format!("{mode:?}"), "delayNs": delay_ns, "scope": if stage.transition_without_audio { "condition-transition-without-audio" } else { "instruction-audio" }, "timingQualification": "unqualified"});
             if self
                 .commit_candidate(candidate, event, CommitPolicy::Ordinary, true)
                 .is_ok()
@@ -1774,12 +1795,9 @@ impl OwnerState {
             )
         };
         let stage = if verified_session.instructions().is_empty() {
-            NativeStage {
-                ordinal: block_ordinal,
-                block_ordinal,
-                instruction: None,
-                needs_continue: false,
-            }
+            *instruction::stages(&verified_session)?
+                .get(block_ordinal as usize)
+                .ok_or("native_stage_count_invalid")?
         } else {
             let progress = self.native_progress.for_run(self.run_generation);
             *instruction::stages(&verified_session)?

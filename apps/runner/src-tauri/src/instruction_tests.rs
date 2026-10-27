@@ -537,3 +537,54 @@ fn durable_group_verifier_rejects_cross_attempt_part_substitution() {
     fs::write(&second_path, second_bytes).unwrap();
     assert_eq!(fs::read(first_path).unwrap(), first_bytes);
 }
+
+#[test]
+fn condition_transition_without_recording_requires_button_and_no_extra_pcm() {
+    for (after_each_audio, stop_at_gate) in [(false, false), (true, false), (false, true)] {
+        let (root, package) = verified_audio_package("P001", 2);
+        let manifest_path = package.manifest_path().to_owned();
+        let mut manifest: Value =
+            serde_json::from_slice(&fs::read(&manifest_path).unwrap()).unwrap();
+        manifest["blocks"][0]["metadata"]["phase_index"] = serde_json::json!(1);
+        manifest["blocks"][1]["metadata"]["phase_index"] = serde_json::json!(2);
+        manifest["blocks"][1]["metadata"]["part_number"] = serde_json::json!(2);
+        if after_each_audio {
+            use sha2::{Digest, Sha256};
+            let bytes = pcm16_wav_bytes(48_000, 80, 500);
+            fs::write(root.join("after-block.wav"), &bytes).unwrap();
+            manifest["instruction_profile"] = serde_json::json!({"schema":"pps-run-instructions.v1","slots":[{"slot":"after_each_block","enabled":true,"label":"After block","path":"after-block.wav","sha256":format!("{:x}",Sha256::digest(bytes)),"duration_s":80.0/48000.0,"channels":2,"sample_rate":48000,"continue_mode":"click","delay_s":0.0,"button_label":"Continue"}]});
+        }
+        fs::write(&manifest_path, serde_json::to_vec(&manifest).unwrap()).unwrap();
+        let package = verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap();
+        let control = Arc::new(FakeControl::default());
+        control.enable_software_callback();
+        let runtime = AppRuntime::with_native_output(fake_coordinator(&control));
+        runtime.adopt_verified_session(package).unwrap();
+        runtime.dispatch_local(Action::SetupSubmit,serde_json::json!({"participant_code":"P001","age":30,"handedness":"right","gender":"other","name_sharing_opt_in":false,"part_labels":{"1":"Pre","2":"Post"}})).unwrap();
+        let gates = run_software_part(&runtime, &control, 1, stop_at_gate);
+        if stop_at_gate {
+            assert!(!runtime.snapshot().unwrap().run.complete);
+            assert!(!fs::read_dir(&root).unwrap().any(|entry| entry
+                .unwrap()
+                .path()
+                .to_string_lossy()
+                .ends_with(".results.json")));
+            continue;
+        }
+        assert_eq!(gates, vec![serde_json::json!({"mode":"continue-button"})]);
+        assert!(runtime.snapshot().unwrap().run.complete);
+        let result_path = fs::read_dir(&root)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .find(|path| path.to_string_lossy().ends_with(".results.json"))
+            .unwrap();
+        let result: Value = serde_json::from_slice(&fs::read(result_path).unwrap()).unwrap();
+        assert_eq!(result["receipt"]["scoredTrialCount"], 2);
+        let events = fs::read_to_string(root.join(result["eventsFile"].as_str().unwrap())).unwrap();
+        assert!(events.contains("condition-transition-without-audio"));
+        assert_eq!(
+            events.matches("instruction.sample-zero").count(),
+            if after_each_audio { 2 } else { 0 }
+        );
+    }
+}

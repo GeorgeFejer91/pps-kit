@@ -55,6 +55,7 @@ impl PreparedAudioSourceReceipt {
                 block_ordinal: fence.block_ordinal(),
                 instruction: None,
                 needs_continue: false,
+                transition_without_audio: false,
             },
             preparation_generation,
             fence,
