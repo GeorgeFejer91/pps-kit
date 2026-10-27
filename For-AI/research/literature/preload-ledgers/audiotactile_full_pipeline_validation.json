@@ -271,7 +271,8 @@
           "blockers": [],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "full exact timing, response mapping, and stimulus asset details need extraction"
+            "Full Methods for both temporal-order and speeded spatial-discrimination experiments remain inaccessible",
+            "Exact sound and tactile recipes, SOA tables, response mappings, trial counts and cohort overlap; no values imported from distinct related studies"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -304,9 +305,10 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "full exact timing, response mapping, and stimulus asset details need extraction"
+        "Full Methods for both temporal-order and speeded spatial-discrimination experiments remain inaccessible",
+        "Exact sound and tactile recipes, SOA tables, response mappings, trial counts and cohort overlap; no values imported from distinct related studies"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: full exact timing, response mapping, and stimulus asset details need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: Full Methods for both temporal-order and speeded spatial-discrimination experiments remain inaccessible; Exact sound and tactile recipes, SOA tables, response mappings, trial counts and cohort overlap; no values imported from distinct related studies",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

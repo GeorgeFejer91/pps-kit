@@ -901,7 +901,8 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "full exact timing, response mapping, and stimulus asset details need extraction"
+        "Full Methods for both temporal-order and speeded spatial-discrimination experiments remain inaccessible",
+        "Exact sound and tactile recipes, SOA tables, response mappings, trial counts and cohort overlap; no values imported from distinct related studies"
       ]
     },
     {

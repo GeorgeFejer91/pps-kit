@@ -3994,6 +3994,326 @@
         }
       ],
       "supporting_task_boundaries": []
+    },
+    {
+      "network_node_id": "doi:10.1007/s00221-004-2212-7",
+      "doi": "10.1007/s00221-004-2212-7",
+      "inventory_status": "minimum_named_protocols_full_inventory_access_blocked",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "One provisional MEG protocol pairs tactile spatial primes with sound under three visual distraction tasks. Full Methods and participant inventory remain inaccessible; three distraction tasks do not establish three experiments.",
+      "evidence_pointer": "https://link.springer.com/article/10.1007/s00221-004-2212-7",
+      "source_version": "Published Experimental Brain Research article (2005); abstract only.",
+      "source_review_limit": "Primary abstract verified. Official PDF request redirected to subscription-preview HTML, not a PDF; author publication list supplied no full text. No full Methods or supplementary source recovered.",
+      "source_lineage": "The separate Mathiak NeuroImage cue study is a different publication and supplies no missing parameters.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/article/10.1007/s00221-004-2212-7",
+          "outcome": "Primary abstract verified. Official PDF request redirected to subscription-preview HTML, not a PDF; author publication list supplied no full text. No full Methods or supplementary source recovered."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.1007/s00221-004-2212-7.pdf",
+          "outcome": "HTTP 200; text/html; charset=utf-8; full-source interpretation is specified in the inventory access note."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "provisional_protocol",
+          "experiment_label": "Auditory MEG with tactile spatial primes and visual distraction",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "provisional_inventory_with_access_blocker",
+          "cohort_relation": "One provisional MEG protocol pairs tactile spatial primes with sound under three visual distraction tasks. Full Methods and participant inventory remain inaccessible; three distraction tasks do not establish three experiments.",
+          "task_boundary": "Auditory orienting/MEG context; not direct tactile-RT dynamic PPS. Visual-load conditions stay inside provisional protocol until Methods establish inventory."
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1016/j.actpsy.2004.10.017",
+      "doi": "10.1016/j.actpsy.2004.10.017",
+      "inventory_status": "minimum_named_protocols_full_inventory_access_blocked",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Three named protocols: Experiment 1 has eight inexperienced observers, Experiment 2 has ten experienced observers, and Experiment 3 has ten experienced observers with electrocutaneous targets. Six Experiment 2 participants return in Experiment 3; other overlap is unresolved.",
+      "evidence_pointer": "https://www.sciencedirect.com/science/article/pii/S0001691804001106",
+      "source_version": "Final Acta Psychologica article (2005); indexed publisher Methods excerpts.",
+      "source_review_limit": "Final abstract plus publisher-indexed Introduction and selected Methods snippets; direct publisher requests403, Oxford archive metadata/abstract only. Exact printed Methods pages and full article unavailable.",
+      "source_lineage": "The cohorts cannot be summed as 28 unique participants. Nearby conference abstracts and Kitagawa (2005) are separate identities.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0001691804001106",
+          "outcome": "Final abstract plus publisher-indexed Introduction and selected Methods snippets; direct publisher requests403, Oxford archive metadata/abstract only. Exact printed Methods pages and full article unavailable."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/pii/S0001691804001106",
+          "outcome": "HTTP 403; text/html; charset=UTF-8; full-source interpretation is specified in the inventory access note."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://ora.ox.ac.uk/objects/uuid:0841347a-1bbb-433b-a5db-a98f7adcec19",
+          "outcome": "HTTP 200; text/html; charset=utf-8; full-source interpretation is specified in the inventory access note."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "provisional_protocol",
+          "experiment_label": "Inexperienced observers, vibrotactile TOJ",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three named protocols: Experiment 1 has eight inexperienced observers, Experiment 2 has ten experienced observers, and Experiment 3 has ten experienced observers with electrocutaneous targets. Six Experiment 2 participants return in Experiment 3; other overlap is unresolved.",
+          "task_boundary": "Unspeeded modality TOJ; precision/PSS endpoint, not tactile-detection reaction time or looming PPS boundary."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "provisional_protocol",
+          "experiment_label": "Experienced observers, vibrotactile TOJ",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three named protocols: Experiment 1 has eight inexperienced observers, Experiment 2 has ten experienced observers, and Experiment 3 has ten experienced observers with electrocutaneous targets. Six Experiment 2 participants return in Experiment 3; other overlap is unresolved.",
+          "task_boundary": "Unspeeded modality TOJ; precision/PSS endpoint, not tactile-detection reaction time or looming PPS boundary."
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "provisional_protocol",
+          "experiment_label": "Experienced observers, electrocutaneous TOJ",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three named protocols: Experiment 1 has eight inexperienced observers, Experiment 2 has ten experienced observers, and Experiment 3 has ten experienced observers with electrocutaneous targets. Six Experiment 2 participants return in Experiment 3; other overlap is unresolved.",
+          "task_boundary": "Unspeeded modality TOJ; precision/PSS endpoint, not tactile-detection reaction time or looming PPS boundary."
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1093/cercor/bhh197",
+      "doi": "10.1093/cercor/bhh197",
+      "inventory_status": "confirmed_protocol_inventory",
+      "inventory_evidence_status": "author_version_methods_reviewed_final_comparison_pending",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "One acquisition with 12 behavioral participants and an eight-person EEG subset after four artifact exclusions. Foam and earplug groups have six participants each, with four EEG contributors each; these are subgroups, not independent experiments.",
+      "evidence_pointer": "https://www.researchgate.net/publication/51368893_Grabbing_Your_Ear_Rapid_Auditory-Somatosensory_Multisensory_Interactions_in_Low-level_Sensory_Cortices_Are_Not_Constrained_by_Stimulus_Alignment",
+      "source_version": "Author-uploaded publisher Advance Access layout, 10 November 2004; final July 2005 issue comparison pending.",
+      "source_review_limit": "Public indexed author content attributed to coauthor JohnJ.Foxe supplies complete Methods; direct ResearchGate/OUP/VU PDF responses403. Binary PDF and glyph-image verification unavailable. This is primary author-version Methods evidence, not merely abstract evidence and not a fresh final-PDF audit.",
+      "source_lineage": "Advance Access and final issue share the DOI. Complete indexed primary Methods were read, but final PDF comparison and glyph verification remain unavailable.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/publication/51368893_Grabbing_Your_Ear_Rapid_Auditory-Somatosensory_Multisensory_Interactions_in_Low-level_Sensory_Cortices_Are_Not_Constrained_by_Stimulus_Alignment",
+          "outcome": "Public indexed author content attributed to coauthor JohnJ.Foxe supplies complete Methods; direct ResearchGate/OUP/VU PDF responses403. Binary PDF and glyph-image verification unavailable. This is primary author-version Methods evidence, not merely abstract evidence and not a fresh final-PDF audit."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://research.vu.nl/files/2085713/Murray%20Cerebral%20Cortex%2015%287%29%202005%20u.pdf",
+          "outcome": "HTTP 403; text/html; charset=UTF-8; full-source interpretation is specified in the inventory access note."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://academic.oup.com/cercor/article-pdf/15/7/963/1096771/bhh197.pdf",
+          "outcome": "HTTP 403; text/html; charset=UTF-8; full-source interpretation is specified in the inventory access note."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.researchgate.net/publication/51368893_Grabbing_Your_Ear_Rapid_Auditory-Somatosensory_Multisensory_Interactions_in_Low-level_Sensory_Cortices_Are_Not_Constrained_by_Stimulus_Alignment",
+          "outcome": "HTTP 403; text/html; charset=UTF-8; full-source interpretation is specified in the inventory access note."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Auditory–somatosensory redundant-signal detection with EEG",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific",
+          "cohort_relation": "One acquisition with 12 behavioral participants and an eight-person EEG subset after four artifact exclusions. Foam and earplug groups have six participants each, with four EEG contributors each; these are subgroups, not independent experiments.",
+          "task_boundary": "Fixed-source RSE with all stimuli relevant. Neither speeded tactile-only target detection nor varying-distance looming PPS. EEG500Hz sampling does not specify audio sampling."
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1007/s00221-005-2393-8",
+      "doi": "10.1007/s00221-005-2393-8",
+      "inventory_status": "minimum_named_protocols_full_inventory_access_blocked",
+      "inventory_evidence_status": "audited_source_access_gap",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "The primary abstract identifies two experiments: temporal-order judgment and speeded electrocutaneous left/right discrimination. Participant counts, overlap and full experimental/control inventory remain inaccessible.",
+      "evidence_pointer": "https://pubmed.ncbi.nlm.nih.gov/16091968/",
+      "source_version": "Final Experimental Brain Research article (2005); abstract and repository metadata.",
+      "source_review_limit": "Primary abstract and repository metadata read; full Methods not recovered. Springer PDF URL returned an HTML client challenge, not PDF; Trento marks deposited file archive-manager-only. No restricted download attempted.",
+      "source_lineage": "Repository conference categorization of the same DOI does not establish an additional publication or cohort.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://pubmed.ncbi.nlm.nih.gov/16091968/",
+          "outcome": "Primary abstract and repository metadata read; full Methods not recovered. Springer PDF URL returned an HTML client challenge, not PDF; Trento marks deposited file archive-manager-only. No restricted download attempted."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:10.1007/s00221-005-2393-8&format=json&resultType=core",
+          "outcome": "HTTP 200; ; full-source interpretation is specified in the inventory access note."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://api.openalex.org/works/https://doi.org/10.1007/s00221-005-2393-8",
+          "outcome": "HTTP 200; ; full-source interpretation is specified in the inventory access note."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://link.springer.com/content/pdf/10.1007/s00221-005-2393-8.pdf",
+          "outcome": "HTTP 200; text/html; charset=utf-8; full-source interpretation is specified in the inventory access note."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unitn.it/handle/11572/39357",
+          "outcome": "Institution record lists deposited file as archive-manager-only; no restricted download attempted."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "provisional_protocol",
+          "experiment_label": "Unspeeded audiotactile temporal-order judgment",
+          "record_id": "kitagawa_2005_sound_complexity",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "The primary abstract identifies two experiments: temporal-order judgment and speeded electrocutaneous left/right discrimination. Participant counts, overlap and full experimental/control inventory remain inaccessible.",
+          "task_boundary": "TOJ/spatial interference paradigm; do not relabel as auditory-irrelevant simple tactile-detection looming PPS."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "provisional_protocol",
+          "experiment_label": "Speeded left/right electrocutaneous-target discrimination with auditory distractors",
+          "record_id": "kitagawa_2005_sound_complexity",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "The primary abstract identifies two experiments: temporal-order judgment and speeded electrocutaneous left/right discrimination. Participant counts, overlap and full experimental/control inventory remain inaccessible.",
+          "task_boundary": "TOJ/spatial interference paradigm; do not relabel as auditory-irrelevant simple tactile-detection looming PPS."
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.1016/j.neuropsychologia.2006.12.004",
+      "doi": "10.1016/j.neuropsychologia.2006.12.004",
+      "inventory_status": "confirmed_protocol_inventory",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "One experiment with 12 participants. Eight modality/spatial configurations and front/rear hand postures are within-subject factors, not eight recruited experiments.",
+      "evidence_pointer": "https://cibm.ch/wp-content/uploads/1-s2.0-S0028393206004775-main.pdf",
+      "source_version": "Final Neuropsychologia article (2007), published pages 1869–1877.",
+      "source_review_limit": "Full9-page final PDF downloaded from author-affiliated CIBM; full Methods and relevant figures/Discussion read. No separate SI identified in inspected article.",
+      "source_lineage": "Earlier redundant-signal studies are antecedents, not sources of missing values or evidence of shared participants.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://cibm.ch/wp-content/uploads/1-s2.0-S0028393206004775-main.pdf",
+          "outcome": "Full9-page final PDF downloaded from author-affiliated CIBM; full Methods and relevant figures/Discussion read. No separate SI identified in inspected article. Primary PDF SHA256 989d63b4521131820277d5a7b0fd3f32ea562226c770462b328184b1d391d5c2"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://cibm.ch/wp-content/uploads/1-s2.0-S0028393206004775-main.pdf",
+          "outcome": "HTTP 200; application/pdf; full-source interpretation is specified in the inventory access note."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Front/rear redundant-signals detection",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific",
+          "cohort_relation": "One experiment with 12 participants. Eight modality/spatial configurations and front/rear hand postures are within-subject factors, not eight recruited experiments.",
+          "task_boundary": "Detect any A, S or AS event. A-only stimuli are response targets, not catch/no-go trials; continuous masker is not a stationary comparator."
+        }
+      ],
+      "source_sha256": "989d63b4521131820277d5a7b0fd3f32ea562226c770462b328184b1d391d5c2"
+    },
+    {
+      "network_node_id": "doi:10.1016/j.neuropsychologia.2008.07.025",
+      "doi": "10.1016/j.neuropsychologia.2008.07.025",
+      "inventory_status": "confirmed_protocol_inventory",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Three protocols with 15, 12 and nine participants. Authors NK and AV contribute across experiments; one additional participant overlaps Experiments 1 and 2. Other overlap is unstated, so these counts do not establish 36 independent participants.",
+      "evidence_pointer": "https://cibm.ch/wp-content/uploads/1-s2.0-S0028393208003266-main.pdf",
+      "source_version": "Final Neuropsychologia article (2009), online August 2008; pages 195–203.",
+      "source_review_limit": "Full9-page final PDF downloaded from author-affiliated CIBM; all three Methods sections read; page197 and198 checked. Trento full PDF was readable through web once, later native/web403; CIBM supplies retained primary bytes.",
+      "source_lineage": "Body-surface, hand-posture and acoustic-spectrum factors remain experiment-specific. Calibration and practice are supporting activities.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://cibm.ch/wp-content/uploads/1-s2.0-S0028393208003266-main.pdf",
+          "outcome": "Full9-page final PDF downloaded from author-affiliated CIBM; all three Methods sections read; page197 and198 checked. Trento full PDF was readable through web once, later native/web403; CIBM supplies retained primary bytes. Primary PDF SHA256 2f681d2ba0aeade44632ea77f3986847442152866cbd29c03be48c364a911c48"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://cibm.ch/wp-content/uploads/1-s2.0-S0028393208003266-main.pdf",
+          "outcome": "HTTP 200; application/pdf; full-source interpretation is specified in the inventory access note."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unitn.it/bitstream/11572/86812/1/Tajadura%20et%20al.%20Neuropsychologia%202009.pdf",
+          "outcome": "HTTP Error 403: Forbidden"
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Earlobe near/far redundant-signals detection",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three protocols with 15, 12 and nine participants. Authors NK and AV contribute across experiments; one additional participant overlaps Experiments 1 and 2. Other overlap is unstated, so these counts do not establish 36 independent participants.",
+          "task_boundary": "Redundant-signals detection of any modality; A-only go trials, S-only component controls, no synthesized looming trajectory."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Hand posture versus near/far redundant-signals detection",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three protocols with 15, 12 and nine participants. Authors NK and AV contribute across experiments; one additional participant overlaps Experiments 1 and 2. Other overlap is unstated, so these counts do not establish 36 independent participants.",
+          "task_boundary": "Redundant-signals detection of any modality; A-only go trials, S-only component controls, no synthesized looming trajectory."
+        },
+        {
+          "suffix": "c",
+          "instance_kind": "experiment",
+          "experiment_label": "Earlobe high/low spectrum redundant-signals detection",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "combined_record_requires_experiment_specific_review",
+          "cohort_relation": "Three protocols with 15, 12 and nine participants. Authors NK and AV contribute across experiments; one additional participant overlaps Experiments 1 and 2. Other overlap is unstated, so these counts do not establish 36 independent participants.",
+          "task_boundary": "Redundant-signals detection of any modality; A-only go trials, S-only component controls, no synthesized looming trajectory."
+        }
+      ],
+      "source_sha256": "2f681d2ba0aeade44632ea77f3986847442152866cbd29c03be48c364a911c48"
     }
   ],
   "corpus_freeze": {
@@ -4566,6 +4886,38 @@
       ],
       "reason": "Full-publication Methods inventory: one cohort, two stimulus protocols; resting acquisition and computational/median-split analyses retained as context. Demographics and behavioral allocation match Ferri2015 main cohort. Neither full Sancristóbal text nor science owner retained notes explicitly establish dataset identity. Possible overlap remains unverified; do not count new independent recruitment or assert reuse. Ferri separate control cohorts are not imported.",
       "evidence_pointer": "https://www.georgnorthoff.com/s/Sancristobal2021_Article_SlowRestingStateFluctuationsEn.pdf",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1016/j.actpsy.2004.10.017",
+      "child_study_row_ids": [
+        "doi:10.1016/j.actpsy.2004.10.017::a",
+        "doi:10.1016/j.actpsy.2004.10.017::b",
+        "doi:10.1016/j.actpsy.2004.10.017::c"
+      ],
+      "reason": "Three named protocols: Experiment 1 has eight inexperienced observers, Experiment 2 has ten experienced observers, and Experiment 3 has ten experienced observers with electrocutaneous targets. Six Experiment 2 participants return in Experiment 3; other overlap is unresolved.",
+      "evidence_pointer": "https://www.sciencedirect.com/science/article/pii/S0001691804001106",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1007/s00221-005-2393-8",
+      "child_study_row_ids": [
+        "doi:10.1007/s00221-005-2393-8::a",
+        "doi:10.1007/s00221-005-2393-8::b"
+      ],
+      "reason": "The primary abstract identifies two experiments: temporal-order judgment and speeded electrocutaneous left/right discrimination. Participant counts, overlap and full experimental/control inventory remain inaccessible.",
+      "evidence_pointer": "https://pubmed.ncbi.nlm.nih.gov/16091968/",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.1016/j.neuropsychologia.2008.07.025",
+      "child_study_row_ids": [
+        "doi:10.1016/j.neuropsychologia.2008.07.025::a",
+        "doi:10.1016/j.neuropsychologia.2008.07.025::b",
+        "doi:10.1016/j.neuropsychologia.2008.07.025::c"
+      ],
+      "reason": "Three protocols with 15, 12 and nine participants. Authors NK and AV contribute across experiments; one additional participant overlaps Experiments 1 and 2. Other overlap is unstated, so these counts do not establish 36 independent participants.",
+      "evidence_pointer": "https://cibm.ch/wp-content/uploads/1-s2.0-S0028393208003266-main.pdf",
       "review_date": "2026-10-27"
     }
   ]
