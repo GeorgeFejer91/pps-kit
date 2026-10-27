@@ -4943,7 +4943,7 @@
         },
         "trajectory_kinematics": {
           "status": "reported_complete",
-          "value": "Static near/far speakers 30 and130cm above chest.",
+          "value": "Static near/far speakers 30 and 130 cm above the chest.",
           "component_reviews": {
             "motion_mode": {
               "status": "reported",
@@ -5227,7 +5227,7 @@
         },
         "trajectory_kinematics": {
           "status": "reported_complete",
-          "value": "Static near/far speakers 5 and75cm from extended arm in depth.",
+          "value": "Static near/far speakers 5 and 75 cm from the extended arm in depth.",
           "component_reviews": {
             "motion_mode": {
               "status": "reported",
@@ -5333,7 +5333,7 @@
         },
         "tactile_target": {
           "status": "partial",
-          "value": "50-ms,35-Hz FES near elbow/extensor digitorum communis, MEDELMotionstim8, at70%individual motor threshold (5-11mA).",
+          "value": "50-ms, 35-Hz FES near elbow/extensor digitorum communis, MEDELMotionstim8, at 70% individual motor threshold (5–11 mA).",
           "component_reviews": {
             "modality": {
               "status": "reported",
@@ -5356,7 +5356,7 @@
         },
         "baseline_trial_contract": {
           "status": "reported_complete",
-          "value": "Actual T-only and near/far A-only unisensory controls; 50trials of each control per250-trial block.",
+          "value": "Actual T-only and near/far A-only unisensory controls; 50 trials of each control per 250-trial block.",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
@@ -8389,7 +8389,7 @@
         },
         "trial_sequence": {
           "status": "reported_complete",
-          "value": "Random targets at 7 tactile timings across 2 sounds and2 rear sides, with auditory-only catches.",
+          "value": "Random targets at 7 tactile timings across 2 sounds and 2 rear sides, with auditory-only catches.",
           "page_or_section": "Publisher PDF pp.2-3, Materials and Methods/Main experiment; Figure 1A-B inspected",
           "component_reviews": {
             "trial_families": {
@@ -10296,7 +10296,7 @@
             }
           },
           "evidence_note": "Three nominal delays per trial, with discrete0-200-msjitter. Preserve the printed unit error and nominal distance labels; no exact per-jitter acoustic position mapping is supplied.",
-          "derivation_note": "Normalize the printed third delay2500m to2500ms from the parallel500/1500-ms timing syntax and3-s trial. The typo persists in preprint and final XML, so the final is not an independent textual correction."
+          "derivation_note": "Normalize the printed third delay 2500m to 2500ms from the parallel 500/1500-ms timing syntax and 3-s trial. The typo persists in preprint and final XML, so the final is not an independent textual correction."
         },
         "tactile_target": {
           "status": "partial",
@@ -20461,7 +20461,7 @@
             }
           },
           "evidence_note": "Three nominal delays per trial, with discrete0-200-msjitter. Preserve the printed unit error and nominal distance labels; no exact per-jitter acoustic position mapping is supplied.",
-          "derivation_note": "Normalize the printed third delay2500m to2500ms from the parallel500/1500-ms timing syntax and3-s trial. The typo persists in preprint and final XML, so the final is not an independent textual correction."
+          "derivation_note": "Normalize the printed third delay 2500m to 2500ms from the parallel 500/1500-ms timing syntax and 3-s trial. The typo persists in preprint and final XML, so the final is not an independent textual correction."
         },
         "tactile_target": {
           "status": "partial",
@@ -20619,7 +20619,7 @@
       "contracts": {
         "auditory_stimulus": {
           "status": "partial",
-          "value": "Retained final-paper review (2026-06-16): 3000-ms pink-noise flat/looming samples at44.1kHz; exponential55-70dBlooming level and62.5dBflat level.",
+          "value": "Retained final-paper review (2026-06-16): 3000-ms pink-noise flat/looming samples at 44.1 kHz; exponential 55–70 dB looming level and 62.5 dB flat level.",
           "page_or_section": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
           "component_reviews": {
             "source_mode": {
@@ -20814,7 +20814,7 @@
         },
         "repetition_allocation": {
           "status": "partial",
-          "value": "Retained final-paper review (2026-06-16): 60%ATtargets and40%remainder containing auditory catches plus tactile baselines; exact PPS total/repetitions unknown.",
+          "value": "Retained final-paper review (2026-06-16): 60% AT targets and 40% remainder containing auditory catches plus tactile baselines; exact PPS total/repetitions unknown.",
           "page_or_section": "Retained rendered-PDF review pp.4-6, PPS task/Figure1; original review2026-06-16",
           "component_reviews": {
             "factor_dimensions": {
@@ -21080,7 +21080,7 @@
         },
         "repetition_allocation": {
           "status": "conflicting_evidence",
-          "value": "SI simultaneously states18targets x5delays x2sounds,60%ATtargets and120total trials; these quantities cannot all hold.",
+          "value": "SI simultaneously states 18 targets × 5 delays × 2 sounds, 60% AT targets and 120 total trials; these quantities cannot all hold.",
           "page_or_section": "Preprintt8h6a_v1 mainMethods pp.5-6; embedded SI pp.23-24",
           "component_reviews": {
             "factor_dimensions": {
@@ -21975,7 +21975,7 @@
               "value": "Chest target frequency150Hz; target duration not reported."
             }
           },
-          "evidence_note": "Heel patterns use recorded footsteps low-pass filtered at120Hz, an asynchronous version, or60-Hz sinusoid. Equal average amplitudes do not establish RMS matching. Target model/duration/threshold procedure and context file/filter order/cadence/amplitudes remain unresolved.",
+          "evidence_note": "Heel patterns use recorded footsteps low-pass filtered at 120 Hz, an asynchronous version, or a 60-Hz sinusoid. Equal average amplitudes do not establish RMS matching. Target model/duration/threshold procedure and context file/filter order/cadence/amplitudes remain unresolved.",
           "missing_required_components": [
             "target_duration_and_amplitude_calibration"
           ]
@@ -22124,7 +22124,7 @@
         },
         "trajectory_kinematics": {
           "status": "reported_complete",
-          "value": "Static near/far speakers 30 and130cm above chest.",
+          "value": "Static near/far speakers 30 and 130 cm above the chest.",
           "component_reviews": {
             "motion_mode": {
               "status": "reported",
@@ -22408,7 +22408,7 @@
         },
         "trajectory_kinematics": {
           "status": "reported_complete",
-          "value": "Static near/far speakers 5 and75cm from extended arm in depth.",
+          "value": "Static near/far speakers 5 and 75 cm from the extended arm in depth.",
           "component_reviews": {
             "motion_mode": {
               "status": "reported",
@@ -22514,7 +22514,7 @@
         },
         "tactile_target": {
           "status": "partial",
-          "value": "50-ms,35-Hz FES near elbow/extensor digitorum communis, MEDELMotionstim8, at70%individual motor threshold (5-11mA).",
+          "value": "50-ms, 35-Hz FES near elbow/extensor digitorum communis, MEDELMotionstim8, at 70% individual motor threshold (5–11 mA).",
           "component_reviews": {
             "modality": {
               "status": "reported",
@@ -22537,7 +22537,7 @@
         },
         "baseline_trial_contract": {
           "status": "reported_complete",
-          "value": "Actual T-only and near/far A-only unisensory controls; 50trials of each control per250-trial block.",
+          "value": "Actual T-only and near/far A-only unisensory controls; 50 trials of each control per 250-trial block.",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",

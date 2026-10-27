@@ -25,13 +25,17 @@ omission candidate for an explicit corpus-version decision, without changing the
 94-member freeze. This check does not establish exhaustive literature coverage
 or resolve the six earlier outside-map identity gaps.
 
-The freeze is **open**. Completion requires a source-backed inventory or actual
-dated access attempts for every frozen publication, plus a disposition for each
-in-scope experiment's eleven compact scientific contracts. Unresolved parameters,
-approximations and inaccessible sources may remain as explicit audited gaps;
-unassessed work cannot be counted as completed. The exact acceptance criteria
-live with the registry. No completion criterion depends on filling every one of
-the 281 method/validation fields or adopting adjacent PPS families.
+The bounded corpus audit is **complete with disclosed gaps**. All 94 frozen
+publications have a source-backed inventory, an actual dated access blocker or
+the identified project-lineage boundary; all 178 retained rows have eleven
+explicit component-reviewed contracts. The criteria and closing evidence live
+in `study_instance_registry.json::corpus_freeze`. Access limitations, unresolved
+parameters, source contradictions and version-comparison gaps remain published.
+This does not establish exhaustive coverage or authorize a corpus expansion.
+The overall PPS Kit completion goal remains open, and no native or physical
+qualification follows from this source audit. The twelve legacy runnable-profile
+coverage records describe configuration eligibility, not twelve fully resolved
+eleven-contract protocols.
 
 Current checkpoint (2026-10-27): 94 frozen publications, 178 study/context rows,
 94 registered publication inventories and 0 unregistered publications.

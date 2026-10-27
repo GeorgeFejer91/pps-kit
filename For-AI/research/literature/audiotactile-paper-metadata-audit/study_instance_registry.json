@@ -4576,7 +4576,7 @@
   "corpus_freeze": {
     "id": "pps-audiotactile-publication-freeze-20261027",
     "frozen_on": "2026-10-27",
-    "completion_status": "open",
+    "completion_status": "audit_complete_with_disclosed_gaps",
     "publication_authority": "apps/designer/frontend/publication_network.v3.json",
     "publication_count": 94,
     "publication_id_sha256": "16f8f076c36f0564fddcccfdf2149f43bd1245352f35a0e2940fa49cbc08a303",
@@ -4680,6 +4680,27 @@
         "disposition": "primary_indexed_visuotactile_boundary_with_audited_methods_access_gap",
         "basis": "Two publisher-indexed visual–tactile experiment headings; direct auditory acquisition is not established by citation ancestry. Full experiment/control inventory and cohort independence remain inaccessible. Frozen membership and citation edges retained.",
         "evidence_pointer": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+        "review_date": "2026-10-27"
+      },
+      {
+        "network_node_id": "doi:10.1371/journal.pone.0006582",
+        "disposition": "primary_methods_adjacent_auditory_motor_boundary_retained",
+        "basis": "Primary Methods and Figure1: sound-to-TMS delays50/100/200/300 ms; tactile attention separately4-5 s from TMS. Retain as mechanistic context, not direct audio-tactile replication.",
+        "evidence_pointer": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML",
+        "review_date": "2026-10-27"
+      },
+      {
+        "network_node_id": "doi:10.1016/j.neuroimage.2012.06.063",
+        "disposition": "primary_methods_adjacent_auditory_motor_boundary_retained",
+        "basis": "Published Methods pp.282–283 and Figure 1 identify sound-to-TMS MEP acquisition under cathodal tDCS; 50/175/300 ms are sound-to-TMS delays. Palm attention events are at least 4–5 s from TMS and are not an audiotactile SOA schedule.",
+        "evidence_pointer": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+        "review_date": "2026-10-27"
+      },
+      {
+        "network_node_id": "doi:10.1016/j.neuropsychologia.2014.09.043",
+        "disposition": "primary_methods_adjacent_auditory_motor_boundary_retained",
+        "basis": "Primary Methods sections 2.3.1-2.3.2: main outcome is TMS-evoked MEP amplitude. Rare tactile probes are separated from TMS by 4-5 s and serve attention; subsequent sound-localization judgments validate the apparatus. The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+        "evidence_pointer": "https://www.researchgate.net/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system",
         "review_date": "2026-10-27"
       }
     ],
@@ -4890,6 +4911,52 @@
         }
       ],
       "conclusion": "Eleven selected antecedents are present; one source-backed omission candidate is outside the frozen map. The 94-member identity set is unchanged. This bounded lineage check does not establish exhaustive audiotactile literature coverage, resolve the six prior outside-map identity gaps, or assess experiment parameters."
+    },
+    "completion_audit": {
+      "reviewed_on": "2026-10-27",
+      "scope": "Audit completion applies only to the frozen publication identity set and retained study/control inventories. It is not exhaustive literature coverage, a complete executable recipe for each study, or completion of the overall PPS Kit release goal.",
+      "publication_count": 94,
+      "retained_study_context_rows": 178,
+      "compact_contract_count": 1958,
+      "contracts_per_row": 11,
+      "methods_backed_inventories": 74,
+      "current_primary_methods_inventories": 59,
+      "retained_primary_methods_inventories": 8,
+      "author_version_inventories_final_comparison_pending": 7,
+      "audited_source_access_gaps": 19,
+      "project_lineage_boundaries": 1,
+      "remaining_inventory_or_contract_audits": 0,
+      "parameter_status_counts": {
+        "approximation_required": 42,
+        "conflicting_evidence": 74,
+        "derived_complete": 132,
+        "explicitly_absent": 29,
+        "not_applicable": 469,
+        "not_reported": 66,
+        "partial": 626,
+        "reported_complete": 329,
+        "source_unavailable": 191
+      },
+      "completion_evidence": [
+        "publication-parameter-matrix/publication_inventory_audit.csv",
+        "parsimonious_source_reviews.v1.json",
+        "apps/designer/frontend/publication_study_reviews.v1.json"
+      ],
+      "verification": "Deterministic source-to-projection freshness, stable identities, component completeness, URL/privacy checks and downstream coverage/outcome/full-pipeline checks pass in the six owning suites. Every retained row has eleven explicit source dispositions; every access-blocked inventory records dated routes and actual outcomes.",
+      "independent_projection_review": {
+        "source_commit": "f50fd804",
+        "result": "No actionable count, identity, provenance, privacy, alias or study-template mapping defect found.",
+        "scope": "94 frozen identities, 178 rows, 1958 contracts, 29 aliases, Methods/access categories, source URLs, template unions and unchanged native qualification."
+      },
+      "retained_limits": [
+        "Nineteen publications have audited full-source access gaps; their exact experiment/control inventories may remain provisional.",
+        "Seven author-version inventories retain final-version comparison gaps; eight others rely on explicitly retained historical primary reviews.",
+        "Partial values, absent reporting, approximations and contradictory source statements remain visible at component level.",
+        "Six outside-map identities and the bounded foundational omission candidate remain explicit future corpus-version decisions; membership is unchanged.",
+        "The legacy covered_runnable_profile count is twelve configuration-coverage records, not twelve publications with all eleven source contracts resolved.",
+        "All native qualification fields remain not_assessed; physical operation is assumed only under the user’s separate deferral, not measured."
+      ],
+      "overall_project_goal_status": "open"
     }
   },
   "study_row_migrations": [

@@ -831,7 +831,15 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         ids = sorted(row["id"] for row in network["nodes"])
         self.assertEqual(freeze["publication_count"], len(ids))
         self.assertEqual(freeze["publication_id_sha256"], hashlib.sha256(("\n".join(ids) + "\n").encode()).hexdigest())
-        self.assertEqual(freeze["completion_status"], "open")
+        self.assertEqual(freeze["completion_status"], "audit_complete_with_disclosed_gaps")
+        public = json.loads(self.public_output.read_text(encoding="utf-8"))
+        closure = freeze["completion_audit"]
+        self.assertEqual(closure["retained_study_context_rows"], len(public["studies"]))
+        self.assertEqual(closure["compact_contract_count"], public["counts"]["contracts"])
+        self.assertEqual(closure["parameter_status_counts"], public["counts"]["parameterStatusCounts"])
+        self.assertEqual(closure["remaining_inventory_or_contract_audits"], public["inventoryAudit"]["remainingInventoryOrContractAudit"])
+        self.assertEqual(closure["overall_project_goal_status"], "open")
+        self.assertEqual(closure["audited_source_access_gaps"], public["inventoryAudit"]["auditedAccessBlockers"])
         boundaries = freeze["boundary_records"]
         self.assertEqual(len(boundaries), 9)
         self.assertEqual({row["record_id"] for row in boundaries if "record_id" in row}, {row["record_id"] for row in read_csv(self.output_dir / "audit_records_outside_network.csv")[1]})
@@ -871,7 +879,7 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
             self.assertEqual(row["network_node_id"], "")
             self.assertIn("Full Methods were not reviewed", row["evidence_basis"])
             self.assertTrue(row["identity_source_url"] and row["membership_decision"] and row["next_action"])
-        self.assertEqual(freeze["completion_status"], "open")
+        self.assertEqual(freeze["completion_status"], "audit_complete_with_disclosed_gaps")
 
     def test_primary_timing_batch_keeps_anchors_counts_and_remaining_gaps(self) -> None:
         data = json.loads(self.public_output.read_text(encoding="utf-8"))
