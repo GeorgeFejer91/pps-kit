@@ -195,11 +195,11 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
     def test_registry_drives_contiguous_lettered_rows(self) -> None:
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         _, rows = read_csv(self.output_dir / "study_instance_index.csv")
-        self.assertEqual(len(registry["entries"]), 39)
+        self.assertEqual(len(registry["entries"]), 42)
         registered_instance_count = sum(
             len(entry["instances"]) for entry in registry["entries"]
         )
-        self.assertEqual(registered_instance_count, 73)
+        self.assertEqual(registered_instance_count, 76)
         network = json.loads(
             (
                 ROOT
@@ -1185,6 +1185,36 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertIn("bisection", inventory["instance_count_basis"])
         for study in (finn, haptic):
             self.assertEqual(study["nativeQualification"], "not_assessed")
+
+    def test_device_protocols_keep_published_conflicts_and_route_limits(self) -> None:
+        data = json.loads(self.public_output.read_text(encoding="utf-8"))
+        studies = {row["studyRowId"]: row for row in data["studies"]}
+        phone = studies["doi:10.3390/s25196072"]
+        vr = studies["doi:10.3389/frvir.2021.644214"]
+        stroke = studies["doi:10.1093/braincomms/fcac179"]
+        pc = {row["key"]: row for row in phone["contracts"]}
+        vc = {row["key"]: row for row in vr["contracts"]}
+        sc = {row["key"]: row for row in stroke["contracts"]}
+        self.assertEqual(pc["catch_trial_contract"]["status"], "conflicting_evidence")
+        self.assertIn("184", pc["catch_trial_contract"]["value"])
+        self.assertIn("144", pc["catch_trial_contract"]["value"])
+        self.assertIn("+105,+1625,+2385,+2765,+2955,+3050", pc["soa_schedule"]["value"])
+        self.assertEqual(pc["jitter_iti_policy"]["status"], "partial")
+        self.assertEqual(vc["repetition_allocation"]["status"], "conflicting_evidence")
+        self.assertIn("96", vc["repetition_allocation"]["value"])
+        self.assertIn("144", vc["repetition_allocation"]["value"])
+        self.assertEqual(vc["trajectory_kinematics"]["status"], "conflicting_evidence")
+        self.assertEqual(vc["soa_schedule"]["status"], "partial")
+        self.assertEqual(sc["task_response"]["status"], "reported_complete")
+        self.assertIn("2000 ms", sc["task_response"]["value"])
+        self.assertIn("foot", sc["task_response"]["value"])
+        self.assertIn("+300,+1500,+2700", sc["soa_schedule"]["value"])
+        self.assertIn("110", sc["repetition_allocation"]["value"])
+        self.assertEqual(sc["repetition_allocation"]["status"], "partial")
+        for study in (phone, vr, stroke):
+            self.assertEqual(study["nativeQualification"], "not_assessed")
+        self.assertTrue(phone["templateIds"])
+        self.assertTrue(vr["templateIds"])
 
     def test_build_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as second_temp:

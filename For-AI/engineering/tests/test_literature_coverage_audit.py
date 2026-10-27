@@ -34,8 +34,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 18,
-        "covered_blocked_missing_publication_parameters": 5,
+        "covered_runnable_profile": 16,
+        "covered_blocked_missing_publication_parameters": 7,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
         "not_yet_templated_missing_publication_parameters": 46,
@@ -792,11 +792,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["serino_2015_peri_trunk_exp1"]["coverage_category"] == "covered_runnable_profile"
     assert records["serino_2015_peri_trunk_exp1"]["can_recreate_audiotactile_components_now"] is True
     assert records["serino_2015_peri_trunk_exp1"]["blocking_constraint_ids"] == []
-    assert records["smartphone_rt_methods_2025"]["coverage_category"] == "covered_runnable_profile"
+    assert records["smartphone_rt_methods_2025"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
     assert records["smartphone_rt_methods_2025"]["current_template_ids"] == [
         "roussel_2025_dynaspace_mobile_pps"
     ]
-    assert records["smartphone_rt_methods_2025"]["can_recreate_audiotactile_components_now"] is True
+    assert records["smartphone_rt_methods_2025"]["can_recreate_audiotactile_components_now"] is False
     assert records["smartphone_rt_methods_2025"]["blocking_constraint_ids"] == []
     assert records["serino_2015_peri_hand_exp3"]["coverage_category"] == "covered_runnable_profile"
     assert records["serino_2015_peri_hand_exp3"]["can_recreate_audiotactile_components_now"] is True
@@ -830,11 +830,20 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["galli_2015_wheelchair"]["can_recreate_audiotactile_components_now"] is True
     assert records["galli_2015_wheelchair"]["blocking_constraint_ids"] == []
     assert records["galli_2015_wheelchair"]["missing_publication_parameters"] == []
-    assert records["lerner_2021_3d_boundary"]["coverage_category"] == "covered_runnable_profile"
-    assert records["lerner_2021_3d_boundary"]["can_recreate_audiotactile_components_now"] is True
+    assert records["lerner_2021_3d_boundary"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
+    assert records["lerner_2021_3d_boundary"]["can_recreate_audiotactile_components_now"] is False
     assert records["lerner_2021_3d_boundary"]["blocking_constraint_ids"] == []
-    assert records["lerner_2021_3d_boundary"]["missing_publication_parameters"] == []
+    assert records["lerner_2021_3d_boundary"]["missing_publication_parameters"]
     assert records["lerner_2021_3d_boundary"]["recreation_caveats"]
+    for record_id in ("lerner_2021_3d_boundary", "smartphone_rt_methods_2025"):
+        revised = records[record_id]
+        assert revised["current_template_ids"], "source gaps must not erase available presets"
+        assert revised["coverage_category"] == "covered_blocked_missing_publication_parameters"
+        assert revised["missing_publication_parameters"]
+        prior = revised["prior_software_comparison_evidence"]
+        assert prior["status"] == "historical_ledger_references_retained_not_reverified"
+        assert prior["mouse_click"]["source_report"]
+        assert prior["synthetic_contrast"]["source_report"]
     assert records["taffou_2014_cynophobic_rear_looming"]["coverage_category"] == (
         "covered_blocked_missing_publication_parameters"
     )
