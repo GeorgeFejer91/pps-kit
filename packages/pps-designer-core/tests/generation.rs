@@ -382,3 +382,56 @@ fn polar_arcs_and_burst_edges_match_the_reference_samples() {
         Some("raised-cosine-endpoint-exclusive.v1")
     );
 }
+
+#[test]
+fn explicit_noise_colors_and_profiles_generate_distinct_bounded_waveforms() {
+    let mut input = request();
+    let white = prepare(&input, &AtomicBool::new(false)).unwrap();
+    for color in [
+        NoiseColor::White,
+        NoiseColor::Pink,
+        NoiseColor::Blue,
+        NoiseColor::Violet,
+        NoiseColor::Brown,
+    ] {
+        input.source = SourceSpec::Noise {
+            color,
+            profile: SourceProfile::Continuous,
+        };
+        let generated = prepare(&input, &AtomicBool::new(false)).unwrap();
+        assert_eq!(generated.source_qc().noise_color, Some(color));
+        assert_eq!(generated.source_qc().peak, 1.0);
+        if color == NoiseColor::White {
+            assert_eq!(generated.dry_pcm(), white.dry_pcm());
+        } else {
+            assert_ne!(generated.dry_pcm(), white.dry_pcm());
+        }
+        input.source = SourceSpec::Noise {
+            color,
+            profile: SourceProfile::GaussianBurstTrain {
+                onset_s: 0.1,
+                active_window_s: 0.48,
+                burst_duration_s: 0.03,
+                rise_fall_s: 0.01,
+                target_period_s: 0.095,
+            },
+        };
+        let burst = prepare(&input, &AtomicBool::new(false)).unwrap();
+        assert_eq!(
+            burst.source_qc().burst_onset_frames,
+            [800, 1520, 2240, 2960, 3680, 4400]
+        );
+        assert!(burst.dry_pcm()[..800].iter().all(|v| *v == 0.0));
+        assert!(burst.dry_pcm()[4640..].iter().all(|v| *v == 0.0));
+    }
+    input.sample_rate_hz = 192000;
+    input.duration_s = 6.0;
+    input.source = SourceSpec::Noise {
+        color: NoiseColor::Pink,
+        profile: SourceProfile::Continuous,
+    };
+    assert_eq!(
+        prepare(&input, &AtomicBool::new(false)).unwrap_err(),
+        GenerationError::ResourceLimit
+    );
+}

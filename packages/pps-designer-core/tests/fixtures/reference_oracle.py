@@ -42,4 +42,16 @@ fixture = {
         elevation_deg=30.0, padding_pre_s=0.2, padding_post_s=0.2, path_length_m=0.6,
         propagation_speed_mps=1.0), t) for t in [0.0, 0.2, 0.35, 0.5, 0.65, 0.8, 1.0]],
 }
+shared_white = np.asarray([np.sin(i * 0.19) + 0.3 * np.cos(i * 0.47) + 0.1 * np.sin(i * 1.3) for i in range(129)], dtype=np.float32)
+shared_white /= np.max(np.abs(shared_white))
+spectral = {"white_input": shared_white.tolist(), "sample_rate_hz": 8000, "outputs": {}}
+for color, exponent in [("pink", -0.5), ("blue", 0.5), ("violet", 1.0), ("brown", None)]:
+    if exponent is None:
+        result = np.cumsum(shared_white.astype(float))
+    else:
+        frequencies = np.fft.rfftfreq(len(shared_white), 1.0 / 8000)
+        frequencies[0] = frequencies[1]
+        result = np.fft.irfft(np.fft.rfft(shared_white.astype(float)) * frequencies ** exponent, n=len(shared_white))
+    spectral["outputs"][color] = (result / np.max(np.abs(result))).tolist()
+Path(__file__).with_name("spectral_reference.json").write_text(json.dumps(spectral, separators=(",", ":")) + "\n", encoding="utf-8")
 Path(__file__).with_name("python_reference.json").write_text(json.dumps(fixture, indent=2) + "\n", encoding="utf-8")

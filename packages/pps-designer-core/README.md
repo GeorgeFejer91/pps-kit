@@ -14,7 +14,7 @@ f32 PCM. Seeds are **not NumPy-compatible**. No legacy profile is implicitly
 migrated. Unknown fields, algorithms, and modes fail. Frozen seed samples detect
 drift with tolerance; cross-platform bit identity is not claimed.
 
-Sources: continuous Gaussian white noise or Gaussian white bursts with
+Sources: continuous white/pink/blue/violet/brown noise or colored Gaussian bursts with
 duration-derived count, symmetric fitting, and raised-cosine edges. Burst seeds
 are `seed + 37 * burst_index` (wrapping u64). Timing rounds ties to even. Fixed
 and linear/polar paths include holds; PPS coordinates are X right, Y front, Z up.
@@ -38,6 +38,20 @@ Level modes are distinct:
 QC always reports `physical_spl_qualified: false`. A caller may derive digital
 targets from an independently audited calibration policy; this crate does not
 convert an estimate into measured SPL.
+
+The explicit `noise` request combines a color with a `continuous` or
+`gaussian_burst_train` profile. Pink/blue/violet use the reference frequency-power
+shaping with locked RustFFT 6.4.1; brown uses a cumulative sum. Shared-input NumPy
+fixtures test the transformation, without claiming NumPy seed parity. Each
+spectral transform is limited to 1,048,576 frames; cancellation is checked before
+and after the bounded transform. Default RustFFT CPU dispatch remains enabled.
+
+`imported_wav` requires `wav-pcm-dry.v1`, seed zero, SHA-256, explicit `mono` or
+`stereo_mean`, and `exact` or `trim_or_zero_pad`. Call `prepare_imported_wav` with
+native-authorized bounded bytes. Hash/headers are checked before PCM allocation.
+PCM16/24/32 and float32 WAVs are supported at an exact matching rate. Amplitude
+is preserved, and every decoded sample is validated even if a tail is trimmed.
+`generation_capabilities()` exposes these limits to the host/UI.
 
 ## Integration
 
@@ -87,6 +101,6 @@ lower explicit target succeeds. The 2026-10-27 MSVC/FABIAN run, including polar
 versus Cartesian waveform differences, passed in 67 s.
 Evidence remains in ignored `artifacts/`. No audio device is opened or qualified.
 
-Unavailable: legacy NumPy generation; colored/imported/resampled sources;
+Unavailable: legacy NumPy generation; resampled or compressed imported sources;
 additional trajectory/burst policies; ILD near-field correction; full profile
 assembly; physical calibration. This subset is not full catalogue replication.

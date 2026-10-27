@@ -105,7 +105,7 @@ pub fn write_spatializer_input<W: Write>(
         dry_source: DrySource {
             path: "dry.f32",
             sha256: format!("{:x}", digest.finalize()),
-            algorithm: crate::SOURCE_ALGORITHM,
+            algorithm: prepared.qc.source_algorithm,
         },
         trajectory: prepared.request.trajectory.clone(),
         spatialization: Spatialization {

@@ -99,16 +99,18 @@ Args parse_args(int argc, char** argv) {
 }
 
 std::string slurp(const fs::path& path) {
-    if (fs::file_size(path) > 1024 * 1024) {
+    const auto bytes = fs::file_size(path);
+    if (bytes > 1024 * 1024) {
         throw std::runtime_error("Render config exceeds 1 MiB.");
     }
     std::ifstream in(path, std::ios::binary);
     if (!in) {
         throw std::runtime_error("Could not open " + path.string());
     }
-    std::ostringstream buffer;
-    buffer << in.rdbuf();
-    return buffer.str();
+    std::string buffer(static_cast<std::size_t>(bytes), '\0');
+    in.read(buffer.data(), static_cast<std::streamsize>(bytes));
+    if (!in || in.peek() != std::ifstream::traits_type::eof()) { throw std::runtime_error("Render config changed or was truncated while reading."); }
+    return buffer;
 }
 
 std::string slug(std::string value) {
