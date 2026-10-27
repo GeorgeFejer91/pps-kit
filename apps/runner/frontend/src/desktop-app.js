@@ -119,7 +119,8 @@ function renderPreparedAudio(nextPreparation) {
     && qualification === "unqualified"
     && candidate.executable === false
     && outputPlanPrepared === true
-    && blockOrdinal === 0
+    && Number.isSafeInteger(blockOrdinal) && blockOrdinal >= 0
+    && blockOrdinal < Number(planValue(preparedExecution, "blockCount", "block_count"))
     && Number.isSafeInteger(sampleRate) && sampleRate > 0
     && [2, 3].includes(channels)
     && ["legacy-study5-tactile-audio", "binaural-left-right-tactile"].includes(layout)
@@ -135,13 +136,13 @@ function renderPreparedAudio(nextPreparation) {
     && decodedBytes <= byteBudget;
   preparedAudio = valid ? candidate : null;
   nativeOutputSetup.update(snapshot, preparedAudio);
-  text("prepared-audio-status", preparedAudio ? "Prepared · output disabled" : "Not prepared");
+  text("prepared-audio-status", preparedAudio ? `Block ${blockOrdinal + 1} prepared · output disabled` : "Not prepared");
   text(
     "prepared-audio-detail",
     preparedAudio
-      ? `Block 1 is content-bound in the one-block native PCM and renderer-plan cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB, ${scheduledEventCount.toLocaleString()} scheduled events, proposed route ${outputRoute}. Output qualification: ${qualification}; executable: no.`
+      ? `Block ${blockOrdinal + 1} is content-bound in the one-block native PCM and renderer-plan cache: ${frames.toLocaleString()} frames at ${sampleRate.toLocaleString()} Hz, ${channels} source channels (${layout}), ${(decodedBytes / (1024 * 1024)).toFixed(2)} MiB, ${scheduledEventCount.toLocaleString()} scheduled events, proposed route ${outputRoute}. Output qualification: ${qualification}; executable: no.`
       : preparedExecution
-        ? "Prepare the first verified WAV and renderer-neutral plan in the bounded native cache. This does not open an output device, qualify a route, arm, or execute the experiment."
+        ? "Prepare the next unfinished block in manifest order. This fills the bounded native cache; device selection, local arm and start remain separate actions."
         : "Native PCM and output-plan preparation is unavailable until the first schedule is inspected.",
   );
   return !candidate || valid;
@@ -264,6 +265,7 @@ function renderSnapshot(next) {
   if (!next || typeof next !== "object") return;
   if (snapshot && (next.epoch < snapshot.epoch
     || (next.epoch === snapshot.epoch && next.revision < snapshot.revision))) return;
+  const previous = snapshot;
   snapshot = next;
   participantResponse.refresh(next);
   const phase = next.run?.phase ?? "unknown";
@@ -275,8 +277,10 @@ function renderSnapshot(next) {
   text("run-progress", next.run?.progress_label, "Waiting for target state.");
   text("event-label", next.run?.event_label, "No current event");
   text("block-label", next.active_block?.active ? next.active_block.block_label : "No active block");
-  const elapsed = Number(next.active_block?.elapsed_s) || 0;
-  const duration = Number(next.active_block?.duration_s) || 0;
+  const completedBlockIndex = Number(next.active_block?.display_block_index) || 0;
+  const betweenBlocks = phase === "prepared" && !next.run?.complete && completedBlockIndex > 0;
+  const elapsed = betweenBlocks ? 0 : Number(next.active_block?.elapsed_s) || 0;
+  const duration = betweenBlocks ? 0 : Number(next.active_block?.duration_s) || 0;
   text("block-time", `${formatDuration(elapsed)} / ${formatDuration(duration)}`);
   elements["block-progress"].style.width = `${duration > 0 ? Math.min(100, elapsed / duration * 100) : 0}%`;
 
@@ -309,8 +313,11 @@ function renderSnapshot(next) {
     return token;
   }));
   const active = ["instruction_gate", "running", "paused", "stopping"].includes(phase);
+  const terminal = ["completed", "interrupted", "error"].includes(phase) || next.run?.complete;
+  const completedBlockChanged = betweenBlocks && (previous?.run?.phase !== "prepared"
+    || previous?.active_block?.display_block_index !== next.active_block?.display_block_index);
   const invalidatesPreparedAudio = active
-    || ["completed", "interrupted", "error"].includes(phase)
+    || terminal || completedBlockChanged
     || !next.package_verified
     || !preparedExecution;
   if (preparedAudio && invalidatesPreparedAudio) renderPreparedAudio(null);
@@ -325,10 +332,16 @@ function renderSnapshot(next) {
   elements["prepare-first-audio-block"].disabled = api.kind !== "tauri-native"
     || !preparedExecution
     || active
+    || terminal
     || Boolean(preparedAudio);
+  text("prepare-first-audio-block", betweenBlocks ? "Prepare next block" : "Prepare first audio block");
   elements["prepare-first-audio-block"].title = api.kind === "tauri-native"
-    ? "Content-bind the first verified WAV and renderer-neutral plan in the one-block native cache"
+    ? "Content-bind the next unfinished manifest block in the one-block native cache"
     : "Native audio preparation is available in the Tauri app";
+  if (betweenBlocks) {
+    text("run-progress", `Block ${completedBlockIndex} complete. ${preparedAudio ? "Choose its output device, then arm and start the prepared next block." : "Prepare the next block to continue."}`);
+    text("block-label", preparedAudio ? `Block ${Number(planValue(preparedAudio, "blockOrdinal", "block_ordinal")) + 1} prepared` : "Next block awaits preparation");
+  }
   nativeOutputSetup.update(next, preparedAudio);
   updateInboundPolicyUi();
 

@@ -52,6 +52,51 @@ try {
   assert.deepEqual(errors, []);
   report.checks.push("Runner draft survives snapshot refresh and acknowledged submit");
 
+  const nativeRunner = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await nativeRunner.addInitScript(() => {
+    let callbackId = 0;
+    const callbacks = new Map();
+    let listener = null;
+    const native = { epoch: 1, revision: 1, run: { phase: "prepared", complete: false },
+      active_block: { active: false, display_block_index: 0 }, identity: { session_id: "browser-native-fixture" },
+      safety: { local_armed: false }, allowed_actions: [], package_verified: true };
+    window.advanceNativeFixture = (phase, block) => {
+      native.revision++; native.run = { phase, complete: phase === "completed" };
+      native.active_block = { active: phase === "running", display_block_index: block, elapsed_s: 5, duration_s: 5 };
+      callbacks.get(listener)?.({ payload: structuredClone(native) });
+    };
+    window.__TAURI_INTERNALS__ = { transformCallback(callback) { const id = ++callbackId; callbacks.set(id, callback); return id; },
+      async invoke(command, args) {
+        if (command === "plugin:event|listen") { listener = args.handler; return 1; }
+        if (command === "runner_snapshot") return structuredClone(native);
+        if (command === "remote_status") return { enabled: false };
+        if (command === "native_output_status") return { schema: "pps-runner-native-output-preflight.v1", phase: "idle",
+          policyGeneration: "1", serviceGeneration: "1", operationGeneration: "1", inventoryGeneration: null,
+          reservationGeneration: null, inFlight: false, cleanupPending: false, silenceOnly: true, executable: false, armed: false, qualified: false };
+        if (command === "select_prepared_session") return { snapshot: structuredClone(native), summary: { sessionId: native.identity.session_id, blocks: [{ index: 1, label: "First" }, { index: 2, label: "Second" }] } };
+        if (command === "inspect_prepared_execution") return { eventCount: 10, trialRowCount: 2, blockCount: 2, encodedBytes: 500,
+          blocks: [{}, {}], inspectionScope: "schedule-only", timingQualification: "unqualified", executable: false };
+        if (command === "prepare_first_audio_block") return { schema: "pps-runner-prepared-audio-summary.v1", preparationScope: "pcm-and-output-plan-cache",
+          outputQualification: "unqualified", executable: false, outputPlanPrepared: true, blockOrdinal: native.active_block.display_block_index,
+          sampleRateHz: 48000, sourceChannels: 3, sourceChannelLayout: "binaural-left-right-tactile", outputRoute: "canonical-three",
+          scheduledEventCount: 5, frames: 48000, decodedBytes: 576000, cacheCapacityBlocks: 1, cacheByteBudget: 1280 * 1024 * 1024 };
+        throw new Error(`Unexpected fixture command: ${command}`);
+      } };
+  });
+  await nativeRunner.goto(`${base}/apps/runner/compiled/index.html`);
+  await nativeRunner.locator("#select-session-manifest").click();
+  await nativeRunner.locator("#inspect-prepared-execution").click();
+  await nativeRunner.locator("#prepare-first-audio-block").click();
+  await nativeRunner.locator("#prepared-audio-status").filter({ hasText: "Block 1 prepared" }).waitFor();
+  await nativeRunner.evaluate(() => { window.advanceNativeFixture("running", 1); window.advanceNativeFixture("prepared", 1); });
+  await nativeRunner.getByRole("button", { name: "Prepare next block", exact: true }).click();
+  await nativeRunner.locator("#prepared-audio-status").filter({ hasText: "Block 2 prepared" }).waitFor();
+  assert.equal(await nativeRunner.locator("#block-progress").evaluate(element => element.style.width), "0%");
+  await nativeRunner.locator("#prepared-audio-status").screenshot({ path: resolve(output, "runner-next-block.png") });
+  await nativeRunner.evaluate(() => window.advanceNativeFixture("completed", 2));
+  assert.equal(await nativeRunner.locator("#prepare-first-audio-block").isDisabled(), true);
+  report.checks.push("Runner real controls consume mocked native two-block transitions and reject preparation after completion");
+
   const designer = await browser.newPage({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
   designer.on("pageerror", error => errors.push(error.message));
   await designer.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&desktop=1`);
@@ -229,6 +274,21 @@ try {
   assert.equal(new URL(presetPage.url()).searchParams.get("template"), linkedPublication.templateIds[0]);
   assert.deepEqual(errors, []);
   report.checks.push("Mapper retry, DOI search, keyboard detail, study deep link, evidence separation, responsive layout and preset navigation");
+  const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+  await phone.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&desktop=1`);
+  await phone.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
+  await phone.evaluate(() => { document.documentElement.dataset.theme = "dark"; });
+  assert.equal(await phone.locator("#mobile-companion-toggle").evaluate(element => getComputedStyle(element).display), "none");
+  const removalControls = phone.locator(".panel.profile-readonly [data-remove-noise], .panel.profile-readonly [data-remove-audio]");
+  assert.ok(await removalControls.count() > 0);
+  for (const control of await removalControls.all()) assert.equal(await control.evaluate(element => getComputedStyle(element).display), "none");
+  assert.equal(await phone.locator(".segment-collapse-icon").first().evaluate(element => getComputedStyle(element).transitionDuration), "0s");
+  assert.equal(await phone.locator(".arch-hw-label").first().evaluate(element => getComputedStyle(element).color), await phone.evaluate(() => {
+    const probe = document.createElement("span"); probe.style.color = "var(--muted)"; document.body.append(probe);
+    const color = getComputedStyle(probe).color; probe.remove(); return color;
+  }));
+  await phone.screenshot({ path: resolve(output, "designer-phone-dark-reduced-motion.png") });
+  report.checks.push("Compiled phone hides readonly removal/native companion controls, preserves dark labels and reduced-motion collapse");
   await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
