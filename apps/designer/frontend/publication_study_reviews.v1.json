@@ -10,23 +10,23 @@
   },
   "counts": {
     "publications": 94,
-    "studies": 146,
-    "contracts": 1606,
+    "studies": 148,
+    "contracts": 1628,
     "reportedComplete": 295,
     "derivedComplete": 63,
     "parameterStatusCounts": {
       "approximation_required": 34,
       "composite_requires_split": 146,
-      "conflicting_evidence": 45,
+      "conflicting_evidence": 47,
       "derived_complete": 63,
       "explicitly_absent": 22,
       "low_confidence": 10,
-      "not_applicable": 143,
-      "not_assessed": 209,
-      "not_reported": 44,
-      "partial": 356,
+      "not_applicable": 165,
+      "not_assessed": 198,
+      "not_reported": 53,
+      "partial": 357,
       "reported_complete": 295,
-      "source_unavailable": 239
+      "source_unavailable": 238
     }
   },
   "statusLegend": {
@@ -238,25 +238,29 @@
         "doi:10.1007/s00221-020-05771-5::a",
         "doi:10.1007/s00221-020-05771-5::b",
         "doi:10.1007/s00221-020-05771-5::c",
-        "doi:10.1007/s00221-020-05771-5::d"
+        "doi:10.1007/s00221-020-05771-5::d",
+        "doi:10.1007/s00221-020-05771-5::e",
+        "doi:10.1007/s00221-020-05771-5::f"
       ],
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
+        "conflicting_evidence": 2,
         "explicitly_absent": 6,
-        "partial": 8,
-        "reported_complete": 28,
-        "source_unavailable": 1
+        "not_applicable": 11,
+        "not_reported": 9,
+        "partial": 9,
+        "reported_complete": 28
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
         "registered": true,
-        "evidenceStatus": "abstract_or_metadata_inventory",
-        "inventoryStatus": "confirmed_total",
-        "studyRowCount": 4,
-        "rowsWithElevenSourceDispositions": 4,
+        "evidenceStatus": "primary_methods_reviewed",
+        "inventoryStatus": "confirmed_four_main_supplementary_pilot_and_failed_experiment",
+        "studyRowCount": 6,
+        "rowsWithElevenSourceDispositions": 6,
         "allRowsHaveElevenSourceDispositions": true,
-        "inventoryAndContractsAudited": false
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -1853,17 +1857,17 @@
       ],
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "inventoryAudit": {
-        "registered": false,
-        "evidenceStatus": "not_registered",
-        "inventoryStatus": "not_assessed",
+        "registered": true,
+        "evidenceStatus": "primary_project_lineage_reviewed",
+        "inventoryStatus": "primary_project_identity_no_independent_acquisition",
         "studyRowCount": 1,
-        "rowsWithElevenSourceDispositions": 0,
-        "allRowsHaveElevenSourceDispositions": false,
-        "inventoryAndContractsAudited": false
+        "rowsWithElevenSourceDispositions": 1,
+        "allRowsHaveElevenSourceDispositions": true,
+        "inventoryAndContractsAudited": true
       }
     },
     {
@@ -4631,7 +4635,7 @@
       "networkNodeId": "doi:10.1007/s00221-020-05771-5",
       "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (a)",
       "experimentLabel": "Experiment 1",
-      "inventoryStatus": "confirmed_total",
+      "inventoryStatus": "confirmed_four_main_supplementary_pilot_and_failed_experiment",
       "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
@@ -4650,10 +4654,10 @@
           "pageOrSection": "PDF pp.3-4, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "source_mode": {
@@ -4682,10 +4686,10 @@
           "pageOrSection": "PDF p.3, Apparatus; PDF pp.3-4, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "coordinate_frame_body_anchor": {
@@ -4719,10 +4723,10 @@
           "pageOrSection": "PDF pp.3-5, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "ordered_elements_and_source_selection"
           ],
@@ -4746,12 +4750,12 @@
           "value": "Go/NoGo: say TAH to weak tactile targets; withhold for no vibration and strong non-targets. The paper's 150-ms-to-2-s analysis window is not an explicit online timeout.",
           "compositeValue": "",
           "pageOrSection": "PDF pp.3-5, Experiment 1",
-          "evidenceNote": "",
+          "evidenceNote": "The 2.25-second response period belongs to two-interval QUEST training, not the main task. Main signals share a waveform; far sound leads by 2.9 ms for propagation compensation.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "response_window_and_anchor"
           ],
@@ -4787,10 +4791,10 @@
           "pageOrSection": "PDF p.4, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "policy_type": {
@@ -4819,10 +4823,10 @@
           "pageOrSection": "PDF p.4, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
@@ -4844,12 +4848,12 @@
           "value": "125-ms white-noise vibration through an Oticon bone-conducting vibrator; weak threshold target and strong stimulus at 150% of weak intensity.",
           "compositeValue": "",
           "pageOrSection": "PDF pp.3-4, Experiment 1",
-          "evidenceNote": "",
+          "evidenceNote": "Experiment 1 counterbalances dominant/non-dominant stimulation/response hands and blindfolded/not-blindfolded subgroups; Experiment 2 retains the other details. These factors are not extra independently recruited experiments.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "body_site_and_side": {
@@ -4878,10 +4882,10 @@
           "pageOrSection": "PDF pp.3-4, Experiment 1, Design",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -4915,10 +4919,10 @@
           "pageOrSection": "PDF pp.3-4, Experiment 1, Design",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -4950,12 +4954,12 @@
           "value": "Four 40-trial blocks (160 total): per block 8 no-vibration, 16 weak-target, and 16 strong-nontarget trials, each balanced near/far.",
           "compositeValue": "",
           "pageOrSection": "PDF pp.3-4, Experiment 1, Design",
-          "evidenceNote": "",
+          "evidenceNote": "Experiment 1 counterbalances dominant/non-dominant stimulation/response hands and blindfolded/not-blindfolded subgroups; Experiment 2 retains the other details. These factors are not extra independently recruited experiments.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "exceptions_or_overrides": {
@@ -4984,10 +4988,10 @@
           "pageOrSection": "PDF pp.3-4, Experiment 1, Design",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "block_composition": {
@@ -5009,7 +5013,7 @@
       "networkNodeId": "doi:10.1007/s00221-020-05771-5",
       "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (b)",
       "experimentLabel": "Experiment 2",
-      "inventoryStatus": "confirmed_total",
+      "inventoryStatus": "confirmed_four_main_supplementary_pilot_and_failed_experiment",
       "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
@@ -5028,10 +5032,10 @@
           "pageOrSection": "PDF p.6, Experiment 2; PDF pp.3-4, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "source_mode": {
@@ -5060,10 +5064,10 @@
           "pageOrSection": "PDF p.6, Experiment 2; PDF p.3, Apparatus; PDF p.6, Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "coordinate_frame_body_anchor": {
@@ -5097,10 +5101,10 @@
           "pageOrSection": "PDF p.6, Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "ordered_elements_and_source_selection"
           ],
@@ -5124,12 +5128,12 @@
           "value": "Conventional Go/NoGo intensity-discrimination task; half target/respond and half non-target/withhold. No explicit online response timeout.",
           "compositeValue": "",
           "pageOrSection": "PDF p.6, Experiment 2",
-          "evidenceNote": "",
+          "evidenceNote": "The 2.25-second response period belongs to two-interval QUEST training, not the main task. Main signals share a waveform; far sound leads by 2.9 ms for propagation compensation.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "response_window_and_anchor"
           ],
@@ -5165,10 +5169,10 @@
           "pageOrSection": "PDF p.6, Experiment 2; PDF p.4, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "policy_type": {
@@ -5197,10 +5201,10 @@
           "pageOrSection": "PDF p.6, Experiment 2; PDF p.4, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
@@ -5222,12 +5226,12 @@
           "value": "Weak/strong 125-ms Oticon vibration; target assignment counterbalanced across participants.",
           "compositeValue": "",
           "pageOrSection": "PDF p.6, Experiment 2",
-          "evidenceNote": "",
+          "evidenceNote": "Experiment 1 counterbalances dominant/non-dominant stimulation/response hands and blindfolded/not-blindfolded subgroups; Experiment 2 retains the other details. These factors are not extra independently recruited experiments.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "body_site_and_side": {
@@ -5256,10 +5260,10 @@
           "pageOrSection": "PDF p.6, Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -5293,10 +5297,10 @@
           "pageOrSection": "PDF p.6, Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -5328,12 +5332,12 @@
           "value": "Ten repetitions per near/far x target/non-target cell in each of four 40-trial blocks; 160 total.",
           "compositeValue": "",
           "pageOrSection": "PDF p.6, Experiment 2",
-          "evidenceNote": "",
+          "evidenceNote": "Experiment 1 counterbalances dominant/non-dominant stimulation/response hands and blindfolded/not-blindfolded subgroups; Experiment 2 retains the other details. These factors are not extra independently recruited experiments.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "exceptions_or_overrides": {
@@ -5362,10 +5366,10 @@
           "pageOrSection": "PDF p.6, Experiment 2",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "block_composition": {
@@ -5387,7 +5391,7 @@
       "networkNodeId": "doi:10.1007/s00221-020-05771-5",
       "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (c)",
       "experimentLabel": "Experiment 3",
-      "inventoryStatus": "confirmed_total",
+      "inventoryStatus": "confirmed_four_main_supplementary_pilot_and_failed_experiment",
       "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
@@ -5406,10 +5410,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "source_mode": {
@@ -5438,10 +5442,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "coordinate_frame_body_anchor": {
@@ -5475,10 +5479,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "ordered_elements_and_source_selection"
           ],
@@ -5502,12 +5506,12 @@
           "value": "One-interval detection: respond to every felt weak or strong vibration; no explicit online response timeout.",
           "compositeValue": "",
           "pageOrSection": "PDF pp.6-7, Experiment 3",
-          "evidenceNote": "",
+          "evidenceNote": "The 2.25-second response period belongs to two-interval QUEST training, not the main task. Main signals share a waveform; far sound leads by 2.9 ms for propagation compensation.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "response_window_and_anchor"
           ],
@@ -5543,10 +5547,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3; PDF p.4, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "policy_type": {
@@ -5575,10 +5579,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3; PDF p.4, Experiment 1",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
@@ -5602,10 +5606,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "body_site_and_side": {
@@ -5634,10 +5638,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -5671,10 +5675,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -5708,10 +5712,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "exceptions_or_overrides": {
@@ -5740,10 +5744,10 @@
           "pageOrSection": "PDF pp.6-7, Experiment 3",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "block_composition": {
@@ -5765,15 +5769,15 @@
       "networkNodeId": "doi:10.1007/s00221-020-05771-5",
       "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (d)",
       "experimentLabel": "Experiment 4",
-      "inventoryStatus": "confirmed_total",
+      "inventoryStatus": "confirmed_four_main_supplementary_pilot_and_failed_experiment",
       "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
         "approximation_required": 1,
         "explicitly_absent": 2,
+        "not_reported": 1,
         "partial": 2,
-        "reported_complete": 5,
-        "source_unavailable": 1
+        "reported_complete": 5
       },
       "nativeQualification": "not_assessed",
       "contracts": [
@@ -5786,10 +5790,10 @@
           "pageOrSection": "PDF pp.7-8, Experiment 4",
           "evidenceNote": "The waveform identity and duration are reported, but the source asset or an executable synthesis recipe is not supplied.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "source_recipe_or_asset_provenance"
           ],
@@ -5820,10 +5824,10 @@
           "pageOrSection": "PDF pp.7-8, Experiment 4",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "coordinate_frame_body_anchor": {
@@ -5857,10 +5861,10 @@
           "pageOrSection": "PDF p.8, Experiment 4",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "ordered_elements_and_source_selection"
           ],
@@ -5886,10 +5890,10 @@
           "pageOrSection": "PDF p.8, Experiment 4",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "response_window_and_anchor"
           ],
@@ -5919,16 +5923,16 @@
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "source_unavailable",
+          "status": "not_reported",
           "value": "Within-trial jitter/ITI is not reported in the reviewed Experiment 4 methods.",
           "compositeValue": "",
           "pageOrSection": "PDF pp.7-8, Experiment 4",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [
             "policy_type",
             "timing_scope_and_anchor",
@@ -5936,18 +5940,18 @@
           ],
           "components": {
             "policy_type": {
-              "status": "source_unavailable",
-              "value": "",
+              "status": "not_reported",
+              "value": "Primary Methods is accessible; within-trial ITI/jitter is not specified.",
               "note": ""
             },
             "timing_scope_and_anchor": {
-              "status": "source_unavailable",
-              "value": "",
+              "status": "not_reported",
+              "value": "Primary Methods is accessible; within-trial ITI/jitter is not specified.",
               "note": ""
             },
             "values_or_range": {
-              "status": "source_unavailable",
-              "value": "",
+              "status": "not_reported",
+              "value": "Primary Methods is accessible; within-trial ITI/jitter is not specified.",
               "note": ""
             }
           }
@@ -5961,10 +5965,10 @@
           "pageOrSection": "PDF p.8, Experiment 4",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "ordered_soa_values_or_derivable_distance_anchors": {
@@ -5988,10 +5992,10 @@
           "pageOrSection": "PDF pp.7-8, Experiment 4",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "body_site_and_side": {
@@ -6020,10 +6024,10 @@
           "pageOrSection": "PDF pp.7-8, Experiment 4",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -6057,10 +6061,10 @@
           "pageOrSection": "PDF p.8, Experiment 4",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "allocation_rule": {
@@ -6094,10 +6098,10 @@
           "pageOrSection": "PDF p.8, Experiment 4",
           "evidenceNote": "",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "exceptions_or_overrides": {
@@ -6121,15 +6125,15 @@
           "key": "block_order_contract",
           "label": "Block and order policy",
           "status": "reported_complete",
-          "value": "Away, Passive and Active 60-trial condition blocks; condition order counterbalanced.",
+          "value": "Three counterbalanced Away/Passive/Active blocks, 60 targets each. Of 44 retained participants, 17 had five-minute inter-block breaks; 27 had self-paced breaks with no stated limit.",
           "compositeValue": "",
           "pageOrSection": "PDF pp.7-8, Experiment 4",
-          "evidenceNote": "",
+          "evidenceNote": "Break policy varies across participants; it is not a within-trial ITI or an added acquisition condition.",
           "derivationNote": "",
-          "reviewedOn": "2026-08-12",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
-          "evidenceSourceUrl": "",
-          "sourceType": "publication_pdf",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
           "missingComponents": [],
           "components": {
             "block_composition": {
@@ -6140,6 +6144,754 @@
             "block_count": {
               "status": "reported",
               "value": "Away, Passive and Active 60-trial condition blocks; condition order counterbalanced.",
+              "note": ""
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Three conditions counterbalanced. Inter-block breaks: 17 participants fixed five minutes; 27 self-paced, limit unspecified.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1007/s00221-020-05771-5::e",
+      "networkNodeId": "doi:10.1007/s00221-020-05771-5",
+      "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (e)",
+      "experimentLabel": "Supplementary Experiment 5 — tactile task-feasibility pilot",
+      "inventoryStatus": "confirmed_four_main_supplementary_pilot_and_failed_experiment",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "not_applicable": 11
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "not_applicable",
+          "value": "Continuous background white noise versus discrete noise pulses, described as those in the main experiments. No near-versus-far manipulation is reported for the feasibility pilot. Do not promote it into a direct PPS effect test.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "not_applicable",
+          "value": "No auditory distance or motion manipulation is reported. The purpose is tactile detection/discrimination feasibility, with one- and two-interval tasks.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_applicable",
+          "value": "Detection thresholds established before discrimination. In two-interval discrimination one interval contains the threshold stimulus and one a 1.5-times stronger stimulus; one-interval discrimination presents either weak or strong. Exact timings are not restated for the new apparatus.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "not_applicable",
+          "value": "Identify the interval containing the stronger target in two-interval discrimination, or identify weak versus strong in one-interval trials. This is task-feasibility accuracy, not a near–far tactile RT comparison.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_applicable",
+          "value": "No pilot-specific jitter or ITI is reported. The supplement says the original computers/peripherals were unavailable, so main-experiment timing and calibration cannot be inherited without evidence.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_applicable",
+          "value": "No distance-dependent auditory–tactile SOA schedule applies. Continuous versus discrete noise is a masking/context factor.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_applicable",
+          "value": "Same type of vibrotactile stimulator as the main experiments, with new generation/amplification hardware. Authors explicitly cannot establish intensity comparability. Threshold training targets 90% detection; main pilot strong stimulus is 1.5 times threshold. The separate same-observer follow-up tests strong/weak ratios 1.2, 1.4, 1.6, 1.8, 2.0, 2.2 and 2.4 in both noise contexts; it does not reuse the pilot 1.5 ratio throughout.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_applicable",
+          "value": "No direct-PPS tactile-only baseline family is reported. Continuous and discrete noise are task context, not baseline trial substitutions.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_applicable",
+          "value": "Do not copy main Experiment 1 no-vibration catches. The supplementary discrimination procedures require classifying weak/strong stimuli; exact pilot catch allocation is not given.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_applicable",
+          "value": "Main pilot has three observers in two one-hour sessions and 44 trials per reported discrimination task. The same highly trained author completes a separate 14-block follow-up crossing two noise contexts with seven intensity ratios. Do not count the author twice as an independently recruited cohort.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_applicable",
+          "value": "Detection procedures precede discrimination. Exact task order/counterbalance is not supplied. Retain the later single-observer session as a protocol variant, not a fourth recruited observer.",
+          "compositeValue": "",
+          "pageOrSection": "Published Supplementary Experiment 5, rendered DOC pp.24–26; main Experiment 3 Discussion",
+          "evidenceNote": "Adjacent tactile feasibility/control evidence without an auditory-distance PPS test; the direct-AT compact contracts are not applicable. Useful protocol facts remain contextual.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00221-020-05771-5/MediaObjects/221_2020_5771_MOESM3_ESM.doc",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "studyRowId": "doi:10.1007/s00221-020-05771-5::f",
+      "networkNodeId": "doi:10.1007/s00221-020-05771-5",
+      "label": "Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. (f)",
+      "experimentLabel": "Additional auditory stimulus/localizability experiment — unusable coding-confounded data",
+      "inventoryStatus": "confirmed_four_main_supplementary_pilot_and_failed_experiment",
+      "evidenceScope": "study_specific_source_review",
+      "templateIds": [],
+      "parameterStatusCounts": {
+        "conflicting_evidence": 2,
+        "not_reported": 8,
+        "partial": 1
+      },
+      "nativeQualification": "not_assessed",
+      "contracts": [
+        {
+          "key": "auditory_stimulus",
+          "label": "Auditory stimulus",
+          "status": "conflicting_evidence",
+          "value": "The intended contrast was amplitude-modulated white noise versus pure tones, but stimulus type was confounded with auditory distance by a coding error. This is a reported invalid design, not a valid source recipe.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "source_mode",
+            "source_recipe_or_asset_provenance"
+          ],
+          "components": {
+            "stimulus_identity_or_asset": {
+              "status": "conflicting_evidence",
+              "value": "The intended contrast was amplitude-modulated white noise versus pure tones, but stimulus type was confounded with auditory distance by a coding error. This is a reported invalid design, not a valid source recipe.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trajectory_kinematics",
+          "label": "Trajectory and kinematics",
+          "status": "conflicting_evidence",
+          "value": "Auditory distance and source type were confounded. Exact positions and the executed assignment are not documented in the inspected article paragraph.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "motion_mode",
+            "coordinate_frame_body_anchor",
+            "timing_constraint"
+          ],
+          "components": {
+            "geometry": {
+              "status": "conflicting_evidence",
+              "value": "Auditory distance and source type were confounded. Exact positions and the executed assignment are not documented in the inspected article paragraph.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "trial_sequence",
+          "label": "Trial sequence",
+          "status": "not_reported",
+          "value": "No complete trial timeline is printed for this additional invalid experiment. Do not inherit the numbered experiment schedule.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "trial_families",
+            "ordered_elements_and_source_selection"
+          ],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "task_response",
+          "label": "Task and response",
+          "status": "partial",
+          "value": "The aim was to test whether more localizable sounds improved auditory-distance effects on tactile perception. Exact response rules and windows are not described in the paragraph.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "target_and_nontarget_rule",
+            "response_mode_or_device",
+            "response_mapping_or_expected_action",
+            "response_window_and_anchor"
+          ],
+          "components": {}
+        },
+        {
+          "key": "jitter_iti_policy",
+          "label": "Jitter and ITI policy",
+          "status": "not_reported",
+          "value": "No experiment-specific jitter or ITI is reported.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "policy_type",
+            "timing_scope_and_anchor",
+            "values_or_range"
+          ],
+          "components": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "soa_schedule",
+          "label": "SOA schedule",
+          "status": "not_reported",
+          "value": "No experiment-specific onset or propagation-compensation schedule is reported.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "reference_event_and_sign",
+            "ordered_soa_values_or_derivable_distance_anchors"
+          ],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "tactile_target",
+          "label": "Tactile target",
+          "status": "not_reported",
+          "value": "No additional-experiment tactile waveform, location or calibration is specified.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "modality",
+            "body_site_and_side",
+            "waveform_and_duration"
+          ],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "baseline_trial_contract",
+          "label": "Baseline/control trials",
+          "status": "not_reported",
+          "value": "A baseline family is not described; absence is not established.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "family_or_explicit_none",
+            "timing_and_anchor",
+            "allocation_rule",
+            "resolved_trial_count"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "catch_trial_contract",
+          "label": "Catch/no-target trials",
+          "status": "not_reported",
+          "value": "Catch/no-target allocation is not described; absence is not established.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "family_or_explicit_none",
+            "target_role_and_expected_action",
+            "allocation_rule",
+            "resolved_trial_count"
+          ],
+          "components": {
+            "allocation_rule": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "repetition_allocation",
+          "label": "Repetition allocation",
+          "status": "not_reported",
+          "value": "Sample size, cell repetitions and total trials are not printed for this invalid additional experiment.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "factor_dimensions",
+            "repetitions_or_exact_counts",
+            "exceptions_or_overrides"
+          ],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            }
+          }
+        },
+        {
+          "key": "block_order_contract",
+          "label": "Block and order policy",
+          "status": "not_reported",
+          "value": "No complete block or trial-order policy is printed; the distance/type confound is explicit.",
+          "compositeValue": "",
+          "pageOrSection": "Main Experiment 3 Discussion, paragraph immediately before Experiment 4",
+          "evidenceNote": "Authors declare the extra experiment unusable after a coding confound; missing specifics are not inherited from a numbered experiment.",
+          "derivationNote": "",
+          "reviewedOn": "2026-10-27",
+          "sourceUrl": "https://doi.org/10.1007/s00221-020-05771-5",
+          "evidenceSourceUrl": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7181441/fullTextXML",
+          "sourceType": "primary_article_and_published_protocol_supplement",
+          "missingComponents": [
+            "block_count",
+            "block_composition"
+          ],
+          "components": {
+            "block_composition": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_reported",
+              "value": "Not reported for this additional failed experiment.",
               "note": ""
             }
           }
@@ -45480,236 +46232,372 @@
     {
       "studyRowId": "doi:10.17605/osf.io/73x59",
       "networkNodeId": "doi:10.17605/osf.io/73x59",
-      "label": "Audio-tactile peripersonal space",
-      "experimentLabel": "not_assessed",
-      "inventoryStatus": "not_assessed",
-      "evidenceScope": "none",
+      "label": "Audio-tactile peripersonal space (a)",
+      "experimentLabel": "OSF project provenance for Holmes; no independent acquisition",
+      "inventoryStatus": "primary_project_identity_no_independent_acquisition",
+      "evidenceScope": "study_specific_source_review",
       "templateIds": [],
       "parameterStatusCounts": {
-        "not_assessed": 11
+        "not_applicable": 11
       },
       "nativeQualification": "not_assessed",
       "contracts": [
         {
           "key": "auditory_stimulus",
           "label": "Auditory stimulus",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "source_mode",
-            "stimulus_identity_or_asset",
-            "source_recipe_or_asset_provenance"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trajectory_kinematics",
           "label": "Trajectory and kinematics",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "motion_mode",
-            "coordinate_frame_body_anchor",
-            "geometry",
-            "timing_constraint"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "trial_sequence",
           "label": "Trial sequence",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "trial_families",
-            "ordered_elements_and_source_selection"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "task_response",
           "label": "Task and response",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "target_and_nontarget_rule",
-            "response_mode_or_device",
-            "response_mapping_or_expected_action",
-            "response_window_and_anchor"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "jitter_iti_policy",
           "label": "Jitter and ITI policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "policy_type",
-            "timing_scope_and_anchor",
-            "values_or_range"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "soa_schedule",
           "label": "SOA schedule",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "reference_event_and_sign",
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "tactile_target",
           "label": "Tactile target",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "modality",
-            "body_site_and_side",
-            "waveform_and_duration"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "modality": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "baseline_trial_contract",
           "label": "Baseline/control trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "timing_and_anchor",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "catch_trial_contract",
           "label": "Catch/no-target trials",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "family_or_explicit_none",
-            "target_role_and_expected_action",
-            "allocation_rule",
-            "resolved_trial_count"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "repetition_allocation",
           "label": "Repetition allocation",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "factor_dimensions",
-            "repetitions_or_exact_counts",
-            "exceptions_or_overrides"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         },
         {
           "key": "block_order_contract",
           "label": "Block and order policy",
-          "status": "not_assessed",
-          "value": "",
+          "status": "not_applicable",
+          "value": "This project identity supplies data/code provenance for the linked Holmes publication. It is not an independent acquisition protocol; consult its source-linked experiment rows without duplicating their participants.",
           "compositeValue": "",
-          "pageOrSection": "",
-          "evidenceNote": "",
+          "pageOrSection": "OSF node73x59 public metadata; Holmes main Apparatus and Experiment3 Discussion",
+          "evidenceNote": "Project/dataset lineage identity rather than an independent PPS experiment.",
           "derivationNote": "",
-          "reviewedOn": "",
+          "reviewedOn": "2026-10-27",
           "sourceUrl": "https://doi.org/10.17605/osf.io/73x59",
-          "evidenceSourceUrl": "",
-          "sourceType": "not_assessed",
-          "missingComponents": [
-            "block_count",
-            "block_composition"
-          ],
-          "components": {}
+          "evidenceSourceUrl": "https://api.osf.io/v2/nodes/73x59/",
+          "sourceType": "primary_project_identity_and_publication_lineage",
+          "missingComponents": [],
+          "components": {
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            },
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Outside direct PPS measurement; retained contextual protocol.",
+              "note": ""
+            }
+          }
         }
       ]
     },
@@ -51452,19 +52340,21 @@
   ],
   "inventoryAudit": {
     "publications": 94,
-    "registeredInventories": 61,
-    "methodsReviewedInventories": 51,
+    "registeredInventories": 62,
+    "methodsReviewedInventories": 52,
     "auditedAccessBlockers": 5,
-    "publicationsWithAllContractDispositions": 50,
-    "inventoryAndContractsAudited": 49,
-    "remainingInventoryOrContractAudit": 45,
+    "projectLineageReviews": 1,
+    "publicationsWithAllContractDispositions": 51,
+    "inventoryAndContractsAudited": 51,
+    "remainingInventoryOrContractAudit": 43,
     "inventoryEvidenceCounts": {
-      "abstract_or_metadata_inventory": 4,
+      "abstract_or_metadata_inventory": 3,
       "audited_source_access_gap": 5,
       "author_version_methods_reviewed_final_comparison_pending": 2,
-      "not_registered": 33,
+      "not_registered": 32,
       "partial_methods_inventory": 1,
-      "primary_methods_reviewed": 38,
+      "primary_methods_reviewed": 39,
+      "primary_project_lineage_reviewed": 1,
       "retained_primary_methods_review": 11
     },
     "interpretation": "Audited means inventory evidence or documented access blocker plus eleven explicit source dispositions per retained row. It does not mean all values are reported, final-version equivalence is proven, a template exists, or native hardware is qualified."

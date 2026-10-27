@@ -33,24 +33,30 @@ unassessed work cannot be counted as completed. The exact acceptance criteria
 live with the registry. No completion criterion depends on filling every one of
 the 281 method/validation fields or adopting adjacent PPS families.
 
-Current checkpoint (2026-10-27): 94 frozen publications, 146 study/context rows,
+Current checkpoint (2026-10-27): 94 frozen publications, 148 study/context rows,
 56 registered publication inventories, five access-audited publications,
-and 33 publication inventories still unassessed. Registry presence alone
+one audited project-lineage identity,
+and 32 publication inventories still unassessed. Registry presence alone
 does not certify a Methods-confirmed inventory: earlier abstract-based or partial
 inventories still require their source and compact-contract audits.
 `publication-parameter-matrix/publication_inventory_audit.csv` and the public
 `inventoryAudit` summary derive these distinctions from explicit registry
 evidence categories and the finalized eleven-contract source dispositions.
-The current audit records 51 Methods-backed inventories (38 current primary
+The current audit records 52 Methods-backed inventories (39 current primary
 reviews, eleven retained primary reviews, and two identified author versions whose
-final comparison is pending), four abstract/metadata inventories, one partial
-Methods inventories, five audited access blockers, and 33 unregistered publications.
-Only 49 publications currently have both an eligible inventory/access disposition
-and all eleven source dispositions for every retained row; 45 still need inventory
+final comparison is pending), three abstract/metadata inventories, one partial
+Methods inventories, five audited access blockers, one project-lineage boundary, and 32 unregistered publications.
+Only 51 publications currently have both an eligible inventory/access disposition
+and all eleven source dispositions for every retained row; 43 still need inventory
 or contract review. A partial parameter value can count as reviewed when its
 missing parts are explicit; a coarse inherited field or unassessed child cannot.
 These are audit counts, not counts of runnable or scientifically qualified studies.
 The earlier counts below describe individual historical checkpoints.
+Holmes (2020) retains four main experiments, Supplementary Experiment 5 with
+a separate same-observer follow-up variant, and the additional experiment
+declared unusable after a coding confound. OSF 73x59 is an audited project
+identity linked to that publication, not a new cohort or another Methods review.
+
 Canzoneri amputation/prosthesis (2013) now has a confirmed three-experiment
 inventory. Experiment 1 is tactile-only; Experiment 3 includes upper-arm and
 hand conditions with four blocks. Its 76-versus-80 target contradiction remains

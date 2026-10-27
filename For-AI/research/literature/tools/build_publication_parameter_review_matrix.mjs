@@ -1346,8 +1346,8 @@ for (const node of network.nodes) {
   }
 }
 
-if (studyInstanceRows.length !== 146) {
-  throw new Error(`Expected 146 registered study-instance rows, found ${studyInstanceRows.length}`);
+if (studyInstanceRows.length !== 148) {
+  throw new Error(`Expected 148 registered study-instance rows, found ${studyInstanceRows.length}`);
 }
 if (atomicEvidenceRows.length !== studyInstanceRows.length * PAPER_PARAMETERS.length) {
   throw new Error("Atomic evidence ledger is not a complete study-by-parameter Cartesian product");

@@ -869,6 +869,7 @@ def inventory_review_audit(
     allowed = assessed_inventory | {
         "abstract_or_metadata_inventory", "partial_methods_inventory",
         "audited_source_access_gap", "inventory_evidence_not_classified", "not_registered",
+        "primary_project_lineage_reviewed",
     }
     entries = {row["network_node_id"]: row for row in registry["entries"]}
     studies_by_node: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -885,6 +886,16 @@ def inventory_review_audit(
             raise ValueError(f"Unknown inventory evidence status: {status}")
         if status == "audited_source_access_gap" and not entry.get("retrieval_attempts"):
             raise ValueError("Audited source-access gap requires actual retrieval attempts")
+        project_lineage = status == "primary_project_lineage_reviewed"
+        if project_lineage and (
+            entry.get("framework_disposition") != "research_project_provenance_no_new_acquisition"
+            or entry.get("source_lineage", {}).get("network_node_id") not in entries
+            or entry.get("source_lineage", {}).get("network_node_id") == node
+            or not entry.get("retrieval_attempts")
+            or not entry.get("instances")
+            or any(instance.get("instance_kind") != "research_project_context" for instance in entry.get("instances", []))
+        ):
+            raise ValueError("Reviewed project lineage requires a primary identity audit and a distinct registered publication")
         reviewed = 0
         for study in studies:
             cells = evidence_by_study[study["study_row_id"]]
@@ -896,7 +907,13 @@ def inventory_review_audit(
             ):
                 reviewed += 1
         all_reviewed = reviewed == len(studies)
-        audited = all_reviewed and status in assessed_inventory | {"audited_source_access_gap"}
+        # Project identity/lineage is an auditable boundary, not a Methods review
+        # or a route for admitting an unreviewed acquisition protocol.
+        project_boundary = project_lineage and all(
+            cell["evidence_status"] == "not_applicable"
+            for study in studies for cell in evidence_by_study[study["study_row_id"]]
+        )
+        audited = all_reviewed and (status in assessed_inventory | {"audited_source_access_gap"} or project_boundary)
         rows.append({
             "network_node_id": node,
             "inventory_registered": "yes" if entry else "no",
@@ -915,6 +932,7 @@ def inventory_review_audit(
         "registeredInventories": sum(row["inventory_registered"] == "yes" for row in rows),
         "methodsReviewedInventories": sum(counts[key] for key in assessed_inventory),
         "auditedAccessBlockers": counts["audited_source_access_gap"],
+        "projectLineageReviews": counts["primary_project_lineage_reviewed"],
         "publicationsWithAllContractDispositions": sum(row["all_rows_have_eleven_source_dispositions"] == "yes" for row in rows),
         "inventoryAndContractsAudited": sum(row["inventory_and_contracts_audited"] == "yes" for row in rows),
         "remainingInventoryOrContractAudit": sum(row["inventory_and_contracts_audited"] == "no" for row in rows),
