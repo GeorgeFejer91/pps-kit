@@ -1199,11 +1199,11 @@
     {
       "network_node_id": "doi:10.1016/j.neuropsychologia.2017.07.018",
       "doi": "10.1016/j.neuropsychologia.2017.07.018",
-      "inventory_status": "confirmed_main_audio_tactile_experiment",
+      "inventory_status": "retained_primary_inventory_with_fresh_access_limit",
       "inventory_evidence_status": "retained_primary_methods_review",
       "inventory_evidence_classified_on": "2026-10-27",
-      "instance_count_basis": "One near/far task design with group-specific session eligibility: novices receive two racket conditions and tennis players three. Preserve this conditional block rule rather than assuming every participant completes three sessions.",
-      "evidence_pointer": "https://doi.org/10.1016/j.neuropsychologia.2017.07.018::Methods; manual_reviews/biggio_2017_racket_tool_use.json::segment_2_sequence_and_intermixing;segment_4_counts",
+      "instance_count_basis": "One main static AT protocol supported by current final preview and historical full Methods review; fresh whole-PDF inventory remains blocked.",
+      "evidence_pointer": "https://www.sciencedirect.com/science/article/abs/pii/S0028393217302713",
       "review_date": "2026-10-27",
       "instances": [
         {
@@ -1220,7 +1220,44 @@
           "disaggregation_status": "record_already_experiment_specific"
         }
       ],
-      "source_review_limit": "Inventory and bounded values normalized from existing critical primary PDF review dated 2026-06-16; current main PDF not re-inspected. Current abstract corroborates broad design only."
+      "source_review_limit": "Current full Methods and supplement availability not independently reverified; historical no-SI-found result remains dated 2026-06-16.",
+      "source_cohorts": [
+        {
+          "label": "Tennis athletes",
+          "n": 14,
+          "source": "B 2 Participants",
+          "notes": "Competitive nonprofessional tennis group; 8 male/6 female, mean 27±2.41 SE, experience 5–20 years."
+        },
+        {
+          "label": "Tennis novices",
+          "n": 20,
+          "n_status": "derived",
+          "derivation_note": "34 total−14 athletes; fresh preview gives total 34 and athlete 14.",
+          "source": "B 2 Participants"
+        }
+      ],
+      "supporting_task_boundaries": [
+        "Athlete personal/common/no-racket conditions are repeated measures, not new cohorts. Novices have only common/no-racket.",
+        "No separate motor-training acquisition is established; holding objects and prior expertise define conditions.",
+        "No dataset reuse or independence relative to other publications asserted."
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "Existing dated primary review",
+          "outcome": "Historical full-PDF extraction retained. Its named PDF/render paths not found by bounded search in science and primary artifacts. Current task did not freshly read it."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0028393217302713",
+          "outcome": "Public indexed abstract/Participants/Results snippets; direct route 403. Not full Methods."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unige.it/retrieve/e268c4c9-72b1-a6b7-e053-3a05fe0adea1/phdunige_3257805.pdf",
+          "outcome": "Indexed contents identify article chapterpp 89–106; actual PDF retrieval failed expired TLS certificate; web 502. TLS not disabled. Chapter not used as read source."
+        }
+      ]
     },
     {
       "network_node_id": "doi:10.1016/j.neuropsychologia.2009.07.025",
@@ -2862,6 +2899,185 @@
         "For fitted slopes, p. 18 states six exclusions in each group but reports t(33). Starting from 49, subtracting 12 yields 37, so those statements do not independently establish one consistent final slope sample. Retain the printed analysis ambiguity; no raw-data reconciliation was attempted.",
         "Offline trimming outside 2.5 SD and fit-quality threshold adjusted R-squared <0.2 do not establish an online response deadline."
       ]
+    },
+    {
+      "network_node_id": "doi:10.1016/j.neuropsychologia.2020.107622",
+      "doi": "10.1016/j.neuropsychologia.2020.107622",
+      "inventory_status": "confirmed_main_and_adjacent_protocols_with_explicit_context_limits",
+      "inventory_evidence_status": "author_version_methods_reviewed_final_comparison_pending",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Full accepted-manuscript inventory plus selected final Methods correction; two main cohorts/protocols and incompletely described pilot boundary.",
+      "evidence_pointer": "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+      "source_review_limit": "Original audio/source recipe, exact level reference, ITI distribution/anchor and online response window remain unspecified. No identified officialSI was recovered in bounded routes. G 1 PDF p.  12 first paragraph is visibly incomplete; G 2 final p.  5 supplies complete rationale, pilot statement and 1 week spacing. That final evidence is explicitly distinguished. A maximum 40 ms auditory lag is reported in both manuscript/final excerpts. Nominal simultaneity does not imply validated zero physical SOA. Reported pooled tactile mean 3.14 mA differs from unweighted mean of three session means 3.55, 3.10, 3.18 mA (3.2767 mA). Aggregation basis unverified; preserve per-session evidence and threshold×2 rule, do not choose a replacement current.",
+      "source_cohorts": [
+        {
+          "label": "Group 1 body landmarks",
+          "recruited": 21,
+          "analyzed": 19,
+          "source": "G 1 §2.1/§2.2.5",
+          "notes": "Two exclusions: baseline outlier and technical actual-landmark acquisition failure."
+        },
+        {
+          "label": "Group 2 AT PPS",
+          "recruited": 21,
+          "source": "G 1 §2.1",
+          "notes": "Distinct reported group, three repeated post-training sessions; no explicit participant exclusion reported for this group in read Methods/results."
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "kind": "pilot",
+          "source": "G 2 final p.  5 §2.2.4",
+          "status": "provisional_inventory",
+          "evidence": "Pilot pre/post repeated AT testing produced learning/ceiling RTs; motivates post-only main task. Pilot N, full schedule, exclusions and overlap with main cohorts not reported.",
+          "safety": "Do not copy main 24-per-cell/21 participants into pilot. Pilot synchronization check reported separately in G 1 p 14/G 2 p 6 may belong to same piloting phase; relationship unverified."
+        },
+        {
+          "kind": "training_context",
+          "source": "G 1 PDF pp.  9–10 §2.2.1–2.2.2",
+          "evidence": "Active and observed 1 m rake use: 30 coloured objects/block, 5 s pacing tone, 150 s retrieval, 60 s reset, 6 blocks described as 20 min. Observation first-person perspective while participant holds own tool. These timings are training, not AT ITI."
+        },
+        {
+          "kind": "cognitive_training_control",
+          "source": "G 1 PDF p.  13/G 2 final p.  5",
+          "evidence": "Same/different sequential dot-triangle judgments at 100 cm, 50 ms displays with 1 sISI; no motor action. Do not convert to audio-tactile trial conditions or infer unreported control-task trial count."
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+          "outcome": "Full primary manuscript downloaded/read; PDF p.  12 rendered and visibly confirms omitted opening text of §2.2.4. SHA256 843772825b071011c47eb316fe5bf2642fe833bbe8ee6c416a162faffdd88a2f"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf",
+          "outcome": "DirectPDF 403. Public index supplies pp 3, 5, 6 snippets; p 5 restores preproof omission, p 6 confirms hardware lag. Not a full final-file comparison."
+        }
+      ],
+      "identity_note": "Published first author is Galigani. Legacy record ferroni_2020_tool_observation remains stable and is not an authorship claim.",
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "adjacent_body_representation_protocol",
+          "experiment_label": "Group 1 body-landmark localization",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_body_representation",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "cohort": "21 recruited, 19 analyzed; wrist/elbow estimates before/after active and observed tool use."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "experiment",
+          "experiment_label": "Group 2 post-training static audio-tactile task",
+          "record_id": "ferroni_2020_tool_observation",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific",
+          "cohort": "Distinct group of 21; post-only acquisition after active, observed and cognitive training sessions."
+        }
+      ]
+    },
+    {
+      "network_node_id": "doi:10.3233/rnn-120286",
+      "doi": "10.3233/rnn-120286",
+      "inventory_status": "confirmed_main_and_adjacent_protocols_with_explicit_context_limits",
+      "inventory_evidence_status": "primary_methods_reviewed",
+      "inventory_evidence_classified_on": "2026-10-27",
+      "review_date": "2026-10-27",
+      "instance_count_basis": "Full final primary Methods/results inventory: one longitudinal case, one AT PPS protocol and adjacent somatosensory/body-representation assessments.",
+      "evidence_pointer": "https://journals.sagepub.com/doi/pdf/10.3233/RNN-120286?download=true",
+      "source_review_limit": "PPS control N/demographics conflict; exact electrical pulse/current, ITI and online deadline absent. Physical propagation compensation is reported, not a newly measured guarantee.",
+      "source_cohorts": [
+        {
+          "label": "Longitudinal surgical case",
+          "n": 1,
+          "source": "C 1 pp 288–289",
+          "notes": "Same person before surgery, post at about 5 months after first assessment, follow-up 6 months later for broader battery. Do not count repeated assessments as recruited people."
+        },
+        {
+          "label": "Primary tactile/DDt controls",
+          "n": 26,
+          "source": "C 1 p 289 §2",
+          "notes": "20 of these also receive PDt and DH; 4 DH technical exclusions leave 16 DH. PPS overlap with 26 not explicitly established."
+        },
+        {
+          "label": "PPS controls",
+          "status": "conflicting_evidence",
+          "source": "C 1 p 289 §2 versusp 292 §2.5 andp 294 Table 5",
+          "notes": "General Methods 7(mean 28, 5 female), PPS procedure 6(allfemale, mean 25), Table 5 N 7. Do not resolve by majority or statistical degrees of freedom."
+        }
+      ],
+      "supporting_task_boundaries": [
+        {
+          "kind": "primary_tactile_assessments",
+          "source": "C 1 p 290 §2.1",
+          "evidence": "Von Frey ascending/descending detection (10 actual+5 catch per level; 6/10 threshold) and two-point acuity on ventral upper arm. These are distinct tactile-only procedures, not PPS baselines."
+        },
+        {
+          "kind": "distance_discrimination",
+          "source": "C 1 p 290 §2.2",
+          "evidence": "Right arm then neck 250 ms later, solenoid pairs separated relative to subjective two-point threshold; 2×108 trials, verbal greater-distance judgment.250 ms is tactile–tactile timing, not AT SOA."
+        },
+        {
+          "kind": "pressure_control",
+          "source": "C 1 p 290 §2.3",
+          "evidence": "Same apparatus/protocol explicitly as distance task, pressure judgment across 3 intensities; 2×108 trials. Same 20 control subset later assessed with DH, not independently recruited 20 per task."
+        },
+        {
+          "kind": "body_image",
+          "source": "C 1 pp 290–291 §2.4",
+          "evidence": "Nine body-part tiles positioned on a face-contour board, recorded photographically; no audio/tactile target schedule."
+        },
+        {
+          "kind": "longitudinal_scope",
+          "source": "C 1 p 289 §1.2; p 294§3.4/Table 5",
+          "evidence": "PPS explicitly before/after surgery and results PRE/POST only. General three-time-point battery statement does not establish a PPS follow-up condition."
+        },
+        {
+          "kind": "control_repeat_scope",
+          "source": "C 1 p 289 §2; Table 5",
+          "evidence": "General controls tested twice 5 months apart, but PPS Table 5 has one control row and no separate temporal breakdown. Exact PPS control repetition interpretation remains unresolved."
+        }
+      ],
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/pdf/10.3233/RNN-120286?download=true",
+          "outcome": "Complete public PDF text through web reader, Methods/results read. Direct binary 403, so no localPDFhash. An indexed ResearchGate uncorrected proof was not substituted."
+        }
+      ],
+      "instances": [
+        {
+          "suffix": "a",
+          "instance_kind": "experiment",
+          "experiment_label": "Static audio-tactile PPS before and after surgery",
+          "record_id": "cimmino_2013_surgical_arm_elongation",
+          "template_ids": [],
+          "toolkit_scope": "in_scope",
+          "disaggregation_status": "record_already_experiment_specific",
+          "cohort": "One longitudinal case; PPS controls reported as six versus seven, unresolved. PPS follow-up not established."
+        },
+        {
+          "suffix": "b",
+          "instance_kind": "adjacent_named_protocol_variants",
+          "experiment_label": "Tactile and body-representation battery",
+          "record_id": "",
+          "template_ids": [],
+          "toolkit_scope": "adjacent_tactile_body_representation",
+          "disaggregation_status": "adjacent_protocol_source_reviewed",
+          "protocol_variants": [
+            "Von Frey sensitivity",
+            "Two-point acuity",
+            "Distance discrimination",
+            "Pressure discrimination",
+            "Body-image reconstruction"
+          ],
+          "cohort": "Same longitudinal case; 26 tactile controls, 20-subset pressure/body-image tasks and 16 usable body-image controls after four technical exclusions. These are overlapping samples."
+        }
+      ]
     }
   ],
   "corpus_freeze": {
@@ -3341,6 +3557,26 @@
       "review_date": "2026-10-27",
       "reason": "Whole-publication inventory now includes the distinct supporting localization task. Main task remains child a; child b is adjacent validation. Old publication placeholder is not equivalent to either child alone.",
       "evidence_pointer": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0044306&type=printable"
+    },
+    {
+      "old_study_row_id": "doi:10.1016/j.neuropsychologia.2020.107622",
+      "child_study_row_ids": [
+        "doi:10.1016/j.neuropsychologia.2020.107622::a",
+        "doi:10.1016/j.neuropsychologia.2020.107622::b"
+      ],
+      "reason": "Whole-source inventory separates direct AT acquisition from adjacent body-representation protocol. Old publication row is an alias, not an additional experiment.",
+      "evidence_pointer": "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+      "review_date": "2026-10-27"
+    },
+    {
+      "old_study_row_id": "doi:10.3233/rnn-120286",
+      "child_study_row_ids": [
+        "doi:10.3233/rnn-120286::a",
+        "doi:10.3233/rnn-120286::b"
+      ],
+      "reason": "Whole-source inventory separates direct AT acquisition from adjacent body-representation protocol. Old publication row is an alias, not an additional experiment.",
+      "evidence_pointer": "https://journals.sagepub.com/doi/pdf/10.3233/RNN-120286?download=true",
+      "review_date": "2026-10-27"
     }
   ]
 }

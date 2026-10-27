@@ -12265,145 +12265,411 @@
     },
     {
       "study_row_id": "doi:10.1016/j.neuropsychologia.2017.07.018",
-      "source_type": "existing_critical_primary_pdf_review",
-      "source_file": "https://doi.org/10.1016/j.neuropsychologia.2017.07.018",
+      "source_type": "retained_primary_review_with_current_publisher_preview",
+      "source_file": "https://www.sciencedirect.com/science/article/abs/pii/S0028393217302713",
       "review_date": "2026-10-27",
-      "review_scope": "Bounded static-task timing, response and trial-allocation normalization. Other contracts retain earlier evidence; no template or native-readiness promotion.",
-      "prior_review_pointer": "manual_reviews/biggio_2017_racket_tool_use.json",
+      "review_scope": "One main static AT protocol supported by current final preview and historical full Methods review; fresh whole-PDF inventory remains blocked.",
       "retrieval_attempts": [
         {
           "date": "2026-10-27",
-          "route": "https://unige.iris.cineca.it/handle/11567/887804",
-          "outcome": "institutional_abstract_read; journal_PDF_explicitly_closed_access; no_copy_requested"
+          "route": "Existing dated primary review",
+          "outcome": "Historical full-PDF extraction retained. Its named PDF/render paths not found by bounded search in science and primary artifacts. Current task did not freshly read it."
         },
         {
           "date": "2026-10-27",
-          "route": "manual_reviews/biggio_2017_racket_tool_use.json",
-          "outcome": "existing_2026-06-16_critical_PDF_review_read; expected_local_PDF_absent"
+          "route": "https://www.sciencedirect.com/science/article/abs/pii/S0028393217302713",
+          "outcome": "Public indexed abstract/Participants/Results snippets; direct route 403. Not full Methods."
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unige.it/retrieve/e268c4c9-72b1-a6b7-e053-3a05fe0adea1/phdunige_3257805.pdf",
+          "outcome": "Indexed contents identify article chapterpp 89–106; actual PDF retrieval failed expired TLS certificate; web 502. TLS not disabled. Chapter not used as read source."
         }
       ],
       "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
         "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
         "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
         "catch_trial_contract",
         "repetition_allocation",
         "block_order_contract"
       ],
       "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "Static 150 ms pink-noise bursts, near/far loudspeakers equalized to 70 dB at the right ear.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF p.  2 Experimental procedure",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_reported",
+              "value": "Computer-controlled pink noise; generation versus pre-existing digital file is unspecified.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "Pink noise, 150 ms.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No original waveform, RNG, seed, sample rate or spectral-filter recipe.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
+            },
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Near/far volume individually equalized to 70 dB at the right ear; calibration transfer/envelope not supplied.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two identical physical loudspeakers; custom MATLAB synchronization. No virtual moving renderer.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Two fixed near/far locations; no moving trajectory.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF pp.  2–3 Experimental design/Fig 1",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "static",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design/Fig 1"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Right hand approximately 30 cm from the body.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design/Fig 1"
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Near speaker close to right hand, far 68.5 cm from near speaker, corresponding to racket length. Exact near-hand offset/3D coordinates absent.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design/Fig 1",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "Each stationary sound lasts 150 ms.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design/Fig 1"
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "Trial pre/post silence not reported.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design/Fig 1"
+            },
+            "attenuation_law": {
+              "status": "not_applicable",
+              "value": "Positions are physically separate and ear-level equalized; no synthesized distance attenuation law.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design/Fig 1"
+            }
+          }
+        },
         "trial_sequence": {
-          "status": "reported_complete",
-          "value": "Static near and far audio-tactile targets plus sound-only catches, randomized within each racket session.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "status": "partial",
+          "value": "Near/far AT targets and near/far auditory-only catches within blocked racket conditions.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF pp.  2–3 Experimental procedure/design",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
           "component_reviews": {
             "trial_families": {
               "status": "reported",
-              "value": "Near targets,far targets,near sound-only catches,far sound-only catches."
+              "value": "Near AT, far AT, near auditory-only and far auditory-only.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental procedure/design"
             },
             "ordered_elements_and_source_selection": {
               "status": "reported",
-              "value": "Single static near/far sound paired with wrist stimulation for targets; sound alone for catches."
+              "value": "Familiarization then session-specific randomized trials; near simultaneous A/T, far A leads T qualitatively.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental procedure/design"
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "150 ms audio and near simultaneity; exact far lead and trial-clock endpoints unavailable.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental procedure/design",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
             },
             "condition_intermixing": {
               "status": "reported",
-              "value": "Target/catch and near/far rows randomly intermixed within session."
+              "value": "Near/far and catches intermixed randomly within each racket session.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental procedure/design"
             }
-          },
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. "
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Speeded verbal detection of electrical touch; ignore sound and withhold on auditory-only catches.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF pp.  2–3 Experimental procedure/Data processing",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Touch is target; no-touch auditory-only trials require withholding.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental procedure/Data processing"
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Microphone records voice; MATLAB analyzes audio traces.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental procedure/Data processing"
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Respond verbally as quickly as possible to touch while blindfolded.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental procedure/Data processing"
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "Numeric deadline and exact online acquisition anchor not recovered.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental procedure/Data processing"
+            },
+            "scoring_rule": {
+              "status": "not_reported",
+              "value": "Near/far tactile RT comparison; exact exclusion thresholds not recovered in the historical compact card.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental procedure/Data processing",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_reported",
+          "value": "No ITI/jitter policy recovered in the historical full-source review.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF pp.  2–4 prior timing pass",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "No policy reported.",
+              "page_or_section": "B 1 PDF pp.  2–4 prior timing pass"
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "No interval anchor reported.",
+              "page_or_section": "B 1 PDF pp.  2–4 prior timing pass"
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "No numeric interval reported.",
+              "page_or_section": "B 1 PDF pp.  2–4 prior timing pass"
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "No distribution reported.",
+              "page_or_section": "B 1 PDF pp.  2–4 prior timing pass"
+            },
+            "randomization": {
+              "status": "not_reported",
+              "value": "Trial randomization does not establish interval randomization.",
+              "page_or_section": "B 1 PDF pp.  2–4 prior timing pass"
+            }
+          }
         },
         "soa_schedule": {
           "status": "partial",
-          "value": "Near sound and touch begin together; far sound starts earlier by an unspecified amount.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "value": "Near A/T simultaneous; far sound leads touch by an unspecified compensation interval.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF p.  2 Experimental procedure",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
           "component_reviews": {
             "reference_event_and_sign": {
-              "status": "reported",
-              "value": "Source onset scheduling relative to tactile onset."
+              "status": "derived",
+              "value": "Normalize SOA as tactile onset minus acoustic-source onset; positive means touch after sound.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_reported",
+              "value": "Near 0 ms; far positive but unknown. Do not calculate it from 68.5 cm or borrow another paper’s 5 ms.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
             },
             "direction_specific_pairing": {
-              "status": "reported",
-              "value": "Static near/far conditions with qualitative far acoustic-travel compensation."
+              "status": "not_applicable",
+              "value": "Static location pairing, no approach/recede factor.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
             }
           },
-          "missing_required_components": [
-            "ordered_soa_values_or_derivable_distance_anchors"
-          ],
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Do not import the 5-ms value from Serino 2007: Biggio does not give the exact far lead."
+          "derivation_note": "Sign conversion only; no unreported far SOA generated."
         },
-        "catch_trial_contract": {
+        "tactile_target": {
+          "status": "partial",
+          "value": "Electrical target at right wrist; pulse/current specification missing.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF p.  2 Experimental procedure",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Electrical stimulation.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right wrist, surface bipolar electrode secured with Velcro.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
+            },
+            "waveform_and_duration": {
+              "status": "not_reported",
+              "value": "Pulse waveform/duration not reported in prior review.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
+            },
+            "frequency_or_amplitude": {
+              "status": "not_reported",
+              "value": "Pulse frequency/current not reported.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
+            },
+            "intensity_or_calibration": {
+              "status": "not_reported",
+              "value": "Individual calibration rule not recovered.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure"
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "DS7AH HV Digitimer constant-current stimulator synchronized with MATLAB; trigger details absent.",
+              "page_or_section": "B 1 PDF p.  2 Experimental procedure",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            }
+          }
+        },
+        "baseline_trial_contract": {
           "status": "reported_complete",
-          "value": "30 sound-only catches per session:15 near and 15 far; withhold response.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "value": "No separate tactile-only trial family; near/far AT comparison is the spatial contrast.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF p.  3 Experimental design",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
           "component_reviews": {
             "family_or_explicit_none": {
               "status": "reported",
-              "value": "Auditory-only withhold catches."
+              "value": "none for standalone baseline; near/far are target-condition comparisons.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "No separate baseline timing.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "No separate baseline allocation.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "Zero separate baseline rows.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
+            },
+            "crossing_rule": {
+              "status": "not_applicable",
+              "value": "No separate baseline crossing.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
+            }
+          },
+          "derivation_note": "The exhaustive 90-trial inventory is 60 AT+30 auditory-only; it leaves no separate tactile-only rows."
+        },
+        "catch_trial_contract": {
+          "status": "reported_complete",
+          "value": "30 auditory-only withhold catches per session: 15 near+15 far.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF p.  3 Experimental design",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
             },
             "target_role_and_expected_action": {
               "status": "reported",
-              "value": "No tactile target; no vocal response."
+              "value": "No touch; withhold verbal response.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
             },
             "allocation_rule": {
               "status": "reported",
-              "value": "15 near plus 15 far per session."
+              "value": "Exact 15 per auditory location per session.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
             },
             "resolved_trial_count": {
               "status": "reported",
-              "value": "30 per 90-trial session."
+              "value": "30 per session.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Near/far crossed with each applicable racket session.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
             }
-          },
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. "
+          }
         },
         "repetition_allocation": {
-          "status": "reported_complete",
-          "value": "30 near targets +30 far targets +30 sound-only catches =90 trials per session.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "status": "derived_complete",
+          "value": "Each session 90 trials: 30 near AT, 30 far AT, 15 near catch, 15 far catch.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF p.  3 Experimental design",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
           "component_reviews": {
             "factor_dimensions": {
               "status": "reported",
-              "value": "Static near/far target locations plus near/far catches."
+              "value": "Auditory location×target/catch×racket session; athlete/novice between groups.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
             },
             "repetitions_or_exact_counts": {
               "status": "reported",
-              "value": "30 targets per location and 15 catches per location."
+              "value": "30 AT/location and 15 catch/location/session.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
             },
             "exceptions_or_overrides": {
               "status": "reported",
-              "value": "Familiarization remains separate."
+              "value": "Personal-racket session only for athletes; familiarization count unknown.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
             },
             "derived_total_reconciliation": {
-              "status": "reported",
-              "value": "60 target+30 catch=90 per session; novice 180 and player 270 totals follow from group-specific sessions."
+              "status": "derived",
+              "value": "180 main trials/novice; 270/athlete.",
+              "derivation_note": "90×2 novice sessions; 90×3 athlete sessions; excludes unspecified familiarization.",
+              "page_or_section": "B 1 PDF p.  3 Experimental design"
             }
           },
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. "
+          "derivation_note": "Per-session 90 is reported; group totals 180/270 are arithmetic, not separate quoted totals."
         },
         "block_order_contract": {
-          "status": "reported_complete",
-          "value": "Novices: no-racket/common-racket sessions. Tennis players: those two plus personal-racket; session order counterbalanced.",
-          "page_or_section": "Methods / Procedure and Materials / Experimental design, PDF pp.2-3",
+          "status": "partial",
+          "value": "Novices have no-racket and common-racket sessions; athletes additionally have a personal-racket session. Session order is counterbalanced; the athlete-only condition is not assigned to novices.",
+          "page_or_section": "Retained primary review dated 2026-06-16 PDF pp.  2–3 Experimental design",
+          "evidence_note": "Historical full-PDF review dated 2026-06-16; primary PDF is not retained at its old local path and was not freshly re-read. Current final publisher preview corroborates only the broad paradigm/cohorts. Preserve this evidence tier.",
           "component_reviews": {
             "block_count": {
               "status": "reported",
-              "value": "Two sessions for novices;three for tennis players."
+              "value": "Two sessions for novices, three for athletes; further subdivisions not recovered.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design"
             },
             "block_composition": {
               "status": "reported",
-              "value": "90 trials per session."
+              "value": "No racket/common racket for both; personal racket additionally for athletes; 90 trials/session.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design"
             },
             "pool_repeat_or_distribution": {
               "status": "reported",
-              "value": "Same 90-trial design in each administered session."
+              "value": "Same 90-trial family inventory per applicable session.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design"
             },
             "within_block_randomization": {
               "status": "reported",
-              "value": "Random order within session."
+              "value": "Random order reported, RNG and sequence constraints absent.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
             },
             "block_order_or_counterbalancing": {
-              "status": "reported",
-              "value": "Session order counterbalanced."
+              "status": "not_reported",
+              "value": "Session counterbalancing reported; exact assignment schedule absent.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "No run-length or balancing constraints recovered.",
+              "page_or_section": "B 1 PDF pp.  2–3 Experimental design"
             }
-          },
-          "evidence_note": "Normalized from existing primary PDF critical review dated 2026-06-16; no renewed PDF inspection. Personal racket is not administered to novices; group totals are derived from 90 trials per session."
+          }
         }
       }
     },
@@ -33087,6 +33353,1335 @@
           "outcome": "Primary source retrieved and Methods reviewed. SHA256 17f425375936e9eed93236730cc9e107a75cd55bb55d6f31d2c22df48efdfc3a. Complete 10-page author-hosted publisher-layout ARTICLE IN PRESS PDF; final paginated version comparison remains pending."
         }
       ]
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2020.107622::b",
+      "source_type": "author_preproof_with_bounded_final_methods_excerpts",
+      "source_file": "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Full accepted-manuscript inventory plus selected final Methods correction; two main cohorts/protocols and incompletely described pilot boundary.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+          "outcome": "Full primary manuscript downloaded/read; PDF p.  12 rendered and visibly confirms omitted opening text of §2.2.4. SHA256 843772825b071011c47eb316fe5bf2642fe833bbe8ee6c416a162faffdd88a2f"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf",
+          "outcome": "DirectPDF 403. Public index supplies pp 3, 5, 6 snippets; p 5 restores preproof omission, p 6 confirms hardware lag. Not a full final-file comparison."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "784 Hz tones, 50 ms, approximately 65 dB, from two physical speakers.",
+          "page_or_section": "Author preproof PDF p.  13/printed 11 §2.2.4; Selected final indexed excerpt final p.  5",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_reported",
+              "value": "Computer-delivered tone; original synthesized recipe versus stored file unspecified.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "784 Hz tone, 50 ms.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No original file, sample rate, phase or onset/offset envelope.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "level_envelope_calibration": {
+              "status": "not_reported",
+              "value": "Approximately 65 dB; meter position/reference and level matching procedure not reported.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two physical loudspeakers; Arduino–E-Prime system.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Fixed near<5 cm and far 100 cm positions relative to stimulated right hand.",
+          "page_or_section": "Author preproof PDF p.  13/printed 11 §2.2.4; Selected final indexed excerpt final p.  5",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "static",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Seated participant, right hand on table holding 1 m tool during AT acquisition.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Near<5 cm from right hand; far 100 cm from hand. Exact azimuth/elevation and near offset not specified.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "50 ms tones.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "No pre/post-sound silence specified.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "attenuation_law": {
+              "status": "not_applicable",
+              "value": "Physical static locations; no generated moving attenuation law.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "Post-training AT task after active, observational and cognitive sessions, each a week apart.",
+          "page_or_section": "Author preproof PDF pp.  12–14/printed 10–12; Selected final indexed excerpt final p.  5 §2.2.4",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Finalp 5 restores the preproof’s visibly incomplete first paragraph, including week spacing and pilot rationale. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "T, auditory-near, auditory-far, AT-near, AT-far.",
+              "page_or_section": "G 1 PDF pp.  12–14/printed 10–12; G 2 final p.  5 §2.2.4"
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "One training then post-only AT block per session; T-only comparator and auditory-only catches included.",
+              "page_or_section": "G 1 PDF pp.  12–14/printed 10–12; G 2 final p.  5 §2.2.4"
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Nominal simultaneous AT; pilot hardware delay has A up to 40 ms later. Full trial-clock endpoints absent.",
+              "page_or_section": "G 1 PDF pp.  12–14/printed 10–12; G 2 final p.  5 §2.2.4",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "condition_intermixing": {
+              "status": "not_reported",
+              "value": "Exact trial-family intermixing/order not specified; random ITI is not proof of randomized family order.",
+              "page_or_section": "G 1 PDF pp.  12–14/printed 10–12; G 2 final p.  5 §2.2.4"
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Right-index button response to touch; ignore sound.",
+          "page_or_section": "Author preproof PDF pp.  14–15/printed 12–13 §2.2.4–2.2.5",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Respond to T and AT; auditory-only conditions are catches.",
+              "page_or_section": "G 1 PDF pp.  14–15/printed 12–13 §2.2.4–2.2.5"
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Response-box button, right index; E-Prime 2 records RT.",
+              "page_or_section": "G 1 PDF pp.  14–15/printed 12–13 §2.2.4–2.2.5"
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Speeded button press to tactile target, ignore auditory stimuli.",
+              "page_or_section": "G 1 PDF pp.  14–15/printed 12–13 §2.2.4–2.2.5"
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "Numeric response deadline/acquisition edge not specified.",
+              "page_or_section": "G 1 PDF pp.  14–15/printed 12–13 §2.2.4–2.2.5"
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "Check≥97% detection accuracy; remove RTs beyond 2 SD per specific-distance repetition set for unimodal/bimodal; about 5% discarded. This is analysis trimming, not an online deadline.",
+              "page_or_section": "G 1 PDF pp.  14–15/printed 12–13 §2.2.4–2.2.5"
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "partial",
+          "value": "ITI randomly varies between 7 and 9 s; exact anchor and distribution unspecified.",
+          "page_or_section": "Author preproof PDF p.  14/printed 12 §2.2.4",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "reported",
+              "value": "Randomly jittered range; no named distribution, so do not label uniform.",
+              "page_or_section": "G 1 PDF p.  14/printed 12 §2.2.4",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "Called inter-trial interval between stimulations; onset-to-onset versus offset-to-onset not resolved.",
+              "page_or_section": "G 1 PDF p.  14/printed 12 §2.2.4",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "values_or_range": {
+              "status": "reported",
+              "value": "7–9 s.",
+              "page_or_section": "G 1 PDF p.  14/printed 12 §2.2.4"
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "Probabilities/discretization absent.",
+              "page_or_section": "G 1 PDF p.  14/printed 12 §2.2.4"
+            },
+            "randomization": {
+              "status": "reported",
+              "value": "Random jitter stated; seed/sequence absent.",
+              "page_or_section": "G 1 PDF p.  14/printed 12 §2.2.4",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "partial",
+          "value": "Nominal simultaneity, with measured pilot A lag up to 40 ms; not an exact zero-latency schedule.",
+          "page_or_section": "Author preproof PDF p.  14/printed 12 §2.2.4; Selected final indexed excerpt final p. p 5–6",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "derived",
+              "value": "Tactile onset minus acoustic-source onset; A-later gives negative tactile-relative-A SOA.",
+              "derivation_note": "Source reports auditory stimulus later; reverse sign for T−A convention.",
+              "page_or_section": "G 1 PDF p.  14/printed 12 §2.2.4; G 2 final p. p 5–6"
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_reported",
+              "value": "Nominal 0 ms; reported maximum auditory delay 40 ms. Exact per-trial or near/far delay distribution absent; do not substitute fixed−40 ms.",
+              "page_or_section": "G 1 PDF p.  14/printed 12 §2.2.4; G 2 final p. p 5–6",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "direction_specific_pairing": {
+              "status": "not_applicable",
+              "value": "Static near/far factor, no movement directions.",
+              "page_or_section": "G 1 PDF p.  14/printed 12 §2.2.4; G 2 final p. p 5–6"
+            }
+          },
+          "derivation_note": "Only the sign convention is derived. The maximum is not an exact delivered SOA or a validated universal hardware correction."
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Right-hand dorsum 200 μs constant-current square pulse, intensity twice individual sensory threshold.",
+          "page_or_section": "Author preproof PDF p.  13/printed 11 §2.2.4; Selected final indexed excerpt final p.  5",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Nonpainful transcutaneous electrical stimulation.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Right-hand dorsum; roughly 1 cm electrode spacing; one negative and alternate positive electrodes shift perceived site.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "waveform_and_duration": {
+              "status": "reported",
+              "value": "Constant-current square-wave pulse, 200 μs.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "frequency_or_amplitude": {
+              "status": "not_reported",
+              "value": "Threshold×2; no fixed universal current. Three session means reported separately, not a prescription.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Methods-of-limits sensory threshold before each session, then×2.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5"
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Digitimer DS7A, Arduino–E-Prime; exact alternating-positive allocation and trigger code absent.",
+              "page_or_section": "G 1 PDF p.  13/printed 11 §2.2.4; G 2 final p.  5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "partial",
+          "value": "T-only condition is the unimodal baseline within each post-training block; exact trial-origin timing is not reported.",
+          "page_or_section": "Author preproof PDF pp.  12–14/printed 10–12 §2.2.4",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "tactile_only_unspecified",
+              "page_or_section": "G 1 PDF pp.  12–14/printed 10–12 §2.2.4"
+            },
+            "timing_and_anchor": {
+              "status": "not_reported",
+              "value": "No sound and no auditory-onset SOA; ITI 7–9 s. Exact trial-origin timing absent.",
+              "page_or_section": "G 1 PDF pp.  12–14/printed 10–12 §2.2.4",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "24 T-only trials per block.",
+              "page_or_section": "G 1 PDF pp.  12–14/printed 10–12 §2.2.4"
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "72 T-only across three training sessions.",
+              "derivation_note": "24×3.",
+              "page_or_section": "G 1 PDF pp.  12–14/printed 10–12 §2.2.4"
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "One T-only cell per training; not multiplied by two auditory locations.",
+              "page_or_section": "G 1 PDF pp.  12–14/printed 10–12 §2.2.4"
+            }
+          },
+          "derivation_note": "Total 72 derives from 24 per condition×3 post-training blocks. This is not a pre/post endpoint ladder."
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "Auditory-only near/far are no-touch catches; 24 each per block.",
+          "page_or_section": "Author preproof PDF pp.  13–14/printed 11–12 §2.2.4",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "auditory_only_withhold",
+              "page_or_section": "G 1 PDF pp.  13–14/printed 11–12 §2.2.4"
+            },
+            "target_role_and_expected_action": {
+              "status": "derived",
+              "value": "Withhold because task responds only to touch; auditory-only explicitly called catch.",
+              "page_or_section": "G 1 PDF pp.  13–14/printed 11–12 §2.2.4"
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "24 per near/far auditory-only condition per block.",
+              "page_or_section": "G 1 PDF pp.  13–14/printed 11–12 §2.2.4"
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "48 per block, 144 across sessions.",
+              "derivation_note": "24×2 auditory locations×3 sessions.",
+              "page_or_section": "G 1 PDF pp.  13–14/printed 11–12 §2.2.4"
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Near/far catches in each of active, observational, cognitive sessions.",
+              "page_or_section": "G 1 PDF pp.  13–14/printed 11–12 §2.2.4"
+            }
+          },
+          "derivation_note": "Two auditory-only conditions×24=48; repeated in 3 sessions gives 144."
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "Five conditions×24 trials=120 per post-training block; 360 across three sessions.",
+          "page_or_section": "Author preproof PDF pp.  13–14/printed 11–12 §2.2.4",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Five stimulation conditions(T, ANear, AFar, TANear, TAFar)×three training sessions.",
+              "page_or_section": "G 1 PDF pp.  13–14/printed 11–12 §2.2.4"
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "24 trials per stimulation condition per 16 min AT block.",
+              "page_or_section": "G 1 PDF pp.  13–14/printed 11–12 §2.2.4"
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Body-landmark cohort, pilot and training blocks are separate; no pre-training AT acquisition in the main design.",
+              "page_or_section": "G 1 PDF pp.  13–14/printed 11–12 §2.2.4"
+            },
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "Per block 48 AT+24 T+48 catch=120; three blocks 360.",
+              "derivation_note": "5×24×3; excludes training, thresholding and incompletely described pilot.",
+              "page_or_section": "G 1 PDF pp.  13–14/printed 11–12 §2.2.4"
+            }
+          },
+          "derivation_note": "The source gives 24 per condition and five conditions; 120/360 are calculated."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Three post-only AT blocks following three counterbalanced training sessions.",
+          "page_or_section": "Author preproof PDF pp.  14–15/Fig 4; Selected final indexed excerpt final p. p 5–6",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "One 16 min AT block per each of 3 training sessions.",
+              "page_or_section": "G 1 PDF pp.  14–15/Fig 4; G 2 final p. p 5–6"
+            },
+            "block_composition": {
+              "status": "reported",
+              "value": "24 each of 5 stimulation conditions/block.",
+              "page_or_section": "G 1 PDF pp.  14–15/Fig 4; G 2 final p. p 5–6"
+            },
+            "pool_repeat_or_distribution": {
+              "status": "reported",
+              "value": "Condition inventory repeated after each training.",
+              "page_or_section": "G 1 PDF pp.  14–15/Fig 4; G 2 final p. p 5–6"
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "Family ordering algorithm not specified.",
+              "page_or_section": "G 1 PDF pp.  14–15/Fig 4; G 2 final p. p 5–6"
+            },
+            "block_order_or_counterbalancing": {
+              "status": "not_reported",
+              "value": "Trainings counterbalanced across participants; final p.  5 states 1 week separation, exact assignment sequence absent.",
+              "page_or_section": "G 1 PDF pp.  14–15/Fig 4; G 2 final p. p 5–6",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "sequence_constraints": {
+              "status": "not_reported",
+              "value": "No run-length or seed specification.",
+              "page_or_section": "G 1 PDF pp.  14–15/Fig 4; G 2 final p. p 5–6"
+            }
+          }
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2020.107622::a",
+      "source_type": "author_preproof_with_bounded_final_methods_excerpts",
+      "source_file": "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+      "review_date": "2026-10-27",
+      "review_scope": "Full accepted-manuscript inventory plus selected final Methods correction; two main cohorts/protocols and incompletely described pilot boundary.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+          "outcome": "Full primary manuscript downloaded/read; PDF p.  12 rendered and visibly confirms omitted opening text of §2.2.4. SHA256 843772825b071011c47eb316fe5bf2642fe833bbe8ee6c416a162faffdd88a2f"
+        },
+        {
+          "date": "2026-10-27",
+          "route": "https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf",
+          "outcome": "DirectPDF 403. Public index supplies pp 3, 5, 6 snippets; p 5 restores preproof omission, p 6 confirms hardware lag. Not a full final-file comparison."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Body-landmark localization has no auditory/tactile stimulus target; do not import the other cohort’s AT parameters.",
+          "page_or_section": "Author preproof PDF pp.  11–12/printed 9–10 §2.2.3",
+          "evidence_note": "Outside the auditory-tactile PPS stimulus contract for this adjacent task. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Body-landmark localization has no auditory/tactile stimulus target; do not import the other cohort’s AT parameters.",
+          "page_or_section": "Author preproof PDF pp.  11–12/printed 9–10 §2.2.3",
+          "evidence_note": "Outside the auditory-tactile PPS stimulus contract for this adjacent task. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Localize wrist/elbow before and after active and observational tool-use.",
+          "page_or_section": "Author preproof PDF pp.  11–12 §2.2.3; Fig 4",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Verbally stop/adjust marker to estimate concealed wrist/elbow location.",
+          "page_or_section": "Author preproof PDF pp.  11–12 §2.2.3; p 15 §2.2.5",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Experimenter-guided marker placement; no timed ITI specified.",
+          "page_or_section": "Author preproof PDF pp.  11–12 §2.2.3",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          },
+          "derivation_note": "Event-driven characterization follows the reported experimenter/participant procedure, not a new clock default."
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Body-landmark localization has no auditory/tactile stimulus target; do not import the other cohort’s AT parameters.",
+          "page_or_section": "Author preproof PDF pp.  11–12/printed 9–10 §2.2.3",
+          "evidence_note": "Outside the auditory-tactile PPS stimulus contract for this adjacent task. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Body-landmark localization has no auditory/tactile stimulus target; do not import the other cohort’s AT parameters.",
+          "page_or_section": "Author preproof PDF pp.  11–12/printed 9–10 §2.2.3",
+          "evidence_note": "Outside the auditory-tactile PPS stimulus contract for this adjacent task. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Pre-training landmark estimates are within-person controls.",
+          "page_or_section": "Author preproof PDF pp.  11–12 §2.2.3; Fig 4",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          },
+          "derivation_note": "Derived 40 baseline estimates; no tactile-only stimulus trials."
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Body-landmark localization has no auditory/tactile stimulus target; do not import the other cohort’s AT parameters.",
+          "page_or_section": "Author preproof PDF pp.  11–12/printed 9–10 §2.2.3",
+          "evidence_note": "Outside the auditory-tactile PPS stimulus contract for this adjacent task. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Ten estimates for each of 2 landmarks in 4 pre/post assessments.",
+          "page_or_section": "Author preproof PDF pp.  11–12 §2.2.3; Fig 4",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          },
+          "derivation_note": "80 is derived; separate from 360 AT trials in the other cohort."
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Four localization assessments around two counterbalanced training sessions.",
+          "page_or_section": "Author preproof §2.2.3/Fig 4, PDF pp.  11–12, 14",
+          "evidence_note": "Retained primary Journal Pre-proof, DOI 10.1016/j.neuropsychologia.2020.107622. Final indexed pages corroborate selected Methods; no full final-PDF comparison claimed. Source version: full author preproof, with selected final Methods excerpts at https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf. Full final-file comparison remains pending.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          },
+          "derivation_note": "2 training types×2 assessment timings=4."
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.3233/rnn-120286::a",
+      "source_type": "primary_published_article_full_methods",
+      "source_file": "https://journals.sagepub.com/doi/pdf/10.3233/RNN-120286?download=true",
+      "review_date": "2026-10-27",
+      "review_scope": "Full final primary Methods/results inventory: one longitudinal case, one AT PPS protocol and adjacent somatosensory/body-representation assessments.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/pdf/10.3233/RNN-120286?download=true",
+          "outcome": "Complete public PDF text through web reader, Methods/results read. Direct binary 403, so no localPDFhash. An indexed ResearchGate uncorrected proof was not substituted."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "partial",
+          "value": "White-noise bursts 150 ms; near/far matched 70 dB at ear.",
+          "page_or_section": "Published final article final p.  292 §2.5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_reported",
+              "value": "Computer-delivered white noise, original synthesis/file mode unspecified.",
+              "page_or_section": "C 1 final p.  292 §2.5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "reported",
+              "value": "White noise, 150 ms.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_reported",
+              "value": "No original waveform, sample rate, RNG or edge envelope.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "level_envelope_calibration": {
+              "status": "reported",
+              "value": "Sound meter at ear sets near/far equal 70 dB; recorded phono-spectral comparison confirms equal source sounds.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "renderer_apparatus": {
+              "status": "reported",
+              "value": "Two identical physical speakers, XGen presentation software.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "partial",
+          "value": "Static near 5 cm from hand; far 25 or 100 cm from near speaker.",
+          "page_or_section": "Published final article final p. p 291–292 §2.5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "reported",
+              "value": "static",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "reported",
+              "value": "Stimulated right index/hand; two speaker separations.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "geometry": {
+              "status": "not_reported",
+              "value": "Near 5 cm from hand; far 25 or 100 cm from near speaker. Do not relabel these as exact hand-relative coordinates; full 3D geometry absent.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "timing_constraint": {
+              "status": "reported",
+              "value": "150 ms sound.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "padding_or_holds": {
+              "status": "not_reported",
+              "value": "Trial margins absent.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "attenuation_law": {
+              "status": "not_applicable",
+              "value": "Physical speakers with ear-level equality, no synthesized motion attenuation.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "partial",
+          "value": "Weak-touch targets, strong-touch nontargets and auditory-only catches at near/far locations.",
+          "page_or_section": "Published final article final p. p 291–292 §2.5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "reported",
+              "value": "WeakAT-near/far; strongAT-near/far; auditory-only near/far.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "reported",
+              "value": "Near A/T simultaneous, far A precedes T 5 ms; separate far 100/far 25 condition blocks.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "within_trial_timing_or_placement": {
+              "status": "not_reported",
+              "value": "Sound 150 ms, electrical pulse duration and trial-clock endpoints absent.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "condition_intermixing": {
+              "status": "not_reported",
+              "value": "Within-block target/nontarget/catch ordering not specified.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            }
+          }
+        },
+        "task_response": {
+          "status": "partial",
+          "value": "Say tah quickly to weak electrical target; withhold for strong touch and sound-only.",
+          "page_or_section": "Published final article final p. p 291–292 §2.5; p 294 §3.4",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "reported",
+              "value": "Weak touch is target; strong touch is nontarget; auditory-only catch has no target.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5; p 294 §3.4"
+            },
+            "response_mode_or_device": {
+              "status": "reported",
+              "value": "Voice-activated relay; XGen captures responses.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5; p 294 §3.4"
+            },
+            "response_mapping_or_expected_action": {
+              "status": "reported",
+              "value": "Vocal tah as quickly as possible only for weak target, ignoring sound.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5; p 294 §3.4"
+            },
+            "response_window_and_anchor": {
+              "status": "not_reported",
+              "value": "Numeric response deadline and exact response-time origin not specified.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5; p 294 §3.4"
+            },
+            "scoring_rule": {
+              "status": "reported",
+              "value": "RT observations beyond 2 SD from mean removed in analysis; no online timeout inferred.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5; p 294 §3.4"
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_reported",
+          "value": "No exact ITI/jitter policy reported; approximate block duration does not define it.",
+          "page_or_section": "Published final article final p. p 291–292 §2.5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_reported",
+              "value": "Not reported.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_reported",
+              "value": "No interval anchor.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "values_or_range": {
+              "status": "not_reported",
+              "value": "No numeric ITI. About 6 min/block is not an intertrial value.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "distribution": {
+              "status": "not_reported",
+              "value": "Not reported.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "randomization": {
+              "status": "not_reported",
+              "value": "Not reported.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "derived_complete",
+          "value": "Near T−A=0 ms; far T−A=+5 ms at source-onset scheduling.",
+          "page_or_section": "Published final article final p.  292 §2.5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "derived",
+              "value": "Tactile onset minus acoustic-source onset.",
+              "derivation_note": "Far sound starts 5 ms before touch; therefore T−A=+5 ms.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "reported",
+              "value": "Near simultaneous; far sound 5 ms before touch. The source describes one far compensation, not separate calculated 25/100 cm values.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "direction_specific_pairing": {
+              "status": "not_applicable",
+              "value": "Location-specific static timing, no movement directions.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            }
+          },
+          "derivation_note": "Sign normalized from reported 5 ms auditory lead. Does not establish measured arrival simultaneity."
+        },
+        "tactile_target": {
+          "status": "partial",
+          "value": "Weak/strong electrical pulses at right index; independently titrated 90%/100% detection.",
+          "page_or_section": "Published final article final p.  292 §2.5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "modality": {
+              "status": "reported",
+              "value": "Constant-current electrical stimulation.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "body_site_and_side": {
+              "status": "reported",
+              "value": "Upper/dorsal right index; separate electrode pairs for weak/strong.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "waveform_and_duration": {
+              "status": "not_reported",
+              "value": "Exact pulse waveform/duration not reported.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "frequency_or_amplitude": {
+              "status": "not_reported",
+              "value": "Current and repetition frequency not reported.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "intensity_or_calibration": {
+              "status": "reported",
+              "value": "Pre-test weak target detectable approximately 90%, strong nontarget 100%.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "external_trigger": {
+              "status": "not_reported",
+              "value": "Two DS7A stimulators, two Neuroline/Ambu electrode pairs, XGen; electrical trigger details absent.",
+              "page_or_section": "C 1 final p.  292 §2.5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "derived_complete",
+          "value": "No standalone tactile-only family. Far 100 is the spatial control for far 25.",
+          "page_or_section": "Published final article final p. p 291–292 §2.5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "static_or_fixed_distance_expectancy_control; far100 condition compared with critical far25.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "timing_and_anchor": {
+              "status": "reported",
+              "value": "Same near 0/far 5 ms source-onset timing as targets.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Each far-distance condition 240 trials with same weak/strong/catch composition.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "resolved_trial_count": {
+              "status": "reported",
+              "value": "240 far 100-condition trials including 120 weak, 80 strong, 40 auditory-only; these are not additional baseline rows.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Near/far location×weak/strong/audio-only in each far-distance condition.",
+              "page_or_section": "C 1 final p. p 291–292 §2.5"
+            }
+          },
+          "derivation_note": "The exhaustive 240-per-condition inventory leaves no separate tactile-only rows; do not double-count the spatial control as extra trials."
+        },
+        "catch_trial_contract": {
+          "status": "derived_complete",
+          "value": "Two no-go families: strong touch with sound and auditory-only catches.",
+          "page_or_section": "Published final article final p.  292 §2.5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "reported",
+              "value": "combined_no_target_families",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "target_role_and_expected_action": {
+              "status": "reported",
+              "value": "Strong touch nontarget and no-touch auditory-only both require withholding; do not merge their stimulus identities.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "allocation_rule": {
+              "status": "reported",
+              "value": "Per far-distance condition: 40 strong near+40 strong far; 20 auditory-only near+20 auditory-only far.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "resolved_trial_count": {
+              "status": "derived",
+              "value": "80 strong nontarget+40 auditory-only per condition; 160+80 across both.",
+              "derivation_note": "Each reported family count repeated across far 100/far 25.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "crossing_rule": {
+              "status": "reported",
+              "value": "Near/far×both far-distance blocks; weak target remains separate.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            }
+          },
+          "derivation_note": "The paper calls only auditory-only rows catches; the contract also preserves strong nontarget withholding without relabelling it auditory-only."
+        },
+        "repetition_allocation": {
+          "status": "derived_complete",
+          "value": "240 trials/far-distance condition, 480 per PPS assessment.",
+          "page_or_section": "Published final article final p.  292 §2.5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "reported",
+              "value": "Far-distance condition 25/100×near/far sound×weak/strong/auditory-only.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "repetitions_or_exact_counts": {
+              "status": "reported",
+              "value": "Per condition 60 weak/location, 40 strong/location, 20 audio-only/location.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "exceptions_or_overrides": {
+              "status": "reported",
+              "value": "Case longitudinal repeats are same person. PPS control cohort count conflicts 6 versus 7; do not calculate a study recruitment or pooled trial total.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            },
+            "derived_total_reconciliation": {
+              "status": "derived",
+              "value": "480=2×(120 weak+80 strong+40 audio-only).",
+              "derivation_note": "Two far-distance conditions, each 240 reported; target 240, nontarget 160, auditory-only 80 per assessment.",
+              "page_or_section": "C 1 final p.  292 §2.5"
+            }
+          },
+          "derivation_note": "480 is derived per assessment, not a new subject count. No PPS follow-up trial inventory is established."
+        },
+        "block_order_contract": {
+          "status": "partial",
+          "value": "Four PPS blocks per assessment; case 100, 25, 25, 100; controls half same/half reverse.",
+          "page_or_section": "Published final article final p.  292 §2.5; p 294 Table 5",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "block_count": {
+              "status": "reported",
+              "value": "Two blocks per each far-distance condition; four total.",
+              "page_or_section": "C 1 final p.  292 §2.5; p 294 Table 5"
+            },
+            "block_composition": {
+              "status": "not_reported",
+              "value": "Each condition 240 trials across 2 blocks of about 6 min; exact per-block family allocation not stated.",
+              "page_or_section": "C 1 final p.  292 §2.5; p 294 Table 5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "pool_repeat_or_distribution": {
+              "status": "not_reported",
+              "value": "240 per condition divided across two blocks; no independent 240 trial repeat in each block.",
+              "page_or_section": "C 1 final p.  292 §2.5; p 294 Table 5",
+              "note": "Some subfacts are stated in value; the complete required component remains unspecified."
+            },
+            "within_block_randomization": {
+              "status": "not_reported",
+              "value": "Not specified.",
+              "page_or_section": "C 1 final p.  292 §2.5; p 294 Table 5"
+            },
+            "block_order_or_counterbalancing": {
+              "status": "reported",
+              "value": "Case far 100, far 25, far 25, far 100; controls half this order, half reverse.",
+              "page_or_section": "C 1 final p.  292 §2.5; p 294 Table 5"
+            },
+            "sequence_constraints": {
+              "status": "conflicting_evidence",
+              "value": "Counterbalance refers to 6 controls in procedure, while general Methods and Table 5 say 7. Exact assignment cannot be resolved.",
+              "page_or_section": "C 1 final p.  292 §2.5; p 294 Table 5"
+            }
+          }
+        }
+      }
+    },
+    {
+      "study_row_id": "doi:10.3233/rnn-120286::b",
+      "source_type": "primary_published_article_full_methods",
+      "source_file": "https://journals.sagepub.com/doi/pdf/10.3233/RNN-120286?download=true",
+      "review_date": "2026-10-27",
+      "review_scope": "Full final primary Methods/results inventory: one longitudinal case, one AT PPS protocol and adjacent somatosensory/body-representation assessments.",
+      "retrieval_attempts": [
+        {
+          "date": "2026-10-27",
+          "route": "https://journals.sagepub.com/doi/pdf/10.3233/RNN-120286?download=true",
+          "outcome": "Complete public PDF text through web reader, Methods/results read. Direct binary 403, so no localPDFhash. An indexed ResearchGate uncorrected proof was not substituted."
+        }
+      ],
+      "reviewed_contract_keys": [
+        "auditory_stimulus",
+        "trajectory_kinematics",
+        "trial_sequence",
+        "task_response",
+        "jitter_iti_policy",
+        "soa_schedule",
+        "tactile_target",
+        "baseline_trial_contract",
+        "catch_trial_contract",
+        "repetition_allocation",
+        "block_order_contract"
+      ],
+      "contracts": {
+        "auditory_stimulus": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Adjacent tactile/body-representation battery; no auditory target or auditory-tactile onset schedule. PPS uses a separate protocol.",
+          "page_or_section": "Published final article final p. p 290–291 §2.1–2.4",
+          "evidence_note": "Outside the auditory-tactile PPS stimulus contract for this adjacent task.",
+          "component_reviews": {
+            "source_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "stimulus_identity_or_asset": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "source_recipe_or_asset_provenance": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "trajectory_kinematics": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Adjacent tactile/body-representation battery; no auditory target or auditory-tactile onset schedule. PPS uses a separate protocol.",
+          "page_or_section": "Published final article final p. p 290–291 §2.1–2.4",
+          "evidence_note": "Outside the auditory-tactile PPS stimulus contract for this adjacent task.",
+          "component_reviews": {
+            "motion_mode": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "coordinate_frame_body_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "geometry": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "timing_constraint": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "trial_sequence": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Named variants: Von Frey sensitivity, two-point acuity, distance judgment, pressure judgment, body-image tiles.",
+          "page_or_section": "Published final article final p. p 290–291 §2.1–2.4",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "trial_families": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "ordered_elements_and_source_selection": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "task_response": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Verbal tactile judgments plus manual body-image reconstruction.",
+          "page_or_section": "Published final article final p. p 290–291 §2.1–2.4",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "target_and_nontarget_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "response_mode_or_device": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "response_mapping_or_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "response_window_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "jitter_iti_policy": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. No common numeric ITI/jitter policy for this multi-measure battery.",
+          "page_or_section": "Published final article final p. p 290–291 §2.1–2.4",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "policy_type": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "timing_scope_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "values_or_range": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "soa_schedule": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Adjacent tactile/body-representation battery; no auditory target or auditory-tactile onset schedule. PPS uses a separate protocol.",
+          "page_or_section": "Published final article final p. p 290–291 §2.1–2.4",
+          "evidence_note": "Outside the auditory-tactile PPS stimulus contract for this adjacent task.",
+          "component_reviews": {
+            "reference_event_and_sign": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "ordered_soa_values_or_derivable_distance_anchors": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "tactile_target": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Mechanical tactile variants; body-image reconstruction has no delivered tactile target.",
+          "page_or_section": "Published final article final p.  290 §2.1–2.3",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "modality": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "body_site_and_side": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "waveform_and_duration": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "baseline_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Within-task reference conditions and pre-surgery/repeated controls; no generated PPS baseline rows.",
+          "page_or_section": "Published final article final p. p 289–291 §2–2.4",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "timing_and_anchor": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          },
+          "derivation_note": "Per-variant equal/unequal totals derive from 2 blocks×108 and half allocation."
+        },
+        "catch_trial_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Von Frey has 5 catch trials per staircase level; other judgment variants do not define a shared catch family.",
+          "page_or_section": "Published final article final p.  290 §2.1–2.3",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "family_or_explicit_none": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "target_role_and_expected_action": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "allocation_rule": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "resolved_trial_count": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        },
+        "repetition_allocation": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Variant-specific counts, not one common trial pool.",
+          "page_or_section": "Published final article final p. p 290–291 §2.1–2.4",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "factor_dimensions": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "repetitions_or_exact_counts": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "exceptions_or_overrides": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          },
+          "derivation_note": "216 per distance or pressure task; do not infer 9 tile trials if repeated placement count is unstated."
+        },
+        "block_order_contract": {
+          "status": "not_applicable",
+          "value": "Adjacent acquisition context, outside direct audiotactile PPS emulation. Variant-specific blocks within longitudinal assessments; complete battery order absent.",
+          "page_or_section": "Published final article final p. p 289–291 §2–2.4; Tables 1–4",
+          "evidence_note": "Final primary 12-page article read through public publisher PDF text. Direct local binary download returned 403; no local PDF hash or new rendered-page verification claimed.",
+          "component_reviews": {
+            "block_count": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            },
+            "block_composition": {
+              "status": "not_applicable",
+              "value": "Adjacent named protocol; source facts retained in contract value, not a direct AT reconstruction contract."
+            }
+          }
+        }
+      }
     }
   ]
 }

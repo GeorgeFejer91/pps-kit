@@ -540,11 +540,12 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "not expected to significantly modulate BR or PPS."
         ),
         "expected_effect_direction": "active_tool_use_modulates_pps_but_observation_does_not",
-        "observable_metric": "body-landmark localization and audio-tactile PPS boundary/facilitation before versus after training",
-        "condition_contrast": "active tool-use training versus observational tool-use training",
+        "observable_metric": "pre/post body-landmark localization in Group 1; post-training near/far audio-tactile facilitation in the separate Group 2",
+        "condition_contrast": "post-only audio-tactile task after active, observational and cognitive training sessions; separate pre/post body-landmark task",
         "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#ferroni_2020_tool_observation",
-            "Consensus MCP 2026-07-15 query: 10.1016/j.cortex.2020.11.021 ageing body space representations peripersonal space audio tactile",
+            "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+            "https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf#page=5",
         ],
     },
     "ferroni_2026_pps_plasticity": {
