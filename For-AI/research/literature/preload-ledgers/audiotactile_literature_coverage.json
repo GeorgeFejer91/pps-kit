@@ -1909,8 +1909,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract auditory-probe trajectory, baseline structure, and apparatus geometry"
-      ]
+        "Original pink-noise sample/recipe, sampling rate and exact physical-speaker crossfade; warning-tone onset/offset anchor for probe interval and silent baselines; ITI anchor/distribution; exact response key/hand and online deadline; front/rear block order. Methods resolves physical geometry, +250/+500/+750-ms probe SOAs and 112-row allocation."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://muroran-it.repo.nii.ac.jp/record/2000223/files/Comparison%20of%20peripersonal%20space%20in%20front%20and%20rear%20spaces.pdf",
+      "scope_review_basis": "Fresh institutional manuscript and rendered apparatus figure separate one short-probe PPS experiment from two auditory-only perceptual tasks. No physical multi-speaker capability or calibration is inferred for PPS Kit."
     },
     {
       "record_id": "body_image_social_cognition_2024",

@@ -5602,7 +5602,7 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract auditory-probe trajectory, baseline structure, and apparatus geometry"
+            "Original pink-noise sample/recipe, sampling rate and exact physical-speaker crossfade; warning-tone onset/offset anchor for probe interval and silent baselines; ITI anchor/distribution; exact response key/hand and online deadline; front/rear block order. Methods resolves physical geometry, +250/+500/+750-ms probe SOAs and 112-row allocation."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -5637,9 +5637,9 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract auditory-probe trajectory, baseline structure, and apparatus geometry"
+        "Original pink-noise sample/recipe, sampling rate and exact physical-speaker crossfade; warning-tone onset/offset anchor for probe interval and silent baselines; ITI anchor/distribution; exact response key/hand and online deadline; front/rear block order. Methods resolves physical geometry, +250/+500/+750-ms probe SOAs and 112-row allocation."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract auditory-probe trajectory, baseline structure, and apparatus geometry",
+      "next_required_action": "Extract or source the missing paper parameters: Original pink-noise sample/recipe, sampling rate and exact physical-speaker crossfade; warning-tone onset/offset anchor for probe interval and silent baselines; ITI anchor/distribution; exact response key/hand and online deadline; front/rear block order. Methods resolves physical geometry, +250/+500/+750-ms probe SOAs and 112-row allocation.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
