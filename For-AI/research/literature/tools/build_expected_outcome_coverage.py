@@ -509,7 +509,7 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
         ),
         "expected_effect_direction": "autism_smaller_sharper_pps_and_reduced_full_body_illusion",
         "observable_metric": "PPS boundary size/slope plus self-location and self-identification measures",
-        "condition_contrast": "autism versus neurotypical group and synchronous versus asynchronous full-body-illusion stroking",
+        "condition_contrast": "autism versus neurotypical group for the preceding PPS task; synchronous versus asynchronous stroking belongs to the subsequent full-body illusion, not a pre/post PPS contrast",
         "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#autism_2019",
             "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile",

@@ -2265,7 +2265,10 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract exact audiotactile PPS timing, distances, trial counts, tactile settings, and response settings; shared sensory/social context is non-blocking"
+            "exact original pink-noise samples, digital crossfade/envelope and calibration transfer",
+            "exact speaker coordinates/perceived distance law, ITI/jitter and online response window",
+            "complete threshold staircase final steps/electrode geometry; separate catch/baseline allocation is not reported",
+            "accepted author manuscript reviewed; final publisher comparison remains pending"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -2300,9 +2303,12 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract exact audiotactile PPS timing, distances, trial counts, tactile settings, and response settings; shared sensory/social context is non-blocking"
+        "exact original pink-noise samples, digital crossfade/envelope and calibration transfer",
+        "exact speaker coordinates/perceived distance law, ITI/jitter and online response window",
+        "complete threshold staircase final steps/electrode geometry; separate catch/baseline allocation is not reported",
+        "accepted author manuscript reviewed; final publisher comparison remains pending"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract exact audiotactile PPS timing, distances, trial counts, tactile settings, and response settings; shared sensory/social context is non-blocking",
+      "next_required_action": "Extract or source the missing paper parameters: exact original pink-noise samples, digital crossfade/envelope and calibration transfer; exact speaker coordinates/perceived distance law, ITI/jitter and online response window; complete threshold staircase final steps/electrode geometry; separate catch/baseline allocation is not reported; accepted author manuscript reviewed; final publisher comparison remains pending",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -4035,7 +4041,10 @@
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact task parameters need extraction; clinical context is non-blocking"
+            "exact pink-noise duration/sample recipe, gain law and source levels",
+            "mechanical tap force/waveform/duration and calibration; 4 mm refers to magnet, not a reported pulse duration or travel distance",
+            "ITI/jitter, online response window and exact randomized sequence constraints",
+            "accepted author manuscript reviewed; final publisher comparison pending; PPS precedes the adjacent FBI task"
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -4070,9 +4079,12 @@
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "exact task parameters need extraction; clinical context is non-blocking"
+        "exact pink-noise duration/sample recipe, gain law and source levels",
+        "mechanical tap force/waveform/duration and calibration; 4 mm refers to magnet, not a reported pulse duration or travel distance",
+        "ITI/jitter, online response window and exact randomized sequence constraints",
+        "accepted author manuscript reviewed; final publisher comparison pending; PPS precedes the adjacent FBI task"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact task parameters need extraction; clinical context is non-blocking",
+      "next_required_action": "Extract or source the missing paper parameters: exact pink-noise duration/sample recipe, gain law and source levels; mechanical tap force/waveform/duration and calibration; 4 mm refers to magnet, not a reported pulse duration or travel distance; ITI/jitter, online response window and exact randomized sequence constraints; accepted author manuscript reviewed; final publisher comparison pending; PPS precedes the adjacent FBI task",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",

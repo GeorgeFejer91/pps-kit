@@ -145,6 +145,7 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert moving_sound["runnable_status"] == "adjacent_not_applicable"
     assert "MEP" in moving_sound["expected_outcome"]["observable_metric"]
     assert moving_sound["current_template_ids"] == []
+    assert "not a pre/post PPS contrast" in records["autism_2019"]["expected_outcome"]["condition_contrast"]
     social = records["social_perception_2017"]
     assert social["expected_outcome_status"] == "adjacent_out_of_scope"
     assert social["observed_vs_expected_status"] == "adjacent_not_applicable"
