@@ -35,6 +35,7 @@ def native_catalog(tmp_path, monkeypatch):
 def test_catalog_rebuild_preserves_native_audio_and_generation_authority(native_catalog):
     builder, template, folder = native_catalog
     entry, _parameters = builder.build_profile_catalog(template, force=False)
+    assert b"\r\n" not in (folder / "preload_manifest.json").read_bytes()
     manifest = json.loads((folder / "preload_manifest.json").read_text(encoding="utf-8"))
     assert manifest["render_contract"]["engine"] == "rust-native-corrected-3dti"
     assert not manifest["render_contract"]["scientific_source_conformance"]
