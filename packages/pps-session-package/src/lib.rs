@@ -36,10 +36,10 @@ pub const MAX_PREPARED_BLOCK_MANIFEST_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_PREPARED_BLOCK_METADATA_BYTES: usize = 64 * 1024;
 /// Maximum encoded size of one prepared block WAV.
 ///
-/// The largest qualified local package observed during the Rust migration is
-/// approximately 453 MiB, so this leaves bounded headroom without accepting a
-/// multi-gigabyte single asset.
-pub const MAX_PREPARED_BLOCK_WAV_BYTES: u64 = 768 * 1024 * 1024;
+/// Covers the complete archived approximately 1,073 MiB float block. Native
+/// decoding retains its separate 1,280 MiB allocation and frame ceilings;
+/// this size allowance does not establish execution or timing qualification.
+pub const MAX_PREPARED_BLOCK_WAV_BYTES: u64 = 1280 * 1024 * 1024;
 /// Maximum encoded WAV bytes hashed across one prepared-session package.
 ///
 /// This supports multiple large blocks while bounding verification I/O even

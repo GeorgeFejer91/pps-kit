@@ -21,7 +21,7 @@ pub use output::{
 use std::{
     fmt,
     fs::File,
-    io::{self, Read},
+    io::{self, BufReader, Read},
     path::Path,
     sync::Arc,
 };
@@ -33,9 +33,9 @@ use thiserror::Error;
 const BOUNDED_READER_LIMIT_MESSAGE: &str = "pps encoded WAV byte limit exceeded";
 const F32_SAMPLE_BYTES: u64 = size_of::<f32>() as u64;
 
-/// Default per-WAV encoded limit. The current largest migration fixture is
-/// approximately 453 MiB; 768 MiB leaves bounded headroom.
-pub const DEFAULT_MAXIMUM_ENCODED_BYTES: u64 = 768 * 1024 * 1024;
+/// Includes the complete archived 1,073 MiB float block. Encoded data streams
+/// through a 64 KiB buffer; the separate decoded/frame ceilings still apply.
+pub const DEFAULT_MAXIMUM_ENCODED_BYTES: u64 = 1280 * 1024 * 1024;
 /// Default decoded allocation limit. A 453 MiB PCM16 file expands to roughly
 /// 906 MiB as `f32`, so this allows that workload without unbounded growth.
 pub const DEFAULT_MAXIMUM_DECODED_BYTES: u64 = 1280 * 1024 * 1024;
@@ -294,7 +294,7 @@ fn decode_verified(
     }
 
     let bounded = BoundedHashReader::new(file, request.limits.maximum_encoded_bytes);
-    let mut wav = WavReader::new(bounded)
+    let mut wav = WavReader::new(BufReader::with_capacity(64 * 1024, bounded))
         .map_err(|error| map_hound_error(error, request.limits.maximum_encoded_bytes))?;
     let spec = wav.spec();
     let native_float = spec.channels == 3
@@ -385,7 +385,7 @@ fn decode_verified(
     let mut bounded = wav.into_inner();
     io::copy(&mut bounded, &mut io::sink())
         .map_err(|error| map_io_error(error, request.limits.maximum_encoded_bytes))?;
-    let (digest, actual_encoded_bytes) = bounded.finish();
+    let (digest, actual_encoded_bytes) = bounded.into_inner().finish();
     if actual_encoded_bytes != request.expected_encoded_byte_count {
         return Err(AudioPreparationError::EncodedByteCountMismatch);
     }
@@ -529,6 +529,32 @@ impl Read for BoundedHashReader {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn complete_archived_float_block_fits_without_relaxing_decoded_or_frame_limits() {
+        let frames = 93_740_000_u64;
+        let (actual_frames, bytes) =
+            decoded_shape(frames * 3, 3, AudioLoadLimits::default()).unwrap();
+        assert_eq!(actual_frames, frames);
+        assert!(bytes + 44 <= DEFAULT_MAXIMUM_ENCODED_BYTES);
+        assert_eq!(DEFAULT_MAXIMUM_DECODED_BYTES, 1280 * 1024 * 1024);
+        assert_eq!(DEFAULT_MAXIMUM_FRAMES, 100_000_000);
+        assert!(matches!(
+            decoded_shape(100_000_001 * 3, 3, AudioLoadLimits::default()),
+            Err(AudioPreparationError::FrameLimitExceeded { .. })
+        ));
+        assert!(matches!(
+            decoded_shape(
+                frames * 3,
+                3,
+                AudioLoadLimits {
+                    maximum_decoded_bytes: bytes - 1,
+                    ..AudioLoadLimits::default()
+                }
+            ),
+            Err(AudioPreparationError::DecodedBytesTooLarge { .. })
+        ));
+    }
 
     #[test]
     fn decoded_shape_rejects_overflow_before_allocation() {
