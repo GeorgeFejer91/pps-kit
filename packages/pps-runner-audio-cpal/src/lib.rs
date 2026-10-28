@@ -58,5 +58,8 @@ pub mod test_support {
         pub fn render(&mut self, output: &mut [f32], observed: Instant) -> bool {
             self.callback.render(output, observed, None)
         }
+        pub fn status(&self) -> crate::PlaybackStatus {
+            self._owner.status()
+        }
     }
 }
