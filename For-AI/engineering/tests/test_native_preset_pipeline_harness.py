@@ -73,3 +73,7 @@ def test_native_pipeline_disk_admission_preserves_part_and_iti_cost(tmp_path):
     assert single == 128 * 1024 * 1024 + (10400 + 8000) * 12
     captured["design"]["study_profile_reference_parameters"]["dashboard_run_setup"]["experiment_structure"] = "pre_post"
     assert pipeline.preparation_disk_bound(captured, tmp_path) == 128 * 1024 * 1024 + 2 * (10400 + 8000) * 12
+    row = captured["block_csv_preview"]["blocks"][0]["preview_rows"][0]
+    row.update(iti_ms="1000-1500", iti_policy="paper_randomized_1000_to_1500_ms")
+    assert pipeline.preparation_disk_bound(captured, tmp_path) == 128 * 1024 * 1024 + 2 * (20000 + 8000) * 12
+    assert row["iti_ms"] == "1000-1500", "admission estimates storage only; native owns actual interval selection"

@@ -94,7 +94,13 @@ def preparation_disk_bound(capture: dict, resources: Path) -> int:
     for block in capture["block_csv_preview"].get("blocks", []):
         for row in block["preview_rows"]:
             seconds = float(row["duration_s"])
-            iti_seconds = float(row.get("iti_ms") or 0) / 1000
+            iti = row.get("iti_ms") or 0
+            if iti == "1000-1500" and row.get("iti_policy") == "paper_randomized_1000_to_1500_ms":
+                # Storage bound only; native review chooses and binds the actual
+                # toolkit realization. This never selects an interval in Python.
+                iti_seconds = 1.5
+            else:
+                iti_seconds = float(iti) / 1000
             if not all(math.isfinite(v) and v >= 0 for v in (seconds, iti_seconds)):
                 raise ValueError("invalid duration in disk admission input")
             frames = math.ceil(seconds * rate)
@@ -113,13 +119,15 @@ def run_case(args, case: dict, evidence_directory: Path) -> dict:
     target = evidence_directory / case["template_id"]
     target.mkdir()
     environment = dict(os.environ)
-    for name in ("PPS_PRESET_PREFLIGHT_ONLY", "PPS_PRESET_GENERATE_BASELINES",
+    for name in ("PPS_PRESET_PREFLIGHT_ONLY", "PPS_PRESET_GENERATE_BASELINES", "PPS_PRESET_RESOLVE_ITI_RANGES",
                  "PPS_NATIVE_FULL_MANIFEST", "PPS_NATIVE_EXPECTED_SHA256"):
         environment.pop(name, None)
     environment["PPS_PRESET_CAPTURE"] = str(args.captures / case["capture_file"])
     environment["PPS_PRESET_RESOURCE_ROOT"] = str(args.resources)
     if args.preflight_only:
         environment["PPS_PRESET_PREFLIGHT_ONLY"] = "1"
+    if args.resolve_iti_ranges:
+        environment["PPS_PRESET_RESOLVE_ITI_RANGES"] = "1"
     if args.renderer:
         environment.update(PPS_PRESET_GENERATE_BASELINES="1",
                            PPS_DESIGNER_RENDERER=str(args.renderer),
@@ -201,6 +209,7 @@ def main() -> None:
     parser.add_argument("--template-id", action="append", default=[])
     parser.add_argument("--preflight-only", action="store_true")
     parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--resolve-iti-ranges", action="store_true", help="explicitly accept disclosed native toolkit ITI realizations for this software audit; no source/legacy parity")
     parser.add_argument("--minimum-free-mib", type=int, default=512)
     args = parser.parse_args()
     if not (args.preflight_only or args.prepare_only) and not args.runner_test_exe:

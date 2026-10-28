@@ -345,6 +345,93 @@ fn iti_uses_existing_ties_even_samples_and_rejects_invalid_values() {
         );
     }
 }
+
+#[test]
+fn reported_iti_range_has_reviewed_identity_bound_toolkit_delay_and_real_pcm() {
+    let (mut design, preview, variants) = fixture();
+    design["protocol"]["trial_strips"][0]["metadata"] =
+        json!({"iti_ms":"1000-1500","iti_policy":"paper_randomized_1000_to_1500_ms"});
+    let (assets, cue) = assets();
+    let cancel = AtomicBool::new(false);
+    let proposed =
+        plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap();
+    let repeated =
+        plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap();
+    assert_eq!(proposed.preview, repeated.preview);
+    assert_eq!(proposed.preview_sha256, repeated.preview_sha256);
+    let rows = proposed.preview["blocks"].clone();
+    let mut seeds = std::collections::BTreeSet::new();
+    for block in rows.as_array().unwrap() {
+        for row in block["preview_rows"].as_array().unwrap() {
+            assert_eq!(row["iti_ms"], "1000-1500");
+            assert_eq!(row["iti_policy"], "paper_randomized_1000_to_1500_ms");
+            assert_eq!(
+                row["native_iti_materialization_policy"],
+                NATIVE_ITI_RANGE_POLICY
+            );
+            assert_eq!(row["native_iti_anchor"], "after_trial_audio_end");
+            assert_eq!(row["native_iti_source_distribution_reported"], false);
+            assert_eq!(row["native_iti_source_anchor_reported"], false);
+            assert_eq!(row["native_iti_legacy_compatible"], false);
+            let ms = row["native_resolved_iti_ms"].as_u64().unwrap();
+            assert!((1000..=1500).contains(&ms));
+            assert_eq!(row["native_iti_frames"], ms * 8);
+            let seed = row["native_iti_seed_sha256"].as_str().unwrap();
+            assert_eq!(seed.len(), 64);
+            assert!(seeds.insert(seed.to_owned()));
+        }
+    }
+    let dh = proposed.design_sha256.clone();
+    let ph = proposed.preview_sha256.clone();
+    let accepted = accept_assembly_preview(proposed, &dh, &ph, 1).unwrap();
+    let temp = Temp::new();
+    let staged = prepare_accepted_session(
+        &accepted,
+        &assets,
+        &cue,
+        &temp.path.join("range"),
+        "P001",
+        "range",
+        &cancel,
+    )
+    .unwrap();
+    let verified =
+        verify_prepared_session(VerificationRequest::new(staged.manifest_path())).unwrap();
+    for (block, planned) in verified.blocks().iter().zip(rows.as_array().unwrap()) {
+        let mut wav = hound::WavReader::open(block.wav_path()).unwrap();
+        let pcm: Vec<f32> = wav.samples::<f32>().map(Result::unwrap).collect();
+        let mut cursor = 0;
+        for row in planned["preview_rows"].as_array().unwrap() {
+            let gap = row["native_iti_frames"].as_u64().unwrap() as usize;
+            assert!(pcm[cursor * 3..(cursor + 2480) * 3]
+                .iter()
+                .any(|v| *v != 0.0));
+            assert!(pcm[(cursor + 2480) * 3..(cursor + 2480 + gap) * 3]
+                .iter()
+                .all(|v| *v == 0.0));
+            cursor += 2480 + gap;
+        }
+        assert_eq!(wav.duration() as usize, cursor);
+        let mut csv = csv::Reader::from_path(block.manifest_path()).unwrap();
+        let header = csv.headers().unwrap().clone();
+        let original = header.iter().position(|v| v == "iti_ms").unwrap();
+        let selected = header
+            .iter()
+            .position(|v| v == "native_resolved_iti_ms")
+            .unwrap();
+        for (row, planned) in csv
+            .records()
+            .zip(planned["preview_rows"].as_array().unwrap())
+        {
+            let row = row.unwrap();
+            assert_eq!(&row[original], "1000-1500");
+            assert_eq!(
+                row[selected].parse::<u64>().unwrap(),
+                planned["native_resolved_iti_ms"].as_u64().unwrap()
+            );
+        }
+    }
+}
 fn accept(
     design: &Value,
     preview: &Value,
