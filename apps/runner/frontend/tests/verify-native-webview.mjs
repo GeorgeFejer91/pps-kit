@@ -9,6 +9,7 @@ import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { applyTextSpacing, restoreTextSpacing } from "../../../../For-AI/engineering/validation/scripts/webview-layout-helpers.mjs";
 const { chromium } = createRequire(import.meta.url)(process.env.PPS_PLAYWRIGHT_MODULE || "playwright");
 const root = fileURLToPath(new URL("../../../../", import.meta.url));
 const output = resolve(root, "artifacts/ui-workflow-check");
@@ -147,6 +148,7 @@ async function verifyInstalledLayout(page, browser) {
     origin: new URL(page.url()).origin, scope: "Actual packaged Runner WebView; idle presentation and keyboard navigation only",
     viewportMethod: "CDP CSS viewport emulation; default is the existing native viewport; OS-window resizing not assessed",
     zoomMethod: "documentElement CSS zoom 2; browser UI zoom and assistive technology not assessed",
+    spacingMethod: "Reversible WCAG text-spacing CSSOM overrides; production Content Security Policy retained",
     documentPolicy: "Existing stretch workspace or explicit outer document reflow; no bounded panel clipping or inner scrolling",
     nativeCommands: ["runner_snapshot", "native_output_status"], packageSelected: false, participantEdited: false,
     outputReserved: false, armed: false, executed: false, cases: [], failures: [], errors, restored: false };
@@ -171,8 +173,8 @@ async function verifyInstalledLayout(page, browser) {
     for (const [name, width, height] of matrix) {
       if (width) await cdp.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 0, mobile: false });
       await page.evaluate(zoom => { document.documentElement.style.zoom = zoom; }, name === "zoom-200" ? "2" : original.zoom);
-      if (spacing) { await spacing.evaluate(node => node.remove()); spacing = null; }
-      if (name === "text-spacing") spacing = await page.addStyleTag({ content: "body *{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}p{margin-bottom:2em!important}" });
+      if (spacing) { await restoreTextSpacing(spacing); spacing = null; }
+      if (name === "text-spacing") spacing = await applyTextSpacing(page);
       const record = { name, requested: width ? { width, height } : "existing viewport", views: [], keyboard: [] };
       report.cases.push(record);
       for (const [tab, views] of [["control", ["run", "participant", "package", "output", "overview"]], ["logging", [null]], ["remote", ["remote-access"]]]) {
@@ -225,7 +227,7 @@ async function verifyInstalledLayout(page, browser) {
     throw error;
   } finally {
     try {
-      if (spacing) await spacing.evaluate(node => node.remove());
+      if (spacing) await restoreTextSpacing(spacing);
       await page.evaluate(zoom => { document.documentElement.style.zoom = zoom; }, original.zoom);
       await cdp.send("Emulation.clearDeviceMetricsOverride");
       for (const view of original.views) {

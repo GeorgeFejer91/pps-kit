@@ -29,6 +29,7 @@ on:
       - "For-AI/engineering/tests/**"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - "For-AI/engineering/validation/scripts/verify_bounded_text.mjs"
+      - "For-AI/engineering/validation/scripts/webview-layout-helpers.mjs"
       - ".github/workflows/runner-next.yml"
   push:
     branches: [main]
@@ -59,6 +60,7 @@ on:
       - "For-AI/engineering/tests/**"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
       - "For-AI/engineering/validation/scripts/verify_bounded_text.mjs"
+      - "For-AI/engineering/validation/scripts/webview-layout-helpers.mjs"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
     inputs:

@@ -55,7 +55,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   visible-label/name checks at 320/760/761/1440px, the complete Designer stretch
   rerun, canonical rebuild and both Pages parity checks. The source correction
   and its regression are included in the next final installer build.
-  Final package promotion waits for the pinned Windows candidate evidence.
+  Further installed WebView inspection found an About dialog overflow at 200%
+  CSS zoom and unlocalized native-only whole-page overflow at 320px. The About
+  defect also reproduces in Chromium 151; the UI worker's overlay-relative sizing
+  fix passes eight hosted dialog cases and is held pending the full diagnostic
+  batch. Transparent source selects underneath real comboboxes were audit false
+  positives, now excluded without weakening whole-page overflow checks. Package
+  promotion waits for these UI defects to be resolved and rebuilt.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
   replication-ready labels. Generation ships without Python; Python remains
@@ -257,13 +263,18 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Downloaded installers/source match every build-manifest hash; the renderer
   source archive passes integrity checking. Retain this intermediate evidence,
   but publish only after navigation fix `751945ab` is packaged and verified.
-  Final candidate [40740525976](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40740525976)
+  Candidate [40740525976](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40740525976)
   and normal [CI 40740539024](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40740539024)
-  target `a98115cf012fffe0ff55203d49e52742d354057c`. The final candidate passes
-  native contracts and is building both installers. Its normal CI passes all three
-  Core/Desktop platforms and Browser; remaining oracle/bundle checks are running.
-  The asset-free
-  release draft targets `a98115cf`. Do not rebuild for later checklist-only changes.
+  target `a98115cf012fffe0ff55203d49e52742d354057c`. Both complete successfully:
+  all 14 ordinary CI jobs, Windows Standard (762 passes, nine skips, one warning),
+  both installers/installed checks and all 25 complete eligible native presets.
+  Downloaded artifacts match their manifest hashes. The strict public JSON/CSV
+  exporter now passes with all 39 source-input/template hashes matching canonical
+  candidate bytes. Two metadata files and eight templates needed CRLF-only local
+  byte restoration; no scientific values changed. The preload writer at `c5d06cfa`
+  now forces LF, with its regression failing before and both owning tests passing
+  afterward. The asset-free release draft targets `a98115cf`, but the newly found
+  actual-WebView UI defects require a later rebuilt product before publication.
   Its normal CI passed Windows/Linux Desktop and Browser,
   but the macOS Desktop job was cancelled before downstream checks could run.
   Follow-up [CI 40737552536](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40737552536)
@@ -351,6 +362,19 @@ in that command executed and no alternate local launch was attempted. The safer
 follow-up uses a fresh disposable Windows CI account, the successful candidate's
 exact installers/executable hashes, and explicit mode/pass reports. It reuses
 the frozen packages rather than rebuilding for validation-only changes.
+The first disposable [WebView follow-up](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40747682339)
+confirmed the About zoom defect on WebView2 131. The second
+[assessment](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40749192639)
+also reached all five initial Runner geometry/keyboard cases; its spacing test
+was blocked by the production `style-src 'self'` policy. Keep that policy intact:
+the shared test helper now applies/restores equivalent CSSOM declarations,
+including late modal content, and passes a strict-CSP real-browser check.
+The [third diagnostic run](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40749764201)
+retains bounded painted/transparent page-overflow offenders for the 320px issue.
+Its actual mode reports remain evidence, not a passing release claim. Continue
+both app assessments after one fails; only an explicit passing mode report can
+close its gate. Rebuild after the complete native UI repair batch, then regenerate
+the final software-validation tables without relaxing raw-byte freshness checks.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous

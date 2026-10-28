@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { applyTextSpacing, restoreTextSpacing } from "../../../../For-AI/engineering/validation/scripts/webview-layout-helpers.mjs";
 const layoutOnly = process.argv.includes("--layout-only");
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PPS_PLAYWRIGHT_MODULE || "playwright");
@@ -115,6 +116,7 @@ async function verifyInstalledLayout(page, browser, errors) {
     origin: new URL(page.url()).origin, scope: "Actual packaged Designer WebView; presentation and keyboard navigation only",
     viewportMethod: "CDP CSS viewport emulation; default is the existing native viewport; OS-window resizing not assessed",
     zoomMethod: "documentElement CSS zoom 2; browser UI zoom and assistive technology not assessed",
+    spacingMethod: "Reversible WCAG text-spacing CSSOM overrides; production Content Security Policy retained",
     documentPolicy: "Workflow uses outer document flow; About text has its existing separate reading region",
     draftCreated: false, profileSelected: false, generationStarted: false, nativeReviewBuilt: false,
     cases: [], failures: [], errors, restored: false };
@@ -124,12 +126,12 @@ async function verifyInstalledLayout(page, browser, errors) {
     assert.equal(await page.evaluate(() => typeof window.__TAURI_INTERNALS__?.invoke), "function");
     assert.equal(await page.locator('[role="dialog"]:visible').count(), 0, "Close existing dialogs before a read-only layout check");
     const matrix = [["default"], ["desktop", 1280, 800], ["wide-short", 1920, 620],
-      ["narrow", 320, 1000], ["zoom-200", 1280, 800], ["text-spacing", 1280, 800]];
+      ["narrow", 320, 1000], ["text-spacing", 1280, 800], ["zoom-200", 1280, 800]];
     for (const [name, width, height] of matrix) {
       if (width) await cdp.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 0, mobile: false });
       await page.evaluate(zoom => { document.documentElement.style.zoom = zoom; }, name === "zoom-200" ? "2" : original.zoom);
-      if (spacing) { await spacing.evaluate(node => node.remove()); spacing = null; }
-      if (name === "text-spacing") spacing = await page.addStyleTag({ content: "body *{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}p{margin-bottom:2em!important}" });
+      if (spacing) { await restoreTextSpacing(spacing); spacing = null; }
+      if (name === "text-spacing") spacing = await applyTextSpacing(page);
       const record = { name, requested: width ? { width, height } : "existing viewport", views: [], keyboard: [] };
       report.cases.push(record);
       for (const selector of ["#study-segment", "#native-generation-controls", "#native-execution"]) {
@@ -185,7 +187,7 @@ async function verifyInstalledLayout(page, browser, errors) {
   } finally {
     try {
       if (openedAbout && await page.locator("#segment-info-modal:visible").count()) await page.keyboard.press("Escape");
-      if (spacing) await spacing.evaluate(node => node.remove());
+      if (spacing) await restoreTextSpacing(spacing);
       await page.evaluate(zoom => { document.documentElement.style.zoom = zoom; }, original.zoom);
       await cdp.send("Emulation.clearDeviceMetricsOverride");
       await position.evaluate(({ focus, scroll }) => { if (focus?.isConnected) focus.focus({ preventScroll: true });
