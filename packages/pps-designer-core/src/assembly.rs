@@ -680,8 +680,9 @@ fn baseline_policy(design: &Value, row: &Value) -> Result<String, GenerationErro
         .unwrap_or("");
     match mode {
         "tactile_only" | "stationary_burst" => Ok(mode.into()),
+        "min_anchor" | "max_anchor" | "min_max" => Ok("audio_tactile".into()),
         "custom" => match design["protocol"]["baseline_custom_trial_mode"].as_str() {
-            Some("tactile_only") => Ok("tactile_only".into()),
+            Some(mode @ ("tactile_only" | "audio_tactile")) => Ok(mode.into()),
             _ => Err(GenerationError::Invalid(
                 "assembly_custom_baseline_unsupported",
             )),

@@ -52,8 +52,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   descriptive block labels, native CSV arrays and actual intertrial silence
   have focused repairs. Runner decoding now uses bounded buffered reads;
   encoded-block admission matches the existing 1,280 MiB decoded ceiling so
-  the complete Serino trunk Exp. 2 block is not truncated. New Rust checks and
-  complete native execution remain pending. Noel walking's reported interval
+  the complete Serino trunk Exp. 2 block is not truncated. The fresh native
+  preflight found 21 reviewed plans, five expected source-gap guards and four
+  failures: two Canzoneri audio-tactile baseline policies, optional Study 5
+  snapshot shape, and the lateral profile's explicit burst-window provenance.
+  Repairs are under owning regression and full-profile verification. Noel walking's reported interval
   range has no reported distribution or anchor: any native realization is an
   explicit reviewed toolkit customization, preserving the source gap, original
   range and versioned derived timing. It is not an exact-paper replication.
@@ -73,8 +76,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Rust/C++, invalidated stale outputs and previewed muted audio without HTTP
   fallback. This supersedes the historical launch rejection; both intermediate
   installers require rebuilding with the later functional repairs. The complete
-  408-row software execution attempt stopped when the disk filled; partial
-  journals are retained and no whole-session success is claimed.
+  retained 408-trial Study 5 package now passes native software execution across
+  all 12 blocks and both parts, 39 stages and 23 continuation gates. Its independent
+  file audit passes 2,991 events, 408 scored rows and 408 dataset rows, binding two
+  exact attempts to the whole-group receipt. The native test uses a synthetic
+  callback clock and checks all routed PCM plus 310 response identities/outcomes/RTs;
+  this is software execution evidence. Earlier disk-full and harness identity
+  failures remain retained as superseded attempts, not successful executions.
 - **Next action:** run the complete Windows candidate CI job, rebuild both
   installers from the repaired source, execute every eligible full preset with
   independent result auditing, verify the installed payloads and publish the
@@ -250,13 +258,18 @@ not bypassed. Existing identity/publication direction is sufficient to continue.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous
-worktrees/caches. The unused Rust-generation worktree is now recoverably archived
-through Codex, including its dirty Cargo files. Its 600 ignored artifact files
-(2,204,663,742 bytes) were moved to the user's existing Proton Drive folder and
-every file hash verified before archival. The client was started; cloud upload
-completion is unverified because native UI inspection still fails. Active worker
-and integration worktrees remain. This restored about 2.6 GB; use bounded local
-checks and the pinned hosted Windows candidate job for large builds.
+worktrees/caches. The unused Rust-generation, catalogue and UI worktrees are now
+recoverably archived through Codex, including dirty source where present. Their
+600, 297 and 5,005 ignored artifact files respectively were moved to the existing
+Proton Drive folder and every file hash verified before archival. Cloud upload
+completion is unverified. Starting the existing sync client caused Git branch
+refs and indexes under the primary checkout to acquire name-clash filenames.
+The task-owned client was stopped; exact known refs and indexes were recovered,
+the original conflict files preserved, and Git connectivity validation passed.
+Keep that client stopped until the Git synchronization conflict is resolved.
+Integration and runtime-worker checkouts remain active. About 12.5 GiB is now
+free; the separately denied integration incremental-cache deletion was not retried.
+Use bounded local checks and the pinned hosted Windows candidate job for large builds.
 Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
 skips and strict Clippy; current Designer/Runner frontend checks pass 42/79 tests.
 At product revision `9dfd1760`, [CI run 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
@@ -269,6 +282,11 @@ deferred), 200 native host/audio/execution library tests (nine opt-in cases
 deferred), 15 Python audit/helper tests, and 52 Designer JS tests. Canonical
 frontend builds and rendered label/timing disclosure checks pass. Complete
 all-preset execution and the rebuilt packages still need the new cloud run.
+The four subsequent preflight repairs pass 50 Designer core checks, 13 native
+Designer host checks and strict all-target Clippy. Their focused PCM tests cover
+audio-tactile baseline preservation and the actual lateral preset's 33 burst
+onsets, silent intervals and complete frame count. Full saved-profile retries
+are the next gate; earlier installer binaries do not contain these repairs.
 The full Standard tier, including final follow-ups, passes on the existing
 Windows CI worker, with actual free space and skip reasons logged. Later
 documentation-only checkpoints do not change the tested product/package bytes.

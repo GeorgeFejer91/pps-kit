@@ -171,6 +171,15 @@ mode: the cue occurs in silence while the full trial retains its sound. Teneggi'
 template targets Experiment 3 only; its one-per-SOA preview does not supply
 unreported repetition, catch or block counts. It remains source-blocked.
 
+Native assembly accepts the existing custom audio-tactile mode and min/max/both
+anchor policies with that same meaning. Frame-level regressions preserve the
+selected stereo sound and pre/post-sound tactile boundaries; unknown modes still
+fail. Generating consecutive Study 5 controls must leave absent optional
+`project_segments` absent rather than inserting a null value that invalidates the
+next snapshot. The lateral preset's explicit raw active-window provenance is
+retained: its existing duration-derived symmetric policy emits 33 complete bursts
+at the saved onsets. This support does not qualify legacy RNG or source equivalence.
+
 Native FLOAT sources cannot be FFmpeg stream-copied together with PCM silence.
 The fast path requires identical audio encoding and exact combined frame counts;
 mixed encodings use the existing decoded concatenation path. The Serino hand

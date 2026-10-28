@@ -488,6 +488,111 @@ fn signed_soa_fixture(soa_ms: f64) -> (Value, Value, Value) {
 }
 
 #[test]
+fn audio_tactile_baselines_preserve_sound_and_pre_or_post_sound_cues() {
+    let (assets, cue) = assets();
+    let cancel = AtomicBool::new(false);
+    for strategy in ["custom", "min_anchor", "max_anchor", "min_max"] {
+        let (mut design, mut preview, mut variants) = signed_soa_fixture(-700.0);
+        design["protocol"]["baseline_strategy"] = json!(strategy);
+        design["protocol"]["baseline_custom_trial_mode"] = json!("audio_tactile");
+        design["protocol"]["soa_values_ms"] = json!([-700, 500]);
+        design["protocol"]["baseline_soa_values_ms"] = json!([-700, 500]);
+        design["protocol"]["trial_strips"][0]["elements"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"kind":"jitter","label":"Post","jitter_values_ms":[1000]}));
+        variants[0]["choices"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"kind":"jitter","label":"Post (1000 ms)","value":1000}));
+        let key = "jitter_1000ms + Noise + jitter_1000ms";
+        variants[0]["sequence_variant_key"] = json!(key);
+        for block in preview["blocks"].as_array_mut().unwrap() {
+            for (index, row) in block["preview_rows"]
+                .as_array_mut()
+                .unwrap()
+                .iter_mut()
+                .enumerate()
+            {
+                row["family"] = json!("baseline");
+                row["baseline_mode"] = json!("audio_tactile");
+                row["sequence_variant_key"] = json!(key);
+                row["sequence_labels"] = json!("Wait (1000 ms) | Noise | Post (1000 ms)");
+                row["soa_ms"] = json!(if strategy == "max_anchor"
+                    || (strategy != "min_anchor" && index == 1)
+                {
+                    500
+                } else {
+                    -700
+                });
+            }
+        }
+        let plan = accept(&design, &preview, &variants, &assets, &cue);
+        let temp = Temp::new();
+        let staged = prepare_accepted_session(
+            &plan,
+            &assets,
+            &cue,
+            &temp.path.join("candidate"),
+            "P001",
+            "baseline",
+            &cancel,
+        )
+        .unwrap();
+        let verified =
+            verify_prepared_session(VerificationRequest::new(staged.manifest_path())).unwrap();
+        for block in verified.blocks() {
+            let mut wav = hound::WavReader::open(block.wav_path()).unwrap();
+            assert_eq!(wav.duration(), 35_200);
+            let pcm: Vec<f32> = wav.samples::<f32>().map(Result::unwrap).collect();
+            for (frame, channels) in pcm.chunks_exact(3).enumerate() {
+                let trial = frame / 17_600;
+                let local = frame % 17_600;
+                let onset = if strategy == "max_anchor" || (strategy != "min_anchor" && trial == 1)
+                {
+                    12_000
+                } else {
+                    2_400
+                };
+                assert_eq!(
+                    &channels[..2],
+                    if (8_000..9_600).contains(&local) {
+                        &[0.05, -0.025]
+                    } else {
+                        &[0.0, 0.0]
+                    }
+                );
+                assert_eq!(
+                    channels[2],
+                    if (onset..onset + 80).contains(&local) {
+                        0.7
+                    } else {
+                        0.0
+                    }
+                );
+            }
+            let mut csv = csv::Reader::from_path(block.manifest_path()).unwrap();
+            let header = csv.headers().unwrap().clone();
+            let mode = header
+                .iter()
+                .position(|name| name == "baseline_mode")
+                .unwrap();
+            for row in csv.records() {
+                assert_eq!(&row.unwrap()[mode], "audio_tactile");
+            }
+        }
+        design["protocol"]["baseline_strategy"] = json!("custom");
+        design["protocol"]["baseline_custom_trial_mode"] = json!("unknown");
+        assert!(matches!(
+            plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel),
+            Err(GenerationError::Invalid(
+                "assembly_custom_baseline_unsupported"
+            ))
+        ));
+    }
+}
+
+#[test]
 fn signed_soa_preserves_real_prefix_cue_pcm_and_verified_schedule() {
     let root = Temp::new();
     let (assets, cue) = assets();
