@@ -163,6 +163,8 @@ async function verifyInstalledLayout(page, browser, errors) {
         ? page.locator("#segment-info-modal [role=dialog]") : page.locator("#segment-info-modal");
       const box = await dialog.boundingBox();
       const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+      record.about = { box, viewport, readingRegion: await body.evaluate(node => ({ box: node.getBoundingClientRect().toJSON(),
+        height: node.clientHeight, scrollHeight: node.scrollHeight })) };
       assert.ok(box && box.x >= -1 && box.y >= -1 && box.x + box.width <= viewport.width + 1 && box.y + box.height <= viewport.height + 1, "About anchors fit the viewport");
       await page.screenshot({ path: resolve(output, `${name}-about.png`) });
       await page.keyboard.press("Escape");
@@ -212,6 +214,10 @@ async function layoutGeometry(page, selector) {
     const scope = document.querySelector(selector);
     const visible = node => {
       if (!node.getClientRects().length || getComputedStyle(node).visibility === "hidden") return false;
+      // This form-state select is deliberately transparent and removed from the
+      // accessibility/tab order; its painted combobox is measured instead.
+      if (node.matches("select.bounded-select-native[aria-hidden=true]") && node.tabIndex === -1
+        && Number(getComputedStyle(node).opacity) === 0 && getComputedStyle(node).pointerEvents === "none") return false;
       for (let p = node.parentElement; p; p = p.parentElement) {
         if (p.matches("details:not([open])") && !p.querySelector(":scope > summary")?.contains(node)) return false;
       }
@@ -228,6 +234,10 @@ async function layoutGeometry(page, selector) {
     }
     return { viewport: { width: innerWidth, height: innerHeight, visualWidth: visualViewport?.width, visualHeight: visualViewport?.height, dpr: devicePixelRatio },
       userAgent: navigator.userAgent, container: box(scope), documentHeight: document.documentElement.scrollHeight,
+      documentWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth,
+      horizontalOffenders: document.documentElement.scrollWidth > innerWidth + 1
+        ? [...document.querySelectorAll("body *")].filter(visible).filter(node => { const b = node.getBoundingClientRect();
+          return b.left < -1 || b.right > innerWidth + 1; }).slice(0, 30).map(box) : [],
       horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
       controls: controls.map(box), overlaps, outside: controls.filter(node => { const r = node.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1; }).map(box),
       clipped: labels.filter(node => { const r = document.createRange(); r.selectNodeContents(node); const text = r.getBoundingClientRect(), b = node.getBoundingClientRect();
