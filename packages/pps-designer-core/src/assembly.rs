@@ -166,6 +166,7 @@ struct Variant {
     components: Vec<Component>,
     frames: usize,
     looming: usize,
+    strip: Value,
 }
 #[derive(Debug, Clone)]
 struct PlannedRow {
@@ -174,6 +175,7 @@ struct PlannedRow {
     family: String,
     baseline_mode: String,
     tactile_onset: Option<usize>,
+    iti_frames: usize,
 }
 #[derive(Debug, Clone)]
 struct PlannedBlock {
@@ -424,7 +426,26 @@ pub fn plan_assembly_preview(
             } else {
                 None
             };
-            let mut enriched = row.clone();
+            let mut enriched = crate::row_contract::merge(&variant.strip, row, family)?;
+            let iti_ms = match enriched
+                .get("iti_ms")
+                .filter(|v| !v.is_null() && v.as_str() != Some(""))
+            {
+                None => 0.0,
+                Some(value) => value
+                    .as_f64()
+                    .or_else(|| value.as_str().and_then(|s| s.trim().parse::<f64>().ok()))
+                    .filter(|ms| ms.is_finite() && *ms >= 0.0)
+                    .ok_or(GenerationError::Invalid("assembly_iti_ms"))?,
+            };
+            let iti_frames = sample_index(iti_ms / 1000.0, rate);
+            let session_frames = variant
+                .frames
+                .checked_add(iti_frames)
+                .filter(|n| *n <= MAX_FRAMES)
+                .ok_or(GenerationError::ResourceLimit)?;
+            enriched["native_iti_frames"] = json!(iti_frames);
+            enriched["native_session_duration_ms"] = json!(milliseconds(session_frames, rate));
             enriched["duration_ms"] = json!(milliseconds(variant.frames, rate));
             enriched["duration_s"] = json!(variant.frames as f64 / f64::from(rate));
             enriched["sample_rate_hz"] = json!(rate);
@@ -433,11 +454,20 @@ pub fn plan_assembly_preview(
             enriched["tactile_onset_s"] = tactile_onset
                 .map(|v| json!(v as f64 / f64::from(rate)))
                 .unwrap_or(json!(""));
-            enriched["tactile_duration_ms"] = json!(if tactile_onset.is_some() {
+            let actual_tactile_duration_ms = json!(if tactile_onset.is_some() {
                 milliseconds(tactile.frames(), rate)
             } else {
                 0
             });
+            // A reported source contract is distinct from the actual shared
+            // cue used by this explicitly unqualified native preparation.
+            if enriched
+                .get("tactile_duration_ms")
+                .is_none_or(|v| v.is_null() || v.as_str() == Some(""))
+            {
+                enriched["tactile_duration_ms"] = actual_tactile_duration_ms.clone();
+            }
+            enriched["native_tactile_duration_ms"] = actual_tactile_duration_ms;
             enriched["channels"] = json!(3);
             enriched["tactile_channel"] = if tactile_onset.is_some() {
                 json!(3)
@@ -450,7 +480,7 @@ pub fn plan_assembly_preview(
             enriched["native_assembly_policy"] =
                 json!("verified_pcm_exact_rate_no_hidden_normalization.v1");
             frames = frames
-                .checked_add(variant.frames)
+                .checked_add(session_frames)
                 .ok_or(GenerationError::ResourceLimit)?;
             planned.push(PlannedRow {
                 row: enriched,
@@ -458,6 +488,7 @@ pub fn plan_assembly_preview(
                 family: family.into(),
                 baseline_mode,
                 tactile_onset,
+                iti_frames,
             });
         }
         let bytes = (frames as u64)
@@ -771,6 +802,7 @@ fn validate_variants(
                     components,
                     frames,
                     looming,
+                    strip: (**strip).clone(),
                 },
             )
             .is_some()
@@ -1391,6 +1423,16 @@ fn write_session(
                 (path, digest)
             };
             write_pcm(&mut writer, &pcm, cancelled)?;
+            // V1 appends the explicit saved per-row ITI to the prepared block,
+            // while retaining the source trial WAV's original duration/hash.
+            let silence = [0.0f32; 3072];
+            let mut remaining = planned.iti_frames * 3;
+            while remaining > 0 {
+                let count = remaining.min(silence.len());
+                write_pcm(&mut writer, &silence[..count], cancelled)?;
+                remaining -= count;
+            }
+            let duration_frames = planned.variant.frames + planned.iti_frames;
             let mut source = planned.row.clone();
             source["trial_file_path"] = json!(format!("../{trial_relative}"));
             source["source_sha256"] = json!(trial_hash);
@@ -1438,11 +1480,11 @@ fn write_session(
                 .ok_or(GenerationError::Invalid("assembly_native_path"))?);
             row["Sample_Rate_Hz"] = json!(rate);
             row["Channels"] = json!(3);
-            row["Trial_Duration_S"] = json!(planned.variant.frames as f64 / f64::from(rate));
+            row["Trial_Duration_S"] = json!(duration_frames as f64 / f64::from(rate));
             row["Trial_Start_Sample"] = json!(cursor);
             row["Trial_Start_S"] = json!(cursor as f64 / f64::from(rate));
-            row["Trial_End_Sample"] = json!(cursor + planned.variant.frames);
-            row["Trial_End_S"] = json!((cursor + planned.variant.frames) as f64 / f64::from(rate));
+            row["Trial_End_Sample"] = json!(cursor + duration_frames);
+            row["Trial_End_S"] = json!((cursor + duration_frames) as f64 / f64::from(rate));
             row["Looming_Onset_Sample"] = if planned.family == "baseline" {
                 json!("")
             } else {
@@ -1470,7 +1512,7 @@ fn write_session(
             row["Tactile_Latency_Compensation_Status"] = json!("not_applied_unqualified");
             row["Native_Approved_Preview_SHA256"] = json!(plan.preview_sha256);
             row["Physical_Timing_Qualified"] = json!(false);
-            cursor += planned.variant.frames;
+            cursor += duration_frames;
             prepared_rows.push(row);
             trial_total += 1;
         }
