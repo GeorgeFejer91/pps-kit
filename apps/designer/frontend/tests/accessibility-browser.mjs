@@ -163,6 +163,19 @@ export async function verifyDesignerControlNames(page, screenshotPath) {
   await continuation.press("Enter"); // Blurring the edited label schedules another identical preview.
   await page.waitForFunction(() => window.sameProfileRenderCount > 0);
   await page.evaluate(() => window.sameProfileObserver.disconnect());
+  // Actual scrolling while a live field stays visible must keep its menu
+  // anchored, including a pending scroll from keyboard focus or preview reflow.
+  const beforeScroll = await page.evaluate(() => scrollY);
+  await page.mouse.move(20, 500);
+  await page.mouse.wheel(0, 24);
+  await page.waitForFunction(before => scrollY !== before, beforeScroll);
+  assert.equal(await page.locator("#bounded-select-menu").isVisible(), true);
+  const anchors = await page.evaluate(() => {
+    const button = document.getElementById("instruction-before_experiment-continue-combobox").getBoundingClientRect();
+    const menu = document.getElementById("bounded-select-menu").getBoundingClientRect();
+    return { left: Math.abs(button.left - menu.left), width: Math.abs(button.width - menu.width) };
+  });
+  assert.ok(anchors.left < 1 && anchors.width < 1, JSON.stringify(anchors));
   await page.getByRole("option", { name: "Runner button", exact: true }).click();
   await page.waitForFunction(() => window.PPSDesignerApp.getState().design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots.find(slot => slot.slot === "before_experiment").continue_mode === "button");
   await page.waitForFunction(() => document.activeElement === document.getElementById("instruction-before_experiment-continue-combobox"));

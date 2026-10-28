@@ -27,13 +27,17 @@
       background: rgba(17, 16, 14, 0.58);
       border-radius: 6px;
       line-height: 1.35;
-      font-size: 12px;
+      font-size: .875rem;
       pointer-events: none;
+      box-sizing: border-box;
+      max-width: calc(100% - 28px);
+      overflow-wrap: break-word;
     }
+    #hud > * { display: block; }
     #hud strong {
       display: block;
       margin-bottom: 2px;
-      font-size: 13px;
+      font-size: 1rem;
     }
   </style>
   <script type="importmap">
