@@ -7331,29 +7331,29 @@ async function reopenWorkflowStep(stepId) {
 }
 
 async function loadTemplate() {
-  if (templateLoadInFlight || workflowSaveInFlight) return;
+  if (templateLoadInFlight || workflowSaveInFlight) return false;
   const select = $("template-select");
   if (!confirmDiscardUnsaved("load another profile")) {
     renderStudy();
-    return;
+    return false;
   }
   if (designerDirty) markDesignerSaved();
   const choice = selectedProfileChoice(select.value);
   const id = choice.id;
-  if (!id) return;
+  if (!id) return false;
   if (choice.kind === "custom") {
     await loadCustomProject(id);
-    return;
+    return true;
   }
   if (staticModeActive) {
     if (choice.kind === "manual") {
       renderStudy();
       showToast("Choose Create study to begin a custom profile.");
-      return;
+      return false;
     }
     const previousState = state;
     const loadedState = await staticStateForTemplate(id);
-    if (workflowSaveInFlight || state !== previousState) return;
+    if (workflowSaveInFlight || state !== previousState) return false;
     state = loadedState;
     if (nativeDesigner.enabled) nativeDesigner.invalidate();
     staticModeActive = true;
@@ -7362,7 +7362,7 @@ async function loadTemplate() {
     renderAll();
     updateViewer();
     showToast("Static profile loaded from committed GitHub assets");
-    return;
+    return true;
   }
   templateLoadInFlight = true;
   select.disabled = true;
@@ -7373,6 +7373,7 @@ async function loadTemplate() {
     renderAll();
     updateViewer();
     showToast(choice.kind === "manual" ? "Custom design started" : "Profile loaded");
+    return true;
   } finally {
     templateLoadInFlight = false;
     $("template-select").disabled = false;
@@ -9376,16 +9377,29 @@ function enforceExternalLinkTargets(root = document) {
 
 function handoffExternalLinkToNative(event) {
   const link = event.target.closest?.("a[href]");
-  const nativeOpener = window.pywebview?.api?.open_external;
-  if (!link || typeof nativeOpener !== "function") return;
+  if (!link) return;
   let url;
   try {
     url = new URL(link.getAttribute("href"), window.location.href);
   } catch (_err) {
     return;
   }
+  if (nativeDesigner.enabled && url.origin === window.location.origin
+    && link.hasAttribute("data-open-designer-template")) {
+    const templateId = link.dataset.openDesignerTemplate;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openLinkedDesignerTemplate(templateId).catch(reportError);
+    return;
+  }
+  const nativeOpener = nativeDesigner.enabled
+    ? url => nativeDesigner.openExternal(url)
+    : window.pywebview?.api?.open_external;
+  if (typeof nativeOpener !== "function") return;
   const designerTemplateLink = link.hasAttribute("data-open-designer-template");
-  if (!/^(https?|mailto):$/i.test(url.protocol) || (url.origin === window.location.origin && !designerTemplateLink)) return;
+  const permittedScheme = nativeDesigner.enabled ? /^https?:$/i : /^(https?|mailto):$/i;
+  if (!permittedScheme.test(url.protocol)
+    || (url.origin === window.location.origin && (nativeDesigner.enabled || !designerTemplateLink))) return;
   event.preventDefault();
   event.stopImmediatePropagation();
   Promise.resolve(nativeOpener(url.href))
@@ -9396,6 +9410,24 @@ function handoffExternalLinkToNative(event) {
       console.error(error);
       showToast("The system browser could not open this link.");
     });
+}
+
+async function openLinkedDesignerTemplate(templateId) {
+  if (templateLoadInFlight || workflowSaveInFlight) {
+    showToast("Wait for the current profile operation to finish.");
+    return;
+  }
+  const select = $("template-select");
+  if (!state.templates.some(template => template.template_id === templateId)
+    || ![...select.options].some(option => option.value === templateId)) {
+    showToast("This preset is unavailable in the installed catalogue.");
+    return;
+  }
+  select.value = templateId;
+  if (!await loadTemplate()) return;
+  setActivePage("toolkit", { updateHash: true });
+  scrollToStep("study");
+  focusSectionNavigationTarget($("study-segment"));
 }
 
 function renderHardwarePixelArt() {

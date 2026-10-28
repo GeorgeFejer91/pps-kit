@@ -3,6 +3,15 @@ import test from "node:test";
 import { createNativeDesigner } from "../native_designer.js";
 
 globalThis.document = new EventTarget();
+test("external web links use one explicit native command and preserve its failure", async () => {
+  const calls = [];
+  const adapter = createNativeDesigner(async (command, args) => {
+    calls.push({ command, args });
+    throw new Error("external_browser_unavailable");
+  }, true);
+  await assert.rejects(adapter.openExternal("https://doi.org/10.1038/example"), /external_browser_unavailable/);
+  assert.deepEqual(calls, [{ command: "designer_open_external", args: { url: "https://doi.org/10.1038/example" } }]);
+});
 test("native failures stay native and a rejected capability does not prevent a later save", async () => {
   const calls = [];
   const adapter = createNativeDesigner(async (command, args) => {

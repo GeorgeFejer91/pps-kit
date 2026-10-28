@@ -1,5 +1,17 @@
 # Third-Party Licenses
 
+## Native external web links
+
+- Tauri opener plugin: `tauri-plugin-opener` 2.5.5, from
+  https://github.com/tauri-apps/plugins-workspace, under MIT OR Apache-2.0.
+  Its MIT notice is preserved in `third_party/tauri-plugin-opener/LICENSE.MIT`.
+- Default-application dispatch: `open` 5.4.5, from
+  https://github.com/Byron/open-rs, under MIT. Its notice is preserved in
+  `third_party/open/LICENSE.MIT`.
+
+The Designer uses the Rust URL API through a bounded HTTP(S)-only command.
+The dependency versions and crate checksums are recorded in `Cargo.lock`.
+
 ## 3DTI AudioToolkit
 
 - Project: 3DTI AudioToolkit

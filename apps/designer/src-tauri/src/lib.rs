@@ -1,4 +1,5 @@
 mod assembly_host;
+mod external_links;
 mod generation;
 mod jobs;
 mod service;
@@ -20,6 +21,19 @@ fn main_window(window: &tauri::WebviewWindow) -> Result<(), String> {
 }
 fn lock(shared: &Shared) -> Result<std::sync::MutexGuard<'_, DesignerService>, String> {
     shared.lock().map_err(|_| "host_unavailable".into())
+}
+
+#[tauri::command]
+async fn designer_open_external(window: tauri::WebviewWindow, url: String) -> Result<bool, String> {
+    main_window(&window)?;
+    let url = external_links::web_url(&url)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        tauri_plugin_opener::open_url(url, None::<&str>)
+            .map(|_| true)
+            .map_err(|_| "external_browser_unavailable".to_owned())
+    })
+    .await
+    .map_err(|_| "external_browser_worker_failed")?
 }
 
 #[tauri::command]
@@ -425,6 +439,7 @@ pub fn run() {
             });
         })
         .invoke_handler(tauri::generate_handler![
+            designer_open_external,
             designer_snapshot,
             designer_invalidate,
             designer_save,

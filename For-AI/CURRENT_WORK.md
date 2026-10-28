@@ -55,13 +55,29 @@ This file is the active checklist and handoff owner; replace state, do not appen
   visible-label/name checks at 320/760/761/1440px, the complete Designer stretch
   rerun, canonical rebuild and both Pages parity checks. The source correction
   and its regression are included in the next final installer build.
-  Further installed WebView inspection found an About dialog overflow at 200%
-  CSS zoom and unlocalized native-only whole-page overflow at 320px. The About
-  defect also reproduces in Chromium 151; the UI worker's overlay-relative sizing
-  fix passes eight hosted dialog cases and is held pending the full diagnostic
-  batch. Transparent source selects underneath real comboboxes were audit false
-  positives, now excluded without weakening whole-page overflow checks. Package
-  promotion waits for these UI defects to be resolved and rebuilt.
+  Further installed WebView inspection found About overflow at 200% CSS zoom
+  and whole-page overflow at 320px. Source fixes `8b0463b1`/`1c1621c1` now use
+  overlay-relative dialog sizing, three shrinkable noise columns, mobile sequence
+  sizing and wrapping action rows. Real noise-label leaves preserve measured
+  text independently of their hints; all seven help topics match current behavior.
+  Classic-scrollbar Chromium 151 passes 11 layout cases, 13 About checks and 20
+  label/hint checks. Inspected zoom and compact screenshots remain readable.
+  The final rerun also passes 53 JS checks, 14 Designer Rust host checks (five
+  opt-in cases skipped), strict all-target Clippy and six repository/provenance
+  checks. Pages assembly preserves canonical bytes. Rebuilt installed proof remains.
+  Native external web links also need an explicit system-browser handoff:
+  Wry suppresses unhandled new-window requests. The narrow native command accepts
+  bounded HTTP(S) URLs only, without credentials or alternate handlers. The
+  pinned opener works on the existing Rust 1.88 floor. Mapper presets reuse the
+  existing loader, including unsaved-draft confirmation, in the current native
+  window; hosted preset links retain their browser behavior. New installed
+  control checks cover both routes in the next candidate.
+  Native-mode review also found legacy applet selectors hiding the shared header
+  and tabs. The six-selector scope fix `8cbe0afd` preserves legacy applet behavior
+  while exposing native Documentation/Downloads. Canonical native-mode Chromium
+  passes six cases, 24 views and 12 keyboard checks with the actual candidate CSS;
+  mapper Cancel/Confirm and one external handoff pass through a mocked IPC
+  boundary. These are UI checks, not installed native-command evidence.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
   replication-ready labels. Generation ships without Python; Python remains
@@ -353,10 +369,14 @@ Native picker interaction and clean Windows without an existing WebView2 runtime
 remain unverified. Final publication must preserve the immutable build manifest,
 add the separate installed report, and checksum all seven public non-checksum
 assets. Prepared public download documentation stays unstaged until assets exist.
-The existing installed checks do not cover the whole browser resize/zoom matrix.
-Test-only packaged WebView layout modes at `a40dd127` now preserve experiment and
-native state while checking actual CDP viewports, CSS zoom, spacing and keyboard
-focus. Their actual run remains pending. Automatic review rejected the local
+Test-only packaged WebView layout modes preserve experiment and native state
+while checking actual CDP viewports, CSS zoom, spacing and keyboard focus.
+The [fourth follow-up](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40751499138)
+passes Runner's six cases, 42 views and 18 keyboard checks on WebView2 131;
+state, participant drafts and original presentation are preserved. Designer
+reported the two geometry defects now repaired in source. Repeat both apps on
+the final rebuilt candidate. This is CSS viewport/zoom evidence; OS-window
+resizing and assistive technology remain unassessed. Automatic review rejected the local
 exact-payload Runner verification/launch command as "blocked by policy"; nothing
 in that command executed and no alternate local launch was attempted. The safer
 follow-up uses a fresh disposable Windows CI account, the successful candidate's
@@ -375,6 +395,16 @@ Its actual mode reports remain evidence, not a passing release claim. Continue
 both app assessments after one fails; only an explicit passing mode report can
 close its gate. Rebuild after the complete native UI repair batch, then regenerate
 the final software-validation tables without relaxing raw-byte freshness checks.
+The intermediate product `a98115cf` passed the full
+[Windows candidate run](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40740525976):
+both exact installed payloads, actual Designer Rust/C++ generation/preview,
+Runner startup, all 30 browser captures and all 25 eligible native preset
+executions/results. Its [ordinary CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40740539024)
+passed all 14 jobs; Windows Standard passed 762 tests with nine scope skips.
+The sanitized JSON/CSV generated from those exact artifacts independently passed
+30-row, hash, count, privacy and scope checks. These remain intermediate evidence
+because subsequent UI and native-link changes need new packages, captures,
+installed checks and regenerated public tables before publication.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous

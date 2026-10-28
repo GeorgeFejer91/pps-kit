@@ -626,7 +626,7 @@ export async function initializePublicationNetwork(root) {
     ]);
     const templateIds = study.templateIds || [];
     content.append(element("p", { className: "publication-network-detail-muted", text: templateIds.length
-      ? "Linked preset for this study. Prepare and preview in a new browser tab; review its evidence gaps before adapting it."
+      ? "Linked preset for this study. Open in Experiment Designer to prepare and preview; review its evidence gaps before adapting it."
       : "No linked Toolkit template for this study." }));
     if (templateIds.length) content.append(element("div", {
       className: "publication-network-detail-links publication-network-template-links",

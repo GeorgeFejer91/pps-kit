@@ -1,6 +1,7 @@
 fn main() {
     tauri_build::try_build(tauri_build::Attributes::new().app_manifest(
         tauri_build::AppManifest::new().commands(&[
+            "designer_open_external",
             "designer_snapshot",
             "designer_invalidate",
             "designer_save",

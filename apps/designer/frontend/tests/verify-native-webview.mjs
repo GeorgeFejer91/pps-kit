@@ -28,7 +28,8 @@ try {
   page.on("pageerror", error => recordFailure({ kind: "pageerror", message: error.message }));
   page.on("console", message => { if (message.type() === "error") recordFailure({ kind: "console", message: message.text() }); });
   page.on("requestfailed", request => recordFailure({ kind: "requestfailed", url: request.url(), message: request.failure()?.errorText }));
-  if (!layoutOnly) page.on("dialog", dialog => dialog.accept());
+  const acceptDialog = dialog => dialog.accept();
+  if (!layoutOnly) page.on("dialog", acceptDialog);
   await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
   assert.equal(await page.evaluate(() => window.PPSDesignerApp.isNative()), true);
   if (layoutOnly) {
@@ -90,16 +91,88 @@ try {
   await page.waitForFunction(() => window.nativePreviewStarts > 0);
   await play.click();
   assert.ok(!requests.some(url => /https?:.*\/api\//.test(url)), "native errors and success never call the HTTP backend");
+  const externalWebLinkHandoff = await verifyExternalWebLink(page);
   await page.locator("#native-generation-controls").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "artifacts/ui-workflow-check/native-generation.png" });
+  page.off("dialog", acceptDialog);
+  const mapperTemplateNavigation = await verifyMapperTemplateNavigation(page);
   await writeFile("artifacts/ui-workflow-check/native-webview-report.json", JSON.stringify({
     native: true, sharedHtml: true, trajectoryIframe: true, customDraftThroughControls: true, algorithmOptInRequired: true,
     actualRenderer: asset.provenance.renderer.schema, channels: asset.channels, sha256: asset.sha256,
     downstreamInvalidated: true, generatedPreviewStartedMuted: true, httpFallbackRequests: 0,
+    externalWebLinkHandoff,
+    mapperTemplateNavigation,
   }, null, 2));
   console.log("Native WebView: real controls, required algorithm opt-in, actual C++ audio publication, downstream invalidation, no HTTP fallback passed.");
   }
 } finally { await browser.close(); }
+
+async function verifyMapperTemplateNavigation(page) {
+  await page.locator("#movement-duration").fill("1.25");
+  assert.equal(await page.evaluate(() => PPSDesignerApp.isDirty()), true);
+  const draft = await page.evaluate(() => JSON.stringify(PPSDesignerApp.getState()));
+  await page.getByRole("tab", { name: "Documentation", exact: true }).click();
+  await page.locator("[data-publication-network-root]").scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => document.querySelector("[data-publication-network-root]").dataset.publicationNetworkState === "ready");
+  await page.locator("#publication-network-search").fill("10.1016/j.cub.2013.01.043");
+  await page.locator(".publication-network-result-button").click();
+  const study = page.locator("#publication-network-detail [data-study-id]:has([data-open-designer-template])").first();
+  if (!await study.evaluate(node => node.open)) await study.locator(":scope > summary").click();
+  const link = study.locator("[data-open-designer-template]").first();
+  const templateId = await link.getAttribute("data-open-designer-template");
+  const pages = page.context().pages().length;
+  const cancel = page.waitForEvent("dialog").then(async dialog => {
+    assert.match(dialog.message(), /Discard.*load another profile/);
+    await dialog.dismiss();
+  });
+  await link.click();
+  await cancel;
+  assert.equal(await page.evaluate(() => JSON.stringify(PPSDesignerApp.getState())), draft, "Cancel retains the complete custom draft");
+  assert.equal(await page.locator("body").getAttribute("data-active-page"), "documentation", "Cancel retains the mapper");
+  const confirm = page.waitForEvent("dialog").then(dialog => dialog.accept());
+  await link.click();
+  await confirm;
+  await page.waitForFunction(id => PPSDesignerApp.getState().design.study_profile_id === id
+    && !PPSDesignerApp.getState().custom_workflow?.is_custom && document.body.dataset.activePage === "toolkit", templateId);
+  assert.equal(await page.evaluate(() => document.activeElement.id), "study-segment");
+  assert.equal(page.context().pages().length, pages, "Native preset links stay in the existing app WebView");
+  return { templateId, unsavedDraftCancelPreserved: true, confirmedPresetLoaded: true, existingWebview: true, focusMovedToStudy: true };
+}
+
+async function verifyExternalWebLink(page) {
+  await page.evaluate(() => {
+    const bridge = window.__TAURI_INTERNALS__;
+    const original = bridge.invoke.bind(bridge);
+    window.externalLinkReceipts = [];
+    window.restoreExternalLinkTrace = () => { bridge.invoke = original; };
+    bridge.invoke = async (command, args, options) => {
+      try {
+        const result = await original(command, args, options);
+        if (command === "designer_open_external") window.externalLinkReceipts.push({ url: args.url, opened: result });
+        return result;
+      } catch (error) {
+        if (command === "designer_open_external") window.externalLinkReceipts.push({ opened: false });
+        throw error;
+      }
+    };
+  });
+  try {
+    await page.getByRole("tab", { name: "Downloads", exact: true }).click();
+    const originalUrl = page.url();
+    const link = page.locator("#download-software");
+    const url = await link.getAttribute("href");
+    await link.click();
+    await page.waitForFunction(() => window.externalLinkReceipts.length > 0);
+    const receipts = await page.evaluate(() => window.externalLinkReceipts);
+    assert.deepEqual(receipts, [{ url, opened: true }], "One real link click reaches the OS browser handoff exactly once");
+    assert.equal(page.url(), originalUrl, "External links do not navigate the privileged app WebView");
+    return { acceptedByOs: true, mainWebviewStayedLocal: true,
+      scope: "System browser accepted the public release URL; remote availability is checked at publication" };
+  } finally {
+    await page.evaluate(() => window.restoreExternalLinkTrace());
+    await page.getByRole("tab", { name: "Experiment Designer", exact: true }).click();
+  }
+}
 
 // Presentation-only installed check. Never creates a draft or activates a
 // generation/review/import control. CSS viewport emulation is not OS resizing.
@@ -261,6 +334,14 @@ async function layoutGeometry(page, selector) {
 }
 
 async function focusedControl(page, name) {
+  // Keyboard focus may trigger the document's existing smooth scroll. Wait for
+  // its real viewport/hit-test condition; do not scroll or refocus for the test.
+  await page.waitForFunction(() => {
+    const node = document.activeElement, b = node.getBoundingClientRect();
+    const hit = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
+    return b.left >= -1 && b.top >= -1 && b.right <= innerWidth + 1 && b.bottom <= innerHeight + 1
+      && (hit === node || node.contains(hit));
+  }, null, { timeout: 3000 });
   const result = await page.evaluate(() => { const node = document.activeElement, b = node.getBoundingClientRect(), style = getComputedStyle(node);
     const hit = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
     return { id: node.id, box: b.toJSON(), focusVisible: node.matches(":focus-visible"), outline: style.outline, outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth,

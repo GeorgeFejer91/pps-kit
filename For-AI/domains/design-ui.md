@@ -181,3 +181,17 @@ through form collection and embed comparator bytes separately in portable export
 Native cache writes publish only fully written, synced assets; portable import
 cleans its temporary extraction and commits the registry after all verified copies
 succeed. Failure leaves the prior authoring authority intact and permits retry.
+
+The repository mirrors Uncodixfy Pretext and its outside-in stretch geometry.
+Designer and Runner allocate shell/panel space before ordered groups and cells;
+bounded controls measure their actual text leaves. Keep deliberate document flow,
+paged scientific lists and the separate About reading region. Classic Windows
+scrollbars participate in compact-layout checks. Noise hints never determine
+their label's measured width; overlay-relative sizing bounds About at CSS zoom.
+
+The native Designer explicitly opens external HTTP(S) links through its narrow
+system-browser command. It does not navigate the privileged WebView. Same-origin
+mapper preset links instead reuse the existing profile loader and its dirty-draft
+confirmation, then focus Segment 0 only after successful adoption. Hosted links
+retain their ordinary browser targets. Do not bypass that loader or add another
+profile authority for catalogue navigation.

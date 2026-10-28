@@ -71,6 +71,7 @@ export function createNativeDesigner(call = invoke, enabled = typeof window !== 
       return this.runJob("designer_prepare", { participant, identity }, "Preparing immutable participant files…");
     },
     openPrepared: () => call("designer_open_prepared"),
+    openExternal: url => call("designer_open_external", { url }),
     exportAudio: reference => call("designer_export_audio", { reference }),
     async runJob(command, args, message) {
       if (pendingJob || activeJob) throw new Error("Native work is already running.");
