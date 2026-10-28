@@ -3882,7 +3882,9 @@ a:focus-visible,
 }
 
 .noise-type-row-secondary {
-  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  /* These three ordered choices share a row, keeping the middle hint centred
+     between the existing edge-anchored hints even with classic scrollbars. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .noise-type-button {
@@ -4028,6 +4030,7 @@ a:focus-visible,
 .bake-action-row {
   grid-column: 1 / -1;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin-top: 4px;
@@ -7768,6 +7771,8 @@ body.desktop-applet .segment-heading {
     min-width: 0;
   }
 
+  .filmstrip-element.sequence-event { flex-basis: auto; }
+
   .panel.profile-readonly [data-add-strip-element],
   .panel.profile-readonly [data-add-strip-row],
   .panel.profile-readonly [data-remove-noise],
@@ -8492,10 +8497,12 @@ body.desktop-applet .segment-heading {
 .modal-heading > button { flex-shrink: 0; }
 /* About is an unbounded reading document, separate from the utility forms.
    Keep its title/close anchor visible while the reading region scrolls. */
+#segment-info-modal { grid-template-rows: minmax(0, 1fr); }
 .segment-info-card {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  max-block-size: calc(100dvh - 2 * var(--stretch-space));
+  /* The fixed overlay owns the zoom-adjusted budget; viewport units do not. */
+  max-block-size: 100%;
   min-block-size: 0;
 }
 .segment-info-body {
