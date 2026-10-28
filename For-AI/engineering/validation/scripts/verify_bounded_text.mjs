@@ -41,6 +41,7 @@ try {
     <div id="empty" data-pretext></div>
     <div id="normal" data-pretext style="line-height:normal;height:auto">Natural line height</div>
     <div id="fractional" data-pretext style="width:120.219px;height:44px;padding:10.4px 12px;border:0;border-bottom:3px solid;font:750 14px/19.6px 'Segoe UI'">Phone Remote</div>
+    <div id="fractional-edges" data-pretext style="width:121.141px;height:31.8906px;padding:4.8px 9.28px;border:1px solid;font:800 14px/20.3px 'Segoe UI',Arial,sans-serif">Not submitted</div>
   </body></html>`);
   await page.evaluate(async () => {
     const pretext = await import("/apps/designer/frontend/node_modules/@chenglou/pretext/dist/layout.js");
@@ -67,6 +68,7 @@ try {
   assert.equal(await result("empty"), "fit");
   assert.equal(await result("normal"), "dom-fallback", "normal line height never uses invented Pretext height");
   assert.equal(await result("fractional"), "fit", "fractional intrinsic-width action keeps its actual line budget");
+  assert.equal(await result("fractional-edges"), "fit", "separately snapped padding edges do not invent another line");
   const initial = await page.evaluate(() => ({ prepares: window.prepares, clears: window.clears }));
   await page.evaluate(() => { document.getElementById("fit").style.width = "180px"; });
   await page.waitForFunction(() => getComputedStyle(document.getElementById("fit")).width === "180px");
