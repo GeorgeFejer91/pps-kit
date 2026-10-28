@@ -74,7 +74,10 @@ export function initializeBoundedText(root, pretext, selector = "[data-pretext]"
           }) };
           cache.set(element, entry);
         }
-        const stats = pretext.measureLineStats(entry.prepared, width);
+        // Engines snap individual padding/border edges to subpixels; the sum of
+        // serialized CSS edges can differ from the used text track by <1/16 px.
+        // Keep the independent rendered-overflow/line checks as the final gate.
+        const stats = pretext.measureLineStats(entry.prepared, width + 1 / 16);
         const natural = pretext.measureNaturalWidth(entry.prepared);
         // Rich text and user spacing remain DOM verified, without a fit claim.
         const supported = !element.childElementCount && Number.isFinite(Number.parseFloat(style.lineHeight))
@@ -83,7 +86,7 @@ export function initializeBoundedText(root, pretext, selector = "[data-pretext]"
           && ["normal", "keep-all"].includes(style.wordBreak)
           && style.overflowWrap !== "anywhere" && style.direction !== "rtl";
         let renderedLines;
-        if (!supported && Number.isFinite(maxLines)) {
+        if (Number.isFinite(maxLines)) {
           // Text-leaf rectangles avoid counting a rich parent's union box.
           // Inline superscripts/smaller spans share a line when their bands overlap.
           const range = document.createRange();
@@ -102,7 +105,7 @@ export function initializeBoundedText(root, pretext, selector = "[data-pretext]"
           }
           renderedLines = bands.length;
         }
-        const exceedsLines = supported ? stats.lineCount > maxLines : renderedLines > maxLines;
+        const exceedsLines = (supported && stats.lineCount > maxLines) || renderedLines > maxLines;
         const predictedOverflow = supported && (stats.maxLineWidth > width + 1
           || Math.max(1, stats.lineCount) * lineHeight > innerHeight + 1
           || (maxLines === 1 && natural > width + 1));
