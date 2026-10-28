@@ -9,9 +9,8 @@ export function initializeBoundedText(root, pretext, selector = "[data-pretext]"
   const resize = new ResizeObserver(refresh);
 
   function refresh() {
-    if (disposed) return;
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(measure);
+    if (disposed || frame) return;
+    frame = requestAnimationFrame(() => { frame = 0; measure(); });
   }
 
   function invalidateFonts() {

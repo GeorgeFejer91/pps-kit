@@ -37,6 +37,7 @@ try {
     <div id="mixed-line" data-pretext data-pretext-max-lines="1">SOA <sup>2</sup> <span style="font-size:12px">(ms)</span></div>
     <div id="space" data-pretext style="word-spacing:3px;height:auto">Readable fallback text</div>
     <div id="grow" data-pretext style="height:32px">Save</div>
+    <div id="restore" data-pretext>Save</div>
     <div id="empty" data-pretext></div>
     <div id="normal" data-pretext style="line-height:normal;height:auto">Natural line height</div>
   </body></html>`);
@@ -72,11 +73,11 @@ try {
   await page.evaluate(() => document.fonts.dispatchEvent(new Event("loadingdone")));
   await page.waitForFunction(count => window.prepares > count, initial.prepares);
   assert.ok(await page.evaluate(count => window.clears > count, initial.clears), "font loads clear Pretext's own caches");
-  const originalStyle = await page.locator("#fit").getAttribute("style");
-  await page.evaluate(() => { document.getElementById("fit").style.fontSize = "18px"; });
-  await page.waitForFunction(() => document.getElementById("fit").dataset.pretextFontSize === "18");
-  await page.evaluate(value => document.getElementById("fit").setAttribute("style", value), originalStyle);
-  await page.waitForFunction(() => document.getElementById("fit").dataset.pretextFontSize === "16");
+  const originalStyle = await page.locator("#restore").getAttribute("style");
+  await page.evaluate(() => { document.getElementById("restore").style.fontSize = "18px"; });
+  await page.waitForFunction(() => document.getElementById("restore").dataset.pretextFontSize === "18");
+  await page.evaluate(value => document.getElementById("restore").setAttribute("style", value), originalStyle);
+  await page.waitForFunction(() => document.getElementById("restore").dataset.pretextFontSize === "16");
   await page.evaluate(() => { document.documentElement.style.zoom = "2"; });
   await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
   assert.equal(await result("fit"), "fit");
@@ -94,6 +95,17 @@ try {
   await page.waitForFunction(() => document.getElementById("fit").dataset.pretextResult === "dom-fallback");
   await page.evaluate(() => { document.documentElement.dir = "ltr"; });
   await page.waitForFunction(() => document.getElementById("fit").dataset.pretextResult === "fit");
+  const progress = await page.evaluate(() => new Promise(done => {
+    const before = window.prepares;
+    let frame = 0;
+    function update() {
+      document.getElementById("fit").textContent = `Progress ${frame++}`;
+      if (frame < 8) requestAnimationFrame(update);
+      else done(window.prepares - before);
+    }
+    requestAnimationFrame(update);
+  }));
+  assert.ok(progress > 1, "continuous progress mutations cannot starve the scheduled measurement");
   const disconnected = await page.evaluate(() => { window.measurement.disconnect(); return window.prepares; });
   await page.evaluate(() => { document.getElementById("fit").textContent = "Changed"; window.measurement.refresh();
     document.fonts.dispatchEvent(new Event("loadingdone")); });
