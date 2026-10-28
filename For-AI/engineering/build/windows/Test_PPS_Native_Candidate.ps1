@@ -95,7 +95,7 @@ try {
             Push-Location -LiteralPath $Root
             try {
                 if ($app -eq 'designer') { & $Node apps/designer/frontend/tests/verify-native-webview.mjs }
-                else { & $Node apps/runner/frontend/tests/verify-native-webview.mjs --startup-only }
+                else { & $Node apps/runner/frontend/tests/verify-native-webview.mjs --startup-only --packaged-only }
                 if ($LASTEXITCODE) { throw "$app installed WebView check failed" }
             } finally { Pop-Location }
         } finally {

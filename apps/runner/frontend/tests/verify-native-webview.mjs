@@ -12,13 +12,14 @@ import { createRequire } from "node:module";
 const { chromium } = createRequire(import.meta.url)(process.env.PPS_PLAYWRIGHT_MODULE || "playwright");
 const root = fileURLToPath(new URL("../../../../", import.meta.url));
 const output = resolve(root, "artifacts/ui-workflow-check");
+const packagedOnly = process.argv.includes("--packaged-only");
 await mkdir(output, { recursive: true });
 const browser = await chromium.connectOverCDP(process.env.PPS_RUNNER_TEST_CDP || "http://127.0.0.1:19227");
 try {
   let page;
   for (let attempt = 0; attempt < 20 && !page; attempt++) {
     for (const candidate of browser.contexts().flatMap(context => context.pages())) {
-      if (attempt === 0 && process.argv.includes("--startup-only") && candidate.url().startsWith("http://127.0.0.1:1420/")) {
+      if (!packagedOnly && attempt === 0 && process.argv.includes("--startup-only") && candidate.url().startsWith("http://127.0.0.1:1420/")) {
         await candidate.reload({ waitUntil: "domcontentloaded" });
       }
       if (await candidate.locator("#select-session-group").count()) { page = candidate; break; }
@@ -26,6 +27,10 @@ try {
     if (!page) await new Promise(done => setTimeout(done, 500));
   }
   assert.ok(page, "Open the actual Runner WebView first.");
+  if (packagedOnly) {
+    assert.equal(new URL(page.url()).origin, "http://tauri.localhost",
+      "Installed verification requires the packaged frontend origin");
+  }
   const initial = await page.evaluate(async () => ({
     group: await window.__TAURI_INTERNALS__.invoke("native_group_status"),
     output: await window.__TAURI_INTERNALS__.invoke("native_output_status"),
