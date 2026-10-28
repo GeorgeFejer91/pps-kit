@@ -1,0 +1,2 @@
+# Preserve the exact upstream bytes recorded in UPSTREAM.json on Windows too.
+* text eol=lf
