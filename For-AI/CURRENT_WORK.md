@@ -248,10 +248,16 @@ This file is the active checklist and handoff owner; replace state, do not appen
   [Draft PR #2](https://github.com/GeorgeFejer91/pps-kit/pull/2) tracks integration;
   no merge or release promotion has occurred.
   Intermediate candidate [40735351508](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40735351508)
-  targets `39e9d778e3ffc76d0ca23606e10321e2066e8a1f`; native contract tests pass
-  and both installer builds are running. Retain its installed/pipeline evidence,
-  but rebuild after navigation fix `751945ab` before publication. The asset-free
-  release draft will be retargeted to that final build checkpoint.
+  targets `39e9d778e3ffc76d0ca23606e10321e2066e8a1f`; native contract tests,
+  both installer builds, hosted Windows layout checks and exact installed-payload
+  checks now pass. Actual installed Designer generation/preview and packaged
+  Runner startup pass; the complete-preset audit is running. Retain this evidence,
+  but publish only after navigation fix `751945ab` is packaged and verified.
+  Final candidate [40740525976](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40740525976)
+  and normal [CI 40740539024](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40740539024)
+  target `a98115cf012fffe0ff55203d49e52742d354057c`. The final candidate has built
+  the renderer and is testing native contracts; normal CI is queued. The asset-free
+  release draft targets `a98115cf`. Do not rebuild for later checklist-only changes.
   Its normal CI passed Windows/Linux Desktop and Browser,
   but the macOS Desktop job was cancelled before downstream checks could run.
   Follow-up [CI 40737552536](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40737552536)
@@ -321,6 +327,12 @@ local free space, and native OS automation initialization failing with
 "failed to write kernel assets" (os error 3). The latest user request authorizes
 fresh installed-test requests; any new automatic rejection must be reported,
 not bypassed. Existing identity/publication direction is sufficient to continue.
+The documented Computer Use `@oai/sky` entrypoint was also retried after a
+JavaScript-kernel reset; it fails before initialization with the same error.
+Native picker interaction and clean Windows without an existing WebView2 runtime
+remain unverified. Final publication must preserve the immutable build manifest,
+add the separate installed report, and checksum all seven public non-checksum
+assets. Prepared public download documentation stays unstaged until assets exist.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous
