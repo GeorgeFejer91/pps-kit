@@ -10,7 +10,9 @@ import ast
 from collections import Counter
 import hashlib
 import json
+import math
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[4]
 RESOURCES = "packages/pps-resources"
@@ -53,6 +55,46 @@ def saved_metadata_findings(capture: dict, allowed_fields: set[str]) -> list[dic
                     findings[(row["row_label"], row["family"], key)] += 1
     return [{"row_label": label, "family": family, "field": field, "affected_rows": count}
             for (label, family, field), count in sorted(findings.items())]
+
+
+def saved_block_label_findings(capture: dict) -> list[dict]:
+    """Record label loss without inferring condition membership or multiplicity."""
+    specs = capture["design"]["protocol"].get("block_specs", [])
+    findings = []
+    for index, block in enumerate(capture["block_csv_preview"].get("blocks", [])):
+        declared = specs[index].get("label") if index < len(specs) else None
+        captured = block.get("block_label")
+        if not declared or declared == captured:
+            continue
+        def block_number(label):
+            match = re.fullmatch(r"Block\s+(\d+)", label or "", flags=re.IGNORECASE)
+            return int(match[1]) if match else None
+        number = block_number(declared)
+        formatting_only = number is not None and number == block_number(captured)
+        findings.append({"block_index": block["block_index"], "declared_label": declared,
+                         "captured_label": captured, "affected_rows": block["trial_count"],
+                         "classification": "number_format_only" if formatting_only else "descriptive_label_replaced"})
+    return findings
+
+
+def source_duration_checks(root: Path, capture: dict) -> list[dict]:
+    """Inspect actual shipped WAV headers, including native IEEE-float assets."""
+    import soundfile
+    checks = []
+    for collection, path_key in (("noises", "prebaked_path"), ("custom_looming_files", "path")):
+        for source in capture["design"].get(collection, []):
+            reference = source.get(path_key)
+            if not reference:
+                continue
+            info = soundfile.info(root / RESOURCES / reference)
+            captured = source.get("duration_s")
+            matches = isinstance(captured, (int, float)) and not isinstance(captured, bool) \
+                and math.isfinite(captured) and abs(captured - info.duration) <= 1 / info.samplerate
+            checks.append({"collection": collection, "label": source["label"], "path": reference,
+                           "frames": info.frames, "sample_rate_hz": info.samplerate,
+                           "actual_duration_s": info.duration, "captured_duration_s": captured,
+                           "status": "match" if matches else "mismatch"})
+    return checks
 
 
 def checked_plan(template_id: str, eligible: bool, capture: dict) -> dict:
@@ -134,6 +176,8 @@ def build_report(root: Path, captures: Path) -> dict:
         eligible = profile["runner_readiness"] == "ready" and profile["profile_checks_passed"] is True
         plan = checked_plan(template_id, eligible, capture)
         plan["saved_metadata_findings"] = saved_metadata_findings(capture, allowed_fields)
+        plan["saved_block_label_findings"] = saved_block_label_findings(capture)
+        plan["source_duration_checks"] = source_duration_checks(root, capture)
         presets.append({
             "template_id": template_id, "template_sha256": case["template_sha256"],
             "capture_sha256": case["capture_sha256"], "publication_status": profile["publication_status"],
@@ -170,6 +214,10 @@ def build_report(root: Path, captures: Path) -> dict:
                    "blocked_as_shipped": sum(not x["configuration_eligible"] for x in presets),
                    "published_presets_without_study_assignment": sum(x["publication_status"] == "published" and not x["study_row_ids"] for x in presets),
                    "presets_with_saved_metadata_loss": sum(bool(x["plan"]["saved_metadata_findings"]) for x in presets),
+                   "presets_with_descriptive_block_labels_replaced": sum(any(f["classification"] == "descriptive_label_replaced" for f in x["plan"]["saved_block_label_findings"]) for x in presets),
+                   "descriptive_block_labels_replaced": sum(f["classification"] == "descriptive_label_replaced" for x in presets for f in x["plan"]["saved_block_label_findings"]),
+                   "source_duration_checks": sum(len(x["plan"]["source_duration_checks"]) for x in presets),
+                   "source_duration_mismatches": sum(c["status"] != "match" for x in presets for c in x["plan"]["source_duration_checks"]),
                    "native_preparation_verified": 0, "native_execution_verified": 0},
         "presets": presets, "archive_rows": archive_rows,
     }
@@ -186,6 +234,15 @@ def markdown(report: dict) -> str:
     for item in report["presets"]:
         plan = item["plan"]
         lines.append(f"| {item['template_id']} | {plan['status']} | {plan['source_trial_count']} / {len(plan['source_blocks'])} | {plan.get('saved_experiment_structure', 'gated')} | Not assessed / not assessed |")
+    lines += ["", "## Saved plan contract observations", "",
+              f"{counts['source_duration_checks']} actual stimulus WAV headers checked; {counts['source_duration_mismatches']} captured-duration mismatches. "
+              f"{counts['presets_with_saved_metadata_loss']} presets lose declared allowlisted strip metadata. "
+              f"{counts['descriptive_block_labels_replaced']} descriptive block labels are replaced across {counts['presets_with_descriptive_block_labels_replaced']} presets. "
+              "These are separate observations; preserving counts does not establish condition allocation or published-method equivalence.", ""]
+    for item in report["presets"]:
+        labels = [f for f in item["plan"]["saved_block_label_findings"] if f["classification"] == "descriptive_label_replaced"]
+        if labels:
+            lines.append(f"- **{item['template_id']}**: " + "; ".join(f"{f['declared_label']} → {f['captured_label']}" for f in labels))
     lines += ["", "## Explicit missing inputs", "", "These are retained as-shipped gates. No source or apparatus values were supplied by the audit.", ""]
     for item in report["presets"]:
         if not item["configuration_eligible"]:

@@ -66,3 +66,29 @@ def test_declared_choice_contract_must_survive_even_when_counts_match():
     fixture["block_csv_preview"]["blocks"][0]["preview_rows"][0].pop("correct_response")
     assert audit.saved_metadata_findings(fixture, allowed) == [{
         "row_label": "Left", "family": "audio_tactile", "field": "correct_response", "affected_rows": 1}]
+
+
+def test_condition_label_loss_is_separate_from_number_formatting():
+    fixture = capture()
+    fixture["design"]["protocol"]["block_specs"] = [{"label": "Left direction"}]
+    assert audit.saved_block_label_findings(fixture)[0]["classification"] == "descriptive_label_replaced"
+    fixture["design"]["protocol"]["block_specs"][0]["label"] = "Block 01"
+    assert audit.saved_block_label_findings(fixture)[0]["classification"] == "number_format_only"
+
+
+def test_duration_check_uses_actual_float_wav_and_rejects_historical_fallback(tmp_path):
+    import soundfile
+    path = tmp_path / audit.RESOURCES / "assets/short.wav"
+    path.parent.mkdir(parents=True)
+    # Native assets can use IEEE float; the historical four-second fallback
+    # must not pass just because both inventory and captured metadata repeat it.
+    with soundfile.SoundFile(path, mode="w", samplerate=8000, channels=1, subtype="FLOAT") as wav:
+        wav.write([0.0] * 1001)
+    fixture = capture()
+    source = {"label": "short", "prebaked_path": "assets/short.wav", "duration_s": 1001 / 8000}
+    fixture["design"]["noises"] = [source]
+    assert audit.source_duration_checks(tmp_path, fixture)[0]["status"] == "match"
+    source["duration_s"] = 4
+    check = audit.source_duration_checks(tmp_path, fixture)[0]
+    assert check["status"] == "mismatch"
+    assert check["frames"] == 1001
