@@ -238,6 +238,15 @@ async function layoutGeometry(page, selector) {
       horizontalOffenders: document.documentElement.scrollWidth > innerWidth + 1
         ? [...document.querySelectorAll("body *")].filter(visible).filter(node => { const b = node.getBoundingClientRect();
           return b.left < -1 || b.right > innerWidth + 1; }).slice(0, 30).map(box) : [],
+      // Transparent form controls can still enlarge the scrollable document.
+      // Keep these separate from painted-control overlap checks, never mask
+      // the whole-page overflow just because its cause is not painted.
+      layoutHorizontalOffenders: document.documentElement.scrollWidth > innerWidth + 1
+        ? [...document.querySelectorAll("body *")].filter(node => node.getClientRects().length).filter(node => {
+          const b = node.getBoundingClientRect(); return b.left < -1 || b.right > innerWidth + 1;
+        }).slice(0, 40).map(node => { const style = getComputedStyle(node); return { ...box(node), tag: node.tagName,
+          opacity: style.opacity, visibility: style.visibility, pointerEvents: style.pointerEvents,
+          ariaHidden: node.getAttribute("aria-hidden"), overflowX: style.overflowX, position: style.position }; }) : [],
       horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
       controls: controls.map(box), overlaps, outside: controls.filter(node => { const r = node.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1; }).map(box),
       clipped: labels.filter(node => { const r = document.createRange(); r.selectNodeContents(node); const text = r.getBoundingClientRect(), b = node.getBoundingClientRect();
