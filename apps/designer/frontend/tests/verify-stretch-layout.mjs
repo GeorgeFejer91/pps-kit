@@ -21,7 +21,9 @@ const server = createServer(async (request, response) => {
   catch { response.writeHead(404).end(); }
 });
 await new Promise(done => server.listen(0, "127.0.0.1", done));
-const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
+// Retain the scrollbar width consumed by the installed Windows WebView. The
+// Playwright default hides it and missed compact tooltip/sequence overflow.
+const browser = await chromium.launch({ headless: true, ignoreDefaultArgs: ["--hide-scrollbars"], args: ["--mute-audio"] });
 const report = { browser: browser.version(), scope: "compiled hosted Chromium; ordered workflow/document flow and embedded settings panels",
   documentPolicies: ["Existing closed details do not paint their contents", "Narrow scientific tables use labelled row cards with existing six-row/all-row reveal", "Complete workflow, catalogue details and fullscreen root retain document scrolling"], cases: [], errors: [] };
 const page = await browser.newPage();

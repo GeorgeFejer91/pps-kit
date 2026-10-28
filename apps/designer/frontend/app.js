@@ -107,10 +107,10 @@ const SEGMENT_INFO = {
     title: "Choose or Create Study",
     purpose: "Choose an existing study profile or create a new custom experiment design.",
     inputs: "Select a built-in template or custom profile, or name a new clean-slate design.",
-    backendBeforeLink: "The application loads the selected profile from its ",
-    backendLinkLabel: "Template Directory",
-    backendAfterLink: ". New custom drafts are stored automatically in the researcher workspace. No folder selection is required.",
-    output: "A new template starts a dedicated folder for storing assets used to run the experiment.",
+    backendBeforeLink: "Loads design settings and available assets from the ",
+    backendLinkLabel: "bundled profile definitions",
+    backendAfterLink: ". Hosted drafts stay in this browser; the installed Designer saves drafts locally. Export a portable profile to transfer the design.",
+    output: "Selects a design for editing and preview. Choose an output folder later when preparing a participant in the installed Designer.",
     note: PROFILE_RECREATION_NOTICE
   },
   stimulus: {
@@ -118,7 +118,7 @@ const SEGMENT_INFO = {
     title: "Build Looming Stimuli",
     purpose: "Define the auditory ingredients available to the experiment.",
     inputs: "Trajectory values, one generated or imported source, an ingredient name, and the loudness policy. Calibration assumptions are available as advanced settings.",
-    backend: "Copies, imports, or bakes 1_core_audio_ingredients audio ingredients and records source metadata.",
+    backend: "Records the chosen source and trajectory. Hosted mode previews available audio; the installed Designer generates supported custom ingredients.",
     output: "Supplies stimulus ingredients for Trial Sequence Design."
   },
   trials: {
@@ -126,31 +126,31 @@ const SEGMENT_INFO = {
     title: "Trial Sequence Design",
     purpose: "Arrange ingredients into within-trial audio sequences.",
     inputs: "Trial-family rows, left-to-right box order, fixed clips, alternatives within a box, and jitter values.",
-    backend: "Bakes 2_trial_sequence_designs row-level sequence WAVs and a manifest mapping each file to its components and timing.",
-    output: "Feeds exact trial sequences into baseline/tactile trial generation."
+    backend: "Previews each ordered ingredient combination and its timing. Native preparation later assembles the accepted sequences into audio.",
+    output: "Provides sequence definitions for baseline/tactile trial design."
   },
   baseline: {
     kicker: "Segment 3",
     title: "Baseline and Tactile Trial Design",
     purpose: "Add tactile timing and define the baseline, catch, and auditory-only trial families.",
     inputs: "SOAs, one explicit baseline strategy, optional custom baseline SOAs, and separate catch/auditory-only choices.",
-    backend: "Creates 3_tactile_and_baseline_trials target and baseline WAVs with tactile on channel 3, optional audio-only families, and row-preserving manifests.",
-    output: "Supplies final trial files for repetition-pool construction."
+    backend: "Previews target, baseline, catch and auditory-only rows. Native preparation renders the reviewed audio and tactile channel.",
+    output: "Supplies trial definitions for repetition-pool construction."
   },
   block: {
     kicker: "Segment 4",
     title: "Trial Repetition Pool",
     purpose: "Decide how many times each trial family/file should appear.",
     inputs: "Global, folder, or file-level repetition counts.",
-    backend: "Writes the 4_trial_repetition_pool CSV and manifest without duplicating WAV files.",
+    backend: "Builds repetition-pool rows without duplicating audio. The pool can be reviewed and exported.",
     output: "Provides the trial rows that will be arranged into blocks."
   },
   schedule: {
     kicker: "Segment 5",
     title: "Generate and Review Blocks",
-    purpose: "Generate block CSVs and accept the final block set.",
+    purpose: "Generate block previews and accept the final block set.",
     inputs: "Block count, generated seed, reproducibility review, and regenerate/accept decision.",
-    backend: "Creates 5_block_csv_preview block CSV previews, then finalizes accepted block CSVs.",
+    backend: "Generates block rows for review and CSV export. The installed Designer verifies full timing and order before native preparation.",
     output: "Unlocks profile validation and provides the accepted block definitions."
   },
   run: {
@@ -158,8 +158,8 @@ const SEGMENT_INFO = {
     title: "Profile Validation and Save",
     purpose: "Validate and save a reusable design without fixing the eventual study size.",
     inputs: "Part membership, instruction policy, example-order preview count, and the versioned block-order policy.",
-    backend: "Stores the profile contract and deterministic order policy. The Runner materializes an immutable participant session later.",
-    output: "Exports a portable .pps-profile or registers the profile for Runner discovery."
+    backend: "Stores the profile contract and order policy. The installed Designer requires a complete native review and explicit acceptance before preparing an immutable participant session.",
+    output: "Exports a portable .pps-profile. Prepare participant files in the installed Designer, then open the prepared session or group in Runner."
   }
 };
 const DOWNSTREAM_STEPS = {
