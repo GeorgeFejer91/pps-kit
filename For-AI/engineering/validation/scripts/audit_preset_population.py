@@ -6,6 +6,7 @@ protect the input population and complete row contracts for the native audit.
 from __future__ import annotations
 
 import argparse
+import ast
 from collections import Counter
 import hashlib
 import json
@@ -14,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 RESOURCES = "packages/pps-resources"
 PROJECTION = "apps/designer/frontend/publication_study_reviews.v1.json"
+ROW_CONTRACT_SOURCE = "packages/pps-runtime/src/peripersonal_space_toolkit/dashboard_app.py"
 
 
 def read_json(path: Path):
@@ -29,6 +31,28 @@ def unique_by(items: list[dict], key: str) -> dict:
     if len(result) != len(items):
         raise ValueError(f"Duplicate {key}")
     return result
+
+
+def saved_metadata_findings(capture: dict, allowed_fields: set[str]) -> list[dict]:
+    """Compare declared row metadata without inventing missing source values."""
+    strips = unique_by(capture["design"]["protocol"].get("trial_strips", []), "label")
+    findings = Counter()
+    for block in capture["block_csv_preview"].get("blocks", []):
+        for row in block["preview_rows"]:
+            metadata = strips[row["row_label"]].get("metadata", {})
+            expected = {key: value for key, value in metadata.items()
+                        if key in allowed_fields and value not in (None, "")}
+            if row["family"] == "catch":
+                # Existing dashboard family policy overrides target response metadata.
+                if "expected_response" in expected:
+                    expected["expected_response"] = "withhold"
+                if "target_role" in expected:
+                    expected["target_role"] = "catch_no_target"
+            for key, value in expected.items():
+                if row.get(key) != value:
+                    findings[(row["row_label"], row["family"], key)] += 1
+    return [{"row_label": label, "family": family, "field": field, "affected_rows": count}
+            for (label, family, field), count in sorted(findings.items())]
 
 
 def checked_plan(template_id: str, eligible: bool, capture: dict) -> dict:
@@ -81,6 +105,10 @@ def build_report(root: Path, captures: Path) -> dict:
     templates = {path.stem: path for path in (root / RESOURCES / "study_templates").glob("*.json")}
     profiles = unique_by(status["profiles"], "template_id")
     receipt = read_json(captures / "capture-report.json")
+    contract_source = root / ROW_CONTRACT_SOURCE
+    syntax = ast.parse(contract_source.read_text(encoding="utf-8"))
+    allowed_fields = set(next(ast.literal_eval(node.value) for node in syntax.body
+                             if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == "ROW_CONTRACT_FIELDS" for target in node.targets)))
     cases = unique_by(receipt["cases"], "template_id")
     if templates.keys() != profiles.keys() or templates.keys() != cases.keys():
         raise ValueError("Template/status/capture population mismatch")
@@ -105,6 +133,7 @@ def build_report(root: Path, captures: Path) -> dict:
         capture = read_json(capture_path)
         eligible = profile["runner_readiness"] == "ready" and profile["profile_checks_passed"] is True
         plan = checked_plan(template_id, eligible, capture)
+        plan["saved_metadata_findings"] = saved_metadata_findings(capture, allowed_fields)
         presets.append({
             "template_id": template_id, "template_sha256": case["template_sha256"],
             "capture_sha256": case["capture_sha256"], "publication_status": profile["publication_status"],
@@ -132,13 +161,15 @@ def build_report(root: Path, captures: Path) -> dict:
     return {
         "schema": "pps-preset-population-audit.v1", "captured_at": receipt["captured_at"],
         "evidence_scope": "Complete shipped configuration inventory and browser plans. Native preparation/execution and published-method equivalence are separate gates.",
-        "input_hashes": {**receipt["input_hashes"], PROJECTION: sha256(root / PROJECTION)},
+        "input_hashes": {**receipt["input_hashes"], PROJECTION: sha256(root / PROJECTION),
+                         ROW_CONTRACT_SOURCE: sha256(contract_source)},
         "counts": {"publications": len(publications), "study_context_rows": len(studies),
                    "publications_with_presets": sum(bool(row["templateIds"]) for row in publications.values()),
                    "study_rows_with_presets": sum(bool(row["templateIds"]) for row in studies.values()),
                    "presets": len(presets), "configuration_eligible": sum(x["configuration_eligible"] for x in presets),
                    "blocked_as_shipped": sum(not x["configuration_eligible"] for x in presets),
                    "published_presets_without_study_assignment": sum(x["publication_status"] == "published" and not x["study_row_ids"] for x in presets),
+                   "presets_with_saved_metadata_loss": sum(bool(x["plan"]["saved_metadata_findings"]) for x in presets),
                    "native_preparation_verified": 0, "native_execution_verified": 0},
         "presets": presets, "archive_rows": archive_rows,
     }

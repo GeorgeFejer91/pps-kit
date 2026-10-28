@@ -103,3 +103,14 @@ are correctly three seconds, but the base generated source is planned as four;
 the appended receding custom source retains three. This is a software defect,
 not a missing scientific parameter. Fix its owning frontend source and re-capture;
 do not manually patch captured plans or audio to make native checks pass.
+
+A second baseline handoff defect affects nine eligible presets: the browser
+trial-file/pool/block projections drop declared strip metadata that the existing
+Python `ROW_CONTRACT_FIELDS` owner preserves. This includes the Collignon
+presets' left/right choice set and correct answer, response rules, and task
+context. Native assembly copies the resulting rows into its CSV. The report
+compares every declared allowlisted field to the complete plan, accounting for
+the established catch-family withholding override, and reports each affected
+row count. A complete numerical trial pool does not compensate for a lost
+response contract. Native result checks must verify response-to-trial identity
+and scoring, not only that a response event was observed.
