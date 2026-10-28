@@ -40,6 +40,7 @@ try {
     <div id="restore" data-pretext>Save</div>
     <div id="empty" data-pretext></div>
     <div id="normal" data-pretext style="line-height:normal;height:auto">Natural line height</div>
+    <div id="fractional" data-pretext style="width:120.219px;height:44px;padding:10.4px 12px;border:0;border-bottom:3px solid;font:750 14px/19.6px 'Segoe UI'">Phone Remote</div>
   </body></html>`);
   await page.evaluate(async () => {
     const pretext = await import("/apps/designer/frontend/node_modules/@chenglou/pretext/dist/layout.js");
@@ -65,6 +66,7 @@ try {
   assert.equal(await page.locator("#space").getAttribute("data-pretext-dom-result"), "fit");
   assert.equal(await result("empty"), "fit");
   assert.equal(await result("normal"), "dom-fallback", "normal line height never uses invented Pretext height");
+  assert.equal(await result("fractional"), "fit", "fractional intrinsic-width action keeps its actual line budget");
   const initial = await page.evaluate(() => ({ prepares: window.prepares, clears: window.clears }));
   await page.evaluate(() => { document.getElementById("fit").style.width = "180px"; });
   await page.waitForFunction(() => getComputedStyle(document.getElementById("fit")).width === "180px");
