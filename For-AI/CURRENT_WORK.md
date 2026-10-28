@@ -29,8 +29,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   ordered control groups and text/action cells; retain deliberate paging/details
   for unbounded content. Reuse the existing locked Pretext and shared text owner.
   Verify actual width/height, zoom, text-spacing and keyboard behavior before the
-  final installer rebuild. The final candidate at `39e9d778` includes the layout
-  work; its packages remain unpublished until installed and full-preset checks pass.
+  final installer rebuild. Candidate `39e9d778` includes the main layout work;
+  a visual follow-up at `751945ab` corrects duplicate long/short navigation labels.
+  Final packages must include that correction and pass installed/full-preset checks.
   The new UI checkpoints are integrated: Runner `2750a3f5` and Designer
   `078761da`, with About-dialog follow-up `663a3662`, including the shared
   text-fit fixes and exact skill mirror.
@@ -49,6 +50,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   invalid for the new container-based layout. Six audit-contract tests and six
   repository/release checks pass. The full 12-case mandatory rerun now passes
   with inspected screenshots, as do six focused existing UI source contracts.
+  A subsequent screenshot inspection caught a CSS specificity conflict painting
+  both long and short navigation labels. Its minimal fix now passes actual
+  visible-label/name checks at 320/760/761/1440px, the complete Designer stretch
+  rerun, canonical rebuild and both Pages parity checks. The source correction
+  and its regression are included in the next final installer build.
   Final package promotion waits for the pinned Windows candidate evidence.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
@@ -241,10 +247,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   checkpoint; V1 applications and public products were not promoted.
   [Draft PR #2](https://github.com/GeorgeFejer91/pps-kit/pull/2) tracks integration;
   no merge or release promotion has occurred.
-  Final candidate [40735351508](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40735351508)
+  Intermediate candidate [40735351508](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40735351508)
   targets `39e9d778e3ffc76d0ca23606e10321e2066e8a1f`; native contract tests pass
-  and both installer builds are running. The release draft targets that revision
-  and still has no assets. Its normal CI passed Windows/Linux Desktop and Browser,
+  and both installer builds are running. Retain its installed/pipeline evidence,
+  but rebuild after navigation fix `751945ab` before publication. The asset-free
+  release draft will be retargeted to that final build checkpoint.
+  Its normal CI passed Windows/Linux Desktop and Browser,
   but the macOS Desktop job was cancelled before downstream checks could run.
   Follow-up [CI 40737552536](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40737552536)
   at the documentation-only `3c7da150` passes all three Desktop jobs and Browser;
