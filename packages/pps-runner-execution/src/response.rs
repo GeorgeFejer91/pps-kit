@@ -13,6 +13,53 @@ pub const RESPONSE_MIN_RT_NS: u64 = 100_000_000;
 pub const RESPONSE_MAX_RT_NS: u64 = 1_300_000_000;
 pub const MAX_TRIAL_RESPONSES: usize = 4_096;
 
+/// Closed local input affordances; never contains a saved correct answer.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ResponseControlPolicy {
+    Go,
+    LeftRight,
+    Unsupported,
+}
+
+pub fn response_control_policy(row: &Map<String, Value>) -> ResponseControlPolicy {
+    let choice = ChoicePolicy::from_row(row);
+    let mode = token(&choice.mode);
+    if choice.choices.is_empty() && choice.correct.is_empty() {
+        return if [
+            "",
+            "go",
+            "click",
+            "button_press",
+            "simple_reaction_time",
+            "detection",
+            "tactile_detection",
+            "voice_key_mouse_click_proxy",
+            "button_press_mouse_click_proxy",
+        ]
+        .contains(&mode.as_str())
+        {
+            ResponseControlPolicy::Go
+        } else {
+            ResponseControlPolicy::Unsupported
+        };
+    }
+    let options: Vec<_> = choice
+        .choices
+        .split(['|', '/', ',', ';'])
+        .map(token)
+        .collect();
+    if choice.required()
+        && options.len() == 2
+        && options.contains(&"left".to_owned())
+        && options.contains(&"right".to_owned())
+        && ["left", "right"].contains(&token(&choice.correct).as_str())
+    {
+        ResponseControlPolicy::LeftRight
+    } else {
+        ResponseControlPolicy::Unsupported
+    }
+}
+
 pub const DATA_MIN_FIELDNAMES: [&str; 18] = [
     "participant_id",
     "session_id",
@@ -682,6 +729,32 @@ pub fn data_min_row(row: &Map<String, Value>, trial_number_global: u64) -> Optio
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn response_controls_project_only_supported_options_not_correct_answers() {
+        let policy = |row: Value| response_control_policy(row.as_object().unwrap());
+        assert_eq!(policy(json!({})), ResponseControlPolicy::Go);
+        assert_eq!(
+            policy(json!({"response_mode":"voice_key_mouse_click_proxy"})),
+            ResponseControlPolicy::Go
+        );
+        for answer in ["left", "right"] {
+            assert_eq!(
+                policy(
+                    json!({"response_mode":"mouse_click_choice_proxy_for_left_right_keypress","response_choice_set":"left,right","correct_response":answer})
+                ),
+                ResponseControlPolicy::LeftRight
+            );
+        }
+        for row in [
+            json!({"response_choice_set":"left,right"}),
+            json!({"response_mode":"voice_key"}),
+            json!({"response_mode":"choice","response_choice_set":"red,green","correct_response":"red"}),
+            json!({"response_mode":"choice","response_choice_set":"left,right","correct_response":"secret-other"}),
+        ] {
+            assert_eq!(policy(row), ResponseControlPolicy::Unsupported);
+        }
+    }
 
     #[test]
     fn inclusive_window_selection_withholding_and_minimal_projection() {

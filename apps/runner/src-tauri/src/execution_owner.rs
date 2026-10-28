@@ -710,6 +710,10 @@ impl OwnerState {
 
     fn native_start_ready(&self) -> bool {
         self.core.native_block_prepared()
+            && self
+                .prepared_audio
+                .as_ref()
+                .is_some_and(|cached| cached.summary.response_mode != "unsupported")
             && self.native_journal_current()
             && self.native_output.media_prepared()
             && self.native_playback.as_ref().is_some_and(|playback| {
@@ -2675,6 +2679,9 @@ impl OwnerState {
         self.native_output.observe_cleanup(observation);
         self.poll_event_journal();
         let source = if let Some(cached) = self.prepared_audio.as_ref() {
+            if cached.summary.response_mode == "unsupported" {
+                return Err(NativeOutputCommandError::new("native_response_contract_unsupported","This block requires response controls that the native Runner does not support. Choose a supported saved response contract before acquisition."));
+            }
             if !self.native_journal_current()
                 || cached.candidate.run_generation() != self.run_generation
             {
