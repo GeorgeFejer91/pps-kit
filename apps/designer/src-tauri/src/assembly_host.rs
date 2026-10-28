@@ -55,6 +55,12 @@ impl DesignerService {
         variants: Value,
     ) -> Result<(crate::jobs::JobSnapshot, ReviewWork)> {
         service::bound_snapshot(&snapshot)?;
+        if snapshot["block_csv_preview"]["blocks"]
+            .as_array()
+            .is_none_or(Vec::is_empty)
+        {
+            return Err("native_complete_block_plan_required".into());
+        }
         if serde_json::to_vec(&variants)
             .map_err(|_| "invalid_variants")?
             .len()

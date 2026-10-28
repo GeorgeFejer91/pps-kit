@@ -19,6 +19,12 @@ fn preset_job(shared: &Shared, id: &str) -> Result<Value> {
     Ok(job.result.unwrap_or(Value::Null))
 }
 
+fn preset_expected_empty_plan_guard(case: &Value, rows: usize, error: &str) -> bool {
+    case["configuration_eligible"] == false
+        && rows == 0
+        && error == "native_complete_block_plan_required"
+}
+
 fn preset_compare_complete_rows(before: &Value, after: &Value) -> Result<()> {
     let original = before["blocks"].as_array().ok_or("capture_blocks")?;
     let enriched = after["blocks"].as_array().ok_or("review_blocks")?;
@@ -181,7 +187,7 @@ fn preset_prepare_case(
         .begin_review(revision, snapshot, variants);
     let (job, work) = match review {
         Ok(value) => value,
-        Err(error) if case["configuration_eligible"] == false && source_rows == 0 => {
+        Err(error) if preset_expected_empty_plan_guard(case, source_rows, &error) => {
             evidence["status"] = json!("blocked");
             evidence["native_guard_error"] = json!(error);
             return Ok(());
@@ -189,14 +195,7 @@ fn preset_prepare_case(
         Err(error) => return Err(error),
     };
     crate::assembly_host::review(shared.clone(), work);
-    if let Err(error) = preset_job(&shared, &job.job_id) {
-        if case["configuration_eligible"] == false && source_rows == 0 {
-            evidence["status"] = json!("blocked");
-            evidence["native_guard_error"] = json!(error);
-            return Ok(());
-        }
-        return Err(error);
-    }
+    preset_job(&shared, &job.job_id)?;
     if case["configuration_eligible"] != true {
         return Err("blocked_capture_unexpectedly_reviewed".into());
     }
@@ -382,4 +381,38 @@ fn complete_preset_comparison_rejects_changed_order_and_verified_duration() {
     assert!(preset_compare_complete_rows(&original, &changed)
         .unwrap_err()
         .contains("row_count_changed"));
+}
+
+#[test]
+fn empty_preset_plan_guard_precedes_assets_and_does_not_classify_unrelated_errors() {
+    let case = json!({"configuration_eligible":false});
+    assert!(preset_expected_empty_plan_guard(
+        &case,
+        0,
+        "native_complete_block_plan_required"
+    ));
+    for error in [
+        "asset_hash_mismatch",
+        "storage_unavailable",
+        "invalid_snapshot",
+        "ResourceLimit",
+    ] {
+        assert!(!preset_expected_empty_plan_guard(&case, 0, error));
+    }
+    assert!(!preset_expected_empty_plan_guard(
+        &case,
+        1,
+        "native_complete_block_plan_required"
+    ));
+    let root = std::env::temp_dir().join(format!(
+        "pps-empty-plan-{}-{}",
+        std::process::id(),
+        SEQUENCE.fetch_add(1, Ordering::Relaxed)
+    ));
+    fs::create_dir(&root).unwrap();
+    let _cleanup = ImportDirectory(Some(root.clone()));
+    let mut owner = DesignerService::open(root, PathBuf::new(), PathBuf::new()).unwrap();
+    let result = owner.begin_review(0, json!({"design":{"noises":[{"label":"missing","prebaked_path":"unavailable.wav"}]},"block_csv_preview":{}}), json!([{"choices":[{"kind":"audio","label":"missing"}]}]));
+    assert_eq!(result.err().unwrap(), "native_complete_block_plan_required");
+    assert!(owner.jobs.snapshot("1").is_none());
 }
