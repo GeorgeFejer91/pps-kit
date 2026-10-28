@@ -48,6 +48,13 @@ computes the expected SHA256 after that exact in-memory transformation; it rejec
 missing/ambiguous markers and still hashes every byte. Resource files compare
 directly. Packaged WebView checks require the Tauri origin, not a development URL.
 
+The existing preset-population auditor can export a public JSON/CSV projection
+of a terminal native sweep. It binds captured inputs, candidate attribution and
+exact preset identities; multipart success requires distinct ordered parts and
+the corresponding durable group audit. Public fields exclude paths, participant
+identities and raw receipts/errors. Software completion does not promote source
+completeness, native physical qualification or publication equivalence.
+
 Report each relevant gate as **VERIFIED**, **PARTIAL**, **BLOCKED**, or
 **NOT RUN**, with the observed surface and missing evidence. A guidance review
 does not qualify runtime code, installed packages, or scientific performance.

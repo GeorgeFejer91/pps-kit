@@ -354,6 +354,24 @@ def build_public_report(root: Path, captures: Path, native_report: Path, candida
                 raise ValueError("Native success does not preserve the complete configured parts")
             for part in case["parts"]:
                 public_token(part["manifest_sha256"], r"[a-f0-9]{64}")
+            identities = [part.get("part_session_id") for part in case["parts"]]
+            if (any(not isinstance(identity, str) or not identity for identity in identities)
+                    or len(set(identities)) != expected_parts
+                    or len({part["manifest_sha256"] for part in case["parts"]}) != expected_parts):
+                raise ValueError("Native parts require distinct verified identities and hashes")
+            if expected_parts == 2:
+                if ([part.get("part_number") for part in case["parts"]] != [1, 2]
+                        or not isinstance(receipt.get("group_result_manifest"), str)
+                        or not receipt["group_result_manifest"]
+                        or independent.get("schema") != "pps.native-group-result-file-audit.v1"
+                        or independent.get("partCount") != 2):
+                    raise ValueError("Multipart success requires ordered parts and a durable group audit")
+            elif (case["parts"][0].get("part_number") is not None
+                    or receipt.get("group_result_manifest") is not None
+                    or independent.get("schema") != "pps.native-result-file-audit.v1"):
+                raise ValueError("Single-part success requires the matching session audit")
+            if independent.get("evidence") != "file-contract-only" or independent.get("timingQualification") != "unqualified":
+                raise ValueError("Independent audit scope changed")
             totals = {"verified_parts": len(case["parts"]),
                       **{target: sum(public_count(part[source]) for part in receipt["parts"])
                          for target, source in (("executed_trial_rows", "trial_count"), ("executed_block_occurrences", "block_count"),

@@ -141,6 +141,7 @@ def public_inputs(tmp_path):
             native["native_guard_error"] = "native_complete_block_plan_required"
         elif name != "failed":
             parts = [{"manifest_sha256": "a" * 64, "block_count": 1, "trial_count": 2,
+                      "part_session_id": "synthetic_part_1", "part_number": 1 if name == "passed" else None,
                       "blocks": [{"trial_count": 2}], "manifest_path": "C:/PRIVATE_SENTINEL/part.json"}]
             observed = [{"package_manifest_sha256": "a" * 64, "block_count": 1, "trial_count": 2,
                          "per_block_trial_counts": [2], "stage_count": 3, "gate_count": 2,
@@ -149,16 +150,20 @@ def public_inputs(tmp_path):
                          "all_trial_response_identities_outcomes_and_rts_matched": True,
                          "scored_responses": [{"participant": "PRIVATE_SENTINEL"}]}]
             if name == "passed":
-                parts.append({**copy.deepcopy(parts[0]), "manifest_sha256": "f" * 64})
+                parts.append({**copy.deepcopy(parts[0]), "manifest_sha256": "f" * 64,
+                              "part_session_id": "synthetic_part_2", "part_number": 2})
                 observed.append({**copy.deepcopy(observed[0]), "package_manifest_sha256": "f" * 64})
             native.update(full_plan_preserved=True, all_part_packages_verified=True, all_block_schedules_compiled=True,
                           handoff_sha256="b" * 64, parts=parts,
                           generation={"status": "premade_assets_reused"},
                           execution={"status": "completed_software", "receipt": {
                               "passed": True, "input_manifest_sha256": "b" * 64, "parts": observed,
+                              "group_result_manifest": "C:/PRIVATE_SENTINEL/group.results.json" if name == "passed" else None,
                               "clock_basis": "test-only-sample-paced-simulated-monotonic", "synthetic_responses": True,
                               "physical_device_used": False, "timing_qualification": "unqualified"},
                               "independent_file_audit": {"passed": True, "scoredTrialCount": 2 * len(parts), "datasetRowCount": 2 * len(parts),
+                                                         "schema": "pps.native-group-result-file-audit.v1" if name == "passed" else "pps.native-result-file-audit.v1",
+                                                         "partCount": len(parts), "evidence": "file-contract-only", "timingQualification": "unqualified",
                                                          "path": "C:/PRIVATE_SENTINEL/results"}})
         native_cases.append(native)
     save(status_path, {"profiles": profiles})
@@ -218,7 +223,8 @@ def test_public_export_keeps_native_outcomes_and_science_separate(public_inputs,
 @pytest.mark.parametrize("mutation", ["missing_case", "duplicate_case", "template_hash", "capture_hash", "capture_report_hash",
                                     "input_hash", "candidate_commit", "source_commit", "ci_url", "preflight", "false_guard",
                                     "false_pass", "result_rows", "part_hash", "physical", "source_counts", "missing_part",
-                                    "capture_bytes", "template_bytes", "capture_path"])
+                                    "capture_bytes", "template_bytes", "capture_path", "duplicate_parts", "part_identity",
+                                    "part_order", "missing_group_receipt", "wrong_audit_kind", "group_part_count"])
 def test_public_export_rejects_unbound_or_overstated_evidence(public_inputs, mutation):
     inputs = copy.deepcopy(public_inputs)
     native = audit.read_json(inputs["native_report"])
@@ -257,6 +263,19 @@ def test_public_export_rejects_unbound_or_overstated_evidence(public_inputs, mut
         case["parts"].pop()
         case["execution"]["receipt"]["parts"].pop()
         case["execution"]["independent_file_audit"].update(scoredTrialCount=2, datasetRowCount=2)
+    elif mutation == "duplicate_parts":
+        case["parts"][1] = copy.deepcopy(case["parts"][0])
+        case["execution"]["receipt"]["parts"][1] = copy.deepcopy(case["execution"]["receipt"]["parts"][0])
+    elif mutation == "part_identity":
+        case["parts"][1]["part_session_id"] = case["parts"][0]["part_session_id"]
+    elif mutation == "part_order":
+        case["parts"][1]["part_number"] = 1
+    elif mutation == "missing_group_receipt":
+        case["execution"]["receipt"].pop("group_result_manifest")
+    elif mutation == "wrong_audit_kind":
+        case["execution"]["independent_file_audit"]["schema"] = "pps.native-result-file-audit.v1"
+    elif mutation == "group_part_count":
+        case["execution"]["independent_file_audit"]["partCount"] = 1
     elif mutation == "capture_bytes":
         with (inputs["captures"] / "passed.json").open("a") as handle:
             handle.write(" ")
