@@ -14,7 +14,7 @@
       }
     }
   </script>
-  <script type="module" crossorigin src="./assets/index-Ckc1884j.js"></script>
+  <script type="module" crossorigin src="./assets/index-DvJQYYoB.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-NJnpkcLS.css">
 </head>
 <body>
@@ -1181,7 +1181,7 @@
             <span class="segment-kicker">Native Runtime</span>
             <h2 id="docs-runner-title">How The Experiment Runner Works</h2>
           </div>
-          <p class="info-copy">The Experiment Runner is a native Windows application, PPSExperimentRunner.exe, launched from the Segment 6 setup package and entirely separate from the browser dashboard. It is responsible for all timing-sensitive work during data collection, opening the prepared session package, playing the three-channel ASIO stream to the lab hardware, and recording participant responses and event markers. All playback timing is handled natively to avoid the latency variability inherent in browser JavaScript execution. Session output folders contain event CSVs, XDF and marker mirrors for Lab Streaming Layer integrations, trigger dictionaries, timing quality-control reports, and analysis-ready trial rows.</p>
+          <p class="info-copy">The Windows Experiment Runner Preview opens verified prepared sessions from Designer. Native Rust playback handles the audio and tactile channels, participant responses, and durable event and result files. Output includes event journals, trial CSVs, and completion receipts. Physical timing remains unqualified. Live LSL streaming and XDF capture are not supported in this Preview; ASIO and optional LSL/LabRecorder workflows belong to the separately documented V1 Python/Qt route.</p>
           <div class="doc-link-row">
             <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/WINDOWS_APP.md">Open Windows App Guide</a>
             <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/For-AI/engineering/validation/docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
