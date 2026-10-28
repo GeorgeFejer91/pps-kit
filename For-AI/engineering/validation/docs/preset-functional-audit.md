@@ -114,3 +114,21 @@ the established catch-family withholding override, and reports each affected
 row count. A complete numerical trial pool does not compensate for a lost
 response contract. Native result checks must verify response-to-trial identity
 and scoring, not only that a response event was observed.
+
+The same review found that the initial native assembler concatenates each trial
+variant without the saved numeric `iti_ms` silence that the Python assembler
+appends. This affects, for example, Biggio's configured 300 ms default and
+Collignon's configured 1950 ms mean. Preserving these fields in CSV is necessary
+but insufficient: native output and trial bounds must include the configured
+interval, or reject it explicitly. That does not establish an unreported jitter
+distribution. The native callback audit must compare input-to-trial identity,
+expected synthetic scores and RTs, including explicitly supported choice and
+auditory-only target policies; generic observed-response counts alone are not
+that evidence.
+
+Independent re-capture after the UI duration correction `f19e693a` (with download
+checkpoint `09062da1`) again covers all 30 presets. All 44 generated premade
+source durations match actual WAV headers; Canzoneri rows are now 5000 ms in
+both directions. Source-row multiplicities are unchanged. Outputs are retained
+separately under ignored `artifacts/preset-functional-audit-duration-fixed/`;
+the nine saved-metadata losses remain present in that intermediate snapshot.
