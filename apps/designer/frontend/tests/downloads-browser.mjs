@@ -59,5 +59,33 @@ export async function verifyNativeDownloads(page, output) {
     exactReleaseTarget: true, remoteAvailabilityAssessed: false }, null, 2));
   await page.evaluate(() => { document.documentElement.style.zoom = ""; });
   await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("tab", { name: "Documentation", exact: true }).click();
+  const section = page.locator("#docs-emulatable-studies");
+  assert.equal(await section.getByRole("heading", { level: 2 }).innerText(), "Archived Study Configurations");
+  assert.doesNotMatch(await section.innerText(), /six study profiles|five publications|Studies Currently Emulatable/i);
+  assert.match(await section.innerText(), /Template availability and native software checks are separate from scientific equivalence/);
+  const mapLink = section.getByRole("link", { name: "Open Audiotactile Map", exact: true });
+  const configurationGeometry = [];
+  for (const [width, zoom] of [[320, 1], [900, 1], [1440, 1], [1440, 2]]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.evaluate(value => { document.documentElement.style.zoom = String(value); }, zoom);
+    await mapLink.scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => document.querySelector('#docs-emulatable-studies [data-pretext]').dataset.pretextResult);
+    const rendered = await section.evaluate(node => [...node.querySelectorAll('h2,.info-copy,.button-link')].map(element => ({
+      text: element.textContent, overflow: element.scrollWidth > element.clientWidth + 1,
+      outsideViewport: element.getBoundingClientRect().left < -1 || element.getBoundingClientRect().right > innerWidth + 1,
+    })));
+    assert.ok(rendered.every(item => !item.overflow && !item.outsideViewport), `${width}px / ${zoom}: configuration copy reflows`);
+    configurationGeometry.push({ width, zoom, rendered });
+  }
+  await page.evaluate(() => { document.documentElement.style.zoom = ""; });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await section.screenshot({ path: join(output, "archived-configurations.png") });
+  await mapLink.focus(); await page.keyboard.press("Enter");
+  await page.waitForFunction(() => location.hash === "#docs-publication-network");
+  await page.waitForFunction(() => document.getElementById("publication-network-inventory-note").textContent.includes("inventory and contract audits complete"));
+  assert.equal(await page.locator("#documentation-page").isVisible(), true);
+  await writeFile(join(output, "archived-configurations-report.json"), JSON.stringify({ configurationGeometry,
+    keyboardMapRoute: true, generatedAuditText: await page.locator("#publication-network-inventory-note").innerText() }, null, 2));
   await page.getByRole("tab", { name: "Experiment Designer", exact: true }).click();
 }
