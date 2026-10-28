@@ -117,6 +117,7 @@ fn software_trial_expectations(
                 / 1_000_000.0
         );
         assert!(expected.insert(key,serde_json::json!({
+            "execution_block_number":schedule.summary().block_index,
             "response_required":policy.response_required,"choice_required":policy.choice_required,
             "response_given":inject,"valid_response":inject,"response_frame":response_frame,
             "response_choice":if inject { choice } else { String::new() },
@@ -490,9 +491,16 @@ fn software_run_complete_part(
     let expected_response_ids: std::collections::BTreeMap<_, _> = expected_trials
         .iter()
         .filter_map(|(key, row)| {
-            row["response_event_id"]
-                .as_u64()
-                .map(|id| (id, (key.clone(), row["observed_ns"].as_u64().unwrap())))
+            row["response_event_id"].as_u64().map(|id| {
+                (
+                    id,
+                    (
+                        key.clone(),
+                        row["observed_ns"].as_u64().unwrap(),
+                        row["execution_block_number"].as_i64().unwrap(),
+                    ),
+                )
+            })
         })
         .collect();
     let expected_trial_count = expected_trials.len();
@@ -514,12 +522,20 @@ fn software_run_complete_part(
         }
         if event["eventType"] == "response.observed" {
             let id = event["payload"]["response_event_id"].as_u64().unwrap();
-            let (key, ns) = expected_response_ids
+            let (key, ns, execution_block_number) = expected_response_ids
                 .get(&id)
                 .expect("unexpected native input identity");
             assert!(observed_ids.insert(id), "duplicate native input identity");
             assert_eq!(event["payload"]["observedHostMonotonicNs"], *ns);
-            assert_eq!(event["payload"]["block_number"], key.0);
+            // In a counterbalanced part, the saved source block_index can
+            // differ from this occurrence's execution position. Ingress is
+            // attributed to the compiled schedule, while the scored trial
+            // must retain its distinct saved source identity below.
+            assert_eq!(
+                event["payload"]["block_number"],
+                execution_block_number.to_string(),
+                "response occurrence for saved trial {key:?}"
+            );
             native_responses += 1;
         }
         if event["eventType"] == "trial.scored" {
@@ -528,6 +544,7 @@ fn software_run_complete_part(
             let expected = expected_trials
                 .remove(&key)
                 .expect("unknown or duplicated scored trial");
+            assert_eq!(row["block_number"], expected["execution_block_number"]);
             for field in [
                 "response_required",
                 "choice_required",
@@ -552,7 +569,7 @@ fn software_run_complete_part(
                     assert_eq!(row["response_correct"], true);
                 }
             }
-            scored_responses.push(serde_json::json!({"block_index":key.0,"trial_uid":key.1,"outcome":row["outcome"],"rt_ms":row["rt_ms"],"response_event_id":row["response_event_id"]}));
+            scored_responses.push(serde_json::json!({"block_index":key.0,"execution_block_number":expected["execution_block_number"],"trial_uid":key.1,"outcome":row["outcome"],"rt_ms":row["rt_ms"],"response_event_id":row["response_event_id"]}));
         }
     }
     assert_eq!(
@@ -726,7 +743,8 @@ fn unsupported_prepared_response_contract_cannot_reserve_native_output() {
 fn full_package_software_clock_preserves_native_three_hundred_ms_response() {
     let (root, original) = verified_audio_package("SOFTWARE_FIXTURE", 1);
     fs::write(root.join("block-0.wav"), pcm16_wav_bytes(8000, 16_000, 500)).unwrap();
-    fs::write(root.join("block-0.csv"), "Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Looming_Onset_Sample,Tactile_Onset_Sample,Response_Window_Onset_Sample,Trial_End_Sample\n1,T1,Target,audiotactile,8000,0,0,4000,0,16000\n").unwrap();
+    // Source block 2 occurs first, as in an actual counterbalanced package.
+    fs::write(root.join("block-0.csv"), "Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Looming_Onset_Sample,Tactile_Onset_Sample,Response_Window_Onset_Sample,Trial_End_Sample,block_index\n1,T1,Target,audiotactile,8000,0,0,4000,0,16000,2\n").unwrap();
     let mut manifest: Value =
         serde_json::from_slice(&fs::read(original.manifest_path()).unwrap()).unwrap();
     manifest["blocks"][0]["duration_s"] = serde_json::json!(2.0);
@@ -742,6 +760,14 @@ fn full_package_software_clock_preserves_native_three_hundred_ms_response() {
         software_run_complete_package(verified.manifest_path(), verified.manifest_sha256());
     assert_eq!(report["parts"][0]["injected_responses"], 1);
     assert_eq!(report["parts"][0]["scored_responses"][0]["outcome"], "Hit");
+    assert_eq!(
+        report["parts"][0]["scored_responses"][0]["block_index"],
+        "2"
+    );
+    assert_eq!(
+        report["parts"][0]["scored_responses"][0]["execution_block_number"],
+        1
+    );
     assert_eq!(
         report["parts"][0]["scored_responses"][0]["rt_ms"],
         "300.000"
