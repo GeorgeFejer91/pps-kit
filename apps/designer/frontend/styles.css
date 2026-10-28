@@ -5999,6 +5999,16 @@ a:focus-visible,
   overflow-wrap: anywhere;
 }
 
+.native-iti-details {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.native-iti-details > summary {
+  display: block;
+}
+
 .profile-validation-panel:not([open]) { margin-bottom: 8px; }
 
 .block-preview-table td[data-label="WAV"] {

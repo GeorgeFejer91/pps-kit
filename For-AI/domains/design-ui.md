@@ -74,7 +74,12 @@ in `apps/designer/frontend/tests/verify-browser-workflows.mjs`.
 Premade source hydration retains the selected file's actual duration. Edited
 trial strips retain their saved identity, SOAs and metadata; source, pool and
 block rows carry the existing V1 contract allowlist, including response and ITI
-fields. The explicit transition into block review rebuilds the complete edited
+fields. Block rows and summaries retain saved descriptive labels without
+changing trial allocation. Native toolkit ITI materialization stays separate
+from the source range: Segment 5 exposes the selected delay, frames, anchor and
+exact seed, and Segment 6 discloses the substitution before acceptance. The
+review CSV retains both contracts; these fields do not establish source or
+legacy equivalence. The explicit transition into block review rebuilds the complete edited
 preview before acceptance. Startup draft restore waits for the initial load and
 does not override an intervening user interaction or save.
 
