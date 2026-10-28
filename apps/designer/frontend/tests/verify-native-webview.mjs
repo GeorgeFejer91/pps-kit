@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+const layoutOnly = process.argv.includes("--layout-only");
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PPS_PLAYWRIGHT_MODULE || "playwright");
 let browser;
@@ -24,9 +27,12 @@ try {
   page.on("pageerror", error => recordFailure({ kind: "pageerror", message: error.message }));
   page.on("console", message => { if (message.type() === "error") recordFailure({ kind: "console", message: message.text() }); });
   page.on("requestfailed", request => recordFailure({ kind: "requestfailed", url: request.url(), message: request.failure()?.errorText }));
-  page.on("dialog", dialog => dialog.accept());
+  if (!layoutOnly) page.on("dialog", dialog => dialog.accept());
   await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
   assert.equal(await page.evaluate(() => window.PPSDesignerApp.isNative()), true);
+  if (layoutOnly) {
+    await verifyInstalledLayout(page, browser, failures);
+  } else {
   assert.equal(await page.locator("#native-import-profile").isVisible(), true);
   assert.equal(await page.locator("#native-import-profile").isEnabled(), true);
   assert.equal(await page.evaluate(() => Boolean(window.PPSDesignerApp.getState().custom_workflow?.is_custom)), false,
@@ -91,4 +97,155 @@ try {
     downstreamInvalidated: true, generatedPreviewStartedMuted: true, httpFallbackRequests: 0,
   }, null, 2));
   console.log("Native WebView: real controls, required algorithm opt-in, actual C++ audio publication, downstream invalidation, no HTTP fallback passed.");
+  }
 } finally { await browser.close(); }
+
+// Presentation-only installed check. Never creates a draft or activates a
+// generation/review/import control. CSS viewport emulation is not OS resizing.
+async function verifyInstalledLayout(page, browser, errors) {
+  const output = resolve(fileURLToPath(new URL("../../../../", import.meta.url)), "artifacts/ui-workflow-check/designer-native-layout");
+  await mkdir(output, { recursive: true });
+  await page.evaluate(async () => { await window.PPSDesignerApp.ready; });
+  const cdp = await page.context().newCDPSession(page);
+  const original = await page.evaluate(() => ({ zoom: document.documentElement.style.zoom,
+    design: JSON.stringify({ design: PPSDesignerApp.getState().design, workflow: PPSDesignerApp.getState().custom_workflow }) }));
+  const position = await page.evaluateHandle(() => ({ focus: document.activeElement,
+    scroll: [...document.querySelectorAll("*")].filter(node => node.scrollHeight > node.clientHeight || node.scrollWidth > node.clientWidth).map(node => [node, node.scrollLeft, node.scrollTop]) }));
+  const report = { mode: "packaged-read-only-layout", passed: false, browser: browser.version(), browserVersion: await cdp.send("Browser.getVersion"),
+    origin: new URL(page.url()).origin, scope: "Actual packaged Designer WebView; presentation and keyboard navigation only",
+    viewportMethod: "CDP CSS viewport emulation; default is the existing native viewport; OS-window resizing not assessed",
+    zoomMethod: "documentElement CSS zoom 2; browser UI zoom and assistive technology not assessed",
+    documentPolicy: "Workflow uses outer document flow; About text has its existing separate reading region",
+    draftCreated: false, profileSelected: false, generationStarted: false, nativeReviewBuilt: false,
+    cases: [], failures: [], errors, restored: false };
+  let spacing, openedAbout = false;
+  try {
+    assert.equal(report.origin, "http://tauri.localhost");
+    assert.equal(await page.evaluate(() => typeof window.__TAURI_INTERNALS__?.invoke), "function");
+    assert.equal(await page.locator('[role="dialog"]:visible').count(), 0, "Close existing dialogs before a read-only layout check");
+    const matrix = [["default"], ["desktop", 1280, 800], ["wide-short", 1920, 620],
+      ["narrow", 320, 1000], ["zoom-200", 1280, 800], ["text-spacing", 1280, 800]];
+    for (const [name, width, height] of matrix) {
+      if (width) await cdp.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 0, mobile: false });
+      await page.evaluate(zoom => { document.documentElement.style.zoom = zoom; }, name === "zoom-200" ? "2" : original.zoom);
+      if (spacing) { await spacing.evaluate(node => node.remove()); spacing = null; }
+      if (name === "text-spacing") spacing = await page.addStyleTag({ content: "body *{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}p{margin-bottom:2em!important}" });
+      const record = { name, requested: width ? { width, height } : "existing viewport", views: [], keyboard: [] };
+      report.cases.push(record);
+      for (const selector of ["#study-segment", "#native-generation-controls", "#native-execution"]) {
+        await page.locator(selector).scrollIntoViewIfNeeded();
+        await settleLayout(page);
+        const geometry = await layoutGeometry(page, selector);
+        record.views.push({ selector, ...geometry });
+        if (geometry.horizontalOverflow || geometry.outside.length || geometry.clipped.length || geometry.overlaps.length || geometry.boundedOverflow.length || geometry.textNoFit.length) {
+          report.failures.push({ name, selector, reason: "Rendered geometry does not fit", geometry });
+        }
+        await page.screenshot({ path: resolve(output, `${name}-${selector.slice(1)}.png`) });
+      }
+      assert.equal(await page.getByRole("button", { name: "Open portable profile", exact: true }).getAttribute("id"), "native-import-profile");
+      assert.equal(await page.getByRole("spinbutton", { name: "Native source seed", exact: true }).getAttribute("id"), "native-source-seed");
+      assert.equal(await page.getByRole("button", { name: "Build full native review", exact: true }).getAttribute("id"), "native-build-review");
+      await page.locator("#native-import-profile").focus();
+      await page.keyboard.press("Tab");
+      const trigger = page.getByRole("button", { name: "About Segment 0: Choose or Create Study", exact: true });
+      assert.equal(await trigger.evaluate(node => node === document.activeElement), true, "Tab follows the native import control in DOM order");
+      record.keyboard.push(await focusedControl(page, "About Segment 0"));
+      await page.keyboard.press("Enter");
+      openedAbout = true;
+      const close = page.locator("#segment-info-modal-close");
+      await close.waitFor();
+      await close.focus();
+      await page.keyboard.press("Tab");
+      const body = page.getByRole("region", { name: "Segment information", exact: true });
+      assert.equal(await body.evaluate(node => node === document.activeElement), true);
+      record.keyboard.push(await focusedControl(page, "About reading region"));
+      const dialog = await page.locator("#segment-info-modal [role=dialog]").count()
+        ? page.locator("#segment-info-modal [role=dialog]") : page.locator("#segment-info-modal");
+      const box = await dialog.boundingBox();
+      const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+      assert.ok(box && box.x >= -1 && box.y >= -1 && box.x + box.width <= viewport.width + 1 && box.y + box.height <= viewport.height + 1, "About anchors fit the viewport");
+      await page.screenshot({ path: resolve(output, `${name}-about.png`) });
+      await page.keyboard.press("Escape");
+      openedAbout = false;
+      assert.equal(await trigger.evaluate(node => node === document.activeElement), true, "Closing About restores focus to its actual trigger");
+      record.focusReturned = true;
+    }
+    const unchanged = await page.evaluate(before => before === JSON.stringify({ design: PPSDesignerApp.getState().design,
+      workflow: PPSDesignerApp.getState().custom_workflow }), original.design);
+    report.designAndWorkflowUnchanged = unchanged;
+    assert.ok(unchanged, "Layout checks must not change the design or custom workflow");
+    assert.deepEqual(report.failures, []);
+    assert.deepEqual(errors, [], "Installed WebView errors are retained, not suppressed");
+  } catch (error) {
+    report.failures.push({ reason: error.message });
+    await page.screenshot({ path: resolve(output, "failure.png") }).catch(() => {});
+    throw error;
+  } finally {
+    try {
+      if (openedAbout && await page.locator("#segment-info-modal:visible").count()) await page.keyboard.press("Escape");
+      if (spacing) await spacing.evaluate(node => node.remove());
+      await page.evaluate(zoom => { document.documentElement.style.zoom = zoom; }, original.zoom);
+      await cdp.send("Emulation.clearDeviceMetricsOverride");
+      await position.evaluate(({ focus, scroll }) => { if (focus?.isConnected) focus.focus({ preventScroll: true });
+        for (const [node, left, top] of scroll) if (node.isConnected) node.scrollTo({ left, top, behavior: "instant" }); });
+      report.restored = true;
+      report.passed = Boolean(report.designAndWorkflowUnchanged && report.cases.length === 6 && !report.failures.length && !errors.length);
+    } catch (error) {
+      report.failures.push({ reason: `Restoration failed: ${error.message}` });
+      throw error;
+    } finally {
+      await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2));
+      await cdp.detach();
+    }
+  }
+  assert.ok(report.passed, "The complete installed layout report must pass");
+  console.log(`Packaged Designer layout-only checks passed: ${output}`);
+}
+
+async function settleLayout(page) {
+  await page.evaluate(async () => { await document.fonts.ready;
+    for (let i = 0; i < 4; i++) await new Promise(done => requestAnimationFrame(done)); });
+}
+
+async function layoutGeometry(page, selector) {
+  return page.evaluate(selector => {
+    const scope = document.querySelector(selector);
+    const visible = node => {
+      if (!node.getClientRects().length || getComputedStyle(node).visibility === "hidden") return false;
+      for (let p = node.parentElement; p; p = p.parentElement) {
+        if (p.matches("details:not([open])") && !p.querySelector(":scope > summary")?.contains(node)) return false;
+      }
+      return true;
+    };
+    const box = node => ({ id: node.id || node.className, ...node.getBoundingClientRect().toJSON() });
+    const controls = [...scope.querySelectorAll("button,input,select,textarea,summary")].filter(visible);
+    const labels = [...scope.querySelectorAll("button,label,[data-pretext-result]")].filter(visible);
+    const overlaps = [];
+    for (let i = 0; i < controls.length; i++) for (let j = i + 1; j < controls.length; j++) {
+      if (controls[i].contains(controls[j]) || controls[j].contains(controls[i])) continue;
+      const a = controls[i].getBoundingClientRect(), b = controls[j].getBoundingClientRect();
+      if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1) overlaps.push([box(controls[i]), box(controls[j])]);
+    }
+    return { viewport: { width: innerWidth, height: innerHeight, visualWidth: visualViewport?.width, visualHeight: visualViewport?.height, dpr: devicePixelRatio },
+      userAgent: navigator.userAgent, container: box(scope), documentHeight: document.documentElement.scrollHeight,
+      horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+      controls: controls.map(box), overlaps, outside: controls.filter(node => { const r = node.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1; }).map(box),
+      clipped: labels.filter(node => { const r = document.createRange(); r.selectNodeContents(node); const text = r.getBoundingClientRect(), b = node.getBoundingClientRect();
+        return text.width && (text.left < b.left - 2 || text.right > b.right + 2 || text.top < b.top - 2 || text.bottom > b.bottom + 2); }).map(box),
+      boundedOverflow: [scope, ...scope.querySelectorAll(".panel")].filter(visible).filter(node =>
+        (node.scrollWidth > node.clientWidth + 2 && getComputedStyle(node).overflowX !== "visible") ||
+        (node.scrollHeight > node.clientHeight + 2 && getComputedStyle(node).overflowY !== "visible")).map(box),
+      textNoFit: labels.filter(node => node.dataset.pretextDomResult === "no-fit").map(box) };
+  }, selector);
+}
+
+async function focusedControl(page, name) {
+  const result = await page.evaluate(() => { const node = document.activeElement, b = node.getBoundingClientRect(), style = getComputedStyle(node);
+    const hit = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
+    return { id: node.id, box: b.toJSON(), focusVisible: node.matches(":focus-visible"), outline: style.outline, outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth,
+      boxShadow: style.boxShadow, reachable: b.left >= -1 && b.top >= -1 && b.right <= innerWidth + 1 && b.bottom <= innerHeight + 1 && (hit === node || node.contains(hit)) }; });
+  assert.ok(result.reachable, `${name} is not covered or outside the viewport`);
+  assert.ok(result.focusVisible, `${name} has keyboard focus`);
+  assert.ok((result.outlineStyle !== "none" && parseFloat(result.outlineWidth) > 0) || result.boxShadow !== "none", `${name} retains a focus indicator`);
+  return { name, accessibleNode: (await page.locator(":focus").ariaSnapshot()).split("\n")[0], ...result };
+}
