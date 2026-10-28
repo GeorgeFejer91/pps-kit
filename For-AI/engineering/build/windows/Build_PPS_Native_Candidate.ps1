@@ -32,6 +32,17 @@ function Assert-Exit([string]$Operation) {
     if ($LASTEXITCODE -ne 0) { throw "$Operation failed with exit code $LASTEXITCODE" }
 }
 function Hash([string]$Path) { (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
+$PreviousEncodedRustFlags = $env:CARGO_ENCODED_RUSTFLAGS
+# Panic locations include Cargo registry paths even when release symbols are
+# stripped. Map both Windows spellings before compiling public executables.
+$RemappedFlags = @($PreviousEncodedRustFlags -split [char]31 | Where-Object { $_ })
+foreach ($Mapping in @(@($env:USERPROFILE, '/build/user'), @($Root, '/build/pps-kit'))) {
+    foreach ($Source in @($Mapping[0], $Mapping[0].Replace('\', '/')) | Select-Object -Unique) {
+        $Flag = '--remap-path-prefix=' + $Source + '=' + $Mapping[1]
+        if ($Flag -notin $RemappedFlags) { $RemappedFlags += $Flag }
+    }
+}
+$env:CARGO_ENCODED_RUSTFLAGS = $RemappedFlags -join [char]31
 Push-Location -LiteralPath $Root
 try {
     $Commit = (git rev-parse HEAD).Trim(); Assert-Exit 'Read source revision'
@@ -70,7 +81,7 @@ try {
         renderer_source_commit=$RendererSourceCommit; renderer_files=$RendererInventory; selected_apps=@($Apps | Select-Object -Unique);
         microsoft_runtime=$RuntimeLock;
         builder_sha256=(Hash $PSCommandPath); runtime_lock_sha256=(Hash (Join-Path $PSScriptRoot 'native-runtime-lock.json'));
-        signing='unsigned'; webview2='offlineInstaller'; python_runtime=$false }
+        signing='unsigned'; webview2='offlineInstaller'; python_runtime=$false; rust_source_paths_remapped=$true }
     if ($ValidateOnly) { $Preflight | ConvertTo-Json -Depth 8; return }
     New-Item -ItemType Directory -Path $OutputDirectory | Out-Null
     # CAB-extracted Microsoft notices can be read-only. Tauri preserves that
@@ -175,4 +186,7 @@ try {
     $Preflight | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $OutputDirectory 'candidate-manifest.json') -Encoding utf8
     $Artifacts | ForEach-Object { "$($_.sha256)  $($_.file)" } | Set-Content -LiteralPath (Join-Path $OutputDirectory 'SHA256SUMS') -Encoding ascii
     Write-Host "Built unsigned native candidates in $OutputDirectory; installation and publication remain separate checks."
-} finally { Pop-Location }
+} finally {
+    Pop-Location
+    $env:CARGO_ENCODED_RUSTFLAGS = $PreviousEncodedRustFlags
+}

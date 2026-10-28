@@ -20,8 +20,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   explicitly renewed on 2026-10-28. The user directs finishing the committed
   preview products; retain `org.peripersonalspace.designer.preview` and
   `org.peripersonalspace.runner.preview`. GitHub installer publication and fresh
-  installed functionality testing are now explicitly authorized. Final source validation is delivered;
-  installed and publication gates remain open.
+  installed functionality testing are now explicitly authorized. The previous
+  source baseline passed; the full-preset audit found additional defects now
+  being repaired and verified. Installed and publication gates remain open.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
   replication-ready labels. Generation ships without Python; Python remains
@@ -44,6 +45,18 @@ This file is the active checklist and handoff owner; replace state, do not appen
   B1–B3/C1 fixes and the sanitized study projection are integrated
   on the review branch; the bounded catalogue audit and browser source checks
   are complete. Installed and publication gates remain open.
+- **Current full-preset findings:** fresh actual-browser captures preserve all
+  30 presets: 25 configuration-eligible plans, five source-gap guards, 4,740
+  source rows/61 blocks, and 80/80 referenced WAV durations. These are not 94
+  runnable publications. Duration hydration, saved response/ITI metadata,
+  descriptive block labels, native CSV arrays and actual intertrial silence
+  have focused repairs. Runner decoding now uses bounded buffered reads;
+  encoded-block admission matches the existing 1,280 MiB decoded ceiling so
+  the complete Serino trunk Exp. 2 block is not truncated. New Rust checks and
+  complete native execution remain pending. Noel walking's reported interval
+  range has no reported distribution or anchor: any native realization is an
+  explicit reviewed toolkit customization, preserving the source gap, original
+  range and versioned derived timing. It is not an exact-paper replication.
 - **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
@@ -52,15 +65,22 @@ This file is the active checklist and handoff owner; replace state, do not appen
   installed application/runtime/web files match its audited 24-file NSIS payload.
   The unsigned installer is 220,505,585 bytes, SHA256
   `3fdbe2bd33c3fef3b444b44441e362e34ea5b3a67c98e2319d145788bfa2873f`.
-  Startup was verified only at earlier `b8e0e789`;
-  automatic approval review rejected the fresh launch check at `468c8241`
-  ("blocked by policy", without a more specific reason). No alternate launch
-  was attempted. Complete installed execution remains unverified.
-- **Next action:** build the Designer installer beside the verified Runner,
-  execute the complete installed software journey, audit all archived presets and
-  publish the verified installers/checksums/source on GitHub. The coordinator owns
+  Under the fresh user authorization, Designer source `613c1542` was built and
+  installed: the 305,521,763-byte installer has SHA256
+  `91bc3b9523572cd89e1485195c5f744d561c7d6925c330b16332b19084881f85`;
+  all 493 application/resource files match the audited payload. Actual installed
+  controls created a custom draft, enforced algorithm opt-in, generated through
+  Rust/C++, invalidated stale outputs and previewed muted audio without HTTP
+  fallback. This supersedes the historical launch rejection; both intermediate
+  installers require rebuilding with the later functional repairs. The complete
+  408-row software execution attempt stopped when the disk filled; partial
+  journals are retained and no whole-session success is claimed.
+- **Next action:** run the complete Windows candidate CI job, rebuild both
+  installers from the repaired source, execute every eligible full preset with
+  independent result auditing, verify the installed payloads and publish the
+  exact tested installers/checksums/source on GitHub. The coordinator owns
   packaging/release/current state; workers own archive usability, native complete-
-  package execution and hosted/installed UI verification. Final product
+  package execution and hosted/installed UI verification. The preceding product
   source `9dfd1760` passes [CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
   (14/14 jobs), including full Standard and the final UI/import/storage follow-ups.
   Reuse the frozen scientific audit and existing test owners. New checks must
@@ -121,9 +141,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Previous actual browser export/offline re-export/native import verifies nine
   embedded assets and exact premade receipt/WAV hashes. Read-only recovery retains
   six process-crash boundary checks and explicit incomplete/orphaned classifications.
-  Installed startup evidence belongs only to `b8e0e789`; `9dfd1760` has installed
-  payload equality. The launch-policy blocker from `468c8241` remains; no alternate
-  startup route was attempted. The rebuilt payload has no Python/source inputs,
+  Runner startup evidence belongs to `b8e0e789`; `9dfd1760` has installed
+  payload equality. Fresh authorized Designer installed startup/generation at
+  `613c1542` passed as above. The rebuilt payload has no Python/source inputs,
   all ten canonical web files match, and its offline WebView2 installer has a valid
   Microsoft signature. This host already has WebView2.
   Independent final scope review corrected stale hosted-to-localhost and remote
@@ -222,13 +242,21 @@ This file is the active checklist and handoff owner; replace state, do not appen
   renderer source and software validation/scope notes on GitHub under the
   2026-10-28 authorization. Independently download/hash-check published assets.
 
-Current constraints are missing installed/full-journey evidence, approximately
-3.5 GB local free space, and native OS automation initialization failing with
+Current constraints are missing final installed/full-journey evidence, limited
+local free space, and native OS automation initialization failing with
 "failed to write kernel assets" (os error 3). The latest user request authorizes
 fresh installed-test requests; any new automatic rejection must be reported,
 not bypassed. Existing identity/publication direction is sufficient to continue.
-The exact compiler-cache cleanup remains unapproved and must not be retried;
-reuse existing release caches and bounded outputs or hosted build workers.
+The user explicitly approved the exact incremental cache deletion, but automatic
+review still rejected it as "blocked by policy"; no alternate deletion was used.
+The user then authorized Proton Drive archival and removal of superfluous
+worktrees/caches. The unused Rust-generation worktree is now recoverably archived
+through Codex, including its dirty Cargo files. Its 600 ignored artifact files
+(2,204,663,742 bytes) were moved to the user's existing Proton Drive folder and
+every file hash verified before archival. The client was started; cloud upload
+completion is unverified because native UI inspection still fails. Active worker
+and integration worktrees remain. This restored about 2.6 GB; use bounded local
+checks and the pinned hosted Windows candidate job for large builds.
 Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
 skips and strict Clippy; current Designer/Runner frontend checks pass 42/79 tests.
 At product revision `9dfd1760`, [CI run 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
@@ -236,10 +264,11 @@ passes all three Core, Desktop and Python/Rust oracle platforms, Browser,
 optional Quest and all three validation bundles (14/14 jobs). The earlier non-Windows icon and
 shared-module source-map drift failures are resolved with existing assets and
 a scoped LF rule. CI artifacts are not installed/qualified release evidence.
-The pinned-toolchain checks accumulated approximately 15.6 GB of regenerable
-Rust incremental cache, leaving approximately 3 GB free. Automatic approval review
-rejected the exact compiler-cache cleanup as "blocked by policy" without a
-more specific reason. No cleanup ran; explicit user approval remains pending.
+The new full-preset repairs pass 48 Designer core tests (seven opt-in cases
+deferred), 200 native host/audio/execution library tests (nine opt-in cases
+deferred), 15 Python audit/helper tests, and 52 Designer JS tests. Canonical
+frontend builds and rendered label/timing disclosure checks pass. Complete
+all-preset execution and the rebuilt packages still need the new cloud run.
 The full Standard tier, including final follow-ups, passes on the existing
 Windows CI worker, with actual free space and skip reasons logged. Later
 documentation-only checkpoints do not change the tested product/package bytes.

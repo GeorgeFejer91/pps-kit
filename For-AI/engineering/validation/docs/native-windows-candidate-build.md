@@ -16,15 +16,38 @@ the proposed manifest without creating output. `-NpmCliPath` accepts an existing
 pinned npm CLI when npm is not on PATH. Node 24.19.0, npm 10.9.4, Rust 1.96.0
 and the repository's Tauri CLI 2.11.4 lock are required.
 
-The runtime inputs are x64 Microsoft redistribution files, not copies from
-System32. The VC14 files come from the installed Build Tools redistribution
-directory; their matching English license is the `license.rtf` payload in the
-same redistribution executable. The VC2013 package URL/hash is recorded in the
-lock. Its signed embedded cabinet contains `F_CENTRAL_msvcr120_x64`, copied as
+Stage the six locked inputs with
+[Stage_PPS_Native_Runtime.ps1](../../build/windows/Stage_PPS_Native_Runtime.ps1)
+and a new output directory. It downloads the exact official Microsoft VC2013
+and VC14 redistributables, verifies their and their embedded cabinets' hashes,
+and extracts only the declared DLL/license payloads without executing them.
+No installed Build Tools redistribution folder or System32 copy is required.
+The VC2013 signed embedded cabinet contains `F_CENTRAL_msvcr120_x64`, copied as
 `msvcr120.dll`; its bootstrap cabinet's `license.rtf` payload becomes
 `VC2013-license.rtf`. Extracting these inputs does not run an installer. The
 reviewed DLLs have valid Microsoft Authenticode signatures. The builder checks
 every DLL/license hash before copying any into the candidate.
+
+For the full cloud route, dispatch `runner-next.yml` on the exact review branch
+with `native_release=true`. The additional Windows job builds C++ into fresh
+ignored directories (the tracked legacy executable is never a build result),
+stages the locked child-process DLLs, checks actual renderer waveforms, and
+builds both NSIS installers from committed source. Rust compiler path remapping
+removes the build user's home and repository paths from panic locations.
+The complete preset driver uses actual browser captures and both native host
+owners, then independently audits result files. Noel's interval realization
+is explicitly opted into as a disclosed toolkit customization, preserving
+reported-range gaps; that result is not an unchanged paper replication.
+
+[Test_PPS_Native_Candidate.ps1](../../build/windows/Test_PPS_Native_Candidate.ps1)
+requires a fresh disposable CI account. It verifies installer hashes, installs
+both exact payloads, compares every resource and executable, rejects unexpected
+development files, checks private build-home strings, and launches with a
+Windows-only PATH. Actual Designer controls exercise generation and preview;
+Runner startup checks canonical embedded bytes and unarmed native state.
+Native file dialogs, physical timing and Windows prerequisite installation
+without an existing WebView2 runtime remain separate evidence. The job uploads
+candidate artifacts and compact receipts; it never publishes a GitHub release.
 The builder normalizes configured resource source paths before bundling. Its
 single JSON Merge Patch removes each old relative map key with a null value and
 adds the canonical key; merging only new keys would retain the old relative
