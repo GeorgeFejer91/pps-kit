@@ -7,6 +7,116 @@ fn software_frame_ns(frames: u64, rate: u32) -> u64 {
     u64::try_from(u128::from(frames) * 1_000_000_000 / u128::from(rate)).unwrap()
 }
 
+fn software_trial_key(row: &Value) -> (String, String) {
+    let scalar = |value: &Value| {
+        value
+            .as_str()
+            .map(str::to_owned)
+            .unwrap_or_else(|| value.to_string())
+    };
+    let uid = row
+        .get("trial_uid")
+        .filter(|v| !v.is_null() && v.as_str() != Some(""))
+        .or_else(|| row.get("trial_number"))
+        .expect("compiled trial identity");
+    (scalar(&row["block_index"]), scalar(uid))
+}
+
+fn software_trial_expectations(
+    schedule: &pps_runner_execution::BlockEventSchedule,
+    rate: u32,
+    origin: u64,
+    required_ordinal: &mut usize,
+) -> std::collections::BTreeMap<(String, String), Value> {
+    use pps_runner_execution::{score_trial_response, TrialResponseWindow};
+    let mut expected = std::collections::BTreeMap::new();
+    for start in schedule
+        .events()
+        .iter()
+        .filter(|e| e.event_type == "trial_start")
+    {
+        let key = software_trial_key(&start.payload);
+        let sample = |kind: &str| {
+            schedule
+                .events()
+                .iter()
+                .find(|event| event.event_type == kind && software_trial_key(&event.payload) == key)
+                .map(|e| u64::try_from(e.sample_index).unwrap())
+        };
+        let start_frame = u64::try_from(start.sample_index).unwrap();
+        let tactile = sample("tactile_onset");
+        let response_window = sample("response_window_onset")
+            .or_else(|| sample("looming_onset"))
+            .or(tactile)
+            .unwrap_or(start_frame);
+        let end = sample("trial_end").expect("saved trial end");
+        let window = TrialResponseWindow {
+            trial_start_ns: origin + software_frame_ns(start_frame, rate),
+            response_window_ns: origin + software_frame_ns(response_window, rate),
+            tactile_onset_ns: tactile.map(|frame| origin + software_frame_ns(frame, rate)),
+            trial_end_ns: origin + software_frame_ns(end, rate),
+        };
+        // Reuse the frozen V1 policy parser, then independently assert ingress
+        // identity/window/selection against the durable scored row. The
+        // independent Python oracle remains responsible for cross-language
+        // policy/projection conformance; this is not a new response policy.
+        let policy = score_trial_response(
+            start.payload.as_object().unwrap(),
+            window,
+            &[],
+            &std::collections::BTreeSet::new(),
+        )
+        .unwrap();
+        let choice = if policy.choice_required && policy.response_required {
+            [
+                "correct_response",
+                "Correct_Response",
+                "correct_choice",
+                "Correct_Choice",
+                "target_choice",
+                "Target_Choice",
+                "expected_choice",
+                "Expected_Choice",
+            ]
+            .iter()
+            .find_map(|key| {
+                start
+                    .payload
+                    .get(*key)
+                    .and_then(Value::as_str)
+                    .map(str::trim)
+                    .filter(|v| !v.is_empty())
+            })
+            .expect("software_driver_unsupported_choice_without_saved_correct_response")
+            .to_owned()
+        } else {
+            String::new()
+        };
+        if policy.response_required {
+            *required_ordinal += 1;
+        }
+        let omitted = policy.response_required && (*required_ordinal).is_multiple_of(7);
+        let inject = policy.response_required && !omitted;
+        let anchor = tactile.unwrap_or(response_window);
+        let response_frame = anchor + u64::from(rate) * 3 / 10;
+        let expected_rt = format!(
+            "{:.3}",
+            (software_frame_ns(response_frame, rate) - software_frame_ns(anchor, rate)) as f64
+                / 1_000_000.0
+        );
+        assert!(expected.insert(key,serde_json::json!({
+            "response_required":policy.response_required,"choice_required":policy.choice_required,
+            "response_given":inject,"valid_response":inject,"response_frame":response_frame,
+            "response_choice":if inject { choice } else { String::new() },
+            "outcome":if omitted { "Miss" } else { "Hit" },
+            "rt_ms":if inject { expected_rt } else { String::new() },
+            "response_event_id":null,
+            "observed_ns":if inject { Some(origin+software_frame_ns(response_frame,rate)) } else { None }
+        })).is_none(),"duplicate compiled trial identity");
+    }
+    expected
+}
+
 fn software_result_files(
     session: &VerifiedPreparedSession,
 ) -> std::collections::BTreeSet<std::path::PathBuf> {
@@ -42,6 +152,8 @@ fn software_run_complete_part(
     let mut expected_boundary_times = Vec::new();
     let mut response_count = 0;
     let mut gate_count = 0;
+    let mut required_ordinal = 0;
+    let mut expected_trials = std::collections::BTreeMap::new();
     for stage in &stages {
         let boundary_start = expected_boundaries.len();
         let preparation =
@@ -70,7 +182,6 @@ fn software_run_complete_part(
             .into(),
             0,
         ));
-        let mut responses = Vec::new();
         if !is_instruction {
             for event in candidate
                 .schedule()
@@ -79,23 +190,8 @@ fn software_run_complete_part(
                 .filter(|e| e.event_type != "audio_sample_zero" && e.sample_index >= 0)
             {
                 expected_boundaries.push((event.event_type.clone(), event.sample_index as u64));
-                // Deliberately synthetic tactile-detection responses. No
-                // psychometric model or physical response claim is implied.
-                let kind = format!(
-                    "{} {}",
-                    event.payload["family"], event.payload["trial_type"]
-                )
-                .to_lowercase();
-                if event.event_type == "tactile_onset"
-                    && !kind.contains("catch")
-                    && !kind.contains("audio_only")
-                {
-                    responses.push(event.sample_index as u64 + u64::from(rate) * 3 / 10);
-                }
             }
         }
-        responses.sort_unstable();
-        let response_end_frame = responses.last().copied().unwrap_or(frames).max(frames);
         expected_boundaries.push(("audio.final-frame-submitted".into(), frames));
         media_evidence.push(serde_json::json!({
             "stage_ordinal": stage.ordinal, "block_ordinal": stage.block_ordinal,
@@ -106,6 +202,7 @@ fn software_run_complete_part(
             "instruction_tactile_zero": is_instruction,
             "all_pcm_samples_compared": true
         }));
+        let schedule = Arc::clone(candidate.schedule());
         runtime.cache_prepared_audio(candidate).unwrap();
         tauri::async_runtime::block_on(runtime.ensure_execution_journal()).unwrap();
         drop(guard);
@@ -138,6 +235,25 @@ fn software_run_complete_part(
         );
 
         let origin = clock.now_ns();
+        let trials = if is_instruction {
+            std::collections::BTreeMap::new()
+        } else {
+            software_trial_expectations(&schedule, rate, origin, &mut required_ordinal)
+        };
+        let mut responses: Vec<_> = trials
+            .iter()
+            .filter(|(_, v)| v["response_given"] == true)
+            .map(|(key, v)| (v["response_frame"].as_u64().unwrap(), key.clone()))
+            .collect();
+        responses.sort_unstable();
+        let response_end_frame = responses
+            .last()
+            .map(|(frame, _)| *frame)
+            .unwrap_or(frames)
+            .max(frames);
+        for (key, value) in trials {
+            assert!(expected_trials.insert(key, value).is_none());
+        }
         expected_boundary_times.extend(
             expected_boundaries[boundary_start..]
                 .iter()
@@ -155,21 +271,28 @@ fn software_run_complete_part(
             );
             while responses
                 .get(response_index)
-                .is_some_and(|frame| *frame <= cursor)
+                .is_some_and(|(frame, _)| *frame <= cursor)
             {
-                tauri::async_runtime::block_on(runtime.record_native_response(
+                let expected = expected_trials
+                    .get_mut(&responses[response_index].1)
+                    .unwrap();
+                let id = tauri::async_runtime::block_on(runtime.record_native_response(
                     NativeResponseRequest {
-                        choice: String::new(),
+                        choice: expected["response_choice"].as_str().unwrap().to_owned(),
                         x: Some(0.5),
                         y: Some(0.5),
                     },
                 ))
                 .unwrap();
+                expected["response_event_id"] = serde_json::json!(id);
                 response_index += 1;
                 response_count += 1;
             }
             if cursor < frames {
-                let next_response = responses.get(response_index).copied().unwrap_or(frames);
+                let next_response = responses
+                    .get(response_index)
+                    .map(|(frame, _)| *frame)
+                    .unwrap_or(frames);
                 let count = 1024u64
                     .min(frames - cursor)
                     .min(next_response.saturating_sub(cursor).max(1));
@@ -206,8 +329,8 @@ fn software_run_complete_part(
                 }
                 cursor = status.submitted_frames;
                 clock.advance_to(origin + software_frame_ns(cursor, rate));
-            } else if let Some(next) = responses.get(response_index).copied() {
-                cursor = next;
+            } else if let Some((next, _)) = responses.get(response_index) {
+                cursor = *next;
                 clock.advance_to(origin + software_frame_ns(cursor, rate));
                 continue;
             } else {
@@ -340,6 +463,16 @@ fn software_run_complete_part(
     let mut actual_boundary_times = Vec::new();
     let mut native_responses = 0;
     let mut scored_responses = Vec::new();
+    let mut observed_ids = std::collections::BTreeSet::new();
+    let expected_response_ids: std::collections::BTreeMap<_, _> = expected_trials
+        .iter()
+        .filter_map(|(key, row)| {
+            row["response_event_id"]
+                .as_u64()
+                .map(|id| (id, (key.clone(), row["observed_ns"].as_u64().unwrap())))
+        })
+        .collect();
+    let expected_trial_count = expected_trials.len();
     for line in BufReader::new(fs::File::open(event_path).unwrap())
         .lines()
         .skip(1)
@@ -357,10 +490,46 @@ fn software_run_complete_part(
             );
         }
         if event["eventType"] == "response.observed" {
+            let id = event["payload"]["response_event_id"].as_u64().unwrap();
+            let (key, ns) = expected_response_ids
+                .get(&id)
+                .expect("unexpected native input identity");
+            assert!(observed_ids.insert(id), "duplicate native input identity");
+            assert_eq!(event["payload"]["observedHostMonotonicNs"], *ns);
+            assert_eq!(event["payload"]["block_number"], key.0);
             native_responses += 1;
         }
-        if event["eventType"] == "trial.scored" && event["payload"]["response_given"] == true {
-            scored_responses.push(serde_json::json!({"outcome":event["payload"]["outcome"],"rt_ms":event["payload"]["rt_ms"]}));
+        if event["eventType"] == "trial.scored" {
+            let row = &event["payload"];
+            let key = software_trial_key(row);
+            let expected = expected_trials
+                .remove(&key)
+                .expect("unknown or duplicated scored trial");
+            for field in [
+                "response_required",
+                "choice_required",
+                "response_given",
+                "valid_response",
+                "response_choice",
+                "response_event_id",
+                "outcome",
+                "rt_ms",
+            ] {
+                assert_eq!(
+                    row[field], expected[field],
+                    "native response {field} did not join its expected trial {key:?}"
+                );
+            }
+            if expected["response_given"] == true {
+                assert_eq!(
+                    row["response_observed_host_monotonic_ns"],
+                    expected["observed_ns"]
+                );
+                if expected["choice_required"] == true {
+                    assert_eq!(row["response_correct"], true);
+                }
+            }
+            scored_responses.push(serde_json::json!({"block_index":key.0,"trial_uid":key.1,"outcome":row["outcome"],"rt_ms":row["rt_ms"],"response_event_id":row["response_event_id"]}));
         }
     }
     assert_eq!(
@@ -368,6 +537,16 @@ fn software_run_complete_part(
         "all saved sample boundaries must reach the durable event stream in order"
     );
     assert_eq!(native_responses, response_count);
+    assert!(
+        expected_trials.is_empty(),
+        "native results omitted expected trial responses"
+    );
+    assert_eq!(expected_trial_count as i64, expected_rows);
+    assert_eq!(
+        observed_ids.len(),
+        expected_response_ids.len(),
+        "native results orphaned an injected response"
+    );
     assert_eq!(actual_boundary_times.len(), expected_boundary_times.len());
     assert!(actual_boundary_times.iter().zip(&expected_boundary_times).all(|(actual, expected)|actual.abs_diff(*expected)<=1), "callback times must preserve the saved sample durations, within integer-nanosecond rounding");
     serde_json::json!({
@@ -375,8 +554,10 @@ fn software_run_complete_part(
         "block_count":session.blocks().len(), "trial_count":expected_rows,
         "per_block_trial_counts":session.summary().blocks.iter().map(|b|b.trial_count).collect::<Vec<_>>(),
         "stage_count":stages.len(), "gate_count":gate_count, "media":media_evidence,
-        "injected_tactile_responses":response_count, "native_response_events":native_responses,
+        "injected_responses":response_count, "native_response_events":native_responses,
         "scored_responses":scored_responses,
+        "response_policy":"saved-v1-required-and-correct-choice-300ms-every-seventh-required-omitted.v1",
+        "all_trial_response_identities_outcomes_and_rts_matched":true,
         "receipt":result["receipt"], "all_block_schedules_compiled":true,
         "all_saved_occurrences_preserved":true, "all_callback_boundaries_matched":true
     })
@@ -492,10 +673,11 @@ fn full_package_software_clock_preserves_native_three_hundred_ms_response() {
         verify_prepared_session(VerificationRequest::new(original.manifest_path())).unwrap();
     let report =
         software_run_complete_package(verified.manifest_path(), verified.manifest_sha256());
-    assert_eq!(report["parts"][0]["injected_tactile_responses"], 1);
+    assert_eq!(report["parts"][0]["injected_responses"], 1);
+    assert_eq!(report["parts"][0]["scored_responses"][0]["outcome"], "Hit");
     assert_eq!(
-        report["parts"][0]["scored_responses"],
-        serde_json::json!([{"outcome":"Hit","rt_ms":"300.000"}])
+        report["parts"][0]["scored_responses"][0]["rt_ms"],
+        "300.000"
     );
     assert!(report["simulated_elapsed_ns"].as_u64().unwrap() >= 2_000_000_000);
 }
