@@ -14,19 +14,23 @@ import {
   remoteActionsForTarget,
 } from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
-import { initializeTextLayout } from "./ui/text-layout.js";
+import { initializeTextLayout, initializeWorkspaceLayout, paginateCollection } from "./ui/text-layout.js";
 import { bindParticipantResponse } from "./ui/participant-response.js";
 import { bindParticipantSetupDraft } from "./ui/participant-setup-draft.js";
 import { bindNativeOutputSetup } from "./ui/native-output-setup.js";
 import { bindSessionProgress } from "./ui/session-progress.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 
+initializeWorkspaceLayout();
 initializeTextLayout();
 
 const api = selectRunnerAdapter();
 let nativeSnapshotSubscription = null;
 let nativeUpdatesReady = false;
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));
+paginateCollection(elements["package-block-list"], { size: 4,
+  previous: elements["package-block-previous"], next: elements["package-block-next"], label: elements["package-block-page"] });
+paginateCollection(elements["desktop-controller-targets"]);
 const participantSetupDraft = bindParticipantSetupDraft(elements);
 const participantResponse = bindParticipantResponse({
   target: elements["participant-response"], api,
@@ -440,7 +444,7 @@ async function renderRemote(next) {
     ? `Fresh legacy LAN invitation for ${next.target_id ?? next.targetId ?? "this runner"}. The secret remains in the fragment.`
     : serverAvailable
       ? "Remote authority is disabled. No active invitation is exposed."
-      : "The website beacon below does not expose the app's local port or private pairing secret.");
+      : "Public beacon does not expose the app's local port or private pairing secret.");
 
   if (inboundPrivateTarget && (!enabled || remoteSessionId(next) !== inboundPrivateTarget.sessionId)) {
     void stopInboundPrivateTarget("remote_activation_changed");

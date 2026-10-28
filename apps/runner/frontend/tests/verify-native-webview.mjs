@@ -36,6 +36,8 @@ try {
     output: await window.__TAURI_INTERNALS__.invoke("native_output_status"),
     snapshot: await window.__TAURI_INTERNALS__.invoke("runner_snapshot"),
   }));
+  await page.getByRole("button", { name: "Experiment Control", exact: true }).click();
+  await page.locator('[data-workspace-open="package"]').click();
   if (process.argv.includes("--startup-only")) {
     assert.equal(initial.group.partCount, 0);
     assert.equal(initial.snapshot.package_verified, false);
@@ -83,7 +85,9 @@ try {
   });
   await page.getByRole("button", { name: "Experiment Control", exact: true }).click();
   await page.locator("#inspect-prepared-execution").click();
+  await page.locator('[data-workspace-open="overview"]').click();
   await page.locator("#execution-inspection-status").filter({ hasText: "Compiled" }).waitFor();
+  await page.locator('[data-workspace-open="package"]').click();
   await page.locator("#prepare-first-audio-block").click();
   await page.waitForFunction(() => window.runnerNativeCheck.some(item => item.command === "prepare_first_audio_block"));
   const observed = await page.evaluate(async () => {
@@ -106,6 +110,7 @@ try {
   assert.equal(observed.group.completedParts, 0, "Selection must not resume prior complete result files.");
   assert.equal(observed.group.experimentComplete, false);
   assert.match(observed.recovery, /prior group receipt/);
+  await page.locator('[data-workspace-open="overview"]').click();
   await page.locator("#prepared-audio-status").scrollIntoViewIfNeeded();
   await page.screenshot({ path: resolve(output, "runner-actual-native-preload.png") });
   await writeFile(resolve(output, "runner-actual-native-report.json"), JSON.stringify({ browser: browser.version(),

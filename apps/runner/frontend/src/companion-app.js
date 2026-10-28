@@ -25,11 +25,12 @@ import { PpsPublicBeacon } from "./remote/vdo-beacon.js";
 import { BrspControllerSession, BrspTargetSession } from "./remote/websocket-session.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 import { renderQrCode } from "./ui/qr-code.js";
-import { initializeTextLayout } from "./ui/text-layout.js";
+import { initializeTextLayout, paginateCollection } from "./ui/text-layout.js";
 
 initializeTextLayout();
 
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));
+paginateCollection(elements["beacon-targets"]);
 const outputEngine = new BrowserOutputEngine();
 let controllerInvitation = null;
 let controllerSession = null;
@@ -77,7 +78,8 @@ function activateMode(mode) {
   document.querySelectorAll("[data-mode]").forEach((button) => {
     const active = button.dataset.mode === mode;
     button.classList.toggle("is-active", active);
-    button.setAttribute("aria-selected", String(active));
+    if (active) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
   });
   document.querySelectorAll("[data-mode-panel]").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.modePanel === mode));
 }
