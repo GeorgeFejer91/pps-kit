@@ -25,17 +25,13 @@ try {
   await page.waitForFunction(() => typeof document.querySelector("#trajectory-frame").contentWindow.updateTrajectory === "function");
   assert.equal(await page.locator("#native-import-profile").isVisible(), true);
   assert.equal(await page.locator("#native-import-profile").isEnabled(), true);
-  await page.evaluate(() => {
-    const snapshot = window.PPSDesignerApp.getState();
-    snapshot.design.name = "Native WebView acceptance fixture";
-    snapshot.design.study_profile_id = ""; snapshot.design.study_profile_title = "";
-    snapshot.design.study_profile_reference_parameters.dashboard_mode = "custom";
-    snapshot.design.study_profile_reference_parameters.profile_status = "draft";
-    snapshot.custom_workflow = { is_custom: true, is_finalized: false, edit_step: "stimulus", confirmed_steps: ["study"], needs_review_steps: [] };
-    snapshot.project = { project_id: "native-webview-fixture", project_kind: "native_draft" };
-    window.PPSDesignerApp.restoreHostedDraft(snapshot);
-  });
+  assert.equal(await page.evaluate(() => Boolean(window.PPSDesignerApp.getState().custom_workflow?.is_custom)), false,
+    "Run this control journey in a fresh isolated app profile; do not overwrite an existing draft");
   await page.locator("#edit-mode-button").click();
+  await page.locator("#customize-study-name").fill("Native WebView acceptance fixture");
+  await page.locator("#customize-submit").click();
+  await page.locator("#customize-modal").waitFor({ state: "hidden" });
+  await page.waitForFunction(() => window.PPSDesignerApp.getState().custom_workflow?.edit_step === "stimulus");
   await page.locator('.noise-type-button[data-noise-type="white"]').click();
   await page.locator("#bake-label").fill("Native WebView white");
   await page.locator("#movement-duration").fill("1");
@@ -75,7 +71,7 @@ try {
   await page.locator("#native-generation-controls").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "artifacts/ui-workflow-check/native-generation.png" });
   await writeFile("artifacts/ui-workflow-check/native-webview-report.json", JSON.stringify({
-    native: true, sharedHtml: true, trajectoryIframe: true, algorithmOptInRequired: true,
+    native: true, sharedHtml: true, trajectoryIframe: true, customDraftThroughControls: true, algorithmOptInRequired: true,
     actualRenderer: asset.provenance.renderer.schema, channels: asset.channels, sha256: asset.sha256,
     downstreamInvalidated: true, generatedPreviewStartedMuted: true, httpFallbackRequests: 0,
   }, null, 2));
