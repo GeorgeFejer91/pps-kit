@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light">
+    <meta name="color-scheme" content="light dark">
     <title>PPS Experiment Runner</title>
     <script type="module" crossorigin src="./assets/desktop.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/text-layout.js">
@@ -32,11 +32,15 @@
         <button class="tab-button" type="button" data-tab="remote" aria-controls="runner-remote">Phone Remote</button>
       </nav>
 
+      <div class="session-status-strip">
+        <p id="session-group-status" class="safety-copy" role="status">Native session-group status unavailable.</p>
+        <button class="button button-quiet" type="button" data-workspace-link="package" aria-controls="workspace-package">Package and parts</button>
+      </div>
+
       <main>
-        <section class="tab-panel is-active" id="runner-control" data-panel="control">
-          <div class="workspace-grid">
-            <div class="workspace-main stack">
-              <section class="hero-panel panel">
+        <section class="tab-panel is-active" id="runner-control" data-panel="control" data-workspace-deck aria-label="Experiment control workspace">
+<div id="workspace-run" class="workspace-view run-workspace" data-workspace="run" data-workspace-label="Run">
+<section class="hero-panel panel">
                 <div>
                   <h2 id="run-heading">Waiting for a prepared package</h2>
                   <p id="run-progress" class="subtle">The native target remains the timing and state authority.</p>
@@ -49,10 +53,7 @@
                   <button id="participant-response-right" class="response-target" type="button" disabled
                     aria-describedby="participant-response-help" data-pretext>Right</button>
                 </div>
-              </section>
-              <p id="participant-response-help" class="subtle">Click or tap the response area. Space or Enter records a response without a position. Responses are enabled during native playback or an instruction click gate.</p>
-
-              <section class="panel">
+              </section><p id="participant-response-help" class="subtle">Click or tap the response area. Space or Enter records a response without a position. Responses are enabled during native playback or an instruction click gate.</p><section class="panel">
                 <div class="section-heading">
                   <div>
                     <p class="eyebrow">Session transport</p>
@@ -74,9 +75,8 @@
                   <p id="event-label" class="timeline-event">Waiting for target snapshot</p>
                 </div>
               </section>
-
-              <section class="panel two-column-panel">
-                <form id="setup-form" class="stack compact-stack">
+</div><div id="workspace-participant" class="workspace-view " data-workspace="participant" data-workspace-label="Participant">
+<form id="setup-form" class="panel stack compact-stack">
                   <div class="section-heading">
                     <div><p class="eyebrow">Participant</p><h2>Participant Setup</h2></div>
                     <span id="setup-badge" class="badge">Not submitted</span>
@@ -91,22 +91,30 @@
                   </div>
                   <button class="button button-primary" type="submit">Submit participant setup</button>
                 </form>
-
-                <div class="stack compact-stack split-border">
+</div><div id="workspace-package" class="workspace-view " data-workspace="package" data-workspace-label="Package">
+<div class="panel stack compact-stack package-actions">
                   <div class="section-heading"><div><p class="eyebrow">Package</p><h2>Session Package</h2></div><span id="package-badge" class="badge">Unverified</span></div>
                   <p id="package-label" class="subtle">No package loaded.</p>
                   <button id="select-session-manifest" class="button button-primary" type="button">Choose prepared session manifest</button>
                   <button id="select-session-group" class="button" type="button">Choose participant session group</button>
-                  <p id="session-group-status" class="safety-copy" role="status">Native session-group status unavailable.</p>
+
                   <button id="advance-session-part" class="button" type="button" hidden disabled>Load next part</button>
                   <button id="inspect-prepared-execution" class="button" type="button" disabled>Compile and inspect Rust schedule</button>
                   <button id="prepare-first-audio-block" class="button" type="button" disabled>Prepare next audio occurrence</button>
                   <button id="prepare-demo-button" class="button" type="button" data-action="package.prepare_demo">Prepare deterministic validation demo</button>
-                  <p id="package-detail" class="safety-copy">The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.</p>
-                  <p id="execution-inspection-detail" class="safety-copy">Schedule inspection is unavailable until a real prepared session is selected.</p>
-                  <p id="prepared-audio-detail" class="safety-copy">Native PCM preparation is unavailable until the first schedule is inspected.</p>
-                  <ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol>
-                  <details id="native-results-assessment" hidden>
+
+
+
+
+
+                  <div class="inline-actions">
+                    <button class="button" type="button" data-action="target.arm">Arm local target</button>
+                    <button class="button button-quiet" type="button" data-action="target.disarm">Disarm</button>
+                  </div>
+                  <p class="safety-copy">Audio-device selection, tactile calibration, filesystem access, and acquisition controls remain local-only.</p>
+                </div>
+</div><div id="workspace-inspection" class="workspace-view " data-workspace="inspection" data-workspace-label="Inspection">
+<section class="panel stack package-review"><h2>Package inspection</h2><div class="inspection-grid"><div class="stack"><p id="package-detail" class="safety-copy">The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.</p><p id="execution-inspection-detail" class="safety-copy">Schedule inspection is unavailable until a real prepared session is selected.</p><p id="prepared-audio-detail" class="safety-copy">Native PCM preparation is unavailable until the first schedule is inspected.</p></div><div class="package-inventory"><h3>Verified blocks</h3><ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol><div class="inline-actions" id="package-block-pages"><button id="package-block-previous" class="button" type="button">Previous blocks</button><span id="package-block-page" role="status"></span><button id="package-block-next" class="button" type="button">Next blocks</button></div></div></div><details id="native-results-assessment" hidden>
                     <summary>Existing result files</summary>
                     <div id="native-group-results" hidden>
                       <p id="native-group-results-summary" class="safety-copy"></p>
@@ -125,18 +133,9 @@
                       <span id="native-results-page" class="subtle" role="status"></span>
                       <button id="native-results-next" class="button" type="button" disabled>Next attempts</button>
                     </div>
-                  </details>
-                  <div class="inline-actions">
-                    <button class="button" type="button" data-action="target.arm">Arm local target</button>
-                    <button class="button button-quiet" type="button" data-action="target.disarm">Disarm</button>
-                  </div>
-                  <p class="safety-copy">Audio-device selection, tactile calibration, filesystem access, and acquisition controls remain local-only.</p>
-                </div>
-              </section>
-            </div>
-
-            <aside class="workspace-side stack">
-              <section class="panel stack compact-stack" aria-labelledby="native-output-heading">
+                  </details></section>
+</div><div id="workspace-output" class="workspace-view paired-workspace" data-workspace="output" data-workspace-label="Audio output">
+<section class="panel stack compact-stack" aria-labelledby="native-output-heading">
                 <h2 id="native-output-heading">Prepare audio output</h2>
                 <p id="native-output-detail" class="safety-copy" role="status">Prepare the next audio occurrence before choosing an output device.</p>
                 <button id="native-output-list" class="button" type="button" disabled>List output devices</button>
@@ -149,10 +148,9 @@
                   <button id="native-output-release" class="button" type="button" disabled>Release output</button>
                   <button id="native-output-disable" class="button button-quiet" type="button" disabled>Disable output</button>
                 </div>
-              </section>
-              <section class="panel">
-                <p class="eyebrow">Output levels</p>
-                <h2>Output Summary</h2>
+              </section><section class="panel">
+                <div class="panel-heading"><p class="eyebrow">Output levels</p>
+                <h2>Output Summary</h2></div>
                 <dl class="summary-list">
                   <div><dt>Audio route</dt><dd id="audio-route">Not ready</dd></div>
                   <div><dt>Local armed</dt><dd id="local-armed">No</dd></div>
@@ -160,10 +158,10 @@
                   <div><dt>Capture</dt><dd id="capture-ready">Not started</dd></div>
                 </dl>
               </section>
-
-              <section class="panel">
-                <p class="eyebrow">Run plan</p>
-                <h2>Session Overview</h2>
+</div><div id="workspace-overview" class="workspace-view " data-workspace="overview" data-workspace-label="Overview">
+<section class="panel">
+                <div class="panel-heading"><p class="eyebrow">Run plan</p>
+                <h2>Session Overview</h2></div>
                 <dl class="summary-list">
                   <div><dt>Session</dt><dd id="session-id">—</dd></div>
                   <div><dt>Package part</dt><dd id="package-part">—</dd></div>
@@ -177,9 +175,8 @@
                 </dl>
                 <div id="allowed-actions" class="token-list" aria-label="Currently allowed actions"></div>
               </section>
-            </aside>
-          </div>
-        </section>
+</div>
+</section>
 
         <section class="tab-panel" id="runner-logging" data-panel="logging">
           <div class="workspace-grid balanced-grid">
@@ -196,8 +193,8 @@
               <p class="safety-copy">Native execution records semantic events and trial results. Playback alone does not establish physical timing or capture qualification.</p>
             </section>
             <section class="panel stack">
-              <p class="eyebrow">Session annotation</p>
-              <h2>Add a Note</h2>
+              <div class="panel-heading"><p class="eyebrow">Session annotation</p>
+              <h2>Add a Note</h2></div>
               <label>Researcher note<textarea id="session-note" maxlength="500" rows="6" placeholder="Record a bounded session annotation…"></textarea></label>
               <button id="note-button" class="button button-primary" type="button">Save note</button>
               <div class="note-preview"><span>Latest note</span><p id="last-note">None</p></div>
@@ -205,14 +202,13 @@
           </div>
         </section>
 
-        <section class="tab-panel" id="runner-remote" data-panel="remote">
-          <div class="workspace-grid balanced-grid">
-            <section class="panel stack">
+        <section class="tab-panel" id="runner-remote" data-panel="remote" data-workspace-deck aria-label="Remote workspace"><div id="workspace-remote-access" class="workspace-view paired-workspace" data-workspace="remote-access" data-workspace-label="Access and pairing">
+<section class="panel stack">
               <div class="section-heading">
                 <div><p class="eyebrow">Explicit activation</p><h2>Phone Remote</h2></div>
                 <span id="remote-state-badge" class="badge">Disabled</span>
               </div>
-              <label class="switch-row"><span><strong>Enable remote authority</strong><small>Allows a locally approved browser controller. Public discovery is a separate explicit action below.</small></span><input id="remote-enabled" type="checkbox" role="switch"></label>
+              <label class="switch-row"><span><strong>Enable remote authority</strong><small>Allows a locally approved browser controller. Public discovery is a separate action in Public beacon.</small></span><input id="remote-enabled" type="checkbox" role="switch"></label>
               <label class="switch-row"><span><strong>Allow remote abort</strong><small>Grants the separate high-impact <code>session.abort</code> scope.</small></span><input id="remote-allow-abort" type="checkbox" role="switch"></label>
               <div class="inline-actions">
                 <button id="remote-apply" class="button button-primary" type="button">Apply remote settings</button>
@@ -224,16 +220,16 @@
                 <div><dt>Granted scopes</dt><dd id="remote-scopes">None</dd></div>
                 <div><dt>Native authority</dt><dd id="remote-route">Local-only</dd></div>
               </dl>
-            </section>
-            <section class="panel pairing-panel stack">
-              <p class="eyebrow">Fresh invitation</p>
-              <h2>Scan to Control</h2>
+            </section><section class="panel pairing-panel stack">
+              <div class="panel-heading"><p class="eyebrow">Fresh invitation</p>
+              <h2>Scan to Control</h2></div>
               <canvas id="pairing-qr" width="212" height="212" hidden aria-label="Phone companion pairing QR code"></canvas>
               <div id="pairing-placeholder" class="qr-placeholder">Enable remote control to create a short-lived pairing invitation.</div>
               <p id="pairing-summary" class="subtle">The secret is held in the URL fragment and is not sent in an HTTP request.</p>
               <button id="copy-invite" class="button" type="button" disabled>Copy invitation link</button>
             </section>
-            <section class="panel stack remote-controller-panel" aria-labelledby="desktop-controller-heading">
+</div><div id="workspace-browser-control" class="workspace-view " data-workspace="browser-control" data-workspace-label="Browser controller">
+<section class="panel stack remote-controller-panel" aria-labelledby="desktop-controller-heading">
               <div class="section-heading">
                 <div><p class="eyebrow">Controller role · browser or phone target</p><h2 id="desktop-controller-heading">Control a Browser Experiment</h2></div>
                 <span id="desktop-controller-status" class="badge">Controller off</span>
@@ -265,7 +261,8 @@
                 </div>
               </div>
             </section>
-            <section class="panel stack remote-beacon-panel" aria-labelledby="desktop-beacon-heading">
+</div><div id="workspace-advertise" class="workspace-view " data-workspace="advertise" data-workspace-label="Public beacon">
+<section class="panel stack remote-beacon-panel" aria-labelledby="desktop-beacon-heading">
               <div class="section-heading">
                 <div><p class="eyebrow">Public rendezvous · private control</p><h2 id="desktop-beacon-heading">Website Connection Beacon</h2></div>
                 <span id="desktop-beacon-status" class="badge">Beacon off</span>
@@ -293,9 +290,9 @@
                 </div>
               </div>
             </section>
-          </div>
-        </section>
+</div></section>
       </main>
+      <p id="layout-status" class="layout-status" role="status" hidden></p>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite" data-pretext></div>
