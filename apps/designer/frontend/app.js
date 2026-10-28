@@ -4,6 +4,7 @@ import {
 } from "./documentation_typography.js";
 import { DesignerApiError, createDesignerApi } from "./designer_api.js";
 import { nativeDesigner } from "./native_designer.js";
+import { ROW_CONTRACT_FIELDS, rowContractMetadata, trialFamilyContract } from "./row_contract.js";
 import { audioBoxLabels, countStripVariants, iterateStripVariants, previewStripVariants, assertSequenceLimit, assertCountLimit, variantCountLabel } from "./sequence_variants.js";
 import {
   NEXT_STEP,
@@ -56,6 +57,7 @@ const BLOCK_CSV_DOWNLOAD_COLUMNS = [
   "fractional_extra",
   "channels",
   "tactile_channel",
+  ...ROW_CONTRACT_FIELDS,
 ];
 const DEFAULT_LOUDNESS_POLICY = {
   schema: "pps-loudness-policy.v1",
@@ -1583,6 +1585,7 @@ function staticTrialFileRow({
   soaMs = "",
   baselineMode = "",
   noiseType = "",
+  metadata = {},
 }) {
   const rowFolderName = `row_${String(rowIndex + 1).padStart(2, "0")}__${slugify(rowLabel)}`;
   const sequenceLabels = variant.map((choice) => choice.label).join(" | ");
@@ -1617,6 +1620,7 @@ function staticTrialFileRow({
     noise_type: noiseType,
     channels: ["catch", "auditory_only"].includes(family) ? 2 : 3,
     tactile_channel: ["catch", "auditory_only"].includes(family) ? "" : 3,
+    ...trialFamilyContract(metadata, family),
   };
 }
 
@@ -1665,6 +1669,7 @@ function staticTrialFileBakePayload(design, status, limit = Number.MAX_SAFE_INTE
           rowIndex,
           rowLabel,
           family: "audio_tactile",
+          metadata: strip.metadata,
           folderName: "target_audio_tactile",
           variant,
           variantIndex,
@@ -1681,6 +1686,7 @@ function staticTrialFileBakePayload(design, status, limit = Number.MAX_SAFE_INTE
             rowIndex,
             rowLabel,
             family: "baseline",
+            metadata: strip.metadata,
             folderName: "baseline",
             variant,
             variantIndex,
@@ -1698,6 +1704,7 @@ function staticTrialFileBakePayload(design, status, limit = Number.MAX_SAFE_INTE
           rowIndex,
           rowLabel,
           family: "catch",
+          metadata: strip.metadata,
           folderName: "catch_trials",
           variant,
           variantIndex,
@@ -1712,6 +1719,7 @@ function staticTrialFileBakePayload(design, status, limit = Number.MAX_SAFE_INTE
           rowIndex,
           rowLabel,
           family: "auditory_only",
+          metadata: strip.metadata,
           folderName: "auditory_only",
           variant,
           variantIndex,
@@ -1931,6 +1939,7 @@ function staticTrialPoolRows(files, settings, limit = Number.MAX_SAFE_INTEGER) {
         noise_type: record.file.noise_type || "",
         channels: record.file.channels || "",
         tactile_channel: record.file.tactile_channel || "",
+        ...rowContractMetadata(record.file),
       });
       trialPoolIndex += 1;
     }
@@ -2222,6 +2231,7 @@ function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax)
     fractional_extra: row.fractional_extra || "",
     channels: row.channels || "",
     tactile_channel: row.tactile_channel || "",
+    ...rowContractMetadata(row),
   };
 }
 
@@ -5896,6 +5906,7 @@ function stimulusSourceDetailsFromDom() {
 function collectTrialStrips() {
   const strips = [];
   for (const [stripIndex, row] of [...$("filmstrip-list").querySelectorAll(".filmstrip-row")].entries()) {
+    const original = state.design.protocol?.trial_strips?.[Number(row.dataset.stripIndex)] || {};
     const label = row.querySelector('[data-strip-field="label"]')?.value.trim() || `Trial type ${stripIndex + 1}`;
     const elements = [];
     for (const [elementIndex, card] of [...row.querySelectorAll(".filmstrip-element")].entries()) {
@@ -5929,7 +5940,8 @@ function collectTrialStrips() {
       elements.push(item);
     }
     strips.push({
-      strip_id: `strip-${stripIndex + 1}`,
+      ...clone(original),
+      strip_id: original.strip_id || `strip-${stripIndex + 1}`,
       label,
       audio_tactile_percentage: Number(row.querySelector('[data-strip-field="audio_tactile_percentage"]')?.value || 0),
       catch_percentage: Number(row.querySelector('[data-strip-field="catch_percentage"]')?.value || 0),
@@ -7168,6 +7180,17 @@ async function continueWorkflowStep(stepId) {
   try {
     if (staticModeActive) {
       state.design = payload.design;
+      if (stepId === "block") {
+        // Rebuild the complete edited plan only on the explicit transition into review.
+        const limit = nativeDesigner.enabled ? nativeAssemblyLimit(state.design) : Number.MAX_SAFE_INTEGER;
+        const previewStatus = state.preload_inventory || {};
+        const trialFiles = staticTrialFileBakePayload(state.design, previewStatus, limit);
+        const pool = staticTrialPoolBakePayload(state.design, trialFiles, limit);
+        const blocks = staticBlockCsvPreviewPayload(state.design, pool, previewStatus);
+        blocks.accepted = false;
+        Object.assign(state, { trial_file_bake: trialFiles, trial_pool_bake: pool, block_csv_preview: blocks,
+          project_segments: staticProjectSegments(previewStatus, trialFiles, pool, blocks) });
+      }
       refreshHostedWorkflowSteps();
       const step = getWorkflowStep(stepId) || profileStepStatus(stepId);
       if (step?.complete) {
@@ -8038,7 +8061,7 @@ async function acceptBlockCsvs() {
 }
 
 function csvEscape(value) {
-  const text = String(value ?? "");
+  const text = value !== null && typeof value === "object" ? JSON.stringify(value) : String(value ?? "");
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
@@ -9945,7 +9968,10 @@ if (nativeDesigner.enabled) {
   $("native-download-review").addEventListener("click", () => downloadTextFile("native-execution-review.json", JSON.stringify({ ...state.native_execution_review, blocks: state.block_csv_preview, run_order: state.run_sequence_setup }, null, 2), "application/json"));
   document.addEventListener("pps-native-status", event => { $("native-generation-status").textContent = event.detail; nativeExecutionMessage = event.detail; $("native-execution-status").textContent = event.detail; });
 }
+let resolveInitialState;
+const initialStateReady = new Promise(resolve => { resolveInitialState = resolve; });
 window.PPSDesignerApp = Object.freeze({
+  ready: initialStateReady,
   preloadAssetUrl: staticResourceUrl,
   getState: () => clone(state),
   getAssemblyVariants: () => assemblyVariants(state?.design, nativeDesigner.enabled ? nativeAssemblyLimit(state.design) : Number.MAX_SAFE_INTEGER),
@@ -9971,4 +9997,4 @@ window.PPSDesignerApp = Object.freeze({
   markSaved: markDesignerSaved,
 });
 
-loadState({ resetEditMode: true }).catch(reportError);
+loadState({ resetEditMode: true }).catch(reportError).finally(resolveInitialState);

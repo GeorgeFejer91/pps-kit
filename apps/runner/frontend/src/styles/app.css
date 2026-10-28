@@ -161,6 +161,7 @@ input[type="checkbox"] {
 }
 .hero-panel {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   min-height: 126px;
@@ -179,6 +180,7 @@ input[type="checkbox"] {
 }
 .response-target:disabled { border-color: var(--border); color: var(--muted); cursor: default; }
 .response-target:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+.response-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; min-width: min(100%, 14rem); flex: 0 1 20rem; }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.8rem; }
 .control-grid, .phone-action-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; }
 .button {
@@ -377,6 +379,7 @@ input[type="checkbox"] {
   .workspace-side, .control-grid, .form-grid, .compact-controller-actions { grid-template-columns: minmax(0, 1fr); }
   .hero-panel { flex-direction: column; align-items: stretch; }
   .response-target { flex-basis: auto; }
+  .response-choices { flex-basis: auto; }
   .form-span { grid-column: auto; }
   .section-heading { align-items: center; flex-wrap: wrap; }
   .desktop-page .brand-block { min-width: 0; max-width: 100%; }
