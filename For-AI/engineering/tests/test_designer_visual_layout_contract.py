@@ -136,6 +136,15 @@ def test_visual_layout_audit_rejects_geometry_regressions() -> None:
     assert any("tab labels are clipped" in failure for failure in failures)
     assert any("tabs overlap" in failure for failure in failures)
 
+    # A narrow settings container can stack above the old viewport breakpoint.
+    geometry["metrics"]["select_button_stacked"] = True
+    geometry["metrics"]["select_button_center_delta_px"] = 64
+    narrow_container = audit.assess_geometry(audit.ViewportCase("container", 761, 900, "light", False), geometry)
+    assert not any("vertical centers" in failure for failure in narrow_container)
+    geometry["metrics"]["select_button_overlap_px"] = 12
+    stacked_overlap = audit.assess_geometry(audit.ViewportCase("phone", 320, 800, "light", False), geometry)
+    assert any("selector and primary action overlap" in failure for failure in stacked_overlap)
+
 
 def test_visual_layout_audit_covers_mobile_breakpoints_without_full_boundary_matrix() -> None:
     audit = _load_audit_module()
@@ -223,7 +232,7 @@ def test_visual_layout_audit_rejects_phone_navigation_target_and_breakpoint_regr
 
     failures = audit.assess_geometry(phone, geometry)
 
-    assert any("compact section and connection disclosures" in failure for failure in failures)
+    assert any("compact section disclosure" in failure for failure in failures)
     assert any("expanded before" in failure for failure in failures)
     assert any("taller than 300" in failure for failure in failures)
     assert any("below 44x44" in failure for failure in failures)

@@ -150,9 +150,10 @@ def assess_geometry(case: ViewportCase, geometry: dict[str, Any]) -> list[str]:
         failures.append("Segment 0 heading and panel content do not share the leading meridian")
     if metrics["select_button_height_delta_px"] > 1:
         failures.append("Segment 0 selector and primary action have different heights")
-    if not case.stacked_segment_zero and metrics["select_button_center_delta_px"] > 1:
+    stacked_picker = metrics.get("select_button_stacked", case.stacked_segment_zero)
+    if not stacked_picker and metrics["select_button_center_delta_px"] > 1:
         failures.append("Segment 0 selector and primary action have different vertical centers")
-    if not case.stacked_segment_zero and metrics["select_button_overlap_px"] > 0:
+    if metrics["select_button_overlap_px"] > 0:
         failures.append("Segment 0 selector and primary action overlap")
     if metrics.get("select_menu_width_delta_px", 0) > 1:
         failures.append("Segment 0 dropdown is not the same width as its selector")
@@ -167,7 +168,7 @@ def assess_geometry(case: ViewportCase, geometry: dict[str, Any]) -> list[str]:
     if case.phone and metrics.get("mobile_topbar_above_rail", 0) < 1:
         failures.append("mobile page navigation is not above the sidebar")
     if case.phone and metrics.get("mobile_rail_toggles_visible", 1) < 1:
-        failures.append("mobile sidebar is missing its compact section and connection disclosures")
+        failures.append("mobile sidebar is missing its compact section disclosure or exposes V1 connection controls in hosted mode")
     if case.phone and metrics.get("mobile_sections_collapsed", 1) < 1:
         failures.append("mobile section navigation is expanded before the user requests it")
     if case.phone and metrics.get("mobile_companion_collapsed", 1) < 1:
@@ -372,6 +373,7 @@ def _geometry_script() -> str:
       const undersizedPhoneTargets = [...interactive, ...phoneOnlyTargets]
         .filter((item) => item.width < 44 || item.height < 44);
       const horizontalOverlap = Math.max(0, Math.min(select.right, button.right) - Math.max(select.x, button.x));
+      const verticalOverlap = Math.max(0, Math.min(select.bottom, button.bottom) - Math.max(select.y, button.y));
       const siteTabs = [...document.querySelectorAll('.site-tab')];
       const siteTabRects = siteTabs.map((element) => element.getBoundingClientRect());
       const siteTabOverlapPx = siteTabRects.reduce((maximum, current, index) => {
@@ -398,7 +400,8 @@ def _geometry_script() -> str:
           heading_panel_left_delta_px: Math.abs(headingKicker.x - panelTitle.x),
           select_button_height_delta_px: Math.abs(select.height - button.height),
           select_button_center_delta_px: Math.abs((select.y + select.height / 2) - (button.y + button.height / 2)),
-          select_button_overlap_px: horizontalOverlap,
+          select_button_overlap_px: Math.min(horizontalOverlap, verticalOverlap),
+          select_button_stacked: button.y >= select.bottom - 1,
           topbar_visible: visible(document.querySelector('.topbar')),
           mobile_topbar_above_rail: topbar.bottom <= rail.y + 1,
           site_tab_labels_fit: siteTabs.every((element) => element.clientWidth + 1 >= element.scrollWidth),
@@ -411,7 +414,8 @@ def _geometry_script() -> str:
             Math.abs((modeViewLabel.y + modeViewLabel.height / 2) - (modeSwitch.y + modeSwitch.height / 2)),
             Math.abs((modeEditLabel.y + modeEditLabel.height / 2) - (modeSwitch.y + modeSwitch.height / 2)),
           ),
-          mobile_rail_toggles_visible: visible(mobileSectionToggle) && visible(mobileCompanionToggle),
+          // This audit explicitly forces hosted/static preview on every route.
+          mobile_rail_toggles_visible: visible(mobileSectionToggle) && !visible(mobileCompanionToggle),
           mobile_sections_collapsed: !visible(activeRailNav) && mobileSectionToggle?.getAttribute('aria-expanded') === 'false',
           mobile_companion_collapsed: !visible(companionPanel) && mobileCompanionToggle?.getAttribute('aria-expanded') === 'false',
           mobile_rail_height_px: rail.height,
@@ -678,26 +682,17 @@ def run_audit(
                         section_toggle.get_attribute("aria-expanded") == "false"
                         and not page.locator(".rail-nav-group.active").is_visible()
                     )
-                    companion_toggle.click()
-                    companion_open = (
-                        companion_toggle.get_attribute("aria-expanded") == "true"
-                        and page.locator("#companion-panel").is_visible()
-                    )
-                    companion_targets = page.evaluate(_phone_target_script())
-                    phone_target_checks["companion_open"] = companion_targets
-                    if companion_targets:
-                        labels = ", ".join(item["selector"] for item in companion_targets[:6])
-                        failures.append(f"mobile expanded companion targets are below 44x44 CSS px: {labels}")
-                    companion_toggle.click()
-                    companion_closed = (
-                        companion_toggle.get_attribute("aria-expanded") == "false"
+                    # _page_url explicitly sets forceStaticPreview=1. V1
+                    # connection controls must remain absent on this route;
+                    # the real-browser workflow separately covers V1 chrome.
+                    companion_hidden = (
+                        not companion_toggle.is_visible()
                         and not page.locator("#companion-panel").is_visible()
                     )
                     mobile_rail_interaction = {
                         "section_open": section_open,
                         "section_closed": section_closed,
-                        "companion_open": companion_open,
-                        "companion_closed": companion_closed,
+                        "hosted_companion_hidden": companion_hidden,
                     }
                     if not all(mobile_rail_interaction.values()):
                         failures.append("mobile sidebar disclosures do not open and return to their compact state")

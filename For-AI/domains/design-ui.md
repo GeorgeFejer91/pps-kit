@@ -54,6 +54,17 @@ actual DOM overflow through `data-pretext-dom-result`. A fallback label is not
 a Pretext accuracy claim. Font completion invalidates both preparation and font
 metric caches; class/style/locale changes remeasure without changing user type.
 The real-browser regression is `engineering/validation/scripts/verify_bounded_text.mjs`.
+Use the mirrored [stretch geometry](../skills/uncodixfy-pretext/references/accordion-stretch.md)
+at each bounded shell, settings panel, ordered group and label/action cell. Give
+headers/actions stable anchors, allocate the outside box first, and distribute
+extra width/height between groups with readable type floors. The complete
+Designer workflow and long documentation remain document flow; inventories use
+their existing pagination/details. Runner's bounded desktop mode supports at
+least 1280 by 800 CSS pixels at normal text settings; smaller or enlarged-text
+states explicitly reflow the page, never clip or add an internal panel scroller.
+Keep group completion/receipt status reachable from Run and preserve discovery
+pages when a refresh keeps the same ordered identities. Native pickers have a
+separate platform-owned interaction contract.
 
 The citation mapper joins the generated publication network to
 `publication_study_reviews.v1.json`. Keep publication evidence, linked template

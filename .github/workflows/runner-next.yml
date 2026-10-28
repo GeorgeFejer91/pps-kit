@@ -18,6 +18,7 @@ on:
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
       - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
+      - "packages/pps-resources/assets/ui/**"
       - "packages/pps-resources/study_templates/**"
       - "For-AI/research/literature/tools/**"
       - "For-AI/research/literature/audiotactile-paper-metadata-audit/**"
@@ -27,6 +28,7 @@ on:
       - "For-AI/engineering/automation/check_all.ps1"
       - "For-AI/engineering/tests/**"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
+      - "For-AI/engineering/validation/scripts/verify_bounded_text.mjs"
       - ".github/workflows/runner-next.yml"
   push:
     branches: [main]
@@ -46,6 +48,7 @@ on:
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
       - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
+      - "packages/pps-resources/assets/ui/**"
       - "packages/pps-resources/study_templates/**"
       - "For-AI/research/literature/tools/**"
       - "For-AI/research/literature/audiotactile-paper-metadata-audit/**"
@@ -55,6 +58,7 @@ on:
       - "For-AI/engineering/automation/check_all.ps1"
       - "For-AI/engineering/tests/**"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
+      - "For-AI/engineering/validation/scripts/verify_bounded_text.mjs"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
     inputs:
@@ -150,11 +154,16 @@ jobs:
         run: |
           $revision = (git rev-parse HEAD).Trim()
           ./For-AI/engineering/build/windows/Build_PPS_Native_Candidate.ps1 -OutputDirectory dist/native-windows-candidate -RendererDirectory $env:PPS_CANDIDATE_RENDERER_DIR -RuntimeDirectory artifacts/windows-runtime -RendererSha256 $env:PPS_CANDIDATE_RENDERER_SHA256 -RendererSourceCommit $revision
-      - name: Install and verify the exact packaged payloads
+      - name: Verify shared text and nested interface layouts
         run: |
           node For-AI/engineering/validation/scripts/verify_bounded_text.mjs
           if ($LASTEXITCODE) { throw 'Actual bounded text checks failed' }
-          ./For-AI/engineering/build/windows/Test_PPS_Native_Candidate.ps1 -CandidateDirectory dist/native-windows-candidate -OutputDirectory artifacts/installed-native-candidate
+          node apps/designer/frontend/tests/verify-stretch-layout.mjs
+          if ($LASTEXITCODE) { throw 'Designer stretch layout checks failed' }
+          node apps/runner/frontend/tests/verify-stretch-layout.mjs
+          if ($LASTEXITCODE) { throw 'Runner stretch layout checks failed' }
+      - name: Install and verify the exact packaged payloads
+        run: ./For-AI/engineering/build/windows/Test_PPS_Native_Candidate.ps1 -CandidateDirectory dist/native-windows-candidate -OutputDirectory artifacts/installed-native-candidate
       - name: Capture every full browser plan and audit independent native results
         run: |
           node For-AI/engineering/validation/scripts/capture_preset_plans.mjs artifacts/preset-plan-capture
@@ -179,6 +188,10 @@ jobs:
             artifacts/preset-plan-capture/
             artifacts/native-preset-pipeline/
             artifacts/installed-native-candidate/*.json
+            artifacts/designer-stretch/*.json
+            artifacts/designer-stretch/*.png
+            artifacts/runner-stretch/*.json
+            artifacts/runner-stretch/*.png
             artifacts/ui-workflow-check/native-webview-report.json
             artifacts/ui-workflow-check/native-generation.png
             artifacts/ui-workflow-check/runner-actual-native-startup-report.json

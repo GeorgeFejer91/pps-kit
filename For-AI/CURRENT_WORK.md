@@ -31,6 +31,24 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Verify actual width/height, zoom, text-spacing and keyboard behavior before the
   final installer rebuild. The current candidate build remains intermediate;
   its packages cannot be published as containing the new layout work.
+  The new UI checkpoints are integrated: Runner `2750a3f5` and Designer
+  `078761da`, with About-dialog follow-up `663a3662`, including the shared
+  text-fit fixes and exact skill mirror.
+  Both canonical rebuilds reproduce committed bytes; Pages parity passes.
+  Runner passes 80 JS tests, its native-boundary browser fixture and 210 rendered
+  cases; Designer passes 52 JS tests, the full hosted workflow and 11 rendered
+  geometry cases. Independent review fixes preserve discovery pagination,
+  visible whole-group receipt status, and hidden trajectory controls for preserved
+  audio. Mapper citations are fully revealable and its fullscreen graph fits the
+  remaining height. The 30 fresh browser profile captures match every earlier
+  complete-plan byte; no experimental values or order changed. The expanded
+  mandatory audit exposed a short-landscape About overflow, now repaired and
+  verified in six focused browser cases with anchored heading/close and a
+  separately labelled reading region. The audit now checks actual container
+  stacking and two-dimensional control overlap; its old 760px assumption was
+  invalid for the new container-based layout. Six audit-contract tests and six
+  repository/release checks pass. The full 12-case rerun is in progress; final
+  package promotion waits for that and the pinned Windows candidate evidence.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
   replication-ready labels. Generation ships without Python; Python remains
@@ -118,7 +136,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   to initialize (kernel assets path not found); no substitute UI driver was used.
   The bounded corpus audit is complete with disclosed gaps. Pages assembly includes
   referenced Study 5 instruction audio with its checked manifest hashes.
-- **Verification:** fresh Windows Standard at `9dfd1760` passes 717 tests with
+- **Verification:** the complete follow-up CI at `25e69831` passes all 14 normal
+  jobs; Windows Standard passes 761 tests with nine skips and one warning.
+  The latest layout revision still needs its own full CI and installer run.
+  Earlier Windows Standard at `9dfd1760` passes 717 tests with
   nine skips and one warning in 2039.46 s; Quick passes 38 tests and the
   release/privacy audit. [CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
   passes all 14 jobs, with web/GUI/XDF dependencies, offscreen Qt and native writer
@@ -211,8 +232,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   ignored reproduction artifact is recorded in the completion review.
 - **Git observation:** implementation began on clean `main` at `ae8a4aa4`,
   synchronized with `origin/main`. Work is isolated on
-  `codex/pps-publication-integration`, `codex/pps-catalogue`,
-  `codex/pps-rust-generation`, and `codex/pps-ui-desktop`. Verified checkpoints
+  `codex/pps-publication-integration`; the original domain worktrees are now
+  recoverably archived. Current UI checks use `codex/pps-designer-stretch` and
+  `codex/pps-runner-stretch`, whose app checkpoints are integrated. Verified checkpoints
   are pushed to review branches; public Pages/download promotion remains a
   separate verified gate. A local Runner preview is installed at the recorded
   checkpoint; V1 applications and public products were not promoted.
