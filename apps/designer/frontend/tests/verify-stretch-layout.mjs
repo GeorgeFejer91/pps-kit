@@ -304,6 +304,7 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
     await page.screenshot({ path: resolve(output, `downloads-${width}.png`) });
   }
+  report.noiseLabels = await verifyNoiseLabels(browser, `http://127.0.0.1:${server.address().port}/apps/designer/frontend/compiled/index.html`, output);
   assert.deepEqual(report.errors, []);
   for (const item of report.cases) {
     assert.equal(item.documentOverflow, false, `${item.width}/${item.height}/${item.mode}: document overflow`);
@@ -320,3 +321,58 @@ try {
   await browser.close(); await new Promise(done => server.close(done));
 }
 console.log("Designer stretch geometry, keyboard resize and dialog focus passed.");
+
+async function verifyNoiseLabels(browser, url, output) {
+  const page = await browser.newPage();
+  const evidence = [];
+  try {
+    await page.goto(url);
+    await page.evaluate(async () => { await window.PPSDesignerApp.ready; });
+    await page.locator("#edit-mode-button").click();
+    await page.locator("#customize-study-name").fill("Noise label layout fixture");
+    await page.locator("#customize-submit").click();
+    await page.locator("#customize-modal").waitFor({ state: "hidden" });
+    // A click on the new leaf still reaches the original button controller.
+    await page.locator('[data-noise-type="white"] .noise-type-label').click();
+    assert.equal(await page.locator('[data-noise-type="white"]').getAttribute("aria-pressed"), "true");
+    for (const mode of ["narrow", "spacing", "zoom", "long-label"]) {
+      await page.setViewportSize({ width: mode === "zoom" ? 1280 : 320, height: mode === "zoom" ? 800 : 1000 });
+      await page.evaluate(mode => {
+        document.documentElement.style.zoom = mode === "zoom" ? "2" : "";
+        document.querySelector('[data-noise-type="violet"] .noise-type-label').textContent =
+          mode === "long-label" ? "Violet noise — extended spectrum label" : "Violet";
+      }, mode);
+      const spacing = mode === "spacing" ? await page.addStyleTag({ content: "body *{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}p{margin-bottom:2em!important}" }) : null;
+      await page.evaluate(async () => { await document.fonts.ready; await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))); });
+      for (const color of ["white", "pink", "blue", "violet", "brown"]) {
+        const button = page.locator(`[data-noise-type="${color}"]`);
+        await button.scrollIntoViewIfNeeded();
+        await button.focus(); await page.keyboard.press("Tab"); await button.focus();
+        await page.waitForFunction(color => {
+          const button = document.querySelector(`[data-noise-type="${color}"]`);
+          return getComputedStyle(button, "::after").visibility === "visible"
+            && Number(getComputedStyle(button, "::after").opacity) >= 0.99
+            && button.querySelector(".noise-type-label").dataset.pretextDomResult === "fit";
+        }, color);
+        const measurement = await button.evaluate(button => {
+          const leaf = button.querySelector(".noise-type-label"), box = leaf.getBoundingClientRect();
+          const range = document.createRange(); range.selectNodeContents(leaf); const text = range.getBoundingClientRect();
+          return { label: leaf.textContent, prediction: leaf.dataset.pretextResult, dom: leaf.dataset.pretextDomResult,
+            measuredContainer: button.hasAttribute("data-pretext-result"), fontSize: getComputedStyle(leaf).fontSize,
+            text: text.toJSON(), box: box.toJSON(), button: button.getBoundingClientRect().toJSON(),
+            documentWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth };
+        });
+        assert.equal(measurement.measuredContainer, false, "The tooltip container is not a bounded text leaf");
+        assert.ok(measurement.documentWidth <= measurement.clientWidth + 1);
+        assert.ok(measurement.text.left >= measurement.box.left - 1 && measurement.text.right <= measurement.box.right + 1);
+        // Font ink can extend beyond the normal line box; it must remain inside
+        // the padded control while the measured leaf retains its actual DOM fit.
+        assert.ok(measurement.text.top >= measurement.button.top && measurement.text.bottom <= measurement.button.bottom);
+        evidence.push({ mode, color, ...measurement });
+        if (color === "violet") await page.screenshot({ path: resolve(output, `noise-label-${mode}.png`) });
+      }
+      if (spacing) await spacing.evaluate(node => node.remove());
+    }
+  } finally { await page.close(); }
+  return evidence;
+}
