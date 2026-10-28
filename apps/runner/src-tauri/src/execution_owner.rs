@@ -519,7 +519,9 @@ pub(crate) struct OwnerTestView {
     pub compiled_schedule_strong_count: Option<usize>,
     pub retained_session_strong_count: Option<usize>,
     pub journal_durable_sequence: Option<u64>,
+    pub journal_failed: Option<bool>,
     pub ledger_last_sequence: Option<u64>,
+    pub ledger_tail: Vec<(u64, String)>,
     pub evidence_unavailable: bool,
 }
 
@@ -3976,7 +3978,18 @@ impl ExecutionOwner {
                 .event_journal
                 .as_ref()
                 .map(|(_, _, journal)| journal.durable_sequence()),
+            journal_failed: state
+                .event_journal
+                .as_ref()
+                .map(|(_, _, journal)| journal.failed()),
             ledger_last_sequence: state.ledger.summary().last_sequence,
+            ledger_tail: state
+                .ledger
+                .records()
+                .iter()
+                .skip(state.ledger.records().len().saturating_sub(8))
+                .map(|record| (record.sequence, record.event_type.clone()))
+                .collect(),
             evidence_unavailable: state.evidence_unavailable,
         })
         .expect("test authority remains available")
