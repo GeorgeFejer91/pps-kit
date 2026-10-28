@@ -47,6 +47,13 @@ and long source filenames in disclosures so the approved plan remains readable.
 Designer and Runner share `pps-resources/assets/ui/bounded-text.mjs` for Pretext
 measurement. CSS owns wrapping and text size; user zoom is never reduced to fit.
 Unsupported text layout is marked for DOM verification rather than claimed to fit.
+The helper checks inner height, width and optional `data-pretext-max-lines` or
+`data-pretext-mode="single-line"`; icon-bearing controls measure their label
+leaf in its allocated box. Unsupported rich/RTL/spacing layouts still expose
+actual DOM overflow through `data-pretext-dom-result`. A fallback label is not
+a Pretext accuracy claim. Font completion invalidates both preparation and font
+metric caches; class/style/locale changes remeasure without changing user type.
+The real-browser regression is `engineering/validation/scripts/verify_bounded_text.mjs`.
 
 The citation mapper joins the generated publication network to
 `publication_study_reviews.v1.json`. Keep publication evidence, linked template

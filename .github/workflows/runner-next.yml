@@ -151,7 +151,10 @@ jobs:
           $revision = (git rev-parse HEAD).Trim()
           ./For-AI/engineering/build/windows/Build_PPS_Native_Candidate.ps1 -OutputDirectory dist/native-windows-candidate -RendererDirectory $env:PPS_CANDIDATE_RENDERER_DIR -RuntimeDirectory artifacts/windows-runtime -RendererSha256 $env:PPS_CANDIDATE_RENDERER_SHA256 -RendererSourceCommit $revision
       - name: Install and verify the exact packaged payloads
-        run: ./For-AI/engineering/build/windows/Test_PPS_Native_Candidate.ps1 -CandidateDirectory dist/native-windows-candidate -OutputDirectory artifacts/installed-native-candidate
+        run: |
+          node For-AI/engineering/validation/scripts/verify_bounded_text.mjs
+          if ($LASTEXITCODE) { throw 'Actual bounded text checks failed' }
+          ./For-AI/engineering/build/windows/Test_PPS_Native_Candidate.ps1 -CandidateDirectory dist/native-windows-candidate -OutputDirectory artifacts/installed-native-candidate
       - name: Capture every full browser plan and audit independent native results
         run: |
           node For-AI/engineering/validation/scripts/capture_preset_plans.mjs artifacts/preset-plan-capture
