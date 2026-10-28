@@ -8490,6 +8490,21 @@ body.desktop-applet .segment-heading {
 .modal-heading { position: static; margin: 0; padding: 0 0 var(--stretch-gap); gap: var(--stretch-gap); }
 .modal-heading > div { min-inline-size: 0; overflow-wrap: break-word; }
 .modal-heading > button { flex-shrink: 0; }
+/* About is an unbounded reading document, separate from the utility forms.
+   Keep its title/close anchor visible while the reading region scrolls. */
+.segment-info-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  max-block-size: calc(100dvh - 2 * var(--stretch-space));
+  min-block-size: 0;
+}
+.segment-info-body {
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.segment-info-body:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
 .modal-actions { flex-wrap: wrap; gap: var(--stretch-gap); }
 .modal-actions > button { flex: 1 1 8rem; }
 
