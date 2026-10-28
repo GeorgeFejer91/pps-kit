@@ -327,7 +327,7 @@ async fn prepare_first_audio_block(
         .await
         .map_err(prepared_audio_runtime_error)?;
     let (_preparation_guard, summary) = match preparation {
-        PreparedAudioPreparation::Cached { _guard, summary } => (_guard, summary),
+        PreparedAudioPreparation::Cached { _guard, summary } => (_guard, *summary),
         PreparedAudioPreparation::Decode { _guard, source } => {
             // Hash/decode outside the actor. Its completion must still match
             // every package/run/block/schedule/preparation/receipt fence.

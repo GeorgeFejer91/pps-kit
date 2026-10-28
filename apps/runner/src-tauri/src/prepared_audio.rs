@@ -37,7 +37,7 @@ pub(crate) struct PreparedAudioSource {
 /// existing path-free summary; misses hand one fenced source to the blocking
 /// decoder. No caller can request a filesystem path or bypass the actor.
 pub(crate) enum PreparedAudioLookup {
-    Cached(PreparedAudioSummary),
+    Cached(Box<PreparedAudioSummary>),
     Decode(PreparedAudioSource),
 }
 
