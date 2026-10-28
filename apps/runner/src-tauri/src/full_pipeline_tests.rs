@@ -702,7 +702,7 @@ fn unsupported_prepared_response_contract_cannot_reserve_native_output() {
     assert_eq!(summary.response_mode, "unsupported");
     assert!(summary.response_choices.is_empty());
     let projection = serde_json::to_string(&summary).unwrap();
-    for private in ["correct_response", "red", "green"] {
+    for private in ["correct_response", "\"red\"", "\"green\""] {
         assert!(!projection.contains(private));
     }
     runtime.cache_prepared_audio(candidate).unwrap();
