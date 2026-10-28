@@ -1887,7 +1887,9 @@ impl OwnerState {
                     == current_wav.encoded_byte_count()
                 && candidate.media().sample_rate_hz() == expected_sample_rate_hz;
             if cache_is_current {
-                return Ok(PreparedAudioLookup::Cached(cached.summary.clone()));
+                return Ok(PreparedAudioLookup::Cached(Box::new(
+                    cached.summary.clone(),
+                )));
             }
         }
         // A different or stale cached block is dropped before the worker may

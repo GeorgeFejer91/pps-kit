@@ -303,7 +303,7 @@ struct NativeOutputOperationGuard {
 pub(crate) enum PreparedAudioPreparation {
     Cached {
         _guard: PreparedAudioPreparationGuard,
-        summary: PreparedAudioSummary,
+        summary: Box<PreparedAudioSummary>,
     },
     Decode {
         _guard: PreparedAudioPreparationGuard,
@@ -2822,7 +2822,7 @@ mod tests {
         match runtime.begin_prepared_audio_preparation(0).unwrap() {
             PreparedAudioPreparation::Cached {
                 summary: cached, ..
-            } => assert_eq!(cached, first),
+            } => assert_eq!(*cached, first),
             PreparedAudioPreparation::Decode { .. } => {
                 panic!("an exact sequential cache hit must not decode again")
             }
