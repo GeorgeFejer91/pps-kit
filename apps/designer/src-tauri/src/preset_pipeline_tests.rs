@@ -72,7 +72,7 @@ fn preset_compare_complete_rows(before: &Value, after: &Value) -> Result<()> {
 fn preset_prepare_case(
     captured: Value,
     case: &Value,
-    resources: PathBuf,
+    shared: Shared,
     output: &Path,
     evidence: &mut Value,
 ) -> Result<()> {
@@ -97,14 +97,6 @@ fn preset_prepare_case(
         return Err("capture_full_pool_count_mismatch".into());
     }
     evidence["captured_pool_trial_count"] = captured["trial_pool_bake"]["total_count"].clone();
-    let renderer = std::env::var_os("PPS_DESIGNER_RENDERER")
-        .map(PathBuf::from)
-        .unwrap_or_default();
-    let shared = Arc::new(Mutex::new(DesignerService::open(
-        output.join("host"),
-        resources,
-        renderer,
-    )?));
     let mut snapshot = captured;
     let needs_baselines = source_blocks
         .iter()
@@ -361,7 +353,19 @@ fn full_archived_preset_native_host_preparation() {
     let captured: Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(captured["design"]["study_profile_id"], id);
     let mut evidence = json!({"schema":"pps-native-preset-preparation.v1","template_id":id,"template_sha256":case["template_sha256"],"capture_sha256":case["capture_sha256"],"capture_input_hashes":report["input_hashes"],"status":"failed","participant_index":1,"full_plan_preserved":false,"all_part_packages_verified":false,"all_block_schedules_compiled":false,"generation":{"status":"premade_assets_reused"},"execution":{"status":"not_run"},"physical_timing_qualified":false,"replication_qualified":false});
-    let outcome = preset_prepare_case(captured, case, resources, &output, &mut evidence);
+    let renderer = std::env::var_os("PPS_DESIGNER_RENDERER")
+        .map(PathBuf::from)
+        .unwrap_or_default();
+    let outcome =
+        DesignerService::open(output.join("host"), resources, renderer).and_then(|owner| {
+            preset_prepare_case(
+                captured,
+                case,
+                Arc::new(Mutex::new(owner)),
+                &output,
+                &mut evidence,
+            )
+        });
     if let Err(error) = &outcome {
         evidence["error"] = json!(error);
     }

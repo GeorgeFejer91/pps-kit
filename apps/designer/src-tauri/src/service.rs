@@ -663,6 +663,267 @@ fn safe_join(root: &Path, relative: &str) -> Result<PathBuf> {
 mod tests {
     use super::*;
     include!("preset_pipeline_tests.rs");
+
+    // Compare every field, reporting only the first differing pointer rather
+    // than dumping the complete private design in a failed assertion.
+    fn bridge_design_difference(left: &Value, right: &Value, path: &str) -> Option<String> {
+        if left == right {
+            return None;
+        }
+        match (left, right) {
+            (Value::Object(a), Value::Object(b)) => {
+                for key in a.keys().chain(b.keys()) {
+                    let pointer = format!("{path}/{key}");
+                    match (a.get(key), b.get(key)) {
+                        (Some(a), Some(b)) => {
+                            if let Some(difference) = bridge_design_difference(a, b, &pointer) {
+                                return Some(difference);
+                            }
+                        }
+                        _ => return Some(pointer),
+                    }
+                }
+            }
+            (Value::Array(a), Value::Array(b)) if a.len() == b.len() => {
+                for (index, (a, b)) in a.iter().zip(b).enumerate() {
+                    if let Some(difference) =
+                        bridge_design_difference(a, b, &format!("{path}/{index}"))
+                    {
+                        return Some(difference);
+                    }
+                }
+            }
+            _ => {}
+        }
+        Some(path.to_owned())
+    }
+
+    fn bridge_rebase_capture(
+        mut design: Value,
+        owner: &DesignerService,
+        assets: &[pps_session_package::VerifiedProfileAsset],
+    ) -> Result<Value> {
+        let mut bindings = BTreeMap::new();
+        for asset in assets {
+            let native = format!("native-assets/{}.wav", asset.sha256);
+            bindings.insert(asset.logical_id.clone(), native.clone());
+            bindings.insert(
+                format!("browser-asset:{}", asset.logical_id),
+                native.clone(),
+            );
+            bindings.insert(asset.path.to_string_lossy().into_owned(), native);
+        }
+        for (pointer, field) in [
+            ("/noises", "prebaked_path"),
+            ("/noises", "native_stationary_baseline_asset"),
+            ("/custom_looming_files", "path"),
+            ("/prestimulus_files", "path"),
+            (
+                "/study_profile_reference_parameters/dashboard_run_setup/instruction_profile/slots",
+                "path",
+            ),
+        ] {
+            for source in design
+                .pointer_mut(pointer)
+                .and_then(Value::as_array_mut)
+                .into_iter()
+                .flatten()
+            {
+                let path = source[field].as_str().unwrap_or_default();
+                let primary = field != "native_stationary_baseline_asset";
+                let id = primary
+                    .then(|| source["browser_asset_id"].as_str())
+                    .flatten()
+                    .filter(|s| !s.is_empty());
+                if path.is_empty() && id.is_none() {
+                    continue;
+                }
+                if let (Some(id), Some(path_id)) = (id, path.strip_prefix("browser-asset:")) {
+                    if id != path_id {
+                        return Err(format!("capture_asset_identity_conflict: {pointer}"));
+                    }
+                }
+                let native = if let Some(key) = bindings.get(id.unwrap_or(path)) {
+                    key.clone()
+                } else {
+                    let (bytes, mime) = owner.resource(path)?;
+                    let digest = sha(&bytes);
+                    if mime != "audio/wav" || !assets.iter().any(|a| a.sha256 == digest) {
+                        return Err(format!("capture_audio_not_embedded: {pointer}"));
+                    }
+                    format!("native-assets/{digest}.wav")
+                };
+                source[field] = json!(native);
+                if primary {
+                    source
+                        .as_object_mut()
+                        .ok_or("capture_source_object")?
+                        .remove("browser_asset_id");
+                }
+            }
+        }
+        Ok(design)
+    }
+
+    #[test]
+    fn hosted_bridge_design_comparison_rejects_scientific_changes_and_missing_fields() {
+        let original = json!({"protocol":{"repetitions_per_condition":1},"source":{"gain":1.0}});
+        assert!(bridge_design_difference(&original, &original, "/design").is_none());
+        let changed = json!({"protocol":{"repetitions_per_condition":6},"source":{"gain":1.0}});
+        assert_eq!(
+            bridge_design_difference(&original, &changed, "/design").unwrap(),
+            "/design/protocol/repetitions_per_condition"
+        );
+        let missing = json!({"protocol":{"repetitions_per_condition":1},"source":{}});
+        assert_eq!(
+            bridge_design_difference(&original, &missing, "/design").unwrap(),
+            "/design/source/gain"
+        );
+    }
+
+    #[test]
+    #[ignore = "requires one hash-bound actual hosted bundle/capture, corrupted-asset negative, actual renderer and fresh output"]
+    fn hosted_portable_bundle_preserves_full_native_pipeline() {
+        let binding_path =
+            PathBuf::from(std::env::var_os("PPS_BROWSER_BINDING").expect("PPS_BROWSER_BINDING"));
+        let binding = preset_json(&binding_path).unwrap();
+        assert_eq!(binding["schema"], "pps-hosted-native-bridge-binding.v1");
+        let input = binding_path.parent().unwrap();
+        let input_file = |field: &str| {
+            let name = binding[field].as_str().unwrap();
+            assert!(
+                Path::new(name).components().count() == 1
+                    && matches!(
+                        Path::new(name).components().next(),
+                        Some(Component::Normal(_))
+                    )
+            );
+            input.join(name)
+        };
+        let bundle = input_file("bundle_file");
+        let capture = input_file("capture_file");
+        assert_eq!(
+            sha(&read_bounded(&bundle, 270 * 1024 * 1024).unwrap()),
+            binding["bundle_sha256"]
+        );
+        let capture_bytes = read_bounded(&capture, MAX_JSON as u64).unwrap();
+        assert_eq!(sha(&capture_bytes), binding["capture_sha256"]);
+        let mut snapshot: Value = serde_json::from_slice(&capture_bytes).unwrap();
+        let blocks = snapshot["block_csv_preview"]["blocks"].as_array().unwrap();
+        assert_eq!(blocks.len(), 6);
+        assert_eq!(
+            blocks
+                .iter()
+                .map(|b| b["preview_rows"].as_array().unwrap().len())
+                .sum::<usize>(),
+            204
+        );
+        for block in blocks {
+            assert_eq!(
+                block["trial_count"],
+                block["preview_rows"].as_array().unwrap().len()
+            );
+        }
+        let case = json!({"configuration_eligible":true,"source_trial_count":204,
+            "source_block_rows":blocks.iter().map(|b|json!({"index":b["block_index"],"label":b["block_label"],"rows":b["preview_rows"].as_array().unwrap().len()})).collect::<Vec<_>>()});
+        let output = PathBuf::from(std::env::var_os("PPS_PRESET_OUTPUT").expect("fresh output"));
+        assert!(output.is_dir() && fs::read_dir(&output).unwrap().next().is_none());
+        let resources =
+            PathBuf::from(std::env::var_os("PPS_PRESET_RESOURCE_ROOT").expect("resources"));
+        let renderer =
+            PathBuf::from(std::env::var_os("PPS_DESIGNER_RENDERER").expect("actual renderer"));
+        let mut evidence = json!({"schema":"pps-native-hosted-bundle-preparation.v1","status":"failed",
+            "bundle_sha256":binding["bundle_sha256"],"capture_sha256":binding["capture_sha256"],
+            "binding_sha256":sha(&read_bounded(&binding_path, MAX_JSON as u64).unwrap()),
+            "participant_index":1,"full_plan_preserved":false,"all_part_packages_verified":false,
+            "all_block_schedules_compiled":false,"physical_timing_qualified":false,"replication_qualified":false});
+        let outcome = (|| -> Result<()> {
+            // Independently retain the verifier's original inventory and asset
+            // receipts. No old prepared-session design supplies these inputs.
+            let verified = pps_session_package::materialize_profile_bundle(
+                &bundle,
+                &output.join("verified-bundle"),
+                &AtomicBool::new(false),
+            )
+            .map_err(|e| e.to_string())?;
+            let mut owner = DesignerService::open(output.join("host"), resources, renderer)?;
+            let imported = owner.import_bundle(0, &bundle)?;
+            let expected =
+                bridge_rebase_capture(snapshot["design"].clone(), &owner, verified.assets())?;
+            if let Some(pointer) =
+                bridge_design_difference(&expected, &imported["design"], "/design")
+            {
+                return Err(format!("captured_exported_design_mismatch: {pointer}"));
+            }
+            for asset in imported["assets"].as_array().ok_or("import_assets")? {
+                let key = asset["path"].as_str().ok_or("import_path")?;
+                let (bytes, _) = owner.resource(key)?;
+                if sha(&bytes) != asset["sha256"] || owner.stored.assets[key].dry_source {
+                    return Err("import_asset_authority_changed".into());
+                }
+            }
+            snapshot["design"] = imported["design"].clone();
+            // Corrupt an embedded WAV in a separately owned ZIP, preserving its
+            // declared inventory. A failed import must leave this draft intact.
+            owner.stored.snapshot = Some(snapshot.clone());
+            let before = serde_json::to_value(&owner.stored).map_err(|e| e.to_string())?;
+            let revision = owner.jobs.revision();
+            let corrupt = PathBuf::from(
+                std::env::var_os("PPS_BROWSER_CORRUPT_BUNDLE").ok_or("corrupt_fixture_required")?,
+            );
+            let error = owner
+                .import_bundle(revision, &corrupt)
+                .err()
+                .ok_or("corrupt_bundle_accepted")?;
+            if error != "profile_InvalidInventory"
+                || owner.jobs.revision() != revision
+                || serde_json::to_value(&owner.stored).map_err(|e| e.to_string())? != before
+            {
+                return Err("failed_import_changed_authority".into());
+            }
+            evidence["import"] = json!({"assets":imported["assets"],"design_matches_capture_after_verified_rebasing":true,"corrupt_embedded_asset_rejected":true,"failure_preserved_prior_authority":true,"error":error});
+            preset_prepare_case(
+                snapshot,
+                &case,
+                Arc::new(Mutex::new(owner)),
+                &output,
+                &mut evidence,
+            )?;
+            let parts = evidence["parts"].as_array().ok_or("prepared_parts")?;
+            if evidence["status"] != "prepared"
+                || parts.len() != 2
+                || parts[0]["part_number"] != 1
+                || parts[1]["part_number"] != 2
+                || parts[0]["part_session_id"] == parts[1]["part_session_id"]
+                || parts.iter().any(|p| {
+                    p["trial_count"] != 204
+                        || p["block_count"] != 6
+                        || p["instruction_slots"].as_u64().unwrap_or(0) == 0
+                })
+            {
+                return Err("complete_hosted_participant_not_prepared".into());
+            }
+            Ok(())
+        })();
+        if let Err(error) = &outcome {
+            evidence["status"] = json!("failed");
+            evidence["error"] = json!(error);
+        }
+        let mut report = fs::OpenOptions::new()
+            .create_new(true)
+            .write(true)
+            .open(output.join("native-preparation.json"))
+            .unwrap();
+        report
+            .write_all(&serde_json::to_vec_pretty(&evidence).unwrap())
+            .unwrap();
+        report.sync_all().unwrap();
+        assert!(
+            outcome.is_ok(),
+            "hosted bridge failed: {}",
+            evidence["error"]
+        );
+    }
     #[test]
     fn generation_invalidation_preserves_optional_snapshot_shape_for_next_operation() {
         let mut snapshot = json!({"design":{},"custom_workflow":{"is_custom":true}});
