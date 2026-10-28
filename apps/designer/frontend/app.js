@@ -2197,12 +2197,12 @@ function seededGellermannBlockRows(poolRows, blockCount, seed, maxRun = BLOCK_RA
   return { blocks, rowOrder };
 }
 
-function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax) {
+function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax, blockLabel = `Block ${String(blockIndex).padStart(2, "0")}`) {
   const family = trialPoolFamilyKey(row.family);
   const soaValue = Number(row.soa_ms || 0);
   return {
     block_index: blockIndex,
-    block_label: `Block ${String(blockIndex).padStart(2, "0")}`,
+    block_label: blockLabel,
     block_trial_index: blockTrialIndex,
     trial_pool_index: row.trial_pool_index,
     family,
@@ -2261,11 +2261,12 @@ function staticBlockCsvPreviewPayload(design, trialPoolBake, status) {
   );
   const blocks = scheduled.blocks.map((rows, index) => {
     const blockIndex = index + 1;
-    const previewRows = rows.map((row, rowIndex) => staticBlockPreviewRow(row, blockIndex, rowIndex + 1, soaMin, soaMax));
+    const blockLabel = String(design.protocol?.block_specs?.[index]?.label || "").trim() || `Block ${String(blockIndex).padStart(2, "0")}`;
+    const previewRows = rows.map((row, rowIndex) => staticBlockPreviewRow(row, blockIndex, rowIndex + 1, soaMin, soaMax, blockLabel));
     const durationMs = previewRows.reduce((total, row) => total + Number(row.duration_ms || 0), 0);
     return {
       block_index: blockIndex,
-      block_label: `Block ${String(blockIndex).padStart(2, "0")}`,
+      block_label: blockLabel,
       csv_path: "",
       csv_file_name: `static_block_${String(blockIndex).padStart(2, "0")}.csv`,
       trial_count: previewRows.length,
