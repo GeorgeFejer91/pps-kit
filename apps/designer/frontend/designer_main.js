@@ -313,6 +313,23 @@ function applyTheme(theme) {
   }
 }
 
+function scheduleHostedDraftRestore() {
+  let cancelled = false;
+  const events = ["pointerdown", "keydown", "pps-designer-dirty", "pps-designer-saved"];
+  const cancel = () => { cancelled = true; };
+  for (const event of events) document.addEventListener(event, cancel, true);
+  return (async () => {
+    try {
+      await window.PPSDesignerApp?.ready;
+      if (cancelled) return;
+      const stored = await drafts.load().catch(() => null);
+      if (!cancelled && stored?.custom_workflow?.is_custom) window.PPSDesignerApp?.restoreHostedDraft(stored);
+    } finally {
+      for (const event of events) document.removeEventListener(event, cancel, true);
+    }
+  })();
+}
+
 function initializeChrome() {
   const desktop = nativeDesigner.enabled || new URLSearchParams(location.search).get("desktop") === "1";
   document.body.classList.toggle("desktop-applet", desktop);
@@ -374,13 +391,7 @@ function initializeChrome() {
     });
     heading.appendChild(button);
   }
-  if (!desktop) {
-    const restore = async () => {
-      const stored = await drafts.load().catch(() => null);
-      if (stored?.custom_workflow?.is_custom) window.PPSDesignerApp?.restoreHostedDraft(stored);
-    };
-    window.setTimeout(restore, 900);
-  }
+  if (!desktop) scheduleHostedDraftRestore();
 }
 
 window.PPSDesigner = Object.freeze({ drafts, exportBundle });

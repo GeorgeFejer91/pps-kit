@@ -208,7 +208,12 @@ export async function verifyDesignerControlNames(page, screenshotPath) {
   await page.waitForFunction(async () => (await window.PPSDesigner.drafts.load())?.custom_workflow.is_finalized);
   assert.equal(await instruction.isDisabled(), true, "finalization replaces the identical profile with disabled controls");
   await page.reload();
-  await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.custom_workflow.is_finalized);
+  await page.waitForFunction(() => {
+    const snapshot = window.PPSDesignerApp?.getState();
+    return snapshot?.custom_workflow?.is_custom && snapshot.custom_workflow.is_finalized
+      && snapshot.design.study_profile_reference_parameters.dashboard_run_setup.instruction_profile.slots
+        .some(slot => slot.slot === "before_experiment" && slot.label === "Reviewed instruction label");
+  });
   const download = page.waitForEvent("download");
   await page.locator("#export-profile-bundle").click();
   const file = await download;

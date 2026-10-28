@@ -1,6 +1,65 @@
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
 
+export async function recordStorageEvents(page) {
+  await page.addInitScript(() => {
+    const events = window.storageTestEvents = [];
+    let sequence = 0;
+    const note = (id, operation, event) => {
+      events.push({ id, operation, event, at: performance.now() });
+      if (events.length > 160) events.shift();
+    };
+    const open = IDBFactory.prototype.open;
+    IDBFactory.prototype.open = function (...args) {
+      const id = ++sequence, request = open.apply(this, args);
+      note(id, "open", "requested");
+      for (const type of ["success", "error", "blocked", "upgradeneeded"]) request.addEventListener(type, () => note(id, "open", type));
+      return request;
+    };
+    const transaction = IDBDatabase.prototype.transaction;
+    IDBDatabase.prototype.transaction = function (...args) {
+      const id = ++sequence, result = transaction.apply(this, args);
+      note(id, "transaction", result.mode);
+      for (const type of ["complete", "error", "abort"]) result.addEventListener(type, () => note(id, "transaction", type));
+      return result;
+    };
+    for (const operation of ["get", "put"]) {
+      const original = IDBObjectStore.prototype[operation];
+      IDBObjectStore.prototype[operation] = function (...args) {
+        const id = ++sequence, request = original.apply(this, args);
+        note(id, operation, "requested");
+        for (const type of ["success", "error"]) request.addEventListener(type, () => note(id, operation, type));
+        return request;
+      };
+    }
+  });
+}
+
+export async function verifyStartupRestoreOrdering(browser, base) {
+  const page = await browser.newPage();
+  await page.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
+  await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
+  await page.evaluate(async () => {
+    await window.PPSDesignerApp.ready;
+    const snapshot = window.PPSDesignerApp.getState();
+    snapshot.design.name = "Startup restore ordering fixture";
+    snapshot.custom_workflow.is_custom = true;
+    await window.PPSDesigner.drafts.save(snapshot);
+  });
+  let release;
+  const requested = new Promise(resolve => { release = resolve; });
+  await page.route("**/study_templates/study5_box_breathing_pps.json*", route => release(route));
+  await page.reload({ waitUntil: "commit" });
+  const held = await requested;
+  await page.waitForFunction(() => Boolean(window.PPSDesignerApp?.ready));
+  assert.equal(await page.evaluate(() => window.PPSDesignerApp.getState()), null,
+    "the delayed initial template cannot race with automatic restoration");
+  await held.continue();
+  await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.design?.name === "Startup restore ordering fixture");
+  assert.equal(await page.evaluate(() => window.PPSDesignerApp.getState().custom_workflow.is_custom), true);
+  await page.close();
+}
+
 export async function verifyAbortedBrowserWrites(page, evidencePath) {
   const evidence = await page.evaluate(async () => {
     const drafts = window.PPSDesigner.drafts;
