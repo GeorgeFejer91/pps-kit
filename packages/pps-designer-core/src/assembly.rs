@@ -585,6 +585,30 @@ pub fn plan_assembly_preview(
         .sum::<u64>());
     output["native_assembly_qualification"] = json!("unqualified_exact_verified_assets");
     output["native_assembly_scope"] = json!("source_blocks_once");
+    if let Some(columns) = output["csv_columns"].as_array_mut() {
+        for field in [
+            "native_iti_materialization_policy",
+            "native_iti_anchor",
+            "native_iti_seed_sha256",
+            "native_iti_range_min_ms",
+            "native_iti_range_max_ms",
+            "native_resolved_iti_ms",
+            "native_iti_source_distribution_reported",
+            "native_iti_source_anchor_reported",
+            "native_iti_legacy_compatible",
+            "native_iti_frames",
+            "native_session_duration_ms",
+        ] {
+            if blocks
+                .iter()
+                .flat_map(|b| &b.rows)
+                .any(|r| r.row.get(field).is_some())
+                && !columns.iter().any(|column| column == field)
+            {
+                columns.push(json!(field));
+            }
+        }
+    }
     let preview_sha256 = hash_json(&output)?;
     let asset_hashes = assets
         .iter()
