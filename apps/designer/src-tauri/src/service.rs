@@ -643,6 +643,7 @@ fn safe_join(root: &Path, relative: &str) -> Result<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    include!("preset_pipeline_tests.rs");
     #[test]
     fn partial_asset_write_does_not_poison_digest_path_and_retry_succeeds() {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
