@@ -3,7 +3,12 @@
 Reviewed: 2026-10-28. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
-- **Goal:** publish an audited audiotactile catalogue and citation mapper,
+- **Current user objective (2026-10-28):** finish the desktop PC installers and
+  release them on GitHub; validate profile creation, native generation/preparation,
+  complete Runner execution and independently inspectable results; assess every
+  archived study/preset for usable Runner files and verify all advertised software
+  functions in principle. Hardware specifications and new calibration are excluded.
+  This continues the approved goal to publish an audited catalogue and citation mapper,
   reliable online preparation with premade assets, and a Python-free Windows
   Tauri/Rust Designer → immutable experiment profile → native Runner →
   inspectable results and installed qualification. On 2026-10-27 the user
@@ -11,8 +16,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Treat hardware operation as an assumption; do not label physical timing measured.
   The [completion review and multi-agent plan](engineering/validation/docs/completion-review-2026-10-27.md)
   defines the finish criteria and extends the original 17 audit items.
-- **Current milestone:** Wave 3 installed qualification and release preparation,
-  explicitly authorized on 2026-10-27. Final source validation is delivered;
+- **Current milestone:** Wave 3 installed software verification and GitHub release,
+  explicitly renewed on 2026-10-28. The user directs finishing the committed
+  preview products; retain `org.peripersonalspace.designer.preview` and
+  `org.peripersonalspace.runner.preview`. GitHub installer publication and fresh
+  installed functionality testing are now explicitly authorized. Final source validation is delivered;
   installed and publication gates remain open.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
@@ -48,11 +56,16 @@ This file is the active checklist and handoff owner; replace state, do not appen
   automatic approval review rejected the fresh launch check at `468c8241`
   ("blocked by policy", without a more specific reason). No alternate launch
   was attempted. Complete installed execution remains unverified.
-- **Next action:** finish the approved-identity installed journey. Final product
+- **Next action:** build the Designer installer beside the verified Runner,
+  execute the complete installed software journey, audit all archived presets and
+  publish the verified installers/checksums/source on GitHub. The coordinator owns
+  packaging/release/current state; workers own archive usability, native complete-
+  package execution and hosted/installed UI verification. Final product
   source `9dfd1760` passes [CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
   (14/14 jobs), including full Standard and the final UI/import/storage follow-ups.
-  Do not expand the frozen source audit or repeat suites merely while awaiting
-  the pending approvals and installed/clean-Windows access. The corpus projection, canonical frontend
+  Reuse the frozen scientific audit and existing test owners. New checks must
+  cover the complete saved profile rather than substitute reduced toy trials.
+  The corpus projection, canonical frontend
   and local Pages assembly agree. Installed operation and package identity
   remain separate gates. The first Runner NSIS payload and
   installed native WebView startup passed without Python or checkout paths on
@@ -161,8 +174,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   checkpoint; V1 applications and public products were not promoted.
   [Draft PR #2](https://github.com/GeorgeFejer91/pps-kit/pull/2) tracks integration;
   no merge or release promotion has occurred.
-  The Designer preview identifier proposal is pending explicit confirmation;
-  this gates package identity, not source/verification work.
+  The renewed user direction authorizes finishing the committed preview identity
+  and publishing its Windows installers; do not select a new identity/channel.
 
 ## Active completion checklist
 
@@ -187,23 +200,35 @@ This file is the active checklist and handoff owner; replace state, do not appen
   now passes source and real silent-callback checks, including next-block UI.
   Browser bundle materialization, native host preparation and instruction/group
   execution, durable group receipts and final Runner UI pass software checks;
-  complete installed interaction remains.
+  complete installed interaction remains. Validate profile creation → portable
+  export/import → custom generation → accepted schedule → all saved blocks/parts
+  → independently checked final results. Keep real software execution separate
+  from physical timing, and retain full-profile rows/durations/order.
 - [ ] M4 — Close supported acquisition/recovery, accessibility/performance and
   evidence-record gaps (D1–D2, F1–F2, I1); audit every included experiment's 11
   replication contracts and finish citation mapper/preset navigation.
   The bounded catalogue audit, mapper/preset source checks, F1 browser semantics
   and F2 bounded counts are complete. Installed WebView accessibility/performance
-  and acquisition evidence remain open.
+  and acquisition evidence remain open. Audit every archived template's actual
+  generation/materialization/Runner usability; source-incomplete studies must
+  retain their explicit limitations and cannot inherit replication-ready status.
 - [ ] M5 — Build and inspect exact-revision installed packages and advertised
   phone routes (G3, E1). New physical calibration (D3/I2) is deferred by the
   user; hardware operation is assumed, with no measured qualification claim.
+  Finish both native installers and verify installed software without Python or
+  checkout paths; cover advertised controls and recoverable failure behavior.
 - [ ] M6 — Review all finish criteria, supported-scope claims and release
-  artifacts; publish only under the matching release authorization.
+  artifacts; publish the verified Windows installers, hashes, corresponding
+  renderer source and software validation/scope notes on GitHub under the
+  2026-10-28 authorization. Independently download/hash-check published assets.
 
-Current blockers are missing installed/full-journey and clean-Windows evidence,
-the retained automatic-review launch restriction, and pending Designer package
-identity approval. Source validation is complete; user requests for the proposed
-identity and exact compiler-cache cleanup remain unanswered.
+Current constraints are missing installed/full-journey evidence, approximately
+3.5 GB local free space, and native OS automation initialization failing with
+"failed to write kernel assets" (os error 3). The latest user request authorizes
+fresh installed-test requests; any new automatic rejection must be reported,
+not bypassed. Existing identity/publication direction is sufficient to continue.
+The exact compiler-cache cleanup remains unapproved and must not be retried;
+reuse existing release caches and bounded outputs or hosted build workers.
 Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
 skips and strict Clippy; current Designer/Runner frontend checks pass 42/79 tests.
 At product revision `9dfd1760`, [CI run 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)

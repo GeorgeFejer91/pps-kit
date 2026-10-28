@@ -105,12 +105,22 @@ try {
     Assert-Exit 'Locked dependencies/canonical frontend drift; verify and commit before packaging'
     $Cli = Join-Path $Root 'apps/runner/node_modules/@tauri-apps/cli/tauri.js'
     $LicenseResources = @{}
-    $LicenseFiles = @(git ls-files third_party | Where-Object { [IO.Path]::GetFileName($_) -match '(?i)(licen[cs]e|copying|copyright)' })
+    $LicenseFiles = @(git ls-files third_party | Where-Object { [IO.Path]::GetFileName($_) -match '(?i)(^|[_-])(licen[cs]e|copying|copyright)' })
     Assert-Exit 'Read third-party notices'
     foreach ($File in $LicenseFiles) { $LicenseResources[(Join-Path $Root $File)] = ('licenses/' + $File) }
     $Artifacts = @()
     foreach ($App in @(@{name='designer'; config=$Designer}, @{name='runner'; config=$Runner}) | Where-Object { $_.name -in $Apps }) {
         $Resources = @{}
+        $ConfigDirectory = Join-Path $Root ('apps/' + $App.name + '/src-tauri')
+        foreach ($Resource in $App.config.bundle.resources.PSObject.Properties) {
+            # Tauri's final JSON Merge Patch removes these original map keys.
+            # A separate reset config is folded before the base is loaded and
+            # cannot clear it; retain each null in this one patch instead.
+            $Resources[$Resource.Name] = $null
+            $SourcePath = [IO.Path]::GetFullPath((Join-Path $ConfigDirectory $Resource.Name))
+            if (-not (Test-Path -LiteralPath $SourcePath)) { throw "Missing native bundle resource: $($Resource.Name)" }
+            $Resources[$SourcePath] = $Resource.Value
+        }
         foreach ($File in $RuntimeLock.files) {
             $InputFile = Join-Path $StagedRuntime $File.file
             if ($File.kind -eq 'license') { $Resources[$InputFile] = ('licenses/' + $File.file) }

@@ -1,8 +1,10 @@
 # Native Windows candidate build
 
 This route builds unsigned local NSIS candidates; it does not install, sign or
-publish them. Keep the Designer identifier proposal pending until approved.
-The existing Runner identifier is `org.peripersonalspace.runner.preview`.
+publish them. On 2026-10-28 the user explicitly directed finishing and releasing
+the existing Windows preview products. Retain Designer identity
+`org.peripersonalspace.designer.preview` and Runner identity
+`org.peripersonalspace.runner.preview`; no new identity or release channel is selected.
 An installed or clean-Windows result requires a separate recorded test.
 
 Use [Build_PPS_Native_Candidate.ps1](../../build/windows/Build_PPS_Native_Candidate.ps1)
@@ -23,6 +25,18 @@ lock. Its signed embedded cabinet contains `F_CENTRAL_msvcr120_x64`, copied as
 `VC2013-license.rtf`. Extracting these inputs does not run an installer. The
 reviewed DLLs have valid Microsoft Authenticode signatures. The builder checks
 every DLL/license hash before copying any into the candidate.
+The builder normalizes configured resource source paths before bundling. Its
+single JSON Merge Patch removes each old relative map key with a null value and
+adds the canonical key; merging only new keys would retain the old relative
+paths. Separate CLI config patches are folded before the base config is merged,
+so a separate empty-map reset is ineffective. A real NSIS
+probe reproduced failure for a 272-character path containing `../../../` and
+success for the same readable file at its 239-character canonical path. This
+avoids long-path failures in managed worktrees without changing system settings
+or renaming scientific assets.
+Notice selection matches actual license/copying/copyright filenames rather
+than maintenance scripts such as Eigen's `relicense.py`; corresponding source
+remains in the separate renderer archive.
 The builder stages writable copies without modifying those inputs. CAB-extracted
 read-only notices otherwise make a subsequent Tauri resource copy fail. Identical
 read-only outputs from the old builder are normalized only after hash and
