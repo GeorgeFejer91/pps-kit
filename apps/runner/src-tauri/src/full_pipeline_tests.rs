@@ -95,7 +95,19 @@ fn software_trial_expectations(
         if policy.response_required {
             *required_ordinal += 1;
         }
-        let omitted = policy.response_required && (*required_ordinal).is_multiple_of(7);
+        let next_start = schedule
+            .events()
+            .iter()
+            .filter(|event| {
+                event.event_type == "trial_start" && event.sample_index > start.sample_index
+            })
+            .map(|event| origin + software_frame_ns(event.sample_index as u64, rate))
+            .min();
+        // Do not manufacture an ambiguous omission when the frozen V1
+        // selection window overlaps another saved trial. Those trials still
+        // receive and must select their exact own synthetic response IDs.
+        let isolated = next_start.is_none_or(|next| window.selection_end_ns().unwrap() <= next);
+        let omitted = policy.response_required && (*required_ordinal).is_multiple_of(7) && isolated;
         let inject = policy.response_required && !omitted;
         let anchor = tactile.unwrap_or(response_window);
         let response_frame = anchor + u64::from(rate) * 3 / 10;
@@ -170,7 +182,16 @@ fn software_run_complete_part(
         let delay_ns = instruction.map(|item| item.delay_ns()).unwrap_or(0);
         let plan = candidate.shared_playback_plan();
         let frames = plan.media().frames();
-        let channels = plan.media().channels();
+        let channels = plan.route().output_channels();
+        let source_channels = plan.media().channels() as usize;
+        let channel_map: &[usize] = match plan.route().kind() {
+            pps_runner_audio::ResolvedOutputRouteKind::LegacyStereo => &[1, 0],
+            pps_runner_audio::ResolvedOutputRouteKind::CanonicalThree => &[0, 1, 2],
+            pps_runner_audio::ResolvedOutputRouteKind::CanonicalFourWithTactileMirror => {
+                &[0, 1, 2, 2]
+            }
+        };
+        assert_eq!(channel_map.len(), channels as usize);
         let rate = plan.media().sample_rate_hz();
         assert_eq!(plan.gains(), pps_runner_audio::OutputGains::unity());
         expected_boundaries.push((
@@ -198,6 +219,7 @@ fn software_run_complete_part(
             "kind": if is_instruction { "instruction" } else { "block" },
             "wav_sha256": candidate.wav_receipt().unwrap().sha256(),
             "frames": frames, "sample_rate_hz": rate, "channels": channels,
+            "source_channels":source_channels,"output_source_channel_map":channel_map,
             "scheduled_event_count": plan.scheduled_events().len(),
             "instruction_tactile_zero": is_instruction,
             "all_pcm_samples_compared": true
@@ -315,12 +337,13 @@ fn software_run_complete_part(
                     std::thread::yield_now();
                     continue;
                 }
-                let begin = cursor as usize * channels as usize;
-                let expected = &plan.media().interleaved_f32()[begin..begin + buffer.len()];
-                assert_eq!(
-                    buffer, expected,
-                    "callback changed, omitted or reordered actual PCM"
-                );
+                for (index, actual) in buffer.iter().enumerate() {
+                    let frame = cursor as usize + index / channels as usize;
+                    let output_channel = index % channels as usize;
+                    let expected = plan.media().interleaved_f32()
+                        [frame * source_channels + channel_map[output_channel]];
+                    assert!(actual.to_bits()==expected.to_bits(),"routed PCM mismatch at source frame {frame}, output channel {output_channel}: actual {actual:?}, expected {expected:?}");
+                }
                 assert!(buffer.iter().all(|v| v.is_finite() && v.abs() <= 1.0));
                 if is_instruction {
                     assert_eq!(channels, 3);
@@ -533,9 +556,17 @@ fn software_run_complete_part(
         }
     }
     assert_eq!(
-        actual_boundaries, expected_boundaries,
-        "all saved sample boundaries must reach the durable event stream in order"
+        actual_boundaries.len(),
+        expected_boundaries.len(),
+        "durable sample boundary count"
     );
+    for (index, (actual, expected)) in actual_boundaries
+        .iter()
+        .zip(&expected_boundaries)
+        .enumerate()
+    {
+        assert_eq!(actual, expected, "durable sample boundary {index}");
+    }
     assert_eq!(native_responses, response_count);
     assert!(
         expected_trials.is_empty(),
@@ -556,7 +587,7 @@ fn software_run_complete_part(
         "stage_count":stages.len(), "gate_count":gate_count, "media":media_evidence,
         "injected_responses":response_count, "native_response_events":native_responses,
         "scored_responses":scored_responses,
-        "response_policy":"saved-v1-required-and-correct-choice-300ms-every-seventh-required-omitted.v1",
+        "response_policy":"saved-v1-required-and-correct-choice-300ms-isolated-seventh-required-omitted.v1",
         "all_trial_response_identities_outcomes_and_rts_matched":true,
         "receipt":result["receipt"], "all_block_schedules_compiled":true,
         "all_saved_occurrences_preserved":true, "all_callback_boundaries_matched":true
@@ -653,6 +684,42 @@ fn software_run_complete_package(path: &std::path::Path, expected_sha256: &str) 
         report_path.display()
     );
     report
+}
+
+#[test]
+fn unsupported_prepared_response_contract_cannot_reserve_native_output() {
+    let (root, original) = verified_audio_package("SOFTWARE_UNSUPPORTED", 1);
+    fs::write(root.join("block-0.csv"),"Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Trial_End_Sample,response_mode,response_choice_set,correct_response\n1,T1,Target,audiotactile,48000,0,4,choice,red|green,red\n").unwrap();
+    let verified =
+        verify_prepared_session(VerificationRequest::new(original.manifest_path())).unwrap();
+    let control = Arc::new(FakeControl::default());
+    let runtime = AppRuntime::with_native_output(fake_coordinator(&control));
+    tauri::async_runtime::block_on(runtime.adopt_verified_session_async(verified)).unwrap();
+    compile_current_execution(&runtime);
+    let (guard, source) = begin_audio_decode(&runtime, 0);
+    let candidate = prepare_verified_audio(source).unwrap();
+    let summary = candidate.summary().unwrap();
+    assert_eq!(summary.response_mode, "unsupported");
+    assert!(summary.response_choices.is_empty());
+    let projection = serde_json::to_string(&summary).unwrap();
+    for private in ["correct_response", "red", "green"] {
+        assert!(!projection.contains(private));
+    }
+    runtime.cache_prepared_audio(candidate).unwrap();
+    tauri::async_runtime::block_on(runtime.ensure_execution_journal()).unwrap();
+    drop(guard);
+    let inventory =
+        tauri::async_runtime::block_on(runtime.start_native_output_enumerate().unwrap())
+            .unwrap()
+            .unwrap();
+    let error = tauri::async_runtime::block_on(
+        runtime
+            .start_native_output_reserve(fake_reserve_request(&inventory))
+            .unwrap(),
+    )
+    .unwrap()
+    .unwrap_err();
+    assert_eq!(error.code, "native_response_contract_unsupported");
 }
 
 #[test]
