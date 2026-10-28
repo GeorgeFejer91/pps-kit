@@ -1029,6 +1029,7 @@ fn source_profile(
             "active_window_source",
             "spacing_policy",
             "standard_basis",
+            "evidence_basis",
         ];
         if object.keys().any(|k| !known.contains(&k.as_str())) {
             return Err(error("unsupported_burst_policy","bake_recipe.source_profile_parameters","Fixed counts, overlap and legacy truncation need an explicit supported source policy."));
@@ -1043,7 +1044,6 @@ fn source_profile(
     for (field, expected) in [
         ("burst_count_mode", "duration_derived"),
         ("spacing_policy", "symmetric_fit"),
-        ("active_window_source", "trajectory_movement_duration"),
     ] {
         if parameters
             .get(field)
@@ -1054,6 +1054,46 @@ fn source_profile(
                 "unsupported_burst_policy",
                 format!("bake_recipe.source_profile_parameters.{field}"),
                 "The requested burst scheduling policy is not implemented.",
+            ));
+        }
+    }
+    let window_source = match parameters.get("active_window_source") {
+        None => "trajectory_movement_duration",
+        Some(Value::String(value))
+            if [
+                "trajectory_movement_duration",
+                "raw_dynaspace_active_burst_window",
+            ]
+            .contains(&value.as_str()) =>
+        {
+            value
+        }
+        _ => {
+            return Err(error(
+                "unsupported_burst_policy",
+                "bake_recipe.source_profile_parameters.active_window_source",
+                "The requested burst window source is not implemented.",
+            ))
+        }
+    };
+    if window_source == "raw_dynaspace_active_burst_window"
+        && parameters.get("active_window_s").is_none()
+    {
+        return Err(error(
+            "invalid_burst_timing",
+            "bake_recipe.source_profile_parameters.active_window_s",
+            "Raw-source window provenance requires an explicit active-window duration.",
+        ));
+    }
+    for field in ["standard_basis", "evidence_basis"] {
+        if parameters
+            .get(field)
+            .is_some_and(|value| !value.is_string())
+        {
+            return Err(error(
+                "invalid_source_parameters",
+                format!("bake_recipe.source_profile_parameters.{field}"),
+                "Source provenance must be text.",
             ));
         }
     }
@@ -1076,6 +1116,13 @@ fn source_profile(
             "Burst timing must fit completely without overlap or implicit truncation.",
         ));
     }
+    let mut resolved = json!({"burst_count_mode":"duration_derived","burst_duration_s":burst,"rise_fall_s":edge,"target_period_s":period,"onset_s":onset,
+        "active_window_s":active,"active_window_source":window_source,"spacing_policy":"symmetric_fit"});
+    for field in ["standard_basis", "evidence_basis"] {
+        if let Some(value) = parameters.get(field) {
+            resolved[field] = value.clone();
+        }
+    }
     Ok((
         SourceProfile::GaussianBurstTrain {
             onset_s: onset,
@@ -1084,8 +1131,7 @@ fn source_profile(
             rise_fall_s: edge,
             target_period_s: period,
         },
-        json!({"burst_count_mode":"duration_derived","burst_duration_s":burst,"rise_fall_s":edge,"target_period_s":period,"onset_s":onset,
-            "active_window_s":active,"active_window_source":"trajectory_movement_duration","spacing_policy":"symmetric_fit"}),
+        resolved,
     ))
 }
 

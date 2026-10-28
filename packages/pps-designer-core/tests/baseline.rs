@@ -140,3 +140,85 @@ fn inherited_calibrated_envelope_and_new_rng_opt_in_remain_distinct() {
         "unsupported_burst_policy"
     );
 }
+
+#[test]
+fn lateral_study5_keeps_explicit_burst_window_provenance_and_complete_pcm() {
+    let template: Value = serde_json::from_str(include_str!(
+        "../../pps-resources/study_templates/study5_dynaspace_lateral_45_pps.json"
+    ))
+    .unwrap();
+    let design = template["design"].clone();
+    // Existing Python _dynaspace_burst_onsets development oracle at 44.1 kHz;
+    // schedule parity does not imply NumPy noise-waveform parity.
+    let expected_onsets = [
+        13230, 17420, 21609, 25798, 29988, 34177, 38367, 42556, 46746, 50936, 55125, 59314, 63504,
+        67694, 71883, 76072, 80262, 84452, 88641, 92830, 97020, 101210, 105399, 109588, 113778,
+        117967, 122157, 126346, 130536, 134726, 138915, 143104, 147294,
+    ];
+    for source in design["noises"].as_array().unwrap() {
+        let plan = plan_stationary_baseline(&design, source["label"].as_str().unwrap(), &opt_in())
+            .unwrap();
+        assert_eq!(
+            plan.generation.source["source_profile_parameters"],
+            source["source_profile_parameters"]
+        );
+        assert!((plan.generation.request.duration_s - 3.85).abs() < 1e-9);
+        let prepared = prepare(&plan.generation.request, &AtomicBool::new(false)).unwrap();
+        assert_eq!(prepared.dry_pcm().len(), 169785);
+        assert_eq!(prepared.source_qc().burst_onset_frames, expected_onsets);
+        assert_eq!(prepared.source_qc().burst_frames, Some(1323));
+        assert!(!prepared.source_qc().numpy_seed_compatible);
+        for (index, onset) in expected_onsets.iter().copied().enumerate() {
+            let burst = &prepared.dry_pcm()[onset..onset + 1323];
+            assert!(burst.iter().all(|sample| sample.is_finite()));
+            assert!(burst.iter().any(|sample| *sample != 0.0));
+            let next = expected_onsets.get(index + 1).copied().unwrap_or(169785);
+            assert!(prepared.dry_pcm()[onset + 1323..next]
+                .iter()
+                .all(|sample| *sample == 0.0));
+        }
+        assert!(prepared.dry_pcm()[..expected_onsets[0]]
+            .iter()
+            .all(|sample| *sample == 0.0));
+    }
+    let label = design["noises"][0]["label"].as_str().unwrap();
+    for (field, value, code) in [
+        (
+            "active_window_source",
+            json!("unknown_window"),
+            "unsupported_burst_policy",
+        ),
+        ("active_window_s", json!(3.56), "invalid_burst_timing"),
+        ("burst_count", json!(33), "unsupported_burst_policy"),
+        (
+            "allow_burst_overlap",
+            json!(true),
+            "unsupported_burst_policy",
+        ),
+        (
+            "evidence_basis",
+            json!({"untrusted":"object"}),
+            "invalid_source_parameters",
+        ),
+    ] {
+        let mut invalid = design.clone();
+        invalid["noises"][0]["source_profile_parameters"][field] = value;
+        assert_eq!(
+            plan_stationary_baseline(&invalid, label, &opt_in())
+                .unwrap_err()
+                .code,
+            code
+        );
+    }
+    let mut missing = design.clone();
+    missing["noises"][0]["source_profile_parameters"]
+        .as_object_mut()
+        .unwrap()
+        .remove("active_window_s");
+    assert_eq!(
+        plan_stationary_baseline(&missing, label, &opt_in())
+            .unwrap_err()
+            .code,
+        "invalid_burst_timing"
+    );
+}

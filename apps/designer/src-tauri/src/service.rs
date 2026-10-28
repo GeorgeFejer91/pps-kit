@@ -537,9 +537,7 @@ pub fn execute(shared: Shared, work: Work) {
             next["run_package"] = Value::Null;
             next["session"] = Value::Null;
             for (index, field) in [(2,"trial_sequence_bake"), (3,"trial_file_bake"), (4,"trial_pool_bake"), (5,"block_csv_preview")] { if index >= minimum_invalidated { next[field] = json!({}); } }
-            if let Some(segments) = next["project_segments"].as_object_mut() {
-                for (name, segment) in segments { if name.split('_').next().and_then(|v|v.parse::<u8>().ok()).is_some_and(|n|n >= minimum_invalidated) { segment["status"] = json!("stale"); segment["accepted"] = json!(false); } }
-            }
+            invalidate_project_segments(&mut next, minimum_invalidated);
             if let Some(assets) = next["preload_inventory"]["assets"].as_array_mut() { assets.retain(|item| if minimum_invalidated == 2 { item["label"] != plan.original_label } else { item["label"] != asset["label"] }); assets.push(asset.clone()); }
             let mut records = owner.stored.assets.clone(); records.insert(key, record);
             if work.ticket.cancel.load(Ordering::Acquire) { return Err("generation_cancelled".into()); }
@@ -560,6 +558,27 @@ pub fn execute(shared: Shared, work: Work) {
                 "Native generation failed; no output published",
                 Some(json!({"error":error})),
             );
+        }
+    }
+}
+
+fn invalidate_project_segments(snapshot: &mut Value, minimum_invalidated: u8) {
+    // Optional browser projection: mutably indexing an absent key would insert
+    // null and make the published snapshot fail the next native operation.
+    if let Some(segments) = snapshot
+        .get_mut("project_segments")
+        .and_then(Value::as_object_mut)
+    {
+        for (name, segment) in segments {
+            if name
+                .split('_')
+                .next()
+                .and_then(|v| v.parse::<u8>().ok())
+                .is_some_and(|n| n >= minimum_invalidated)
+            {
+                segment["status"] = json!("stale");
+                segment["accepted"] = json!(false);
+            }
         }
     }
 }
@@ -644,6 +663,32 @@ fn safe_join(root: &Path, relative: &str) -> Result<PathBuf> {
 mod tests {
     use super::*;
     include!("preset_pipeline_tests.rs");
+    #[test]
+    fn generation_invalidation_preserves_optional_snapshot_shape_for_next_operation() {
+        let mut snapshot = json!({"design":{},"custom_workflow":{"is_custom":true}});
+        for _ in 0..2 {
+            bound_snapshot(&snapshot).unwrap();
+            invalidate_project_segments(&mut snapshot, 3);
+            assert!(snapshot.get("project_segments").is_none());
+            bound_snapshot(&snapshot).unwrap();
+        }
+        snapshot["project_segments"] = json!({
+            "2_trial_sequence_designs":{"status":"ready","accepted":true},
+            "3_trial_files":{"status":"ready","accepted":true},
+            "6_run_setup":{"status":"ready","accepted":true}
+        });
+        invalidate_project_segments(&mut snapshot, 3);
+        assert_eq!(
+            snapshot["project_segments"]["2_trial_sequence_designs"]["accepted"],
+            true
+        );
+        for key in ["3_trial_files", "6_run_setup"] {
+            assert_eq!(snapshot["project_segments"][key]["status"], "stale");
+            assert_eq!(snapshot["project_segments"][key]["accepted"], false);
+        }
+        bound_snapshot(&snapshot).unwrap();
+    }
+
     #[test]
     fn partial_asset_write_does_not_poison_digest_path_and_retry_succeeds() {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
