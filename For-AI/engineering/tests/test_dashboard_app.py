@@ -373,10 +373,12 @@ def test_dashboard_static_assets_are_packaged():
     assert "closeSegmentInfoModal" in app_js
     assert "Purpose" in html
     assert "Your Inputs" in html
-    assert "Backend Work" in html
+    assert "What happens" in html
     assert "Output" in html
     assert "Used Next" not in html
-    assert "Template Directory" in app_js
+    assert "bundled profile definitions" in app_js
+    assert "Hosted drafts stay in this browser" in app_js
+    assert "Choose an output folder later" in app_js
     assert "HOSTED_TEMPLATE_DIRECTORY_URL" in app_js
     for title in [
         "Choose or Create Study",
