@@ -5,18 +5,15 @@
 //! which is incompatible with the shared frontends' synchronous discard guards.
 //! Delegate native setup, but retain `Plugin`'s default no-script/no-IPC methods.
 
-use tauri::{
-    plugin::{Plugin, TauriPlugin},
-    AppHandle, Runtime,
-};
+use tauri::{plugin::Plugin, AppHandle, Runtime};
 
-struct NativeFileDialogs<R: Runtime>(TauriPlugin<R>);
+struct NativeFileDialogs<P>(P);
 
 pub(crate) fn init<R: Runtime>() -> impl Plugin<R> {
-    NativeFileDialogs(tauri_plugin_dialog::init())
+    NativeFileDialogs(tauri_plugin_dialog::init::<R>())
 }
 
-impl<R: Runtime> Plugin<R> for NativeFileDialogs<R> {
+impl<R: Runtime, P: Plugin<R>> Plugin<R> for NativeFileDialogs<P> {
     fn name(&self) -> &'static str {
         self.0.name()
     }
@@ -34,13 +31,23 @@ impl<R: Runtime> Plugin<R> for NativeFileDialogs<R> {
 mod tests {
     use super::*;
 
+    // No native app handle or GUI-bearing plugin destructor is required to
+    // verify the public trait boundary in a manifest-free Rust test EXE.
+    struct DialogPlugin;
+
+    impl Plugin<tauri::Wry> for DialogPlugin {
+        fn name(&self) -> &'static str {
+            "dialog"
+        }
+
+        fn initialization_script(&self) -> Option<String> {
+            Some("window.confirm = async () => false;".to_owned())
+        }
+    }
+
     #[test]
     fn retains_native_plugin_identity_without_injecting_dialog_overrides() {
-        // Exercise the public plugin boundary without linking the upstream
-        // GUI message-dialog constructor into a manifest-free Rust test EXE.
-        let original = tauri::plugin::Builder::<tauri::Wry>::new("dialog")
-            .js_init_script("window.confirm = async () => false;".to_owned())
-            .build();
+        let original = DialogPlugin;
         assert_eq!(original.name(), "dialog");
         assert!(original.initialization_script().is_some());
         assert!(original.initialization_script_2().is_some());
