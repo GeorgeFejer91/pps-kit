@@ -1,4 +1,4 @@
-import { verifyDesignerControlNames, verifyRunnerNavigation } from "./accessibility-browser.mjs";
+import { verifyDesignerControlNames, verifyRunnerNavigation, verifyDesignerNavigationLabels } from "./accessibility-browser.mjs";
 import { verifySequenceScaling } from "./sequence-scaling-browser.mjs";
 import { verifyAbortedBrowserWrites, recordStorageEvents, verifyStartupRestoreOrdering } from "./indexeddb-browser.mjs";
 import { verifyNativeDownloads } from "./downloads-browser.mjs";
@@ -290,6 +290,7 @@ try {
   accessible.on("pageerror", error => errors.push(error.message));
   accessible.on("dialog", dialog => dialog.accept());
   await accessible.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
+  await verifyDesignerNavigationLabels(accessible, output);
   await verifyDesignerControlNames(accessible, resolve(output, "accessible-instructions.png"));
   assert.deepEqual(errors, []);
   report.checks.push("Designer names, keyboard/focus, 320–1920px and 200% CSS zoom; uploaded instruction bytes/hash survive preview, lock, reload and export; last-slot focus clears footer at 620/1000px");

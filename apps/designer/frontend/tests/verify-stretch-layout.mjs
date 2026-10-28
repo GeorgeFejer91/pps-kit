@@ -6,6 +6,7 @@ import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { verifyAboutDialog } from "./about-dialog-browser.mjs";
+import { verifyDesignerNavigationLabels } from "./accessibility-browser.mjs";
 const { chromium } = createRequire(import.meta.url)(process.env.PPS_PLAYWRIGHT_MODULE || "playwright");
 const root = fileURLToPath(new URL("../../../../", import.meta.url));
 const output = resolve(root, "artifacts/designer-stretch");
@@ -34,6 +35,7 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/apps/designer/frontend/compiled/index.html`);
   await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
   await settle();
+  report.navigationLabels = await verifyDesignerNavigationLabels(page, output);
   const matrix = [
     [900, 620, "light"], [1920, 620, "dark"], [900, 1400, "dark"],
     [1440, 1000, "light"], [1920, 1440, "light"], [320, 1000, "dark"],

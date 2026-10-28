@@ -3,6 +3,27 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 
+export async function verifyDesignerNavigationLabels(page, output) {
+  await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
+  const originalViewport = page.viewportSize();
+  const evidence = [];
+  for (const width of [320, 760, 761, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const expected = width <= 760 ? ["Experiment", "Docs"] : ["Experiment Designer", "Documentation"];
+    for (const [index, id] of ["toolkit", "documentation"].entries()) {
+      const tab = page.locator(`#page-tab-${id}`);
+      const labels = await tab.locator("span").evaluateAll(nodes => nodes.filter(node => node.getClientRects().length).map(node => ({ text: node.textContent, width: node.clientWidth })));
+      assert.deepEqual(labels.map(label => label.text), [expected[index]], `${width}px: exactly one complete navigation label is painted`);
+      assert.ok(labels[0].width > 0, "Visible label retains a measurable box");
+      assert.equal(await tab.getAttribute("aria-label"), ["Experiment Designer", "Documentation"][index]);
+      evidence.push({ width, id, labels });
+    }
+    if (output && [320, 1440].includes(width)) await page.locator(".topbar").screenshot({ path: join(output, `navigation-labels-${width}.png`) });
+  }
+  if (originalViewport) await page.setViewportSize(originalViewport);
+  return evidence;
+}
+
 export async function verifyRunnerNavigation(page) {
   const control = page.getByRole("button", { name: "Experiment Control", exact: true });
   const logging = page.getByRole("button", { name: "Data Logging", exact: true });
