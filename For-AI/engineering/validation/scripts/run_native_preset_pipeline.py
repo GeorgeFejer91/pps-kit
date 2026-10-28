@@ -60,6 +60,15 @@ def retain_text_receipts(work: Path, destination: Path) -> None:
             raise ValueError("compact evidence retention budget exhausted")
         remaining -= size
         target = destination / "receipts" / path.relative_to(work)
+        if os.name == "nt":
+            # Deep managed checkouts plus exact receipt names can exceed MAX_PATH.
+            # Use the Windows file namespace without shortening evidence identities.
+            absolute = str(target.resolve())
+            slash = chr(92)
+            prefix = slash * 2 + "?" + slash
+            if not absolute.startswith(prefix):
+                absolute = prefix + ("UNC" + absolute[1:] if absolute.startswith(slash * 2) else absolute)
+            target = Path(absolute)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, target)
 

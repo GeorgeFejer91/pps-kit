@@ -1,0 +1,12 @@
+{
+  "source_repository": "https://github.com/GeorgeFejer91/uncodixfy-pretext",
+  "reviewed_on": "2026-10-28",
+  "source": "Exact installed skill snapshot; entrypoint matches existing baseline-lock.json",
+  "files": {
+    "SKILL.md": "800a8c1519f768676e53f5af1198663b366f7d3076a41c8eeb9fcef0f68304b2",
+    "LICENSE": "eb412411b17bbfdd37e1b3b60aecae36afa04e4c55de7387c77721a4c6ebd450",
+    "references/pretext.md": "6c2cd1e671d37378f5ad634ef028f14a9a66785ab1f93798a8c7517ce39cf6c7",
+    "references/accordion-stretch.md": "ee2e99f39737dc9c12006cf965f7e743c207d919cdb639334c9b7142d73a2040"
+  },
+  "runtime_dependency": "Existing locked @chenglou/pretext 0.0.8 is retained; guidance does not upgrade it."
+}

@@ -23,6 +23,14 @@ This file is the active checklist and handoff owner; replace state, do not appen
   installed functionality testing are now explicitly authorized. The previous
   source baseline passed; the full-preset audit found additional defects now
   being repaired and verified. Installed and publication gates remain open.
+  On 2026-10-28 the user additionally requested the combined Uncodixfy Pretext
+  skill in this repository and stretch-accordion geometry at every UI level.
+  Apply outside-in sizing across Designer and Runner shells, bounded panels,
+  ordered control groups and text/action cells; retain deliberate paging/details
+  for unbounded content. Reuse the existing locked Pretext and shared text owner.
+  Verify actual width/height, zoom, text-spacing and keyboard behavior before the
+  final installer rebuild. The current candidate build remains intermediate;
+  its packages cannot be published as containing the new layout work.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
   replication-ready labels. Generation ships without Python; Python remains
@@ -57,7 +65,14 @@ This file is the active checklist and handoff owner; replace state, do not appen
   failures: two Canzoneri audio-tactile baseline policies, optional Study 5
   snapshot shape, and the lateral profile's explicit burst-window provenance.
   All four repairs now pass owning regressions and exact full-profile preflight
-  retries; the complete 30-case execution sweep is running. Noel walking's reported interval
+  retries. The complete sweep now independently verifies native execution and
+  results for all 25 eligible plans (5,148 scored/dataset rows, including both
+  Study 5 parts); five source-gap guards remain. The original sweep retained
+  24 successes and one evidence-copy failure after successful execution: an
+  exact receipt destination exceeded Windows MAX_PATH. The existing retention
+  owner now uses the Windows extended path namespace; its full 300-trial retry
+  and deep-path regression pass. Preserve both attempts, and run a fresh unified
+  sweep on the final UI/package revision before publishing. Noel walking's reported interval
   range has no reported distribution or anchor: any native realization is an
   explicit reviewed toolkit customization, preserving the source gap, original
   range and versioned derived timing. It is not an exact-paper replication.
@@ -259,16 +274,19 @@ not bypassed. Existing identity/publication direction is sufficient to continue.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous
-worktrees/caches. The unused Rust-generation, catalogue and UI worktrees are now
+worktrees/caches. The unused Rust-generation, catalogue, UI and native-instructions worktrees are now
 recoverably archived through Codex, including dirty source where present. Their
-600, 297 and 5,005 ignored artifact files respectively were moved to the existing
+600, 297, 5,005 and 370 ignored artifact files respectively were moved to the existing
 Proton Drive folder and every file hash verified before archival. Cloud upload
 completion is unverified. Starting the existing sync client caused Git branch
 refs and indexes under the primary checkout to acquire name-clash filenames.
 The task-owned client was stopped; exact known refs and indexes were recovered,
 the original conflict files preserved, and Git connectivity validation passed.
-Keep that client stopped until the Git synchronization conflict is resolved.
-Integration and runtime-worker checkouts remain active. About 12.5 GiB is now
+The client restarted and repeated the metadata conflict; exact refs were checked
+against the remote, conflict files preserved, the index restored without changing
+working files, and Git connectivity reverified. It was stopped again after a
+further restart. Keep that client stopped until its Git sync conflict is resolved.
+Integration and the two new Designer/Runner layout checkouts remain active. About 16 GiB is now
 free; the separately denied integration incremental-cache deletion was not retried.
 Use bounded local checks and the pinned hosted Windows candidate job for large builds.
 Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
@@ -287,7 +305,8 @@ The four subsequent preflight repairs pass 50 Designer core checks, 13 native
 Designer host checks and strict all-target Clippy. Their focused PCM tests cover
 audio-tactile baseline preservation and the actual lateral preset's 33 burst
   onsets, silent intervals and complete frame count. Full saved-profile retries
-are the next gate; earlier installer binaries do not contain these repairs.
+pass; earlier installer binaries do not contain these repairs. The full saved
+source sweep and long-path retry retain exact independent result evidence.
 At `5820757f`, the fresh full CI run passed 13 jobs; Windows Standard had 731
 passes and one stale assertion expecting only the navigation link to the mapper.
 The catalogue shortcut is intentional; the corrected routing assertion passes
@@ -295,8 +314,16 @@ all ten publication-network checks. The pinned Windows candidate job built both
 installers, then failed its raw build-output/installed-executable comparison.
 The pinned bundler's exact NSIS marker transformation is now accounted for in
 the verifier, independently checked against actual installed bytes and negative
-integrity probes. Both packages still need the repaired installed verification
-and final complete-preset cloud run before publication.
+integrity probes. Candidate run 40719498413 at `4eadb222` rebuilt both installers
+and passed Designer payload verification/native startup; its UI check then timed
+out awaiting the intentionally lazy trajectory iframe before navigating to it.
+Repair that test's real-control navigation order and retain failure diagnostics.
+Runner installation was not reached. Both packages still need the completed
+installed checks and final full-preset cloud run after the stretch UI changes.
+The GitHub `native-preview-v0.1.0` release exists only as a draft without assets;
+retarget it to the final verified revision before publication. The exact local
+Uncodixfy Pretext mirror is hash-verified, with its license and geometry references;
+existing locked Pretext 0.0.8 remains unchanged.
 The full Standard tier, including final follow-ups, passes on the existing
 Windows CI worker, with actual free space and skip reasons logged. Later
 documentation-only checkpoints do not change the tested product/package bytes.

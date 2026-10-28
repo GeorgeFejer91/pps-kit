@@ -1,6 +1,7 @@
 """Native audit joins fail when a complete saved plan loses evidence."""
 import copy
 import importlib.util
+import os
 from pathlib import Path
 import wave
 
@@ -55,6 +56,21 @@ def test_native_pipeline_retains_exact_result_bytes_but_not_pcm(tmp_path):
     assert (kept / "receipts/result.results.json").read_bytes() == raw
     assert not (kept / "receipts/block.wav").exists()
     assert (work / "block.wav").exists(), "retention does not delete before caller exits owned temporary scope"
+
+
+def test_native_pipeline_retains_deep_windows_receipt_names(tmp_path):
+    work = tmp_path / "work"
+    work.mkdir()
+    filename = "native_events_" + "x" * 32 + ".results.pending.json"
+    raw = b'{"passed":true,"timingQualification":"unqualified"}\n'
+    (work / filename).write_bytes(raw)
+    kept = tmp_path / ("capture_" * 12) / ("experiment_" * 12)
+    pipeline.retain_text_receipts(work, kept)
+    target = (kept / "receipts" / filename).resolve()
+    assert len(str(target)) > 260
+    if os.name == "nt":
+        target = Path(chr(92) * 2 + "?" + chr(92) + str(target))
+    assert target.read_bytes() == raw
 
 
 def test_native_pipeline_disk_admission_preserves_part_and_iti_cost(tmp_path):
