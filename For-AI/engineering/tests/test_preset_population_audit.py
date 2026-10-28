@@ -53,3 +53,16 @@ def test_gate_success_is_not_a_usable_file_and_identity_mismatch_fails():
         audit.checked_plan("different", False, fixture)
     with pytest.raises(ValueError, match="Duplicate"):
         audit.unique_by([{"id": "same"}, {"id": "same"}], "id")
+
+
+def test_declared_choice_contract_must_survive_even_when_counts_match():
+    fixture = capture()
+    fixture["design"]["protocol"]["trial_strips"] = [{"label": "Left", "metadata": {
+        "correct_response": "left", "response_choice_set": "left,right", "expected_response": "respond"}}]
+    for row in fixture["block_csv_preview"]["blocks"][0]["preview_rows"]:
+        row.update(row_label="Left", correct_response="left", response_choice_set="left,right", expected_response="respond")
+    allowed = {"correct_response", "response_choice_set", "expected_response"}
+    assert audit.saved_metadata_findings(fixture, allowed) == []
+    fixture["block_csv_preview"]["blocks"][0]["preview_rows"][0].pop("correct_response")
+    assert audit.saved_metadata_findings(fixture, allowed) == [{
+        "row_label": "Left", "family": "audio_tactile", "field": "correct_response", "affected_rows": 1}]
