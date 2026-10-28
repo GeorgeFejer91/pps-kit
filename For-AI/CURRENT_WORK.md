@@ -39,13 +39,16 @@ This file is the active checklist and handoff owner; replace state, do not appen
   identifies exact source and checks. Source, CI packages, installed behavior,
   physical timing, participant results and replication remain distinct gates.
   V1 installations and public downloads remain unchanged. A separate local
-  Runner preview candidate was installed at `468c8241` and its installed bytes
-  match the audited NSIS payload. Startup was verified at earlier `b8e0e789`;
-  automatic approval review rejected the fresh launch check at the new revision
+  Runner preview candidate was rebuilt and installed at `9dfd1760`; all 16
+  installed application/runtime/web files match its audited 24-file NSIS payload.
+  The unsigned installer is 220,505,585 bytes, SHA256
+  `3fdbe2bd33c3fef3b444b44441e362e34ea5b3a67c98e2319d145788bfa2873f`.
+  Startup was verified only at earlier `b8e0e789`;
+  automatic approval review rejected the fresh launch check at `468c8241`
   ("blocked by policy", without a more specific reason). No alternate launch
   was attempted. Complete installed execution remains unverified.
-- **Next action:** verify the combined follow-up CI, rebuild the Runner candidate
-  from committed canonical bytes, then finish the approved-identity installed
+- **Next action:** verify [combined follow-up CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
+  at `9dfd1760`, assess its Standard skip reasons, then finish the approved-identity installed
   journey. The baseline CI including full Standard passes all 14 jobs; the
   final UI/import/storage follow-ups now need their integration run. The corpus projection, canonical frontend
   and local Pages assembly agree. Installed operation and package identity
@@ -100,8 +103,16 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Previous actual browser export/offline re-export/native import verifies nine
   embedded assets and exact premade receipt/WAV hashes. Read-only recovery retains
   six process-crash boundary checks and explicit incomplete/orphaned classifications.
-  Installed startup evidence belongs only to `b8e0e789`; `468c8241` has installed
-  payload equality but its fresh launch check was rejected by automatic review.
+  Installed startup evidence belongs only to `b8e0e789`; `9dfd1760` has installed
+  payload equality. The launch-policy blocker from `468c8241` remains; no alternate
+  startup route was attempted. The rebuilt payload has no Python/source inputs,
+  all ten canonical web files match, and its offline WebView2 installer has a valid
+  Microsoft signature. This host already has WebView2.
+  Independent final scope review corrected stale hosted-to-localhost and remote
+  setup claims in the public guides. V1 LSL/XDF/loopback instructions are explicitly
+  scoped; native preview limitations remain visible. Documentation links and
+  whitespace pass; the remote setup prohibition applies to remote controllers,
+  while a browser-owned local Phone Experiment can submit its own setup.
   Full installed interaction, clean Windows and public promotion remain open.
   Revision-specific details are in the linked implementation record and domain
   references; detailed logs, CPU profiles and captures stay in ignored artifacts.
@@ -194,7 +205,7 @@ optional Quest and all three validation bundles (14/14 jobs). The earlier non-Wi
 shared-module source-map drift failures are resolved with existing assets and
 a scoped LF rule. CI artifacts are not installed/qualified release evidence.
 The pinned-toolchain checks accumulated approximately 15.6 GB of regenerable
-Rust incremental cache, leaving less than 7 GB free. Automatic approval review
+Rust incremental cache, leaving approximately 3 GB free. Automatic approval review
 rejected the exact compiler-cache cleanup as "blocked by policy" without a
 more specific reason. No cleanup ran; explicit user approval remains pending.
 The full Standard tier now passes on the existing Windows CI worker; final

@@ -74,7 +74,27 @@ startup at this updated revision remains unverified. See ignored
 `artifacts/native-runner-r3-payload-report.json`. The earlier startup evidence
 above belongs only to `b8e0e789`, not to this replacement package.
 
-Later source/UI changes need their own rebuilt candidate. Designer packaging,
+The final integrated source at `9dfd176063997fddfe36ac8a8c5a2a38e2b6b428`
+was rebuilt and installed on 2026-10-28 using the pinned builder/toolchain.
+Its unsigned Runner-only NSIS installer is 220,505,585 bytes, SHA256
+`3fdbe2bd33c3fef3b444b44441e362e34ea5b3a67c98e2319d145788bfa2873f`.
+The audited 24-file payload contains ten canonical web files with identical
+hashes, the pinned application-local VC14 files and the signed offline WebView2
+installer; no Python, source checkout or `For-AI/` is present. Installation
+returned zero and all 16 installed application/runtime/web files match the
+extracted payload. The existing preview application was not running before
+installation. This check did not launch the application or exercise any control.
+The earlier automatic-review launch rejection remains in force; no alternate
+launch was attempted. This host already had WebView2, so prerequisite setup on
+clean Windows remains untested.
+
+Evidence is retained in ignored `artifacts/native-candidate-runner-20261028-r1/`,
+`artifacts/native-runner-9dfd-payload-report.json` and
+`artifacts/native-runner-9dfd-installed-payload-report.json`. The candidate
+manifest and `SHA256SUMS` bind the verified renderer/runtime inputs and separate
+renderer source archive. No public download was changed.
+
+Later product source/UI changes need their own rebuilt candidate. Designer packaging,
 native file dialogs, clean-Windows operation and the complete installed
 import/generate/execute/result journey remain release checks. Keep those states
 distinct in `CURRENT_WORK.md`.

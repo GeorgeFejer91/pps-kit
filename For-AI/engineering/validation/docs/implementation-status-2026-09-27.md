@@ -25,7 +25,7 @@ Each status applies to its stated surface, not to the whole product.
 | 14 | PARTIAL: suspension/resume, no replay, stale-state denial, disarmed phone outputs and pending-activation cancellation | Physical Safari/Chrome lock and BFCache cases |
 | 15 | VERIFIED source policy: local setup, observer scope, participant-free public projection and fresh invitations | Physical expiry/revocation; remembered phones remain unselected |
 | 16 | VERIFIED source: Designer/Runner lock Vite 6.4.5 and preserve the nanoid repair; canonical byte checks pass | Repeat advisory checks at release revision |
-| 17 | PARTIAL: Runner preview NSIS rebuilt and installed at 468c8241; installed bytes match its audited payload; canonical source/Pages staging pass | Fresh installed launch/full journey, clean Windows and Designer identity approval; physical calibration deferred by user |
+| 17 | PARTIAL: Runner preview NSIS rebuilt and installed at 9dfd1760; all 16 installed application/runtime/web files match its audited 24-file payload; canonical source/Pages staging pass | Fresh installed launch/full journey, clean Windows and Designer identity approval; physical calibration deferred by user |
 
 ## Current source evidence
 
@@ -63,8 +63,20 @@ Each status applies to its stated surface, not to the whole product.
 - [CI 40597111467](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40597111467)
   at `d1b30ec6` also passes all 14 jobs and now runs the entire Windows Standard
   tier: 717 passed, nine skipped, one warning in 1950.39 s; Quick passes 38.
-  Subsequent UI/import/storage follow-ups require their integration CI. The next
-  Standard run prints skip reasons; no measured or installed claim follows.
+  The final UI/import/storage integration runs at `9dfd1760` in
+  [CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247).
+  Core/Desktop/Browser and non-Windows oracle checks have passed; Windows Standard
+  and validation packaging are still running. Standard now prints skip reasons;
+  no measured or installed claim follows.
+- The Runner-only candidate at `9dfd1760` rebuilt with pinned tooling and installed
+  successfully in the existing isolated current-user preview location. All 16
+  installed application/runtime/web files match the independently extracted
+  24-file payload; all ten web files match canonical source bytes. The installer
+  is 220,505,585 bytes, SHA256
+  `3fdbe2bd33c3fef3b444b44441e362e34ea5b3a67c98e2319d145788bfa2873f`.
+  It contains no Python or source checkout. Fresh startup remains unverified:
+  the earlier automatic approval rejection was retained, with no alternate launch.
+  See the [candidate build record](native-windows-candidate-build.md).
 - Integrated provenance checkpoint `c389449a`: 23 Designer frontend tests,
   ten native bundle tests, actual Chromium export/offline re-export/native import,
   strict package Clippy and inspected mapper/Pages checks pass. The subsequent

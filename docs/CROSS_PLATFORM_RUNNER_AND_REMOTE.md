@@ -102,7 +102,7 @@ The current closed action catalogue is:
 | --- | --- | --- |
 | `system.snapshot` | `session.read` | Read bounded authoritative state. |
 | `package.prepare_demo` | `session.prepare` | Deterministic preview package only. |
-| `setup.submit` | `session.prepare` | Participant name is redacted unless local sharing is enabled. |
+| `setup.submit` | local only | Participant setup stays on the target; a remote controller cannot submit it. |
 | `part.start` | `session.transport` | Requires target-local arming. |
 | `instruction.continue` | `session.transport` | Requires the current opaque gate identifier. |
 | `run.pause` / `run.resume` | `session.transport` | Reliable, revision-checked commands. |

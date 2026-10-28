@@ -1,6 +1,10 @@
 ﻿# Replication Workflow
 
-This workflow describes the public, reusable path for reproducing the Study 5 audio-tactile PPS task or adapting it with the stimulus designer.
+This workflow describes the V1 Python/PySide path for reproducing the Study 5
+audio-tactile PPS task or adapting it with the stimulus designer. Its LSL,
+LabRecorder/XDF, loopback and analysis instructions apply to V1. The hosted
+Designer prepares profiles; the separate Rust/Tauri preview has different
+acquisition limits. See [the native Windows preview guide](NATIVE_WINDOWS_PREVIEW.md).
 
 ## 1. Install
 

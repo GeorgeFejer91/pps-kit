@@ -1,18 +1,22 @@
 # PPS Experiment Designer
 
-PPS Experiment Designer is a standalone authoring applet with one compiled
-frontend delivered in two capability modes.
+PPS Experiment Designer uses one compiled frontend with three explicit adapters.
 
-- `desktop_full`: `pps-designer` starts FastAPI on `127.0.0.1`, exchanges a
-  per-launch bootstrap token for an HttpOnly same-site cookie, and opens the UI
-  in pywebview. Windows uses WebView2; Linux uses GTK/WebKitGTK.
-- `hosted_compose`: GitHub Pages can inspect immutable templates, create
+- Hosted Designer: GitHub Pages can inspect immutable templates, create
   browser-local drafts, use redistribution-cleared hosted assets, retain fixed
   user audio in IndexedDB, preview stored trajectories, and export a portable
   `.pps-profile`. Selected files are not uploaded.
-- `hosted_connected`: a hosted page may explicitly connect to an installed
-  local companion. Backend URL/token controls remain an advanced compatibility
-  surface, not part of ordinary desktop use.
+- Native Designer preview: Rust/Tauri imports and verifies portable bundles,
+  generates custom endpoint trajectories through Rust/3DTI, reviews schedules
+  and prepares immutable experiments without Python. Native errors remain
+  explicit; they do not switch to hosted generation. See the
+  [Windows preview guide](NATIVE_WINDOWS_PREVIEW.md) for its capability limits.
+- V1 local Designer: `pps-designer` starts FastAPI on loopback, exchanges a
+  per-launch bootstrap token for an HttpOnly same-site cookie, and opens the UI
+  in pywebview. The companion adapter requires a loopback `/dashboard/` origin;
+  a hosted page does not connect to it. Windows uses WebView2; Linux uses
+  GTK/WebKitGTK. These are V1 compatibility products, separate from the native
+  Windows preview.
 
 Hosted compose cannot generate or spatialize looming audio, mutate stored
 trajectories, write folders, materialize acquisition CSVs, or launch the
@@ -52,7 +56,11 @@ The output is `apps/designer/frontend/compiled/`; FastAPI and local packaging
 consume it directly, while Pages assembly copies the same bytes into ignored
 deployment staging.
 
-Windows x64:
+The following packaging commands build the V1 Python compatibility products.
+For the separate Rust/Tauri preview, use the
+[native candidate build record](../For-AI/engineering/validation/docs/native-windows-candidate-build.md).
+
+V1 Windows x64:
 
 ```powershell
 .\For-AI\engineering\build\windows\Build_PPS_Designer.ps1
