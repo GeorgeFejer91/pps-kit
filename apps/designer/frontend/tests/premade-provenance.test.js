@@ -46,7 +46,7 @@ test("static premade projection and source hydration preserve receipt references
   const { asset } = await fixture();
   const context = vm.createContext({ clone: structuredClone, staticInventoryProfile: () => ({ assets: [asset] }),
     staticPreloadInventory: {}, staticResourceUrl: value => value, normalizeSourceKey: value => value.toLowerCase(), expandStaticTrialStripSourceLabels() {} });
-  for (const name of ["staticPremadeProvenance", "staticProfileAssetStatus", "hydrateStaticSourceAssets", "staticRenderStatus"]) {
+  for (const name of ["staticPremadeProvenance", "staticPremadeDuration", "staticProfileAssetStatus", "hydrateStaticSourceAssets", "staticRenderStatus"]) {
     const start = app.indexOf(`function ${name}(`);
     vm.runInContext(app.slice(start, app.indexOf("\nfunction ", start + 1)), context);
   }
