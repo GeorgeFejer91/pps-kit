@@ -6905,7 +6905,7 @@ body.modal-open {
   }
 
   .site-tab[data-page-tab="documentation"] .tab-label-short {
-    display: inline;
+    display: inline-block;
   }
 
   .site-tab[data-page-tab="toolkit"] .tab-label-full {
@@ -6913,7 +6913,7 @@ body.modal-open {
   }
 
   .site-tab[data-page-tab="toolkit"] .tab-label-short {
-    display: inline;
+    display: inline-block;
   }
 
   .info-page,
@@ -8365,7 +8365,7 @@ body.desktop-applet .segment-heading {
   white-space: normal;
   overflow-wrap: break-word;
 }
-.site-tab > span, .brand-name, .brand-subtitle { display: inline-block; }
+.site-tab > .tab-label-full, .brand-name, .brand-subtitle { display: inline-block; }
 .decision-segment :is(.bounded-select-button, .bounded-select-value, .audio-source-file-status) {
   block-size: auto;
   overflow: visible;

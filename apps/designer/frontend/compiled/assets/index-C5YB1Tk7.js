@@ -387,4 +387,4 @@ external_trigger_tolerance_ms external_trigger_channel
         </svg>
       </span>
     `,a.setAttribute("aria-controls",n.id),a.setAttribute("aria-expanded","true"),a.setAttribute("aria-label",`Collapse ${r}: ${o}`),a.title=`Collapse ${r}: ${o}`,a.addEventListener("click",()=>{n.classList.toggle("collapsed");const s=n.classList.contains("collapsed");a.setAttribute("aria-expanded",String(!s)),a.setAttribute("aria-label",`${s?"Expand":"Collapse"} ${r}: ${o}`),a.title=`${s?"Expand":"Collapse"} ${r}: ${o}`}),i.appendChild(a)}e||T_()}window.PPSDesigner=Object.freeze({drafts:Er,exportBundle:Ll});O_();
-//# sourceMappingURL=index-BFuBP56F.js.map
+//# sourceMappingURL=index-C5YB1Tk7.js.map
