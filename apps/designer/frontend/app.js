@@ -7523,6 +7523,7 @@ function openSegmentInfoModal(stepId, trigger = null) {
   $("segment-info-noise-guide").hidden = !showNoiseGuide;
   document.querySelector(".segment-info-card")?.classList.toggle("noise-guide-active", showNoiseGuide);
   $("segment-info-modal").hidden = false;
+  document.querySelector(".segment-info-body").scrollTop = 0;
   syncModalEnvironment();
   window.setTimeout(() => $("segment-info-modal-close")?.focus(), 0);
 }

@@ -5,6 +5,7 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { verifyAboutDialog } from "./about-dialog-browser.mjs";
 const { chromium } = createRequire(import.meta.url)(process.env.PPS_PLAYWRIGHT_MODULE || "playwright");
 const root = fileURLToPath(new URL("../../../../", import.meta.url));
 const output = resolve(root, "artifacts/designer-stretch");
@@ -119,6 +120,7 @@ try {
   await page.keyboard.press("Escape");
   assert.equal(await page.evaluate(() => document.activeElement.dataset.segmentInfo), "study");
   report.focusReturn = true;
+  report.aboutDialogs = await verifyAboutDialog(page, output);
   // Stress only presentation strings, then restore the actual profile by reload.
   const longLabel = "Long study label — العربية 漢字 👩🏽‍🔬 " + "unbroken-profile-identifier".repeat(5);
   for (const width of [320, 900, 1920]) {
