@@ -348,7 +348,8 @@ fn iti_uses_existing_ties_even_samples_and_rejects_invalid_values() {
 
 #[test]
 fn reported_iti_range_has_reviewed_identity_bound_toolkit_delay_and_real_pcm() {
-    let (mut design, preview, variants) = fixture();
+    let (mut design, mut preview, variants) = fixture();
+    preview["csv_columns"] = json!(["family", "soa_ms", "iti_ms", "iti_policy"]);
     design["protocol"]["trial_strips"][0]["metadata"] =
         json!({"iti_ms":"1000-1500","iti_policy":"paper_randomized_1000_to_1500_ms"});
     let (assets, cue) = assets();
@@ -359,6 +360,18 @@ fn reported_iti_range_has_reviewed_identity_bound_toolkit_delay_and_real_pcm() {
         plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap();
     assert_eq!(proposed.preview, repeated.preview);
     assert_eq!(proposed.preview_sha256, repeated.preview_sha256);
+    assert!(proposed.preview["csv_columns"]
+        .as_array()
+        .unwrap()
+        .contains(&json!("native_iti_materialization_policy")));
+    assert!(proposed.preview["csv_columns"]
+        .as_array()
+        .unwrap()
+        .contains(&json!("native_resolved_iti_ms")));
+    assert!(proposed.preview["csv_columns"]
+        .as_array()
+        .unwrap()
+        .contains(&json!("native_session_duration_ms")));
     let rows = proposed.preview["blocks"].clone();
     let mut seeds = std::collections::BTreeSet::new();
     for block in rows.as_array().unwrap() {
