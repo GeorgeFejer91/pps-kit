@@ -7332,14 +7332,14 @@ body:not(.desktop-applet) .legacy-session-action {
   display: none;
 }
 
-body.desktop-applet [data-page-tab="documentation"],
-body.desktop-applet [data-page-tab="downloads"],
+body.desktop-applet:not(.native-designer) [data-page-tab="documentation"],
+body.desktop-applet:not(.native-designer) [data-page-tab="downloads"],
 body.desktop-applet .companion-panel,
 body.desktop-applet .rail-note {
   display: none !important;
 }
 
-body.desktop-applet .topbar {
+body.desktop-applet:not(.native-designer) .topbar {
   display: none;
 }
 
@@ -7380,11 +7380,11 @@ body.native-designer .legacy-session-action {
   width: 10ch;
 }
 
-body.desktop-applet .workspace {
+body.desktop-applet:not(.native-designer) .workspace {
   padding-top: var(--layout-gutter);
 }
 
-body.desktop-applet .segment-heading {
+body.desktop-applet:not(.native-designer) .segment-heading {
   top: var(--layout-gutter);
 }
 
@@ -8550,7 +8550,7 @@ body.desktop-applet .segment-heading {
   .rail .rail-note { margin-block-start: 0; }
   .topbar { grid-column: 2; grid-row: 1; margin: 0; top: 0; }
   .workspace { grid-column: 2; grid-row: 2; margin: 0; padding: 0; }
-  body.desktop-applet .workspace { grid-row: 1 / span 2; }
+  body.desktop-applet:not(.native-designer) .workspace { grid-row: 1 / span 2; }
   .topbar, .segment-heading { position: static; }
 }
 @media (min-width: 761px) and (max-height: 760px) {
