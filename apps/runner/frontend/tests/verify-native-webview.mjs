@@ -154,9 +154,9 @@ async function verifyInstalledLayout(page, browser) {
   const readNativeState = () => page.evaluate(async () => {
     const snapshot = await window.__TAURI_INTERNALS__.invoke("runner_snapshot");
     const output = await window.__TAURI_INTERNALS__.invoke("native_output_status");
-    return { identity: JSON.stringify([snapshot.epoch, snapshot.revision, snapshot.session_id, snapshot.package_verified,
+    return { identity: JSON.stringify([snapshot.epoch, snapshot.revision, snapshot.identity, snapshot.package_verified,
       snapshot.safety.local_armed, snapshot.run.phase, snapshot.run.complete]), armed: snapshot.safety.local_armed,
-      phase: snapshot.run.phase, reservation: output.reservationGeneration };
+      phase: snapshot.run.phase, packageVerified: snapshot.package_verified, reservation: output.reservationGeneration };
   });
   try {
     assert.equal(report.origin, "http://tauri.localhost");
@@ -164,7 +164,8 @@ async function verifyInstalledLayout(page, browser) {
     const before = await readNativeState();
     assert.equal(before.armed, false, "Run layout checks only on an unarmed idle target");
     assert.equal(before.reservation, null, "Do not inspect layouts while output is reserved");
-    assert.doesNotMatch(before.phase, /running|paused|instruction/i);
+    assert.equal(before.phase, "idle", "Use an idle target for presentation-only checks");
+    assert.equal(before.packageVerified, false, "Do not inspect layouts on a selected package");
     const matrix = [["default"], ["desktop", 1280, 800], ["wide-short", 1920, 620],
       ["narrow", 320, 1000], ["zoom-200", 1280, 800], ["text-spacing", 1280, 800]];
     for (const [name, width, height] of matrix) {
@@ -209,6 +210,8 @@ async function verifyInstalledLayout(page, browser) {
       record.keyboard.push(await focusedControl(page, "Age (focused, never edited)"));
     }
     const after = await readNativeState();
+    assert.equal(after.phase, "idle");
+    assert.equal(after.packageVerified, false);
     report.nativeUnarmed = after.armed === false && after.reservation === null;
     report.nativeStateUnchanged = after.identity === before.identity && report.nativeUnarmed;
     report.participantFormUnchanged = await page.evaluate(before => before === JSON.stringify([...document.querySelectorAll("#setup-form input,#setup-form select")]
