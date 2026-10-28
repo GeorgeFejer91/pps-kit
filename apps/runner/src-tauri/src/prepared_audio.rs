@@ -166,7 +166,18 @@ impl PreparedAudioCandidate {
     }
 
     pub(crate) fn summary(&self) -> Result<PreparedAudioSummary, PreparedAudioError> {
+        let response_mode = if self.receipt.instruction().is_some() {
+            "go"
+        } else {
+            block_response_mode(self.schedule())
+        };
         Ok(PreparedAudioSummary {
+            response_mode,
+            response_choices: if response_mode == "left_right" {
+                vec!["left", "right"]
+            } else {
+                Vec::new()
+            },
             stage_ordinal: self.receipt.stage().ordinal,
             media_kind: if self.receipt.instruction().is_some() {
                 "instruction"
@@ -220,6 +231,8 @@ impl PreparedAudioCandidate {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct PreparedAudioSummary {
+    pub response_mode: &'static str,
+    pub response_choices: Vec<&'static str>,
     pub stage_ordinal: u32,
     pub media_kind: &'static str,
     pub instruction_label: Option<String>,
@@ -240,6 +253,32 @@ pub(crate) struct PreparedAudioSummary {
     pub decoded_bytes: u64,
     pub cache_capacity_blocks: u8,
     pub cache_byte_budget: u64,
+}
+
+fn block_response_mode(schedule: &BlockEventSchedule) -> &'static str {
+    use pps_runner_execution::{response_control_policy, ResponseControlPolicy};
+    let mut selected = None;
+    for event in schedule
+        .events()
+        .iter()
+        .filter(|e| e.event_type == "trial_start")
+    {
+        let Some(row) = event.payload.as_object() else {
+            return "unsupported";
+        };
+        let policy = response_control_policy(row);
+        if policy == ResponseControlPolicy::Unsupported
+            || selected.is_some_and(|previous| previous != policy)
+        {
+            return "unsupported";
+        }
+        selected = Some(policy);
+    }
+    match selected {
+        Some(ResponseControlPolicy::LeftRight) => "left_right",
+        Some(ResponseControlPolicy::Unsupported) => "unsupported",
+        _ => "go",
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -625,6 +664,25 @@ mod tests {
         .unwrap();
         assert_eq!(error.code(), "prepared_audio_resource_limit");
         fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn response_summary_is_block_scoped_and_never_projects_answer_keys() {
+        let row = |answer: &str, index: i64| {
+            let mut result = event("trial_start", index, &format!("trial{index}"));
+            result.payload = json!({"response_mode":"choice","response_choice_set":"left,right","correct_response":answer});
+            result
+        };
+        let schedule = BlockEventSchedule::new(vec![row("left", 0), row("right", 1)]).unwrap();
+        assert_eq!(block_response_mode(&schedule), "left_right");
+        let unsupported = BlockEventSchedule::new(vec![row("secret-other", 0)]).unwrap();
+        assert_eq!(block_response_mode(&unsupported), "unsupported");
+        let mut ordinary = event("trial_start", 1, "ordinary");
+        ordinary.payload = json!({});
+        assert_eq!(
+            block_response_mode(&BlockEventSchedule::new(vec![row("left", 0), ordinary]).unwrap()),
+            "unsupported"
+        );
     }
 
     #[test]
