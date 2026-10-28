@@ -1786,6 +1786,36 @@ fn write_json_new(
     file.sync_all().map_err(|_| GenerationError::Io)?;
     Ok(format!("{:x}", Sha256::digest(bytes)))
 }
+fn csv_cell(column: &str, value: &Value) -> Result<String, GenerationError> {
+    let text = match value {
+        Value::Null => String::new(),
+        Value::String(s) if s.len() <= 16384 => s.clone(),
+        Value::Number(n) => n.to_string(),
+        Value::Bool(b) => b.to_string(),
+        Value::Array(values)
+            if crate::row_contract::ROW_CONTRACT_FIELDS.contains(&column)
+                && values.len() <= 1024
+                && values.iter().all(|value| {
+                    matches!(
+                        value,
+                        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_)
+                    )
+                }) =>
+        {
+            // Preserve the existing typed contract as one escaped CSV cell.
+            // Only flat scalar arrays of known contract fields are supported;
+            // arbitrary objects/nested structures cannot enter schedule rows.
+            serde_json::to_string(values)
+                .map_err(|_| GenerationError::Invalid("assembly_csv_scalar"))?
+        }
+        _ => return Err(GenerationError::Invalid("assembly_csv_scalar")),
+    };
+    if text.len() > 16384 {
+        return Err(GenerationError::Invalid("assembly_csv_scalar"));
+    }
+    Ok(text)
+}
+
 fn write_csv_new(
     path: &std::path::Path,
     rows: &[Value],
@@ -1811,16 +1841,8 @@ fn write_csv_new(
         .map_err(|_| GenerationError::Io)?;
     for row in rows {
         check_cancelled(cancelled)?;
-        let record: Result<Vec<String>, GenerationError> = columns
-            .iter()
-            .map(|c| match &row[c] {
-                Value::Null => Ok(String::new()),
-                Value::String(s) if s.len() <= 16384 => Ok(s.clone()),
-                Value::Number(n) => Ok(n.to_string()),
-                Value::Bool(b) => Ok(b.to_string()),
-                _ => Err(GenerationError::Invalid("assembly_csv_scalar")),
-            })
-            .collect();
+        let record: Result<Vec<String>, GenerationError> =
+            columns.iter().map(|c| csv_cell(c, &row[c])).collect();
         writer
             .write_record(record?)
             .map_err(|_| GenerationError::Io)?;
@@ -1869,6 +1891,35 @@ mod tests {
         io::{Cursor, Seek, SeekFrom, Write},
         sync::atomic::Ordering,
     };
+
+    #[test]
+    fn csv_contract_arrays_roundtrip_but_objects_and_unknown_structures_fail() {
+        let value = json!([1, 2, "left,right", false, null]);
+        let cell = csv_cell("speaker_switch_channels", &value).unwrap();
+        assert_eq!(serde_json::from_str::<Value>(&cell).unwrap(), value);
+        let mut writer = csv::Writer::from_writer(Vec::new());
+        writer.write_record(["speaker_switch_channels"]).unwrap();
+        writer.write_record([cell]).unwrap();
+        let bytes = writer.into_inner().unwrap();
+        let mut reader = csv::Reader::from_reader(bytes.as_slice());
+        assert_eq!(
+            serde_json::from_str::<Value>(&reader.records().next().unwrap().unwrap()[0]).unwrap(),
+            value
+        );
+        for (column, value) in [
+            ("unknown_metadata", json!([1, 2])),
+            ("speaker_switch_channels", json!({"path":"untrusted"})),
+            ("speaker_switch_channels", json!([{"path":"untrusted"}])),
+            ("speaker_switch_channels", json!([[1, 2]])),
+            ("speaker_switch_channels", json!(vec![0; 1025])),
+            ("speaker_switch_channels", json!(["x".repeat(16384)])),
+        ] {
+            assert_eq!(
+                csv_cell(column, &value),
+                Err(GenerationError::Invalid("assembly_csv_scalar"))
+            );
+        }
+    }
 
     #[test]
     fn cancellation_after_pcm_write_returns_error_with_only_a_strict_prefix() {
