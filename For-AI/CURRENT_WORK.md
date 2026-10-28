@@ -56,7 +56,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   preflight found 21 reviewed plans, five expected source-gap guards and four
   failures: two Canzoneri audio-tactile baseline policies, optional Study 5
   snapshot shape, and the lateral profile's explicit burst-window provenance.
-  Repairs are under owning regression and full-profile verification. Noel walking's reported interval
+  All four repairs now pass owning regressions and exact full-profile preflight
+  retries; the complete 30-case execution sweep is running. Noel walking's reported interval
   range has no reported distribution or anchor: any native realization is an
   explicit reviewed toolkit customization, preserving the source gap, original
   range and versioned derived timing. It is not an exact-paper replication.
@@ -285,8 +286,17 @@ all-preset execution and the rebuilt packages still need the new cloud run.
 The four subsequent preflight repairs pass 50 Designer core checks, 13 native
 Designer host checks and strict all-target Clippy. Their focused PCM tests cover
 audio-tactile baseline preservation and the actual lateral preset's 33 burst
-onsets, silent intervals and complete frame count. Full saved-profile retries
+  onsets, silent intervals and complete frame count. Full saved-profile retries
 are the next gate; earlier installer binaries do not contain these repairs.
+At `5820757f`, the fresh full CI run passed 13 jobs; Windows Standard had 731
+passes and one stale assertion expecting only the navigation link to the mapper.
+The catalogue shortcut is intentional; the corrected routing assertion passes
+all ten publication-network checks. The pinned Windows candidate job built both
+installers, then failed its raw build-output/installed-executable comparison.
+The pinned bundler's exact NSIS marker transformation is now accounted for in
+the verifier, independently checked against actual installed bytes and negative
+integrity probes. Both packages still need the repaired installed verification
+and final complete-preset cloud run before publication.
 The full Standard tier, including final follow-ups, passes on the existing
 Windows CI worker, with actual free space and skip reasons logged. Later
 documentation-only checkpoints do not change the tested product/package bytes.

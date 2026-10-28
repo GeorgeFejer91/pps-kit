@@ -233,10 +233,13 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert section["aria-labelledby"] == "docs-publication-network-title"
         assert "data-publication-network-root" in section
 
-        rail_links = markup.with_attr("data-page-section-link", "docs-publication-network")
-        assert len(rail_links) == 1
-        assert rail_links[0][1]["href"] == "#docs-publication-network"
-        assert rail_links[0][1]["data-page-section-page"] == "documentation"
+        map_links = markup.with_attr("data-page-section-link", "docs-publication-network")
+        # The navigation rail and catalogue-coverage shortcut share the router.
+        assert len(map_links) == 2
+        for tag, attributes in map_links:
+            assert tag == "a"
+            assert attributes["href"] == "#docs-publication-network"
+            assert attributes["data-page-section-page"] == "documentation"
 
         topology = markup.by_id("publication-layout-topology")[1]
         timeline = markup.by_id("publication-layout-year")[1]
