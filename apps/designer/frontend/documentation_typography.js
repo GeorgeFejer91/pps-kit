@@ -12,5 +12,6 @@ export function initializeDocumentationTypography() {
     "[data-pretext-fit]", "[data-pretext]",
     "#schedule-segment button", "#schedule-segment .status-label", "#schedule-segment td",
     "#run-segment button", "#run-segment .status-label", "#run-segment td",
+    "#downloads-page .button-link",
   ].join(","));
 }

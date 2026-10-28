@@ -319,8 +319,13 @@ def test_dashboard_static_assets_are_packaged():
     assert "enforceExternalLinkTargets" in app_js
     assert 'id="download-designer"' in html
     assert 'id="download-runner"' in html
-    assert 'id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer"' in html
-    assert "Incompatible Shared versions are rejected instead of mixed." in html
+    native_release = "https://github.com/GeorgeFejer91/pps-kit/releases"
+    assert f'href="{native_release}/download/native-preview-v0.1.0/PPS%20Experiment%20Designer%20Preview_0.1.0_x64-setup.exe"' in html
+    assert f'href="{native_release}/download/native-preview-v0.1.0/PPS%20Experiment%20Runner%20Preview_0.1.0_x64-setup.exe"' in html
+    assert f'id="download-software" class="button-link primary-link" href="{native_release}/tag/native-preview-v0.1.0"' in html
+    assert f'href="{native_release}/download/native-preview-v0.1.0/SHA256SUMS"' in html
+    assert "V1 Python/Qt bootstrappers and a combined Toolkit installer are not available" in html
+    assert "/releases/latest" not in html
     assert "renderHardwarePixelArt" in app_js
     assert 'data-hardware-pixel="komplete-audio6"' in html
     assert 'data-hardware-pixel="woojer-strap-4"' in html
