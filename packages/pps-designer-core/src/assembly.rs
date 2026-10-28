@@ -1,7 +1,8 @@
 //! Native composition of already-reviewed Segment 5 rows. This module never
-//! randomizes, discovers files from JSON, synthesizes replacement comparators,
+//! changes trial order, discovers files from JSON, synthesizes replacement comparators,
 //! or grants permission to publish a staged package.
 use crate::{check_cancelled, sample_index, GenerationError, MAX_FRAMES};
+use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::Serialize;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -17,6 +18,74 @@ const MAX_DECODED_ASSET_BYTES: usize = 512 * 1024 * 1024;
 const MAX_ASSET_BYTES: usize = MAX_FRAMES * 8 + 1024 * 1024;
 const MAX_BLOCK_BYTES: u64 = 1280 * 1024 * 1024;
 const MAX_PACKAGE_BYTES: u64 = 8 * 1024 * 1024 * 1024;
+pub const NATIVE_ITI_RANGE_POLICY: &str = "toolkit_uniform_integer_ms_std_rng_0_8_8.v1";
+
+fn iti_frames(design: &Value, row: &mut Value, rate: u32) -> Result<usize, GenerationError> {
+    row.as_object_mut()
+        .ok_or(GenerationError::Invalid("assembly_row"))?
+        .retain(|key, _| !key.starts_with("native_iti_") && key != "native_resolved_iti_ms");
+    let value = &row["iti_ms"];
+    if value.is_null() || value.as_str() == Some("") {
+        return Ok(0);
+    }
+    if let Some(ms) = value
+        .as_f64()
+        .or_else(|| value.as_str().and_then(|s| s.trim().parse::<f64>().ok()))
+    {
+        if !ms.is_finite() || ms < 0.0 {
+            return Err(GenerationError::Invalid("assembly_iti_ms"));
+        }
+        return Ok(sample_index(ms / 1000.0, rate));
+    }
+    let (minimum, maximum) = value
+        .as_str()
+        .and_then(|s| s.split_once('-'))
+        .and_then(|(a, b)| Some((a.trim().parse::<u64>().ok()?, b.trim().parse::<u64>().ok()?)))
+        .filter(|(a, b)| a <= b && *b <= 60_000)
+        .ok_or(GenerationError::Invalid("assembly_iti_ms"))?;
+    // This is the one saved range contract currently audited. The paper reports
+    // a randomized interval, not a distribution, millisecond grid, seed or
+    // timing anchor. Propose an explicitly named toolkit realization for native
+    // review; never replace the original range or claim V1/source parity.
+    if row["iti_policy"] != "paper_randomized_1000_to_1500_ms" || (minimum, maximum) != (1000, 1500)
+    {
+        return Err(GenerationError::Invalid(
+            "assembly_iti_range_policy_unsupported",
+        ));
+    }
+    let source_seed = &design["protocol"]["random_seed"];
+    if source_seed.as_i64().is_none() && source_seed.as_u64().is_none() {
+        return Err(GenerationError::Invalid(
+            "assembly_iti_integer_seed_required",
+        ));
+    }
+    let seed_input = json!([
+        NATIVE_ITI_RANGE_POLICY,
+        source_seed,
+        row["trial_pool_index"],
+        row["row_label"],
+        row["sequence_variant_key"],
+        row["family"],
+        row["soa_ms"]
+    ]);
+    let seed: [u8; 32] = Sha256::digest(
+        serde_json::to_vec(&seed_input)
+            .map_err(|_| GenerationError::Invalid("assembly_iti_seed"))?,
+    )
+    .into();
+    let milliseconds = StdRng::from_seed(seed).gen_range(minimum..=maximum);
+    row["native_iti_materialization_policy"] = json!(NATIVE_ITI_RANGE_POLICY);
+    row["native_iti_anchor"] = json!("after_trial_audio_end");
+    row["native_iti_seed_sha256"] =
+        json!(seed.iter().map(|b| format!("{b:02x}")).collect::<String>());
+    row["native_iti_range_min_ms"] = json!(minimum);
+    row["native_iti_range_max_ms"] = json!(maximum);
+    row["native_resolved_iti_ms"] = json!(milliseconds);
+    row["native_iti_source_distribution_reported"] = json!(false);
+    row["native_iti_source_anchor_reported"] = json!(false);
+    row["native_iti_legacy_compatible"] = json!(false);
+    Ok(sample_index(milliseconds as f64 / 1000.0, rate))
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -427,18 +496,7 @@ pub fn plan_assembly_preview(
                 None
             };
             let mut enriched = crate::row_contract::merge(&variant.strip, row, family)?;
-            let iti_ms = match enriched
-                .get("iti_ms")
-                .filter(|v| !v.is_null() && v.as_str() != Some(""))
-            {
-                None => 0.0,
-                Some(value) => value
-                    .as_f64()
-                    .or_else(|| value.as_str().and_then(|s| s.trim().parse::<f64>().ok()))
-                    .filter(|ms| ms.is_finite() && *ms >= 0.0)
-                    .ok_or(GenerationError::Invalid("assembly_iti_ms"))?,
-            };
-            let iti_frames = sample_index(iti_ms / 1000.0, rate);
+            let iti_frames = iti_frames(design, &mut enriched, rate)?;
             let session_frames = variant
                 .frames
                 .checked_add(iti_frames)
@@ -1891,6 +1949,44 @@ mod tests {
         io::{Cursor, Seek, SeekFrom, Write},
         sync::atomic::Ordering,
     };
+
+    #[test]
+    fn iti_seed_follows_source_row_identity_and_clears_forged_numeric_provenance() {
+        let design = json!({"protocol":{"random_seed":2015}});
+        let original = json!({"iti_ms":"1000-1500","iti_policy":"paper_randomized_1000_to_1500_ms","trial_pool_index":1,"row_label":"walking","sequence_variant_key":"looming","family":"audio_tactile","soa_ms":300});
+        let mut pre = original.clone();
+        let frames = iti_frames(&design, &mut pre, 44100).unwrap();
+        let mut post = original.clone();
+        post["phase"] = json!("post");
+        assert_eq!(iti_frames(&design, &mut post, 44100).unwrap(), frames);
+        assert_eq!(
+            pre["native_iti_seed_sha256"],
+            post["native_iti_seed_sha256"]
+        );
+        post["trial_pool_index"] = json!(2);
+        iti_frames(&design, &mut post, 44100).unwrap();
+        assert_ne!(
+            pre["native_iti_seed_sha256"],
+            post["native_iti_seed_sha256"]
+        );
+        post["iti_ms"] = json!(300);
+        assert_eq!(iti_frames(&design, &mut post, 44100).unwrap(), 13230);
+        assert!(post.get("native_iti_materialization_policy").is_none());
+        assert!(post.get("native_resolved_iti_ms").is_none());
+        for range in ["1500-1000", "-1000-1500", "1000-60001", "1-2-3"] {
+            let mut row = original.clone();
+            row["iti_ms"] = json!(range);
+            assert!(iti_frames(&design, &mut row, 44100).is_err());
+        }
+        let mut row = original;
+        row["iti_policy"] = json!("unreviewed_range_policy");
+        assert_eq!(
+            iti_frames(&design, &mut row, 44100),
+            Err(GenerationError::Invalid(
+                "assembly_iti_range_policy_unsupported"
+            ))
+        );
+    }
 
     #[test]
     fn csv_contract_arrays_roundtrip_but_objects_and_unknown_structures_fail() {

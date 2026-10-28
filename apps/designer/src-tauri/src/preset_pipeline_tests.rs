@@ -223,6 +223,20 @@ fn preset_prepare_case(
         evidence["status"] = json!("reviewed");
         return Ok(());
     }
+    let toolkit_iti = projection["block_csv_preview"]["blocks"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .flat_map(|b| b["preview_rows"].as_array().into_iter().flatten())
+        .any(|row| row["native_iti_materialization_policy"].is_string());
+    if toolkit_iti {
+        if std::env::var_os("PPS_PRESET_RESOLVE_ITI_RANGES").as_deref()
+            != Some(std::ffi::OsStr::new("1"))
+        {
+            return Err("explicit_toolkit_iti_resolution_acceptance_required".into());
+        }
+        evidence["toolkit_iti_resolution"] = json!({"accepted_for_software_audit":true,"source_distribution_reported":false,"source_anchor_reported":false,"legacy_compatible":false});
+    }
     let (job, work) = {
         let mut owner = shared.lock().map_err(|_| "host_unavailable")?;
         owner.accept_review(revision, &evidence["review_hashes"])?;
