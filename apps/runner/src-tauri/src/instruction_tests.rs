@@ -7,7 +7,9 @@ fn instruction_group_fixture() -> (
     instruction_group_fixture_with_blocks(2)
 }
 
-fn instruction_group_fixture_with_blocks(block_count: u32) -> (
+fn instruction_group_fixture_with_blocks(
+    block_count: u32,
+) -> (
     std::path::PathBuf,
     pps_session_package::VerifiedPreparedGroup,
 ) {
@@ -100,6 +102,7 @@ fn run_software_part(
             _ => panic!("new occurrence must decode"),
         };
         let candidate = prepare_verified_audio(source).unwrap();
+        let stage = candidate.source_receipt().stage();
         let instruction = candidate.source_receipt().instruction().is_some();
         let channels = candidate.media().channels();
         let rate = candidate.media().sample_rate_hz();
@@ -148,6 +151,22 @@ fn run_software_part(
                 .iter()
                 .all(|sample| sample.is_finite() && sample.abs() <= 1.0));
             let snapshot = runtime.snapshot().unwrap();
+            if matches!(
+                snapshot.run.phase,
+                RunnerPhase::Interrupted | RunnerPhase::Error
+            ) {
+                let view = runtime.0.authority.test_view();
+                panic!(
+                    "software stage failed: part={part}, stage={stage:?}, run={:?}, connection={}, evidence_unavailable={}, journal_failed={:?}, durable_sequence={:?}, ledger_sequence={:?}, ledger_tail={:?}",
+                    snapshot.run,
+                    snapshot.connection_state,
+                    view.evidence_unavailable,
+                    view.journal_failed,
+                    view.journal_durable_sequence,
+                    view.ledger_last_sequence,
+                    view.ledger_tail,
+                );
+            }
             if instruction {
                 assert!(!snapshot.run.participant_capture_ready);
                 assert!(output.chunks_exact(3).all(|frame| frame[2] == 0.0));
