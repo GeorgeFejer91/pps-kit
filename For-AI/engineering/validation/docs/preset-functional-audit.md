@@ -132,3 +132,32 @@ source durations match actual WAV headers; Canzoneri rows are now 5000 ms in
 both directions. Source-row multiplicities are unchanged. Outputs are retained
 separately under ignored `artifacts/preset-functional-audit-duration-fixed/`;
 the nine saved-metadata losses remain present in that intermediate snapshot.
+
+The subsequent `af7a3b3a` frontend checkpoint was independently captured through
+the same public APIs into ignored `artifacts/preset-functional-audit-contract-fixed/`.
+All 30 cases pass the capture contract: 25 complete plans, five explicit gates,
+4740 source rows and 61 source blocks, with no browser exceptions. All 80
+referenced stimulus WAV headers (44 generated/noise entries and 36 custom
+entries, including native IEEE-float assets) agree with captured durations.
+Declared allowlisted metadata now survives every complete plan. The reusable
+population audit checks both properties; its focused suite has eight passing
+checks. The capture report SHA256 is
+`5d1c4961ddba24d4dd0113bb40fd3b579f93be67a375baea01e14753791ebed3`.
+
+Block names remain a separate observed contract loss. Thirteen presets replace
+33 descriptive saved block labels with generic `Block NN` labels; the two
+Study 5 presets additionally change 12 numerical labels from `Block N` to
+`Block NN`, which the report distinguishes as formatting only. Six presets
+(Barumerli Experiments 1/2, Matsuda, Noel bodily-self front/back, and Pfeiffer)
+lose 19 explicitly different condition labels. The remaining descriptive
+labels identify the single-condition Biggio/Collignon presets or named
+Noel-walking/Roussel blocks. This audit does not infer condition assignments,
+stimulus direction, cohort multiplicity or repetition counts from those labels,
+and does not repair the captures. Native materialization must preserve the
+accepted full saved plan while reporting this limitation; numerical row
+coverage alone is not evidence that the original condition contract survives.
+
+The native ITI/metadata and response-control followups `ff695ac5` and `ddff1b5c`
+passed an independent read-only review. That review is not execution evidence:
+the archive report still marks native preparation and execution unassessed
+until the exact captures pass the owning full-profile native sweep.
