@@ -42,8 +42,17 @@ export function initializeBoundedText(root, pretext, selector = "[data-pretext]"
       const insetX = px(style.paddingLeft) + px(style.paddingRight);
       const paddingY = px(style.paddingTop) + px(style.paddingBottom);
       const insetY = paddingY + px(style.borderTopWidth) + px(style.borderBottomWidth);
-      const width = Math.max(1, element.clientWidth - insetX);
-      const innerHeight = Math.max(0, element.clientHeight - paddingY);
+      // clientWidth/Height round to integer CSS pixels. Intrinsic labels may lose
+      // a fractional pixel and spuriously wrap; resolved CSS sizes retain it and
+      // remain in logical pixels under user zoom (unlike viewport rectangles).
+      const resolvedWidth = Number.parseFloat(style.width);
+      const resolvedHeight = Number.parseFloat(style.height);
+      const borderBox = style.boxSizing === "border-box";
+      const width = Math.max(1, Number.isFinite(resolvedWidth)
+        ? resolvedWidth - (borderBox ? insetX + px(style.borderLeftWidth) + px(style.borderRightWidth) : 0)
+        : element.clientWidth - insetX);
+      const innerHeight = Math.max(0, Number.isFinite(resolvedHeight)
+        ? resolvedHeight - (borderBox ? insetY : 0) : element.clientHeight - paddingY);
       const size = px(style.fontSize);
       const lineHeight = px(style.lineHeight) || size * 1.5;
       const text = element.textContent || "";
