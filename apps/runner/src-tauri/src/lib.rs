@@ -1,6 +1,8 @@
 mod event_journal;
 mod execution_owner;
 mod latency_diagnostics;
+#[path = "../../../native_file_dialogs.rs"]
+mod native_file_dialogs;
 mod native_output;
 mod native_playback;
 mod prepared_audio;
@@ -633,7 +635,7 @@ async fn remote_session_revoke(
 pub fn run() {
     let runtime = AppRuntime::new();
     tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
+        .plugin(native_file_dialogs::init())
         .manage(runtime)
         .setup(|app| {
             // Observe the existing authority; never run or time an experiment

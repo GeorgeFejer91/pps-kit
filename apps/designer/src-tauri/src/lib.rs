@@ -2,6 +2,8 @@ mod assembly_host;
 mod external_links;
 mod generation;
 mod jobs;
+#[path = "../../../native_file_dialogs.rs"]
+mod native_file_dialogs;
 mod service;
 use pps_designer_core::design::GenerationOptIn;
 use serde_json::Value;
@@ -378,7 +380,7 @@ fn write_selected_file(
 
 pub fn run() {
     let app = tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
+        .plugin(native_file_dialogs::init())
         .setup(|app| {
             #[cfg(debug_assertions)]
             let resources =
