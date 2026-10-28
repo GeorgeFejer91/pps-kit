@@ -58,6 +58,10 @@ const BLOCK_CSV_DOWNLOAD_COLUMNS = [
   "channels",
   "tactile_channel",
   ...ROW_CONTRACT_FIELDS,
+  "native_iti_materialization_policy", "native_iti_anchor", "native_iti_seed_sha256",
+  "native_iti_range_min_ms", "native_iti_range_max_ms", "native_resolved_iti_ms", "native_iti_frames",
+  "native_session_duration_ms", "native_iti_source_distribution_reported", "native_iti_source_anchor_reported",
+  "native_iti_legacy_compatible",
 ];
 const DEFAULT_LOUDNESS_POLICY = {
   schema: "pps-loudness-policy.v1",
@@ -4451,10 +4455,33 @@ function renderBlockPreviewRow(row) {
       ${coloredPreviewCell(row.soa_ms ? `${row.soa_ms} ms` : "", row.soa_color_hex, "SOA")}
       ${coloredPreviewCell(row.noise_type || "", row.noise_color_hex, "Noise")}
       <td data-label="Sequence">${escapeHtml(row.sequence_labels || row.sequence_variant_key || "")}</td>
-      <td data-label="Duration">${escapeHtml(formatDurationMs(row.duration_ms || 0))}</td>
+      <td data-label="Duration">${escapeHtml(formatDurationMs(row.duration_ms || 0))}${renderNativeItiTiming(row)}</td>
       <td data-label="WAV"><details class="block-file-details"><summary>Audio file</summary><code>${escapeHtml(row.source_file_name || "")}</code></details></td>
     </tr>
   `;
+}
+
+function renderNativeItiTiming(row) {
+  if (!row.native_iti_materialization_policy) return "";
+  const policy = row.native_iti_materialization_policy === "toolkit_uniform_integer_ms_std_rng_0_8_8.v1"
+    ? "Toolkit uniform whole-millisecond sampling" : row.native_iti_materialization_policy;
+  const anchor = row.native_iti_anchor === "after_trial_audio_end" ? "after trial audio ends" : row.native_iti_anchor;
+  return `<div>Toolkit ITI: ${escapeHtml(row.native_resolved_iti_ms)} ms</div>
+    <details class="block-file-details native-iti-details"><summary>Timing details</summary>
+      <div>Reported range: ${escapeHtml(row.iti_ms)} ms. Source policy: ${escapeHtml(row.iti_policy)}.</div>
+      <div>${escapeHtml(policy)} from ${escapeHtml(row.native_iti_range_min_ms)} to ${escapeHtml(row.native_iti_range_max_ms)} ms; ${escapeHtml(anchor)}.</div>
+      <div>Selected gap: ${escapeHtml(row.native_iti_frames)} frames. Trial with gap: ${escapeHtml(formatDurationMs(row.native_session_duration_ms))}.</div>
+      <div>Toolkit seed (SHA-256): <code>${escapeHtml(row.native_iti_seed_sha256)}</code></div>
+      <div>Source distribution and anchor are unreported. This toolkit resolution is not source or legacy equivalence.</div>
+    </details>`;
+}
+
+function nativeItiReviewDisclosure(preview) {
+  let count = 0;
+  for (const block of preview?.blocks || []) for (const row of block.preview_rows || []) {
+    if (row.native_iti_materialization_policy) count++;
+  }
+  return count ? `Toolkit ITI substitution affects ${count} reviewed ${count === 1 ? "row" : "rows"}. Whole-millisecond gaps are sampled uniformly within the saved reported range and appended after each trial's audio ends. The source does not report this distribution, anchor or seed; source and legacy equivalence are not established. Review each selected delay and seed under Timing details in Segment 5 before accepting.` : "";
 }
 
 function coloredPreviewCell(value, color, label) {
@@ -6468,6 +6495,9 @@ function renderNativeExecution() {
   fillTable("native-occurrence-table", rows.slice(nativeReviewPage * 12, (nativeReviewPage + 1) * 12), ["participant_id", "phase_label", "participant_block_position", "source_block_index", "trial_count"]);
   const slots = state.run_sequence_setup?.instruction_profile?.slots || [];
   $("native-instruction-summary").textContent = `Instruction policy: ${slots.filter(s => s.enabled).map(s => `${s.label || s.slot}: ${s.continue_mode || "click"}`).join("; ") || "No standalone instruction slots enabled"}.`;
+  const timing = $("native-timing-summary");
+  timing.textContent = hasReview ? nativeItiReviewDisclosure(state.block_csv_preview) : "";
+  timing.hidden = !timing.textContent;
   $("native-build-review").disabled = nativeGenerationInFlight;
   $("native-cancel-work").disabled = !nativeGenerationInFlight;
   $("native-download-review").disabled = !hasReview;

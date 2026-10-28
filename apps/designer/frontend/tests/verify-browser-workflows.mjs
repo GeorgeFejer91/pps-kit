@@ -4,6 +4,7 @@ import { verifyAbortedBrowserWrites, recordStorageEvents, verifyStartupRestoreOr
 import { verifyNativeDownloads } from "./downloads-browser.mjs";
 import { verifyPremadeDuration } from "./premade-duration-browser.mjs";
 import { verifySavedRowContracts } from "./row-contract-browser.mjs";
+import { verifyNativeTimingReview } from "./native-timing-browser.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
@@ -34,6 +35,8 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
 const report = { browser: browser.version(), checks: [] };
 try {
+  await verifyNativeTimingReview(browser, base, output);
+  report.checks.push("Native timing substitution remains visible before explicit acceptance; selected delays, exact seeds and original ranges survive review/CSV (mocked IPC)");
   await verifyStartupRestoreOrdering(browser, base);
   report.checks.push("Startup draft restore waits for the actual initial-template load; it cannot be overwritten by a late initial response");
   await verifyPremadeDuration(browser, base, output);
