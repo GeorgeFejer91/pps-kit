@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
 import { ROW_CONTRACT_FIELDS, rowContractMetadata, trialFamilyContract } from "../row_contract.js";
@@ -17,9 +17,11 @@ function context() {
   const ctx = vm.createContext({ ROW_CONTRACT_FIELDS, rowContractMetadata, trialFamilyContract,
     countStripVariants, iterateStripVariants, assertSequenceLimit, assertCountLimit,
     DEFAULT_STUDY_TEMPLATE_ID: "fixture", TRIAL_FAMILY_COLORS: {},
+    BLOCK_RANDOMIZATION_STRATEGY: "seeded_gellermann_row_order_preserving", BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE: 2,
+    BLOCK_CSV_DOWNLOAD_COLUMNS: ["block_index", "block_label", "block_trial_index"],
     familyDisplayName: value => value, sourceColor: () => "#000", clone: structuredClone,
   });
-  vm.runInContext(functions("staticSourceInventory", "staticCountBy") + single("staticBlockPreviewRow") + single("staticSoaColor")
+  vm.runInContext(functions("staticSourceInventory", "normalizeStaticTemplateDesign")
     + ["normalizedRandomizationSeed", "slugify", "normalizeRepetitionValue", "trialPoolFamilyKey", "stableHashInt",
       "trialPoolSourceLineage", "trialPoolFractionalStratum", "trialPoolFractionalParentStratum", "previewVariantKey",
       "csvEscape", "rowsToCsv"].map(single).join("\n"), ctx);
@@ -37,6 +39,40 @@ test("row contract allowlist matches V1 and retains typed nonempty values withou
     expected_response: "withhold", target_role: "catch_no_target", response_rule: "withhold_response_to_audio_only_catch",
   });
   assert.equal(trialFamilyContract({}, "auditory_only").expected_response, "respond");
+});
+
+test("saved block labels survive every shipped block projection without changing allocation, IDs or order", async () => {
+  const ctx = context();
+  let labelledProfiles = 0;
+  for (const name of await readdir(new URL("study_templates/", resources))) {
+    if (!name.endsWith(".json")) continue;
+    const { design } = JSON.parse(await readFile(new URL(`study_templates/${name}`, resources), "utf8"));
+    if (!design?.protocol?.block_specs?.length) continue;
+    labelledProfiles++;
+    // One row per saved block is enough to exercise the real allocation and projection owners.
+    const pool = { preview_rows: design.protocol.block_specs.map((_, index) => ({
+      trial_pool_index: index + 1, family: "audio_tactile", row_label: "Saved condition", soa_ms: 100,
+      noise_type: "white", sequence_variant_key: `variant${index}`, duration_ms: 1000,
+    })) };
+    const preview = ctx.staticBlockCsvPreviewPayload(design, pool, { finished_profile: true });
+    const unlabelled = structuredClone(design);
+    unlabelled.protocol.block_specs = [];
+    const previous = ctx.staticBlockCsvPreviewPayload(unlabelled, pool, { finished_profile: true });
+    assert.equal(preview.blocks.length, previous.blocks.length, name);
+    for (let index = 0; index < preview.blocks.length; index++) {
+      const block = preview.blocks[index], old = previous.blocks[index];
+      const expected = String(design.protocol.block_specs[index]?.label || "").trim() || `Block ${String(index + 1).padStart(2, "0")}`;
+      assert.equal(block.block_label, expected, name);
+      assert.ok(block.preview_rows.every(row => row.block_label === expected), name);
+      assert.equal(JSON.stringify({ ...block, block_label: old.block_label, preview_rows: block.preview_rows.map(row => ({ ...row, block_label: old.block_label })) }), JSON.stringify(old),
+        `${name}: descriptive labels do not infer new membership or ordering`);
+      assert.ok(ctx.rowsToCsv(block.preview_rows, ["block_label"]).includes(ctx.csvEscape(expected)), name);
+    }
+  }
+  assert.ok(labelledProfiles >= 15, "exercise the shipped labelled presets");
+  const design = { protocol: { blocks: 3, block_specs: [{ label: "  First, named  " }, { label: "  " }] } };
+  const preview = ctx.staticBlockCsvPreviewPayload(design, { preview_rows: [{ family: "catch" }] }, { finished_profile: true });
+  assert.deepEqual(Array.from(preview.blocks, block => block.block_label), ["First, named", "Block 02", "Block 03"]);
 });
 
 test("saved Collignon left/right and Biggio timing contracts survive file, pool, block and CSV projection", async () => {
