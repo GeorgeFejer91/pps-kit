@@ -11,8 +11,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Treat hardware operation as an assumption; do not label physical timing measured.
   The [completion review and multi-agent plan](engineering/validation/docs/completion-review-2026-10-27.md)
   defines the finish criteria and extends the original 17 audit items.
-- **Current milestone:** Wave 3 source verification, explicitly authorized on
-  2026-10-27. M0 is delivered; the expanded plan is now being implemented.
+- **Current milestone:** Wave 3 installed qualification and release preparation,
+  explicitly authorized on 2026-10-27. Final source validation is delivered;
+  installed and publication gates remain open.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
   replication-ready labels. Generation ships without Python; Python remains
@@ -22,7 +23,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   3DTI/viewer, Segment 0–6, schemas, Rust authority and Python oracle.
 - **Product source:** existing generation, JSON/compatibility handoff,
   callback-confirmed controls, response scoring and journal safeguards remain.
-  Single- and two-block native activation/progression pass real CPAL callback
+  Single-, two- and three-block native activation/progression pass real CPAL callback
   tests using silent synthetic PCM. Native portable-profile extraction now verifies
   and rebinds embedded media offline. Immutable source-block and participant
   assembly preserve ordered pre/post parts and instruction media. Native instruction
@@ -47,10 +48,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   automatic approval review rejected the fresh launch check at `468c8241`
   ("blocked by policy", without a more specific reason). No alternate launch
   was attempted. Complete installed execution remains unverified.
-- **Next action:** verify [combined follow-up CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
-  at `9dfd1760`, assess its Standard skip reasons, then finish the approved-identity installed
-  journey. The baseline CI including full Standard passes all 14 jobs; the
-  final UI/import/storage follow-ups now need their integration run. The corpus projection, canonical frontend
+- **Next action:** finish the approved-identity installed journey. Final product
+  source `9dfd1760` passes [CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
+  (14/14 jobs), including full Standard and the final UI/import/storage follow-ups.
+  Do not expand the frozen source audit or repeat suites merely while awaiting
+  the pending approvals and installed/clean-Windows access. The corpus projection, canonical frontend
   and local Pages assembly agree. Installed operation and package identity
   remain separate gates. The first Runner NSIS payload and
   installed native WebView startup passed without Python or checkout paths on
@@ -59,17 +61,20 @@ This file is the active checklist and handoff owner; replace state, do not appen
   to initialize (kernel assets path not found); no substitute UI driver was used.
   The bounded corpus audit is complete with disclosed gaps. Pages assembly includes
   referenced Study 5 instruction audio with its checked manifest hashes.
-- **Verification:** fresh Windows Standard at `d1b30ec6` passes 717 tests with
-  nine skips and one warning in 1950.39 s; Quick passes 38 tests and the
-  release/privacy audit. [CI 40597111467](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40597111467)
+- **Verification:** fresh Windows Standard at `9dfd1760` passes 717 tests with
+  nine skips and one warning in 2039.46 s; Quick passes 38 tests and the
+  release/privacy audit. [CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
   passes all 14 jobs, with web/GUI/XDF dependencies, offscreen Qt and native writer
   files. This supersedes the earlier local snapshot whose twelve catalogue
   failures arose during source mutation. Frozen final corpus/profile checks
   pass 123 tests with one skip, including all those failed cases.
   Independent projection review passes 32 checks; primary-source review of the
-  Pfeiffer/mixed-reality disclosures found no concrete discrepancy. The follow-up run prints skipped-test
-  reasons (`-rs`); baseline output did not identify its nine skip reasons.
-  No local compiler cache was removed; the hosted run had 235 GB free.
+  Pfeiffer/mixed-reality disclosures found no concrete discrepancy. Skip reasons
+  are assessed: eight Android companion/administration cases lie outside this
+  release; one optional cache check needs ignored PubMed abstracts. Tracked
+  scientific projection checks run normally. The one warning is the Python
+  Starlette TestClient/httpx deprecation. No local compiler cache was removed;
+  the final hosted run had 157 GB free. Its four native oracle suites pass 13 tests.
   Native execution now has a three-block actual silent-callback fixture and an
   independent audit of 44 events/three scored rows. The instruction/group fixture
   uses three blocks per part, including click/button/delay gates and breaks; its
@@ -163,7 +168,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
 
 - [x] M0 — Install the current baseline, integrate routes and produce the
   evidence-linked domain review and conflict-safe multi-agent plan.
-- [ ] M1 — Fix authoring/participant defects and complete the validation/build
+- [x] M1 — Fix authoring/participant defects and complete the validation/build
   baseline: B1–B3, C1, G1–G2, H1–H2; add truthful public study-review projection.
 - [x] M2 — Execute one real single-block package through native authority (A1),
   verified with a silent synthetic fixture; installed/physical gates stay open.
@@ -195,11 +200,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - [ ] M6 — Review all finish criteria, supported-scope claims and release
   artifacts; publish only under the matching release authorization.
 
-Current blockers are final follow-up integration CI, missing installed evidence
-and pending Designer package identity approval.
+Current blockers are missing installed/full-journey and clean-Windows evidence,
+the retained automatic-review launch restriction, and pending Designer package
+identity approval. Source validation is complete; user requests for the proposed
+identity and exact compiler-cache cleanup remain unanswered.
 Pinned Rust 1.88 Core/Desktop checks pass 183/169 tests with nine/seven opt-in
 skips and strict Clippy; current Designer/Runner frontend checks pass 42/79 tests.
-At revision `d1b30ec6`, [CI run 40597111467](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40597111467)
+At product revision `9dfd1760`, [CI run 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247)
 passes all three Core, Desktop and Python/Rust oracle platforms, Browser,
 optional Quest and all three validation bundles (14/14 jobs). The earlier non-Windows icon and
 shared-module source-map drift failures are resolved with existing assets and
@@ -208,8 +215,9 @@ The pinned-toolchain checks accumulated approximately 15.6 GB of regenerable
 Rust incremental cache, leaving approximately 3 GB free. Automatic approval review
 rejected the exact compiler-cache cleanup as "blocked by policy" without a
 more specific reason. No cleanup ran; explicit user approval remains pending.
-The full Standard tier now passes on the existing Windows CI worker; final
-follow-ups use that same validation owner, with actual free space logged.
+The full Standard tier, including final follow-ups, passes on the existing
+Windows CI worker, with actual free space and skip reasons logged. Later
+documentation-only checkpoints do not change the tested product/package bytes.
 New calibration is outside the current task
 per user steering; future measured-route claims still require evidence. No new participant study,
 optional XR work, MobX dependency or additional transport is implied.

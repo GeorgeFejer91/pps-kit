@@ -9,8 +9,8 @@ Each status applies to its stated surface, not to the whole product.
 
 | Item | Implemented / observed surface | Remaining gate |
 | --- | --- | --- |
-| 1 | VERIFIED source at `0f76534d`: locked Core/Desktop fmt, Clippy, tests and Python/Rust oracle checks pass on all three CI platforms | Full Standard and installed evidence remain separate |
-| 2 | VERIFIED baseline at `d1b30ec6`: full Standard 717 passed/9 skipped, Quick 38 passed and release/privacy audit passed on fresh Windows CI | Final UI follow-up integration run; print and assess skip reasons |
+| 1 | VERIFIED source at `9dfd1760`: locked Core/Desktop fmt, Clippy, tests and Python/Rust oracle checks pass on all three CI platforms | Installed evidence remains separate |
+| 2 | VERIFIED final source at `9dfd1760`: full Standard 717 passed/9 assessed skips, Quick 38 passed and release/privacy audit passed on fresh Windows CI | No remaining source-validation blocker; installed evidence remains separate |
 | 3 | VERIFIED catalogue/source separation: 94 assessed publications, 178 study rows, 1,958 dispositions; separate source/template/native capability records and explicit hosted/Tauri adapters | Installed evidence; disclosed scientific gaps withhold readiness |
 | 4 | VERIFIED: shared profile/limits/scoring/text/job owners; concise For-AI routing; one native actor/scheduler/file worker | Extract only seams changed by further work |
 | 5 | VERIFIED browser source: planner disclosures/JSON action, phone Pair/state/action flow, participant response, local output picker and inline notifications | Installed UI inspection |
@@ -63,11 +63,16 @@ Each status applies to its stated surface, not to the whole product.
 - [CI 40597111467](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40597111467)
   at `d1b30ec6` also passes all 14 jobs and now runs the entire Windows Standard
   tier: 717 passed, nine skipped, one warning in 1950.39 s; Quick passes 38.
-  The final UI/import/storage integration runs at `9dfd1760` in
-  [CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247).
-  Core/Desktop/Browser and non-Windows oracle checks have passed; Windows Standard
-  and validation packaging are still running. Standard now prints skip reasons;
-  no measured or installed claim follows.
+  The final UI/import/storage integration at `9dfd1760` passes all 14 jobs in
+  [CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247),
+  including all three validation bundles. Final Windows Standard passes 717
+  tests in 2039.46 s, with nine assessed skips and one warning; Quick passes 38
+  and the four native oracle suites pass 13. Eight skips cover out-of-scope
+  Android companion/administration cases; the ninth needs an ignored PubMed
+  abstract cache. Tracked public/scientific data checks run normally. The warning
+  is a Python Starlette TestClient/httpx deprecation. The worker had 157 GB free.
+  No measured or installed claim follows. Later documentation-only checkpoints
+  preserve the same tested product/package bytes.
 - The Runner-only candidate at `9dfd1760` rebuilt with pinned tooling and installed
   successfully in the existing isolated current-user preview location. All 16
   installed application/runtime/web files match the independently extracted

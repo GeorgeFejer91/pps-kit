@@ -119,9 +119,11 @@ unsigned 32-bit sequence. The target checks the granted scope and current
 precondition, deduplicates command-body retries even when they arrive in a
 fresh envelope, applies the transition once, increments the semantic revision,
 increments the preview's bounded audit-event counter for an accepted state
-change, and returns an `applied` result plus authoritative state. Durable audit
-records are still supplied by the validated V1 runner and remain a V2 migration
-gate.
+change, and returns an `applied` result plus authoritative state. That counter
+is not a durable acquisition record. Native prepared experiments separately
+write event journals, response datasets and part/group result receipts. Live
+LSL/LabRecorder integration remains a V1 feature; see the
+[current native workflow](NATIVE_WINDOWS_PREVIEW.md).
 
 Pairing uses a fresh 32-byte invitation secret held only in the URL fragment,
 24-byte nonces, complete canonical target/controller hello transcripts, and
@@ -141,8 +143,14 @@ the snapshot.
 
 ## Desktop preview
 
+The boundary descriptions below retain intermediate rollout checkpoints,
+including earlier non-executable caches. The prepared-execution summary near
+the end of this section and the [Windows preview guide](NATIVE_WINDOWS_PREVIEW.md)
+describe the current runnable capability; intermediate limits are not its
+current feature checklist.
+
 The desktop app uses Tauri v2 and a plain Vite/ES-module frontend. Tauri exposes
-seven local/configuration/inspection commands plus four remote-session commands: claim,
+explicit local/configuration/inspection commands plus four remote-session commands: claim,
 renew, dispatch, and revoke. Those four commands are restricted to the bundled
 `main` WebView and preserve remote origin, negotiated scopes, the exact owner
 token, canonical control sequence, and the native five-second watchdog. VDO
@@ -578,13 +586,13 @@ The migration order is:
    Tauri/Tokio queues.
 4. Port target-native audio/output routing, response timestamping, tactile, and
    acquisition boundaries, then qualify them with physical timing evidence.
-   Native bounded WAV receipts, a pure content-bound PCM16 decoder, and a
-   generation/receipt-fenced one-block actor cache have landed; persistent
-   platform output streams, callback scheduling/routing, response ingress, and
-   physical qualification remain.
-5. Port durable event/LSL evidence, artifact writers, persistence/recovery, and
-   the normal post-run review/analysis required by the Runner, using golden
-   outputs only as temporary Python-oracle evidence.
+   Native bounded WAV receipts, a pure content-bound PCM16 decoder, a fenced
+   one-block cache, persistent output ownership, callback scheduling/routing and
+   response ingress have landed. Physical qualification remains separate.
+5. Native durable event journals, response datasets, part/group result receipts
+   and read-only interruption assessment have landed. Live LSL/LabRecorder,
+   physical capture and the V1 analysis UI remain unavailable in this preview;
+   Python-oracle output is software evidence.
 6. Extend the landed native semantic-request diagnostics through effect
    initiation once the output owner exists, then qualify it in release builds.
    Current native observations cover adapter ingress/authorization, authority
