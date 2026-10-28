@@ -8,7 +8,9 @@ from __future__ import annotations
 import argparse
 import ast
 from collections import Counter
+import csv
 import hashlib
+import importlib.util
 import json
 import math
 from pathlib import Path
@@ -18,6 +20,9 @@ ROOT = Path(__file__).resolve().parents[4]
 RESOURCES = "packages/pps-resources"
 PROJECTION = "apps/designer/frontend/publication_study_reviews.v1.json"
 ROW_CONTRACT_SOURCE = "packages/pps-runtime/src/peripersonal_space_toolkit/dashboard_app.py"
+PUBLIC_PARAMETER_STATUSES = {"reported_complete", "derived_complete", "partial", "conflicting_evidence",
+                             "approximation_required", "explicitly_absent", "not_applicable", "not_reported",
+                             "source_unavailable", "not_assessed"}
 
 
 def read_json(path: Path):
@@ -250,10 +255,194 @@ def markdown(report: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def public_token(value, pattern: str) -> str:
+    if not isinstance(value, str) or not re.fullmatch(pattern, value):
+        raise ValueError("Invalid public identity or attribution")
+    return value
+
+
+def public_count(value) -> int:
+    if type(value) is not int or value < 0:
+        raise ValueError("Invalid evidence count")
+    return value
+
+
+def build_public_report(root: Path, captures: Path, native_report: Path, candidate_manifest: Path,
+                        source_commit: str, ci_run_url: str) -> dict:
+    """Allowlisted projection of a terminal full run, never a second verdict ledger.
+
+    The caller attributes the run to the exact candidate revision and CI URL;
+    this offline projection does not query GitHub or qualify installed execution.
+    Raw paths, participant data, receipt bodies and prose errors are never copied.
+    """
+    source_commit = public_token(source_commit, r"[a-f0-9]{40}")
+    ci_run_url = public_token(ci_run_url, r"https://github\.com/GeorgeFejer91/pps-kit/actions/runs/[1-9][0-9]*(?:/attempts/[1-9][0-9]*)?")
+    candidate = read_json(candidate_manifest)
+    if candidate.get("schema") != "pps-native-windows-candidate.v1" or candidate.get("source_commit") != source_commit:
+        raise ValueError("Candidate source attribution mismatch")
+    captured = read_json(captures / "capture-report.json")
+    if captured.get("schema") != "pps-preset-plan-capture.v1" or not captured["cases"]:
+        raise ValueError("A complete preset inventory cannot be empty")
+    for case in captured["cases"]:
+        identity = public_token(case["template_id"], r"[a-z][a-z0-9_]*")
+        if case["capture_file"] != identity + ".json":
+            raise ValueError("Capture must be an identity-local file")
+    for path, digest in captured["input_hashes"].items():
+        if not path.startswith(("apps/", "packages/")) or "\\" in path or ":" in path or any(p in {"", ".", ".."} for p in path.split("/")):
+            raise ValueError("Capture input must be a repository-relative product file")
+        public_token(digest, r"[a-f0-9]{64}")
+    population = build_report(root, captures)  # Existing full-plan and freshness owner.
+    native = read_json(native_report)
+    if (native.get("schema") != "pps-native-preset-pipeline-audit.v1"
+            or native.get("all_capture_cases_selected") is not True
+            or native.get("capture_report_sha256") != sha256(captures / "capture-report.json")
+            or native.get("physical_timing_qualified") is not False
+            or native.get("replication_qualified") is not False):
+        raise ValueError("Native report is not bound to the complete software-only capture")
+    native_cases = unique_by(native["cases"], "template_id")
+    capture_cases = unique_by(captured["cases"], "template_id")
+    if native_cases.keys() != capture_cases.keys():
+        raise ValueError("Native/capture population mismatch")
+    # Reuse the native driver's exact part/hash/response completeness check.
+    spec = importlib.util.spec_from_file_location("preset_native_validator", Path(__file__).with_name("run_native_preset_pipeline.py"))
+    validator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(validator)
+    profiles = unique_by(read_json(root / RESOURCES / "assets/preloads/profile_recreation_status.json")["profiles"], "template_id")
+    projection = read_json(root / PROJECTION)
+    publications = unique_by(projection["publications"], "networkNodeId")
+    doi_pattern = r"doi:10\.[0-9]{4,9}/[A-Za-z0-9._;()/:-]+"
+    rows = []
+    for preset in population["presets"]:
+        identity = preset["template_id"]
+        case, capture_case, profile = native_cases[identity], capture_cases[identity], profiles[identity]
+        for key in ("template_sha256", "capture_sha256"):
+            public_token(case[key], r"[a-f0-9]{64}")
+            if case[key] != preset[key]:
+                raise ValueError("Native template/capture hash mismatch")
+        if capture_case["configuration_eligible"] is not preset["configuration_eligible"]:
+            raise ValueError("Configuration eligibility mismatch")
+        status = case.get("status")
+        if status not in {"software_pipeline_passed", "blocked", "failed"}:
+            raise ValueError("Public export requires a terminal full run, not preflight or preparation only")
+        if case.get("capture_input_hashes", captured["input_hashes"]) != captured["input_hashes"]:
+            raise ValueError("Native capture input hashes changed")
+        if status != "failed" and (case.get("source_trial_count") != preset["plan"]["source_trial_count"]
+                or case.get("source_block_rows") != preset["plan"]["source_blocks"]
+                or case.get("capture_input_hashes") != captured["input_hashes"]):
+            raise ValueError("Native full source counts or input identities changed")
+        guard = "native_complete_block_plan_required"
+        if status == "blocked" and (preset["configuration_eligible"] or case.get("source_trial_count") != 0
+                                    or case.get("native_guard_error") != guard):
+            raise ValueError("Blocked case does not prove the expected missing-plan guard")
+        totals = {key: None for key in ("verified_parts", "executed_trial_rows", "executed_block_occurrences", "executed_stages", "executed_gates")}
+        if status == "software_pipeline_passed":
+            if (not preset["configuration_eligible"] or case.get("participant_index") != 1
+                    or any(case.get(key) is not True for key in ("full_plan_preserved", "all_part_packages_verified", "all_block_schedules_compiled"))):
+                raise ValueError("Native success lacks complete verified participant evidence")
+            execution = case["execution"]
+            receipt, independent = execution["receipt"], execution["independent_file_audit"]
+            if (execution.get("status") != "completed_software" or receipt.get("synthetic_responses") is not True
+                    or receipt.get("clock_basis") != "test-only-sample-paced-simulated-monotonic"
+                    or receipt.get("physical_device_used") is not False or receipt.get("timing_qualification") != "unqualified"):
+                raise ValueError("Unsupported native execution scope")
+            public_token(case["handoff_sha256"], r"[a-f0-9]{64}")
+            validator.validate_execution(case, receipt)
+            expected_parts = 2 if preset["plan"]["saved_experiment_structure"] == "pre_post" else 1
+            if len(case["parts"]) != expected_parts or any(
+                    part["trial_count"] != preset["plan"]["source_trial_count"]
+                    or part["block_count"] != len(preset["plan"]["source_blocks"]) for part in case["parts"]):
+                raise ValueError("Native success does not preserve the complete configured parts")
+            for part in case["parts"]:
+                public_token(part["manifest_sha256"], r"[a-f0-9]{64}")
+            totals = {"verified_parts": len(case["parts"]),
+                      **{target: sum(public_count(part[source]) for part in receipt["parts"])
+                         for target, source in (("executed_trial_rows", "trial_count"), ("executed_block_occurrences", "block_count"),
+                                                ("executed_stages", "stage_count"), ("executed_gates", "gate_count"))}}
+            if (independent.get("passed") is not True or independent.get("scoredTrialCount") != totals["executed_trial_rows"]
+                    or independent.get("datasetRowCount") != totals["executed_trial_rows"]):
+                raise ValueError("Independent results do not cover every executed row")
+        generation = case.get("generation", {})
+        customizations, algorithm = [], None
+        if generation.get("status") == "generated" and generation.get("customized_controls") is not True:
+            raise ValueError("Generated native controls require an explicit customization disposition")
+        if generation.get("customized_controls") is True:
+            if generation.get("legacy_numpy_seed_compatible") is not False:
+                raise ValueError("Native source customization must retain the legacy incompatibility")
+            algorithm = public_token(generation.get("source_algorithm"), r"[A-Za-z0-9][A-Za-z0-9_.-]{0,100}")
+            customizations.append("nonlegacy_native_controls")
+        if "toolkit_iti_resolution" in case:
+            iti = case["toolkit_iti_resolution"]
+            if (iti.get("accepted_for_software_audit") is not True or any(iti.get(key) is not False
+                    for key in ("source_distribution_reported", "source_anchor_reported", "legacy_compatible"))):
+                raise ValueError("Toolkit ITI customization must preserve source limitations")
+            customizations.append("toolkit_iti_realization")
+        publication_status = profile["publication_status"]
+        if publication_status not in {"published", "unpublished_lab_profile"}:
+            raise ValueError("Unknown preset publication scope")
+        publication_id = public_token("doi:" + profile["doi"].lower(), doi_pattern) if profile.get("doi") else None
+        if (publication_status == "published") != (publication_id is not None):
+            raise ValueError("Publication status and citation disagree")
+        if publication_id is not None and publication_id not in publications:
+            raise ValueError("Preset citation is outside the frozen catalogue")
+        reviews = []
+        for study in projection["studies"]:
+            if identity not in study["templateIds"]:
+                continue
+            counts = {public_token(key, r"[a-z_]+"): public_count(value) for key, value in study["parameterStatusCounts"].items()}
+            if set(counts) - PUBLIC_PARAMETER_STATUSES or sum(counts.values()) != 11:
+                raise ValueError("Expected eleven reviewed source dispositions per linked study")
+            reviews.append({"study_row_id": public_token(study["studyRowId"], doi_pattern), "parameter_status_counts": counts})
+        rows.append({"template_id": identity, "template_sha256": preset["template_sha256"], "capture_sha256": preset["capture_sha256"],
+                     "configuration_eligible": preset["configuration_eligible"], "native_status": status,
+                     "native_guard_code": guard if case.get("native_guard_error") == guard else None,
+                     "source_trial_rows": preset["plan"]["source_trial_count"], "source_blocks": len(preset["plan"]["source_blocks"]),
+                     **totals, "software_execution_verified": status == "software_pipeline_passed",
+                     "customizations": customizations, "source_algorithm": algorithm,
+                     "publication_status": publication_status, "publication_id": publication_id,
+                     "study_mapping_status": "study_specific" if reviews else "publication_only" if publication_id else "local_unpublished",
+                     "source_reviews": reviews, "published_protocol_equivalence": "not_established_by_software_audit"})
+    return {"schema": "pps-public-preset-software-validation.v1", "source_commit": source_commit, "ci_run_url": ci_run_url,
+            "evidence_scope": "Windows x64 native test hosts; complete configured parts for representative participant 1; simulated sample clock and synthetic responses. Not installed acquisition or paper replication.",
+            "physical_timing_qualification": "not_assessed", "catalogue_native_qualification": "not_assessed",
+            "input_sha256": {"native_report": sha256(native_report), "capture_report": sha256(captures / "capture-report.json"),
+                             "candidate_manifest": sha256(candidate_manifest), "catalogue": sha256(root / PROJECTION),
+                             "profile_status": sha256(root / RESOURCES / "assets/preloads/profile_recreation_status.json"),
+                             **{key: public_token(native[key], r"[a-f0-9]{64}") for key in ("designer_test_exe_sha256", "runner_test_exe_sha256")}},
+            "counts": {"presets": len(rows), "publications": len(publications), "study_context_rows": len(projection["studies"]),
+                       "configuration_eligible": sum(row["configuration_eligible"] for row in rows),
+                       "native_statuses": dict(sorted(Counter(row["native_status"] for row in rows).items()))}, "presets": rows}
+
+
+def write_public_report(report: dict, output: Path) -> None:
+    """Fresh output only; CSV carries the same attribution and allowlisted cells."""
+    output.mkdir(parents=True, exist_ok=False)
+    (output / "software-validation.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    common = {key: report[key] for key in ("source_commit", "ci_run_url", "evidence_scope", "physical_timing_qualification", "catalogue_native_qualification", "input_sha256")}
+    with (output / "software-validation.csv").open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=[*common, *report["presets"][0]])
+        writer.writeheader()
+        for row in report["presets"]:
+            writer.writerow({key: json.dumps(value, sort_keys=True) if isinstance(value, (dict, list)) else value
+                             for key, value in {**common, **row}.items()})
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--captures", type=Path, default=ROOT / "artifacts/preset-functional-audit")
+    parser.add_argument("--public-output", type=Path, help="new directory for sanitized final native CSV/JSON; ordinary audit remains unchanged")
+    parser.add_argument("--native-report", type=Path)
+    parser.add_argument("--candidate-manifest", type=Path)
+    parser.add_argument("--source-commit")
+    parser.add_argument("--ci-run-url")
     args = parser.parse_args()
+    export_args = (args.public_output, args.native_report, args.candidate_manifest, args.source_commit, args.ci_run_url)
+    if any(value is not None for value in export_args):
+        if not all(value is not None for value in export_args):
+            parser.error("public export requires --public-output, --native-report, --candidate-manifest, --source-commit and --ci-run-url")
+        report = build_public_report(ROOT, args.captures, args.native_report, args.candidate_manifest, args.source_commit, args.ci_run_url)
+        write_public_report(report, args.public_output)
+        print(json.dumps(report["counts"], sort_keys=True))
+        return
     report = build_report(ROOT, args.captures)
     (args.captures / "population-audit.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     (args.captures / "population-audit.md").write_text(markdown(report), encoding="utf-8")
