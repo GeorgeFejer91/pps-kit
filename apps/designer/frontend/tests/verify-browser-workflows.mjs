@@ -1,6 +1,7 @@
 import { verifyDesignerControlNames, verifyRunnerNavigation } from "./accessibility-browser.mjs";
 import { verifySequenceScaling } from "./sequence-scaling-browser.mjs";
 import { verifyAbortedBrowserWrites } from "./indexeddb-browser.mjs";
+import { verifyNativeDownloads } from "./downloads-browser.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
@@ -121,6 +122,8 @@ try {
   await designer.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
   assert.equal(await designer.locator("#edit-mode-button").isVisible(), true, "Hosted authoring must expose the Edit switch");
   assert.equal(await designer.locator("#companion-panel").isVisible(), false, "Hosted authoring must keep V1 companion controls hidden");
+  await verifyNativeDownloads(designer, output);
+  report.checks.push("Native Preview installer/checksum links use the exact prerelease tag, preserve keyboard order and fit phone/desktop/200% CSS zoom; remote publication not assessed");
   await designer.locator("#profile-mode-panel").screenshot({ path: resolve(output, "hosted-edit-switch.png") });
   const play = designer.locator("[data-preview-source-label]").first();
   await play.click();
