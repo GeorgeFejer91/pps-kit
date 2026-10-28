@@ -47,8 +47,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   separately labelled reading region. The audit now checks actual container
   stacking and two-dimensional control overlap; its old 760px assumption was
   invalid for the new container-based layout. Six audit-contract tests and six
-  repository/release checks pass. The full 12-case rerun is in progress; final
-  package promotion waits for that and the pinned Windows candidate evidence.
+  repository/release checks pass. The full 12-case mandatory rerun now passes
+  with inspected screenshots, as do six focused existing UI source contracts.
+  Final package promotion waits for the pinned Windows candidate evidence.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
   replication-ready labels. Generation ships without Python; Python remains
@@ -240,6 +241,18 @@ This file is the active checklist and handoff owner; replace state, do not appen
   checkpoint; V1 applications and public products were not promoted.
   [Draft PR #2](https://github.com/GeorgeFejer91/pps-kit/pull/2) tracks integration;
   no merge or release promotion has occurred.
+  Final candidate [40735351508](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40735351508)
+  and normal CI [40735365365](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40735365365)
+  target `39e9d778e3ffc76d0ca23606e10321e2066e8a1f`. The release draft now targets
+  that revision and still has no assets. Superseded in-progress CI runs were
+  cancelled to release worker capacity; the final two runs remain active.
+  An older Windows run at `2750a3f5` interrupted two durable-group test fixtures;
+  its snapshot lacks the terminal ledger reason. Test-only diagnostics are under
+  review. Accelerated fixture callback traffic lacks the durable-prefix barrier
+  already used by complete-profile tests, so journal admission pressure is a
+  candidate cause, not yet an established diagnosis. No production safeguard or
+  timeout has been weakened. A separate older macOS artifact upload failed with
+  GitHub's server-busy response, rather than a compilation failure.
   The renewed user direction authorizes finishing the committed preview identity
   and publishing its Windows installers; do not select a new identity/channel.
 
