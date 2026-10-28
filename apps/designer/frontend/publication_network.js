@@ -296,6 +296,18 @@ export async function initializePublicationNetwork(root) {
   }
 
   function resizeGraph() {
+    if (document.fullscreenElement === shell) {
+      const scale = shell.getBoundingClientRect().width / parseFloat(getComputedStyle(shell).width) || 1;
+      const summary = shell.querySelector(".publication-network-summary-row");
+      const search = shell.querySelector(".publication-network-search-row");
+      const padding = getComputedStyle(workspace);
+      const remaining = window.innerHeight / scale - summary.offsetHeight - search.offsetHeight
+        - parseFloat(padding.paddingTop) - parseFloat(padding.paddingBottom);
+      // The graph owns the remaining viewport. Its long result/detail documents
+      // continue below it; they must not inflate this bounded visual viewport.
+      const size = `${Math.max(120, Math.floor(remaining))}px`;
+      if (shell.style.getPropertyValue("--network-fullscreen-graph-size") !== size) shell.style.setProperty("--network-fullscreen-graph-size", size);
+    }
     requestDraw();
   }
 
@@ -473,10 +485,15 @@ export async function initializePublicationNetwork(root) {
         text: `${node.network?.inDegree || 0} citation${node.network?.inDegree === 1 ? "" : "s"} received in this map · ${toolkitStatusLabel(node)}`,
       }),
     );
-    const stageRect = stage.getBoundingClientRect();
-    tooltip.style.left = `${Math.max(12, Math.min(stageRect.width - 312, clientX - stageRect.left + 14))}px`;
-    tooltip.style.top = `${Math.max(12, Math.min(stageRect.height - 130, clientY - stageRect.top + 14))}px`;
     tooltip.hidden = false;
+    tooltip.dataset.inline = "false";
+    const stageRect = stage.getBoundingClientRect();
+    const scale = stageRect.width / parseFloat(getComputedStyle(stage).width) || 1;
+    // Measure the actual wrapped text, including user zoom and spacing. A long
+    // summary joins document flow below the graph instead of clipping in it.
+    tooltip.dataset.inline = String(tooltip.offsetHeight > stage.clientHeight - 24);
+    tooltip.style.left = `${Math.max(12, Math.min(stage.clientWidth - tooltip.offsetWidth - 12, (clientX - stageRect.left) / scale + 14))}px`;
+    tooltip.style.top = `${Math.max(12, Math.min(stage.clientHeight - tooltip.offsetHeight - 12, (clientY - stageRect.top) / scale + 14))}px`;
   }
 
   function currentLayout() {
@@ -571,16 +588,29 @@ export async function initializePublicationNetwork(root) {
   function citationList(indices, emptyText) {
     if (!indices.length) return element("p", { className: "publication-network-detail-muted", text: emptyText });
     const sorted = [...indices]
-      .sort((left, right) => (nodes[right].network?.inDegree || 0) - (nodes[left].network?.inDegree || 0))
-      .slice(0, 24);
-    return element("ul", { className: "publication-network-citation-list" }, sorted.map((index) => {
-      const button = element("button", {
-        text: `${nodes[index].title} (${nodes[index].year || "n.d."})`,
-        attributes: { type: "button" },
+      .sort((left, right) => (nodes[right].network?.inDegree || 0) - (nodes[left].network?.inDegree || 0));
+    const summary = element("p", { className: "publication-network-detail-muted" });
+    const list = element("ul", { className: "publication-network-citation-list" });
+    const more = element("button", { text: "Show more connected papers", attributes: { type: "button" } });
+    let shown = 0;
+    const appendPage = () => {
+      const items = sorted.slice(shown, shown + 24).map((index) => {
+        const button = element("button", {
+          text: `${nodes[index].title} (${nodes[index].year || "n.d."})`,
+          attributes: { type: "button" },
+        });
+        button.addEventListener("click", () => selectNode(index, button));
+        return element("li", {}, button);
       });
-      button.addEventListener("click", () => selectNode(index, button));
-      return element("li", {}, button);
-    }));
+      list.append(...items);
+      shown += items.length;
+      summary.textContent = `${shown} of ${sorted.length} connected papers shown`;
+      more.hidden = shown >= sorted.length;
+      return items[0]?.querySelector("button");
+    };
+    more.addEventListener("click", () => appendPage()?.focus());
+    appendPage();
+    return element("div", {}, [summary, list, more]);
   }
 
   function studyRecord(study) {
@@ -859,6 +889,8 @@ export async function initializePublicationNetwork(root) {
 
   const resizeObserver = new ResizeObserver(resizeGraph);
   resizeObserver.observe(stage);
+  resizeObserver.observe(shell.querySelector(".publication-network-summary-row"));
+  resizeObserver.observe(shell.querySelector(".publication-network-search-row"));
   loading.hidden = true;
   root.dataset.publicationNetworkState = "ready";
   root.dataset.publicationNetworkNodes = String(nodes.length);

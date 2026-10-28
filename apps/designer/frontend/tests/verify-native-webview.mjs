@@ -18,11 +18,15 @@ try {
   const page = context.pages()[0] || await context.waitForEvent("page", { timeout: 10_000 });
   await page.waitForURL(/^http:\/\/tauri\.localhost\//);
   const requests = [];
+  const failures = [];
+  const recordFailure = entry => { if (failures.length < 30) failures.push({ ...entry, message: String(entry.message || "").slice(0, 1000) }); };
   page.on("request", request => requests.push(request.url()));
+  page.on("pageerror", error => recordFailure({ kind: "pageerror", message: error.message }));
+  page.on("console", message => { if (message.type() === "error") recordFailure({ kind: "console", message: message.text() }); });
+  page.on("requestfailed", request => recordFailure({ kind: "requestfailed", url: request.url(), message: request.failure()?.errorText }));
   page.on("dialog", dialog => dialog.accept());
   await page.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
   assert.equal(await page.evaluate(() => window.PPSDesignerApp.isNative()), true);
-  await page.waitForFunction(() => typeof document.querySelector("#trajectory-frame").contentWindow.updateTrajectory === "function");
   assert.equal(await page.locator("#native-import-profile").isVisible(), true);
   assert.equal(await page.locator("#native-import-profile").isEnabled(), true);
   assert.equal(await page.evaluate(() => Boolean(window.PPSDesignerApp.getState().custom_workflow?.is_custom)), false,
@@ -32,6 +36,17 @@ try {
   await page.locator("#customize-submit").click();
   await page.locator("#customize-modal").waitFor({ state: "hidden" });
   await page.waitForFunction(() => window.PPSDesignerApp.getState().custom_workflow?.edit_step === "stimulus");
+  await page.locator("#trajectory-frame").scrollIntoViewIfNeeded();
+  try {
+    await page.waitForFunction(() => {
+      const frame = document.getElementById("trajectory-frame");
+      return frame.src !== "about:blank" && typeof frame.contentWindow?.updateTrajectory === "function";
+    }, null, { timeout: 30_000 });
+  } catch (error) {
+    const frame = await page.locator("#trajectory-frame").evaluate(node => ({ src: node.src,
+      lazySrc: node.dataset.lazySrc, bounds: node.getBoundingClientRect().toJSON() }));
+    throw new Error(`Trajectory viewer did not load after real Stimulus navigation: ${JSON.stringify({ frame, failures })}`, { cause: error });
+  }
   await page.locator('.noise-type-button[data-noise-type="white"]').click();
   await page.locator("#bake-label").fill("Native WebView white");
   await page.locator("#movement-duration").fill("1");

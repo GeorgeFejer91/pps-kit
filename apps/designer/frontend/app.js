@@ -452,10 +452,15 @@ function moveFocusFromBoundedSelect(reverse = false) {
 }
 
 function positionBoundedSelectMenu(button) {
-  const rect = button.getBoundingClientRect();
+  const box = button.getBoundingClientRect();
+  // offsetWidth rounds fractional layout pixels and would shift a far-right
+  // field's popup. Computed width preserves its actual CSS coordinate scale.
+  const scale = box.width / parseFloat(getComputedStyle(button).width) || 1;
+  const rect = { left: box.left / scale, top: box.top / scale, bottom: box.bottom / scale, width: box.width / scale };
+  const viewportHeight = window.innerHeight / scale;
   const viewportInset = 8;
   const menuGap = 4;
-  const availableBelow = Math.max(0, window.innerHeight - rect.bottom - viewportInset - menuGap);
+  const availableBelow = Math.max(0, viewportHeight - rect.bottom - viewportInset - menuGap);
   const availableAbove = Math.max(0, rect.top - viewportInset - menuGap);
   const openAbove = availableBelow < 200 && availableAbove > availableBelow;
   const available = openAbove ? availableAbove : availableBelow;
@@ -465,7 +470,7 @@ function positionBoundedSelectMenu(button) {
   boundedSelectMenu.style.maxHeight = `${menuHeight}px`;
   if (openAbove) {
     boundedSelectMenu.style.top = "auto";
-    boundedSelectMenu.style.bottom = `${window.innerHeight - rect.top + menuGap}px`;
+    boundedSelectMenu.style.bottom = `${viewportHeight - rect.top + menuGap}px`;
   } else {
     boundedSelectMenu.style.top = `${rect.bottom + menuGap}px`;
     boundedSelectMenu.style.bottom = "auto";
@@ -486,6 +491,10 @@ function openBoundedSelect(select) {
   closeBoundedSelect();
   activeBoundedSelect = select;
   activeBoundedOptionIndex = select.selectedIndex;
+  // A fullscreen element is the active top layer; body siblings cannot paint
+  // above it. Keep the existing popup in that layer for its actual owner.
+  const menuHost = document.fullscreenElement || document.body;
+  if (boundedSelectMenu.parentElement !== menuHost) menuHost.appendChild(boundedSelectMenu);
   boundedSelectMenu.replaceChildren();
   let lastGroup = null;
   let groupContainer = boundedSelectMenu;
@@ -645,10 +654,20 @@ function initializeBoundedSelects() {
   document.addEventListener("change", (event) => {
     if (event.target instanceof HTMLSelectElement) syncBoundedSelect(event.target);
   });
+  const repositionMenu = () => {
+    if (!activeBoundedSelect) return;
+    const button = boundedSelectButtons.get(activeBoundedSelect);
+    const box = button?.getBoundingClientRect();
+    if (!button?.isConnected || !box?.width || box.bottom <= 0 || box.top >= innerHeight) closeBoundedSelect();
+    else positionBoundedSelectMenu(button);
+  };
+  // Focus/preview reflow can scroll after opening a menu. Keep the same live
+  // field anchored; a detached or offscreen owner still closes its menu.
   document.addEventListener("scroll", (event) => {
-    if (activeBoundedSelect && !boundedSelectMenu.contains(event.target)) closeBoundedSelect();
+    if (activeBoundedSelect && !boundedSelectMenu.contains(event.target)) repositionMenu();
   }, true);
-  window.addEventListener("resize", () => closeBoundedSelect());
+  window.addEventListener("resize", repositionMenu);
+  document.addEventListener("fullscreenchange", () => closeBoundedSelect());
   new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.type === "attributes" && mutation.target instanceof HTMLSelectElement) {
