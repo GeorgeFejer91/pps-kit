@@ -37,7 +37,7 @@ $Report = [ordered]@{schema='pps-native-packaged-layout-followup.v1'; source_com
     source_run_id=$SourceRunId; validation_commit=(git -C $Root rev-parse HEAD).Trim();
     ci_run_url="https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID";
     scope='Fresh Windows CI account; exact installed executables; CDP CSS viewports and CSS zoom in actual WebView2. No OS-window dragging, acquisition or physical qualification.';
-    applications=@(); passed=$false}
+    applications=@(); failures=@(); passed=$false}
 try {
     foreach ($App in @('designer','runner')) {
         $Config = Get-Content -LiteralPath (Join-Path $Root "apps/$App/src-tauri/tauri.conf.json") -Raw | ConvertFrom-Json
@@ -69,6 +69,7 @@ try {
         $Start.Environment['WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS'] = "--remote-debugging-address=127.0.0.1 --remote-debugging-port=$Port --mute-audio"
         $Start.Environment['WEBVIEW2_USER_DATA_FOLDER'] = Join-Path $Output "webview-$App"
         $Native = [Diagnostics.Process]::Start($Start)
+        $LayoutPassed = $false
         try {
             $Ready = $false
             for ($Attempt=0; $Attempt -lt 60; $Attempt++) {
@@ -80,10 +81,15 @@ try {
             Push-Location -LiteralPath $Root
             try { & $Node $Script --layout-only --packaged-only; Assert-Exit "$App packaged layout checks" }
             finally { Pop-Location }
+            $LayoutPassed = $true
+        } catch {
+            $Report.failures += @{app=$App; message=$_.Exception.Message}
+            Write-Warning "$App layout verification failed; retaining evidence and checking the other application."
         } finally {
             if (-not $Native.HasExited) { $Native.Kill(); $Native.WaitForExit() }
             $Native.Dispose()
         }
+        if (-not $LayoutPassed) { continue }
         $LayoutPath = Join-Path $Root "artifacts/ui-workflow-check/$App-native-layout/report.json"
         $Layout = Get-Content -LiteralPath $LayoutPath -Raw | ConvertFrom-Json
         if ($Layout.mode -ne 'packaged-read-only-layout' -or $Layout.passed -ne $true) {
@@ -92,6 +98,7 @@ try {
         $Report.applications += @{app=$App; installer_sha256=$Asset.sha256; executable_sha256=$Prior[0].executable_sha256;
             actual_packaged_webview_layout='passed'; layout_report_sha256=(Hash $LayoutPath); system_only_path=$true}
     }
+    if ($Report.failures.Count) { throw 'One or more installed layout matrices failed; inspect the retained reports.' }
     $Report.passed = $true
 } finally {
     $Report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $Output 'packaged-layout-report.json') -Encoding utf8
