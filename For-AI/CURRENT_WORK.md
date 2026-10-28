@@ -29,8 +29,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   ordered control groups and text/action cells; retain deliberate paging/details
   for unbounded content. Reuse the existing locked Pretext and shared text owner.
   Verify actual width/height, zoom, text-spacing and keyboard behavior before the
-  final installer rebuild. The current candidate build remains intermediate;
-  its packages cannot be published as containing the new layout work.
+  final installer rebuild. The final candidate at `39e9d778` includes the layout
+  work; its packages remain unpublished until installed and full-preset checks pass.
   The new UI checkpoints are integrated: Runner `2750a3f5` and Designer
   `078761da`, with About-dialog follow-up `663a3662`, including the shared
   text-fit fixes and exact skill mirror.
@@ -242,13 +242,20 @@ This file is the active checklist and handoff owner; replace state, do not appen
   [Draft PR #2](https://github.com/GeorgeFejer91/pps-kit/pull/2) tracks integration;
   no merge or release promotion has occurred.
   Final candidate [40735351508](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40735351508)
-  and normal CI [40735365365](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40735365365)
-  target `39e9d778e3ffc76d0ca23606e10321e2066e8a1f`. The release draft now targets
-  that revision and still has no assets. Superseded in-progress CI runs were
-  cancelled to release worker capacity; the final two runs remain active.
+  targets `39e9d778e3ffc76d0ca23606e10321e2066e8a1f`; native contract tests pass
+  and both installer builds are running. The release draft targets that revision
+  and still has no assets. Its normal CI passed Windows/Linux Desktop and Browser,
+  but the macOS Desktop job was cancelled before downstream checks could run.
+  Follow-up [CI 40737552536](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40737552536)
+  at the documentation-only `3c7da150` passes all three Desktop jobs and Browser;
+  Windows Standard and validation bundles are still running. Superseded
+  in-progress runs were cancelled to release worker capacity.
   An older Windows run at `2750a3f5` interrupted two durable-group test fixtures;
-  its snapshot lacks the terminal ledger reason. Test-only diagnostics are under
-  review. Accelerated fixture callback traffic lacks the durable-prefix barrier
+  its snapshot lacks the terminal ledger reason. Reviewed test-only diagnostics
+  at `051f6317` now include bounded journal/ledger status. Twelve sequential and
+  eight concurrent durable-group batches pass all 60 checks; the complete Runner
+  library passes 163 tests with four opt-in skips. The earlier interruption did
+  not reproduce and remains unexplained. Accelerated fixture callback traffic lacks the durable-prefix barrier
   already used by complete-profile tests, so journal admission pressure is a
   candidate cause, not yet an established diagnosis. No production safeguard or
   timeout has been weakened. A separate older macOS artifact upload failed with
