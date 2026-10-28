@@ -78,7 +78,28 @@ a full-paper reproduction. Source contradictions, approximate assets and partial
 parameters remain visible through the frozen catalogue. No native or physical
 qualification status is changed by this audit.
 
+Other concrete baseline differences are Noel bodily-self front/back (108 rows
+spread over two blocks rather than 108 per stroking condition, 216 total),
+Barumerli Experiments 1/2 (226/210 rows over four blocks rather than the reported
+760/640 and additional tactile-only blocks), and Roussel (72 rows in one block
+rather than six 72-row blocks). The source's Barumerli ordering and Roussel catch
+contradictions remain unresolved. Each preset's report includes its linked
+reviewed allocation/order contracts with primary source pointers, so software
+results can be assessed against these limits without modifying scientific data.
+
+Four published presets have no study-level mapper assignment: Noel walking,
+Canzoneri tool use/amputation, and Galli wheelchair. Their registry entries retain
+combined-profile disaggregation limits. They remain part of the 30-preset file
+audit; no experiment mapping is invented here. Biggio's separate racket presets
+and Collignon's separate posture presets each cover a condition, not the whole
+multi-condition publication protocol by themselves.
+
 Re-capture after any template, preload or frontend change before relying on
-native results. The initial baseline also exposes stale committed Canzoneri
-source-duration metadata; its final outcome must use the coordinator's coherent
-preload correction, rather than manually patching a captured plan.
+native results. The initial baseline exposes a frontend duration defect:
+generated premade sources lack a hydrated duration, so `staticSourceInventory`
+falls back to four seconds. Twenty-five presets / 38 source entries differ from
+their actual bundled WAV durations. Canzoneri's source WAVs and preload metadata
+are correctly three seconds, but the base generated source is planned as four;
+the appended receding custom source retains three. This is a software defect,
+not a missing scientific parameter. Fix its owning frontend source and re-capture;
+do not manually patch captured plans or audio to make native checks pass.

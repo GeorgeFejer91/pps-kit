@@ -112,6 +112,15 @@ def build_report(root: Path, captures: Path) -> dict:
             "missing_inputs": profile.get("missing_publication_parameters", []),
             "unsupported_structures": profile.get("unsupported_toolkit_structures", []),
             "study_row_ids": sorted(k for k, row in studies.items() if template_id in row["templateIds"]),
+            "reviewed_schedule_contracts": [
+                {"study_row_id": key, "key": contract["key"], "status": contract["status"],
+                 "value": contract["value"], "source_url": contract["evidenceSourceUrl"],
+                 "page_or_section": contract["pageOrSection"]}
+                for key, row in sorted(studies.items()) if template_id in row["templateIds"]
+                for contract in row["contracts"]
+                if contract["key"] in {"repetition_allocation", "block_order_contract"}
+            ],
+            "published_protocol_equivalence": "not_established_by_software_audit",
             "plan": plan,
         })
     archive_rows = [{"study_row_id": key, "publication_id": row["networkNodeId"],
@@ -129,6 +138,7 @@ def build_report(root: Path, captures: Path) -> dict:
                    "study_rows_with_presets": sum(bool(row["templateIds"]) for row in studies.values()),
                    "presets": len(presets), "configuration_eligible": sum(x["configuration_eligible"] for x in presets),
                    "blocked_as_shipped": sum(not x["configuration_eligible"] for x in presets),
+                   "published_presets_without_study_assignment": sum(x["publication_status"] == "published" and not x["study_row_ids"] for x in presets),
                    "native_preparation_verified": 0, "native_execution_verified": 0},
         "presets": presets, "archive_rows": archive_rows,
     }
