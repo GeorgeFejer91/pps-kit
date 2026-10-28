@@ -689,7 +689,7 @@ fn software_run_complete_package(path: &std::path::Path, expected_sha256: &str) 
 #[test]
 fn unsupported_prepared_response_contract_cannot_reserve_native_output() {
     let (root, original) = verified_audio_package("SOFTWARE_UNSUPPORTED", 1);
-    fs::write(root.join("block-0.csv"),"Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Trial_End_Sample,response_mode,response_choice_set,correct_response\n1,T1,Target,audiotactile,48000,0,4,choice,red|green,red\n").unwrap();
+    fs::write(root.join("block-0.csv"),"Trial_Number,Trial_UID,Trial_Type,Family,Sample_Rate_Hz,Trial_Start_Sample,Looming_Onset_Sample,Tactile_Onset_Sample,Response_Window_Onset_Sample,Trial_End_Sample,response_mode,response_choice_set,correct_response\n1,T1,Target,audiotactile,48000,0,1,2,1,4,choice,red|green,red\n").unwrap();
     let verified =
         verify_prepared_session(VerificationRequest::new(original.manifest_path())).unwrap();
     let control = Arc::new(FakeControl::default());
