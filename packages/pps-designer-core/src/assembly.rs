@@ -15,7 +15,7 @@ pub const MAX_ASSEMBLY_ROWS: usize = 10_000;
 pub const MAX_ASSEMBLY_BLOCKS: usize = 128;
 const MAX_DECODED_ASSET_BYTES: usize = 512 * 1024 * 1024;
 const MAX_ASSET_BYTES: usize = MAX_FRAMES * 8 + 1024 * 1024;
-const MAX_BLOCK_BYTES: u64 = 768 * 1024 * 1024;
+const MAX_BLOCK_BYTES: u64 = 1280 * 1024 * 1024;
 const MAX_PACKAGE_BYTES: u64 = 8 * 1024 * 1024 * 1024;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]

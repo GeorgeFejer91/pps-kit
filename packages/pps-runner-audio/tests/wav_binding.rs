@@ -461,6 +461,14 @@ fn trailing_bytes_are_included_in_media_digest() {
         .unwrap()
         .write_all(b"JUNK\x04\x00\x00\x00tail")
         .unwrap();
+    // Span multiple native read buffers; EOF draining must hash bytes beyond
+    // the header/data read-ahead as well as the already buffered trailer.
+    OpenOptions::new()
+        .append(true)
+        .open(&path)
+        .unwrap()
+        .write_all(&vec![0x5a; 128 * 1024 + 1])
+        .unwrap();
     let expected_digest = digest(&path);
     let length = fs::metadata(&path).unwrap().len();
 
