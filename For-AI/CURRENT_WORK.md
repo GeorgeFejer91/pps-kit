@@ -251,18 +251,27 @@ This file is the active checklist and handoff owner; replace state, do not appen
   targets `39e9d778e3ffc76d0ca23606e10321e2066e8a1f`; native contract tests,
   both installer builds, hosted Windows layout checks and exact installed-payload
   checks now pass. Actual installed Designer generation/preview and packaged
-  Runner startup pass; the complete-preset audit is running. Retain this evidence,
+  Runner startup pass. The complete job is successful: all 25 eligible full presets
+  pass native execution and independent audits, with five expected source guards,
+  73 participant blocks and 5,148 scored/dataset rows in one retained sweep.
+  Downloaded installers/source match every build-manifest hash; the renderer
+  source archive passes integrity checking. Retain this intermediate evidence,
   but publish only after navigation fix `751945ab` is packaged and verified.
   Final candidate [40740525976](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40740525976)
   and normal [CI 40740539024](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40740539024)
-  target `a98115cf012fffe0ff55203d49e52742d354057c`. The final candidate has built
-  the renderer and is testing native contracts; normal CI is queued. The asset-free
+  target `a98115cf012fffe0ff55203d49e52742d354057c`. The final candidate passes
+  native contracts and is building both installers. Its normal CI passes all three
+  Core/Desktop platforms and Browser; remaining oracle/bundle checks are running.
+  The asset-free
   release draft targets `a98115cf`. Do not rebuild for later checklist-only changes.
   Its normal CI passed Windows/Linux Desktop and Browser,
   but the macOS Desktop job was cancelled before downstream checks could run.
   Follow-up [CI 40737552536](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40737552536)
-  at the documentation-only `3c7da150` passes all three Desktop jobs and Browser;
-  Windows Standard and validation bundles are still running. Superseded
+  at the documentation-only `3c7da150` passes all three Desktop jobs, Browser,
+  validation bundles and Windows Standard (762 passes, nine skips, five warnings).
+  The warnings are one Starlette deprecation and four V1 analysis sigmoid-overflow
+  warnings during capability smoke fitting, outside the native runtime. The
+  macOS Core job was cancelled. Superseded
   in-progress runs were cancelled to release worker capacity.
   An older Windows run at `2750a3f5` interrupted two durable-group test fixtures;
   its snapshot lacks the terminal ledger reason. Reviewed test-only diagnostics
@@ -333,6 +342,15 @@ Native picker interaction and clean Windows without an existing WebView2 runtime
 remain unverified. Final publication must preserve the immutable build manifest,
 add the separate installed report, and checksum all seven public non-checksum
 assets. Prepared public download documentation stays unstaged until assets exist.
+The existing installed checks do not cover the whole browser resize/zoom matrix.
+Test-only packaged WebView layout modes at `a40dd127` now preserve experiment and
+native state while checking actual CDP viewports, CSS zoom, spacing and keyboard
+focus. Their actual run remains pending. Automatic review rejected the local
+exact-payload Runner verification/launch command as "blocked by policy"; nothing
+in that command executed and no alternate local launch was attempted. The safer
+follow-up uses a fresh disposable Windows CI account, the successful candidate's
+exact installers/executable hashes, and explicit mode/pass reports. It reuses
+the frozen packages rather than rebuilding for validation-only changes.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous

@@ -66,6 +66,10 @@ on:
         description: Build both Windows installers and audit every complete preset
         type: boolean
         default: false
+      native_layout_run:
+        description: Successful candidate run to recheck installed WebView layouts (use with native_release)
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -73,7 +77,7 @@ permissions:
 jobs:
   native-windows-candidate:
     name: Complete Windows candidate and preset pipeline
-    if: github.event_name == 'workflow_dispatch' && inputs.native_release
+    if: github.event_name == 'workflow_dispatch' && inputs.native_release && !inputs.native_layout_run
     runs-on: windows-2022
     timeout-minutes: 360
     env:
@@ -199,6 +203,44 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+
+  native-windows-layout-followup:
+    name: Installed Windows layout follow-up
+    if: github.event_name == 'workflow_dispatch' && inputs.native_release && inputs.native_layout_run
+    runs-on: windows-2022
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.19.0"
+      - name: Install the locked CDP driver
+        run: |
+          npm install --prefix artifacts/browser-tools --no-package-lock --ignore-scripts playwright@1.62.1
+          if ($LASTEXITCODE) { throw 'Pinned browser driver installation failed' }
+          "PPS_PLAYWRIGHT_MODULE=$env:GITHUB_WORKSPACE/artifacts/browser-tools/node_modules/playwright" >> $env:GITHUB_ENV
+      - name: Verify the existing exact installers in actual WebViews
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PPS_LAYOUT_SOURCE_RUN: ${{ inputs.native_layout_run }}
+        run: ./For-AI/engineering/build/windows/Test_PPS_Packaged_Layouts.ps1 -SourceRunId $env:PPS_LAYOUT_SOURCE_RUN
+      - name: Retain installed layout evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pps-native-windows-layout-${{ github.run_id }}
+          path: |
+            artifacts/packaged-layout-installed/packaged-layout-report.json
+            artifacts/ui-workflow-check/designer-native-layout/
+            artifacts/ui-workflow-check/runner-native-layout/
+          if-no-files-found: error
+          retention-days: 14
 
   rust-core:
     name: Rust core (${{ matrix.os }})
