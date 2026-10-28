@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { installNativeExternalLinkTrace } from "./native-external-trace.mjs";
 import { applyTextSpacing, restoreTextSpacing } from "../../../../For-AI/engineering/validation/scripts/webview-layout-helpers.mjs";
 const layoutOnly = process.argv.includes("--layout-only");
 const require = createRequire(import.meta.url);
@@ -141,31 +142,22 @@ async function verifyMapperTemplateNavigation(page) {
 }
 
 async function verifyExternalWebLink(page) {
-  await page.evaluate(() => {
-    const bridge = window.__TAURI_INTERNALS__;
-    const original = bridge.invoke.bind(bridge);
-    window.externalLinkReceipts = [];
-    window.restoreExternalLinkTrace = () => { bridge.invoke = original; };
-    bridge.invoke = async (command, args, options) => {
-      try {
-        const result = await original(command, args, options);
-        if (command === "designer_open_external") window.externalLinkReceipts.push({ url: args.url, opened: result });
-        return result;
-      } catch (error) {
-        if (command === "designer_open_external") window.externalLinkReceipts.push({ opened: false });
-        throw error;
-      }
-    };
-  });
+  await page.evaluate(installNativeExternalLinkTrace);
   try {
     await page.getByRole("tab", { name: "Downloads", exact: true }).click();
     const originalUrl = page.url();
     const link = page.locator("#download-software");
     const url = await link.getAttribute("href");
     await link.click();
-    await page.waitForFunction(() => window.externalLinkReceipts.length > 0);
+    try {
+      await page.waitForFunction(() => window.externalLinkReceipts.some(receipt => !receipt.pending));
+    } catch (error) {
+      const trace = await page.evaluate(() => ({ receipts: window.externalLinkReceipts,
+        invokeWritable: Object.getOwnPropertyDescriptor(window.__TAURI_INTERNALS__, "invoke").writable }));
+      throw new Error(`Native external-link fetch acknowledgement was not observed: ${JSON.stringify(trace)}`, { cause: error });
+    }
     const receipts = await page.evaluate(() => window.externalLinkReceipts);
-    assert.deepEqual(receipts, [{ url, opened: true }], "One real link click reaches the OS browser handoff exactly once");
+    assert.deepEqual(receipts, [{ url, method: "POST", pending: false, reply: "ok", opened: true }], "One real link click receives the genuine OS browser acknowledgement exactly once");
     assert.equal(page.url(), originalUrl, "External links do not navigate the privileged app WebView");
     return { acceptedByOs: true, mainWebviewStayedLocal: true,
       scope: "System browser accepted the public release URL; remote availability is checked at publication" };

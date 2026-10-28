@@ -428,6 +428,25 @@ artifacts before the separate all-30-preset sweep. This is native software/file
 evidence with synthetic responses/sample clock, not installed picker/acquisition
 or physical-timing evidence. New packages and their final installed/layout
 checks remain the next gate; no old installer is promoted by these checks.
+The `f46785da` [candidate run](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40763274840)
+built both installers and passed native owner/waveform and shared layout checks.
+Its installed Designer check reached real generation/preview, then the new link
+receipt observer timed out: pinned Tauri makes `invoke` non-writable, so its
+assignment silently failed. This is not evidence of an OS handoff failure.
+Observe the genuine IPC response without replacing `invoke` or its result.
+The same revision's [source CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40763270230)
+passed 13 jobs; Windows Standard passed 760 tests and failed two stale source-copy
+assertions for revised About text/native navigation. Their focused corrections
+pass five checks and retain legacy-hidden/native-visible contracts. These are
+validation repairs; product bytes are unchanged. Repeat the complete candidate
+and final layout/publication checks after the corrected harness is verified.
+The corrected external-link observer now reads the genuine Windows IPC fetch
+response through a clone, preserving the original response and exact fetch
+descriptor. Six regressions cover read-only `invoke`, actual success/error/false
+data, restoration, observer failure isolation, unchanged transport errors and
+zero request-header reads. All 59 Designer JS tests pass. The installed test
+requires the expected POST URL, `Tauri-Response: ok`, actual JSON `true`, one
+request and unchanged local WebView URL; it does not fabricate a receipt.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous
