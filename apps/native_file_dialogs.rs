@@ -36,12 +36,16 @@ mod tests {
 
     #[test]
     fn retains_native_plugin_identity_without_injecting_dialog_overrides() {
-        let original = tauri_plugin_dialog::init::<tauri::Wry>();
-        let native = init::<tauri::Wry>();
-        assert_eq!(native.name(), "dialog");
-        assert_eq!(native.name(), original.name());
+        // Exercise the public plugin boundary without linking the upstream
+        // GUI message-dialog constructor into a manifest-free Rust test EXE.
+        let original = tauri::plugin::Builder::<tauri::Wry>::new("dialog")
+            .js_init_script("window.confirm = async () => false;".to_owned())
+            .build();
+        assert_eq!(original.name(), "dialog");
         assert!(original.initialization_script().is_some());
         assert!(original.initialization_script_2().is_some());
+        let native = NativeFileDialogs(original);
+        assert_eq!(native.name(), "dialog");
         assert!(native.initialization_script().is_none());
         assert!(native.initialization_script_2().is_none());
     }
