@@ -3892,6 +3892,9 @@ a:focus-visible,
   width: 100%;
 }
 
+/* Measure the label's text track, independently of the button's hint popup. */
+.noise-type-label { display: block; inline-size: 100%; min-inline-size: 0; }
+
 .noise-type-primary {
   min-height: 46px;
   font-size: 14px;

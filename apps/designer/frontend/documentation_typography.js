@@ -33,7 +33,7 @@ export function initializeDocumentationTypography() {
   // The shared owner uses ResizeObserver and preserves the computed text size.
   typography = initializeBoundedText(document.body, pretext, [
     "[data-pretext-fit]", "[data-pretext]",
-    ".decision-segment button", ".decision-segment .field-row > label",
+    ".decision-segment button:not(.noise-type-button)", ".decision-segment .field-row > label",
     ".decision-segment .status-label", ".decision-segment .bounded-select-value",
     ".rail-nav-group a > span", ".modal-card button", ".modal-card .field-row > label",
     ".site-tab", ".site-tab > span", ".brand-name", ".brand-subtitle", "#toast",
