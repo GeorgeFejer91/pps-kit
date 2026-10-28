@@ -150,6 +150,8 @@ jobs:
         run: |
           $revision = (git rev-parse HEAD).Trim()
           ./For-AI/engineering/build/windows/Build_PPS_Native_Candidate.ps1 -OutputDirectory dist/native-windows-candidate -RendererDirectory $env:PPS_CANDIDATE_RENDERER_DIR -RuntimeDirectory artifacts/windows-runtime -RendererSha256 $env:PPS_CANDIDATE_RENDERER_SHA256 -RendererSourceCommit $revision
+      - name: Install and verify the exact packaged payloads
+        run: ./For-AI/engineering/build/windows/Test_PPS_Native_Candidate.ps1 -CandidateDirectory dist/native-windows-candidate -OutputDirectory artifacts/installed-native-candidate
       - name: Capture every full browser plan and audit independent native results
         run: |
           node For-AI/engineering/validation/scripts/capture_preset_plans.mjs artifacts/preset-plan-capture
@@ -161,8 +163,6 @@ jobs:
           # gaps remain in the capture and realized policy remains in receipts.
           python For-AI/engineering/validation/scripts/run_native_preset_pipeline.py --captures artifacts/preset-plan-capture --resources packages/pps-resources --designer-test-exe $env:PPS_DESIGNER_TEST_EXE --runner-test-exe $env:PPS_RUNNER_TEST_EXE --renderer $env:PPS_CANDIDATE_RENDERER --renderer-sha256 $env:PPS_CANDIDATE_RENDERER_SHA256 --resolve-iti-ranges --output artifacts/native-preset-pipeline --work-root $env:RUNNER_TEMP
           if ($LASTEXITCODE) { throw 'Complete preset pipeline did not pass' }
-      - name: Install and verify the exact packaged payloads
-        run: ./For-AI/engineering/build/windows/Test_PPS_Native_Candidate.ps1 -CandidateDirectory dist/native-windows-candidate -OutputDirectory artifacts/installed-native-candidate
       - name: Retain candidate installers and compact evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -186,6 +186,7 @@ jobs:
 
   rust-core:
     name: Rust core (${{ matrix.os }})
+    if: github.event_name != 'workflow_dispatch' || !inputs.native_release
     strategy:
       fail-fast: false
       matrix:
@@ -207,6 +208,7 @@ jobs:
 
   desktop-shell:
     name: Tauri desktop (${{ matrix.os }})
+    if: github.event_name != 'workflow_dispatch' || !inputs.native_release
     strategy:
       fail-fast: false
       matrix:
@@ -283,6 +285,7 @@ jobs:
 
   browser-companion:
     name: Browser companion
+    if: github.event_name != 'workflow_dispatch' || !inputs.native_release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -418,6 +421,7 @@ jobs:
 
   quest-apk:
     name: Optional native Quest APK
+    if: github.event_name != 'workflow_dispatch' || !inputs.native_release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

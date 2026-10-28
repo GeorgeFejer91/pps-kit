@@ -174,7 +174,9 @@ try {
     # Corresponding renderer source is a separate download, never part of the
     # runtime install. The replaceable renderer can be rebuilt with its CMake project.
     $SourceZip = Join-Path $OutputDirectory 'pps-native-renderer-source.zip'
-    git archive --format=zip --output=$SourceZip HEAD -- third_party/3dti_AudioToolkit third_party/3dti_renderer third_party/nlohmann_json LICENSE THIRD_PARTY_LICENSES.md
+    # The wrapper directory also retains legacy prebuilt executables. They are
+    # not corresponding source and may contain the original build user's paths.
+    git archive --format=zip --output=$SourceZip HEAD -- third_party/3dti_AudioToolkit third_party/3dti_renderer/CMakeLists.txt third_party/3dti_renderer/README.md third_party/3dti_renderer/src third_party/nlohmann_json LICENSE THIRD_PARTY_LICENSES.md
     Assert-Exit 'Archive corresponding renderer source'
     $Artifacts += @{file=[IO.Path]::GetFileName($SourceZip); sha256=(Hash $SourceZip); bytes=(Get-Item -LiteralPath $SourceZip).Length; app='renderer-source'}
     $Preflight['schema'] = 'pps-native-windows-candidate.v1'
