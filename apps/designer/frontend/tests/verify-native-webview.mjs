@@ -134,6 +134,7 @@ async function verifyMapperTemplateNavigation(page) {
   await confirm;
   await page.waitForFunction(id => PPSDesignerApp.getState().design.study_profile_id === id
     && !PPSDesignerApp.getState().custom_workflow?.is_custom && document.body.dataset.activePage === "toolkit", templateId);
+  assert.equal(new URL(page.url()).searchParams.get("page"), "toolkit", "Preset navigation updates the mapper's page query");
   assert.equal(await page.evaluate(() => document.activeElement.id), "study-segment");
   assert.equal(page.context().pages().length, pages, "Native preset links stay in the existing app WebView");
   return { templateId, unsavedDraftCancelPreserved: true, confirmedPresetLoaded: true, existingWebview: true, focusMovedToStudy: true };

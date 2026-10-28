@@ -78,6 +78,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   passes six cases, 24 views and 12 keyboard checks with the actual candidate CSS;
   mapper Cancel/Confirm and one external handoff pass through a mocked IPC
   boundary. These are UI checks, not installed native-command evidence.
+  The standalone/native route now updates an existing `page` query when tabs
+  change. A mapper selection otherwise left `page=documentation` after returning
+  to Toolkit. The final canonical native-mode Cancel/Confirm/external-link rerun
+  passes, preserving publication/study/search context; real hosted standalone
+  Docs → paper → Toolkit → reload stays on Toolkit. Hosted iframe routing is
+  unchanged. The final 53 JS and canonical Pages parity checks pass.
   Online use is prepare/preview only; Windows and audiotactile paradigms are
   the first release. Audited inaccessible-source gaps may be published without
   replication-ready labels. Generation ships without Python; Python remains
@@ -405,6 +411,23 @@ The sanitized JSON/CSV generated from those exact artifacts independently passed
 30-row, hash, count, privacy and scope checks. These remain intermediate evidence
 because subsequent UI and native-link changes need new packages, captures,
 installed checks and regenerated public tables before publication.
+The new representative bridge `c3045e14` joins one actual finalized hosted bundle
+and its hash-bound capture through the production native importer, full native
+review/accept/preparation, existing Runner callback execution and independent
+results audit. Its local run passes: nine verified embedded assets; exact design
+comparison after asset-reference rebasing; corrupted-WAV rejection with prior
+authority/revision preserved; 204 source rows/six blocks; two distinct 204-row,
+six-block parts with five instruction slots each; 20/19 stages and 10/11 gates;
+408 scored and 408 dataset rows with a durable group receipt. Actual comparator
+generation is explicitly V2/customized, without legacy NumPy parity. The focused
+design-mismatch regression, 44 Python audit regressions and strict all-target
+Designer Clippy pass, with independent source review. The full hosted workflow
+also passes after following the new Runner workspaces through real navigation.
+The final Windows candidate workflow now repeats this joined bridge on fresh
+artifacts before the separate all-30-preset sweep. This is native software/file
+evidence with synthetic responses/sample clock, not installed picker/acquisition
+or physical-timing evidence. New packages and their final installed/layout
+checks remain the next gate; no old installer is promoted by these checks.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous

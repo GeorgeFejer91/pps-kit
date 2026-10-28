@@ -195,3 +195,7 @@ mapper preset links instead reuse the existing profile loader and its dirty-draf
 confirmation, then focus Segment 0 only after successful adoption. Hosted links
 retain their ordinary browser targets. Do not bypass that loader or add another
 profile authority for catalogue navigation.
+Standalone/native page navigation updates an existing `page` query as well as
+the hash, preserving publication/study/search context. Otherwise a mapper URL
+would override the selected Toolkit page after reload. Hosted iframe routes
+continue to use their separate parent-path owner.

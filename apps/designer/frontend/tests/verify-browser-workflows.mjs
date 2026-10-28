@@ -6,6 +6,7 @@ import { verifyPremadeDuration } from "./premade-duration-browser.mjs";
 import { verifySavedRowContracts } from "./row-contract-browser.mjs";
 import { verifyNativeTimingReview } from "./native-timing-browser.mjs";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
@@ -34,30 +35,34 @@ await new Promise(done => server.listen(0, "127.0.0.1", done));
 const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
 const report = { browser: browser.version(), checks: [] };
+const recordCheck = message => { report.checks.push(message); console.log(message); };
 try {
   await verifyNativeTimingReview(browser, base, output);
-  report.checks.push("Native timing substitution remains visible before explicit acceptance; selected delays, exact seeds and original ranges survive review/CSV (mocked IPC)");
+  recordCheck("Native timing substitution remains visible before explicit acceptance; selected delays, exact seeds and original ranges survive review/CSV (mocked IPC)");
   await verifyStartupRestoreOrdering(browser, base);
-  report.checks.push("Startup draft restore waits for the actual initial-template load; it cannot be overwritten by a late initial response");
+  recordCheck("Startup draft restore waits for the actual initial-template load; it cannot be overwritten by a late initial response");
   await verifyPremadeDuration(browser, base, output);
-  report.checks.push("Premade PCM duration survives hosted customization, full block review, lock and portable export");
+  recordCheck("Premade PCM duration survives hosted customization, full block review, lock and portable export");
   await verifySavedRowContracts(browser, base, output);
-  report.checks.push("Saved left/right and ITI contracts survive actual strip edit, all 300 trial rows, lock/reload, block CSV and portable export");
+  recordCheck("Saved left/right and ITI contracts survive actual strip edit, all 300 trial rows, lock/reload, block CSV and portable export");
   const runner = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   const errors = [];
   runner.on("pageerror", error => errors.push(error.message));
   await runner.goto(`${base}/apps/runner/compiled/index.html`);
   await runner.locator("#state-chip").filter({ hasText: "Idle" }).waitFor();
+  await runner.locator('[data-workspace-open="participant"]').click();
   await runner.getByLabel("Participant code", { exact: true }).fill("LOCAL-002");
   await runner.getByLabel("Age", { exact: true }).fill("38");
   await runner.locator("#participant-handedness").selectOption("left");
   await runner.locator("#participant-gender").selectOption("prefer_not_to_say");
   await runner.locator("#participant-name").fill("Local test participant");
   await runner.locator("#name-sharing").check();
+  await runner.locator('[data-workspace-open="run"]').click();
   for (let index = 0; index < 3; index++) {
     await runner.getByRole("button", { name: "Refresh snapshot", exact: true }).click();
     await runner.waitForFunction(() => document.getElementById("last-note").textContent !== "");
   }
+  await runner.locator('[data-workspace-open="participant"]').click();
   assert.equal(await runner.locator("#participant-code").inputValue(), "LOCAL-002");
   assert.equal(await runner.locator("#participant-age").inputValue(), "38");
   assert.equal(await runner.locator("#participant-handedness").inputValue(), "left");
@@ -69,7 +74,7 @@ try {
   assert.equal(await runner.locator("#participant-chip").innerText(), "LOCAL-002");
   assert.deepEqual(errors, []);
   await verifyRunnerNavigation(runner);
-  report.checks.push("Runner draft survives snapshot refresh and acknowledged submit; ordinary section navigation exposes current page and keyboard order");
+  recordCheck("Runner draft survives snapshot refresh and acknowledged submit; ordinary section navigation exposes current page and keyboard order");
 
   const nativeRunner = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await nativeRunner.addInitScript(() => {
@@ -107,10 +112,13 @@ try {
       } };
   });
   await nativeRunner.goto(`${base}/apps/runner/compiled/index.html`);
+  await nativeRunner.locator('[data-workspace-open="package"]').click();
   await nativeRunner.locator("#select-session-manifest").click();
   await nativeRunner.locator("#inspect-prepared-execution").click();
   await nativeRunner.locator("#prepare-first-audio-block").click();
+  await nativeRunner.locator('[data-workspace-open="overview"]').click();
   await nativeRunner.locator("#prepared-audio-status").filter({ hasText: "Block 1 prepared" }).waitFor();
+  await nativeRunner.locator('[data-workspace-open="run"]').click();
   await nativeRunner.evaluate(() => window.advanceNativeFixture("running", 1));
   const leftResponse = nativeRunner.getByRole("button", { name: "Left", exact: true });
   const rightResponse = nativeRunner.getByRole("button", { name: "Right", exact: true });
@@ -142,13 +150,15 @@ try {
   }), "Left/Right labels remain on one readable line at 200% CSS zoom");
   await nativeRunner.locator(".hero-panel").screenshot({ path: resolve(output, "runner-choices-zoom.png") });
   await nativeRunner.evaluate(() => { document.documentElement.style.zoom = ""; window.advanceNativeFixture("prepared", 1); });
+  await nativeRunner.locator('[data-workspace-open="package"]').click();
   await nativeRunner.getByRole("button", { name: "Prepare next audio occurrence", exact: true }).click();
+  await nativeRunner.locator('[data-workspace-open="overview"]').click();
   await nativeRunner.locator("#prepared-audio-status").filter({ hasText: "Block 2 prepared" }).waitFor();
   assert.equal(await nativeRunner.locator("#block-progress").evaluate(element => element.style.width), "0%");
   await nativeRunner.locator("#prepared-audio-status").screenshot({ path: resolve(output, "runner-next-block.png") });
   await nativeRunner.evaluate(() => window.advanceNativeFixture("completed", 2));
   assert.equal(await nativeRunner.locator("#prepare-first-audio-block").isDisabled(), true);
-  report.checks.push("Runner real Left/Right pointer and keyboard controls emit distinct native IPC choices, fit 320–1440px/200% CSS zoom, retire on block transition and reject preparation after completion (native IPC mocked)");
+  recordCheck("Runner real Left/Right pointer and keyboard controls emit distinct native IPC choices, fit 320–1440px/200% CSS zoom, retire on block transition and reject preparation after completion (native IPC mocked)");
 
   const designer = await browser.newPage({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
   await recordStorageEvents(designer);
@@ -168,7 +178,7 @@ try {
   assert.equal(await designer.locator("#edit-mode-button").isVisible(), true, "Hosted authoring must expose the Edit switch");
   assert.equal(await designer.locator("#companion-panel").isVisible(), false, "Hosted authoring must keep V1 companion controls hidden");
   await verifyNativeDownloads(designer, output);
-  report.checks.push("Native Preview installer/checksum links use the exact prerelease tag, preserve keyboard order and fit phone/desktop/200% CSS zoom; remote publication not assessed");
+  recordCheck("Native Preview installer/checksum links use the exact prerelease tag, preserve keyboard order and fit phone/desktop/200% CSS zoom; remote publication not assessed");
   await designer.locator("#profile-mode-panel").screenshot({ path: resolve(output, "hosted-edit-switch.png") });
   const play = designer.locator("[data-preview-source-label]").first();
   await play.click();
@@ -187,7 +197,7 @@ try {
   assert.equal(await designer.evaluate(() => window.previewStarts), 1);
   assert.equal(await designer.locator("[data-preview-source-label].playing").count(), 0);
   await verifyAbortedBrowserWrites(designer, resolve(output, "indexeddb-abort.json"));
-  report.checks.push("Real IndexedDB abort after successful put rejects draft/audio writes, closes connections, retains prior data and permits retry");
+  recordCheck("Real IndexedDB abort after successful put rejects draft/audio writes, closes connections, retains prior data and permits retry");
   await designer.evaluate(async () => {
     const snapshot = window.PPSDesignerApp.getState();
     const asset = snapshot.preload_inventory.assets[0];
@@ -200,7 +210,7 @@ try {
   await restoredClip.click();
   await designer.waitForFunction(() => window.previewStarts === 2);
   await restoredClip.click();
-  report.checks.push("Premade WAV decodes and starts muted; project replacement cancels pending playback without stale start");
+  recordCheck("Premade WAV decodes and starts muted; project replacement cancels pending playback without stale start");
   await designer.evaluate(async () => {
     const snapshot = window.PPSDesignerApp.getState();
     snapshot.design.name = "Browser finalization regression";
@@ -258,6 +268,19 @@ try {
   assert.equal(await designer.evaluate(() => document.querySelector(".app-shell").inert), false);
   assert.equal(await designer.evaluate(async () => (await window.PPSDesigner.drafts.load()).custom_workflow.is_finalized), true);
   assert.equal(await designer.locator("#edit-mode-button").getAttribute("aria-checked"), "false");
+  // Capture the exact finalized export state, rather than joining an earlier
+  // editable preview to a later bundle with different scientific parameters.
+  const finalizedCapture = await designer.evaluate(() => {
+    const snapshot = PPSDesignerApp.getState();
+    return { design: snapshot.design, block_csv_preview: snapshot.block_csv_preview,
+      variants: PPSDesignerApp.getAssemblyVariants(), run_sequence_setup: snapshot.run_sequence_setup,
+      participant_orders: snapshot.participant_orders, preload_inventory: snapshot.preload_inventory,
+      trial_pool_bake: snapshot.trial_pool_bake };
+  });
+  assert.equal(finalizedCapture.block_csv_preview.blocks.length, 6);
+  assert.equal(finalizedCapture.block_csv_preview.blocks.reduce((total, block) => total + block.preview_rows.length, 0), 204);
+  const finalizedCaptureBytes = JSON.stringify(finalizedCapture, null, 2) + "\n";
+  await writeFile(resolve(output, "browser-finalized-full-block-plan.json"), finalizedCaptureBytes);
   const downloadPromise = designer.waitForEvent("download");
   const exportError = designer.waitForEvent("dialog").then(async dialog => {
     const message = dialog.message(); await dialog.dismiss(); throw new Error(`Bundle export: ${message}`);
@@ -266,9 +289,17 @@ try {
   const download = await Promise.race([downloadPromise, exportError]);
   await download.saveAs(resolve(output, "browser-finalized.pps-profile"));
   assert.equal(await download.failure(), null);
+  await writeFile(resolve(output, "browser-finalized-binding.json"), JSON.stringify({
+    schema: "pps-hosted-native-bridge-binding.v1",
+    bundle_file: "browser-finalized.pps-profile",
+    bundle_sha256: createHash("sha256").update(await readFile(resolve(output, "browser-finalized.pps-profile"))).digest("hex"),
+    capture_file: "browser-finalized-full-block-plan.json",
+    capture_sha256: createHash("sha256").update(finalizedCaptureBytes).digest("hex"),
+    scope: "One actual finalized browser export and its complete execution-plan capture; native import and execution assessed separately",
+  }, null, 2) + "\n");
   await designer.locator("section").filter({ has: designer.locator("#export-profile-bundle") }).last()
     .screenshot({ path: resolve(output, "designer-locked-export.png") });
-  report.checks.push("Designer storage rejection stays editable; retry persists lock and exports bundle");
+  recordCheck("Designer storage rejection stays editable; retry persists lock and exports bundle");
   report.text = await designer.locator("#export-profile-bundle").evaluate(element => ({ pretext: element.dataset.pretextResult,
     width: element.clientWidth, scrollWidth: element.scrollWidth, height: element.clientHeight, scrollHeight: element.scrollHeight }));
   assert.ok(report.text.pretext);
@@ -283,7 +314,7 @@ try {
   await scaling.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
   await verifySequenceScaling(scaling);
   assert.deepEqual(errors, []);
-  report.checks.push("Exact 46656 variants and oversized drafts survive real hosted edit, save and restore");
+  recordCheck("Exact 46656 variants and oversized drafts survive real hosted edit, save and restore");
   await scaling.close();
   const accessible = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await recordStorageEvents(accessible);
@@ -293,7 +324,7 @@ try {
   await verifyDesignerNavigationLabels(accessible, output);
   await verifyDesignerControlNames(accessible, resolve(output, "accessible-instructions.png"));
   assert.deepEqual(errors, []);
-  report.checks.push("Designer names, keyboard/focus, 320–1920px and 200% CSS zoom; uploaded instruction bytes/hash survive preview, lock, reload and export; last-slot focus clears footer at 620/1000px");
+  recordCheck("Designer names, keyboard/focus, 320–1920px and 200% CSS zoom; uploaded instruction bytes/hash survive preview, lock, reload and export; last-slot focus clears footer at 620/1000px");
   await accessible.close();
 
   const companionPreview = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
@@ -335,7 +366,7 @@ try {
   assert.equal(await companionPreview.evaluate(() => window.PPSDesignerApp.getState().design.protocol.participants), 3);
   assert.equal(await companionPreview.locator("#participants").inputValue(), "3");
   assert.deepEqual(errors, []);
-  report.checks.push("Explicit V1 companion route with mocked reversed HTTP preview responses preserves the latest form and state");
+  recordCheck("Explicit V1 companion route with mocked reversed HTTP preview responses preserves the latest form and state");
   const mapper = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   mapper.on("pageerror", error => errors.push(error.message));
   let failReview = true;
@@ -432,7 +463,7 @@ try {
     assert.match(await detail.innerText(), /adult/i);
   }
   assert.deepEqual(errors, []);
-  report.checks.push("Mapper retry, DOI search, keyboard detail, study deep link, evidence separation, responsive layout and preset navigation");
+  recordCheck("Mapper retry, DOI search, keyboard detail, study deep link, evidence separation, responsive layout and preset navigation");
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
   await phone.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
   await phone.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
@@ -448,7 +479,7 @@ try {
     const color = getComputedStyle(probe).color; probe.remove(); return color;
   }));
   await phone.screenshot({ path: resolve(output, "designer-phone-dark-reduced-motion.png") });
-  report.checks.push("Hosted desktop and phone expose Edit while hiding companion controls; phone preserves dark labels, readonly removal and reduced motion");
+  recordCheck("Hosted desktop and phone expose Edit while hiding companion controls; phone preserves dark labels, readonly removal and reduced motion");
   await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {

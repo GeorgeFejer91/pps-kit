@@ -3199,7 +3199,10 @@ function pageRouteUrl(page, sectionId = "") {
   const cleanSection = String(sectionId || "").replace(/^#/, "");
   if (!publicRouteNavigationAvailable()) {
     const hash = cleanSection || (nextPage === "toolkit" ? "" : nextPage);
-    return `${window.location.pathname}${window.location.search}${hash ? `#${hash}` : ""}`;
+    const query = new URLSearchParams(window.location.search);
+    if (query.has("page")) query.set("page", nextPage);
+    const search = query.toString();
+    return `${window.location.pathname}${search ? `?${search}` : ""}${hash ? `#${hash}` : ""}`;
   }
   const base = publicRouteBasePath();
   const segment = PAGE_ROUTE_SEGMENTS[nextPage] || "";
