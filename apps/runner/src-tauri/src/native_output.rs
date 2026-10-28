@@ -1734,6 +1734,18 @@ pub(crate) mod tests {
                 callback.render(output, Instant::now());
             }
         }
+        pub(crate) fn render_software_callback_at(
+            &self,
+            output: &mut [f32],
+            observed: Instant,
+        ) -> pps_runner_audio_cpal::PlaybackStatus {
+            let mut guard = self.software_callback.lock().unwrap();
+            let callback = guard
+                .as_mut()
+                .expect("explicit software callback is installed");
+            callback.render(output, observed);
+            callback.status()
+        }
         pub(crate) fn release_calls(&self) -> u64 {
             self.release_calls.load(Ordering::Acquire)
         }

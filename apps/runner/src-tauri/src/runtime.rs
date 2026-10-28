@@ -1596,6 +1596,7 @@ fn validate_owner_request(session_id: &str, owner_token: &str) -> Result<(), Rem
 mod tests {
     use super::*;
     include!("instruction_tests.rs");
+    include!("full_pipeline_tests.rs");
     use crate::{
         latency_diagnostics::{LatencyStage, TraceOutcome},
         native_output::{

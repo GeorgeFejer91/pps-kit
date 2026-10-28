@@ -265,20 +265,63 @@ impl Drop for PendingResponse {
 #[derive(Debug)]
 struct ProcessClock {
     started: Instant,
+    #[cfg(test)]
+    software: Option<SoftwareTestClock>,
+}
+
+/// Explicit test-build clock shared by the real authority, callback and input
+/// ingress. Production builds retain Instant/SystemTime and cannot install it.
+#[cfg(test)]
+#[derive(Debug, Clone)]
+pub(crate) struct SoftwareTestClock {
+    started: Instant,
+    unix_origin_ms: u64,
+    elapsed_ns: Arc<std::sync::atomic::AtomicU64>,
+}
+
+#[cfg(test)]
+impl SoftwareTestClock {
+    pub(crate) fn now_ns(&self) -> u64 {
+        self.elapsed_ns.load(Ordering::Acquire)
+    }
+    pub(crate) fn observed(&self) -> Instant {
+        self.started + Duration::from_nanos(self.now_ns())
+    }
+    pub(crate) fn advance_to(&self, ns: u64) {
+        assert!(ns <= JSON_MAX_SAFE_INTEGER);
+        self.elapsed_ns
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |current| {
+                (ns >= current).then_some(ns)
+            })
+            .expect("software sample time cannot move backwards");
+    }
 }
 
 impl ProcessClock {
     fn new() -> Self {
         Self {
             started: Instant::now(),
+            #[cfg(test)]
+            software: None,
         }
     }
 
     fn monotonic_ns(&self) -> u64 {
+        #[cfg(test)]
+        if let Some(clock) = &self.software {
+            return clock.now_ns();
+        }
         u64::try_from(self.started.elapsed().as_nanos()).unwrap_or(u64::MAX)
     }
 
     fn stamp(&self) -> ClockStamp {
+        #[cfg(test)]
+        if let Some(clock) = &self.software {
+            return ClockStamp {
+                unix_ms: clock.unix_origin_ms + clock.now_ns() / 1_000_000,
+                monotonic_ns: clock.now_ns(),
+            };
+        }
         let unix_ms = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map(|duration| duration.as_millis() as u64)
@@ -2840,6 +2883,8 @@ pub(crate) struct ExecutionOwner {
     mailbox: Arc<Mailbox>,
     thread: Mutex<Option<JoinHandle<()>>>,
     _alive: Arc<AtomicBool>,
+    #[cfg(test)]
+    software_clock: Mutex<Option<SoftwareTestClock>>,
 }
 
 #[derive(Clone)]
@@ -2892,7 +2937,16 @@ impl ExecutionOwner {
         // resolution cutoff before checking this counter, so an input at or
         // before that cutoff cannot be turned into a miss while queued.
         let pending = PendingResponse::begin(&self.mailbox)?;
+        #[cfg(not(test))]
         let observed = Instant::now();
+        #[cfg(test)]
+        let observed = self
+            .software_clock
+            .lock()
+            .unwrap()
+            .as_ref()
+            .map(SoftwareTestClock::observed)
+            .unwrap_or_else(Instant::now);
         let receive = self.submit(
             AdmissionClass::Normal,
             "native_participant_response",
@@ -2980,6 +3034,8 @@ impl ExecutionOwner {
             mailbox,
             thread: Mutex::new(Some(handle)),
             _alive: alive,
+            #[cfg(test)]
+            software_clock: Mutex::new(None),
         })
     }
 
@@ -3844,6 +3900,26 @@ impl ExecutionOwner {
             state.invalidate_prepared_audio();
         })
         .expect("test authority remains available");
+    }
+
+    #[cfg(test)]
+    pub(crate) fn install_software_clock(&self) -> SoftwareTestClock {
+        let clock = self
+            .blocking(AdmissionClass::Normal, "software_clock", |state| {
+                assert!(state.retained_session.is_none() && state.event_journal.is_none());
+                assert!(state.clock.software.is_none());
+                let stamp = state.clock.stamp();
+                let clock = SoftwareTestClock {
+                    started: state.clock.started,
+                    unix_origin_ms: stamp.unix_ms - stamp.monotonic_ns / 1_000_000,
+                    elapsed_ns: Arc::new(std::sync::atomic::AtomicU64::new(stamp.monotonic_ns)),
+                };
+                state.clock.software = Some(clock.clone());
+                clock
+            })
+            .expect("test authority remains available");
+        *self.software_clock.lock().unwrap() = Some(clock.clone());
+        clock
     }
 
     #[cfg(test)]
