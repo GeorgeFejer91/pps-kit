@@ -42,6 +42,12 @@ environment setup, not end-user runtime dependencies.
 Preserve exactly one Shared, V1 Qt/ASIO requirements, scientific handoffs,
 public routes, and exclusion of `For-AI/` from every distribution.
 
+The pinned Tauri 2.11.4 NSIS bundler changes the executable's single bundle-type
+marker from `UNK` to `NSS`, then restores the build output. Installed verification
+computes the expected SHA256 after that exact in-memory transformation; it rejects
+missing/ambiguous markers and still hashes every byte. Resource files compare
+directly. Packaged WebView checks require the Tauri origin, not a development URL.
+
 Report each relevant gate as **VERIFIED**, **PARTIAL**, **BLOCKED**, or
 **NOT RUN**, with the observed surface and missing evidence. A guidance review
 does not qualify runtime code, installed packages, or scientific performance.

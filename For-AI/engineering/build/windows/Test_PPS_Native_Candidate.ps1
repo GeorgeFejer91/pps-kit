@@ -16,6 +16,20 @@ if (Test-Path -LiteralPath $OutputDirectory) { throw 'Installed evidence directo
 New-Item -ItemType Directory -Path $OutputDirectory | Out-Null
 $Node = (Get-Command node -ErrorAction Stop).Source
 function Hash([string]$Path) { (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
+function Get-NsisExecutableHash([string]$Path) {
+    # The pinned Tauri 2.11.4 bundler changes this one marker for NSIS, then
+    # restores the unpatched target/release binary. Reproduce its exact input
+    # transformation in memory; every installed byte still participates in SHA256.
+    # https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.11.4/crates/tauri-bundler/src/bundle.rs
+    $bytes = [IO.File]::ReadAllBytes($Path)
+    $text = [Text.Encoding]::GetEncoding(28591).GetString($bytes)
+    $marker = '__TAURI_BUNDLE_TYPE_VAR_UNK'
+    $offset = $text.IndexOf($marker, [StringComparison]::Ordinal)
+    if ($offset -lt 0 -or $text.LastIndexOf($marker, [StringComparison]::Ordinal) -ne $offset -or
+        $text.Contains('__TAURI_BUNDLE_TYPE_VAR_NSS')) { throw 'Expected one unpatched Tauri bundle marker.' }
+    [Text.Encoding]::ASCII.GetBytes('__TAURI_BUNDLE_TYPE_VAR_NSS').CopyTo($bytes, $offset)
+    [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
+}
 $manifest = Get-Content -LiteralPath (Join-Path $CandidateDirectory 'candidate-manifest.json') -Raw | ConvertFrom-Json
 $revision = (git -C $Root rev-parse HEAD).Trim()
 if ($LASTEXITCODE -or $manifest.source_commit -ne $revision) { throw 'Candidate is not from this verified source revision.' }
@@ -49,7 +63,7 @@ try {
             } else { $expected[$destination.Replace('\', '/')] = Hash $source }
         }
         $exeName = "pps-experiment-$app.exe"
-        $expected[$exeName] = Hash (Join-Path $Root "target/release/$exeName")
+        $expected[$exeName] = Get-NsisExecutableHash (Join-Path $Root "target/release/$exeName")
         foreach ($relative in $expected.Keys) {
             $installed = [IO.Path]::GetFullPath((Join-Path $install $relative))
             if (-not $installed.StartsWith($install + [IO.Path]::DirectorySeparatorChar)) { throw 'Invalid installed resource destination.' }
@@ -103,6 +117,7 @@ try {
             $native.Dispose()
         }
         $report.applications += @{app=$app; installer_sha256=$asset[0].sha256; payload_files=$expected.Count;
+            executable_sha256=$expected[$exeName]; executable_build_transform='tauri-2.11.4-single-UNK-to-NSS-marker';
             exact_payload_hashes=$true; runtime_python_files=0; system_only_path=$true; actual_webview_check='passed'}
     }
     $report.passed = $true
