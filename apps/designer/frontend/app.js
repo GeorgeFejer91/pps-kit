@@ -1284,6 +1284,11 @@ function staticPremadeProvenance(asset) {
     .filter(key => asset[key] !== undefined).map(key => [key, asset[key]]));
 }
 
+function staticPremadeDuration(asset) {
+  const duration = Number(asset.duration_s);
+  return Number.isFinite(duration) && duration > 0 ? { duration_s: duration } : {};
+}
+
 function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory) {
   const entry = staticInventoryProfile(templateId, inventory);
   if (!entry) {
@@ -2363,7 +2368,9 @@ function hydrateStaticSourceAssets(design, status) {
     if (!asset) continue;
     consumed.add(key);
     noise.prebaked_path = noise.prebaked_path || asset.path;
-    if (noise.prebaked_path === asset.path) Object.assign(noise, staticPremadeProvenance(asset));
+    if (asset.path && noise.prebaked_path === asset.path) {
+      Object.assign(noise, staticPremadeProvenance(asset), staticPremadeDuration(asset));
+    }
     noise.noise_type = noise.noise_type || asset.noise_type || asset.tone_type || "pink";
     noise.motion_mode = noise.motion_mode || asset.motion_mode || "looming";
     noise.trajectory_snapshot = Object.keys(noise.trajectory_snapshot || {}).length
@@ -2376,7 +2383,9 @@ function hydrateStaticSourceAssets(design, status) {
     if (!asset) continue;
     consumed.add(key);
     source.path = source.path || asset.path;
-    if (source.path === asset.path) Object.assign(source, staticPremadeProvenance(asset));
+    if (asset.path && source.path === asset.path) {
+      Object.assign(source, staticPremadeProvenance(asset), staticPremadeDuration(asset));
+    }
     source.tone_type = source.tone_type || asset.tone_type || asset.noise_type || "custom_audio";
     source.motion_mode = source.motion_mode || asset.motion_mode || "looming";
     source.trajectory_snapshot = Object.keys(source.trajectory_snapshot || {}).length
@@ -2391,12 +2400,13 @@ function hydrateStaticSourceAssets(design, status) {
     design.custom_looming_files.push({
       label,
       path,
-      target_duration_s: Number(asset.duration_s || design.trajectory?.total_duration_s || 4),
+      target_duration_s: staticPremadeDuration(asset).duration_s ?? Number(design.trajectory?.total_duration_s || 4),
       render_mode: "preserve",
       tone_type: asset.noise_type || asset.tone_type || "custom_audio",
       gain: 1.0,
       motion_mode: asset.motion_mode || "looming",
       ...staticPremadeProvenance(asset),
+      ...staticPremadeDuration(asset),
       trajectory_snapshot: clone(asset.trajectory_snapshot || {}),
     });
   }

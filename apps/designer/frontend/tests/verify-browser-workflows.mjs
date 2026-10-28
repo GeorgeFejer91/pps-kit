@@ -2,6 +2,7 @@ import { verifyDesignerControlNames, verifyRunnerNavigation } from "./accessibil
 import { verifySequenceScaling } from "./sequence-scaling-browser.mjs";
 import { verifyAbortedBrowserWrites } from "./indexeddb-browser.mjs";
 import { verifyNativeDownloads } from "./downloads-browser.mjs";
+import { verifyPremadeDuration } from "./premade-duration-browser.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
@@ -32,6 +33,8 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
 const report = { browser: browser.version(), checks: [] };
 try {
+  await verifyPremadeDuration(browser, base, output);
+  report.checks.push("Premade PCM duration survives hosted customization, full block review, lock and portable export");
   const runner = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   const errors = [];
   runner.on("pageerror", error => errors.push(error.message));
