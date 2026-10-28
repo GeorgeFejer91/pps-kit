@@ -9,6 +9,7 @@ on:
       - "apps/quest-runner/**"
       - "apps/designer/**"
       - "apps/runner/**"
+      - "apps/native_file_dialogs.rs"
       - "packages/pps-designer-core/**"
       - "packages/pps-brsp/**"
       - "packages/pps-contracts/**"
@@ -40,6 +41,7 @@ on:
       - "apps/quest-runner/**"
       - "apps/designer/**"
       - "apps/runner/**"
+      - "apps/native_file_dialogs.rs"
       - "packages/pps-designer-core/**"
       - "packages/pps-brsp/**"
       - "packages/pps-contracts/**"
@@ -171,12 +173,14 @@ jobs:
       - name: Install and verify the exact packaged payloads
         run: ./For-AI/engineering/build/windows/Test_PPS_Native_Candidate.ps1 -CandidateDirectory dist/native-windows-candidate -OutputDirectory artifacts/installed-native-candidate
       - name: Join an actual hosted portable export to native preparation and results
+        if: ${{ !cancelled() && env.PPS_DESIGNER_TEST_EXE != '' && env.PPS_RUNNER_TEST_EXE != '' }}
         run: |
           node apps/designer/frontend/tests/verify-browser-workflows.mjs
           if ($LASTEXITCODE) { throw 'Complete hosted workflow checks failed' }
           python For-AI/engineering/validation/scripts/run_native_preset_pipeline.py --portable-binding artifacts/ui-workflow-check/browser-finalized-binding.json --resources packages/pps-resources --designer-test-exe $env:PPS_DESIGNER_TEST_EXE --runner-test-exe $env:PPS_RUNNER_TEST_EXE --renderer $env:PPS_CANDIDATE_RENDERER --renderer-sha256 $env:PPS_CANDIDATE_RENDERER_SHA256 --output artifacts/hosted-native-pipeline --work-root $env:RUNNER_TEMP
           if ($LASTEXITCODE) { throw 'Hosted bundle to native results did not pass' }
       - name: Capture every full browser plan and audit independent native results
+        if: ${{ !cancelled() && env.PPS_DESIGNER_TEST_EXE != '' && env.PPS_RUNNER_TEST_EXE != '' }}
         run: |
           node For-AI/engineering/validation/scripts/capture_preset_plans.mjs artifacts/preset-plan-capture
           if ($LASTEXITCODE) { throw 'Browser capture failed' }

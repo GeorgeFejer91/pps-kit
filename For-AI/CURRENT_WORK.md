@@ -447,6 +447,28 @@ data, restoration, observer failure isolation, unchanged transport errors and
 zero request-header reads. All 59 Designer JS tests pass. The installed test
 requires the expected POST URL, `Tauri-Response: ok`, actual JSON `true`, one
 request and unchanged local WebView URL; it does not fabricate a receipt.
+The `ecf3f766` [source CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40772023369)
+passed all 14 jobs. Its [candidate](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40772016204)
+built both installers, passed native owner/waveform/layout checks and reached a
+genuine successful OS browser acknowledgement. The next installed mapper check
+exposed a real data-loss guard bug: dialog plugin 2.7.2 injects an asynchronous
+`window.confirm`, while the shared frontend expected a synchronous Boolean.
+Its Promise could approve discard before the user's answer. The injected
+`plugin:dialog|confirm` command is also absent from that pinned plugin's handlers.
+The new shared native-file-dialog adapter keeps the existing Rust setup/file
+pickers but exposes no plugin JavaScript initializer or generic dialog IPC.
+Both hosts retain real synchronous browser confirmations. Designer's discard,
+downstream invalidation and reopen guards additionally require literal `true`;
+Promise-shaped and other truthy answers fail closed. All 60 JS tests pass,
+including the data-loss regression; both native adapter tests and strict
+all-target Clippy pass. The GUI-free adapter unit fixture avoids Windows test
+EXEs' absent common-controls activation manifest without changing product
+manifests. Nine owning source/repository checks and canonical Pages parity pass.
+The next candidate repeats actual Cancel/Confirm and the whole pipeline. Fresh
+scientific pipelines now continue after an installed UI failure when the native
+test owners are available, retaining evidence without masking the failed job.
+The release remains an asset-free draft. Installed controls, complete fresh
+pipelines, final packaged layouts and publication remain pending.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous

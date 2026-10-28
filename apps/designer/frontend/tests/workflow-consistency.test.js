@@ -14,6 +14,24 @@ const deferred = () => {
   return { promise, resolve, reject };
 };
 
+test("discard and invalidation guards require an actual synchronous approval", () => {
+  const unsaved = app.slice(app.indexOf("function confirmDiscardUnsaved("), app.indexOf("async function restorePersistedDraftForView("));
+  const ingredient = app.slice(app.indexOf("function confirmDiscardIngredientDraft("), app.indexOf("function selectIngredient("));
+  const downstream = app.slice(app.indexOf("function confirmDownstreamInvalidation("), app.indexOf("function showToast("));
+  for (const answer of [false, undefined, "true", Promise.resolve(false), Promise.resolve(true), true]) {
+    let discarded = 0;
+    const context = vm.createContext({ designerDirty: true, ingredientEditorDirty: true,
+      window: { confirm: () => answer }, discardIngredientEditorDraft: () => discarded++,
+      isCustomMode: () => true, DOWNSTREAM_STEPS: { stimulus: ["trials"] },
+      segmentHasMaterializedOutput: () => true, getWorkflowStep: () => ({ label: "Trials" }) });
+    vm.runInContext(unsaved + ingredient + downstream, context);
+    assert.equal(context.confirmDiscardUnsaved("load a profile"), answer === true);
+    assert.equal(discarded, answer === true ? 1 : 0, "A Promise or other truthy value must never discard a draft");
+    assert.equal(context.confirmDiscardIngredientDraft(), answer === true);
+    assert.equal(context.confirmDownstreamInvalidation("Change", "stimulus"), answer === true);
+  }
+});
+
 test("static trial timing includes instruction and jitter prefixes without inventing tactile catch events", () => {
   const functions = app.slice(app.indexOf("function staticVariantLoomingOnsetMs("), app.indexOf("function staticTrialFileBakePayload("));
   const context = vm.createContext({ slugify: value => value, previewVariantKey: () => "variant", trialFamilyContract });

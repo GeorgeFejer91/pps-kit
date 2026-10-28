@@ -199,3 +199,9 @@ Standalone/native page navigation updates an existing `page` query as well as
 the hash, preserving publication/study/search context. Otherwise a mapper URL
 would override the selected Toolkit page after reload. Hosted iframe routes
 continue to use their separate parent-path owner.
+Both native hosts use the shared Rust-only file-dialog adapter. It retains
+the pinned plugin's Rust initialization/file pickers while omitting its async
+browser-global overrides and generic JavaScript IPC. Shared browser confirmation
+guards remain synchronous and accept literal `true` only; an unexpected Promise
+must never discard a draft or invalidate saved outputs. Installed Cancel/Confirm
+checks use real browser dialogs, with click and dialog awaited together.

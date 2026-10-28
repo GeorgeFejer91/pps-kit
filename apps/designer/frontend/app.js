@@ -1011,7 +1011,7 @@ function confirmDiscardUnsaved(actionLabel = "continue") {
     : ingredientEditorDirty
       ? `Discard the uncommitted Segment 1 ingredient draft and ${actionLabel}?`
       : `Discard unsaved changes and ${actionLabel}?`;
-  if (!window.confirm(message)) return false;
+  if (window.confirm(message) !== true) return false;
   if (ingredientEditorDirty) discardIngredientEditorDraft();
   return true;
 }
@@ -1209,7 +1209,7 @@ function confirmDownstreamInvalidation(actionLabel, fromStep) {
   const affected = (DOWNSTREAM_STEPS[fromStep] || []).filter(segmentHasMaterializedOutput);
   if (!affected.length) return true;
   const labels = affected.map((step) => getWorkflowStep(step)?.label || humanize(step));
-  return window.confirm(`${actionLabel} will invalidate downstream segment outputs: ${labels.join(", ")}. Continue?`);
+  return window.confirm(`${actionLabel} will invalidate downstream segment outputs: ${labels.join(", ")}. Continue?`) === true;
 }
 
 function showToast(message) {
@@ -3647,7 +3647,7 @@ function hydrateIngredientEditor(entry, { preserveMode = false } = {}) {
 
 function confirmDiscardIngredientDraft(actionLabel = "continue") {
   if (!ingredientEditorDirty) return true;
-  return window.confirm(`Discard the uncommitted Segment 1 ingredient draft and ${actionLabel}?`);
+  return window.confirm(`Discard the uncommitted Segment 1 ingredient draft and ${actionLabel}?`) === true;
 }
 
 function selectIngredient(label, { force = false } = {}) {
@@ -7294,7 +7294,7 @@ async function reopenWorkflowStep(stepId) {
   const consequence = later.length
     ? ` Later saved segments (${later.map(stepLabel).join(", ")}) will need review.`
     : "";
-  if (!window.confirm(`Reopen ${stepLabel(stepId)} for editing?${consequence}`)) return;
+  if (window.confirm(`Reopen ${stepLabel(stepId)} for editing?${consequence}`) !== true) return;
   workflowSaveInFlight = true;
   try {
     if (staticModeActive) {
@@ -8024,7 +8024,7 @@ async function startBakeBlockCsvs() {
     return;
   }
   if (projectSegment("5_block_csv_preview").accepted || state.block_csv_preview?.accepted) {
-    if (!window.confirm("Reopen the accepted Segment 5 blocks and generate a new set?")) return;
+    if (window.confirm("Reopen the accepted Segment 5 blocks and generate a new set?") !== true) return;
     if (staticModeActive) {
       showToast("Block generation needs the installed PPS Designer. Export this browser draft to continue locally.");
       return;

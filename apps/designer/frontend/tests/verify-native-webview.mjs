@@ -109,6 +109,7 @@ try {
 } finally { await browser.close(); }
 
 async function verifyMapperTemplateNavigation(page) {
+  assert.equal(await page.evaluate(() => window.confirm.constructor.name), "Function", "Native file dialogs must preserve synchronous browser confirmations");
   await page.locator("#movement-duration").fill("1.25");
   assert.equal(await page.evaluate(() => PPSDesignerApp.isDirty()), true);
   const draft = await page.evaluate(() => JSON.stringify(PPSDesignerApp.getState()));
@@ -126,13 +127,11 @@ async function verifyMapperTemplateNavigation(page) {
     assert.match(dialog.message(), /Discard.*load another profile/);
     await dialog.dismiss();
   });
-  await link.click();
-  await cancel;
+  await Promise.all([cancel, link.click()]);
   assert.equal(await page.evaluate(() => JSON.stringify(PPSDesignerApp.getState())), draft, "Cancel retains the complete custom draft");
   assert.equal(await page.locator("body").getAttribute("data-active-page"), "documentation", "Cancel retains the mapper");
   const confirm = page.waitForEvent("dialog").then(dialog => dialog.accept());
-  await link.click();
-  await confirm;
+  await Promise.all([confirm, link.click()]);
   await page.waitForFunction(id => PPSDesignerApp.getState().design.study_profile_id === id
     && !PPSDesignerApp.getState().custom_workflow?.is_custom && document.body.dataset.activePage === "toolkit", templateId);
   assert.equal(new URL(page.url()).searchParams.get("page"), "toolkit", "Preset navigation updates the mapper's page query");
