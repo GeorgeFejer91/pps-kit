@@ -6,6 +6,7 @@ export async function verifyPremadeDuration(browser, base, output) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
+  page.on("dialog", dialog => dialog.type() === "confirm" ? dialog.accept() : dialog.dismiss());
   const id = "canzoneri_2012_dynamic_sounds";
   await page.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&template=${id}`);
   await page.waitForFunction(id => window.PPSDesignerApp?.getState()?.design?.study_profile_id === id, id);
@@ -27,12 +28,13 @@ export async function verifyPremadeDuration(browser, base, output) {
   await page.locator("#customize-study-name").fill("Premade duration control regression");
   await page.locator("#customize-submit").click();
   await page.locator("#customize-modal").waitFor({ state: "hidden" });
+  await page.waitForFunction(() => window.PPSDesignerApp.getState().custom_workflow?.edit_step === "stimulus");
   await page.locator('[data-continue-step="stimulus"]').click();
-  await page.locator("#bake-trial-sequences").click();
+  await page.waitForFunction(() => window.PPSDesignerApp.getState().custom_workflow?.edit_step === "trials");
   await page.locator('[data-continue-step="trials"]').click();
-  await page.locator("#bake-trial-files").click();
+  await page.waitForFunction(() => window.PPSDesignerApp.getState().custom_workflow?.edit_step === "baseline");
   await page.locator('[data-continue-step="baseline"]').click();
-  await page.locator("#bake-trial-pool").click();
+  await page.waitForFunction(() => window.PPSDesignerApp.getState().custom_workflow?.edit_step === "block");
   await page.locator('[data-continue-step="block"]').click();
   await page.locator("#accept-block-csvs").click();
   await page.locator("#save-study-profile").click();

@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 import test from "node:test";
 import { webcrypto } from "node:crypto";
+import { trialFamilyContract } from "../row_contract.js";
 
 const app = await readFile(new URL("../app.js", import.meta.url), "utf8");
 const chrome = (await readFile(new URL("../designer_main.js", import.meta.url), "utf8"))
@@ -15,7 +16,7 @@ const deferred = () => {
 
 test("static trial timing includes instruction and jitter prefixes without inventing tactile catch events", () => {
   const functions = app.slice(app.indexOf("function staticVariantLoomingOnsetMs("), app.indexOf("function staticTrialFileBakePayload("));
-  const context = vm.createContext({ slugify: value => value, previewVariantKey: () => "variant" });
+  const context = vm.createContext({ slugify: value => value, previewVariantKey: () => "variant", trialFamilyContract });
   vm.runInContext(functions, context);
   const inventory = new Map([["Instruction", { kind: "prestimulus", duration_ms: 4000 }], ["Noise", { kind: "generated_noise", duration_ms: 4000 }]]);
   const variant = [{ kind: "audio", label: "Instruction" }, { kind: "jitter", value: 250 }, { kind: "audio", label: "Noise" }];
@@ -34,6 +35,32 @@ function handler(name, next) {
   return app.slice(app.indexOf(`async function ${name}(`), app.indexOf(`\n${next}`));
 }
 const instructionAdoption = app.slice(app.indexOf("function adoptInstructionAudio("), app.indexOf("async function importNativeAudio("));
+
+test("startup draft restoration never replaces a new interaction or save, including during a pending read", async () => {
+  for (const action of [null, "pointerdown", "keydown", "pps-designer-dirty", "pps-designer-saved"]) {
+    for (const pendingRead of [false, true]) {
+      const read = deferred(), startup = deferred(), started = deferred(), listeners = new Map();
+      let loads = 0, restores = 0;
+      const context = vm.createContext({
+        document: { addEventListener: (type, fn) => listeners.set(type, fn), removeEventListener: type => listeners.delete(type) },
+        window: { PPSDesignerApp: { ready: startup.promise, restoreHostedDraft: () => restores++ } },
+        drafts: { load: async () => { loads++; started.resolve(); return read.promise; } },
+      });
+      vm.runInContext(chrome.slice(chrome.indexOf("function scheduleHostedDraftRestore("), chrome.indexOf("function initializeChrome(")), context);
+      const done = context.scheduleHostedDraftRestore();
+      assert.equal(loads, 0, "automatic restore waits for the initial template load to settle");
+      if (action && !pendingRead) listeners.get(action)();
+      startup.resolve();
+      if (pendingRead) await started.promise;
+      if (action && pendingRead) listeners.get(action)();
+      read.resolve({ custom_workflow: { is_custom: true } });
+      await done;
+      assert.equal(loads, action && !pendingRead ? 0 : 1);
+      assert.equal(restores, action ? 0 : 1);
+      assert.equal(listeners.size, 0);
+    }
+  }
+});
 
 test("instruction preview debounce preserves form values while native review invalidates immediately", async () => {
   let timer, invalidated = 0, previewed = 0;

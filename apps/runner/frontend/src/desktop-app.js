@@ -30,6 +30,9 @@ const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((
 const participantSetupDraft = bindParticipantSetupDraft(elements);
 const participantResponse = bindParticipantResponse({
   target: elements["participant-response"], api,
+  choiceControls: elements["participant-choice-controls"],
+  choiceButtons: { left: elements["participant-response-left"], right: elements["participant-response-right"] },
+  help: elements["participant-response-help"],
   liveState: () => nativeUpdatesReady,
   onError: (error) => showToast(error.message, { error: true }),
 });
@@ -156,6 +159,7 @@ function renderPreparedAudio(nextPreparation) {
     && byteBudget === 1280 * 1024 * 1024
     && decodedBytes <= byteBudget;
   preparedAudio = valid ? candidate : null;
+  participantResponse.setPreparedMedia(preparedAudio);
   nativeOutputSetup.update(snapshot, preparedAudio);
   const mediaLabel = mediaKind === "instruction" ? `Instruction: ${instructionLabel}` : `Block ${blockOrdinal + 1}`;
   text("prepared-audio-status", preparedAudio ? `${mediaLabel} prepared · output disabled` : "Not prepared");

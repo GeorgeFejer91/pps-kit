@@ -20,7 +20,7 @@ function harness() {
   } });
   const context = vm.createContext({ elements, snapshot: snapshot("prepared", 1, 0), preparedAudio: null,
     preparedExecution: { blockCount: 2 }, preparedPlan: { sessionId: "session" },
-    api: { kind: "tauri-native" }, participantResponse: { refresh() {} }, participantSetupDraft: { refresh() {} },
+    api: { kind: "tauri-native" }, participantResponse: { refresh() {}, setPreparedMedia() {} }, participantSetupDraft: { refresh() {} },
     nativeOutputSetup: { update() {} }, updateInboundPolicyUi() {}, inboundPrivateTarget: null,
     sessionProgress: { update() {}, isBusy: () => false }, packageSelectionInFlight: false,
     document: { querySelectorAll: () => [], createElement: () => ({}) },

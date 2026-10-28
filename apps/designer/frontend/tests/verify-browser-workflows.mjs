@@ -1,8 +1,9 @@
 import { verifyDesignerControlNames, verifyRunnerNavigation } from "./accessibility-browser.mjs";
 import { verifySequenceScaling } from "./sequence-scaling-browser.mjs";
-import { verifyAbortedBrowserWrites } from "./indexeddb-browser.mjs";
+import { verifyAbortedBrowserWrites, recordStorageEvents, verifyStartupRestoreOrdering } from "./indexeddb-browser.mjs";
 import { verifyNativeDownloads } from "./downloads-browser.mjs";
 import { verifyPremadeDuration } from "./premade-duration-browser.mjs";
+import { verifySavedRowContracts } from "./row-contract-browser.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
@@ -33,8 +34,12 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
 const report = { browser: browser.version(), checks: [] };
 try {
+  await verifyStartupRestoreOrdering(browser, base);
+  report.checks.push("Startup draft restore waits for the actual initial-template load; it cannot be overwritten by a late initial response");
   await verifyPremadeDuration(browser, base, output);
   report.checks.push("Premade PCM duration survives hosted customization, full block review, lock and portable export");
+  await verifySavedRowContracts(browser, base, output);
+  report.checks.push("Saved left/right and ITI contracts survive actual strip edit, all 300 trial rows, lock/reload, block CSV and portable export");
   const runner = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   const errors = [];
   runner.on("pageerror", error => errors.push(error.message));
@@ -68,11 +73,12 @@ try {
     let callbackId = 0;
     const callbacks = new Map();
     let listener = null;
+    window.nativeResponseRequests = [];
     const native = { epoch: 1, revision: 1, run: { phase: "prepared", complete: false },
       active_block: { active: false, display_block_index: 0 }, identity: { session_id: "browser-native-fixture" },
       safety: { local_armed: false }, allowed_actions: [], package_verified: true };
     window.advanceNativeFixture = (phase, block) => {
-      native.revision++; native.run = { phase, complete: phase === "completed" };
+      native.revision++; native.run = { phase, complete: phase === "completed", participant_capture_ready: phase === "running" };
       native.active_block = { active: phase === "running", display_block_index: block, elapsed_s: 5, duration_s: 5 };
       callbacks.get(listener)?.({ payload: structuredClone(native) });
     };
@@ -81,6 +87,7 @@ try {
         if (command === "plugin:event|listen") { listener = args.handler; return 1; }
         if (command === "runner_snapshot") return structuredClone(native);
         if (command === "remote_status") return { enabled: false };
+        if (command === "runner_record_response") { window.nativeResponseRequests.push(args.request); return {}; }
         if (command === "native_group_status") return { revision: native.revision, partCount: 0, currentPart: 0, completedParts: 0, experimentComplete: false };
         if (command === "native_output_status") return { schema: "pps-runner-native-output-preflight.v1", phase: "idle",
           policyGeneration: "1", serviceGeneration: "1", operationGeneration: "1", inventoryGeneration: null,
@@ -91,6 +98,7 @@ try {
         if (command === "prepare_first_audio_block") return { schema: "pps-runner-prepared-audio-summary.v1", preparationScope: "pcm-and-output-plan-cache",
           outputQualification: "unqualified", executable: false, outputPlanPrepared: true, blockOrdinal: native.active_block.display_block_index,
           sampleRateHz: 48000, sourceChannels: 3, sourceChannelLayout: "binaural-left-right-tactile", outputRoute: "canonical-three",
+          responseMode: "left_right", responseChoices: ["left", "right"],
           scheduledEventCount: 5, frames: 48000, decodedBytes: 576000, cacheCapacityBlocks: 1, cacheByteBudget: 1280 * 1024 * 1024 };
         throw new Error(`Unexpected fixture command: ${command}`);
       } };
@@ -100,16 +108,47 @@ try {
   await nativeRunner.locator("#inspect-prepared-execution").click();
   await nativeRunner.locator("#prepare-first-audio-block").click();
   await nativeRunner.locator("#prepared-audio-status").filter({ hasText: "Block 1 prepared" }).waitFor();
-  await nativeRunner.evaluate(() => { window.advanceNativeFixture("running", 1); window.advanceNativeFixture("prepared", 1); });
+  await nativeRunner.evaluate(() => window.advanceNativeFixture("running", 1));
+  const leftResponse = nativeRunner.getByRole("button", { name: "Left", exact: true });
+  const rightResponse = nativeRunner.getByRole("button", { name: "Right", exact: true });
+  await leftResponse.click();
+  await rightResponse.focus();
+  await nativeRunner.keyboard.press("Enter");
+  await nativeRunner.keyboard.press("ArrowLeft");
+  await nativeRunner.keyboard.press("ArrowRight");
+  await nativeRunner.keyboard.press("Tab");
+  assert.deepEqual(await nativeRunner.evaluate(() => window.nativeResponseRequests),
+    ["left", "right", "left", "right"].map(choice => ({ choice, x: null, y: null })));
+  for (const width of [320, 900, 1440]) {
+    await nativeRunner.setViewportSize({ width, height: 900 });
+    await leftResponse.scrollIntoViewIfNeeded();
+    for (const button of [leftResponse, rightResponse]) {
+      await button.evaluate(element => document.fonts.ready);
+      assert.ok(await button.evaluate(element => element.scrollWidth <= element.clientWidth && element.scrollHeight <= element.clientHeight));
+    }
+    await nativeRunner.locator(".hero-panel").screenshot({ path: resolve(output, `runner-choices-${width}.png`) });
+  }
+  await nativeRunner.setViewportSize({ width: 900, height: 900 });
+  await nativeRunner.evaluate(() => { document.documentElement.style.zoom = "2"; });
+  await leftResponse.scrollIntoViewIfNeeded();
+  assert.ok(await leftResponse.evaluate(element => element.scrollWidth <= element.clientWidth));
+  assert.ok(await rightResponse.evaluate(element => element.scrollWidth <= element.clientWidth));
+  for (const button of [leftResponse, rightResponse]) assert.ok(await button.evaluate(element => {
+    const range = document.createRange(); range.selectNodeContents(element);
+    return range.getClientRects().length === 1;
+  }), "Left/Right labels remain on one readable line at 200% CSS zoom");
+  await nativeRunner.locator(".hero-panel").screenshot({ path: resolve(output, "runner-choices-zoom.png") });
+  await nativeRunner.evaluate(() => { document.documentElement.style.zoom = ""; window.advanceNativeFixture("prepared", 1); });
   await nativeRunner.getByRole("button", { name: "Prepare next audio occurrence", exact: true }).click();
   await nativeRunner.locator("#prepared-audio-status").filter({ hasText: "Block 2 prepared" }).waitFor();
   assert.equal(await nativeRunner.locator("#block-progress").evaluate(element => element.style.width), "0%");
   await nativeRunner.locator("#prepared-audio-status").screenshot({ path: resolve(output, "runner-next-block.png") });
   await nativeRunner.evaluate(() => window.advanceNativeFixture("completed", 2));
   assert.equal(await nativeRunner.locator("#prepare-first-audio-block").isDisabled(), true);
-  report.checks.push("Runner real controls consume mocked native two-block transitions and reject preparation after completion");
+  report.checks.push("Runner real Left/Right pointer and keyboard controls emit distinct native IPC choices, fit 320–1440px/200% CSS zoom, retire on block transition and reject preparation after completion (native IPC mocked)");
 
   const designer = await browser.newPage({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
+  await recordStorageEvents(designer);
   await designer.addInitScript(() => {
     window.previewStarts = 0;
     const create = AudioContext.prototype.createBufferSource;
@@ -235,6 +274,7 @@ try {
   assert.deepEqual(errors, []);
 
   const scaling = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await recordStorageEvents(scaling);
   scaling.on("pageerror", error => errors.push(error.message));
   scaling.on("dialog", dialog => dialog.accept());
   await scaling.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
@@ -243,6 +283,7 @@ try {
   report.checks.push("Exact 46656 variants and oversized drafts survive real hosted edit, save and restore");
   await scaling.close();
   const accessible = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await recordStorageEvents(accessible);
   accessible.on("pageerror", error => errors.push(error.message));
   accessible.on("dialog", dialog => dialog.accept());
   await accessible.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
@@ -408,6 +449,8 @@ try {
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
   for (const [index, page] of browser.contexts().flatMap(context => context.pages()).entries()) {
+    await writeFile(resolve(output, `failure-${index}-storage.json`), JSON.stringify({ error: error.message,
+      events: await page.evaluate(() => window.storageTestEvents || []).catch(() => []) }, null, 2));
     await page.screenshot({ path: resolve(output, `failure-${index}.png`), fullPage: true });
   }
   throw error;

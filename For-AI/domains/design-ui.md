@@ -71,6 +71,19 @@ storage releases the locked profile and export action. Keep delayed-storage
 and request-order regression checks alongside real browser interaction checks
 in `apps/designer/frontend/tests/verify-browser-workflows.mjs`.
 
+Premade source hydration retains the selected file's actual duration. Edited
+trial strips retain their saved identity, SOAs and metadata; source, pool and
+block rows carry the existing V1 contract allowlist, including response and ITI
+fields. The explicit transition into block review rebuilds the complete edited
+preview before acceptance. Startup draft restore waits for the initial load and
+does not override an intervening user interaction or save.
+
+Runner's prepared-media response policy exposes allowed choices without answer
+keys. Supported left/right blocks show separate buttons with focused arrow-key
+input; ordinary GO and instruction gates retain their existing controls.
+Unsupported policies remain unavailable, and native callback/scoring authority
+is unchanged. Browser tests of mocked IPC do not qualify installed acquisition.
+
 Runner audio preparation follows native instruction/block occurrences through
 the compatibility command `prepare_first_audio_block`. Retire prior media at
 playback and gate boundaries; device preparation, arm and start remain separate
