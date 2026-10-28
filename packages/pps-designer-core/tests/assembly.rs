@@ -114,6 +114,237 @@ fn fixture() -> (Value, Value, Value) {
     let preview = json!({"schema":"pps-block-csv-preview.v1","accepted":true,"block_count":2,"total_trials":4,"total_count":4,"randomization_seed":20260745,"randomization_strategy":"seeded_gellermann_row_order_preserving","blocks":blocks});
     (design, preview, variants)
 }
+
+#[test]
+fn saved_strip_contract_survives_native_preview_csv_and_compiled_rows() {
+    let (mut design, preview, variants) = fixture();
+    design["protocol"]["trial_strips"][0]["metadata"] = json!({
+        "expected_response":"respond","response_mode":"mouse_click_choice_proxy_for_left_right_keypress",
+        "response_choice_set":"left,right","correct_response":"left","response_rule":"choose_external_stimulus_side",
+        "spatial_value_cm":39.1,"external_trigger_required":false,"iti_ms":0,
+        "speaker_switch_channels":[1,2],"tactile_duration_ms":100,"unknown_private_metadata":"must not promote"
+    });
+    let (assets, cue) = assets();
+    let cancel = AtomicBool::new(false);
+    let enriched =
+        plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap();
+    for block in enriched.preview["blocks"].as_array().unwrap() {
+        for row in block["preview_rows"].as_array().unwrap() {
+            assert_eq!(row["correct_response"], "left");
+            assert_eq!(row["response_choice_set"], "left,right");
+            assert_eq!(row["spatial_value_cm"], 39.1);
+            assert_eq!(row["external_trigger_required"], false);
+            assert_eq!(row["iti_ms"], 0);
+            assert_eq!(row["speaker_switch_channels"], json!([1, 2]));
+            assert_eq!(row["tactile_duration_ms"], 100);
+            assert_eq!(
+                row["native_tactile_duration_ms"],
+                if row["family"] == "catch" || row["family"] == "auditory_only" {
+                    0
+                } else {
+                    10
+                }
+            );
+            assert!(row.get("unknown_private_metadata").is_none());
+            assert_eq!(
+                row["expected_response"],
+                if row["family"] == "catch" {
+                    "withhold"
+                } else {
+                    "respond"
+                }
+            );
+            if row["family"] == "catch" {
+                assert_eq!(row["target_role"], "catch_no_target");
+            }
+        }
+    }
+    let accepted = accept_assembly_preview(
+        enriched,
+        &design_fingerprint(&design).unwrap(),
+        &plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel)
+            .unwrap()
+            .preview_sha256,
+        1,
+    )
+    .unwrap();
+    let temp = Temp::new();
+    let staged = prepare_accepted_session(
+        &accepted,
+        &assets,
+        &cue,
+        &temp.path.join("prepared"),
+        "P001",
+        "contracts",
+        &cancel,
+    )
+    .unwrap();
+    let verified =
+        verify_prepared_session(VerificationRequest::new(staged.manifest_path())).unwrap();
+    for (ordinal, block) in verified.blocks().iter().enumerate() {
+        let mut options = BlockScheduleOptions::new(ordinal as i64 + 1);
+        options.sample_rate = 8000;
+        options.block_wav_path = Some(block.wav_path().to_owned());
+        let schedule = compile_verified_block_schedule(
+            block.manifest_path(),
+            block.manifest_sha256(),
+            options,
+        )
+        .unwrap();
+        for event in schedule
+            .events()
+            .iter()
+            .filter(|event| event.event_type == "trial_start")
+        {
+            assert_eq!(event.payload["correct_response"], "left");
+            assert_eq!(event.payload["response_choice_set"], "left,right");
+            assert_eq!(event.payload["speaker_switch_channels"], "[1,2]");
+        }
+    }
+}
+
+#[test]
+fn native_strip_contract_rejects_conflicts_and_keeps_explicit_legacy_values() {
+    let (mut design, mut preview, variants) = fixture();
+    let (assets, cue) = assets();
+    let cancel = AtomicBool::new(false);
+    preview["blocks"][0]["preview_rows"][0]["response_rule"] = json!("legacy_explicit_rule");
+    let kept = plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap();
+    assert_eq!(
+        kept.preview["blocks"][0]["preview_rows"][0]["response_rule"],
+        "legacy_explicit_rule"
+    );
+    design["protocol"]["trial_strips"][0]["metadata"] =
+        json!({"correct_response":"left","external_trigger_required":false});
+    for (field, value) in [
+        ("correct_response", json!("right")),
+        ("external_trigger_required", json!(true)),
+    ] {
+        let mut conflicting = preview.clone();
+        conflicting["blocks"][0]["preview_rows"][0][field] = value;
+        assert_eq!(
+            plan_assembly_preview(&design, &conflicting, &variants, &assets, &cue, &cancel)
+                .unwrap_err(),
+            GenerationError::Invalid("assembly_row_contract_conflict")
+        );
+    }
+    preview["blocks"][0]["preview_rows"][1]["expected_response"] = json!("respond");
+    assert_eq!(
+        plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap_err(),
+        GenerationError::Invalid("assembly_row_contract_conflict")
+    );
+}
+
+#[test]
+fn native_strip_contract_allowlist_matches_existing_python_v1() {
+    let python = include_str!("../../pps-runtime/src/peripersonal_space_toolkit/dashboard_app.py");
+    let fields: Vec<_> = python
+        .split("ROW_CONTRACT_FIELDS = (")
+        .nth(1)
+        .unwrap()
+        .split(')')
+        .next()
+        .unwrap()
+        .lines()
+        .map(str::trim)
+        .filter(|line| line.starts_with('"'))
+        .map(|line| line.trim_matches(',').trim_matches('"'))
+        .collect();
+    assert_eq!(fields, pps_designer_core::row_contract::ROW_CONTRACT_FIELDS);
+}
+
+#[test]
+fn saved_iti_is_real_silence_in_prepared_pcm_and_next_trial_sample_offsets() {
+    let (mut design, preview, variants) = fixture();
+    design["protocol"]["trial_strips"][0]["metadata"] =
+        json!({"iti_ms":"300","iti_policy":"reported_fixed_interval"});
+    let (assets, cue) = assets();
+    let cancel = AtomicBool::new(false);
+    let enriched =
+        plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap();
+    assert_eq!(enriched.preview["blocks"][0]["duration_ms"], 1220);
+    assert_eq!(
+        enriched.preview["blocks"][0]["preview_rows"][0]["duration_ms"],
+        310
+    );
+    assert_eq!(
+        enriched.preview["blocks"][0]["preview_rows"][0]["native_session_duration_ms"],
+        610
+    );
+    let dh = enriched.design_sha256.clone();
+    let ph = enriched.preview_sha256.clone();
+    let accepted = accept_assembly_preview(enriched, &dh, &ph, 1).unwrap();
+    let temp = Temp::new();
+    let staged = prepare_accepted_session(
+        &accepted,
+        &assets,
+        &cue,
+        &temp.path.join("prepared"),
+        "P001",
+        "iti",
+        &cancel,
+    )
+    .unwrap();
+    let verified =
+        verify_prepared_session(VerificationRequest::new(staged.manifest_path())).unwrap();
+    for block in verified.blocks() {
+        let mut wav = hound::WavReader::open(block.wav_path()).unwrap();
+        assert_eq!(wav.duration(), 9760);
+        let pcm: Vec<f32> = wav.samples::<f32>().map(Result::unwrap).collect();
+        for start in [2480, 7360] {
+            assert!(pcm[start * 3..(start + 2400) * 3].iter().all(|v| *v == 0.0));
+        }
+        assert!(pcm[..2480 * 3].iter().any(|v| *v != 0.0));
+        assert!(pcm[4880 * 3..7360 * 3].iter().any(|v| *v != 0.0));
+        let mut csv = csv::Reader::from_path(block.manifest_path()).unwrap();
+        let header = csv.headers().unwrap().clone();
+        let start = header
+            .iter()
+            .position(|v| v == "Trial_Start_Sample")
+            .unwrap();
+        let end = header.iter().position(|v| v == "Trial_End_Sample").unwrap();
+        for (index, row) in csv.records().enumerate() {
+            let row = row.unwrap();
+            assert_eq!(row[start].parse::<usize>().unwrap(), index * 4880);
+            assert_eq!(row[end].parse::<usize>().unwrap(), (index + 1) * 4880);
+        }
+        for source in block.source_trial_wavs() {
+            assert_eq!(
+                hound::WavReader::open(source.path()).unwrap().duration(),
+                2480
+            );
+        }
+    }
+}
+
+#[test]
+fn iti_uses_existing_ties_even_samples_and_rejects_invalid_values() {
+    let (mut design, preview, variants) = fixture();
+    let (assets, cue) = assets();
+    let cancel = AtomicBool::new(false);
+    for (ms, frames) in [(0.0625, 0), (0.1875, 2)] {
+        design["protocol"]["trial_strips"][0]["metadata"] = json!({"iti_ms":ms});
+        let result =
+            plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel).unwrap();
+        assert_eq!(
+            result.preview["blocks"][0]["preview_rows"][0]["native_iti_frames"],
+            frames
+        );
+    }
+    for invalid in [
+        json!(-1),
+        json!("NaN"),
+        json!("infinite"),
+        json!({"value":300}),
+    ] {
+        design["protocol"]["trial_strips"][0]["metadata"] = json!({"iti_ms":invalid});
+        assert_eq!(
+            plan_assembly_preview(&design, &preview, &variants, &assets, &cue, &cancel)
+                .unwrap_err(),
+            GenerationError::Invalid("assembly_iti_ms")
+        );
+    }
+}
 fn accept(
     design: &Value,
     preview: &Value,

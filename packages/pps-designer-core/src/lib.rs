@@ -4,6 +4,7 @@ pub mod baseline;
 pub mod design;
 mod imported;
 mod level;
+pub mod row_contract;
 pub mod run_order;
 mod source;
 mod spatializer;
