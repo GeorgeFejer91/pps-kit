@@ -1,6 +1,6 @@
 # Current work
 
-Reviewed: 2026-10-28. Overall completion goal: **OPEN**.
+Reviewed: 2026-10-29. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
 - **Current user objective (2026-10-28):** finish the desktop PC installers and
@@ -467,8 +467,21 @@ manifests. Nine owning source/repository checks and canonical Pages parity pass.
 The next candidate repeats actual Cancel/Confirm and the whole pipeline. Fresh
 scientific pipelines now continue after an installed UI failure when the native
 test owners are available, retaining evidence without masking the failed job.
-The release remains an asset-free draft. Installed controls, complete fresh
-pipelines, final packaged layouts and publication remain pending.
+At `ff72fa98`, [source CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40780012977)
+passes all 14 jobs. The [Windows candidate](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40780005491)
+builds both installers and passes exact installed payload checks, genuine
+Designer generation/preview, external-browser acknowledgement, actual mapper
+Cancel/Confirm and Runner startup. Fresh captures cover all 30 presets and all
+25 eligible native pipelines pass independent results audits; the five explicit
+source-gap guards remain. The job nevertheless fails the separate hosted export
+join: its mapper navigation times out waiting for the document `load` event,
+before native bridge execution. Diagnose that request rather than treating the
+job as passed. Preserve the failed run and its immutable artifact
+`12859129071`; installed checks do not close the missing joined-journey gate.
+The UI worker owns the narrow hosted-harness diagnosis in its managed checkout.
+Repeat the full candidate after a verified repair, then both packaged WebView
+layout matrices and regenerated public reports. The release remains an
+asset-free draft; no installer, Pages or download promotion has occurred.
 The user explicitly approved the exact incremental cache deletion, but automatic
 review still rejected it as "blocked by policy"; no alternate deletion was used.
 The user then authorized Proton Drive archival and removal of superfluous
