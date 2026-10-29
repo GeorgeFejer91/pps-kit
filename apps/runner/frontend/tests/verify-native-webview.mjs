@@ -280,7 +280,7 @@ async function layoutGeometry(page, selector) {
       userAgent: navigator.userAgent, container: box(scope), documentHeight: document.documentElement.scrollHeight,
       documentWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth,
       horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
-      controls: controls.map(box), overlaps, outside: controls.filter(node => { const r = node.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1; }).map(box),
+      controls: controls.map(box), overlaps, outside: controls.filter(node => { const r = node.getBoundingClientRect(); return r.left < -1 || r.right > document.documentElement.clientWidth + 1; }).map(box),
       clipped: labels.filter(node => { const r = document.createRange(); r.selectNodeContents(node); const text = r.getBoundingClientRect(), b = node.getBoundingClientRect();
         return text.width && (text.left < b.left - 2 || text.right > b.right + 2 || text.top < b.top - 2 || text.bottom > b.bottom + 2); }).map(box),
       boundedOverflow: [scope, ...scope.querySelectorAll(".panel")].filter(visible).filter(node =>
@@ -310,7 +310,7 @@ async function focusedControl(page, name) {
   const result = await page.evaluate(() => { const node = document.activeElement, b = node.getBoundingClientRect(), style = getComputedStyle(node);
     const hit = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
     return { id: node.id, box: b.toJSON(), focusVisible: node.matches(":focus-visible"), outline: style.outline, outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth,
-      boxShadow: style.boxShadow, reachable: b.left >= -1 && b.top >= -1 && b.right <= innerWidth + 1 && b.bottom <= innerHeight + 1 && (hit === node || node.contains(hit)) }; });
+      boxShadow: style.boxShadow, reachable: b.left >= -1 && b.top >= -1 && b.right <= document.documentElement.clientWidth + 1 && b.bottom <= innerHeight + 1 && (hit === node || node.contains(hit)) }; });
   assert.ok(result.reachable, `${name} is not covered or outside the viewport`);
   assert.ok(result.focusVisible, `${name} has keyboard focus`);
   assert.ok(focusPaint.outline || focusPaint.shadow, `${name} retains a painted focus indicator`);
