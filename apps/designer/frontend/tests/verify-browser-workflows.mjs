@@ -36,6 +36,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
 const report = { browser: browser.version(), checks: [] };
 const recordCheck = message => { report.checks.push(message); console.log(message); };
+let mapperFailureDiagnostics = () => null;
 try {
   await verifyNativeTimingReview(browser, base, output);
   recordCheck("Native timing substitution remains visible before explicit acceptance; selected delays, exact seeds and original ranges survive review/CSV (mocked IPC)");
@@ -75,6 +76,7 @@ try {
   assert.deepEqual(errors, []);
   await verifyRunnerNavigation(runner);
   recordCheck("Runner draft survives snapshot refresh and acknowledged submit; ordinary section navigation exposes current page and keyboard order");
+  await runner.close();
 
   const nativeRunner = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await nativeRunner.addInitScript(() => {
@@ -159,6 +161,7 @@ try {
   await nativeRunner.evaluate(() => window.advanceNativeFixture("completed", 2));
   assert.equal(await nativeRunner.locator("#prepare-first-audio-block").isDisabled(), true);
   recordCheck("Runner real Left/Right pointer and keyboard controls emit distinct native IPC choices, fit 320–1440px/200% CSS zoom, retire on block transition and reject preparation after completion (native IPC mocked)");
+  await nativeRunner.close();
 
   const designer = await browser.newPage({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
   await recordStorageEvents(designer);
@@ -306,6 +309,7 @@ try {
   assert.ok(report.text.scrollWidth <= report.text.width + 1);
   assert.ok(report.text.scrollHeight <= report.text.height + 1);
   assert.deepEqual(errors, []);
+  await designer.close();
 
   const scaling = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await recordStorageEvents(scaling);
@@ -367,8 +371,33 @@ try {
   assert.equal(await companionPreview.locator("#participants").inputValue(), "3");
   assert.deepEqual(errors, []);
   recordCheck("Explicit V1 companion route with mocked reversed HTTP preview responses preserves the latest form and state");
+  await companionPreview.close();
   const mapper = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   mapper.on("pageerror", error => errors.push(error.message));
+  const pendingMapperRequests = new Map();
+  const mapperEvents = [];
+  const mapperEvent = (type, detail = {}) => {
+    mapperEvents.push({ type, at: new Date().toISOString(), ...detail });
+    if (mapperEvents.length > 30) mapperEvents.shift();
+  };
+  mapper.on("request", request => pendingMapperRequests.set(request, {
+    url: request.url(), type: request.resourceType(), startedAt: new Date().toISOString(),
+  }));
+  mapper.on("requestfinished", request => pendingMapperRequests.delete(request));
+  mapper.on("requestfailed", request => {
+    pendingMapperRequests.delete(request);
+    mapperEvent("requestfailed", { url: request.url(), error: request.failure()?.errorText });
+  });
+  mapper.on("domcontentloaded", () => mapperEvent("domcontentloaded"));
+  mapper.on("load", () => mapperEvent("load"));
+  // Observe dialogs without installing a Playwright handler that would change auto-dismiss behavior.
+  const mapperCdp = await mapper.context().newCDPSession(mapper);
+  await mapperCdp.send("Page.enable");
+  mapperCdp.on("Page.javascriptDialogOpening", event => mapperEvent("dialog", {
+    dialogType: event.type, message: event.message.slice(0, 300),
+  }));
+  mapperFailureDiagnostics = () => ({ url: mapper.url(), closed: mapper.isClosed(),
+    pendingCount: pendingMapperRequests.size, pending: [...pendingMapperRequests.values()].slice(0, 40), events: mapperEvents });
   let failReview = true;
   await mapper.route("**/publication_study_reviews.v1-*.json", async route => {
     if (failReview) { failReview = false; await route.fulfill({ status: 503 }); }
@@ -444,6 +473,7 @@ try {
   const presetPage = await presetPagePromise;
   await presetPage.waitForFunction(id => window.PPSDesignerApp?.getState()?.selected_template === id, linkedStudy.templateIds[0]);
   assert.equal(new URL(presetPage.url()).searchParams.get("template"), linkedStudy.templateIds[0]);
+  await presetPage.close();
   const legacyStudyId = "doi:10.1371/journal.pone.0006582";
   const splitStudyIds = reviewData.studyRowAliases[legacyStudyId];
   await mapper.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1&page=documentation&study=${encodeURIComponent(legacyStudyId)}#docs-publication-network`);
@@ -464,6 +494,7 @@ try {
   }
   assert.deepEqual(errors, []);
   recordCheck("Mapper retry, DOI search, keyboard detail, study deep link, evidence separation, responsive layout and preset navigation");
+  await mapper.close();
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
   await phone.goto(`${base}/apps/designer/frontend/compiled/index.html?forceStaticPreview=1`);
   await phone.waitForFunction(() => window.PPSDesignerApp?.getState()?.design);
@@ -480,13 +511,21 @@ try {
   }));
   await phone.screenshot({ path: resolve(output, "designer-phone-dark-reduced-motion.png") });
   recordCheck("Hosted desktop and phone expose Edit while hiding companion controls; phone preserves dark labels, readonly removal and reduced motion");
+  await phone.close();
   await writeFile(resolve(output, "report.json"), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
+  await writeFile(resolve(output, "failure-navigation.json"), JSON.stringify({ browser: report.browser,
+    error: error.message, stack: error.stack, mapper: mapperFailureDiagnostics(),
+    openPages: browser.contexts().flatMap(context => context.pages()).map(page => page.url()) }, null, 2));
   for (const [index, page] of browser.contexts().flatMap(context => context.pages()).entries()) {
     await writeFile(resolve(output, `failure-${index}-storage.json`), JSON.stringify({ error: error.message,
       events: await page.evaluate(() => window.storageTestEvents || []).catch(() => []) }, null, 2));
-    await page.screenshot({ path: resolve(output, `failure-${index}.png`), fullPage: true });
+    try {
+      await page.screenshot({ path: resolve(output, `failure-${index}.png`), fullPage: true, timeout: 10_000 });
+    } catch (captureError) {
+      await writeFile(resolve(output, `failure-${index}-screenshot.json`), JSON.stringify({ error: captureError.message }, null, 2));
+    }
   }
   throw error;
 } finally {
