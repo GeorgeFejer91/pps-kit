@@ -278,7 +278,8 @@ async function layoutGeometry(page, selector) {
     }
     return { viewport: { width: innerWidth, height: innerHeight, visualWidth: visualViewport?.width, visualHeight: visualViewport?.height, dpr: devicePixelRatio },
       userAgent: navigator.userAgent, container: box(scope), documentHeight: document.documentElement.scrollHeight,
-      horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+      documentWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth,
+      horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
       controls: controls.map(box), overlaps, outside: controls.filter(node => { const r = node.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1; }).map(box),
       clipped: labels.filter(node => { const r = document.createRange(); r.selectNodeContents(node); const text = r.getBoundingClientRect(), b = node.getBoundingClientRect();
         return text.width && (text.left < b.left - 2 || text.right > b.right + 2 || text.top < b.top - 2 || text.bottom > b.bottom + 2); }).map(box),
@@ -290,12 +291,28 @@ async function layoutGeometry(page, selector) {
 }
 
 async function focusedControl(page, name) {
+  // Keyboard focus starts a 120ms CSS transition on form fields. Observe its
+  // finished paint, not a transparent zero-size shadow at the first frame.
+  const paintHandle = await page.waitForFunction(() => {
+    const node = document.activeElement, style = getComputedStyle(node);
+    const visibleColor = color => color !== "transparent" && !/^rgba\([^)]*,\s*0(?:\.0*)?\)$/.test(color);
+    const outline = style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0 && visibleColor(style.outlineColor);
+    const shadow = style.boxShadow.split(/,(?![^(]*\))/).some(value => {
+      const color = value.match(/rgba?\([^)]+\)/)?.[0];
+      const lengths = value.replace(/rgba?\([^)]+\)/g, "").match(/-?[\d.]+px/g) || [];
+      return color && visibleColor(color) && lengths.some(length => parseFloat(length) !== 0);
+    });
+    const settled = node.getAnimations().every(animation => animation.playState === "finished");
+    return node.matches(":focus-visible") && settled && (outline || shadow) ? { outline, shadow, settled } : false;
+  }, undefined, { timeout: 5000 });
+  const focusPaint = await paintHandle.jsonValue();
+  await paintHandle.dispose();
   const result = await page.evaluate(() => { const node = document.activeElement, b = node.getBoundingClientRect(), style = getComputedStyle(node);
     const hit = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
     return { id: node.id, box: b.toJSON(), focusVisible: node.matches(":focus-visible"), outline: style.outline, outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth,
       boxShadow: style.boxShadow, reachable: b.left >= -1 && b.top >= -1 && b.right <= innerWidth + 1 && b.bottom <= innerHeight + 1 && (hit === node || node.contains(hit)) }; });
   assert.ok(result.reachable, `${name} is not covered or outside the viewport`);
   assert.ok(result.focusVisible, `${name} has keyboard focus`);
-  assert.ok((result.outlineStyle !== "none" && parseFloat(result.outlineWidth) > 0) || result.boxShadow !== "none", `${name} retains a focus indicator`);
-  return { name, accessibleNode: (await page.locator(":focus").ariaSnapshot()).split("\n")[0], ...result };
+  assert.ok(focusPaint.outline || focusPaint.shadow, `${name} retains a painted focus indicator`);
+  return { name, accessibleNode: (await page.locator(":focus").ariaSnapshot()).split("\n")[0], ...result, focusPaint };
 }

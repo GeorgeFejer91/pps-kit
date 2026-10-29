@@ -19,14 +19,20 @@ const server = createServer(async (request, response) => {
   catch { response.writeHead(404).end(); }
 });
 await new Promise(done => server.listen(0, "127.0.0.1", done));
-const browser = await chromium.launch({ headless: true, args: ["--mute-audio"] });
+const browser = await chromium.launch({ headless: true, ignoreDefaultArgs: ["--hide-scrollbars"], args: ["--mute-audio"] });
 const base = `http://127.0.0.1:${server.address().port}/apps/runner/compiled/`;
 const failures = [], records = [], errors = [];
 async function geometry(page, name, screenshot = false) {
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(140);
   const result = await page.evaluate(() => {
-    const visible = e => e.getClientRects().length && getComputedStyle(e).visibility !== "hidden";
+    const visible = e => {
+      if (!e.getClientRects().length || getComputedStyle(e).visibility === "hidden") return false;
+      for (let parent = e.parentElement; parent; parent = parent.parentElement) {
+        if (parent.matches("details:not([open])") && !parent.querySelector(":scope > summary")?.contains(e)) return false;
+      }
+      return true;
+    };
     const controls = [...document.querySelectorAll("button, input:not([type=checkbox]), select, textarea, summary")].filter(visible);
     const panels = [...document.querySelectorAll(".tab-panel.is-active, .workspace-view:not([hidden]), .panel, .phone-shell, .app-shell")].filter(visible);
     const box = e => { const b = e.getBoundingClientRect(); return { id: e.id || e.className, x: b.x, y: b.y, width: b.width, height: b.height }; };
@@ -37,7 +43,7 @@ async function geometry(page, name, screenshot = false) {
         overlaps.push([controls[i].id || controls[i].textContent, controls[j].id || controls[j].textContent]);
     }
     return { layout: document.querySelector(".app-shell")?.dataset.layout || "phone-document",
-      width: innerWidth, height: innerHeight, pageWidth: document.documentElement.scrollWidth,
+      width: innerWidth, height: innerHeight, clientWidth: document.documentElement.clientWidth, pageWidth: document.documentElement.scrollWidth,
       pageHeight: document.documentElement.scrollHeight, overlaps,
       overflow: panels.filter(e => e.scrollWidth > e.clientWidth + 2 || (e.scrollHeight > e.clientHeight + 2 && getComputedStyle(e).overflowY !== "visible")).map(box),
       scrollPanels: panels.filter(e => ["auto", "scroll", "hidden", "clip"].includes(getComputedStyle(e).overflowY) && e.scrollHeight > e.clientHeight + 2).map(box),
@@ -51,7 +57,7 @@ async function geometry(page, name, screenshot = false) {
     };
   });
   records.push({ name, ...result });
-  if (result.pageWidth > result.width + 1 || result.overflow.length || result.scrollPanels.length || result.overlaps.length
+  if (result.pageWidth > result.clientWidth + 1 || result.overflow.length || result.scrollPanels.length || result.overlaps.length
       || result.smallTargets.length || result.smallType.length || result.unmeasured.length || result.textNoFit.length
       || (result.layout === "stretch" && result.pageHeight > result.height + 2)) failures.push({ name, ...result });
   if (screenshot) await page.screenshot({ path: resolve(output, `${name}.png`), fullPage: true });
