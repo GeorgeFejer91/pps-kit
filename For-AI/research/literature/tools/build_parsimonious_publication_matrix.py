@@ -10,11 +10,13 @@ from __future__ import annotations
 
 import argparse
 import csv
+import ipaddress
 import json
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
+from urllib.parse import parse_qsl, unquote, urlsplit
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -25,6 +27,7 @@ METADATA_AUDIT_PATH = AUDIT_DIR / "metadata_audit.jsonl"
 MANUAL_REVIEW_DIR = AUDIT_DIR / "manual_reviews"
 CURRENT_INPUT_SCHEMA_PATH = REPO_ROOT / "For-AI" / "research" / "literature" / "tools" / "current_toolkit_input_schema.json"
 SOURCE_REVIEW_PATH = AUDIT_DIR / "parsimonious_source_reviews.v1.json"
+STUDY_REGISTRY_PATH = AUDIT_DIR / "study_instance_registry.json"
 
 
 EXPECTED_CONTRACT_KEYS = (
@@ -810,7 +813,229 @@ def _toolkit_evidence(
     return encoding_status, " | ".join(value_parts), _unique_text(profile_files)
 
 
-def build(output_dir: Path) -> dict[str, Any]:
+def _public_text(value: Any) -> str:
+    """Allow factual review text, but fail closed on local source/runtime paths.
+
+    Public HTTP URLs are intentionally preserved (including DOI suffix slashes).
+    Local source_file/profile fields are never copied into this projection.
+    """
+    text = str(value or "")
+    without_urls = re.sub(r"https?://[^\s<>\"']+", "", text, flags=re.I)
+    if re.search(
+        r"file://|[a-z]:[\\/]|\\\\|/(?:Users|home)/|"
+        r"(?<![\w/])(?:artifacts|For-AI|packages|apps)[\\/]",
+        without_urls, flags=re.I,
+    ):
+        raise ValueError("Public study review contains a local source/runtime path")
+    return text
+
+
+def _public_evidence_url(value: Any) -> str:
+    """Select a single public source URL; local or composite pointers stay private."""
+    text = str(value or "").strip()
+    if not re.fullmatch(r"https?://[^\s<>\"'|]+", text, re.I):
+        return ""
+    try:
+        parsed = urlsplit(text)
+        if not parsed.hostname or parsed.username or parsed.password:
+            return ""
+        hostname = parsed.hostname.rstrip(".").lower()
+        # Reviewed publication URLs have DNS names; omit local hosts and literal IPs.
+        if "." not in hostname or hostname.endswith((".local", ".localhost")):
+            return ""
+        try:
+            ipaddress.ip_address(hostname)
+        except ValueError:
+            pass
+        else:
+            return ""
+        for parameters in (parsed.query, parsed.fragment.rsplit("?", 1)[-1]):
+            for key, _ in parse_qsl(unquote(parameters), keep_blank_values=True):
+                if re.search(r"(?:token|signature|credential|password|secret|api[_-]?key|access[_-]?key(?:id)?|authorization)$|^sig$", unquote(key), re.I):
+                    return ""
+    except ValueError:
+        return ""
+    return text
+
+
+def inventory_review_audit(
+    registry: dict[str, Any], study_index: list[dict[str, Any]], evidence_rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Count explicit inventory evidence separately from registry and parameter coverage."""
+    assessed_inventory = {
+        "primary_methods_reviewed", "retained_primary_methods_review",
+        "author_version_methods_reviewed_final_comparison_pending",
+    }
+    allowed = assessed_inventory | {
+        "abstract_or_metadata_inventory", "partial_methods_inventory",
+        "audited_source_access_gap", "inventory_evidence_not_classified", "not_registered",
+        "primary_project_lineage_reviewed",
+    }
+    entries = {row["network_node_id"]: row for row in registry["entries"]}
+    studies_by_node: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    evidence_by_study: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in study_index:
+        studies_by_node[row["network_node_id"]].append(row)
+    for row in evidence_rows:
+        evidence_by_study[row["study_row_id"]].append(row)
+    rows = []
+    for node, studies in sorted(studies_by_node.items()):
+        entry = entries.get(node, {})
+        status = entry.get("inventory_evidence_status", "inventory_evidence_not_classified" if entry else "not_registered")
+        if status not in allowed:
+            raise ValueError(f"Unknown inventory evidence status: {status}")
+        if status == "audited_source_access_gap" and not entry.get("retrieval_attempts"):
+            raise ValueError("Audited source-access gap requires actual retrieval attempts")
+        project_lineage = status == "primary_project_lineage_reviewed"
+        if project_lineage and (
+            entry.get("framework_disposition") != "research_project_provenance_no_new_acquisition"
+            or entry.get("source_lineage", {}).get("network_node_id") not in entries
+            or entry.get("source_lineage", {}).get("network_node_id") == node
+            or not entry.get("retrieval_attempts")
+            or not entry.get("instances")
+            or any(instance.get("instance_kind") != "research_project_context" for instance in entry.get("instances", []))
+        ):
+            raise ValueError("Reviewed project lineage requires a primary identity audit and a distinct registered publication")
+        reviewed = 0
+        for study in studies:
+            cells = evidence_by_study[study["study_row_id"]]
+            if len(cells) == 11 and all(
+                cell["experiment_scoped_source_override"] == "yes"
+                and cell["evidence_status"] not in {"not_assessed", "composite_requires_split"}
+                and not {"not_assessed", "composite_requires_split"}.intersection(json.loads(cell["component_status_json"]).values())
+                for cell in cells
+            ):
+                reviewed += 1
+        all_reviewed = reviewed == len(studies)
+        # Project identity/lineage is an auditable boundary, not a Methods review
+        # or a route for admitting an unreviewed acquisition protocol.
+        project_boundary = project_lineage and all(
+            cell["evidence_status"] == "not_applicable"
+            for study in studies for cell in evidence_by_study[study["study_row_id"]]
+        )
+        audited = all_reviewed and (status in assessed_inventory | {"audited_source_access_gap"} or project_boundary)
+        rows.append({
+            "network_node_id": node,
+            "inventory_registered": "yes" if entry else "no",
+            "inventory_evidence_status": status,
+            "inventory_status": entry.get("inventory_status", "not_assessed"),
+            "study_row_count": len(studies),
+            "rows_with_eleven_source_dispositions": reviewed,
+            "all_rows_have_eleven_source_dispositions": "yes" if all_reviewed else "no",
+            "inventory_and_contracts_audited": "yes" if audited else "no",
+            "inventory_evidence_pointer": entry.get("evidence_pointer", ""),
+            "evidence_classified_on": entry.get("inventory_evidence_classified_on", ""),
+        })
+    counts = Counter(row["inventory_evidence_status"] for row in rows)
+    summary = {
+        "publications": len(rows),
+        "registeredInventories": sum(row["inventory_registered"] == "yes" for row in rows),
+        "methodsReviewedInventories": sum(counts[key] for key in assessed_inventory),
+        "auditedAccessBlockers": counts["audited_source_access_gap"],
+        "projectLineageReviews": counts["primary_project_lineage_reviewed"],
+        "publicationsWithAllContractDispositions": sum(row["all_rows_have_eleven_source_dispositions"] == "yes" for row in rows),
+        "inventoryAndContractsAudited": sum(row["inventory_and_contracts_audited"] == "yes" for row in rows),
+        "remainingInventoryOrContractAudit": sum(row["inventory_and_contracts_audited"] == "no" for row in rows),
+        "inventoryEvidenceCounts": dict(sorted(counts.items())),
+        "interpretation": "Audited means inventory evidence or documented access blocker plus eleven explicit source dispositions per retained row. It does not mean all values are reported, final-version equivalence is proven, a template exists, or native hardware is qualified.",
+    }
+    return rows, summary
+
+
+def public_projection(
+    study_index: list[dict[str, Any]], evidence_rows: list[dict[str, Any]], corpus_id: str,
+    study_aliases: dict[str, list[str]],
+) -> dict[str, Any]:
+    """Project finalized component-gated evidence; never infer from templates."""
+    by_study: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in evidence_rows:
+        by_study[row["study_row_id"]].append(row)
+    studies = []
+    publications: dict[str, dict[str, Any]] = {}
+    for study in sorted(study_index, key=lambda row: row["study_row_id"]):
+        rows = by_study[study["study_row_id"]]
+        if {row["contract_key"] for row in rows} != set(EXPECTED_CONTRACT_KEYS) or len(rows) != 11:
+            raise ValueError("Public study review requires exactly eleven finalized contracts")
+        rows = sorted(rows, key=lambda row: EXPECTED_CONTRACT_KEYS.index(row["contract_key"]))
+        contracts = []
+        for row in rows:
+            if row["evidence_status"] not in STATUS_LEGEND:
+                raise ValueError("Unknown public evidence status")
+            statuses = json.loads(row["component_status_json"])
+            values = json.loads(row["component_value_json"])
+            notes = json.loads(row["component_evidence_note_json"])
+            contracts.append({
+                "key": row["contract_key"],
+                "label": _public_text(row["contract_label"]),
+                "status": row["evidence_status"],
+                "value": _public_text(row["paper_value"]),
+                "compositeValue": _public_text(row["composite_record_value"]),
+                "pageOrSection": _public_text(row["page_or_section"]),
+                "evidenceNote": _public_text(row["evidence_note"]),
+                "derivationNote": _public_text(row["derivation_note"]),
+                "reviewedOn": row["review_date"],
+                "sourceUrl": _doi_source_pointer(study.get("doi")),
+                "evidenceSourceUrl": _public_evidence_url(row["source_file"]),
+                "sourceType": _public_text(row["source_layer"]),
+                "missingComponents": [v for v in row["missing_required_components"].split(" | ") if v],
+                "components": {
+                    key: {"status": status, "value": _public_text(values.get(key)),
+                          "note": _public_text(notes.get(key))}
+                    for key, status in sorted(statuses.items())
+                },
+            })
+        counts = dict(sorted(Counter(row["evidence_status"] for row in rows).items()))
+        templates = sorted(set(filter(None, study.get("profile_id", "").split(" | "))))
+        studies.append({
+            "studyRowId": study["study_row_id"],
+            "networkNodeId": study["network_node_id"],
+            "label": _public_text(study["study_label"]),
+            "experimentLabel": _public_text(study.get("experiment_label")),
+            "inventoryStatus": study["instance_inventory_status"],
+            # Compact source reviews can resolve a child without promoting the
+            # legacy coarse record's fields or establishing final-version parity.
+            "evidenceScope": (
+                "study_specific_source_review"
+                if all(row["experiment_scoped_source_override"] == "yes" for row in rows)
+                else study["parameter_evidence_scope"]
+            ),
+            "templateIds": templates,
+            "parameterStatusCounts": counts,
+            "nativeQualification": "not_assessed",
+            "contracts": contracts,
+        })
+        publication = publications.setdefault(study["network_node_id"], {
+            "networkNodeId": study["network_node_id"], "studyIds": [], "templateIds": [],
+            "parameterStatusCounts": Counter(), "nativeQualification": "not_assessed",
+        })
+        publication["studyIds"].append(study["study_row_id"])
+        publication["templateIds"] = sorted(set(publication["templateIds"]) | set(templates))
+        publication["parameterStatusCounts"].update(counts)
+    for publication in publications.values():
+        publication["parameterStatusCounts"] = dict(sorted(publication["parameterStatusCounts"].items()))
+    status_counts = dict(sorted(Counter(row["evidence_status"] for row in evidence_rows).items()))
+    current_ids = {study["studyRowId"] for study in studies}
+    for old_id, children in study_aliases.items():
+        if old_id in current_ids or not children or len(children) != len(set(children)) or not set(children) <= current_ids:
+            raise ValueError("Study-row alias must resolve a superseded identity to existing distinct children")
+    return {
+        "schema": "pps-publication-study-reviews.v1",
+        "scope": {
+            "corpusId": corpus_id,
+            "onlineActions": ["prepare", "preview"],
+            "nativeQualification": "not_assessed",
+        },
+        "counts": {"publications": len(publications), "studies": len(studies),
+                   "contracts": len(evidence_rows), "reportedComplete": status_counts.get("reported_complete", 0),
+                   "derivedComplete": status_counts.get("derived_complete", 0), "parameterStatusCounts": status_counts},
+        "statusLegend": STATUS_LEGEND,
+        "studyRowAliases": dict(sorted(study_aliases.items())),
+        "publications": [publications[key] for key in sorted(publications)],
+        "studies": studies,
+    }
+
+
+def build(output_dir: Path, public_output: Path | None = None) -> dict[str, Any]:
     contract_document = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     if contract_document.get("schema") != "pps-parsimonious-emulation-contract.v1":
         raise RuntimeError("Unexpected parsimonious emulation contract schema")
@@ -1389,6 +1614,32 @@ def build(output_dir: Path) -> dict[str, Any]:
         ["status", "description", "default_review_action"],
     )
 
+    registry = json.loads(STUDY_REGISTRY_PATH.read_text(encoding="utf-8"))
+    inventory_rows, inventory_summary = inventory_review_audit(registry, study_index, evidence_rows)
+    _write_csv(output_dir / "publication_inventory_audit.csv", inventory_rows, list(inventory_rows[0]))
+
+    if public_output is not None:
+        migrations = registry.get("study_row_migrations", [])
+        aliases = {row["old_study_row_id"]: row["child_study_row_ids"] for row in migrations}
+        if len(aliases) != len(migrations):
+            raise ValueError("Duplicate superseded study-row identity")
+        projection = public_projection(study_index, evidence_rows, registry["corpus_freeze"]["id"], aliases)
+        projection["inventoryAudit"] = inventory_summary
+        inventory_by_node = {row["network_node_id"]: row for row in inventory_rows}
+        for publication in projection["publications"]:
+            row = inventory_by_node[publication["networkNodeId"]]
+            publication["inventoryAudit"] = {
+                "registered": row["inventory_registered"] == "yes",
+                "evidenceStatus": row["inventory_evidence_status"],
+                "inventoryStatus": row["inventory_status"],
+                "studyRowCount": row["study_row_count"],
+                "rowsWithElevenSourceDispositions": row["rows_with_eleven_source_dispositions"],
+                "allRowsHaveElevenSourceDispositions": row["all_rows_have_eleven_source_dispositions"] == "yes",
+                "inventoryAndContractsAudited": row["inventory_and_contracts_audited"] == "yes",
+            }
+        public_output.parent.mkdir(parents=True, exist_ok=True)
+        public_output.write_text(json.dumps(projection, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+
     return {
         "schema": contract_document["schema"],
         "contract_count": len(contracts),
@@ -1397,14 +1648,16 @@ def build(output_dir: Path) -> dict[str, Any]:
         "evidence_cell_count": len(evidence_rows),
         "review_queue_count": len(review_queue_rows),
         "status_counts": dict(sorted(Counter(row["evidence_status"] for row in evidence_rows).items())),
+        "inventory_audit": inventory_summary,
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--public-output", type=Path)
     args = parser.parse_args()
-    result = build(args.output.resolve())
+    result = build(args.output.resolve(), args.public_output.resolve() if args.public_output else None)
     print(json.dumps(result, sort_keys=True))
 
 

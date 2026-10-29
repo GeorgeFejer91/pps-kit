@@ -5,12 +5,17 @@
   "source_url": "https://noel-lab.org/wp-content/uploads/2024/05/noet-et-al-cognition-2015.pdf",
   "doi": "10.1016/j.cognition.2015.07.012",
   "verification_status": "verified",
-  "notes": "Companion ready profile for Noel 2015 Experiment 2. It captures the reported back-space looming PPS task with back vibration and source-backed synchronous/asynchronous stroking block labels. Exact waveform, gain law, speaker switching, SPL, speaker model, and full sound-file offset remain original-author provenance gaps.",
+  "notes": "Companion ready profile for Noel 2015 Experiment 2. It captures the reported back-space looming PPS task with back vibration and source-backed synchronous/asynchronous stroking block labels. Exact waveform, gain law, speaker switching, SPL, speaker model, and full sound-file offset remain original-author provenance gaps. A 100-ms derived terminal margin contains the existing software cue; it is not a reported trial interval or evidence of full-protocol timing equivalence.",
   "reference_parameters": {
     "profile_type": "published_variant",
     "experiment_label": "Experiment 2 back-space looming with back vibration",
     "front_space_companion_template_id": "noel_2015_bodily_self",
-    "manual_review_source": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/noel_2015_bodily_self.json"
+    "manual_review_source": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/noel_2015_bodily_self.json",
+    "software_trial_padding_ms": {
+      "pre": 0,
+      "post": 100
+    },
+    "software_trial_padding_basis": "Derived containment for the existing software timeline: pre=0 ms; post=max(0,max(SOA)+cue duration-source duration)=1140+100-1140=100 ms. Noel et al. 2015 Methods 2.3.2 and 2.4: the last reported sound-relative cue is 1140 ms and lasts 100 ms; exact sound offset is unreported. The current 1.14-s premade clip is a software choice. The reported 0.5-s inter-trial interval and 10-s FBI period after each triplet are separate protocol requirements, not demonstrated by this containment margin."
   },
   "design": {
     "name": "Noel 2015 back-space full-body-illusion PPS",
@@ -40,20 +45,57 @@
     },
     "protocol": {
       "repetitions_per_condition": 12,
-      "soa_values_ms": [190, 380, 570, 760, 950, 1140],
-      "spatial_values_cm": [15.0, 30.0, 45.0, 60.0, 75.0, 90.0],
+      "soa_values_ms": [
+        190,
+        380,
+        570,
+        760,
+        950,
+        1140
+      ],
+      "spatial_values_cm": [
+        15.0,
+        30.0,
+        45.0,
+        60.0,
+        75.0,
+        90.0
+      ],
       "pair_spatial_values_with_soas": true,
-      "auditory_motion_directions": ["looming"],
-      "tactile_sites": ["back"],
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "back"
+      ],
       "catch_trial_percentage": 12.5,
       "catch_trials_exact": 12,
       "include_baseline_trials": true,
-      "baseline_soa_values_ms": [190, 1140],
-      "respiratory_phases": ["Any"],
+      "baseline_soa_values_ms": [
+        190,
+        1140
+      ],
+      "respiratory_phases": [
+        "Any"
+      ],
       "blocks": 2,
       "block_specs": [
-        {"label": "Back synchronous stroking block", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
-        {"label": "Back asynchronous stroking block", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]}
+        {
+          "label": "Back synchronous stroking block",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Back asynchronous stroking block",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
       ],
       "trial_strips": [
         {
@@ -68,8 +110,19 @@
               "kind": "looming_stimulus",
               "label": "Back-space looming sound",
               "source_label": "Back-space looming sound",
-              "source_labels": ["Back-space looming sound"],
+              "source_labels": [
+                "Back-space looming sound"
+              ],
               "randomized": true
+            },
+            {
+              "element_id": "noel_2015_bodily_self_back_space-cue-tail",
+              "kind": "jitter",
+              "label": "Derived tactile-cue tail",
+              "jitter_values_ms": [
+                100
+              ],
+              "randomized": false
             }
           ]
         }
@@ -98,6 +151,10 @@
     {
       "field": "trial counts",
       "source": "Manual review records 72 PPS, 24 tactile-only baseline, and 12 auditory-only catch trials per stroking block."
+    },
+    {
+      "field": "software cue containment and source limitation",
+      "source": "Noel et al. 2015 Methods 2.3.2 and 2.4: the last reported sound-relative cue is 1140 ms and lasts 100 ms; exact sound offset is unreported. The current 1.14-s premade clip is a software choice. The reported 0.5-s inter-trial interval and 10-s FBI period after each triplet are separate protocol requirements, not demonstrated by this containment margin. DOI 10.1016/j.cognition.2015.07.012."
     }
   ]
 }

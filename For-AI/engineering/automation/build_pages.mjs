@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /** Assemble the ignored GitHub Pages artifact from canonical product inputs. */
 
-import { cp, lstat, mkdir, readFile, rm, stat } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { cp, lstat, mkdir, readFile, readdir, rm, stat } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -60,7 +61,7 @@ async function requireFile(path, label) {
   if (!details?.isFile()) throw new Error(`Missing ${label}: ${path}`);
 }
 
-async function copyVerified(source, destination, label) {
+async function copyVerified(source, destination, label, expectedHash) {
   const existing = await stat(destination).catch(() => null);
   if (existing) throw new Error(`${label} collides with another Pages input: ${destination}`);
   await mkdir(dirname(destination), { recursive: true });
@@ -72,6 +73,45 @@ async function copyVerified(source, destination, label) {
   if (!sourceBytes.equals(destinationBytes)) {
     throw new Error(`${label} changed while staging Pages: ${destination}`);
   }
+  if (expectedHash && createHash("sha256").update(destinationBytes).digest("hex") !== expectedHash) {
+    throw new Error(`${label} does not match its reviewed SHA256: ${destination}`);
+  }
+}
+
+async function referencedSpokenAssets() {
+  const references = new Set();
+  function collect(value) {
+    if (typeof value === "string" && value.startsWith("assets/breathing/")) references.add(value);
+    else if (value && typeof value === "object") Object.values(value).forEach(collect);
+  }
+  const templates = join(resources, "study_templates");
+  for (const file of await readdir(templates)) {
+    if (file.endsWith(".json")) collect(JSON.parse(await readFile(join(templates, file), "utf8")));
+  }
+  const files = new Map();
+  for (const reference of [...references].sort()) {
+    // Only explicitly referenced audio and its colocated inventory enter Pages.
+    // Reject unexpected paths instead of copying an entire resource directory.
+    if (!/^assets\/breathing\/(?:[A-Za-z0-9_-]+\/)?[A-Za-z0-9_-]+\.(?:wav|json)$/u.test(reference)) {
+      throw new Error(`Invalid spoken asset reference: ${reference}`);
+    }
+    const folder = reference.slice(0, reference.lastIndexOf("/"));
+    const manifestPath = `${folder}/spoken_assets_manifest.json`;
+    const manifestBytes = await readFile(join(resources, manifestPath));
+    const manifest = JSON.parse(manifestBytes);
+    files.set(manifestPath, createHash("sha256").update(manifestBytes).digest("hex"));
+    if (reference.endsWith(".json")) {
+      if (reference !== manifestPath) throw new Error(`Unsupported spoken asset catalogue: ${reference}`);
+      continue;
+    }
+    const name = reference.slice(reference.lastIndexOf("/") + 1);
+    const hash = manifest.files?.[name]?.sha256;
+    if (!/^[a-f0-9]{64}$/u.test(hash ?? "")) throw new Error(`Missing spoken asset SHA256: ${reference}`);
+    const bytes = await readFile(join(resources, reference));
+    if (createHash("sha256").update(bytes).digest("hex") !== hash) throw new Error(`Spoken asset SHA256 mismatch: ${reference}`);
+    files.set(reference, hash);
+  }
+  return files;
 }
 
 function referencedCompanionResources(html) {
@@ -106,6 +146,7 @@ export async function assemblePages(output = canonicalOutput) {
       `Runner companion resource allowlist drift: expected ${companionResources.join(", ")}; found ${referencedResources.join(", ")}`,
     );
   }
+  const spokenAssets = await referencedSpokenAssets();
 
   await prepareOutput(resolvedOutput);
   await cp(website, resolvedOutput, { recursive: true });
@@ -113,6 +154,9 @@ export async function assemblePages(output = canonicalOutput) {
   await cp(join(designerFrontend, "pps_toolkit_icon.png"), join(resolvedOutput, "app", "pps_toolkit_icon.png"));
   await cp(join(resources, "assets", "preloads"), join(resolvedOutput, "assets", "preloads"), { recursive: true });
   await cp(join(resources, "study_templates"), join(resolvedOutput, "study_templates"), { recursive: true });
+  for (const [relative, hash] of spokenAssets) {
+    await copyVerified(join(resources, relative), join(resolvedOutput, relative), "Referenced spoken asset", hash);
+  }
 
   await copyVerified(
     companionIndex,

@@ -1,7 +1,10 @@
+import { nativeDesigner } from "./native_designer.js";
+
 const DATABASE_NAME = "pps-designer";
 const DATABASE_VERSION = 1;
 const DRAFT_STORE = "drafts";
 const ASSET_STORE = "assets";
+const MAX_PORTABLE_AUDIO_BYTES = 64 * 1024 * 1024;
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
@@ -23,6 +26,7 @@ async function put(storeName, key, value) {
     transaction.objectStore(storeName).put(value, key);
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error || new Error("Browser storage transaction aborted."));
   }).finally(() => database.close());
 }
 
@@ -37,6 +41,11 @@ async function get(storeName, key) {
 
 const drafts = {
   async save(snapshot) {
+    if (nativeDesigner.enabled) {
+      await nativeDesigner.save(snapshot);
+      document.dispatchEvent(new CustomEvent("pps-designer-saved"));
+      return;
+    }
     try {
       await put(DRAFT_STORE, "active", { savedAt: new Date().toISOString(), snapshot });
       document.dispatchEvent(new CustomEvent("pps-designer-saved"));
@@ -45,14 +54,17 @@ const drafts = {
     }
   },
   async load() {
+    if (nativeDesigner.enabled) return (await nativeDesigner.load()).snapshot;
     return (await get(DRAFT_STORE, "active"))?.snapshot || null;
   },
   async storeAudio(file) {
+    if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > MAX_PORTABLE_AUDIO_BYTES) throw new Error("Audio exceeds the 64 MiB portable asset limit.");
     const bytes = await file.arrayBuffer();
+    if (bytes.byteLength !== file.size || bytes.byteLength > MAX_PORTABLE_AUDIO_BYTES) throw new Error("Audio byte count does not match the selected file.");
     const digest = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))]
       .map((value) => value.toString(16).padStart(2, "0")).join("");
     const id = `${digest}.${String(file.name).split(".").pop()?.toLowerCase() || "wav"}`;
-    const record = { id, name: file.name, type: file.type || "audio/wav", bytes, size: file.size };
+    const record = { id, name: file.name, type: file.type || "audio/wav", bytes, size: file.size, sha256: digest };
     await put(ASSET_STORE, id, record);
     return { ...record, url: URL.createObjectURL(new Blob([bytes], { type: record.type })) };
   },
@@ -106,38 +118,155 @@ async function sha256(bytes) {
     .map((value) => value.toString(16).padStart(2, "0")).join("");
 }
 
+async function readPortableBytes(response, limit, label) {
+  const reader = response.body.getReader();
+  const chunks = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > limit) throw new Error(`${label} exceeds its portable size limit.`);
+      chunks.push(value);
+    }
+  } finally { await reader.cancel(); }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  return bytes;
+}
+
+async function embedPremadeProvenance(source, audioHash) {
+  const limit = 256 * 1024;
+  let receipt = source.native_premade_provenance;
+  if (receipt === undefined && source.native_generation_provenance === undefined && source.native_generation_provenance_sha256 === undefined) return;
+  if (receipt === undefined) {
+    const path = source.native_generation_provenance;
+    const digest = source.native_generation_provenance_sha256;
+    if (typeof path !== "string" || !/^assets\/preloads\/[a-zA-Z0-9_./-]+\.json$/.test(path) || path.split("/").some(part => !part || part === "." || part === "..") || !/^[a-f0-9]{64}$/.test(digest || "")) throw new Error("Invalid premade provenance reference.");
+    const url = window.PPSDesignerApp?.preloadAssetUrl(path);
+    if (!url) throw new Error("Premade provenance cannot be resolved in this Designer.");
+    const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (!response.ok) throw new Error(`Premade provenance download failed (${response.status}).`);
+    const bytes = await readPortableBytes(response, limit, "Premade provenance");
+    receipt = { json_utf8: new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes), sha256: digest };
+  }
+  if (!receipt || typeof receipt.json_utf8 !== "string" || !/^[a-f0-9]{64}$/.test(receipt.sha256 || "") || Object.keys(receipt).some(key => !["json_utf8", "sha256"].includes(key))) throw new Error("Invalid embedded premade provenance.");
+  const bytes = new TextEncoder().encode(receipt.json_utf8);
+  if (bytes.length > limit) throw new Error("Premade provenance exceeds its portable size limit.");
+  if (await sha256(bytes) !== receipt.sha256 || (source.native_generation_provenance_sha256 !== undefined && source.native_generation_provenance_sha256 !== receipt.sha256)) throw new Error("Premade provenance checksum mismatch.");
+  const evidence = JSON.parse(receipt.json_utf8);
+  if (evidence?.asset?.sha256 !== audioHash || (source.proxy_policy !== undefined && evidence?.proxy_policy !== source.proxy_policy)) throw new Error("Premade provenance does not match this audio or proxy policy.");
+  source.native_premade_provenance = receipt;
+}
+
 async function exportBundle(snapshot) {
   const encoder = new TextEncoder();
   const design = structuredClone(snapshot.design);
-  const assetIds = new Set();
-  for (const item of [...(design.custom_looming_files || []), ...(design.prestimulus_files || [])]) {
-    if (item.browser_asset_id) assetIds.add(item.browser_asset_id);
-  }
+  const instructions = design.study_profile_reference_parameters?.dashboard_run_setup?.instruction_profile?.slots || [];
+  const references = [
+    ...(design.noises || []).map(item => ({ item, key: "prebaked_path" })),
+    ...(design.noises || []).map(item => ({ item, key: "native_stationary_baseline_asset", secondary: true })),
+    ...[...(design.custom_looming_files || []), ...(design.prestimulus_files || []), ...instructions].map(item => ({ item, key: "path" })),
+  ];
+  const inventory = new Map((snapshot.preload_inventory?.assets || []).map(asset => [asset.path, asset]));
+  const spokenManifests = new Set();
+  const resolved = new Map();
   const assetRecords = [];
   const files = [];
-  for (const id of assetIds) {
-    const asset = await drafts.asset(id);
-    if (!asset) throw new Error(`Local browser audio is missing: ${id}`);
-    const path = `assets/${id}`;
-    const bytes = new Uint8Array(asset.bytes);
-    files.push({ name: path, bytes });
-    assetRecords.push({ logical_id: id, path, sha256: await sha256(bytes), bytes: bytes.length, media_type: asset.type, source_name: asset.name });
+  let totalBytes = 0;
+  for (const { item, key, secondary } of references) {
+    const reference = String(item[key] || "");
+    if (!secondary) {
+      const listed = inventory.get(reference);
+      for (const field of ["native_generation_provenance", "native_generation_provenance_sha256", "proxy_policy"]) {
+        if (item[field] === undefined && listed?.[field] !== undefined) item[field] = listed[field];
+      }
+    }
+    const browserId = reference.startsWith("browser-asset:") ? reference.slice("browser-asset:".length) : secondary || reference.startsWith("native-assets/") ? null : item.browser_asset_id;
+    if (!reference && !browserId) {
+      if (!secondary && ["native_premade_provenance", "native_generation_provenance", "native_generation_provenance_sha256"].some(field => item[field] !== undefined)) throw new Error("Premade provenance has no audio reference.");
+      continue;
+    }
+    const sourceKey = browserId ? `browser-asset:${browserId}` : reference;
+    let id = resolved.get(sourceKey);
+    if (!id) {
+      let bytes, mediaType, sourceName, digest;
+      if (browserId) {
+        if (!/^[a-zA-Z0-9._-]+$/.test(browserId) || [".", ".."].includes(browserId)) throw new Error("Invalid local audio asset identity.");
+        const asset = await drafts.asset(browserId);
+        if (!asset) throw new Error(`Local browser audio is missing: ${browserId}`);
+        bytes = new Uint8Array(asset.bytes);
+        mediaType = asset.type;
+        sourceName = asset.name;
+        id = browserId;
+      } else {
+        const spokenPath = /^assets\/breathing\/(?:[a-zA-Z0-9_-]+\/)?[a-zA-Z0-9_-]+\.wav$/.test(reference);
+        const directory = reference.slice(0, reference.lastIndexOf("/"));
+        if (spokenPath && !inventory.has(reference) && !spokenManifests.has(directory)) {
+          const manifestUrl = window.PPSDesignerApp?.preloadAssetUrl(`${directory}/spoken_assets_manifest.json`);
+          if (!manifestUrl) throw new Error("Spoken audio inventory cannot be resolved in this Designer.");
+          const response = await fetch(manifestUrl);
+          if (!response.ok) throw new Error(`Spoken audio inventory unavailable (${response.status}).`);
+          const text = await response.text();
+          if (text.length > 1024 * 1024) throw new Error("Spoken audio inventory exceeds its size limit.");
+          const manifest = JSON.parse(text);
+          for (const [name, entry] of Object.entries(manifest.files || {})) {
+            if (/^[a-zA-Z0-9_-]+\.wav$/.test(name)) inventory.set(`${directory}/${name}`, { path: `${directory}/${name}`, sha256: entry.sha256 });
+          }
+          spokenManifests.add(directory);
+        }
+        const asset = inventory.get(reference);
+        const nativeAsset = nativeDesigner.enabled && /^native-assets\/[a-f0-9]{64}\.wav$/.test(reference);
+        if (!asset || !(nativeAsset || spokenPath || /^assets\/preloads\/[a-zA-Z0-9_./-]+$/.test(reference)) || reference.split("/").includes("..") || !/^[a-f0-9]{64}$/.test(asset.sha256 || "")) {
+          throw new Error(`Audio is not in the verified preload inventory: ${item.label || reference}`);
+        }
+        const url = window.PPSDesignerApp?.preloadAssetUrl(reference);
+        if (!url) throw new Error("Preloaded audio cannot be resolved in this Designer.");
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Preloaded audio download failed (${response.status}): ${item.label || reference}`);
+        bytes = await readPortableBytes(response, MAX_PORTABLE_AUDIO_BYTES, "Audio");
+        digest = await sha256(bytes);
+        if (digest !== asset.sha256) throw new Error(`Preloaded audio checksum mismatch: ${item.label || reference}`);
+        id = `${digest}.wav`;
+        mediaType = "audio/wav";
+        sourceName = reference.split("/").pop();
+      }
+      if (bytes.length > MAX_PORTABLE_AUDIO_BYTES) throw new Error("Audio exceeds the 64 MiB portable asset limit.");
+      digest ||= await sha256(bytes);
+      const existing = assetRecords.find(asset => asset.logical_id === id);
+      if (existing && existing.sha256 !== digest) throw new Error("Conflicting portable audio identities.");
+      if (!existing) {
+        totalBytes += bytes.length;
+        if (totalBytes > 256 * 1024 * 1024) throw new Error("Audio exceeds the 256 MiB portable bundle limit.");
+        const path = `assets/${id}`;
+        files.push({ name: path, bytes });
+        assetRecords.push({ logical_id: id, path, sha256: digest, bytes: bytes.length, media_type: mediaType, source_name: sourceName });
+      }
+      resolved.set(sourceKey, id);
+    }
+    item[key] = `browser-asset:${id}`;
+    if (!secondary) await embedPremadeProvenance(item, assetRecords.find(asset => asset.logical_id === id).sha256);
+    if (secondary && item.native_stationary_baseline_sha256 && assetRecords.find(asset => asset.logical_id === id)?.sha256 !== item.native_stationary_baseline_sha256) throw new Error("Stationary control checksum mismatch.");
+    if (!secondary) { item.browser_asset_id = id; delete item.browser_preview_url; }
   }
   const profileId = `custom_${String(design.name || "profile").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 32) || "profile"}`;
   const profile = { schema: "pps-study-profile.v1", profile_id: profileId, profile_kind: "custom", display_name: design.name, design, assets: assetRecords };
   const profileBytes = encoder.encode(`${JSON.stringify(profile, null, 2)}\n`);
+  if (profileBytes.length > 8 * 1024 * 1024) throw new Error("Profile metadata exceeds the 8 MiB portable limit.");
   files.unshift({ name: "profile.json", bytes: profileBytes });
-  const inventory = [];
-  for (const file of files) inventory.push({ path: file.name, sha256: await sha256(file.bytes), bytes: file.bytes.length });
+  const fileInventory = [];
+  for (const file of files) fileInventory.push({ path: file.name, sha256: await sha256(file.bytes), bytes: file.bytes.length });
   const manifest = {
     schema: "pps-profile-bundle.v1",
     profile_id: profileId,
     profile_kind: "custom",
     display_name: design.name,
     created_at: new Date().toISOString(),
-    capability_provenance: "hosted_compose",
+    capability_provenance: nativeDesigner.enabled ? "native_customized_unqualified" : "hosted_compose",
     parent: { profile_id: design.study_profile_reference_parameters?.customized_from_profile_id || "" },
-    files: inventory,
+    files: fileInventory,
   };
   files.unshift({ name: "manifest.json", bytes: encoder.encode(`${JSON.stringify(manifest, null, 2)}\n`) });
   await saveProfileDownload(zipStored(files), `${profileId}.pps-profile`);
@@ -152,6 +281,7 @@ async function exportDesktopProfile(format) {
 }
 
 async function saveProfileDownload(blob, filename) {
+  if (nativeDesigner.enabled) { await nativeDesigner.exportProfile(blob); return; }
   const shell = window.pywebview?.api;
   const nativeSave = shell?.save_profile || (filename.endsWith(".pps-profile") ? shell?.save_profile_bundle : null);
   if (nativeSave) {
@@ -183,10 +313,28 @@ function applyTheme(theme) {
   }
 }
 
+function scheduleHostedDraftRestore() {
+  let cancelled = false;
+  const events = ["pointerdown", "keydown", "pps-designer-dirty", "pps-designer-saved"];
+  const cancel = () => { cancelled = true; };
+  for (const event of events) document.addEventListener(event, cancel, true);
+  return (async () => {
+    try {
+      await window.PPSDesignerApp?.ready;
+      if (cancelled) return;
+      const stored = await drafts.load().catch(() => null);
+      if (!cancelled && stored?.custom_workflow?.is_custom) window.PPSDesignerApp?.restoreHostedDraft(stored);
+    } finally {
+      for (const event of events) document.removeEventListener(event, cancel, true);
+    }
+  })();
+}
+
 function initializeChrome() {
-  const desktop = new URLSearchParams(location.search).get("desktop") === "1";
+  const desktop = nativeDesigner.enabled || new URLSearchParams(location.search).get("desktop") === "1";
   document.body.classList.toggle("desktop-applet", desktop);
-  document.getElementById("designer-capability-badge").textContent = desktop ? "desktop full" : "hosted compose";
+  document.body.classList.toggle("native-designer", nativeDesigner.enabled);
+  document.getElementById("designer-capability-badge").textContent = nativeDesigner.enabled ? "native preparation · unqualified" : desktop ? "desktop full" : "hosted compose";
   applyTheme(localStorage.getItem("ppsDesigner.theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
   document.getElementById("designer-theme-toggle")?.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
   document.getElementById("designer-help")?.addEventListener("click", () => document.querySelector('[data-segment-info="study"]')?.click());
@@ -202,7 +350,7 @@ function initializeChrome() {
   document.getElementById("export-profile-bundle")?.addEventListener("click", async () => {
     try {
       const snapshot = window.PPSDesignerApp.getState();
-      if (!window.PPSDesignerApp.isHosted()) await exportDesktopProfile("bundle"); else await exportBundle(snapshot);
+      if (!window.PPSDesignerApp.isHosted() && !nativeDesigner.enabled) await exportDesktopProfile("bundle"); else await exportBundle(snapshot);
     } catch (error) { alert(error.message || String(error)); }
   });
   document.getElementById("export-experiment-json")?.addEventListener("click", async () => {
@@ -243,13 +391,7 @@ function initializeChrome() {
     });
     heading.appendChild(button);
   }
-  if (!desktop) {
-    const restore = async () => {
-      const stored = await drafts.load().catch(() => null);
-      if (stored?.custom_workflow?.is_custom) window.PPSDesignerApp?.restoreHostedDraft(stored);
-    };
-    window.setTimeout(restore, 900);
-  }
+  if (!desktop) scheduleHostedDraftRestore();
 }
 
 window.PPSDesigner = Object.freeze({ drafts, exportBundle });

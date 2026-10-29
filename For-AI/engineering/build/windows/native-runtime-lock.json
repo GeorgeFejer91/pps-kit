@@ -1,0 +1,36 @@
+{
+  "schema": "pps-native-windows-runtime-lock.v1",
+  "architecture": "x64",
+  "platform": "Windows 10/11",
+  "origins": {
+    "vc2013": {
+      "version": "12.0.40664.0",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/10912041/cee5d6bca2ddbcd039da727bf4acb48a/vcredist_x64.exe",
+      "sha256": "a4bba7701e355ae29c403431f871a537897c363e215cafe706615e270984f17c",
+      "size_bytes": 7200744,
+      "attached_cabinet": {"offset":465992,"size_bytes":6718755,"sha256":"77b1d4247aa0d305bf794c1641ff0daae69ca14d5699b7812d18a0d2b02e7b88"},
+      "runtime_payload": "a2",
+      "license_payload": "u4",
+      "note": "Legacy runtime required by the pinned 3DTI SOFA dependency DLLs; extracted without installing. Microsoft no longer supports VC2013."
+    },
+    "vc14": {
+      "version": "14.44.35211.0",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/6ba899d4-4c84-4010-87a3-8c0ab392b9c5/CC0FF0EB1DC3F5188AE6300FAEF32BF5BEEBA4BDD6E8E445A9184072096B713B/VC_redist.x64.exe",
+      "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b",
+      "redistributable_sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b",
+      "size_bytes": 25635768,
+      "attached_cabinet": {"offset":686152,"size_bytes":24939223,"sha256":"468f1264d50b9e3b9d309ab9e13c02ff379fd95a2837383bf65c9616583013d6"},
+      "runtime_payload": "a12",
+      "license_payload": "u4",
+      "note": "Official pinned redistributable; DLLs and matching license are extracted without executing or installing it. No installed Build Tools dependency."
+    }
+  },
+  "files": [
+    {"file":"msvcr120.dll","sha256":"753ac30c30aae62415cc225e3d057b8b6254afe280696e0a43f1a7c3132632a6","origin":"vc2013","kind":"dll","app_root":false},
+    {"file":"msvcp140.dll","sha256":"0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9","origin":"vc14","kind":"dll","app_root":true},
+    {"file":"vcruntime140.dll","sha256":"d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066","origin":"vc14","kind":"dll","app_root":true},
+    {"file":"vcruntime140_1.dll","sha256":"1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f","origin":"vc14","kind":"dll","app_root":true},
+    {"file":"VC2013-license.rtf","sha256":"8518f0420972c1dbe8a323ffc6f57863af0b80c6a3b27fd0c6fc9bdabb7e2d13","origin":"vc2013","kind":"license","app_root":false},
+    {"file":"VC14-license.rtf","sha256":"8099dc3cf9502c335da829e5c755948a12e3e6de490eb492a99deb673d883d8b","origin":"vc14","kind":"license","app_root":false}
+  ]
+}

@@ -1,3 +1,8 @@
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <bcrypt.h>
+#endif
 #include <BinauralSpatializer/Core.h>
 #include <BinauralSpatializer/Listener.h>
 #include <BinauralSpatializer/SingleSourceDSP.h>
@@ -94,13 +99,18 @@ Args parse_args(int argc, char** argv) {
 }
 
 std::string slurp(const fs::path& path) {
+    const auto bytes = fs::file_size(path);
+    if (bytes > 1024 * 1024) {
+        throw std::runtime_error("Render config exceeds 1 MiB.");
+    }
     std::ifstream in(path, std::ios::binary);
     if (!in) {
         throw std::runtime_error("Could not open " + path.string());
     }
-    std::ostringstream buffer;
-    buffer << in.rdbuf();
-    return buffer.str();
+    std::string buffer(static_cast<std::size_t>(bytes), '\0');
+    in.read(buffer.data(), static_cast<std::streamsize>(bytes));
+    if (!in || in.peek() != std::ifstream::traits_type::eof()) { throw std::runtime_error("Render config changed or was truncated while reading."); }
+    return buffer;
 }
 
 std::string slug(std::string value) {
@@ -275,6 +285,8 @@ void write_wav_float32(const fs::path& path, const std::vector<float>& interleav
     out.write("data", 4);
     write_u32(out, data_bytes);
     out.write(reinterpret_cast<const char*>(interleaved.data()), data_bytes);
+    out.flush();
+    if (!out) { throw std::runtime_error("Failed writing WAV."); }
 }
 
 std::string pseudo_sha256_note() {
@@ -474,6 +486,8 @@ void write_manifest(const fs::path& path, const json& config, const std::vector<
     out << std::setw(2) << manifest << "\n";
 }
 
+#include "prepared_spatializer.h"
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -481,6 +495,10 @@ int main(int argc, char** argv) {
         const Args args = parse_args(argc, argv);
         fs::create_directories(args.output_dir);
         const json config = json::parse(slurp(args.config));
+        if (config.value("schema", "") == "pps-3dti-spatialize.v2") {
+            spatialize_prepared(config, args);
+            return 0;
+        }
         if (config.value("schema", "") != "pps-3dti-render-config.v1") {
             throw std::runtime_error("Unsupported render config schema.");
         }

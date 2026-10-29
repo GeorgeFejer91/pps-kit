@@ -5,16 +5,23 @@
   "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6394550/",
   "doi": "10.1007/s00221-019-05469-3",
   "verification_status": "partial",
-  "notes": "Seven-speaker looming apparatus on the participant's left side. The preload recreates the reported seven-distance lateral audio-tactile PPS task as a virtual moving white-noise trajectory with paired distance/timing rows, 28 tactile-only baselines, and 28 auditory-only catches. Exact original loudspeaker-switch code, gain transfer, response timeout, and unfixed experimenter-started ITI remain provenance caveats rather than blockers for a runnable toolkit profile.",
+  "notes": "Seven-speaker looming apparatus on the participant's left side. This proxy uses a virtual moving white-noise trajectory with paired distance/timing rows, 28 tactile-only baselines, and 28 auditory-only catches. Its 500-ms pre-sound and 600-ms post-sound margins are derived software containment choices, not reported trial padding. The shared 100-ms audio-channel cue substitutes for the reported 20-ms neck vibration. Exact loudspeaker switching, gain transfer, response timeout and experimenter-started ITI remain unresolved; a complete waveform does not establish protocol or hardware equivalence.",
   "reference_parameters": {
     "profile_check_complete": true,
+    "reported_tactile_duration_ms": 20,
+    "software_tactile_cue_duration_ms": 100,
+    "software_trial_padding_ms": {"pre": 500, "post": 600},
+    "soa_values_ms_basis": "Derived from seven equally spaced positions: elapsed_ms=(119-distance_cm)/34*1000, for distance_cm=[119,102,85,68,51,34,17]. Methods pp. 856-858 (DOI 10.1007/s00221-019-05469-3) report 17-cm spacing and 34 cm/s, not this numerical SOA table.",
+    "software_trial_padding_basis": "Derived containment only: pre=max(0,-min(SOA))=500 ms; post=max(0,max(SOA)+software cue duration-sound duration)=3500+100-3000=600 ms. The article does not report a fixed full-trial padding or response timeout; ITI is experimenter controlled.",
     "reported_trial_formula": "84 audio-tactile trials (7 distances/timings x 12 repetitions), 28 tactile-only baseline trials, and 28 auditory-only catch trials = 140 trials per pre/post PPS session.",
     "apparatus_recreation_policy": "The physical seven-loudspeaker array is represented with the toolkit's lateral binaural moving-source renderer using the reported 119-to-17 cm path and paired seven distance/timing samples.",
     "remaining_caveats": [
       "exact original white-noise asset",
       "exact loudspeaker-switch/gain transfer law",
       "numeric response timeout",
-      "unfixed experimenter-started ITI distribution"
+      "unfixed experimenter-started ITI distribution",
+      "software containment margins are derived rather than reported trial timing",
+      "shared 100-ms audio-channel cue substitutes for the reported 20-ms vibrotactile pulse"
     ]
   },
   "design": {
@@ -63,12 +70,26 @@
           "label": "Echolocation array PPS trial",
           "elements": [
             {
+              "element_id": "tonelli-derived-pre-sound-margin",
+              "kind": "jitter",
+              "label": "Derived pre-sound margin",
+              "jitter_values_ms": [500],
+              "randomized": false
+            },
+            {
               "element_id": "tonelli-array-looming-source",
               "kind": "looming_stimulus",
               "label": "Moving sound array",
               "source_label": "",
               "source_labels": [],
               "randomized": true
+            },
+            {
+              "element_id": "tonelli-derived-post-sound-margin",
+              "kind": "jitter",
+              "label": "Derived post-sound margin",
+              "jitter_values_ms": [600],
+              "randomized": false
             }
           ]
         }
@@ -78,6 +99,10 @@
     }
   },
   "provenance": [
+    {
+      "field": "baseline offsets and software containment",
+      "source": "Tonelli et al. 2019, Methods pp. 856-858, Peripersonal space task (DOI 10.1007/s00221-019-05469-3): targets 500 ms before sound onset and 500 ms after sound offset; 3000-ms motion and 20-ms vibration; no fixed ITI. The software margins and 100-ms cue are explicitly separate implementation choices with their formula in reference_parameters."
+    },
     {
       "field": "trial counts",
       "source": "Methods report 140 trials: 28 tactile-only, 28 catch, and 12 trials for each audio-tactile combination."

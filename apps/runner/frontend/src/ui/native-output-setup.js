@@ -34,17 +34,17 @@ export function bindNativeOutputSetup({ elements, api, onError, onRetireMedia })
     release.disabled = !native || !reserved;
     disable.disabled = !native;
     selection.textContent = choices[Number(route.value)] && route.value !== ""
-      ? choices[Number(route.value)].label : "Choose a device configuration matching the prepared block.";
+      ? choices[Number(route.value)].label : "Choose a device configuration matching the prepared audio.";
     detail.textContent = !native ? "Output preparation is available in the native Runner."
       : busy ? "Preparing native output. No experiment playback is enabled."
       : !status ? "Native output status is unavailable."
-      : status.phase === "reserved-media" ? "Prepared and silent. Experiment activation is still unavailable; this device route is unqualified."
-      : status.phase === "reserved-silence" ? "Silent device reserved without media. Release it before preparing the current block."
+      : status.phase === "reserved-media" ? "Prepared and silent. Arm locally, then start the prepared audio. This device route remains unqualified."
+      : status.phase === "reserved-silence" ? "Silent device reserved without media. Release it before preparing the current audio."
       : status.phase === "cleanup-pending" ? "Releasing native output. Wait for cleanup before preparing another device."
       : ["faulted", "quarantined"].includes(status.phase) ? "Native output failed. Disable output and inspect the device before preparing again."
       : !quiescent() ? "Disarm and stop the run before changing the output device."
-      : !media ? "Prepare the first audio block before listing compatible output devices."
-      : currentInventory() && !choices.length ? "No listed configuration matches this block's channels and sample rate. Check the device, then list again."
+      : !media ? "Prepare the next instruction or block before listing compatible output devices."
+      : currentInventory() && !choices.length ? "No listed configuration matches this audio's channels and sample rate. Check the device, then list again."
       : "List devices, choose a matching configuration, then prepare silent output. Playback and route qualification remain separate.";
   }
 

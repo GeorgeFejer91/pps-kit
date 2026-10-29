@@ -33,6 +33,17 @@
       "metadata": {},
       "elements": [
         {
+          "element_id": "tonelli-derived-pre-sound-margin",
+          "kind": "jitter",
+          "label": "Derived pre-sound margin",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            500
+          ],
+          "randomized": false
+        },
+        {
           "element_id": "tonelli-array-looming-source",
           "kind": "looming_stimulus",
           "label": "Moving sound array",
@@ -42,6 +53,17 @@
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "tonelli-derived-post-sound-margin",
+          "kind": "jitter",
+          "label": "Derived post-sound margin",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            600
+          ],
+          "randomized": false
         }
       ]
     }

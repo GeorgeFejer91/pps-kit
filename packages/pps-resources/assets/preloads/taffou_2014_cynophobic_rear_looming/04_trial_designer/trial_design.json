@@ -29,6 +29,17 @@
       "metadata": {},
       "elements": [
         {
+          "element_id": "taffou_2014_cynophobic_rear_looming-pre-sound",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
           "element_id": "taffou-rear-looming-source",
           "kind": "looming_stimulus",
           "label": "Rear-field animal sound",
@@ -41,6 +52,17 @@
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "taffou_2014_cynophobic_rear_looming-post-sound",
+          "kind": "jitter",
+          "label": "Post-sound silence (lower-bound proxy)",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            2700
+          ],
+          "randomized": false
         }
       ]
     }

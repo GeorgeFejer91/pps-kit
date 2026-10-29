@@ -4,13 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "test": "node --test tests/*.test.js",
     "build": "vite build",
     "dev": "vite --host 127.0.0.1"
   },
   "dependencies": {
-    "@chenglou/pretext": "0.0.8"
+    "@chenglou/pretext": "0.0.8",
+    "@tauri-apps/api": "2.11.1"
   },
   "devDependencies": {
-    "vite": "6.4.3"
+    "vite": "6.4.5"
   }
 }

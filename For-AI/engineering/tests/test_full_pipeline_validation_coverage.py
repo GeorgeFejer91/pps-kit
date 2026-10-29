@@ -45,40 +45,51 @@ def test_full_pipeline_validation_summary_is_conservative():
     summary = pipeline["summary"]
 
     assert summary["literature_record_count"] == 75
-    assert summary["in_scope_record_count"] == 71
-    assert summary["adjacent_not_applicable_record_count"] == 4
-    assert summary["full_emulated_pipeline_validated_record_count"] == 17
+    assert summary["in_scope_record_count"] == 67
+    assert summary["adjacent_not_applicable_record_count"] == 8
+    assert summary["full_emulated_pipeline_validated_record_count"] == 11
     assert summary["human_behavioral_observed_record_count"] == 0
     assert summary["physical_loopback_observed_record_count"] == 0
+    mechanistic = next(record for record in pipeline["records"] if record["record_id"] == "serino_2009_tms")
+    assert mechanistic["full_emulated_pipeline_validated"] is False
+    assert mechanistic["current_template_ids"] == []
+    assert {gate["status"] for gate in mechanistic["gates"].values()} == {"not_applicable_adjacent_record"}
+    moving_sound = next(record for record in pipeline["records"] if record["record_id"] == "finisguerra_2015_moving_sounds_motor")
+    assert moving_sound["full_emulated_pipeline_validated"] is False
+    assert moving_sound["current_template_ids"] == []
+    assert {gate["status"] for gate in moving_sound["gates"].values()} == {"not_applicable_adjacent_record"}
+    social = next(record for record in pipeline["records"] if record["record_id"] == "social_perception_2017")
+    assert social["full_emulated_pipeline_validated"] is False
+    assert {gate["status"] for gate in social["gates"].values()} == {"not_applicable_adjacent_record"}
     tool_use = next(record for record in pipeline["records"] if record["record_id"] == "canzoneri_2013_tool_use_reshaping")
     assert tool_use["full_emulated_pipeline_validated"] is False
     assert tool_use["gates"]["toolkit_gui_implementation"]["passed"] is True
     assert tool_use["gates"]["observed_emulated_expected_match"]["passed"] is False
     assert summary["pipeline_status_counts"] == {
-        "adjacent_not_applicable": 4,
-        "full_emulated_source_to_runner_pipeline_validated": 17,
+        "adjacent_not_applicable": 8,
+        "full_emulated_source_to_runner_pipeline_validated": 11,
         "pipeline_incomplete": 1,
-        "profile_present_but_source_parameters_missing": 5,
-        "source_parameters_missing_before_profile_creation": 48,
+        "profile_present_but_source_parameters_missing": 11,
+        "source_parameters_missing_before_profile_creation": 44,
     }
     assert summary["primary_gap_counts"] == {
-        "profile_present_but_source_parameters_missing": 5,
-        "source_parameters_missing_before_profile_creation": 48,
+        "profile_present_but_source_parameters_missing": 11,
+        "source_parameters_missing_before_profile_creation": 44,
         "toolkit_structure_or_response_contract_missing": 0,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
-        "minimum_source_parameters_captured": 18,
-        "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 53,
+        "minimum_source_parameters_captured": 12,
+        "not_applicable_adjacent_record": 8,
+        "source_parameters_missing_or_unresolved": 55,
     }
     assert summary["gate_status_counts"]["observed_emulated_expected_match"] == {
-        "emulated_observed_direction_matches_expected": 17,
-        "no_observed_emulated_comparison": 54,
-        "not_applicable_adjacent_record": 4,
+        "emulated_observed_direction_matches_expected": 11,
+        "no_observed_emulated_comparison": 56,
+        "not_applicable_adjacent_record": 8,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 53,
-        "not_applicable_adjacent_record": 4,
+        "blocked_by_missing_profile_parameters": 49,
+        "not_applicable_adjacent_record": 8,
         "segment_0_to_6_gui_toolkit_path_ready": 18,
     }
     assert "not collected participant evidence" in pipeline["scope"]["evidence_boundary"]
@@ -91,7 +102,8 @@ def test_full_pipeline_validated_records_pass_every_required_gate():
         record for record in records.values() if record["full_emulated_pipeline_validated"]
     ]
 
-    assert len(full_records) == pipeline["summary"]["full_emulated_pipeline_validated_record_count"] == 17
+    assert len(full_records) == pipeline["summary"]["full_emulated_pipeline_validated_record_count"] == 11
+    assert "pfeiffer_2018_vestibular" not in {r["record_id"] for r in full_records}
     for record in full_records:
         assert record["pipeline_status"] == "full_emulated_source_to_runner_pipeline_validated"
         assert all(gate["passed"] for gate in record["gates"].values()), record["record_id"]
@@ -149,7 +161,9 @@ def test_full_pipeline_validated_records_pass_every_required_gate():
         "noel_2015_known_parameter_validation_report.json"
     )
     canzoneri_amputation = records["canzoneri_2013_amputation_prosthesis"]
-    assert canzoneri_amputation["full_emulated_pipeline_validated"]
+    assert not canzoneri_amputation["full_emulated_pipeline_validated"]
+    assert canzoneri_amputation["gates"]["source_parameter_extraction"]["passed"] is False
+    assert canzoneri_amputation["gates"]["toolkit_gui_implementation"]["passed"] is True
     assert canzoneri_amputation["current_template_ids"] == ["canzoneri_2013_amputation_prosthesis"]
     assert canzoneri_amputation["known_parameter_validation_report"].endswith(
         "canzoneri_2013_amputation_known_parameter_validation_report.json"

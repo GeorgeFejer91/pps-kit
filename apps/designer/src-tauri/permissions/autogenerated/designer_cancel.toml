@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-designer-cancel"
+description = "Enables the designer_cancel command without any pre-configured scope."
+commands.allow = ["designer_cancel"]
+
+[[permission]]
+identifier = "deny-designer-cancel"
+description = "Denies the designer_cancel command without any pre-configured scope."
+commands.deny = ["designer_cancel"]

@@ -11,20 +11,20 @@ try {
     if ($Mode -eq "Core") {
         cargo fmt --all -- --check
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        cargo check --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-audio-cpal -p pps-runner-execution -p pps-session-package
+        cargo check --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-audio-cpal -p pps-runner-execution -p pps-session-package -p pps-designer-core
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        cargo clippy --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-audio-cpal -p pps-runner-execution -p pps-session-package --all-targets -- -D warnings
+        cargo clippy --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-audio-cpal -p pps-runner-execution -p pps-session-package -p pps-designer-core --all-targets -- -D warnings
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        cargo test --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-audio-cpal -p pps-runner-execution -p pps-session-package
+        cargo test --locked -p pps-contracts -p pps-brsp -p pps-runner-core -p pps-runner-audio -p pps-runner-audio-cpal -p pps-runner-execution -p pps-session-package -p pps-designer-core
         exit $LASTEXITCODE
     }
 
     if ($Mode -eq "Desktop") {
-        cargo check --locked -p pps-experiment-runner --all-targets
+        cargo check --locked -p pps-experiment-runner -p pps-experiment-designer --all-targets
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        cargo clippy --locked -p pps-experiment-runner --all-targets -- -D warnings
+        cargo clippy --locked -p pps-experiment-runner -p pps-experiment-designer --all-targets -- -D warnings
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        cargo test --locked -p pps-experiment-runner --all-targets
+        cargo test --locked -p pps-experiment-runner -p pps-experiment-designer --all-targets
         exit $LASTEXITCODE
     }
 
@@ -33,6 +33,14 @@ try {
     npm --prefix apps/runner run check
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     git diff --exit-code -- apps/runner/compiled
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    npm --prefix apps/designer/frontend ci
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    npm --prefix apps/designer/frontend test
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    npm --prefix apps/designer/frontend run build
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    git diff --exit-code -- apps/designer/frontend/compiled
     exit $LASTEXITCODE
 }
 finally {

@@ -1,13 +1,13 @@
 {
   "schema": "pps-preload-baseline-segment.v1",
   "template_id": "taffou_2014_cynophobic_rear_looming",
-  "baseline_strategy": "tactile_only",
+  "baseline_strategy": "custom",
   "include_baseline_trials": true,
   "baseline_trials_exact": 64,
   "baseline_trial_percentage": 0.0,
   "baseline_soa_values_ms": [
-    350,
-    4650
+    -650,
+    3650
   ],
   "baseline_crosses_sequence_variants": true,
   "catch_trial_percentage": 10.0,

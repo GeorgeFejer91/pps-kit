@@ -6,6 +6,15 @@
 //! no filesystem paths or hashes; resolved paths and digests remain in the
 //! Rust-only [`VerifiedPreparedSession`] receipt.
 
+mod group;
+mod instructions;
+pub use group::{verify_prepared_group, VerifiedPreparedGroup};
+mod profile_bundle;
+pub use instructions::{InstructionContinueMode, InstructionSlot, VerifiedInstruction};
+pub use profile_bundle::{
+    materialize_profile_bundle, ProfileBundleError, VerifiedProfileAsset, VerifiedProfileBundle,
+};
+
 use std::{
     fmt, fs,
     io::{self, Read, Write},
@@ -27,10 +36,10 @@ pub const MAX_PREPARED_BLOCK_MANIFEST_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_PREPARED_BLOCK_METADATA_BYTES: usize = 64 * 1024;
 /// Maximum encoded size of one prepared block WAV.
 ///
-/// The largest qualified local package observed during the Rust migration is
-/// approximately 453 MiB, so this leaves bounded headroom without accepting a
-/// multi-gigabyte single asset.
-pub const MAX_PREPARED_BLOCK_WAV_BYTES: u64 = 768 * 1024 * 1024;
+/// Covers the complete archived approximately 1,073 MiB float block. Native
+/// decoding retains its separate 1,280 MiB allocation and frame ceilings;
+/// this size allowance does not establish execution or timing qualification.
+pub const MAX_PREPARED_BLOCK_WAV_BYTES: u64 = 1280 * 1024 * 1024;
 /// Maximum encoded WAV bytes hashed across one prepared-session package.
 ///
 /// This supports multiple large blocks while bounding verification I/O even
@@ -210,6 +219,8 @@ pub struct VerifiedPreparedSession {
     session_dir: PathBuf,
     run_setup_manifest: Option<VerifiedNativeFile>,
     blocks: Vec<VerifiedPreparedBlock>,
+    instructions: Vec<VerifiedInstruction>,
+    split_part: bool,
 }
 
 impl VerifiedPreparedSession {
@@ -239,6 +250,14 @@ impl VerifiedPreparedSession {
 
     pub fn blocks(&self) -> &[VerifiedPreparedBlock] {
         &self.blocks
+    }
+
+    pub fn instructions(&self) -> &[VerifiedInstruction] {
+        &self.instructions
+    }
+
+    pub const fn is_split_part(&self) -> bool {
+        self.split_part
     }
 
     pub const fn v1_message(&self) -> &'static str {
@@ -279,6 +298,8 @@ pub enum VerificationErrorCode {
     SourceTrialWavMissing,
     SourceTrialWavUnreadable,
     SourceTrialWavStale,
+    InstructionInvalid,
+    GroupInvalid,
 }
 
 impl VerificationErrorCode {
@@ -314,6 +335,8 @@ impl VerificationErrorCode {
             Self::SourceTrialWavMissing => "source_trial_wav_missing",
             Self::SourceTrialWavUnreadable => "source_trial_wav_unreadable",
             Self::SourceTrialWavStale => "source_trial_wav_stale",
+            Self::InstructionInvalid => "instruction_invalid",
+            Self::GroupInvalid => "session_group_invalid",
         }
     }
 }
@@ -600,6 +623,11 @@ pub fn verify_prepared_session(
         bound_blocks.push(verified_block.bind_wav(block_wav));
     }
 
+    let instructions = instructions::verify_instructions(manifest_object, &parsed.session_dir)?;
+    let split_part = manifest_object.contains_key("part_split_schema")
+        || manifest_object
+            .get("sibling_part_manifest_paths")
+            .is_some_and(|value| value.as_array().is_none_or(|paths| !paths.is_empty()));
     Ok(VerifiedPreparedSession {
         summary: parsed.summary,
         manifest_path: absolute_native_path(manifest_path),
@@ -607,6 +635,8 @@ pub fn verify_prepared_session(
         session_dir: absolute_native_path(&parsed.session_dir),
         run_setup_manifest,
         blocks: bound_blocks,
+        instructions,
+        split_part,
     })
 }
 

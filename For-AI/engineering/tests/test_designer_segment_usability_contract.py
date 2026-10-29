@@ -1,3 +1,5 @@
+import re
+
 from peripersonal_space_toolkit.runtime_paths import designer_frontend_root
 
 
@@ -19,7 +21,8 @@ def test_segments_expose_one_clear_decision_model_each():
 
     assert 'class="sequence-grammar"' in html
     assert "filmstrip-row-expression" in app_js
-    assert "stripPreviewVariants(strip).length" in app_js
+    # Exact sequence counts/order/overflow are exercised by sequence-variants.test.js.
+    assert "variantCountLabel(strip)" in app_js
     assert "Add first trial family" in app_js
 
     assert 'type="radio" name="baseline-option" value="min_max"' in html
@@ -57,8 +60,19 @@ def test_segments_expose_one_clear_decision_model_each():
     assert 'id="preload-asset-status"' not in html
     assert 'id="profile-recreation-notice"' not in html
     assert 'id="segment-info-note-card"' in html
-    assert "body.desktop-applet .topbar" in styles
-    assert "display: none" in styles[styles.index("body.desktop-applet .topbar"):]
+    # Only the legacy applet hides shared navigation. Native Designer must keep
+    # the same Documentation/Downloads routes and reserve the header's grid row.
+    legacy = "body.desktop-applet:not(.native-designer)"
+    for selector in (".topbar", '[data-page-tab="documentation"]', '[data-page-tab="downloads"]'):
+        assert f"{legacy} {selector}" in styles
+        assert f"body.desktop-applet {selector}" not in styles
+    legacy_header = re.search(rf"{re.escape(legacy)} \.topbar\s*\{{([^}}]*)\}}", styles)
+    assert legacy_header is not None
+    assert re.search(r"display\s*:\s*none\s*;", legacy_header.group(1))
+    shared_header = re.search(r"(?m)^\.topbar\s*\{([^}]*)\}", styles)
+    assert shared_header is not None
+    assert re.search(r"display\s*:\s*flex\s*;", shared_header.group(1))
+    assert re.search(rf"{re.escape(legacy)} \.workspace\s*\{{\s*grid-row:\s*1\s*/\s*span 2;\s*\}}", styles)
     assert html.index('class="topbar site-tabs"') < html.index('<aside class="rail">')
     assert html.count('class="topbar site-tabs"') == 1
     assert html.count("data-page-tab=") == 3
@@ -168,7 +182,10 @@ def test_for_ai_contract_uses_profile_finalization_boundary():
     segment_contract = (repo_root / "For-AI" / "segment_registry_contract.md").read_text(encoding="utf-8")
     skill = (repo_root / "For-AI" / "skills" / "html-dashboard-orchestrator" / "SKILL.md").read_text(encoding="utf-8")
 
-    for text in (segment_contract, skill):
-        assert "Segment 6: Profile Validation and Save" in text or "Segment 6 Profile Validation and Save" in text
-        assert "actual participant" in text
-        assert "Runner" in text
+    # The concise entrypoint routes to the authoritative segment contract;
+    # it should not duplicate that full contract in another memory owner.
+    assert "(../../segment_registry_contract.md)" in skill
+    assert "finished-profile-to-Runner handoff" in skill
+    assert "Segment 6: Profile Validation and Save" in segment_contract or "Segment 6 Profile Validation and Save" in segment_contract
+    assert "actual participant" in segment_contract
+    assert "Runner" in segment_contract

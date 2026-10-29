@@ -23,8 +23,11 @@ use pps_runner_execution::{
     data_min_row, encode_data_min_csv, PreparedLedgerBatch, MAX_LEDGER_ENCODED_BYTES,
 };
 use pps_session_package::VerifiedPreparedSession;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+
+#[path = "group_results.rs"]
+pub(crate) mod group_results;
 
 const QUEUE_CAPACITY: usize = 8;
 const MAX_BATCH_RECORDS: usize = 128;
@@ -45,13 +48,13 @@ struct Progress {
     durable_dataset_rows: AtomicU64,
     failed: AtomicBool,
     retired: AtomicBool,
-    completion: Mutex<Option<NativeResultReceipt>>,
+    completion: Mutex<Option<NativeResultCommit>>,
 }
 
 /// Native-only acknowledgement of the exact published prefix, never a browser
 /// completion request. The manifest contains relative names; no path crosses IPC.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct NativeResultReceipt {
     pub package_manifest_sha256: String,
     pub package_generation: u64,
@@ -63,6 +66,34 @@ pub(crate) struct NativeResultReceipt {
     pub dataset_row_count: u64,
     pub events_sha256: String,
     pub dataset_sha256: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct GroupAttemptContext {
+    pub group_attempt_id: String,
+    pub selected_group_manifest_sha256: String,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct NativeResultCommit {
+    pub receipt: NativeResultReceipt,
+    pub manifest_file: String,
+    pub manifest_sha256: String,
+    pub events_file: String,
+    pub dataset_file: String,
+    pub group_attempt: Option<GroupAttemptContext>,
+}
+
+pub(crate) struct PreparedJournalSource {
+    pub execution: crate::prepared_execution::PreparedExecutionSource,
+    pub group_attempt: Option<GroupAttemptContext>,
+}
+impl std::ops::Deref for PreparedJournalSource {
+    type Target = crate::prepared_execution::PreparedExecutionSource;
+    fn deref(&self) -> &Self::Target {
+        &self.execution
+    }
 }
 
 struct Publication {
@@ -108,12 +139,20 @@ pub(crate) struct NativeEventJournal {
     interrupted: bool,
     publication_enabled: bool,
     pending_seal: Option<NativeResultSeal>,
+    group_attempt: Option<GroupAttemptContext>,
 }
 
 impl NativeEventJournal {
     /// Called on a blocking preflight worker, using the native verifier's
     /// retained directory. The WebView/phone cannot choose a results path.
     pub(crate) fn create(verified: &VerifiedPreparedSession) -> Result<Self, JournalError> {
+        Self::create_for_group(verified, None)
+    }
+
+    pub(crate) fn create_for_group(
+        verified: &VerifiedPreparedSession,
+        group_attempt: Option<&GroupAttemptContext>,
+    ) -> Result<Self, JournalError> {
         let nonce = random_nonce();
         let filename = format!("native_events_{nonce}.partial.jsonl");
         let header = serde_json::to_vec(&serde_json::json!({
@@ -126,6 +165,8 @@ impl NativeEventJournal {
             "executionMode": verified.summary().execution_mode,
             "timingQualification": "unqualified",
             "completion": "partial",
+            "groupAttemptId": group_attempt.map(|context| &context.group_attempt_id),
+            "selectedGroupManifestSha256": group_attempt.map(|context| &context.selected_group_manifest_sha256),
         }))
         .map_err(|_| JournalError::Unavailable)?;
         let events = verified.session_dir().join(filename);
@@ -137,7 +178,9 @@ impl NativeEventJournal {
             dataset: dataset.clone(),
             header: serde_json::from_slice(&header).map_err(|_| JournalError::Unavailable)?,
         };
-        Self::open_files(&events, Some(&dataset), header, Some(publication))
+        let mut journal = Self::open_files(&events, Some(&dataset), header, Some(publication))?;
+        journal.group_attempt = group_attempt.cloned();
+        Ok(journal)
     }
 
     #[cfg(test)]
@@ -260,6 +303,7 @@ impl NativeEventJournal {
             interrupted: false,
             publication_enabled,
             pending_seal: None,
+            group_attempt: None,
         })
     }
 
@@ -434,7 +478,16 @@ impl NativeEventJournal {
         }
     }
 
+    pub(crate) fn group_attempt(&self) -> Option<&GroupAttemptContext> {
+        self.group_attempt.as_ref()
+    }
+
+    #[cfg(test)]
     pub(crate) fn completion_receipt(&self) -> Option<NativeResultReceipt> {
+        self.completion_commit().map(|commit| commit.receipt)
+    }
+
+    pub(crate) fn completion_commit(&self) -> Option<NativeResultCommit> {
         self.progress
             .completion
             .lock()
@@ -518,11 +571,11 @@ fn write_batches(
                     // bytes. Retained partial names remain recovery evidence.
                     drop(file);
                     drop(dataset);
-                    publication.publish(&receipt)?;
+                    let commit = publication.publish(&receipt)?;
                     *progress
                         .completion
                         .lock()
-                        .unwrap_or_else(|error| error.into_inner()) = Some(receipt);
+                        .unwrap_or_else(|error| error.into_inner()) = Some(commit);
                     Ok::<_, std::io::Error>(())
                 })();
                 if result.is_err() {
@@ -533,11 +586,18 @@ fn write_batches(
         };
         let write = (|| {
             file.write_all(&batch.bytes)?;
+            #[cfg(test)]
+            tests::crash_probe("after_event_write");
             if let Some(dataset) = dataset.as_mut() {
                 dataset.write_all(&batch.dataset_bytes)?;
                 dataset.sync_data()?;
+                #[cfg(test)]
+                tests::crash_probe("after_dataset_sync");
             }
-            file.sync_data()
+            file.sync_data()?;
+            #[cfg(test)]
+            tests::crash_probe("after_event_sync");
+            Ok::<_, std::io::Error>(())
         })();
         if write.is_err() {
             progress.failed.store(true, Ordering::Release);
@@ -574,7 +634,7 @@ impl NativeResultReceipt {
 }
 
 impl Publication {
-    fn publish(&self, receipt: &NativeResultReceipt) -> std::io::Result<()> {
+    fn publish(&self, receipt: &NativeResultReceipt) -> std::io::Result<NativeResultCommit> {
         fn final_path(partial: &Path, suffix: &str, replacement: &str) -> std::io::Result<PathBuf> {
             let name = partial
                 .file_name()
@@ -593,6 +653,8 @@ impl Publication {
                 "participantId": self.header["participantId"], "sessionId": self.header["sessionId"],
                 "partSessionId": self.header["partSessionId"], "partNumber": self.header["partNumber"],
                 "executionMode": self.header["executionMode"],
+                "groupAttemptId": self.header["groupAttemptId"],
+                "selectedGroupManifestSha256": self.header["selectedGroupManifestSha256"],
             },
             "receipt": receipt, "eventsFile": events.file_name().and_then(|name| name.to_str()),
             "datasetFile": dataset.file_name().and_then(|name| name.to_str()),
@@ -611,7 +673,11 @@ impl Publication {
         // supported host. Unsupported filesystems fail closed. The manifest
         // appears last; two data files without it are not a completed result.
         fs::hard_link(&self.events, &events)?;
+        #[cfg(test)]
+        tests::crash_probe("after_event_link");
         fs::hard_link(&self.dataset, &dataset)?;
+        #[cfg(test)]
+        tests::crash_probe("after_dataset_link");
         // Re-read the published names on the worker: replacing a partial name
         // while its append handle was open must not certify different bytes.
         for (path, expected) in [
@@ -637,7 +703,27 @@ impl Publication {
                 return Err(std::io::Error::other("published bytes changed"));
             }
         }
-        fs::hard_link(&pending, &manifest)
+        fs::hard_link(&pending, &manifest)?;
+        #[cfg(test)]
+        tests::crash_probe("after_manifest_link");
+        let group_attempt =
+            self.header["groupAttemptId"]
+                .as_str()
+                .map(|attempt| GroupAttemptContext {
+                    group_attempt_id: attempt.to_owned(),
+                    selected_group_manifest_sha256: self.header["selectedGroupManifestSha256"]
+                        .as_str()
+                        .unwrap_or("")
+                        .to_owned(),
+                });
+        Ok(NativeResultCommit {
+            receipt: receipt.clone(),
+            manifest_file: manifest.file_name().unwrap().to_string_lossy().into_owned(),
+            manifest_sha256: format!("{:x}", Sha256::digest(&bytes)),
+            events_file: events.file_name().unwrap().to_string_lossy().into_owned(),
+            dataset_file: dataset.file_name().unwrap().to_string_lossy().into_owned(),
+            group_attempt,
+        })
     }
 }
 

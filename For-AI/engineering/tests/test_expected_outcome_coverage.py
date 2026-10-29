@@ -17,7 +17,6 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "amemiya_2017_pseudowalking_footsole",
     "ardizzi_ferri_2018_interoceptive",
     "autism_2019",
-    "avenanti_2012_motor_cortex",
     "bassolino_2010_mouse_use",
     "biggio_2017_racket_tool_use",
     "body_image_social_cognition_2024",
@@ -34,7 +33,6 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "ferri_2015_jneurosci_itv",
     "ferroni_2020_tool_observation",
     "ferroni_2026_pps_plasticity",
-    "finisguerra_2015_moving_sounds_motor",
     "footsole_vibration_2019",
     "galli_2015_wheelchair",
     "hobeika_2018_anisotropy",
@@ -64,7 +62,6 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "serino_2011_rtms",
     "schizophrenia_tool_use_2022",
     "serino_2007_blind_cane_users",
-    "serino_2009_tms",
     "serino_2018_mixed_reality_pps",
     "serino_2015_exps_4_to_6",
     "serino_2015_front_back_trunk_exp2",
@@ -73,7 +70,6 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
     "serino_2015_toolless_sync_training",
     "smartphone_rt_methods_2025",
     "social_coding_2019",
-    "social_perception_2017",
     "spadone_2021_connectivity",
     "taffou_2014_cynophobic_rear_looming",
     "taffou_2021_auditory_roughness",
@@ -87,20 +83,14 @@ STRUCTURED_EXPECTED_OUTCOME_IDS = {
 
 RUNNABLE_STRUCTURED_IDS = {
     "biggio_2017_racket_tool_use",
-    "canzoneri_2013_amputation_prosthesis",
     "canzoneri_2012_dynamic_sounds",
     "galli_2015_wheelchair",
-    "lerner_2021_3d_boundary",
     "noel_2015_walking",
     "noel_2015_bodily_self",
-    "serino_2015_front_back_trunk_exp2",
     "serino_2015_peri_hand_exp3",
-    "serino_2015_peri_trunk_exp1",
     "serino_2015_toolless_sync_training",
-    "pfeiffer_2018_vestibular",
     "matsuda_2021_four_directions",
     "lamia_2026_arm_movement",
-    "smartphone_rt_methods_2025",
     "tajadura_jimenez_2009_visual_deprivation",
     "tonelli_2019_echolocation",
 }
@@ -142,24 +132,40 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         if record["expected_outcome_status"] == "structured_expected_outcome_extracted"
     }
     assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
+    # Preserve the mechanistic finding while excluding it from direct AT outcomes.
+    mechanistic = records["serino_2009_tms"]
+    assert mechanistic["expected_outcome_status"] == "adjacent_out_of_scope"
+    assert mechanistic["runnable_status"] == "adjacent_not_applicable"
+    assert "TMS-evoked MEP" in mechanistic["expected_outcome"]["observable_metric"]
+    assert mechanistic["current_template_ids"] == []
+    moving_sound = records["finisguerra_2015_moving_sounds_motor"]
+    assert moving_sound["expected_outcome_status"] == "adjacent_out_of_scope"
+    assert moving_sound["runnable_status"] == "adjacent_not_applicable"
+    assert "MEP" in moving_sound["expected_outcome"]["observable_metric"]
+    assert moving_sound["current_template_ids"] == []
+    assert "not a pre/post PPS contrast" in records["autism_2019"]["expected_outcome"]["condition_contrast"]
+    social = records["social_perception_2017"]
+    assert social["expected_outcome_status"] == "adjacent_out_of_scope"
+    assert social["observed_vs_expected_status"] == "adjacent_not_applicable"
+    assert social["expected_outcome"]["primary_expected_effect"]
     assert outcome["summary"] == {
         "literature_record_count": 75,
-        "structured_expected_outcome_record_count": 71,
+        "structured_expected_outcome_record_count": 67,
         "pending_expected_outcome_record_count": 0,
-        "adjacent_or_out_of_scope_record_count": 4,
-        "runnable_profile_parameter_record_count": 18,
+        "adjacent_or_out_of_scope_record_count": 8,
+        "runnable_profile_parameter_record_count": 12,
         "observed_behavioral_comparison_record_count": 0,
-        "mouse_click_simulated_participant_like_comparison_record_count": 17,
-        "synthetic_profile_contrast_comparison_record_count": 17,
+        "mouse_click_simulated_participant_like_comparison_record_count": 11,
+        "synthetic_profile_contrast_comparison_record_count": 11,
         "parameter_run_evidence_only_record_count": 1,
-        "not_runnable_no_observed_comparison_record_count": 53,
-        "adjacent_not_applicable_record_count": 4,
+        "not_runnable_no_observed_comparison_record_count": 55,
+        "adjacent_not_applicable_record_count": 8,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
-            "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 48,
-            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
-            "template_present_blocked_missing_publication_parameters": 5,
+            "not_applicable_adjacent_out_of_scope": 8,
+            "not_yet_templated_missing_publication_parameters": 44,
+            "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 11,
+            "template_present_blocked_missing_publication_parameters": 11,
             "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,
         },
     }

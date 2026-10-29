@@ -34,13 +34,13 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 18,
-        "covered_blocked_missing_publication_parameters": 5,
+        "covered_runnable_profile": 12,
+        "covered_blocked_missing_publication_parameters": 11,
         "covered_blocked_toolkit_structure": 0,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 48,
+        "not_yet_templated_missing_publication_parameters": 44,
         "candidate_needs_full_text_task_audit": 0,
-        "adjacent_out_of_scope": 4,
+        "adjacent_out_of_scope": 8,
     }
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
@@ -706,7 +706,9 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["ferri_2015_jneurosci_itv"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["autism_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["social_coding_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["social_perception_2017"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["social_perception_2017"]["coverage_category"] == "adjacent_out_of_scope"
+    assert "visual–tactile" in records["social_perception_2017"]["scope_review_basis"]
+    assert records["social_perception_2017"]["blocking_constraint_ids"] == []
     assert records["ferroni_2020_tool_observation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["ferroni_2026_pps_plasticity"]["doi"] == "10.1016/j.neuropsychologia.2026.109490"
     assert records["ferroni_2026_pps_plasticity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -780,7 +782,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["spadone_2021_connectivity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["spadone_2021_connectivity"]["blocking_constraint_ids"] == []
     assert records["spadone_2021_connectivity"]["missing_publication_parameters"] == [
-        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
+        "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair. Original Ferri 2015 differs in fMRI experimental repetitions (30 versus 48), runs (five versus eight), and first ITI (4.65 versus 4.56 s); protocol-version relationship remains unresolved."
     ]
     assert records["hobeika_2018_anisotropy"]["coverage_category"] == (
         "not_yet_templated_missing_publication_parameters"
@@ -789,14 +791,22 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "missing_core_soa_iti_baseline_repetition_parameters"
     ]
     assert records["lamia_2026_arm_movement"]["can_recreate_audiotactile_components_now"] is True
-    assert records["serino_2015_peri_trunk_exp1"]["coverage_category"] == "covered_runnable_profile"
-    assert records["serino_2015_peri_trunk_exp1"]["can_recreate_audiotactile_components_now"] is True
-    assert records["serino_2015_peri_trunk_exp1"]["blocking_constraint_ids"] == []
-    assert records["smartphone_rt_methods_2025"]["coverage_category"] == "covered_runnable_profile"
+    for record_id in ("serino_2015_peri_trunk_exp1", "serino_2015_front_back_trunk_exp2"):
+        revised = records[record_id]
+        assert revised["coverage_category"] == "covered_blocked_missing_publication_parameters"
+        assert revised["can_recreate_audiotactile_components_now"] is False
+        assert revised["blocking_constraint_ids"] == [], "source conflict is not a missing native capability"
+        assert revised["current_template_ids"], "retain existing approximation presets"
+        assert revised["missing_publication_parameters"]
+        prior = revised["prior_software_comparison_evidence"]
+        assert prior["status"] == "historical_ledger_references_retained_not_reverified"
+        assert prior["mouse_click"]["source_report"]
+        assert prior["synthetic_contrast"]["source_report"]
+    assert records["smartphone_rt_methods_2025"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
     assert records["smartphone_rt_methods_2025"]["current_template_ids"] == [
         "roussel_2025_dynaspace_mobile_pps"
     ]
-    assert records["smartphone_rt_methods_2025"]["can_recreate_audiotactile_components_now"] is True
+    assert records["smartphone_rt_methods_2025"]["can_recreate_audiotactile_components_now"] is False
     assert records["smartphone_rt_methods_2025"]["blocking_constraint_ids"] == []
     assert records["serino_2015_peri_hand_exp3"]["coverage_category"] == "covered_runnable_profile"
     assert records["serino_2015_peri_hand_exp3"]["can_recreate_audiotactile_components_now"] is True
@@ -821,20 +831,27 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["tonelli_2019_echolocation"]["blocking_constraint_ids"] == []
     assert records["tonelli_2019_echolocation"]["missing_publication_parameters"] == []
     assert records["tonelli_2019_echolocation"]["recreation_caveats"]
-    assert records["serino_2015_front_back_trunk_exp2"]["coverage_category"] == "covered_runnable_profile"
-    assert records["serino_2015_front_back_trunk_exp2"]["can_recreate_audiotactile_components_now"] is True
-    assert records["serino_2015_front_back_trunk_exp2"]["blocking_constraint_ids"] == []
-    assert records["serino_2015_front_back_trunk_exp2"]["missing_publication_parameters"] == []
+    assert "Fourteen" in records["serino_2015_front_back_trunk_exp2"]["missing_publication_parameters"][0]
+    assert "gain" in records["serino_2015_front_back_trunk_exp2"]["missing_publication_parameters"][0]
     assert records["serino_2015_front_back_trunk_exp2"]["recreation_caveats"]
     assert records["galli_2015_wheelchair"]["coverage_category"] == "covered_runnable_profile"
     assert records["galli_2015_wheelchair"]["can_recreate_audiotactile_components_now"] is True
     assert records["galli_2015_wheelchair"]["blocking_constraint_ids"] == []
     assert records["galli_2015_wheelchair"]["missing_publication_parameters"] == []
-    assert records["lerner_2021_3d_boundary"]["coverage_category"] == "covered_runnable_profile"
-    assert records["lerner_2021_3d_boundary"]["can_recreate_audiotactile_components_now"] is True
+    assert records["lerner_2021_3d_boundary"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
+    assert records["lerner_2021_3d_boundary"]["can_recreate_audiotactile_components_now"] is False
     assert records["lerner_2021_3d_boundary"]["blocking_constraint_ids"] == []
-    assert records["lerner_2021_3d_boundary"]["missing_publication_parameters"] == []
+    assert records["lerner_2021_3d_boundary"]["missing_publication_parameters"]
     assert records["lerner_2021_3d_boundary"]["recreation_caveats"]
+    for record_id in ("lerner_2021_3d_boundary", "smartphone_rt_methods_2025"):
+        revised = records[record_id]
+        assert revised["current_template_ids"], "source gaps must not erase available presets"
+        assert revised["coverage_category"] == "covered_blocked_missing_publication_parameters"
+        assert revised["missing_publication_parameters"]
+        prior = revised["prior_software_comparison_evidence"]
+        assert prior["status"] == "historical_ledger_references_retained_not_reverified"
+        assert prior["mouse_click"]["source_report"]
+        assert prior["synthetic_contrast"]["source_report"]
     assert records["taffou_2014_cynophobic_rear_looming"]["coverage_category"] == (
         "covered_blocked_missing_publication_parameters"
     )
@@ -851,12 +868,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     )
     assert records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"] == []
     assert "tactile_discrimination_or_localization_response" not in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
-    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
-    assert records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-    ]
+    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == "adjacent_out_of_scope"
+    assert records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"] == []
+    assert records["finisguerra_2015_moving_sounds_motor"]["retained_frozen_corpus_boundary"] is True
+    assert "sound-position-to-TMS" in records["finisguerra_2015_moving_sounds_motor"]["scope_review_basis"]
+    assert "physical qualification" in records["finisguerra_2015_moving_sounds_motor"]["recreation_caveats"][0]
     assert records["biggio_2017_racket_tool_use"]["coverage_category"] == "covered_runnable_profile"
     assert records["biggio_2017_racket_tool_use"]["current_template_ids"] == [
         "biggio_2017_no_racket",
@@ -901,10 +917,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "artifacts/validation_runs/current_goal_serino_2015_toolless_known_parameter_20260715/"
         "serino_2015_toolless_known_parameter_validation_report.json"
     )
-    assert records["canzoneri_2013_amputation_prosthesis"]["coverage_category"] == "covered_runnable_profile"
-    assert records["canzoneri_2013_amputation_prosthesis"]["can_recreate_audiotactile_components_now"] is True
+    assert records["canzoneri_2013_amputation_prosthesis"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
+    assert records["canzoneri_2013_amputation_prosthesis"]["can_recreate_audiotactile_components_now"] is False
     assert records["canzoneri_2013_amputation_prosthesis"]["blocking_constraint_ids"] == []
-    assert records["canzoneri_2013_amputation_prosthesis"]["missing_publication_parameters"] == []
+    assert "80" in records["canzoneri_2013_amputation_prosthesis"]["missing_publication_parameters"][0]
+    assert records["canzoneri_2013_amputation_prosthesis"]["prior_software_comparison_evidence"]["mouse_click"]["source_report"]
     assert records["canzoneri_2013_amputation_prosthesis"]["known_parameter_validation_report"] == (
         "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/"
         "canzoneri_2013_amputation_known_parameter_validation_report.json"
@@ -925,9 +942,13 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         if "fixed_iti_or_hazard_control_policy" in record["blocking_constraint_ids"]
     } == {"serino_2007_blind_cane_users"}
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
-    assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["serino_2009_tms"]["coverage_category"] == "adjacent_out_of_scope"
+    assert records["serino_2009_tms"]["scope_review_source"] == "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML"
+    assert "sound-to-TMS" in records["serino_2009_tms"]["scope_review_basis"]
+    assert records["serino_2009_tms"]["can_recreate_audiotactile_components_now"] is False
     assert records["serino_2009_tms"]["blocking_constraint_ids"] == []
-    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "adjacent_out_of_scope"
+    assert "sound-to-TMS" in records["avenanti_2012_motor_cortex"]["scope_review_basis"]
     assert records["avenanti_2012_motor_cortex"]["blocking_constraint_ids"] == []
     assert records["barumerli_2026_semantic_looming_auditory_only"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["barumerli_2026_semantic_looming_auditory_only"]["doi"] == "10.1038/s41598-026-48067-4"

@@ -303,7 +303,7 @@ struct NativeOutputOperationGuard {
 pub(crate) enum PreparedAudioPreparation {
     Cached {
         _guard: PreparedAudioPreparationGuard,
-        summary: PreparedAudioSummary,
+        summary: Box<PreparedAudioSummary>,
     },
     Decode {
         _guard: PreparedAudioPreparationGuard,
@@ -846,9 +846,8 @@ impl AppRuntime {
         })
     }
 
-    pub async fn begin_prepared_audio_preparation_async(
+    pub async fn begin_next_prepared_audio_preparation_async(
         &self,
-        block_ordinal: u32,
     ) -> Result<PreparedAudioPreparation, &'static str> {
         self.0
             .prepared_audio_preparation_in_flight
@@ -860,7 +859,7 @@ impl AppRuntime {
         let source = self
             .0
             .authority
-            .prepared_audio_source(block_ordinal)
+            .next_prepared_audio_source()
             .await
             .map_err(|_| "runtime_unavailable")??;
         Ok(match source {
@@ -911,7 +910,11 @@ impl AppRuntime {
             return Ok(());
         };
         let (source, journal) = tauri::async_runtime::spawn_blocking(move || {
-            let journal = NativeEventJournal::create(&source.receipt);
+            let journal = if source.group_attempt.is_some() {
+                NativeEventJournal::create_for_group(&source.receipt, source.group_attempt.as_ref())
+            } else {
+                NativeEventJournal::create(&source.receipt)
+            };
             (source, journal)
         })
         .await
@@ -977,6 +980,73 @@ impl AppRuntime {
                 format!("session_{}", &random_nonce()[..18]),
                 u64::from(random_epoch()),
             )
+            .map_err(|_| "runtime_unavailable")?
+    }
+
+    pub async fn adopt_verified_group_async(
+        &self,
+        verified: pps_session_package::VerifiedPreparedGroup,
+    ) -> Result<RunnerSnapshot, &'static str> {
+        let package =
+            verified_package_projection(verified.parts().first().ok_or("prepared_group_empty")?)?;
+        self.0
+            .authority
+            .adopt_verified_group(
+                verified,
+                package,
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .await
+            .map_err(|_| "runtime_unavailable")?
+    }
+
+    pub async fn native_group_status(
+        &self,
+    ) -> Result<crate::execution_owner::NativeGroupStatus, &'static str> {
+        self.0
+            .authority
+            .group_status()
+            .await
+            .map_err(|_| "runtime_unavailable")
+    }
+
+    pub async fn advance_verified_group_part_async(
+        &self,
+        expected_revision: u64,
+    ) -> Result<RunnerSnapshot, &'static str> {
+        let source = self
+            .0
+            .authority
+            .group_advance_source(expected_revision)
+            .await
+            .map_err(|_| "runtime_unavailable")??;
+        let native_path = source.manifest().path().to_owned();
+        let verified = tauri::async_runtime::spawn_blocking(move || {
+            pps_session_package::verify_prepared_group(&native_path)
+        })
+        .await
+        .map_err(|_| "prepared_group_verification_failed")?
+        .map_err(|_| "prepared_group_verification_failed")?;
+        if source.as_ref() != &verified {
+            return Err("prepared_group_replaced");
+        }
+        // The V1 group has exactly two ordered parts; no UI path or part ID selects the successor.
+        let package =
+            verified_package_projection(verified.parts().get(1).ok_or("prepared_group_complete")?)?;
+        self.0
+            .authority
+            .advance_verified_group(
+                expected_revision,
+                source,
+                verified,
+                package,
+                PairingSecret::generate(),
+                format!("session_{}", &random_nonce()[..18]),
+                u64::from(random_epoch()),
+            )
+            .await
             .map_err(|_| "runtime_unavailable")?
     }
 
@@ -1525,6 +1595,8 @@ fn validate_owner_request(session_id: &str, owner_token: &str) -> Result<(), Rem
 #[cfg(test)]
 mod tests {
     use super::*;
+    include!("instruction_tests.rs");
+    include!("full_pipeline_tests.rs");
     use crate::{
         latency_diagnostics::{LatencyStage, TraceOutcome},
         native_output::{
@@ -1771,6 +1843,223 @@ mod tests {
                 "journal did not reach the expected authority state"
             );
             std::thread::sleep(Duration::from_millis(2));
+        }
+    }
+
+    #[test]
+    fn out_of_order_audio_cache_cannot_reserve_native_output() {
+        let control = Arc::new(FakeControl::default());
+        let runtime = AppRuntime::with_native_output(fake_coordinator(&control));
+        let (root, verified) = verified_audio_package("P001", 2);
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        let (guard, source) = begin_audio_decode(&runtime, 1);
+        runtime
+            .cache_prepared_audio(prepare_verified_audio(source).unwrap())
+            .unwrap();
+        tauri::async_runtime::block_on(runtime.ensure_execution_journal()).unwrap();
+        drop(guard);
+        let inventory =
+            tauri::async_runtime::block_on(runtime.start_native_output_enumerate().unwrap())
+                .unwrap()
+                .unwrap();
+        let rejected = tauri::async_runtime::block_on(
+            runtime
+                .start_native_output_reserve(fake_reserve_request(&inventory))
+                .unwrap(),
+        )
+        .unwrap()
+        .unwrap_err();
+        assert_eq!(rejected.code, "native_block_order_invalid");
+        assert!(!runtime
+            .snapshot()
+            .unwrap()
+            .allowed_actions
+            .contains(&Action::TargetArm));
+        drop(runtime);
+        // The journal closes asynchronously; preserve this partial attempt in
+        // the test temp directory for diagnosis rather than racing its writer.
+        assert!(root.is_dir());
+    }
+
+    #[test]
+    #[ignore = "requires a real stereo f32 output device; renders silent fixture samples"]
+    fn real_single_block_package_completes_through_native_dispatch() {
+        run_silent_native_package(1);
+    }
+
+    #[test]
+    #[ignore = "requires a real stereo f32 output device; renders silent fixture samples"]
+    fn real_multiblock_package_completes_in_manifest_order() {
+        // Exercise an interior block transition before the final completion gate.
+        run_silent_native_package(3);
+    }
+
+    fn run_silent_native_package(block_count: u32) {
+        let runtime = AppRuntime::new();
+        let (root, initial) = verified_audio_package("P001", block_count);
+        let manifest_path = initial.manifest_path().to_path_buf();
+        drop(initial);
+        for ordinal in 0..block_count {
+            let mut silent_wav = pcm16_wav_bytes(48_000, 4 + ordinal, 0);
+            silent_wav[44..].fill(0);
+            fs::write(root.join(format!("block-{ordinal}.wav")), silent_wav).unwrap();
+        }
+        let verified = verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap();
+        runtime.adopt_verified_session(verified).unwrap();
+        let setup = runtime
+            .dispatch_local(
+                Action::SetupSubmit,
+                serde_json::json!({
+                    "participant_code": "P001", "age": 30, "handedness": "right",
+                    "gender": "other", "name_sharing_opt_in": false,
+                    "part_labels": {"1": "Synthetic test", "2": "Unused part"}
+                }),
+            )
+            .unwrap();
+        assert_eq!(setup.status, AppliedStatus::Accepted, "{}", setup.reason);
+        compile_current_execution(&runtime);
+        for ordinal in 0..block_count {
+            let preparation = tauri::async_runtime::block_on(
+                runtime.begin_next_prepared_audio_preparation_async(),
+            )
+            .unwrap();
+            let (guard, source) = match preparation {
+                PreparedAudioPreparation::Decode { _guard, source } => (_guard, source),
+                _ => panic!("each next block must be decoded exactly once"),
+            };
+            runtime
+                .cache_prepared_audio(prepare_verified_audio(source).unwrap())
+                .unwrap();
+            tauri::async_runtime::block_on(runtime.ensure_execution_journal()).unwrap();
+            drop(guard);
+            assert_eq!(
+                runtime
+                    .dispatch_local(Action::TargetArm, serde_json::json!({}))
+                    .unwrap()
+                    .reason,
+                "package_execution_adapter_not_ready"
+            );
+
+            let inventory =
+                tauri::async_runtime::block_on(runtime.start_native_output_enumerate().unwrap())
+                    .unwrap()
+                    .unwrap();
+            let (device, config) = inventory
+                .devices
+                .iter()
+                .find_map(|device| {
+                    device
+                        .f32_configs
+                        .iter()
+                        .find(|config| {
+                            config.channels == 2
+                                && config.minimum_sample_rate_hz <= 48_000
+                                && config.maximum_sample_rate_hz >= 48_000
+                        })
+                        .map(|config| (device, config))
+                })
+                .expect("no stereo 48 kHz native output route is available");
+            tauri::async_runtime::block_on(
+                runtime
+                    .start_native_output_reserve(NativeOutputReserveRequest {
+                        policy_generation: inventory.policy_generation.clone(),
+                        service_generation: inventory.service_generation.clone(),
+                        inventory_generation: inventory.inventory_generation.clone(),
+                        device_ordinal: device.device_ordinal,
+                        config_ordinal: config.config_ordinal,
+                        channels: 2,
+                        sample_rate_hz: 48_000,
+                        buffer_frames: None,
+                        warmup_timeout_ms: 1000,
+                    })
+                    .unwrap(),
+            )
+            .unwrap()
+            .unwrap();
+            let prepared = runtime.snapshot().unwrap();
+            assert!(!prepared.safety.local_armed);
+            assert!(prepared.allowed_actions.contains(&Action::TargetArm));
+            assert_eq!(
+                runtime
+                    .dispatch_local(Action::TargetArm, serde_json::json!({}))
+                    .unwrap()
+                    .status,
+                AppliedStatus::Accepted
+            );
+            assert_eq!(
+                runtime
+                    .dispatch_local(Action::PartStart, serde_json::json!({"part_number": 1}))
+                    .unwrap()
+                    .status,
+                AppliedStatus::Accepted
+            );
+            let deadline = std::time::Instant::now() + Duration::from_secs(5);
+            loop {
+                let snapshot = runtime.snapshot().unwrap();
+                if ordinal + 1 < block_count && snapshot.run.phase == RunnerPhase::Prepared {
+                    assert!(!snapshot.run.complete);
+                    assert!(!snapshot.safety.local_armed);
+                    assert_eq!(snapshot.active_block.display_block_index, Some(ordinal + 1));
+                    assert!(fs::read_dir(&root).unwrap().all(|entry| !entry
+                        .unwrap()
+                        .file_name()
+                        .to_string_lossy()
+                        .ends_with(".results.json")));
+                    break;
+                } else if snapshot.run.complete {
+                    assert_eq!(
+                        ordinal + 1,
+                        block_count,
+                        "only the final block may complete a session"
+                    );
+                    assert_eq!(snapshot.run.phase, RunnerPhase::Completed);
+                    assert!(!snapshot.safety.publication_ready);
+                    break;
+                }
+                assert!(
+                    std::time::Instant::now() < deadline,
+                    "native fixture did not complete: {:?}",
+                    snapshot.run
+                );
+                std::thread::sleep(Duration::from_millis(2));
+            }
+        }
+        let manifests: Vec<_> = fs::read_dir(&root)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .filter(|path| {
+                path.file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .ends_with(".results.json")
+            })
+            .collect();
+        assert_eq!(manifests.len(), 1);
+        let manifest: Value = serde_json::from_slice(&fs::read(&manifests[0]).unwrap()).unwrap();
+        assert_eq!(manifest["completion"], "complete");
+        assert_eq!(manifest["timingQualification"], "unqualified");
+        let csv = fs::read_to_string(root.join(manifest["datasetFile"].as_str().unwrap())).unwrap();
+        assert_eq!(csv.lines().count(), block_count as usize + 1);
+        let events =
+            fs::read_to_string(root.join(manifest["eventsFile"].as_str().unwrap())).unwrap();
+        assert!(events.contains("audio.control.applied"));
+        assert!(events.contains("audio.final-frame-submitted"));
+        assert!(events.contains("trial.scored"));
+        let scored: Vec<Value> = events
+            .lines()
+            .map(|line| serde_json::from_str::<Value>(line).unwrap())
+            .filter(|event| event["eventType"] == "trial.scored")
+            .collect();
+        assert_eq!(scored.len(), block_count as usize);
+        for (ordinal, event) in scored.iter().enumerate() {
+            assert_eq!(event["payload"]["trial_uid"], format!("B{ordinal}_T1"));
+        }
+        drop(runtime);
+        if std::env::var("PPS_KEEP_NATIVE_TEST_ARTIFACTS").as_deref() == Ok("1") {
+            eprintln!("native fixture results: {}", manifests[0].display());
+        } else {
+            fs::remove_dir_all(root).unwrap();
         }
     }
 
@@ -2383,6 +2672,25 @@ mod tests {
     }
 
     #[test]
+    fn split_part_cannot_silently_run_as_a_complete_experiment() {
+        let runtime = AppRuntime::new();
+        let (root, original) = verified_audio_package("P001", 1);
+        let path = original.manifest_path();
+        let mut manifest: serde_json::Value =
+            serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
+        manifest["part_split_schema"] = serde_json::json!("pps-runner-part-split.v1");
+        fs::write(path, serde_json::to_vec(&manifest).unwrap()).unwrap();
+        let verified = verify_prepared_session(VerificationRequest::new(path)).unwrap();
+        runtime.adopt_verified_session(verified).unwrap();
+        compile_current_execution(&runtime);
+        assert_eq!(
+            runtime.begin_prepared_audio_preparation(0).err().unwrap(),
+            "prepared_group_execution_required"
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn prepared_audio_capture_is_denied_while_a_demo_run_is_active() {
         let runtime = locally_ready_runtime();
         runtime
@@ -2514,7 +2822,7 @@ mod tests {
         match runtime.begin_prepared_audio_preparation(0).unwrap() {
             PreparedAudioPreparation::Cached {
                 summary: cached, ..
-            } => assert_eq!(cached, first),
+            } => assert_eq!(*cached, first),
             PreparedAudioPreparation::Decode { .. } => {
                 panic!("an exact sequential cache hit must not decode again")
             }

@@ -1,11 +1,14 @@
 mod event_journal;
 mod execution_owner;
 mod latency_diagnostics;
+#[path = "../../../native_file_dialogs.rs"]
+mod native_file_dialogs;
 mod native_output;
 mod native_playback;
 mod prepared_audio;
 mod prepared_execution;
 mod remote;
+mod result_recovery;
 mod runtime;
 mod trial_capture;
 
@@ -17,7 +20,9 @@ use native_output::{
     NativeOutputReservation, NativeOutputReserveRequest, NativeOutputStatus,
 };
 use pps_contracts::{Action, Applied, AppliedStatus, RunnerSnapshot};
-use pps_session_package::{verify_prepared_session, PreparedSessionSummary, VerificationRequest};
+use pps_session_package::{
+    verify_prepared_group, verify_prepared_session, PreparedSessionSummary, VerificationRequest,
+};
 use prepared_audio::{prepare_verified_audio, PreparedAudioError, PreparedAudioSummary};
 use prepared_execution::{
     compile_prepared_execution, PreparedExecutionError, PreparedExecutionSummary,
@@ -62,6 +67,8 @@ struct PreparedSessionSelection {
     cancelled: bool,
     summary: Option<PreparedSessionSummary>,
     snapshot: RunnerSnapshot,
+    results_assessment: Option<result_recovery::NativeResultsAssessment>,
+    group_results_assessment: Option<result_recovery::NativeGroupResultsAssessment>,
 }
 
 #[tauri::command]
@@ -121,7 +128,7 @@ async fn configure_remote(
     state: tauri::State<'_, AppRuntime>,
 ) -> Result<RemoteStatus, String> {
     if enabled && lan_listener {
-        remote::ensure_started(state.inner().clone(), companion_web_root(&app))?;
+        remote::ensure_started(state.inner().clone(), companion_web_root(&app)?)?;
     }
     state.configure_remote_async(enabled, allow_abort).await
 }
@@ -136,6 +143,26 @@ async fn select_prepared_session(
     app: tauri::AppHandle,
     window: tauri::WebviewWindow,
     state: tauri::State<'_, AppRuntime>,
+) -> Result<PreparedSessionSelection, PreparedSessionCommandError> {
+    select_prepared_package(app, window, state, false).await
+}
+
+#[tauri::command]
+async fn select_prepared_group(
+    app: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<PreparedSessionSelection, PreparedSessionCommandError> {
+    select_prepared_package(app, window, state, true).await
+}
+
+// Package kind is fixed by the command, and only the native chooser can supply
+// a path. Group verification never falls back to accepting a single part.
+async fn select_prepared_package(
+    app: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+    group: bool,
 ) -> Result<PreparedSessionSelection, PreparedSessionCommandError> {
     require_main_window(&window)
         .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
@@ -154,7 +181,14 @@ async fn select_prepared_session(
     let (sender, receiver) = tokio::sync::oneshot::channel();
     app.dialog()
         .file()
-        .add_filter("PPS prepared session", &["json"])
+        .add_filter(
+            if group {
+                "PPS prepared session group"
+            } else {
+                "PPS prepared session"
+            },
+            &["json"],
+        )
         .pick_file(move |selection| {
             let _ = sender.send(selection);
         });
@@ -169,6 +203,8 @@ async fn select_prepared_session(
         return Ok(PreparedSessionSelection {
             cancelled: true,
             summary: None,
+            results_assessment: None,
+            group_results_assessment: None,
             snapshot: runtime
                 .snapshot_async()
                 .await
@@ -182,23 +218,74 @@ async fn select_prepared_session(
         )
     })?;
 
-    let verified = tauri::async_runtime::spawn_blocking(move || {
-        verify_prepared_session(VerificationRequest::new(&manifest_path))
-    })
-    .await
-    .map_err(|_| PreparedSessionCommandError::runtime())?
-    .map_err(|error| PreparedSessionCommandError::new(error.code(), error.public_message()))?;
-    let summary = verified.summary().clone();
-    let snapshot = runtime
-        .adopt_verified_session_async(verified)
+    let (verified, verified_group, results_assessment, group_results_assessment) =
+        tauri::async_runtime::spawn_blocking(move || {
+            let verified_group = if group {
+                Some(verify_prepared_group(&manifest_path)?)
+            } else {
+                None
+            };
+            let verified = match &verified_group {
+                Some(receipt) => receipt.parts()[0].clone(), // verifier guarantees two ordered parts
+                None => verify_prepared_session(VerificationRequest::new(&manifest_path))?,
+            };
+            let assessment = result_recovery::assess_native_results(&verified);
+            let group_assessment = verified_group
+                .as_ref()
+                .map(result_recovery::assess_native_group_results);
+            Ok::<_, pps_session_package::VerificationError>((
+                verified,
+                verified_group,
+                assessment,
+                group_assessment,
+            ))
+        })
         .await
-        .map_err(prepared_session_adoption_error)?;
+        .map_err(|_| PreparedSessionCommandError::runtime())?
+        .map_err(|error| PreparedSessionCommandError::new(error.code(), error.public_message()))?;
+    let summary = verified.summary().clone();
+    let snapshot = match verified_group {
+        Some(receipt) => runtime.adopt_verified_group_async(receipt).await,
+        None => runtime.adopt_verified_session_async(verified).await,
+    }
+    .map_err(prepared_session_adoption_error)?;
 
     Ok(PreparedSessionSelection {
         cancelled: false,
         summary: Some(summary),
         snapshot,
+        results_assessment: Some(results_assessment),
+        group_results_assessment,
     })
+}
+
+#[tauri::command]
+async fn native_group_status(
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<execution_owner::NativeGroupStatus, PreparedSessionCommandError> {
+    require_main_window(&window)
+        .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
+    state
+        .native_group_status()
+        .await
+        .map_err(prepared_session_adoption_error)
+}
+
+#[tauri::command]
+async fn advance_prepared_group_part(
+    expected_revision: u64,
+    window: tauri::WebviewWindow,
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<RunnerSnapshot, PreparedSessionCommandError> {
+    require_main_window(&window)
+        .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
+    // Native authority selects/reverifies the sole successor and requires the
+    // prior part's durable result receipt. No part identity crosses this boundary.
+    state
+        .advance_verified_group_part_async(expected_revision)
+        .await
+        .map_err(prepared_session_adoption_error)
 }
 
 #[tauri::command]
@@ -238,11 +325,11 @@ async fn prepare_first_audio_block(
         .map_err(|error| PreparedSessionCommandError::new(&error.code, &error.message))?;
     let runtime = state.inner().clone();
     let preparation = runtime
-        .begin_prepared_audio_preparation_async(0)
+        .begin_next_prepared_audio_preparation_async()
         .await
         .map_err(prepared_audio_runtime_error)?;
     let (_preparation_guard, summary) = match preparation {
-        PreparedAudioPreparation::Cached { _guard, summary } => (_guard, summary),
+        PreparedAudioPreparation::Cached { _guard, summary } => (_guard, *summary),
         PreparedAudioPreparation::Decode { _guard, source } => {
             // Hash/decode outside the actor. Its completion must still match
             // every package/run/block/schedule/preparation/receipt fence.
@@ -274,6 +361,18 @@ fn prepared_audio_preparation_error(error: PreparedAudioError) -> PreparedSessio
 
 fn prepared_audio_runtime_error(reason: &'static str) -> PreparedSessionCommandError {
     match reason {
+        "prepared_group_execution_required" => PreparedSessionCommandError::new(
+            reason,
+            "Select the verified session group manifest to run both parts in their saved order.",
+        ),
+        "native_condition_transition_instruction_required" => PreparedSessionCommandError::new(
+            reason,
+            "This mixed-condition package needs a verified transition instruction before native execution.",
+        ),
+        "native_stages_complete" => PreparedSessionCommandError::new(
+            reason,
+            "This part has no remaining instruction or block audio to prepare.",
+        ),
         "prepared_audio_preparation_in_progress" => PreparedSessionCommandError::new(
             reason,
             "A native audio preload is already in progress.",
@@ -300,7 +399,7 @@ fn prepared_audio_runtime_error(reason: &'static str) -> PreparedSessionCommandE
         ),
         "prepared_audio_block_missing" => PreparedSessionCommandError::new(
             reason,
-            "The verified package does not contain a first audio block.",
+            "The verified package has no remaining audio block to prepare.",
         ),
         "prepared_audio_sample_rate_invalid" => PreparedSessionCommandError::new(
             reason,
@@ -354,6 +453,26 @@ fn prepared_execution_runtime_error(reason: &'static str) -> PreparedSessionComm
 
 fn prepared_session_adoption_error(reason: &'static str) -> PreparedSessionCommandError {
     match reason {
+        "stale_revision" => PreparedSessionCommandError::new(
+            reason,
+            "Runner changed while this action was pending. Refresh its state and try again.",
+        ),
+        "prepared_group_part_incomplete" => PreparedSessionCommandError::new(
+            reason,
+            "Finish the current part and save its results before advancing.",
+        ),
+        "prepared_group_replaced" | "prepared_group_verification_failed" => {
+            PreparedSessionCommandError::new(
+                reason,
+                "The prepared group changed or failed verification. Select a newly verified group.",
+            )
+        }
+        "prepared_group_missing" | "prepared_group_empty" | "prepared_group_complete" => {
+            PreparedSessionCommandError::new(
+                reason,
+                "There is no next part available in the selected prepared group.",
+            )
+        }
         "cannot_replace_active_package" => PreparedSessionCommandError::new(
             reason,
             "Stop the active run before selecting another prepared session.",
@@ -516,7 +635,7 @@ async fn remote_session_revoke(
 pub fn run() {
     let runtime = AppRuntime::new();
     tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
+        .plugin(native_file_dialogs::init())
         .manage(runtime)
         .setup(|app| {
             // Observe the existing authority; never run or time an experiment
@@ -555,6 +674,9 @@ pub fn run() {
             configure_remote,
             rotate_pairing,
             select_prepared_session,
+            select_prepared_group,
+            native_group_status,
+            advance_prepared_group_part,
             inspect_prepared_execution,
             prepare_first_audio_block,
             remote_session_claim,
@@ -572,12 +694,17 @@ pub fn run() {
         .expect("error while running PPS Experiment Runner preview");
 }
 
-fn companion_web_root(app: &tauri::AppHandle) -> PathBuf {
-    if cfg!(debug_assertions) {
-        return PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../compiled");
+fn companion_web_root(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    #[cfg(debug_assertions)]
+    {
+        let _ = app;
+        Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../compiled"))
     }
-    app.path()
-        .resource_dir()
-        .map(|root| root.join("web"))
-        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../compiled"))
+    #[cfg(not(debug_assertions))]
+    {
+        app.path()
+            .resource_dir()
+            .map(|root| root.join("web"))
+            .map_err(|_| "The installed browser companion resources are unavailable.".to_owned())
+    }
 }

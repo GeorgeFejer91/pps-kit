@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 28,
+      "value": 29,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -136,17 +136,20 @@
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "jitter_values_ms",
-      "status": "defaulted",
-      "value": [],
-      "note": "No explicit jitter box is encoded."
+      "status": "reported",
+      "value": [
+        1000,
+        1000
+      ],
+      "note": "Explicit jitter values encoded."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "iti_jitter_policy",
-      "status": "defaulted",
-      "value": "no explicit Segment 2 ITI/jitter box",
-      "note": "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."
+      "status": "reported",
+      "value": "jitter/iti box",
+      "note": "Segment 2 encodes explicit ITI/jitter timing values."
     },
     {
       "segment": "3",
@@ -177,7 +180,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_mode",
       "status": "reported",
-      "value": "tactile_only",
+      "value": "custom",
       "note": "Baseline strategy is encoded."
     },
     {
@@ -270,23 +273,23 @@
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
-      "profile_metadata": "assets/preloads/canzoneri_2013_tool_use_reshaping/01_profile/profile_metadata.json",
-      "profile_parameters_manifest": "assets/preloads/canzoneri_2013_tool_use_reshaping/01_profile/profile_parameters_manifest.json"
+      "profile_metadata": "packages/pps-resources/assets/preloads/canzoneri_2013_tool_use_reshaping/01_profile/profile_metadata.json",
+      "profile_parameters_manifest": "packages/pps-resources/assets/preloads/canzoneri_2013_tool_use_reshaping/01_profile/profile_parameters_manifest.json"
     },
     "02_looming_stimuli": {
-      "stimulus_sources": "assets/preloads/canzoneri_2013_tool_use_reshaping/02_looming_stimuli/stimulus_sources.json",
-      "trajectory_inventory": "assets/preloads/canzoneri_2013_tool_use_reshaping/02_looming_stimuli/trajectory_inventory.json",
+      "stimulus_sources": "packages/pps-resources/assets/preloads/canzoneri_2013_tool_use_reshaping/02_looming_stimuli/stimulus_sources.json",
+      "trajectory_inventory": "packages/pps-resources/assets/preloads/canzoneri_2013_tool_use_reshaping/02_looming_stimuli/trajectory_inventory.json",
       "asset_count": 2
     },
     "03_baseline_strategy": {
-      "baseline_strategy": "assets/preloads/canzoneri_2013_tool_use_reshaping/03_baseline_strategy/baseline_strategy.json"
+      "baseline_strategy": "packages/pps-resources/assets/preloads/canzoneri_2013_tool_use_reshaping/03_baseline_strategy/baseline_strategy.json"
     },
     "04_trial_designer": {
-      "trial_design": "assets/preloads/canzoneri_2013_tool_use_reshaping/04_trial_designer/trial_design.json",
+      "trial_design": "packages/pps-resources/assets/preloads/canzoneri_2013_tool_use_reshaping/04_trial_designer/trial_design.json",
       "trial_row_count": 1
     },
     "05_run_setup": {
-      "run_defaults": "assets/preloads/canzoneri_2013_tool_use_reshaping/05_run_setup/run_defaults.json",
+      "run_defaults": "packages/pps-resources/assets/preloads/canzoneri_2013_tool_use_reshaping/05_run_setup/run_defaults.json",
       "block_count": 2,
       "participant_count": 12
     },
@@ -316,6 +319,10 @@
     {
       "field": "expected outcome",
       "source": "2013 Results/Figure 3 report a post-tool-use shift of the fitted PPS central point toward far space; Experiment 3 pointing control reports no comparable shift."
+    },
+    {
+      "field": "trial silence",
+      "source": "Canzoneri et al. 2013, Experimental Brain Research, author-uploaded final-layout article pp. 27-28 (DOI 10.1007/s00221-013-3532-2): 3000-ms sound preceded and followed by 1000-ms silence. PPS-specific pulse duration and additional ITI are not specified here."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

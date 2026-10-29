@@ -1,7 +1,7 @@
 {
   "schema": "pps-preload-baseline-segment.v1",
   "template_id": "canzoneri_2013_tool_use_reshaping",
-  "baseline_strategy": "tactile_only",
+  "baseline_strategy": "custom",
   "include_baseline_trials": true,
   "baseline_trials_exact": null,
   "baseline_trial_percentage": 0.0,

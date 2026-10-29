@@ -2,11 +2,11 @@
   "schema": "pps-paper-metadata-manual-review.v1",
   "record_id": "serino_2015_peri_hand_exp3",
   "citation_short": "Serino et al. (2015), Exp. 3",
-  "review_date": "2026-06-16",
+  "review_date": "2026-10-27",
   "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
   "confidence_score": 0.87,
   "confidence_label": "high_confidence_extraction",
-  "confidence_basis": "Main PDF, OpenDataLoader output, pypdf fallback extraction, rendered figure/methods pages, and the downloaded supplement DOC/text extraction were checked. Exp. 3 is separable from the other Serino 2015 experiments: it uses the two-speaker hand-centered setup, five distances, 22 cm/s motion, hand dorsum vibration, reported trial families, D1/D5 baselines, 500-700 ms ITI jitter, 16 repetitions, and 208 total trials. Remaining uncertainty concerns exact original sound files, exact audio duration/SOA milliseconds, hand side, block/order rules, response timeout, and exact catch-direction composition.",
+  "confidence_basis": "Primary article and rendered supplement reviewed; high extraction confidence does not imply internally consistent parameters or exact reconstruction. Ten protocol records and source conflicts are explicit in the compact review.",
   "profile_recreation_assessment": {
     "assessment": "possible_with_caveats",
     "reason": "Experiment 3 can be recreated as a lateralized peri-hand looming/receding pink-noise task using the reported two-speaker near/far geometry, 22 cm/s motion, D1-D5 distance table, hand-dorsum vibrotactile target, D1/D5 tactile-only baselines, sound-only catches, and 208-trial formula. Exact original WAV/envelope files and some order/response details remain approximations."
@@ -61,6 +61,12 @@
       "source": "tmp/pdfs/serino_2015_exp3_review/page-03.png; tmp/pdfs/serino_2015_exp3_methods/page-11.png through page-13.png",
       "status": "reviewed_not_tracked",
       "scope": "Temporary rendered pages checked for visual geometry, methods wording, and design/count paragraphs; page images were not committed."
+    },
+    {
+      "source_type": "primary_article_and_rendered_supplement",
+      "source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "status": "reviewed",
+      "scope": "Fresh full Methods and rendered supplementary pp. 2-9; compact experiment-specific reviews supersede unresolved legacy reconstruction claims."
     }
   ],
   "review_attempts": [
@@ -101,9 +107,10 @@
     }
   ],
   "field_status_counts": {
-    "derived": 4,
+    "derived": 3,
     "not_reported_after_review": 3,
-    "reported": 18
+    "reported": 16,
+    "reported_with_caveat": 3
   },
   "segment_field_audit": {
     "segment_1_stimulus_reconstruction": {
@@ -136,11 +143,11 @@
         "evidence_note": "The hand was at shoulder width and not on the midline; Figure 1 provides the shared 2-speaker near/far geometry."
       },
       "stimulus_duration": {
-        "status": "derived",
-        "value": "Full apparent-motion path duration is about 4.55 s for a 100 cm near-far distance at 22 cm/s.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
-        "page_or_section": "PDF p.11, Acoustic Stimuli",
-        "evidence_note": "Derived from reported path distance and speed; no separate Exp. 3 audio-file duration is printed."
+        "status": "reported_with_caveat",
+        "value": "Nominal path scale and speed constrain an approximate traversal duration, but the audio onset/path origin and endpoint holds are not uniquely established.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "No exact duration or SOA is accepted from the sampled spatial span alone."
       },
       "stimulus_speed": {
         "status": "reported",
@@ -194,11 +201,11 @@
         "evidence_note": "No explicit block count, block structure, or trial randomization algorithm was found."
       },
       "iti_jitter_policy": {
-        "status": "reported",
-        "value": "Inter-trial intervals were randomly shuffled between 500 and 700 ms.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
-        "page_or_section": "PDF p.13, Design and Analysis",
-        "evidence_note": "Reported as a general rule after the experiment-specific trial-count formulas."
+        "status": "reported_with_caveat",
+        "value": "Intertrial interval 500–700 ms, randomly shuffled; exact endpoints and discrete/continuous distribution unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "An ITI range is not an exact audio-padding or response-to-next-onset rule."
       },
       "response_window": {
         "status": "not_reported_after_review",
@@ -224,11 +231,11 @@
         "evidence_note": "Methods also report 3 V, 60 mA, 9000 rpm, 5 g, 113 mm2 surface area, and 50 ms spin-up."
       },
       "soa_table": {
-        "status": "reported",
-        "value": "Five distance-at-touch values D1-D5: 5, 27, 50, 71, and 93 cm; temporal offsets follow 22 cm/s motion and reverse for looming/receding.",
-        "source_file": "artifacts/paper_metadata_audit/publication_pdfs/serino_2015_peri_hand_exp3.pdf",
-        "page_or_section": "PDF p.3, Experiment 3; p.11 Acoustic Stimuli",
-        "evidence_note": "Exact SOA milliseconds are not separately printed, but the distance table and speed are reported."
+        "status": "reported_with_caveat",
+        "value": "Distance-at-touch samples 5, 27, 50, 71, 93 cm, with nominal 22-cm/s auditory motion; exact millisecond SOAs are unresolved.",
+        "source_file": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+        "page_or_section": "Primary Methods; rendered supplement pp. 2-9",
+        "evidence_note": "The sample span and nominal speaker/path extent differ. Do not silently choose an origin or collapse opposite-side positions into one center."
       },
       "baseline_strategy": {
         "status": "reported",
@@ -298,5 +305,5 @@
     "Exact trial-order randomization, block count, and response timeout/window are not reported.",
     "Catch count is derived from the formula residual and total; catch split by looming/receding direction is not explicitly reported."
   ],
-  "next_manual_action": "Strong candidate for a runnable lateralized peri-hand two-speaker/digital two-source profile, with original WAV/envelope files, hand side, exact SOA milliseconds, catch-direction split, and block/order rules treated as approximations unless author materials become available."
+  "next_manual_action": "Resolve the explicitly recorded source conflicts and timing/asset gaps before claiming an exact reconstruction. Compact child reviews preserve all ten protocol boundaries; native qualification is not assessed."
 }

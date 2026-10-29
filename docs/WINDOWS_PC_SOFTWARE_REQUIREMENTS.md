@@ -1,9 +1,13 @@
 # Windows PC Software Requirements
 
-This document is the install checklist for a lab PC that will run the
-Peripersonal Space Toolkit experiment runner, LSL logging, and the internal
+This document is the V1 source-development checklist for a lab PC that will run
+the Python/PySide experiment runner, LSL logging, and the internal
 latency/reliability validation protocols. It separates package dependencies
 from vendor drivers and external recording tools.
+
+Installed V1 packages embed their Python runtime. The separate
+[Rust/Tauri native preview](NATIVE_WINDOWS_PREVIEW.md) ships without Python;
+the Python installation commands below are not its end-user prerequisites.
 
 Generated installers and downloaded third-party binaries must stay in ignored
 local folders such as `local_data/software_installers/` and

@@ -9,7 +9,7 @@ The corpus is a maximum-coverage, multi-index PPS-explicit snapshot with
 citation context. It is not a claim that every PPS publication is present. The
 generator projects this broad input into `publication_network.v3.json`, a
 focused `pps-publication-citation-network.v3` browser asset containing 94
-non-review audio-tactile publications and 750 tracked citation links. The
+non-review audio-tactile candidate publications and 750 tracked citation links. The
 generator preserves all 571 induced links in the frozen snapshot and adds the
 127 non-overlapping links in
 `openalex_audiotactile_citation_overlay.20260808.json`. That overlay records an
@@ -25,11 +25,21 @@ publications after review removal) or a later exact-DOI Toolkit literature audit
 internally consistent canonical DOI link and provider-backed citation metadata, leaving 90
 legacy-confirmed records plus the 4 later additions. A finite provider count of
 zero is valid metadata. Toolkit readiness is an encoding, not an inclusion gate.
+The frozen publication set also retains reviewed adjacent boundaries. The
+coverage source explicitly marks Finisguerra (2015) as a retained frozen boundary:
+its auditory-TMS/MEP endpoint is outside direct audio-tactile replication, while
+its publication identity and citation links remain in the map. That flag only
+preserves membership; the record stays out of scope and gains no readiness.
 
-The detailed Toolkit assessment remains 15 runnable, 49 supported but parameter-
-incomplete, 29 not yet assessed, and 1 adjacent/scope-conflict publication. The
-map reduces that to two visual states: 15 implemented and 79 not implemented
-yet. The default deterministic force layout uses one continuous rule for every
+The legacy Toolkit assessment contains 13 publication nodes labelled runnable,
+48 supported but parameter-incomplete, 29 not yet assessed, and 4 adjacent/scope-
+conflict publications. These are coarse template/encoding labels, not scientific parameter
+completion or native qualification. The 2026-10-27 regeneration incorporates the
+existing Canzoneri tool-use review (10.1007/s00221-013-3532-2; review dated
+2026-07-16): one additional reviewed publication and record, with two combined
+experiment orientation rows that still require experiment-specific checking.
+No citation nodes or edges were added. The legacy map reduces its status to
+13 implemented and 81 not implemented yet. The default deterministic force layout uses one continuous rule for every
 paper: citation neighbours attract, all nodes repel and share weak centering,
 and radius-aware collision separation keeps them distinct on a square canvas.
 The declared normalized edge-to-edge clearance is `0.015`. The 91-node main
@@ -58,6 +68,58 @@ node For-AI/research/literature/tools/build_publication_network_asset.mjs \
 Use `--source-snapshot`, `--snapshot-output`, and `--output` to direct inputs
 and outputs to temporary paths for deterministic validation.
 
+## Public study evidence
+
+`apps/designer/frontend/publication_study_reviews.v1.json` is a separate
+`pps-publication-study-reviews.v1` projection. Its authority runs in one direction:
+network identities → study registry and primary reviews → the compact
+component-gated resolver → public review JSON. It never feeds the network
+generator. Rebuild it with the existing review-matrix command:
+
+```bash
+node For-AI/research/literature/tools/build_publication_parameter_review_matrix.mjs
+```
+
+The public JSON exposes `publications` keyed by `networkNodeId` and `studies`
+keyed by stable `studyRowId`, with eleven `contracts` per registered row. Each
+contract carries its final evidence `status`, short factual `value`, separately
+labelled `compositeValue`, source DOI URL, page/section, review date, missing
+components and component evidence. `sourceUrl` preserves the DOI identity;
+`evidenceSourceUrl` links the actual reviewed public source when a single safe
+HTTP(S) pointer exists, and `sourceType` identifies its evidence layer/version.
+Local, composite and credentialed source pointers are omitted, not published.
+`templateIds` means a profile link exists;
+it does not alter `parameterStatusCounts`. `studyRowAliases` resolves a superseded placeholder to its explicit experiment
+children; a one-to-many alias is not equivalence to either child alone.
+`nativeQualification` remains
+`not_assessed` even for fully resolved paper evidence. Online actions are
+limited to `prepare` and `preview`.
+
+`inventoryAudit` separately counts registered inventories, Methods-backed
+inventories, audited access blockers, and publications with eleven explicit
+source dispositions for every retained row. Its machine-readable row ledger is
+`publication_inventory_audit.csv` beside the compact matrices. Registry presence,
+abstract counts and inherited coarse fields cannot pass that audit gate.
+An eligible inventoried author version may retain an explicit final-comparison
+gap; an inaccessible source requires dated actual attempts and an unresolved
+publication review unit. Neither disposition establishes runnable replication
+or native qualification. New registry entries need an explicit
+`inventory_evidence_status`; missing classification stays open.
+Each `publications[]` entry also exposes an `inventoryAudit` object with
+`registered`, `evidenceStatus`, `inventoryStatus`, `studyRowCount`,
+`rowsWithElevenSourceDispositions`, `allRowsHaveElevenSourceDispositions`, and
+`inventoryAndContractsAudited`. The three yes/no decisions are JSON booleans;
+the two row counts are integers. This public projection omits the private source
+paths that can appear in the internal inventory evidence pointers.
+
+The projection selects public fields explicitly and rejects local source/runtime
+paths in review text; it preserves HTTP source URLs and DOI strings. It includes
+neither raw PDFs nor private paths, generated runtime values, or participant data.
+Unassessed experiments stay unassessed. Temporary matrix builds (`--output`)
+do not write the canonical public asset unless `--public-output <file>` is
+explicitly supplied. Focused tests compare every projected status/value against
+the finalized evidence ledger and compare regenerated bytes against the asset.
+
 ## Public-data boundaries
 
 - Citation edges run from the citing publication to the cited publication.
@@ -65,7 +127,7 @@ and outputs to temporary paths for deterministic validation.
   confirmed audiotactile labels and provisional modality screens. The browser
   excludes reviews and shows only the 94-publication DOI- and metadata-eligible
   projection drawn from 97 verified/audited candidates.
-- One included exact-DOI record is retained as `adjacent_scope_conflict` so the
+- Four included exact-DOI records are retained as `adjacent_scope_conflict` so the
   audit disagreement stays visible. A supported paradigm means the Toolkit can
   represent the task structure, not that every original asset, apparatus
   setting, or reported parameter is available.
@@ -84,3 +146,16 @@ and outputs to temporary paths for deterministic validation.
   corpus-local navigation encodings, not study-quality ratings or effect estimates.
 - Raw provider responses, PDFs, supplements, and extracted full text are not
   part of this tracked asset.
+
+The 2026-10-27 primary review of Serino (2009), DOI
+`10.1371/journal.pone.0006582`, corrects its coverage disposition to adjacent
+auditory/TMS mechanistic context while retaining the node and citation edges.
+Its two experiment rows replace one unassessed study placeholder through an
+explicit alias. Sound-to-TMS timings must never become tactile SOAs.
+
+The Pellencin (2017) source review, DOI `10.1016/j.cortex.2017.08.033`,
+retains two minimum visual–tactile experiment units as an adjacent boundary,
+with failed full-Methods access attempts recorded separately. The earlier
+audio-tactile classification came from paradigm ancestry. This correction
+preserves all 94 publication identities and 750 citation edges while removing
+one record from direct audio-tactile outcome/implementation requirements.

@@ -1,8 +1,19 @@
 # Windows App Guide
 
-This toolkit is designed to run as a local Windows experiment app from a cloned or downloaded repository.
+Installed V1 products use `apps/PPSDesigner/PPSDesigner.exe` and
+`apps/PPSExperimentRunner/PPSExperimentRunner.exe` in their chosen installation
+root, with documentation/resources under `shared/`. Start with those executables
+or their shortcuts; end users do not run repository setup scripts.
+See [component downloads and integrity](PPS_DOWNLOADS.md).
 
-## Setup
+The Python-free Rust/Tauri Designer and native Runner are currently separate
+release candidates. Source tests do not establish an installed update or
+physical timing qualification. The source/build commands below describe the
+existing V1 workflow until a verified native package replaces it.
+See the [native preview workflow and capability table](NATIVE_WINDOWS_PREVIEW.md)
+for its separate import, generation, execution and result paths.
+
+## V1 source-development setup
 
 Run once:
 
@@ -26,9 +37,9 @@ Create a desktop shortcut:
 
 The source shortcut uses the packaged PPS Toolkit icon and opens the standard
 local browser dashboard through the Python development environment. Finished
-installer builds use `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe`
-instead, so installed end users can open the local dashboard and companion
-without Python. The shortcut also creates a `PPS Experiment Runner` shortcut
+component builds use `dist\PPSDesigner\PPSDesigner.exe`, installed as
+`apps\PPSDesigner\PPSDesigner.exe`. V1 embeds its runtime; this is distinct
+from the Rust release's requirement to ship no Python. The shortcut also creates a `PPS Experiment Runner` shortcut
 that opens the standalone Experiment Runner picker for resuming the last
 session, resuming a chosen session folder from metadata, or starting a new
 session from a parent folder/profile/name dialog. The Qt designer and native
@@ -38,10 +49,10 @@ window/taskbar entries do not fall back to the generic Python icon.
 Build the packaged local dashboard launcher:
 
 ```powershell
-.\For-AI\engineering\build\windows\Build_Dashboard_Launcher_Exe.ps1
+.\For-AI\engineering\build\windows\Build_PPS_Designer.ps1
 ```
 
-The build writes `dist\PPSDashboardLauncher\PPSDashboardLauncher.exe` as an
+The build writes `dist\PPSDesigner\PPSDesigner.exe` as an
 onedir app that starts the local companion backend and opens the browser UI.
 When frozen, launcher startup and server logs are written under
 `local_data\logs\pps_dashboard_launcher.log` and
@@ -58,7 +69,8 @@ runner to appear as its own app rather than as Python:
 
 The build writes `dist\PPSExperimentRunner\PPSExperimentRunner.exe` as an
 onedir PyInstaller app with no console window and the packaged PPS Toolkit icon
-embedded. This exe is the only active operator experiment runner. The
+embedded. This is the V1 operator runner. The native candidate has its own
+qualification requirements. The
 `apps\runner\launchers\Launch_Experiment_Runner.bat` wrapper only activates that exe and
 fails with build instructions if it is missing; it does not fall back to a
 Python module runner, and direct module launch exits with retirement guidance.
@@ -73,18 +85,12 @@ for parent folder, experiment profile, and session name. Explicit flags such as
 `--profile` are reserved for dashboard handoff, validation, and scripted
 workflows that intentionally bypass that gate.
 
-Focus Mode starts a local Android companion service by default on LAN port
-`8767` and shows an unobtrusive `Companion Android App (Experimental)` tab with
-the QR pairing code. The service is protected by a per-run
-`X-PPS-Companion-Token`; the laptop remains the timing and command authority.
-The phone can request setup submission, Start Part 01/02, separate Pause and
-Resume commands, and instruction continuation only when the runner advertises
-those commands. The Pause and Resume controls are mutually exclusive and the
-phone shows play/pause state only after a runner snapshot confirms it. Use
-`--no-companion` to disable it, or `--companion-host`, `--companion-port`, and
-`--companion-advertise-ip` when the laptop has multiple network interfaces.
-See [Android Runner Companion](ANDROID_RUNNER_COMPANION.md) for phone pairing,
-firewall, privacy, and APK build steps.
+The experimental Android companion is disabled/hidden in the current V1 Focus
+Mode and excluded from the public component packages. Do not expect a default
+LAN service or pairing tab. The native Runner's phone route has separate
+scope/qualification gates; desktop installation does not qualify it.
+The [Android companion notes](https://github.com/GeorgeFejer91/pps-kit/blob/main/For-AI/experiments/android-companion/docs/ANDROID_RUNNER_COMPANION.md) describe internal
+experimental work, not the supported Windows installation path.
 
 Build the native Android companion debug APK:
 
@@ -98,11 +104,11 @@ For finished public releases, build the lightweight downloader separately:
 .\For-AI\engineering\build\windows\Build_PPS_Downloader.ps1
 ```
 
-That creates a small `dist\PPS-Toolkit-Downloader.exe` intended for GitHub
-release upload. The full offline lab ZIP is built separately and hosted on
-Zenodo; the downloader verifies its SHA256 from `pps_download_manifest.v1.json`
-before extracting to `%LOCALAPPDATA%\PPS Toolkit\versions\` and launching the
-packaged dashboard launcher. See
+That creates three component downloaders, including
+`dist\PPS-Toolkit-Downloader.exe`. The Full payload is paired with
+`pps_toolkit_download_manifest.v1.json`; Designer and Runner have their own
+manifests. The downloader checks hashes and component compatibility before
+installation and launch. See
 [PPS Download Distribution](PPS_DOWNLOADS.md).
 
 Open the Qt stimulus design layer for comparison:
@@ -178,7 +184,7 @@ channels:
 Those rendered files require one synchronized 3+ channel output device. On the
 lab Komplete setup, use `Komplete Audio ASIO Driver`; the Windows `Output 1/2`
 and `Output 3/4` pairs are legacy-only. See
-[Audio Routing And Stress Test](AUDIO_ROUTING_STRESS_TEST.md).
+[Audio Routing And Stress Test](https://github.com/GeorgeFejer91/pps-kit/blob/main/For-AI/engineering/validation/docs/AUDIO_ROUTING_STRESS_TEST.md).
 
 The runner keeps one persistent ASIO output stream open and mixes instructions,
 blocks, background audio, and click/tactile feedback into that stream. This is

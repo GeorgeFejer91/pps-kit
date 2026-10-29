@@ -1,26 +1,22 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "teneggi_2013_social_face_pps",
-  "repetitions_per_condition": 12,
+  "repetitions_per_condition": 1,
   "soa_values_ms": [
-    0,
-    1000,
-    1955,
-    3000,
-    4000
+    250,
+    750,
+    1300,
+    1800,
+    2500,
+    3200,
+    3700
   ],
-  "spatial_values_cm": [
-    93,
-    71,
-    50,
-    27,
-    5
-  ],
+  "spatial_values_cm": [],
   "custom_clip_assets": [],
   "trial_strips": [
     {
       "strip_id": "teneggi-social-face-row",
-      "label": "Social face PPS moving-sound trial",
+      "label": "Experiment 3 approaching sound timing scaffold",
       "audio_tactile_percentage": 100.0,
       "catch_percentage": 0.0,
       "baseline_percentage": 0.0,
@@ -29,20 +25,41 @@
       "metadata": {},
       "elements": [
         {
+          "element_id": "teneggi-exp3-pre-sound-silence",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            500
+          ],
+          "randomized": false
+        },
+        {
           "element_id": "teneggi-face-moving-sound",
           "kind": "looming_stimulus",
           "label": "Face-centered moving sound",
           "source_label": "Face-centered moving sound",
           "source_labels": [
-            "Face-centered moving sound",
-            "Face-centered moving sound - receding"
+            "Face-centered moving sound"
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "teneggi-exp3-post-sound-silence",
+          "kind": "jitter",
+          "label": "Post-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            500
+          ],
+          "randomized": false
         }
       ]
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 120
+  "preview_trial_count": 7
 }

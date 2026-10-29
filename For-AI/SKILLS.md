@@ -13,7 +13,7 @@ below, never an invented claim that a skill ran.
 |---|---|---|
 | Implementation, refactoring, dependency/tooling decisions | [ponytail](https://github.com/DietrichGebert/ponytail/tree/main/skills/ponytail) | Smallest complete change; reuse before adding. Scientific safeguards remain mandatory. |
 | Designer HTML orchestration | [html-dashboard-orchestrator](skills/html-dashboard-orchestrator/SKILL.md) | PPS segment/backend/handoff contracts and local-first UI workflow. |
-| HTML/CSS controls, layout, responsive/localized text | [uncodixfy-pretext](https://github.com/GeorgeFejer91/uncodixfy-pretext) | Existing product identity, actual bounded-text measurement, rendered verification. |
+| HTML/CSS controls, layout, responsive/localized text | [uncodixfy-pretext](skills/uncodixfy-pretext/SKILL.md) | Existing product identity, actual bounded-text measurement, rendered verification; [stretch geometry](skills/uncodixfy-pretext/references/accordion-stretch.md) for bounded shells, nested groups and cells. |
 | Real browser controls/screenshots | playwright when available; otherwise existing Playwright validation tooling | Actual interaction and visual proof, not API-only checks. |
 | Accessible HTML controls, keyboard, focus, names and announcements | [agents-inc-accessibility](skills/agents-inc-accessibility/SKILL.md) | One interaction/layout matrix with Pretext; inspect actual browser/WebView behavior. |
 | Measured browser/WebView loading, interaction or memory cost | [agents-inc-web-performance](skills/agents-inc-web-performance/SKILL.md) | Profile a representative workload; preserve native timing and readable layout. |
@@ -52,6 +52,11 @@ Historical setup on 2026-09-27 recorded these source snapshots:
 This is reproducible setup provenance, not a claim that every future machine
 has these skills. Do not upgrade application dependencies merely to match an
 upstream skill. Use pinned project versions and current primary docs.
+
+The 2026-10-28 user-requested Uncodixfy Pretext mirror includes the exact installed
+entrypoint, both geometry references and upstream license. Its entrypoint matches
+the existing baseline lock; [file hashes](skills/uncodixfy-pretext/UPSTREAM.json)
+record the copied snapshot. Both frontends retain their locked Pretext 0.0.8.
 
 The 2026-10-27 installation supersedes the old For-AI entrypoint with revision
 `67bb9030c077a1978b9f6556b10085623eaec175`. The exact reviewed sources,

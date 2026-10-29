@@ -1,46 +1,40 @@
 # Fresh-PC Verification Protocol
 
-Use this protocol to prove that the lightweight downloader installs a working local PPS Toolkit on a clean Windows folder.
+Qualify each exact-revision component package on clean Windows. A fresh folder
+on a development PC is a smoke test, not proof of independence from a checkout,
+Python, build tools or previously installed runtime DLLs. The current component
+builder still builds V1; the Python-free Rust/Tauri candidate must pass its own
+installed journey before replacing that release.
 
-## Build-Machine Bootstrap
+## Build-machine checks
 
-```powershell
-winget install --id Python.Python.3.12 --source winget --accept-package-agreements --accept-source-agreements
-winget install --id GoLang.Go --source winget --accept-package-agreements --accept-source-agreements
-py -3.12 --version
-go version
-```
-
-## Repository Checks
-
-```powershell
-powershell -ExecutionPolicy Bypass -File For-AI\engineering\build\windows\Setup_Windows_App.ps1
-.\For-AI\engineering\automation\check_all.ps1 -Tier Quick
-pushd distributions\downloader
-go test ./...
-popd
-```
+Follow [release build protocol](release_build_protocol.md). Run Standard,
+applicable Rust/browser checks, release/privacy audit and downloader tests.
+Record source commit, exact tool versions, artifact SHA256 and inventory.
+Use `distributions/manifests/`; do not install a repository checkout.
 
 ## Local Release Smoke
 
-1. Build `PPSExperimentRunner.exe`, `PPSDashboardLauncher.exe`, the offline ZIP, the manifest, and the downloader.
+1. Build the Designer, Runner and Full component payloads with
+   `-PayloadBaseUrl "http://127.0.0.1:8788"` and matching download manifests.
 2. Serve `dist/` locally, for example:
 
 ```powershell
 .\.venv\Scripts\python.exe -m http.server 8788 --directory dist
 ```
 
-3. Rebuild the downloader with `-ManifestUrl "http://127.0.0.1:8788/pps_download_manifest.v1.json"` or pass the local manifest with `--manifest`.
-4. Install into an ignored clean folder:
+3. Build a smoke downloader with `Build_PPS_Downloader.ps1 -Component full
+   -ManifestBaseUrl "http://127.0.0.1:8788"`, or pass its matching manifest
+   through `--manifest`. Repeat independently for Designer and Runner.
+4. Install into a new, uniquely named destination; preserve earlier runs:
 
 ```powershell
-$installDir = Join-Path (Resolve-Path .) "local_data\installer_smoke\installed"
-$smokeRoot = Split-Path -Parent $installDir
+$smokeRoot = Join-Path (Get-Location) "local_data\installer_smoke"
 New-Item -ItemType Directory -Force $smokeRoot | Out-Null
-Remove-Item -LiteralPath $installDir -Recurse -Force -ErrorAction SilentlyContinue
-$args = @("--quiet", "--manifest", "http://127.0.0.1:8788/pps_download_manifest.v1.json", "--install-dir", $installDir, "--force", "--no-shortcuts")
-$proc = Start-Process -FilePath ".\dist\PPS-Toolkit-Downloader.exe" -ArgumentList $args -Wait -PassThru
-$proc.ExitCode
+$installDir = Join-Path $smokeRoot ("installed-" + [Guid]::NewGuid().ToString("N"))
+$smokeArgs = @("--quiet", "--manifest", "http://127.0.0.1:8788/pps_toolkit_download_manifest.v1.json", "--install-dir", $installDir, "--no-shortcuts")
+$proc = Start-Process -WindowStyle Hidden -FilePath ".\dist\PPS-Toolkit-Downloader.exe" -ArgumentList $smokeArgs -Wait -PassThru
+if ($proc.ExitCode -ne 0) { throw "Downloader failed: $($proc.ExitCode)" }
 ```
 
 Use `Start-Process -Wait -PassThru` when capturing exit codes from the lightweight downloader because it is built as a Windows GUI-subsystem executable.
@@ -51,37 +45,44 @@ For a custom `--install-dir`, create only the parent folder before invoking the 
 
 - `pps_install_manifest.json`
 - `pps_package_inventory.v1.json`
-- `dist/PPSDashboardLauncher/PPSDashboardLauncher.exe`
-- `dist/PPSExperimentRunner/PPSExperimentRunner.exe`
-- `dist/PPSExperimentRunner/_internal/PySide6/plugins/platforms/qwindows.dll`
-- `apps/designer/launchers/Launch_HTML_Dashboard.bat`
-- `apps/designer/launchers/Start_Website_Companion.bat`
-- `apps/runner/launchers/Launch_Experiment_Runner.bat`
-- `docs/`, `assets/`, `src/`, `study_templates/`, and `For-AI/engineering/release/protocols/`
+- `apps/PPSDesigner/PPSDesigner.exe`
+- `apps/PPSExperimentRunner/PPSExperimentRunner.exe`
+- `shared/docs/`, `shared/assets/`, `shared/study_templates/` and shared licenses
 
-6. Health-check the installed dashboard launcher:
+The V1 Runner additionally requires its packaged Qt platform plugin.
+Designer-only and Runner-only installations must launch independently with
+compatible Shared resources. No installed `For-AI/`, private data, generated
+research sessions or experimental Android APK is permitted.
 
-```powershell
-$installed = Resolve-Path .\local_data\installer_smoke\installed
-$proc = Start-Process -WindowStyle Hidden -FilePath "$installed\dist\PPSDashboardLauncher\PPSDashboardLauncher.exe" -ArgumentList "--no-browser --port 8799" -PassThru
-Start-Sleep -Seconds 8
-Invoke-RestMethod http://127.0.0.1:8799/api/health
-Stop-Process -Id $proc.Id -Force
-```
+6. Open the installed programs through these exact entrypoints. Inspect
+   startup, resource lookup, actionable errors and logs. A working `--help`
+   invocation alone does not verify their user workflows.
 
-If the dashboard does not bind, inspect `$installed\local_data\logs\pps_dashboard_launcher.log` and `$installed\local_data\logs\pps_dashboard_launcher_stream.log`.
+## Clean Windows candidate journey
 
-7. Check the installed runner help path:
+Use a clean Windows VM or PC with no checkout or Python. Record OS/WebView
+versions, installer hashes and the exact source revision.
 
-```powershell
-$runner = Join-Path $installed "dist\PPSExperimentRunner\PPSExperimentRunner.exe"
-$proc = Start-Process -FilePath $runner -ArgumentList "--help" -Wait -PassThru
-$proc.ExitCode
-```
+1. Download and verify public artifacts, install each advertised component
+   combination, and confirm shortcuts and offline startup.
+2. Online: select premade assets, preview, save/reload, and export all audio,
+   including instructions. Transfer the bundle to the clean offline machine.
+3. Native: import and verify assets, customize an endpoint trajectory, generate
+   with Rust/3DTI, inspect all manifest-ordered blocks, run the full session and
+   independently validate its result files.
+4. Exercise corrupt/missing assets, unavailable renderer/HRTF resources,
+   cancellation, edits during generation, failed writes and interrupted runs.
+   No partial or stale output may be shown as a completed experiment.
+5. Inspect filesystem/process activity for checkout dependencies and Python
+   invocation. Confirm the package includes all approved native resources.
+6. Qualify advertised device/LSL/phone routes. Electrical timing, tactile onset,
+   calibration and behavioral replication remain separately measured claims.
 
-Hardware readiness remains a separate lab-PC validation. A green installer state does not prove Komplete ASIO, LSL/XDF, or loopback readiness.
+## 2026-06-25 Localhost Smoke Evidence (historical)
 
-## 2026-06-25 Localhost Smoke Evidence
+This retained report describes an older packaging layout. It is not current
+release qualification. Its statements about installed For-AI contents conflict;
+re-establish that privacy claim from the new package inventory.
 
 Current local smoke result on this fresh PC:
 

@@ -1,6 +1,9 @@
 # PPS Kit Downloads
 
 PPS Kit V1 publishes two independent Windows programs and one combined suite.
+The [Python-free native preview](NATIVE_WINDOWS_PREVIEW.md) is qualified
+separately. A V1 downloader does not install the Rust/Tauri preview merely
+because newer source code is available in this repository.
 
 ## Choose a Download
 
@@ -73,9 +76,18 @@ under `For-AI/engineering/` and are not installed with the products.
 .\For-AI\engineering\build\windows\Build_PPS_Designer.ps1
 .\For-AI\engineering\build\windows\Build_Experiment_Runner_Exe.ps1
 .\For-AI\engineering\build\windows\Build_PPS_Downloader.ps1
-.\For-AI\engineering\build\windows\Build_PPS_Distribution.ps1 -Version 0.1.0 -ZenodoPayloadUrl "https://zenodo.org/records/<record>/files/<payload>.zip?download=1" -ZenodoDoi "10.5281/zenodo.<record>"
+.\For-AI\engineering\build\windows\Build_PPS_Distribution.ps1 -Version 0.1.0 -PayloadBaseUrl "https://zenodo.org/records/YOUR_RECORD_ID/files" -ZenodoDoi "10.5281/zenodo.YOUR_RECORD_ID"
 ```
 
 Generated binaries, package inventories, manifests, and ZIPs remain under the
 ignored `dist/` tree until attached to a reviewed release.
+
+Replace `YOUR_RECORD_ID` with the allocated record number. `PayloadBaseUrl` is
+the containing folder: the builder appends the separate Designer, Runner and
+Toolkit ZIP filenames. A local smoke build can use `http://127.0.0.1:8788`.
+Missing URLs and template placeholders are rejected before building.
+
+These commands build the existing V1 component packages. The Python-free
+Rust/Tauri Designer and native Runner are being qualified separately; their
+source checks do not establish that these download assets have been replaced.
 

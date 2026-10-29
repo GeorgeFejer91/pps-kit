@@ -1,6 +1,6 @@
 {
   "schema": "pps-audiotactile-expected-outcome-coverage.v1",
-  "generated_on": "2026-07-15",
+  "generated_on": "2026-10-27",
   "source_literature_coverage": "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json",
   "scope": {
     "goal": "Track whether each known audiotactile PPS literature record has a structured expected outcome and whether the current toolkit has observed evidence that can be compared against it.",
@@ -8,23 +8,23 @@
   },
   "summary": {
     "literature_record_count": 75,
-    "structured_expected_outcome_record_count": 71,
+    "structured_expected_outcome_record_count": 67,
     "pending_expected_outcome_record_count": 0,
-    "adjacent_or_out_of_scope_record_count": 4,
-    "runnable_profile_parameter_record_count": 18,
+    "adjacent_or_out_of_scope_record_count": 8,
+    "runnable_profile_parameter_record_count": 12,
     "observed_behavioral_comparison_record_count": 0,
-    "mouse_click_simulated_participant_like_comparison_record_count": 17,
-    "synthetic_profile_contrast_comparison_record_count": 17,
+    "mouse_click_simulated_participant_like_comparison_record_count": 11,
+    "synthetic_profile_contrast_comparison_record_count": 11,
     "parameter_run_evidence_only_record_count": 1,
-    "not_runnable_no_observed_comparison_record_count": 53,
-    "adjacent_not_applicable_record_count": 4,
+    "not_runnable_no_observed_comparison_record_count": 55,
+    "adjacent_not_applicable_record_count": 8,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
-      "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 48,
-      "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
+      "not_applicable_adjacent_out_of_scope": 8,
+      "not_yet_templated_missing_publication_parameters": 44,
+      "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 11,
       "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,
-      "template_present_blocked_missing_publication_parameters": 5
+      "template_present_blocked_missing_publication_parameters": 11
     }
   },
   "expected_outcome_extraction_sources": {
@@ -188,10 +188,10 @@
       "record_id": "serino_2009_tms",
       "citation_short": "Serino et al. (2009)",
       "doi": "10.1371/journal.pone.0006582",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "coverage_category": "adjacent_out_of_scope",
       "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {
         "outcome_family": "time_dependent_motor_coding_of_hand_centered_pps",
         "primary_expected_effect": "Near-hand sounds are expected to enhance hand MEPs at short sound-to-TMS intervals, while longer intervals reverse the pattern toward greater far-sound excitability; the effect is hand-centered rather than body-centered.",
@@ -203,7 +203,7 @@
           "Consensus MCP 2026-07-15 query: 10.1371/journal.pone.0006582 Serino 2009 TMS peripersonal space audio tactile"
         ]
       },
-      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "open_access_unavailable",
         "paper_audit_supplement_status": "not_checked",
@@ -212,10 +212,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_comparison_gap": "not_applicable_adjacent_out_of_scope",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
     },
     {
       "record_id": "tajadura_jimenez_2009_visual_deprivation",
@@ -336,10 +336,10 @@
       "record_id": "avenanti_2012_motor_cortex",
       "citation_short": "Avenanti et al. (2012)",
       "doi": "10.1016/j.neuroimage.2012.06.063",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "coverage_category": "adjacent_out_of_scope",
       "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {
         "outcome_family": "premotor_dependency_of_motor_pps_coding",
         "primary_expected_effect": "Near-hand sounds are expected to produce a spatially dependent motor response in hand MEPs after sham or V1 stimulation, while cathodal suppression of premotor cortex is expected to abolish the near-far motor coding effect.",
@@ -348,10 +348,10 @@
         "condition_contrast": "sham, V1, posterior parietal, and premotor tDCS crossed with near/far hand-centered sounds",
         "source_basis": [
           "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#avenanti_2012_motor_cortex",
-          "Consensus MCP 2026-07-15 query: 10.1016/j.neuroimage.2012.06.063 Avenanti motor cortex peripersonal space audio tactile"
+          "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf#published-pages-282-283"
         ]
       },
-      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "open_access_unavailable",
         "paper_audit_supplement_status": "not_checked",
@@ -360,10 +360,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_comparison_gap": "not_applicable_adjacent_out_of_scope",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
     },
     {
       "record_id": "serino_2011_professional_fencers",
@@ -488,11 +488,11 @@
       "record_id": "canzoneri_2013_amputation_prosthesis",
       "citation_short": "Canzoneri et al. (2013b)",
       "doi": "10.1038/srep02844",
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "canzoneri_2013_amputation_prosthesis"
       ],
-      "runnable_status": "runnable_profile_parameters_ready",
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "prosthesis_dependent_remapping_of_amputated_limb_pps",
@@ -515,22 +515,12 @@
         "paper_audit_visualization_candidate_count": "6",
         "manual_review_status": "manual_review_completed_open_access_pdf_no_supplement_found",
         "manual_review_confidence_label": "high_confidence_extraction_with_source_count_caveat",
-        "manual_review_profile_recreation_assessment": "possible_with_caveats_dynamic_upper_arm_prosthesis_context"
+        "manual_review_profile_recreation_assessment": "source_inconsistency_requires_resolution"
       },
-      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
-      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
-      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
-      "observed_profile_contrast_evidence": {
-        "status": "deterministic_synthetic_profile_contrast_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
-        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
-      },
-      "observed_mouse_click_participant_like_evidence": {
-        "status": "mouse_click_simulated_participant_like_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json",
-        "model_boundary": "Paper-specific deterministic participant-like mouse clicks were injected through SessionRunnerController and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
-      }
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "cimmino_2013_surgical_arm_elongation",
@@ -950,11 +940,11 @@
       "record_id": "serino_2015_peri_trunk_exp1",
       "citation_short": "Serino et al. (2015), Exp. 1",
       "doi": "10.1038/srep18603",
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "serino_2015_peri_trunk_exp1"
       ],
-      "runnable_status": "runnable_profile_parameters_ready",
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "distance_dependent_audio_tactile_facilitation",
@@ -977,32 +967,22 @@
         "paper_audit_visualization_candidate_count": "6",
         "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
         "manual_review_confidence_label": "high_confidence_extraction",
-        "manual_review_profile_recreation_assessment": "possible_with_caveats"
+        "manual_review_profile_recreation_assessment": "source_inconsistency_requires_resolution"
       },
-      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
-      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
-      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
-      "observed_profile_contrast_evidence": {
-        "status": "deterministic_synthetic_profile_contrast_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
-        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
-      },
-      "observed_mouse_click_participant_like_evidence": {
-        "status": "mouse_click_simulated_participant_like_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
-        "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
-      }
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2015_front_back_trunk_exp2",
       "citation_short": "Serino et al. (2015), Exp. 2",
       "doi": "10.1038/srep18603",
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "serino_2015_front_back_trunk_exp2"
       ],
-      "runnable_status": "runnable_profile_parameters_ready",
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "front_back_trunk_audio_tactile_pps_boundary",
@@ -1025,22 +1005,12 @@
         "paper_audit_visualization_candidate_count": "6",
         "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
         "manual_review_confidence_label": "high_confidence_extraction",
-        "manual_review_profile_recreation_assessment": "possible_with_caveats_16_speaker_front_back_trunk_profile"
+        "manual_review_profile_recreation_assessment": "source_inconsistency_requires_resolution"
       },
-      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
-      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
-      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
-      "observed_profile_contrast_evidence": {
-        "status": "deterministic_synthetic_profile_contrast_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
-        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
-      },
-      "observed_mouse_click_participant_like_evidence": {
-        "status": "mouse_click_simulated_participant_like_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
-        "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
-      }
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2015_peri_hand_exp3",
@@ -1073,7 +1043,7 @@
         "paper_audit_visualization_candidate_count": "6",
         "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
         "manual_review_confidence_label": "high_confidence_extraction",
-        "manual_review_profile_recreation_assessment": "possible_with_caveats_lateralized_peri_hand_profile"
+        "manual_review_profile_recreation_assessment": "possible_with_caveats"
       },
       "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
       "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
@@ -1119,7 +1089,7 @@
         "paper_audit_visualization_candidate_count": "6",
         "manual_review_status": "manual_review_completed_main_pdf_and_supplement",
         "manual_review_confidence_label": "high_confidence_extraction",
-        "manual_review_profile_recreation_assessment": "possible_with_caveats_split_into_exp4_exp5_exp6_profiles"
+        "manual_review_profile_recreation_assessment": "possible_with_caveats"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
@@ -1277,11 +1247,11 @@
       "record_id": "pfeiffer_2018_vestibular",
       "citation_short": "Pfeiffer et al. (2018)",
       "doi": "10.1111/ejn.13872",
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "pfeiffer_2018_lateral_perihead_left_to_right"
       ],
-      "runnable_status": "runnable_profile_parameters_ready",
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "vestibular_modulation_of_perihead_pps",
@@ -1291,7 +1261,7 @@
         "condition_contrast": "congruent versus incongruent vestibular/auditory motion and no-rotation baselines",
         "source_basis": [
           "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#pfeiffer_2018_vestibular",
-          "Consensus MCP 2026-07-15 query: audiotactile peripersonal space auditory tactile integration boundary looming"
+          "https://noel-lab.org/wp-content/uploads/2024/05/pfeiffer_et_al-2018-european_journal_of_neuroscience.pdf"
         ]
       },
       "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
@@ -1303,20 +1273,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
-      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
-      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
-      "observed_profile_contrast_evidence": {
-        "status": "deterministic_synthetic_profile_contrast_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
-        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
-      },
-      "observed_mouse_click_participant_like_evidence": {
-        "status": "mouse_click_simulated_participant_like_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
-        "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
-      }
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "ieeg_trunk_2018",
@@ -1517,7 +1477,7 @@
         "primary_expected_effect": "Autistic adults are expected to show reduced susceptibility to the full-body illusion and a smaller, sharper PPS boundary than neurotypical adults in the audio-tactile reaction-time task.",
         "expected_effect_direction": "autism_smaller_sharper_pps_and_reduced_full_body_illusion",
         "observable_metric": "PPS boundary size/slope plus self-location and self-identification measures",
-        "condition_contrast": "autism versus neurotypical group and synchronous versus asynchronous full-body-illusion stroking",
+        "condition_contrast": "autism versus neurotypical group for the preceding PPS task; synchronous versus asynchronous stroking belongs to the subsequent full-body illusion, not a pre/post PPS contrast",
         "source_basis": [
           "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#autism_2019",
           "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile"
@@ -1610,10 +1570,10 @@
       "record_id": "social_perception_2017",
       "citation_short": "Social perception shapes multisensory PPS (2017)",
       "doi": "10.1016/j.cortex.2017.08.033",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "coverage_category": "adjacent_out_of_scope",
       "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {
         "outcome_family": "social_moral_evaluation_modulates_pps_boundary",
         "primary_expected_effect": "PPS is expected to be more extended when participants face a person perceived as moral than when they face a person perceived as immoral; the social manipulation is not expected to affect PPS in the same way when the target is an object.",
@@ -1625,7 +1585,7 @@
           "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile"
         ]
       },
-      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "open_access_unavailable",
         "paper_audit_supplement_status": "not_found",
@@ -1634,10 +1594,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_comparison_gap": "not_applicable_adjacent_out_of_scope",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
     },
     {
       "record_id": "lower_limb_pps_2017",
@@ -1730,7 +1690,7 @@
     },
     {
       "record_id": "ferroni_2020_tool_observation",
-      "citation_short": "Tool-use observation PPS (2020)",
+      "citation_short": "Galigani et al. (2020)",
       "doi": "10.1016/j.neuropsychologia.2020.107622",
       "coverage_category": "not_yet_templated_missing_publication_parameters",
       "current_template_ids": [],
@@ -1740,11 +1700,12 @@
         "outcome_family": "active_tool_use_but_not_observation_modulates_pps",
         "primary_expected_effect": "Active tool use is expected to change body representation and PPS, including comparable tactile facilitation from near and far sounds after training, whereas first-person observation of tool use is not expected to significantly modulate BR or PPS.",
         "expected_effect_direction": "active_tool_use_modulates_pps_but_observation_does_not",
-        "observable_metric": "body-landmark localization and audio-tactile PPS boundary/facilitation before versus after training",
-        "condition_contrast": "active tool-use training versus observational tool-use training",
+        "observable_metric": "pre/post body-landmark localization in Group 1; post-training near/far audio-tactile facilitation in the separate Group 2",
+        "condition_contrast": "post-only audio-tactile task after active, observational and cognitive training sessions; separate pre/post body-landmark task",
         "source_basis": [
           "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#ferroni_2020_tool_observation",
-          "Consensus MCP 2026-07-15 query: 10.1016/j.cortex.2020.11.021 ageing body space representations peripersonal space audio tactile"
+          "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+          "https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf#page=5"
         ]
       },
       "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
@@ -2454,11 +2415,11 @@
       "record_id": "lerner_2021_3d_boundary",
       "citation_short": "Lerner et al. (2021)",
       "doi": "10.3389/frvir.2021.644214",
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "lerner_2021_3d_audio_tactile_boundary"
       ],
-      "runnable_status": "runnable_profile_parameters_ready",
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "vr_3d_audio_tactile_pps_boundary_mapping",
@@ -2481,20 +2442,10 @@
         "paper_audit_visualization_status": "source_mined",
         "paper_audit_visualization_candidate_count": "5"
       },
-      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
-      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
-      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
-      "observed_profile_contrast_evidence": {
-        "status": "deterministic_synthetic_profile_contrast_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
-        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
-      },
-      "observed_mouse_click_participant_like_evidence": {
-        "status": "mouse_click_simulated_participant_like_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
-        "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
-      }
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "lamia_2026_arm_movement",
@@ -2549,11 +2500,11 @@
       "record_id": "smartphone_rt_methods_2025",
       "citation_short": "Using Android smartphones to collect RTs to multisensory stimuli (2025)",
       "doi": "10.3390/s25196072",
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "current_template_ids": [
         "roussel_2025_dynaspace_mobile_pps"
       ],
-      "runnable_status": "runnable_profile_parameters_ready",
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "mobile_looming_versus_static_tactile_rt_facilitation",
@@ -2575,20 +2526,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "mouse_click_simulated_participant_like_comparison_available_behavioral_effect_unobserved",
-      "observed_comparison_gap": "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison",
-      "observed_evidence_boundary": "The ready-profile mouse-click expected-outcome audit runs deterministic participant-like mouse clicks through SessionRunnerController after response windows and compares the runner-produced analysis RTs with the paper's structured expected effect. This proves runner-level software comparison behavior only; it does not prove human behavioral PPS effects or exact original apparatus equivalence.",
-      "required_next_evidence": "Collect participant data before making a scientific PPS-effect replication claim; the current ready-profile comparison is deterministic mouse-click simulated participant-like software evidence only.",
-      "observed_profile_contrast_evidence": {
-        "status": "deterministic_synthetic_profile_contrast_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
-        "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
-      },
-      "observed_mouse_click_participant_like_evidence": {
-        "status": "mouse_click_simulated_participant_like_comparison_available",
-        "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
-        "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
-      }
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "spiousas_2025_auditory_only",
@@ -2696,10 +2637,10 @@
       "record_id": "finisguerra_2015_moving_sounds_motor",
       "citation_short": "Finisguerra et al. (2015)",
       "doi": "10.1016/j.neuropsychologia.2014.09.043",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "coverage_category": "adjacent_out_of_scope",
       "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
-      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "runnable_status": "adjacent_not_applicable",
+      "expected_outcome_status": "adjacent_out_of_scope",
       "expected_outcome": {
         "outcome_family": "moving_sound_modulation_of_hand_motor_excitability",
         "primary_expected_effect": "Moving sounds within the hand-centered PPS are expected to modulate hand motor-cortex excitability, with MEP amplitude varying by sound position and motion direction rather than by tactile RT.",
@@ -2711,7 +2652,7 @@
           "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_review_index.csv#finisguerra_2015_moving_sounds_motor"
         ]
       },
-      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_extraction_blocker": "adjacent_out_of_scope",
       "expected_outcome_source_audit": {
         "paper_audit_pdf_status": "open_access_unavailable",
         "paper_audit_supplement_status": "not_found",
@@ -2723,10 +2664,10 @@
         "manual_review_confidence_label": "high_confidence_extraction",
         "manual_review_profile_recreation_assessment": "possible_with_caveats_tms_specific"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "adjacent_not_applicable",
+      "observed_comparison_gap": "not_applicable_adjacent_out_of_scope",
+      "observed_evidence_boundary": "The record is adjacent or out of scope for audiotactile PPS outcome comparison.",
+      "required_next_evidence": "No outcome comparison required unless the record is reclassified as in scope."
     },
     {
       "record_id": "biggio_2017_racket_tool_use",

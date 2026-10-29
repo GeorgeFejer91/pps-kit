@@ -5004,8 +5004,8 @@
     {
       "template_id": "serino_2015_peri_hand_exp3",
       "title": "Serino 2015 peri-hand PPS Experiment 3",
-      "visible_variant_label": "B",
-      "variant_display": "Serino 2015 peri-hand PPS Experiment 3 - Variant B",
+      "visible_variant_label": "",
+      "variant_display": "Serino 2015 peri-hand PPS Experiment 3",
       "publication_status": "published",
       "profile_type": "",
       "asset_mode": "bundled_local",
@@ -5069,9 +5069,9 @@
         {
           "label": "Hand moving sound",
           "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
-          "sha256": "c19db9afb0250a0231d539e260f7744864b5e31a5e2c9d6fe3c55f4ceeaebfa2",
-          "duration_s": 3.0,
+          "url": "https://georgefejer91.github.io/pps-kit/catalog/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.wav",
+          "sha256": "8b7940a83caa1b5f3ba9de2ea2e9a29733c10c8ff4c3a9f6d135deef1bea9874",
+          "duration_s": 4.0,
           "sample_rate": 44100,
           "channels": 2,
           "source_kind": "generated_noise",
@@ -5090,7 +5090,7 @@
             "end_distance_cm": 35.3553,
             "start_rotation_deg": 20.6235,
             "end_rotation_deg": 81.8699,
-            "movement_duration_s": 3.0,
+            "movement_duration_s": 4.0,
             "start_hold_s": 0.0,
             "end_hold_s": 0.0,
             "path_length_m": 0.88,
@@ -5107,24 +5107,19 @@
               "z_m": 0.0
             }
           },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
+          "source_profile": "continuous_noise",
+          "frames": 176400,
+          "bytes": 1411268,
+          "native_generation_provenance": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound.native_generation.json",
+          "native_generation_provenance_sha256": "155a8ecd83ceaf00164dfe54ee878d6462dc82fd1f17b0c6f766c0e03a9009f7",
+          "proxy_policy": "serino-exp3-continuous-pink-cartesian-proxy.v2"
         },
         {
           "label": "Hand moving sound - receding",
           "path": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
-          "sha256": "28bf141e2467b737ce3dafefee7f0cb8d69e42abcaa4692753c92a68831cae3f",
-          "duration_s": 3.0,
+          "url": "https://georgefejer91.github.io/pps-kit/catalog/assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.wav",
+          "sha256": "29ec47e802d9cd69a70448f1531d2e88b9defd87c087e8cc818f9f3709c78003",
+          "duration_s": 4.0,
           "sample_rate": 44100,
           "channels": 2,
           "source_kind": "generated_noise",
@@ -5143,7 +5138,7 @@
             "end_distance_cm": 99.368,
             "start_rotation_deg": 81.8699,
             "end_rotation_deg": 20.6235,
-            "movement_duration_s": 3.0,
+            "movement_duration_s": 4.0,
             "start_hold_s": 0.0,
             "end_hold_s": 0.0,
             "path_length_m": 0.88,
@@ -5160,17 +5155,12 @@
               "z_m": 0.0
             }
           },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
+          "source_profile": "continuous_noise",
+          "frames": 176400,
+          "bytes": 1411268,
+          "native_generation_provenance": "assets/preloads/serino_2015_peri_hand_exp3/02_looming_stimuli/looming_Hand_moving_sound_-_receding.native_generation.json",
+          "native_generation_provenance_sha256": "c2aedf2888d9f27b62d91c5702ff4b6d793eb82d84396275a87c8a4b3b47539a",
+          "proxy_policy": "serino-exp3-continuous-pink-cartesian-proxy.v2"
         }
       ]
     },
@@ -5761,7 +5751,7 @@
     },
     {
       "template_id": "teneggi_2013_social_face_pps",
-      "title": "Teneggi 2013 social modulation face PPS",
+      "title": "Teneggi 2013 Experiment 3 cooperation PPS scaffold",
       "visible_variant_label": "",
       "variant_display": "Teneggi 2013 social modulation face PPS",
       "publication_status": "published",
@@ -5781,7 +5771,7 @@
         "finished_profile": false,
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 1,
+        "missing_parameter_count": 4,
         "unsupported_structure_count": 0
       },
       "runner_readiness": "blocked_missing_parameters",
@@ -5791,10 +5781,10 @@
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
       "primary_recreation_category": "missing_publication_parameters",
-      "missing_parameter_count": 1,
+      "missing_parameter_count": 4,
       "unsupported_structure_count": 0,
       "local_only": true,
-      "source_recipe_count": 2,
+      "source_recipe_count": 1,
       "catalog_segments": [
         {
           "folder": "01_profile",
@@ -5862,59 +5852,6 @@
             "end": {
               "x_m": 0.0,
               "y_m": 0.05,
-              "z_m": 0.0
-            }
-          },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
-        },
-        {
-          "label": "Face-centered moving sound - receding",
-          "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
-          "sha256": "9a0bc2aadad2a5a6526ee932a455e7df82e23fe3734194bee40aa8348be77cce",
-          "duration_s": 4.0,
-          "sample_rate": 44100,
-          "channels": 2,
-          "source_kind": "generated_noise",
-          "noise_type": "pink",
-          "tone_type": "pink",
-          "motion_mode": "looming",
-          "direction_label": "receding",
-          "render_mode": "preserve",
-          "include_tactile": false,
-          "trajectory_snapshot": {
-            "schema": "pps-stimulus-trajectory.v1",
-            "label": "Face-centered moving sound - receding",
-            "source_kind": "generated_noise",
-            "noise_type": "pink",
-            "start_distance_cm": 5.0,
-            "end_distance_cm": 93.0,
-            "start_rotation_deg": 0.0,
-            "end_rotation_deg": 0.0,
-            "movement_duration_s": 4.0,
-            "start_hold_s": 0.0,
-            "end_hold_s": 0.0,
-            "path_length_m": 0.88,
-            "coordinate_mode": "cartesian",
-            "path_direction": "recede",
-            "start": {
-              "x_m": 0.0,
-              "y_m": 0.05,
-              "z_m": 0.0
-            },
-            "end": {
-              "x_m": 0.0,
-              "y_m": 0.93,
               "z_m": 0.0
             }
           },

@@ -10,23 +10,19 @@ ROOT = Path(__file__).resolve().parents[3]
 LEDGER_PATH = ROOT / "For-AI" / "research" / "literature" / "preload-ledgers" / "audiotactile_expected_outcome_coverage.json"
 SCRIPT_PATH = ROOT / "For-AI/engineering/validation" / "scripts" / "run_synthetic_expected_outcome_smoke.py"
 
+# Primary-source conflicts exclude the smartphone, Lerner 2021, Serino 2015
+# trunk Exp1/Exp2 and Pfeiffer 2018 records from this reviewed eligible set.
 READY_PROFILE_IDS = {
     "biggio_2017_racket_tool_use",
     "tajadura_jimenez_2009_visual_deprivation",
     "canzoneri_2012_dynamic_sounds",
-    "canzoneri_2013_amputation_prosthesis",
     "galli_2015_wheelchair",
     "lamia_2026_arm_movement",
-    "lerner_2021_3d_boundary",
     "matsuda_2021_four_directions",
     "noel_2015_bodily_self",
     "noel_2015_walking",
-    "pfeiffer_2018_vestibular",
-    "serino_2015_front_back_trunk_exp2",
     "serino_2015_peri_hand_exp3",
-    "serino_2015_peri_trunk_exp1",
     "serino_2015_toolless_sync_training",
-    "smartphone_rt_methods_2025",
     "tonelli_2019_echolocation",
 }
 
@@ -49,9 +45,9 @@ def test_synthetic_expected_outcome_smoke_generates_ready_profile_rows(tmp_path)
     assert report["schema"] == module.SCHEMA
     assert report["passed"] is True
     assert report["summary"] == {
-        "ready_profile_record_count": 17,
-        "synthetic_comparison_record_count": 17,
-        "synthetic_direction_match_count": 17,
+        "ready_profile_record_count": len(READY_PROFILE_IDS),
+        "synthetic_comparison_record_count": len(READY_PROFILE_IDS),
+        "synthetic_direction_match_count": len(READY_PROFILE_IDS),
         "synthetic_direction_mismatch_count": 0,
         "human_behavioral_comparison_count_from_ledger": 0,
         "all_synthetic_direction_checks_passed": True,

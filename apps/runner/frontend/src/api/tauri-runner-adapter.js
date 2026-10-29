@@ -35,6 +35,15 @@ export function createTauriRunnerAdapter({ invokeFn = invoke, listenFn = listen 
     selectPreparedSession() {
       return call(invokeFn, "select_prepared_session");
     },
+    selectPreparedGroup() {
+      return call(invokeFn, "select_prepared_group");
+    },
+    nativeGroupStatus() {
+      return call(invokeFn, "native_group_status");
+    },
+    advancePreparedGroupPart({ expectedRevision }) {
+      return call(invokeFn, "advance_prepared_group_part", { expectedRevision });
+    },
     inspectPreparedExecution() {
       return call(invokeFn, "inspect_prepared_execution");
     },

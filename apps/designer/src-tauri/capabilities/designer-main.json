@@ -1,0 +1,9 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "designer-main",
+  "description": "Exact preparation commands for the bundled local Designer window.",
+  "windows": ["main"],
+  "permissions": ["allow-designer-open-external", "allow-designer-snapshot", "allow-designer-invalidate", "allow-designer-save", "allow-designer-generate",
+    "allow-designer-job", "allow-designer-cancel", "allow-designer-pick-audio", "allow-designer-import-profile", "allow-designer-export-profile",
+    "allow-designer-baseline", "allow-designer-review", "allow-designer-accept-review", "allow-designer-prepare", "allow-designer-open-prepared", "allow-designer-export-audio"]
+}

@@ -46,7 +46,7 @@ Push-Location $DownloaderDir
 try {
     if (-not $SkipIconResource) {
         if (-not (Test-Path -LiteralPath $IconPath)) { throw "PPS icon not found: $IconPath" }
-        & $GoExe run github.com/akavel/rsrc@latest -ico $IconPath -o $Syso
+        & $GoExe run github.com/akavel/rsrc@v0.10.2 -ico $IconPath -o $Syso
         if ($LASTEXITCODE -ne 0) { throw "Could not generate Windows icon resource for downloader." }
     }
 

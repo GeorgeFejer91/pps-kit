@@ -84,7 +84,7 @@ Invoke-Step "git whitespace check" {
 
 if ($Tier -in @("Standard", "Deep")) {
     Invoke-Step "standard pytest suite" {
-        & $PythonExe -m pytest -q
+        & $PythonExe -m pytest -q -rs
     }
 }
 

@@ -27,6 +27,7 @@ from peripersonal_space_toolkit import render_backend
 from peripersonal_space_toolkit.dashboard_app import _stimulus_trajectory_snapshot, _write_generated_profile_noise_wav
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
+    DEFAULT_SOFA_FILE,
     NoiseDefinition,
     apply_trajectory_snapshot_to_trajectory,
     audio_file_summary,
@@ -163,9 +164,16 @@ def build_profile_catalog(template: StudyTemplate, *, force: bool, variant_label
         "notes": [
             "Prebaked WAVs are local auditory-only profile assets.",
             "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
-            "The browser dashboard only orchestrates local companion verification and use of these files.",
+            "Hosted preparation uses verified premade assets; native generation and participant execution require the desktop applications.",
         ],
     }
+    native_assets = [asset for asset in source_assets if asset.get("native_generation_provenance")]
+    if native_assets:
+        manifest["render_contract"].update(
+            engine="rust-native-corrected-3dti" if len(native_assets) == len(source_assets) else "mixed-see-asset-provenance",
+            scientific_source_conformance=False,
+            proxy_policies=sorted({asset["proxy_policy"] for asset in native_assets}),
+        )
     write_json(profile_dir / "preload_manifest.json", manifest)
 
     profile_entry = {
@@ -214,6 +222,8 @@ def build_stimulus_assets(
             variant_noise = variant["source"]
             target = stimulus_dir / f"looming_{safe_name(variant_noise.label)}.wav"
             if force or not target.exists():
+                if target.with_suffix(".native_generation.json").exists():
+                    raise ValueError(f"Native preload requires its Rust regeneration workflow; Python cannot replace {target.name}.")
                 render_noise_source(template, variant_design, variant_noise, render_index, target)
             assets.append(
                 asset_metadata(
@@ -316,6 +326,56 @@ def asset_metadata(
             metadata["source_profile"] = source_profile
         if source_profile_parameters:
             metadata["source_profile_parameters"] = source_profile_parameters
+    evidence_path = path.with_suffix(".native_generation.json")
+    if evidence_path.exists():
+        import soundfile as sf
+
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        asset = evidence.get("asset", {})
+        request = evidence.get("request", {})
+        motion = request.get("trajectory", {})
+        info = sf.info(str(path))
+        bindings = {
+            "path": rel_path, "sha256": metadata["sha256"], "frames": info.frames,
+            "sample_rate": info.samplerate, "channels": info.channels,
+            "source_profile": metadata.get("source_profile"), "noise_type": tone_type,
+        }
+        if (
+            evidence.get("schema") != "pps-premade-native-proxy-evidence.v1"
+            or evidence.get("template_id") != template.template_id
+            or evidence.get("direction") != direction_label
+            or not evidence.get("proxy_policy")
+            or any(asset.get(key) != value for key, value in bindings.items())
+        ):
+            raise ValueError(f"Native preload evidence does not match its audio: {path.name}.")
+        sofa = resolve_path(design.sofa_file or DEFAULT_SOFA_FILE)
+        spatializer = evidence.get("spatializer_report", {})
+        if not sofa.is_file():
+            raise ValueError(f"Native preload evidence does not match its template HRTF: {path.name}.")
+        if (
+            motion.get("kind") != "linear"
+            or snapshot.get("coordinate_mode") != "cartesian"
+            or motion.get("start") != snapshot.get("start")
+            or motion.get("end") != snapshot.get("end")
+            or motion.get("movement_duration_s") != snapshot.get("movement_duration_s")
+            or motion.get("pre_hold_s") != snapshot.get("start_hold_s")
+            or request.get("duration_s") != metadata["duration_s"]
+            or request.get("duration_s") != round(design.trajectory.total_duration_s, 6)
+            or request.get("sample_rate_hz") != design.trajectory.sample_rate
+            or request.get("level") != template.reference_parameters.get("loudness_policy")
+            or source.gain != 1.0
+            or spatializer.get("spatialization", {}).get("distance_attenuation") != design.trajectory.use_inverse_square
+            or sha256_file(sofa) != evidence.get("hrtf_sha256")
+            or spatializer.get("hrtf_sha256") != evidence.get("hrtf_sha256")
+        ):
+            raise ValueError(f"Native preload evidence does not match its template: {path.name}.")
+        metadata.update(
+            frames=info.frames,
+            bytes=path.stat().st_size,
+            native_generation_provenance=rel(evidence_path),
+            native_generation_provenance_sha256=sha256_file(evidence_path),
+            proxy_policy=evidence["proxy_policy"],
+        )
     return metadata
 
 
@@ -723,11 +783,13 @@ def resolve_path(path: str | Path) -> Path:
     target = Path(path).expanduser()
     if target.is_absolute():
         return target
+    if target.parts and target.parts[0] in {"assets", "study_templates"}:
+        return RESOURCE_ROOT / target
     return REPO_ROOT / target
 
 
 def rel(path: Path) -> str:
-    return str(Path(path).resolve().relative_to(REPO_ROOT).as_posix())
+    return str(Path(path).resolve().relative_to(RESOURCE_ROOT).as_posix())
 
 
 def safe_name(value: str) -> str:
@@ -739,7 +801,7 @@ def safe_name(value: str) -> str:
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

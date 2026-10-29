@@ -1,5 +1,10 @@
 # Replication Guide
 
+This guide describes the V1 Python/PySide compatibility workflow, including
+its LSL, XDF, loopback and analysis integrations. Those features are not supplied
+by the hosted Designer or the Rust/Tauri preview. For the separate Python-free
+Windows workflow and its current limits, see [the native preview guide](NATIVE_WINDOWS_PREVIEW.md).
+
 ## 1. Prepare Inputs
 
 The repository includes the small reusable seed assets, spoken instruction WAVs, click cue, master blocks, and deidentified sample analysis files.

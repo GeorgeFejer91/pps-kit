@@ -267,13 +267,13 @@
   "coverage_summary": {
     "literature_record_count": 75,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 18,
-      "covered_blocked_missing_publication_parameters": 5,
+      "covered_runnable_profile": 12,
+      "covered_blocked_missing_publication_parameters": 11,
       "covered_blocked_toolkit_structure": 0,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 48,
+      "not_yet_templated_missing_publication_parameters": 44,
       "candidate_needs_full_text_task_audit": 0,
-      "adjacent_out_of_scope": 4
+      "adjacent_out_of_scope": 8
     },
     "current_template_count": 30,
     "current_profile_check_pass_count": 25,
@@ -901,7 +901,8 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "full exact timing, response mapping, and stimulus asset details need extraction"
+        "Full Methods for both temporal-order and speeded spatial-discrimination experiments remain inaccessible",
+        "Exact sound and tactile recipes, SOA tables, response mappings, trial counts and cohort overlap; no values imported from distinct related studies"
       ]
     },
     {
@@ -938,13 +939,14 @@
         "holmes_2020_systematic_review"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "audio-tactile PPS stimulation with TMS/MEP endpoint",
+      "coverage_category": "adjacent_out_of_scope",
+      "audiotactile_task_family": "auditory-TMS/MEP PPS mechanism with separate intertrial tactile attention",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": [
-        "extract audio-tactile task timing, tactile stimulation, MEP/TMS timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
-      ]
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC2719059/fullTextXML",
+      "scope_review_basis": "Primary Methods and Figure1: sound-to-TMS delays50/100/200/300 ms; tactile attention separately4-5 s from TMS. Retain as mechanistic context, not direct audio-tactile replication."
     },
     {
       "record_id": "tajadura_jimenez_2009_visual_deprivation",
@@ -987,7 +989,9 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "full trial counts, tactile calibration, and response mapping need extraction"
+        "Original white-noise asset and exact electrical pulse waveform; source nominal sensory period does not establish tactile pulse width",
+        "Experiment 2 complete mirrored geometry and online voice-relay response cutoff unresolved",
+        "Exact within-block ordering and full counterbalancing assignment unavailable; Experiment 2 active-use block is last"
       ]
     },
     {
@@ -1004,7 +1008,9 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "full audio, tactile, and response settings need extraction"
+        "Exact white-noise asset, seed, sample rate, bandwidth and envelope; complete calibrated apparatus geometry",
+        "Electrical constant-current/constant-voltage wording and Experiment 2 baseline-order conflict",
+        "Exact trial event margins, ITI distribution and online response deadline; Experiment 1A/1B total repetition scope"
       ]
     },
     {
@@ -1015,13 +1021,16 @@
         "holmes_2020_systematic_review"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "audio-tactile PPS stimulation with motor-evoked-potential endpoint",
+      "coverage_category": "adjacent_out_of_scope",
+      "audiotactile_task_family": "Auditory-to-motor-excitability task; separate ITI tactile attention events",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": [
-        "extract audio-tactile task timing, tactile stimulation, motor-evoked-potential timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
-      ]
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf",
+      "scope_review_basis": "Published Methods pp.282–283 and Figure 1 identify sound-to-TMS MEP acquisition under cathodal tDCS; 50/175/300 ms are sound-to-TMS delays. Palm attention events are at least 4–5 s from TMS and are not an audiotactile SOA schedule.",
+      "adjacent_apparatus_boundary": "Physical TMS/tDCS/EMG and electrical or solenoid apparatus remain outside software qualification; preserving external-trigger metadata does not validate their hardware timing.",
+      "retained_frozen_corpus_boundary": true
     },
     {
       "record_id": "serino_2011_professional_fencers",
@@ -1096,12 +1105,34 @@
       "current_template_ids": [
         "canzoneri_2013_amputation_prosthesis"
       ],
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "Canzoneri-style dynamic PPS task",
-      "can_recreate_audiotactile_components_now": true,
+      "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": [],
-      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json"
+      "missing_publication_parameters": [
+        "Eight targets x five delays x two directions gives 80, but primary Methods prints 76 targets plus 76 catches. No corrected total is accepted. Experiment 3 requires upper-arm AND hand conditions, two blocks each, with fixed upper-arm speaker coordinates. Original sound realization, electrical waveform/current and response timeline remain unresolved."
+      ],
+      "known_parameter_validation_report": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json",
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3789144/fullTextXML",
+      "scope_review_date": "2026-10-27",
+      "scope_review_basis": "Primary whole-publication audit verifies three experiments and target/block corrections; count contradiction prevents a unique source reconstruction.",
+      "recreation_caveats": [
+        "Existing template is a historical approximation; source gaps do not erase template availability or prior software behavior."
+      ],
+      "prior_software_comparison_evidence": {
+        "status": "historical_ledger_references_retained_not_reverified",
+        "boundary": "Prior deterministic software comparisons remain historical references. Source conflicts block source-to-runner completeness, not software history; no physical or human replication is inferred.",
+        "mouse_click": {
+          "status": "mouse_click_simulated_participant_like_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_canzoneri_2013_amputation_known_parameter_20260715/canzoneri_2013_amputation_known_parameter_validation_report.json",
+          "model_boundary": "Paper-specific deterministic participant-like mouse clicks were injected through SessionRunnerController and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
+        },
+        "synthetic_contrast": {
+          "status": "deterministic_synthetic_profile_contrast_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+          "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+        }
+      }
     },
     {
       "record_id": "cimmino_2013_surgical_arm_elongation",
@@ -1116,7 +1147,8 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "full audio/tactile/timing parameters need extraction"
+        "Exact electrical pulse/current, ITI and online response deadline",
+        "PPS control count conflicts six versus seven; no PPS follow-up inventory established"
       ]
     },
     {
@@ -1154,7 +1186,8 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "exact distance/timing table from supplement"
+        "Experiment 3 exact repetition, catch and subblock allocation",
+        "Original waveform/exponential fade and electrical-to-vibrotactile substitution; source 100 microsecond pulse"
       ]
     },
     {
@@ -1240,8 +1273,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract exact behavioral audio-tactile PPS timing, distances, response settings, and auditory trajectory; fMRI/BOLD endpoint is non-blocking for audiotactile recreation"
-      ]
+        "Original sound assets/envelope implementation and perceived-distance mapping; online response deadlines; constant-current/constant-voltage terminology conflict; fMRI catch denominator and post-catch 1.55-ms versus one-TR unit conflict; across-task cohort cell/block counts. Main behavioral SOAs, 1000-ms ITI, 300-row count derivation and repeated-session schedule are source assessed."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://static1.squarespace.com/static/528facb6e4b0a18b7e9cde91/t/567541f969492e8da7dd7336/1450525177323/Intertrial%2BVariability%2Bin%2Bthe%2BPremotor%2BCortex%2BAccounts%2Bfor%2BIndividual%2BDifferences%2Bin%2BPeripersonal%2BSp.pdf",
+      "scope_review_basis": "Original primary Methods separates five PPS protocol instances in three cohorts and two supporting validation/localizer tasks. Later reanalysis differs in fMRI repetitions, runs and one ITI value; source-specific versions remain explicit."
     },
     {
       "record_id": "galli_2015_wheelchair",
@@ -1277,8 +1313,14 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract exact audiotactile PPS timing, distances, trial counts, tactile settings, and response settings; shared sensory/social context is non-blocking"
-      ]
+        "exact original pink-noise samples, digital crossfade/envelope and calibration transfer",
+        "exact speaker coordinates/perceived distance law, ITI/jitter and online response window",
+        "complete threshold staircase final steps/electrode geometry; separate catch/baseline allocation is not reported",
+        "accepted author manuscript reviewed; final publisher comparison remains pending"
+      ],
+      "source_review_date": "2026-10-27",
+      "source_review_pointer": "https://ndownloader.figshare.com/files/42193836",
+      "source_review_version": "accepted_author_manuscript_final_comparison_pending"
     },
     {
       "record_id": "noel_2015_bodily_self",
@@ -1329,11 +1371,33 @@
       "current_template_ids": [
         "serino_2015_peri_trunk_exp1"
       ],
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "trunk tactile PPS with two-speaker analog looming/receding setup reconstructed as a binaural trajectory",
-      "can_recreate_audiotactile_components_now": true,
+      "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": []
+      "missing_publication_parameters": [
+        "Primary Methods printed 240 total conflicts with literal allocation 288; exact baseline/catch split and onset-to-distance mapping unresolved. Existing encoded template remains available as an explicit approximation; no source-equivalent reconstruction is accepted."
+      ],
+      "recreation_caveats": [
+        "The available profile is a historical encoded approximation. Fresh primary Methods/SI review does not establish a unique reconstruction."
+      ],
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "scope_review_date": "2026-10-27",
+      "scope_review_basis": "Whole-publication main/SI review: seven main experiments plus three methodological controls. Compact reviewed evidence is separate from retained template availability and native/physical qualification.",
+      "prior_software_comparison_evidence": {
+        "status": "historical_ledger_references_retained_not_reverified",
+        "boundary": "These prior deterministic software comparisons remain recorded. Source conflicts block source-to-runner completeness; they do not erase software history, qualify physical devices or establish human replication.",
+        "mouse_click": {
+          "status": "mouse_click_simulated_participant_like_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
+          "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
+        },
+        "synthetic_contrast": {
+          "status": "deterministic_synthetic_profile_contrast_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+          "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+        }
+      }
     },
     {
       "record_id": "serino_2015_front_back_trunk_exp2",
@@ -1345,16 +1409,33 @@
       "current_template_ids": [
         "serino_2015_front_back_trunk_exp2"
       ],
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "front/back trunk tactile PPS with 16-speaker array recreated as a reported linear moving-source trajectory",
-      "can_recreate_audiotactile_components_now": true,
+      "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": [],
+      "missing_publication_parameters": [
+        "Fourteen reported front/back positions conflict with thirteen allocation cells; supplement Gaussian summary, equation a/lambda^3 and 60-dB-per-doubling prose conflict. Exact gain/level and baseline timings remain unresolved. Existing encoded template remains available as an explicit approximation; no source-equivalent reconstruction is accepted."
+      ],
       "recreation_caveats": [
-        "The physical 16-speaker Gaussian-amplitude array is recreated as a virtual 1 m front-to-1 m back moving-source trajectory with the reported 35 cm/s speed.",
-        "The runnable profile follows the paper's explicit 372-trial arithmetic: 13 multisensory distance samples x 2 sound directions, 3 baselines, and 2 catch rows repeated 12 times.",
-        "The paper also describes 14 front/back delays in the results text; this wording remains a provenance caveat because it conflicts with the published 13-distance trial-count formula."
-      ]
+        "The available profile is a historical encoded approximation. Fresh primary Methods/SI review does not establish a unique reconstruction."
+      ],
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "scope_review_date": "2026-10-27",
+      "scope_review_basis": "Whole-publication main/SI review: seven main experiments plus three methodological controls. Compact reviewed evidence is separate from retained template availability and native/physical qualification.",
+      "prior_software_comparison_evidence": {
+        "status": "historical_ledger_references_retained_not_reverified",
+        "boundary": "These prior deterministic software comparisons remain recorded. Source conflicts block source-to-runner completeness; they do not erase software history, qualify physical devices or establish human replication.",
+        "mouse_click": {
+          "status": "mouse_click_simulated_participant_like_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
+          "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
+        },
+        "synthetic_contrast": {
+          "status": "deterministic_synthetic_profile_contrast_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+          "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+        }
+      }
     },
     {
       "record_id": "serino_2015_peri_hand_exp3",
@@ -1370,7 +1451,10 @@
       "audiotactile_task_family": "hand tactile PPS with lateralized hand-anchored cartesian trajectory",
       "can_recreate_audiotactile_components_now": true,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": []
+      "missing_publication_parameters": [],
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "scope_review_date": "2026-10-27",
+      "scope_review_basis": "Whole-publication main/SI review: seven main experiments plus three methodological controls. Compact reviewed evidence is separate from retained template availability and native/physical qualification."
     },
     {
       "record_id": "serino_2015_exps_4_to_6",
@@ -1381,12 +1465,15 @@
       ],
       "current_template_ids": [],
       "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "additional body-part/front-back PPS variants from the same six-experiment paper",
+      "audiotactile_task_family": "Experiments 4-6 of a seven-main-experiment publication; direct audio-tactile body-part comparisons",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "experiment-specific distance, tactile-site, speaker layout/channel schedule, gain/SPL transfer, and apparatus mappings need extraction; row-level multi-speaker switching is now runner-supported"
-      ]
+        "Experiment-specific compact contracts are reviewed. Remaining source gaps include exact onset-to-distance mapping, original waveforms/channel levels, block ordering and response deadline; Experiment 6 gain descriptions conflict. Physical apparatus equivalence is unqualified. Row-level multi-speaker switching is runner-supported; missing source evidence is not a missing native switching capability."
+      ],
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4686995/fullTextXML",
+      "scope_review_date": "2026-10-27",
+      "scope_review_basis": "Whole-publication main/SI review: seven main experiments plus three methodological controls. Compact reviewed evidence is separate from retained template availability and native/physical qualification."
     },
     {
       "record_id": "serino_2015_toolless_sync_training",
@@ -1447,8 +1534,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "exact lateral trajectory, timing, and tactile-site mapping need extraction"
-      ]
+        "All eleven compact replication contracts and the Methods experiment inventory remain unresolved after actual publisher/HAL access attempts on 2026-10-27. Abstract-only lateral/handedness scope is retained; missing reporting is not inferred from inaccessible Methods."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://link.springer.com/article/10.1007/s00221-017-5158-2",
+      "scope_review_basis": "Audited inaccessible-source gap: publisher PDF route returned subscription-preview HTML; HAL metadata had no document URL, and HAL document route returned 404. Retain the publication review unit without claiming a confirmed experiment or borrowing later protocols."
     },
     {
       "record_id": "noel_2018_neural_adaptation",
@@ -1466,8 +1556,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract velocity levels, peri-face/peri-trunk mapping, timing, tactile settings, response settings, and whether the psychophysical task reuses an existing dynamic PPS scaffold"
-      ]
+        "Original broadband source realization and level reference; exact cited renderer realization, ITI and acquisition-block partition remain unresolved. Printed speed-specific SOAs and 320-trial allocation are reviewed and must not be replaced by model timings."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6032111/fullTextXML",
+      "scope_review_basis": "Two body-target cohort protocols separately reviewed; model conditions are not extra human experiments."
     },
     {
       "record_id": "pfeiffer_2018_vestibular",
@@ -1481,11 +1574,20 @@
       "current_template_ids": [
         "pfeiffer_2018_lateral_perihead_left_to_right"
       ],
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "bilateral lateral peri-head PPS trajectory profile",
-      "can_recreate_audiotactile_components_now": true,
-      "blocking_constraint_ids": [],
-      "missing_publication_parameters": []
+      "can_recreate_audiotactile_components_now": false,
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+      ],
+      "missing_publication_parameters": [
+        "Experiment 1 repetition and baseline allocation wording is unresolved; no independent E1 ITI or original audio/filter/calibration asset",
+        "Existing MATLAB-example template has a different path/speed from the paper’s initial hold, approach-to-head and final hold; it is a related proxy, not demonstrated source equivalence",
+        "Experiment 3 rotation congruency, physical-direction allocation and catches remain unresolved; audio-only E1 proxy does not reproduce vestibular apparatus or localizers"
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://noel-lab.org/wp-content/uploads/2024/05/pfeiffer_et_al-2018-european_journal_of_neuroscience.pdf",
+      "scope_review_basis": "Primary whole Methods distinguish three main protocols and two localization validations. Template availability stays visible while incomplete counts and script-to-paper geometry prevent source-ready eligibility."
     },
     {
       "record_id": "ieeg_trunk_2018",
@@ -1503,8 +1605,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract exact approaching-sound trajectory, far/intermediate/close tactile timings, trunk tactile apparatus, and response/event settings; iEEG endpoint is non-blocking for audiotactile recreation"
-      ]
+        "Original binaural recorded white-noise asset, sample rate, level envelope/SPL/calibration, exact path/endpoint convention, physical tactile waveform/latency, jitter allocation/correlation, ITI anchor and block subdivisions. Primary Methods resolves passive A/T/AT roles and255trials/510tactile pulses;2500m is explicitly interpreted as2500ms, not silently corrected."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6095214/fullTextXML",
+      "scope_review_basis": "Final primary XML and independently reviewed preprint v1 Methods agree on one passive protocol; no overt response/catches or independent replication inferred from the second publication version."
     },
     {
       "record_id": "tonelli_2019_echolocation",
@@ -1555,13 +1660,19 @@
       ],
       "current_template_ids": [],
       "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "newborn audio-tactile PPS boundary task with sound-intensity/distance and tactile response measures",
+      "audiotactile_task_family": "newborn visual-saccade endpoint following static audio-tactile stimulation; sound-intensity conditions without a verified metric-distance map",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract auditory intensity/distance levels, tactile timing, response measure, and infant-specific apparatus separately from participant age"
+        "exact manual stroke onset/duration and reproducible contact profile; exact speaker coordinates/channel allocation; original tone asset recipe/provenance; explicit saccade coding window; Study 1 within-session trial-order rule. Known intensity levels, stage durations and planned maximum counts are separately source-reviewed."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://pure-oai.bham.ac.uk/ws/portalfiles/portal/70592622/Orioli_et_al_Identifying_peripersonal_space_Scientific_Reports_2019.pdf",
+      "scope_review_basis": "Primary Methods pp. 8-9 and Table 4/Figure 3 distinguish the pilot and Study 1, visual saccade response from tactile reaction time, and nominal planned counts from attention-limited administered trials.",
+      "recreation_caveats": [
+        "Manual infant stimulation, visual target presentation, video capture/offline saccade coding and a validated intensity-to-distance interpretation require separate implementation and scientific assessment; no existing native route is qualified by this extraction."
       ]
     },
     {
@@ -1595,8 +1706,14 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "exact task parameters need extraction; clinical context is non-blocking"
-      ]
+        "exact pink-noise duration/sample recipe, gain law and source levels",
+        "mechanical tap force/waveform/duration and calibration; 4 mm refers to magnet, not a reported pulse duration or travel distance",
+        "ITI/jitter, online response window and exact randomized sequence constraints",
+        "accepted author manuscript reviewed; final publisher comparison pending; PPS precedes the adjacent FBI task"
+      ],
+      "source_review_date": "2026-10-27",
+      "source_review_pointer": "https://ndownloader.figshare.com/files/42197946",
+      "source_review_version": "accepted_author_manuscript_final_comparison_pending"
     },
     {
       "record_id": "disorders_consciousness_2019",
@@ -1631,8 +1748,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "exact task parameters need extraction; social context is non-blocking"
-      ]
+        "Original bubbling-water recording, LISTEN HRTF identity and complete room/render configuration; motion time law; online response deadline; trailing-silence distribution; catch allocation across social/hemispace conditions. Three experiments share nine 0-3000-ms SOAs, -650/+3650-ms baseline anchors and 480-row schedules."
+      ],
+      "scope_review_source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6731720/",
+      "scope_review_basis": "Current primary Methods distinguishes collaboration, competition and inactive audience; within-experiment social and spatial factors are not extra experiments. Public evidence does not establish native two-participant synchronization.",
+      "scope_review_date": "2026-10-27"
     },
     {
       "record_id": "social_perception_2017",
@@ -1642,15 +1762,16 @@
         "openalex_audiotactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "audio-tactile PPS task with social-perception context",
+      "coverage_category": "adjacent_out_of_scope",
+      "audiotactile_task_family": "social visual–tactile interaction; auditory PPS paradigm is citation ancestry",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ],
-      "missing_publication_parameters": [
-        "extract the core audio-tactile PPS task parameters; social perception context is non-blocking"
-      ]
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.sciencedirect.com/science/article/abs/pii/S0010945217302903",
+      "scope_review_basis": "Publisher indexed Experiment 1/2 headings identify visual–tactile acquisition. Retain two minimum adjacent experiment units and a documented full-Methods access gap; do not infer direct auditory–tactile acquisition from the cited paradigm.",
+      "inventory_access_gap": "Trento openly listed manuscript HTTP 403; EPFL HTTP 429 on two attempts; final publisher full-page HTTP 403. Full experiment/control inventory and cohort independence unresolved.",
+      "retained_frozen_corpus_boundary": true
     },
     {
       "record_id": "lower_limb_pps_2017",
@@ -1683,8 +1804,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract the core audio-tactile PPS timing, distances, trial counts, and response settings separately from the foot-sole vibration manipulation"
-      ]
+        "Full Methods experiment inventory and all eleven exact replication contracts remain inaccessible after dated official source attempts. Abstract context is retained; the2019technical summary is not substituted as original Methods. Chest detection target and foot-sole context remain distinct."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://doi.org/10.1177/0956797619869337",
+      "scope_review_basis": "Audited source-access gap: IEEE empty202/PDF418 or SAGE main/SI/XML403. Single retained review unit does not establish one experiment. Conference duplicate DOI/page discrepancy is separately recorded in the corpus identity audit."
     },
     {
       "record_id": "hobeika_2020_methods",
@@ -1701,25 +1825,30 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract logarithmic distances, fixed-distance baselines, and sound-propagation settings"
-      ]
+        "Exact Gaussian-noise realization, LISTEN HRTF and complete room/render settings; motion time origin; trailing-silence distribution and online response deadline. Current Table 2 resolves sound-onset SOAs, -250/+3500-ms baseline anchors, two sampling sessions and 1152-row allocation; old 300-ms-shifted anchors are superseded."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://hal.science/hal-02418179/document",
+      "scope_review_basis": "Fresh DOI-linked author manuscript and rendered Table 2 separate sound-onset anchors from leading silence, analysis RT inclusion from online timing, and one two-session PPS experiment from auditory discomfort tasks."
     },
     {
       "record_id": "ferroni_2020_tool_observation",
-      "citation_short": "Tool-use observation PPS (2020)",
+      "citation_short": "Galigani et al. (2020)",
       "doi": "10.1016/j.neuropsychologia.2020.107622",
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
       "current_template_ids": [],
       "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "audio-tactile PPS task around tool-use observation",
+      "audiotactile_task_family": "static near/far AT after active, observed and cognitive tool-training sessions; separate body-landmark cohort",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract whether PPS task differs from Canzoneri-style dynamic scaffold"
+        "Exact audio source/envelope, ITI distribution/anchor and online response window",
+        "Nominal simultaneity with up to 40 ms pilot auditory lag; exact delivered timing unspecified",
+        "Full final-file comparison and unresolved pilot inventory detail"
       ]
     },
     {
@@ -1753,8 +1882,11 @@
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
       "missing_publication_parameters": [
-        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
-      ]
+        "Original stimulus recipe/assets and electrical waveform; current behavioral catch allocation; fMRI active/passive role wording conflict, ambiguous catch denominator and ITI selection distribution. Individual near/far SOA rule is reported, not a universal fixed pair. Original Ferri 2015 differs in fMRI experimental repetitions (30 versus 48), runs (five versus eight), and first ITI (4.65 versus 4.56 s); protocol-version relationship remains unresolved."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.nature.com/articles/s41598-021-00048-5.pdf",
+      "scope_review_basis": "Primary Methods pp. 9-10 reuses Ferri 2015 data and distinguishes behavioral localizer from fMRI protocol; current source contradictions and gaps remain in the component review. Original 2015 Methods now inspected as separately attributed lineage evidence; incompatible values are retained rather than propagated as verified equivalents."
     },
     {
       "record_id": "ageing_2021",
@@ -1771,8 +1903,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "exact task parameters need extraction; age group context is non-blocking"
-      ]
+        "Original audio generation/envelope and distance mapping; silent-baseline zero trigger; inter-stimulus interval anchor/distribution; whether 110-row recipe repeats per hand; PPS block count/composition. Current Methods reports 300/1500/2700-ms SOAs and a 2000-ms right-foot response window."
+      ],
+      "scope_review_source": "https://arodes.hes-so.ch/nanna/record/7034/files/Published%20version.pdf",
+      "scope_review_basis": "Fresh published Methods separates one bilateral age-group PPS assessment from body and sound-localization tasks; later partial control-data reuse is disclosed without independent replication claims.",
+      "scope_review_date": "2026-10-27"
     },
     {
       "record_id": "seeming_confines_2021",
@@ -1789,8 +1924,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract PPS task timing, distances, tactile settings, response rules, and trial repetition counts separately from electrophysiology; electrophysiology context is non-blocking unless trigger timing changes task execution"
-      ]
+        "Primary abstract identifies three experiments, but full Methods inventory/cohort linkage and all eleven exact acquisition contracts remain inaccessible after repository/publisher attempts.20-minute145-cm-rake or visual training is a manipulation, not a trial-count specification."
+      ],
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=EXT_ID:34666298%20AND%20SRC:MED&format=json&resultType=core",
+      "scope_review_date": "2026-10-27",
+      "scope_review_basis": "Independent source-specific inventory/contract audit; explicit version differences, unavailable source details and physical-qualification gaps retained."
     },
     {
       "record_id": "jazz_duet_2021",
@@ -1807,8 +1945,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract the audiotactile PPS task parameters separately from the musical-interaction manipulation; music/social context is non-blocking unless it changes the task audio assets"
-      ]
+        "Final-article equivalence to the identified author thesis remains unverified; exact tone modulation depth/sample rate/level, near-speaker offset, ISI anchor/distribution, online response window and rating collection sequence remain unresolved. Pilot-specific schedule is not reported. Author version resolves static0-msSOA,120rows per main/control administration and the five-administration main regimen."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://backoffice.biblio.ugent.be/download/8673877/8673880",
+      "scope_review_basis": "Author thesis publication list explicitly identifies the matching forthcoming Psychological Research article. Review separates main musicians, new baseline-only controls and power pilot; actual failed/restricted final-text routes remain documented. No final-version equivalence or electrical hardware capability is inferred."
     },
     {
       "record_id": "taffou_2021_auditory_roughness",
@@ -1865,8 +2006,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract PPS task parameters; clinical group and tool-use context are non-blocking"
-      ]
+        "Original auditory asset/recipe and duration; contradictory 180-target versus 120-total schedule and unresolved shared 40% baseline/catch allocation; online response deadline; conflicting constant-current/constant-voltage pulse specification. SI reports five positive SOAs, -700-ms tactile baseline, 1000-ms ITI and 100-microsecond electrical pulse."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/schizophreniabulletin/48/5/10.1093_schbul_sbac067/1/sbac067_suppl_supplementary_material.docx",
+      "scope_review_basis": "Current official supplementary section 1.2 was retrieved and inspected; the primary article separates two assessments from physical tool-use intervention. Gaps are source conflicts/missing details, not an unavailable supplement."
     },
     {
       "record_id": "teraoka_2024_front_rear",
@@ -1884,8 +2028,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract auditory-probe trajectory, baseline structure, and apparatus geometry"
-      ]
+        "Original pink-noise sample/recipe, sampling rate and exact physical-speaker crossfade; warning-tone onset/offset anchor for probe interval and silent baselines; ITI anchor/distribution; exact response key/hand and online deadline; front/rear block order. Methods resolves physical geometry, +250/+500/+750-ms probe SOAs and 112-row allocation."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://muroran-it.repo.nii.ac.jp/record/2000223/files/Comparison%20of%20peripersonal%20space%20in%20front%20and%20rear%20spaces.pdf",
+      "scope_review_basis": "Fresh institutional manuscript and rendered apparatus figure separate one short-probe PPS experiment from two auditory-only perceptual tasks. No physical multi-speaker capability or calibration is inferred for PPS Kit."
     },
     {
       "record_id": "body_image_social_cognition_2024",
@@ -1902,8 +2049,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract exact audio-tactile reaction-time task parameters; body-image/social-cognition variables are non-blocking context"
-      ]
+        "Original pink-noise clip/envelope and level calibration; tactile waveform/duration; ITI/foreperiod, response timeout and silent-control zero-time anchor. The author manuscript reports 3000-ms sound, five SOAs and the reconciled 81-trial schedule."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://aru.figshare.com/articles/journal_contribution/The_Impact_of_Body_Image_on_Social_Cognition_Fear_of_Negative_Evaluation_Mediates_the_Relationship_between_Body_Surveillance_and_Interpersonal_Distance_in_Women/26381626",
+      "scope_review_basis": "Author-deposited manuscript section 2.2.9 confirms the in-scope audio-tactile assessment and separates it from interpersonal-distance measures; the compact review retains technical gaps."
     },
     {
       "record_id": "mindfulness_pps_2024",
@@ -1940,7 +2090,9 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "source PDF reports a trimodal audiovisuotactile Experiment 2 with 2 m virtual-ball approach, 75 cm/s matched dynamic sound, right-cheek 10 ms tactile taps, five delay levels, 540 total trials, and a PPS boundary between D3 and D4/central point near 105 cm; row-level audiovisual/MR provenance metadata are now runner-supported, but exact delay table, original video/3D assets, ExpyVR/RealiSM scripts, binaural source tracks, and physical HMD/audio synchronization remain unresolved before a full runnable profile is honest"
+        "Experiment 2 requires synchronous audiovisual motion and 10 ms cheek touch; row-level audiovisual/MR provenance metadata are now runner-supported, but source assets and physical HMD/audio synchronization remain unresolved",
+        "Five timing labels lack numeric SOAs; 540 reported trials conflicts with 180 from named cells; catch composition and exact allocation unresolved",
+        "Nominal 2 m at 0.75 m/s conflicts with 2.6 s movement; original video/3D assets, binaural tracks and ExpyVR/RealiSM scripts are unavailable"
       ]
     },
     {
@@ -1959,8 +2111,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract core looming-sound timing/distance profile, chest vibrotactile target timing, response settings, trial counts, and whether the foot-sole vibration context must be represented as a secondary tactile condition for exact task execution"
-      ]
+        "Full Methods experiment inventory and all eleven exact replication contracts remain inaccessible after dated official source attempts. Abstract context is retained; the2019technical summary is not substituted as original Methods. Chest detection target and foot-sole context remain distinct."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://doi.org/10.1109/WHC.2017.7989970",
+      "scope_review_basis": "Audited source-access gap: IEEE empty202/PDF418 or SAGE main/SI/XML403. Single retained review unit does not establish one experiment. Conference duplicate DOI/page discrepancy is separately recorded in the corpus identity audit."
     },
     {
       "record_id": "novel_two_phase_audio_tactile_2025",
@@ -1996,7 +2151,9 @@
         "hrtf_database_or_binaural_engine_mismatch"
       ],
       "missing_publication_parameters": [
-        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved"
+        "Original MATLAB HRTF/right-lateral source assets, output levels and complete propagation law; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, which does not establish source equivalence",
+        "Pad dimensions and reported analyzed N versus test degrees of freedom conflict",
+        "Independent ITI, online response deadline and source-equivalence validation"
       ]
     },
     {
@@ -2014,8 +2171,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "determine PPS-task parameters separately from time-perception measures"
-      ]
+        "Retained final review lacks exact PPSITI/jitter, repetitions/total, baseline/catch split, online deadline, detailed tactile calibration and original audio. Fresh official final/SIroutes returned403. The preprintSIhas incompatible study context and arithmetic; it cannot repair missing final values or establish final contradictions."
+      ],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://doi.org/10.1177/17470218241261645",
+      "scope_review_basis": "RetainedJune16primaryPDFreview is preserved separately from exactOSFv1review and actual fresh final/SIaccess failures. PPSversusMTTtasks remain distinct; no silent nominal-motion or trial-count repair."
     },
     {
       "record_id": "amiel_2025_front_rear",
@@ -2032,7 +2192,9 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract front/rear sound-spatialization method, distance levels, tactile timing, and exact body-relative trajectory mappings; row-level auditory trajectory-family metadata is now runner-supported"
+        "Original burst recipe, LISTEN subject/HRTF and complete Spat level/room settings; row-level auditory trajectory-family metadata is now runner-supported, which does not establish source equivalence",
+        "3250 ms waveform versus 620 cm at 210 cm/s: exact movement timing unresolved",
+        "Post-sound jitter distribution, exact catch crossing, per-block balancing and online response window"
       ]
     },
     {
@@ -2070,8 +2232,11 @@
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract near/far audiotactile stimulus distances, tactile settings, timing, trial counts, response/trigger settings, and apparatus details independently of sleep or clinical endpoint"
-      ]
+        "Original white-noise waveform/audio rate/envelope; healthy intensity-matching contradiction and40%quantity basis; precise awake/sleep ITI support/anchor and overnight allocation; clinical electrical pulse width/train waveform and exact breaks. Primary final/SI now confirms two formal experiments and final-specific healthy synchrony/ear-pressure equalization; no calibration inferred."
+      ],
+      "scope_review_source": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13130652/fullTextXML",
+      "scope_review_date": "2026-10-27",
+      "scope_review_basis": "Independent source-specific inventory/contract audit; explicit version differences, unavailable source details and physical-qualification gaps retained."
     },
     {
       "record_id": "matsuda_2021_four_directions",
@@ -2099,16 +2264,35 @@
       "current_template_ids": [
         "lerner_2021_3d_audio_tactile_boundary"
       ],
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "VR 3D audio-tactile PPS boundary estimation",
-      "can_recreate_audiotactile_components_now": true,
+      "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": [],
+      "missing_publication_parameters": [
+        "Primary Methods conflicts: four 24-trial blocks versus 144 total; head-versus-sternum coordinate origin; unresolved arm-distance-to-SOA mapping, tactile attack/decay details, original spatial audio recipe and trial interval/catch policy. Existing template is an encoded approximation, not a complete source reconstruction."
+      ],
       "recreation_caveats": [
         "The original Unity/3D Tune-In scene and per-subject head-circumference/ITD customization are represented with the toolkit's Python SOFA reference renderer and fixed listener model.",
         "The original body-scaled tactile timepoints are represented with a declared 70 cm reference arm length, preserving the reported 0.7-1.7 arm-length sequence as 49-119 cm values.",
         "The paper text reports four blocks and 144 total trials but also says 24 trials per block; the runnable profile preserves the 144-trial condition matrix and four-block workflow."
-      ]
+      ],
+      "scope_review_source": "https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2021.644214/pdf",
+      "scope_review_date": "2026-10-27",
+      "scope_review_basis": "Current primary Methods and compact component review preserve source contradictions independently of existing template availability. No device calibration or native qualification is inferred. The existing profile can be opened/run as a declared reconstruction, but source-to-runner completeness remains blocked by unresolved publication parameters.",
+      "prior_software_comparison_evidence": {
+        "status": "historical_ledger_references_retained_not_reverified",
+        "boundary": "These prior deterministic software comparisons remain recorded. New source gaps block source-to-runner completeness; they do not erase software history, qualify physical devices or establish human replication.",
+        "mouse_click": {
+          "status": "mouse_click_simulated_participant_like_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
+          "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
+        },
+        "synthetic_contrast": {
+          "status": "deterministic_synthetic_profile_contrast_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+          "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+        }
+      }
     },
     {
       "record_id": "lamia_2026_arm_movement",
@@ -2137,11 +2321,30 @@
       "current_template_ids": [
         "roussel_2025_dynaspace_mobile_pps"
       ],
-      "coverage_category": "covered_runnable_profile",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "smartphone DynaSpace looming versus fixed audio-tactile PPS validation task",
-      "can_recreate_audiotactile_components_now": true,
+      "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": []
+      "missing_publication_parameters": [
+        "Primary Methods conflicts: 144 catches by block/total arithmetic versus 184 stated, 72 rows versus Figure 9 loop 76, and five- versus three-minute blocks. Original burst-train/HRTF/rendering parameters, motion time origin, random-silence distribution, online response deadline and trial randomization remain unresolved. Existing template availability does not settle these source gaps."
+      ],
+      "scope_review_source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12526932/",
+      "scope_review_date": "2026-10-27",
+      "scope_review_basis": "Current primary Methods and compact component review preserve source contradictions independently of existing template availability. No device calibration or native qualification is inferred. The existing profile can be opened/run as a declared reconstruction, but source-to-runner completeness remains blocked by unresolved publication parameters.",
+      "prior_software_comparison_evidence": {
+        "status": "historical_ledger_references_retained_not_reverified",
+        "boundary": "These prior deterministic software comparisons remain recorded. New source gaps block source-to-runner completeness; they do not erase software history, qualify physical devices or establish human replication.",
+        "mouse_click": {
+          "status": "mouse_click_simulated_participant_like_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_ready_profile_mouse_click_expected_outcome_20260715/ready_profile_mouse_click_expected_outcome_audit_report.json",
+          "model_boundary": "Deterministic participant-like mouse clicks were injected through SessionRunnerController after tactile onsets and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
+        },
+        "synthetic_contrast": {
+          "status": "deterministic_synthetic_profile_contrast_comparison_available",
+          "source_report": "artifacts/validation_runs/current_goal_ready_profile_expected_contrast_audit_20260715/ready_profile_expected_contrast_audit_report.json",
+          "model_boundary": "Deterministic synthetic RT comparisons over runner rows; not collected participant data, not mouse-click-simulated participant-like runner behavior, and not a scientific replication claim."
+        }
+      }
     },
     {
       "record_id": "spiousas_2025_auditory_only",
@@ -2184,7 +2387,10 @@
       "audiotactile_task_family": "visuo-tactile PPS task, not an audio-tactile profile",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [],
-      "missing_publication_parameters": []
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.nature.com/articles/s41598-022-21469-w.pdf",
+      "scope_review_basis": "Primary Methods pp. 2-3 confirms one counterbalanced visuotactile design with LEDs and electrical hand targets; retained as an adjacent boundary without implying auditory-tactile or native support."
     },
     {
       "record_id": "teramoto_2013_beyond_head_audiotactile",
@@ -2212,15 +2418,19 @@
         "web_search_2026_06_13"
       ],
       "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "moving-sound hand-PPS task with rare tactile targets and motor-system/TMS endpoint",
+      "coverage_category": "adjacent_out_of_scope",
+      "audiotactile_task_family": "moving auditory-TMS/MEP mechanism with separate tactile attention and localization validation",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "scope_review_date": "2026-10-27",
+      "scope_review_source": "https://www.researchgate.net/publication/266398259_Moving_sounds_within_the_peripersonal_space_modulate_the_motor_system",
+      "scope_review_basis": "Primary Methods sections 2.3.1-2.3.2: main outcome is TMS-evoked MEP amplitude. Rare tactile probes are separated from TMS by 4-5 s and serve attention; subsequent sound-localization judgments validate the apparatus. The 50-ms delay is sound-position-to-TMS, not a tactile-detection SOA. Preserve TMS/EMG and hardware qualification requirements as external mechanistic context.",
+      "recreation_caveats": [
+        "TMS/EMG acquisition and physical qualification remain external requirements for the mechanistic experiment. Boundary classification does not establish software or hardware support.",
+        "Existing critical primary review retains incomplete audio waveform, tactile calibration and baseline-probe inclusion evidence for any future mechanistic recreation."
       ],
-      "missing_publication_parameters": [
-        "extract moving-sound trajectory, tactile target schedule, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating; vocal/voice-key response metadata is now runner-supported"
-      ]
+      "retained_frozen_corpus_boundary": true
     },
     {
       "record_id": "biggio_2017_racket_tool_use",

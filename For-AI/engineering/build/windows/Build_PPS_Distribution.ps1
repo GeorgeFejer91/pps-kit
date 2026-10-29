@@ -1,3 +1,4 @@
+[CmdletBinding()]
 param(
     [string]$Version = "",
     [string]$PayloadBaseUrl = "",
@@ -8,6 +9,14 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$PayloadUri = $null
+if (-not [Uri]::TryCreate($PayloadBaseUrl, [UriKind]::Absolute, [ref]$PayloadUri) -or
+    $PayloadUri.Scheme -notin @("http", "https") -or -not $PayloadUri.Host -or
+    $PayloadUri.UserInfo -or $PayloadUri.Query -or $PayloadUri.Fragment -or
+    [Uri]::UnescapeDataString($PayloadBaseUrl) -match '(?i)replace_with|your_record_id|[<>\s]' -or
+    $PayloadUri.AbsolutePath.EndsWith(".zip", [StringComparison]::OrdinalIgnoreCase)) {
+    throw "PayloadBaseUrl must be a complete HTTP(S) folder URL without placeholders, credentials, query or fragment. Use a local server URL for smoke builds."
+}
 $Root = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")).Path
 $DistDir = Join-Path $Root "dist"
 $Python = Join-Path $Root ".venv\Scripts\python.exe"
@@ -51,11 +60,7 @@ foreach ($Product in $Products) {
     & $Python (Join-Path $Root "For-AI\engineering\release\tools\make_offline_lab_zip.py") --source-dir $StageRoot --output $Zip
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-    $PayloadUrl = if ($PayloadBaseUrl) {
-        "$($PayloadBaseUrl.TrimEnd('/'))/$PackageName.zip"
-    } else {
-        "https://zenodo.org/records/REPLACE_WITH_RECORD/files/$PackageName.zip?download=1"
-    }
+    $PayloadUrl = "$($PayloadBaseUrl.TrimEnd('/'))/$PackageName.zip"
     $ManifestPath = Join-Path $DistDir $Product.Manifest
     $ManifestArgs = @(
         (Join-Path $Root "For-AI\engineering\release\tools\make_download_manifest.py"),

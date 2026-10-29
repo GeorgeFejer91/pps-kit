@@ -1,5 +1,10 @@
 # Stimulus Designer
 
+This guide describes the V1 Python/HTML and Qt Designer. For the hosted
+premade-asset workflow and Python-free Rust/Tauri Designer, use the
+[Windows preview guide](NATIVE_WINDOWS_PREVIEW.md). V1 fallback rendering below
+does not apply to the native preview.
+
 The standard researcher-facing design surface is the local HTML dashboard:
 
 ```bat

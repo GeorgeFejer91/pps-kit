@@ -60,7 +60,11 @@ impl NativePlaybackSource {
                 .filter(|index| *index > 0)
                 .ok_or("native_block_index_invalid")?,
             block_ordinal: self.plan.fence().audio().block_ordinal(),
-            block_label: schedule.block_label.clone(),
+            block_label: self
+                .receipt
+                .instruction()
+                .map(|item| item.label().to_owned())
+                .unwrap_or_else(|| schedule.block_label.clone()),
             duration_ns,
         })
     }
@@ -198,8 +202,9 @@ impl NativePreparedPlayback {
             .map_err(|_| "native_playback_unavailable")?;
         let mut inputs = Vec::with_capacity(records.len());
         for record in records {
-            if let Some(input) = record_input(
+            if let Some(input) = record_input_for_media(
                 self.source.receipt.schedule(),
+                self.source.receipt.instruction().is_some(),
                 self.source.plan.fence(),
                 record,
                 stamp,
@@ -212,11 +217,13 @@ impl NativePreparedPlayback {
                             .ok_or("native_playback_clock_invalid")?,
                     );
                 }
-                self.capture.observe(&input)?;
+                if self.source.receipt.instruction().is_none() {
+                    self.capture.observe(&input)?;
+                }
                 inputs.push(input);
             }
         }
-        if resolve_responses {
+        if resolve_responses && self.source.receipt.instruction().is_none() {
             inputs.extend(
                 self.capture
                     .resolve_ready(stamp.monotonic_ns, stamp.unix_ms)?,
@@ -226,8 +233,20 @@ impl NativePreparedPlayback {
     }
 }
 
+#[cfg(test)]
 pub(crate) fn record_input(
     schedule: &BlockEventSchedule,
+    fence: &OutputFence,
+    record: NativePlaybackRecord,
+    stamp: &ClockStamp,
+    host_monotonic_ns: u64,
+) -> Result<Option<LedgerEventInput>, &'static str> {
+    record_input_for_media(schedule, false, fence, record, stamp, host_monotonic_ns)
+}
+
+fn record_input_for_media(
+    schedule: &BlockEventSchedule,
+    instruction: bool,
     fence: &OutputFence,
     record: NativePlaybackRecord,
     stamp: &ClockStamp,
@@ -242,6 +261,11 @@ pub(crate) fn record_input(
                 return Err("native_playback_stale_record");
             }
             let (event_type, trigger, payload) = match boundary.kind() {
+                RtEventKind::SampleZero if instruction => (
+                    "instruction.sample-zero".to_owned(),
+                    None,
+                    serde_json::json!({}),
+                ),
                 RtEventKind::SampleZero => {
                     let anchor = schedule
                         .events()
@@ -255,6 +279,9 @@ pub(crate) fn record_input(
                     )
                 }
                 RtEventKind::Scheduled { event_index } => {
+                    if instruction {
+                        return Err("instruction_unexpected_trial_event");
+                    }
                     let event = usize::try_from(event_index)
                         .ok()
                         .and_then(|index| schedule.events().get(index))

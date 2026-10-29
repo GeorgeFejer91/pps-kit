@@ -5,7 +5,7 @@
   "source_url": "https://www.nature.com/articles/srep18603",
   "doi": "10.1038/srep18603",
   "verification_status": "partial",
-  "notes": "Peri-hand branch of the Serino body-part mapping series. The original two-speaker analog setup is treated as apparatus provenance and recreated as a binaural moving-sound trajectory. The lateralized hand posture is represented with an explicit cartesian hand-anchored path offset to shoulder width; exact hand side, original WAV/envelope files, and block/order rules remain caveats.",
+  "notes": "Peri-hand branch of the Serino body-part mapping series. This binaural proxy uses continuous pink noise and a derived 4-s path (0.88 m / 0.22 m/s), with a separate 100-ms software tail to contain the last tactile cue. The right-side 0.35-m hand offset and distance-to-SOA origin are explicit assumptions. Digital peak normalization at 0.9 plus inverse-square attenuation is a proxy policy; it does not reproduce the reported speaker SPL envelope or establish calibration. Exact hand side, original WAV/envelope files, numerical timing origin and block/order rules remain caveats.",
   "reference_parameters": {
     "distances_cm": [
       93,
@@ -16,6 +16,11 @@
     ],
     "profile_check_complete": true,
     "repetitions_reported": 16,
+    "software_trial_padding_ms": {"pre": 0, "post": 100},
+    "software_trial_padding_basis": "Derived containment only: post=max(0,4000+100-4000)=100 ms after the four-second software sound. This tail is not a reported trial margin or the reported shuffled 500-700-ms ITI.",
+    "soa_values_ms_basis": "Derived proxy: elapsed_ms=(93-distance_cm)/22*1000, rounded to whole milliseconds, for [93,71,50,27,5] cm gives [0,1000,1955,3000,4000]. The primary Methods report distances and 22 cm/s, but do not report this numerical SOA table or establish this exact sound-onset origin.",
+    "loudness_policy": {"kind": "peak_normalize", "target_peak_dbfs": -0.9151498112135024, "peak_ceiling_dbfs": -0.9151498112135024},
+    "loudness_policy_basis": "Explicit digital proxy: peak 0.9 with inverse-square attenuation. No physical SPL or original 55-to-70-dB envelope equivalence is claimed.",
     "analog_apparatus_recreation": "Original near/far speakers are modeled as the reported moving-sound trajectory in the binaural renderer.",
     "body_anchor_frame": {
       "anchor": "lateralized hand at shoulder width",
@@ -41,7 +46,9 @@
         "noise_type": "pink",
         "azimuth_deg": 0.0,
         "elevation_deg": 0.0,
-        "gain": 1.0
+        "gain": 1.0,
+        "source_profile": "continuous_noise",
+        "source_profile_parameters": {}
       }
     ],
     "custom_looming_files": [],
@@ -58,7 +65,7 @@
       "end_y_m": 0.05,
       "end_z_m": 0.0,
       "path_length_m": 0.88,
-      "propagation_speed_mps": 0.293333333,
+      "propagation_speed_mps": 0.22,
       "azimuth_start_deg": 20.623531383,
       "azimuth_end_deg": 81.869897646,
       "elevation_deg": 0.0,
@@ -119,6 +126,13 @@
               "source_label": "Hand moving sound",
               "source_labels": ["Hand moving sound"],
               "randomized": true
+            },
+            {
+              "element_id": "serino-peri-hand-derived-tail",
+              "kind": "jitter",
+              "label": "Derived tactile containment tail",
+              "jitter_values_ms": [100],
+              "randomized": false
             }
           ]
         }
@@ -128,6 +142,10 @@
     }
   },
   "provenance": [
+    {
+      "field": "proxy duration, SOA and level policy",
+      "source": "Scientific Reports DOI 10.1038/srep18603, Methods Experiment 3 and Supplementary Methods: 22 cm/s and five hand-relative distances. Software duration=(0.93-0.05)/0.22=4 s; SOA=(0.93-distance_m)/0.22. The exact sound-onset origin is unreported. A separate 100-ms tail contains the software tactile cue; digital peak 0.9/inverse-square and right-side hand offset are explicit proxy choices. Native generation sidecars bind actual source, renderer, resources and output hashes."
+    },
     {
       "field": "distances",
       "source": "Scientific Reports Experiment 3 reports five distances: 5, 27, 50, 71, and 93 cm."

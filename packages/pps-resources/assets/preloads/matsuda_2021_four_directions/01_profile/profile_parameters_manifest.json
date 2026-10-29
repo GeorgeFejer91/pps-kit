@@ -54,7 +54,7 @@
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
         "passed": true,
-        "field_count": 5,
+        "field_count": 6,
         "blocking_reasons": []
       },
       {
@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 2,
+      "value": 7,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -136,17 +136,20 @@
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "jitter_values_ms",
-      "status": "defaulted",
-      "value": [],
-      "note": "No explicit jitter box is encoded."
+      "status": "inferred",
+      "value": [
+        700,
+        800
+      ],
+      "note": "Derived containment only: pre=max(0,-min(SOA))=700 ms; post=max(0,max(SOA)+software cue duration-sound duration)=3700+100-3000=800 ms. Fixed full-trial silence and ITI are not specified in the reviewed Methods prose."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "iti_jitter_policy",
-      "status": "defaulted",
-      "value": "no explicit Segment 2 ITI/jitter box",
-      "note": "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."
+      "status": "inferred",
+      "value": "derived software containment",
+      "note": "Derived containment only: pre=max(0,-min(SOA))=700 ms; post=max(0,max(SOA)+software cue duration-sound duration)=3700+100-3000=800 ms. Fixed full-trial silence and ITI are not specified in the reviewed Methods prose."
     },
     {
       "segment": "3",
@@ -161,6 +164,17 @@
         2700
       ],
       "note": "SOA values are encoded."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "tactile_cue_substitution",
+      "status": "defaulted",
+      "value": {
+        "reported_ms": 24,
+        "software_ms": 100
+      },
+      "note": "The shared audio-channel cue is a software substitution, not the reported physical stimulus."
     },
     {
       "segment": "3",
@@ -241,23 +255,23 @@
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
-      "profile_metadata": "assets/preloads/matsuda_2021_four_directions/01_profile/profile_metadata.json",
-      "profile_parameters_manifest": "assets/preloads/matsuda_2021_four_directions/01_profile/profile_parameters_manifest.json"
+      "profile_metadata": "packages/pps-resources/assets/preloads/matsuda_2021_four_directions/01_profile/profile_metadata.json",
+      "profile_parameters_manifest": "packages/pps-resources/assets/preloads/matsuda_2021_four_directions/01_profile/profile_parameters_manifest.json"
     },
     "02_looming_stimuli": {
-      "stimulus_sources": "assets/preloads/matsuda_2021_four_directions/02_looming_stimuli/stimulus_sources.json",
-      "trajectory_inventory": "assets/preloads/matsuda_2021_four_directions/02_looming_stimuli/trajectory_inventory.json",
+      "stimulus_sources": "packages/pps-resources/assets/preloads/matsuda_2021_four_directions/02_looming_stimuli/stimulus_sources.json",
+      "trajectory_inventory": "packages/pps-resources/assets/preloads/matsuda_2021_four_directions/02_looming_stimuli/trajectory_inventory.json",
       "asset_count": 2
     },
     "03_baseline_strategy": {
-      "baseline_strategy": "assets/preloads/matsuda_2021_four_directions/03_baseline_strategy/baseline_strategy.json"
+      "baseline_strategy": "packages/pps-resources/assets/preloads/matsuda_2021_four_directions/03_baseline_strategy/baseline_strategy.json"
     },
     "04_trial_designer": {
-      "trial_design": "assets/preloads/matsuda_2021_four_directions/04_trial_designer/trial_design.json",
+      "trial_design": "packages/pps-resources/assets/preloads/matsuda_2021_four_directions/04_trial_designer/trial_design.json",
       "trial_row_count": 1
     },
     "05_run_setup": {
-      "run_defaults": "assets/preloads/matsuda_2021_four_directions/05_run_setup/run_defaults.json",
+      "run_defaults": "packages/pps-resources/assets/preloads/matsuda_2021_four_directions/05_run_setup/run_defaults.json",
       "block_count": 4,
       "participant_count": 20
     },
@@ -279,6 +293,10 @@
     {
       "field": "stimuli",
       "source": "Methods report 3000 ms pink noise moving between 10 and 110 cm with T1-T5 at 300-2700 ms."
+    },
+    {
+      "field": "baseline offsets and derived software margins",
+      "source": "Matsuda et al. 2021, Audio stimuli, Tactile stimuli and Procedure, DOI 10.1038/s41598-021-90784-5 (PMC8163804): 3000-ms sound, 24-ms tactile stimulus, controls 700 ms before onset/after offset. The margins and 100-ms software cue are separate implementation choices; formula in reference_parameters."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

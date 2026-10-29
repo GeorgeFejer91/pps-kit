@@ -80,6 +80,7 @@ fn queue_full_and_sequence_gaps_do_not_advance_admission_or_claim_durability() {
         interrupted: false,
         publication_enabled: false,
         pending_seal: None,
+        group_attempt: None,
     };
     let mut ledger = EventLedger::default();
     let first = prepared(&ledger, 1);
@@ -111,6 +112,7 @@ fn file_budget_and_large_batches_are_rejected_before_queue_admission() {
         interrupted: false,
         publication_enabled: false,
         pending_seal: None,
+        group_attempt: None,
     };
     let ledger = EventLedger::default();
     assert_eq!(
@@ -234,8 +236,16 @@ fn dataset_write_failure_never_acknowledges_events_or_rows_and_retains_both_file
 }
 
 fn publishable_journal(root: &Path) -> NativeEventJournal {
-    let events = root.join("events.partial.jsonl");
-    let dataset = root.join("trials.partial.csv");
+    publishable_named_journal(root, "events.partial.jsonl", "trials.partial.csv")
+}
+
+fn publishable_named_journal(
+    root: &Path,
+    events_name: &str,
+    dataset_name: &str,
+) -> NativeEventJournal {
+    let events = root.join(events_name);
+    let dataset = root.join(dataset_name);
     let header = serde_json::json!({"schema": "pps.native-event-journal.v1", "packageManifestSha256": "a".repeat(64),
         "participantId": "fixture", "sessionId": "S1", "partSessionId": "S1P2", "partNumber": 2,
         "executionMode": "participant_block_wavs", "completion": "partial", "timingQualification": "unqualified"});
@@ -251,6 +261,123 @@ fn publishable_journal(root: &Path) -> NativeEventJournal {
         Some(publication),
     )
     .unwrap()
+}
+
+// Absent from production. A dedicated child test process parks at an actual
+// writer boundary so its parent can terminate it without unwinding the writer.
+pub(super) fn crash_probe(stage: &str) {
+    if std::env::var("PPS_JOURNAL_CRASH_STAGE").ok().as_deref() != Some(stage) {
+        return;
+    }
+    let root = PathBuf::from(std::env::var_os("PPS_JOURNAL_CRASH_ROOT").unwrap());
+    fs::write(root.join("crash-ready"), stage).unwrap();
+    loop {
+        thread::sleep(Duration::from_secs(1));
+    }
+}
+
+#[test]
+fn recovery_crash_child() {
+    let Some(root) = std::env::var_os("PPS_JOURNAL_CRASH_ROOT") else {
+        return;
+    };
+    let root = PathBuf::from(root);
+    let id = "A".repeat(32);
+    let mut journal = publishable_named_journal(
+        &root,
+        &format!("native_events_{id}.partial.jsonl"),
+        &format!("native_trials_{id}.partial.csv"),
+    );
+    let _ledger = scored_prefix(&mut journal);
+    journal.finish(4, 9, 3).unwrap();
+    loop {
+        thread::sleep(Duration::from_secs(1));
+    }
+}
+
+#[test]
+fn process_termination_at_write_sync_and_publication_boundaries_is_read_only_recoverable() {
+    use std::process::{Command, Stdio};
+    struct ChildGuard(std::process::Child);
+    impl Drop for ChildGuard {
+        fn drop(&mut self) {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
+    }
+    for (stage, expected, rows) in [
+        ("after_event_write", "interrupted", 0),
+        ("after_dataset_sync", "interrupted", 2),
+        ("after_event_sync", "interrupted", 2),
+        ("after_event_link", "orphaned", 2),
+        ("after_dataset_link", "orphaned", 2),
+        ("after_manifest_link", "complete", 2),
+    ] {
+        let root = std::env::temp_dir().join(format!("pps-crash-recovery-{}", random_nonce()));
+        fs::create_dir(&root).unwrap();
+        let mut command = Command::new(std::env::current_exe().unwrap());
+        command
+            .args([
+                "--exact",
+                "event_journal::tests::recovery_crash_child",
+                "--nocapture",
+            ])
+            .env("PPS_JOURNAL_CRASH_ROOT", &root)
+            .env("PPS_JOURNAL_CRASH_STAGE", stage)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null());
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            command.creation_flags(0x08000000);
+        }
+        let mut child = ChildGuard(command.spawn().unwrap());
+        let deadline = Instant::now() + Duration::from_secs(15);
+        while !root.join("crash-ready").is_file() {
+            assert!(
+                child.0.try_wait().unwrap().is_none(),
+                "child exited before {stage}"
+            );
+            assert!(Instant::now() < deadline, "child did not reach {stage}");
+            thread::sleep(Duration::from_millis(10));
+        }
+        child.0.kill().unwrap();
+        child.0.wait().unwrap();
+        let snapshot = || {
+            fs::read_dir(&root)
+                .unwrap()
+                .map(|e| {
+                    let path = e.unwrap().path();
+                    (
+                        path.file_name().unwrap().to_owned(),
+                        fs::read(path).unwrap(),
+                    )
+                })
+                .collect::<std::collections::BTreeMap<_, _>>()
+        };
+        let before = snapshot();
+        let assessment = serde_json::to_value(crate::result_recovery::assess_directory(
+            &root,
+            &crate::result_recovery::ExpectedResultContext {
+                package_hash: "a".repeat(64), scored_trial_count: Some(3),
+                identity: serde_json::json!({"participantId":"fixture","sessionId":"S1","partSessionId":"S1P2",
+                    "partNumber":2,"executionMode":"participant_block_wavs"}),
+            },
+        ))
+        .unwrap();
+        assert_eq!(assessment["attempts"][0]["status"], expected, "{stage}");
+        assert_eq!(
+            assessment["attempts"][0]["commonDatasetRows"], rows,
+            "{stage}"
+        );
+        assert_eq!(
+            snapshot(),
+            before,
+            "assessment must never repair or rewrite evidence"
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
 }
 
 fn scored_prefix(journal: &mut NativeEventJournal) -> EventLedger {
@@ -404,6 +531,7 @@ fn full_finish_queue_keeps_the_same_tail_retryable_without_accepting_more_record
         interrupted: false,
         publication_enabled: true,
         pending_seal: None,
+        group_attempt: None,
     };
     let ledger = scored_prefix(&mut journal);
     assert_eq!(journal.finish(4, 9, 3), Err(JournalError::QueueFull));

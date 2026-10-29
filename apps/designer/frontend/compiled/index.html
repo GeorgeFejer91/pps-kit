@@ -14,8 +14,8 @@
       }
     }
   </script>
-  <script type="module" crossorigin src="./assets/index-C_Rdfloz.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DwguwD-4.css">
+  <script type="module" crossorigin src="./assets/index-j_SmFi1J.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-9YevsFhO.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -95,23 +95,23 @@
         <a href="#docs-hardware" data-page-section-link="docs-hardware" data-page-section-page="documentation"><span>Hardware</span></a>
         <a href="#docs-designer" data-page-section-link="docs-designer" data-page-section-page="documentation"><span>Designer</span></a>
         <a href="#docs-runner" data-page-section-link="docs-runner" data-page-section-page="documentation"><span>Runner</span></a>
-        <a href="#docs-emulatable-studies" data-page-section-link="docs-emulatable-studies" data-page-section-page="documentation"><span>Emulatable Studies</span></a>
+        <a href="#docs-emulatable-studies" data-page-section-link="docs-emulatable-studies" data-page-section-page="documentation"><span>Study Configurations</span></a>
         <a href="#docs-data-boundary" data-page-section-link="docs-data-boundary" data-page-section-page="documentation"><span>Data Boundary</span></a>
       </nav>
       <nav id="download-section-nav" class="rail-nav-group" aria-label="Download sections" data-rail-page="downloads" hidden>
         <div class="rail-nav-kicker">Downloads</div>
         <a href="#downloads-installer" data-page-section-link="downloads-installer" data-page-section-page="downloads"><span>Installer</span></a>
-        <a href="#downloads-package" data-page-section-link="downloads-package" data-page-section-page="downloads"><span>Offline Package</span></a>
+        <a href="#downloads-package" data-page-section-link="downloads-package" data-page-section-page="downloads"><span>Checksums</span></a>
         <a href="#downloads-source" data-page-section-link="downloads-source" data-page-section-page="downloads"><span>Source</span></a>
         <a href="#downloads-companion" data-page-section-link="downloads-companion" data-page-section-page="downloads"><span>Companion</span></a>
       </nav>
-      <button id="mobile-companion-toggle" class="mobile-rail-toggle mobile-companion-toggle" type="button" aria-expanded="false" aria-controls="companion-panel">
+      <button id="mobile-companion-toggle" class="mobile-rail-toggle mobile-companion-toggle" type="button" aria-expanded="false" aria-controls="companion-panel" data-companion-only hidden>
         <span>Connection</span>
         <strong>Local Companion</strong>
         <span class="mobile-disclosure-chevron" aria-hidden="true"></span>
       </button>
-      <div id="companion-panel" class="companion-panel" aria-label="Local companion backend">
-        <div class="layout-title">Local Companion</div>
+      <div id="companion-panel" class="companion-panel" aria-label="V1 local companion backend" data-companion-only hidden>
+        <div class="layout-title">V1 Local Companion</div>
         <span id="connection-status" class="status-label required">checking</span>
         <label for="backend-url">Backend URL</label>
         <input id="backend-url" type="url" autocomplete="off">
@@ -119,7 +119,7 @@
         <input id="companion-token" type="password" autocomplete="off">
         <button id="connect-backend" type="button">Connect</button>
       </div>
-      <div class="rail-note">
+      <div class="rail-note" data-companion-only hidden>
         <span>Qt UI remains available as</span>
         <code>pps-design</code>
       </div>
@@ -132,6 +132,7 @@
         <div class="segment-heading">
           <span class="segment-kicker">Segment 0</span>
           <h2 id="study-segment-title">Choose or Create Study</h2>
+          <button id="native-import-profile" type="button" hidden>Open portable profile</button>
           <button class="segment-info-button" type="button" data-segment-info="study" aria-label="About Segment 0: Choose or Create Study">About</button>
         </div>
         <div class="main-column">
@@ -193,13 +194,13 @@
                 </select>
                 <div class="noise-type-buttons" role="group" aria-label="Generate looming noise type">
                   <div class="noise-type-row noise-type-row-primary">
-                    <button type="button" class="noise-type-button noise-type-primary" data-noise-type="white" data-noise-hint="White noise - flat spectrum. Rated the most pleasant and least arousing of the five colours in Ferri et al. (2015), who used it as the neutral looming sound.">White</button>
-                    <button type="button" class="noise-type-button noise-type-primary" data-noise-type="pink" data-noise-hint="Pink noise - power falls ~3 dB/octave (1/f). Rated more arousing and less pleasant than white in Ferri et al. (2015).">Pink</button>
+                    <button type="button" class="noise-type-button noise-type-primary" data-noise-type="white" data-noise-hint="White noise - flat spectrum. Rated the most pleasant and least arousing of the five colours in Ferri et al. (2015), who used it as the neutral looming sound."><span class="noise-type-label" data-pretext>White</span></button>
+                    <button type="button" class="noise-type-button noise-type-primary" data-noise-type="pink" data-noise-hint="Pink noise - power falls ~3 dB/octave (1/f). Rated more arousing and less pleasant than white in Ferri et al. (2015)."><span class="noise-type-label" data-pretext>Pink</span></button>
                   </div>
                   <div class="noise-type-row noise-type-row-secondary">
-                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="blue" data-noise-hint="Blue noise - power rises ~3 dB/octave (f); high-frequency emphasis. One of the five colours validated in Ferri et al. (2015) Experiment 1.">Blue</button>
-                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="violet" data-noise-hint="Violet noise - power rises ~6 dB/octave (f^2), the derivative of white noise. Validated in Ferri et al. (2015); its valence differed from white.">Violet</button>
-                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="brown" data-noise-hint="Brown noise - power falls ~6 dB/octave (1/f^2); low rumble. Ferri et al. (2015) used it as the negative-valence sound, which expanded peripersonal space.">Brown</button>
+                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="blue" data-noise-hint="Blue noise - power rises ~3 dB/octave (f); high-frequency emphasis. One of the five colours validated in Ferri et al. (2015) Experiment 1."><span class="noise-type-label" data-pretext>Blue</span></button>
+                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="violet" data-noise-hint="Violet noise - power rises ~6 dB/octave (f^2), the derivative of white noise. Validated in Ferri et al. (2015); its valence differed from white."><span class="noise-type-label" data-pretext>Violet</span></button>
+                    <button type="button" class="noise-type-button noise-type-secondary" data-noise-type="brown" data-noise-hint="Brown noise - power falls ~6 dB/octave (1/f^2); low rumble. Ferri et al. (2015) used it as the negative-valence sound, which expanded peripersonal space."><span class="noise-type-label" data-pretext>Brown</span></button>
                   </div>
                 </div>
               </div>
@@ -324,6 +325,13 @@
             <div id="loudness-derived" class="loudness-derived"></div>
           </details>
 
+          <div id="native-generation-controls" hidden>
+            <label><input id="native-source-opt-in" type="checkbox"> Use the native noise algorithm (seeds differ from legacy NumPy audio)</label>
+            <label for="native-source-seed">Native source seed</label>
+            <input id="native-source-seed" type="number" min="0" max="4294967295" step="1" value="0">
+            <button id="native-cancel-generation" type="button" disabled>Cancel generation</button>
+            <p id="native-generation-status" class="decision-note" role="status">Native preparation supports noise, dry WAV and endpoint trajectories. Output levels use the selected estimate; physical output has not been measured.</p>
+          </div>
           <div class="bake-action-row stimulus-commit-row">
             <button id="bake-stimulus" type="button" class="primary">Create Stimulus</button>
             <span id="bake-status" class="status-label required">Choose a stimulus type</span>
@@ -700,6 +708,37 @@
             </div>
           </section>
         </section>
+        <section id="native-execution" class="panel" aria-labelledby="native-execution-title" hidden>
+          <h3 id="native-execution-title">Native participant preparation</h3>
+          <p>Review the complete blocks, participant order and instruction policy before accepting. Prepared files have not been executed or physically qualified.</p>
+          <div id="native-baseline-controls" class="native-execution-actions" hidden>
+            <label>Stationary control source <select id="native-baseline-source" data-preview-view-control></select></label>
+            <label><input id="native-baseline-opt-in" type="checkbox" data-preview-view-control> Use the native noise algorithm for this custom control; seeds differ from legacy NumPy audio.</label>
+            <button id="native-generate-baseline" type="button">Create stationary control</button>
+            <span id="native-baseline-help"></span>
+          </div>
+          <div class="native-execution-actions">
+            <button id="native-build-review" type="button">Build full native review</button>
+            <button id="native-download-review" type="button" disabled>Download full review</button>
+            <button id="native-cancel-work" type="button" disabled>Cancel native work</button>
+          </div>
+          <p id="native-execution-status" role="status" aria-live="polite">Build a native review to verify audio and exact timing.</p>
+          <div id="native-review-detail" hidden>
+            <p id="native-instruction-summary"></p>
+            <p id="native-timing-summary" hidden></p>
+            <p>Segment 5 shows the verified trial rows. This table lists every participant/part block occurrence.</p>
+            <table id="native-occurrence-table" class="data-table mobile-card-table"><thead><tr><th>Participant</th><th>Part</th><th>Position</th><th>Source block</th><th>Trials</th></tr></thead><tbody></tbody></table>
+            <div class="native-execution-actions"><button id="native-order-previous" type="button">Previous</button><span id="native-order-page"></span><button id="native-order-next" type="button">Next</button></div>
+            <label class="native-review-confirm"><input id="native-review-confirm" type="checkbox" data-preview-view-control> I reviewed the full blocks, timing substitutions, participant order and instruction policy.</label>
+            <button id="native-accept-review" type="button" disabled>Accept this native review</button>
+          </div>
+          <div class="native-execution-actions">
+            <label>Participant index <input id="native-participant" type="number" min="1" max="100" value="1" step="1" data-preview-view-control></label>
+            <label>Session identifier <input id="native-session-identity" value="session_001" maxlength="80" data-preview-view-control></label>
+            <button id="native-prepare-participant" type="button" disabled>Choose folder and prepare participant</button>
+            <button id="native-open-output" type="button" hidden>Open prepared folder</button>
+          </div>
+        </section>
       </section>
       </div>
 
@@ -743,16 +782,23 @@
           <div class="publication-network-shell" aria-describedby="publication-network-help">
             <div class="publication-network-summary-row">
               <p id="publication-network-status" class="publication-network-status" role="status" aria-live="polite">Loading publication network…</p>
-              <p id="publication-network-size-note" class="publication-network-metric-note">Circle area increases with incoming citations from other papers in this 94-paper map; a larger circle was cited by more included papers. Node size and position are navigation encodings, not study-quality scores.</p>
+              <p id="publication-network-inventory-note" class="publication-network-metric-note"></p>
+              <p id="publication-network-size-note" class="publication-network-metric-note">Circle area reflects incoming citations in this map. Size and position are navigation aids, not study-quality scores.</p>
               <button id="publication-network-fullscreen" type="button" aria-label="Open publication network full screen">Full screen</button>
+            </div>
+
+            <div class="publication-network-search-row">
+              <label for="publication-network-search" data-pretext>Find a publication</label>
+              <input id="publication-network-search" type="search" maxlength="200" placeholder="Title, author or DOI" aria-controls="publication-network-results publication-network-graph">
             </div>
 
             <div id="publication-network-workspace" class="publication-network-workspace">
               <div id="publication-network-stage" class="publication-network-stage">
-                <svg id="publication-network-graph" role="img" tabindex="0" focusable="true" preserveAspectRatio="none" aria-label="Interactive citation network of 94 audio-tactile PPS study publications with verified DOI links and citation metadata. Use the publication list for keyboard access, or use arrow keys to move between papers." aria-describedby="publication-network-help publication-network-status publication-network-size-note"></svg>
+                <svg id="publication-network-graph" role="img" tabindex="0" focusable="true" preserveAspectRatio="none" aria-label="Interactive audio-tactile PPS citation network. Use the publication list for keyboard access, or arrow keys to move between papers." aria-describedby="publication-network-help publication-network-status publication-network-size-note"></svg>
                 <div id="publication-network-loading" class="publication-network-loading" role="status">
                   <span class="publication-network-spinner" aria-hidden="true"></span>
-                  <span>Preparing publication network…</span>
+                  <span id="publication-network-loading-message">Preparing publication network…</span>
+                  <button id="publication-network-retry" type="button" hidden data-pretext>Retry loading</button>
                 </div>
                 <div id="publication-network-tooltip" class="publication-network-tooltip" role="tooltip" hidden></div>
               </div>
@@ -784,15 +830,15 @@
                 </div>
               </fieldset>
               <div class="publication-network-legend" aria-label="Map key">
-                <span><i class="publication-network-legend-node legend-node-implemented" aria-hidden="true"></i>Implemented in Toolkit</span>
-                <span><i class="publication-network-legend-node legend-node-not-implemented" aria-hidden="true"></i>Not implemented yet</span>
+                <span><i class="publication-network-legend-node legend-node-implemented" aria-hidden="true"></i>Linked Toolkit template</span>
+                <span><i class="publication-network-legend-node legend-node-not-implemented" aria-hidden="true"></i>No linked template</span>
                 <span class="publication-network-size-key"><i aria-hidden="true"></i><i aria-hidden="true"></i>Larger circle = cited by more included papers</span>
                 <span><i class="publication-network-legend-line legend-line-incoming" aria-hidden="true"></i>Incoming to selection</span>
                 <span><i class="publication-network-legend-line legend-line-outgoing" aria-hidden="true"></i>Outgoing from selection</span>
               </div>
             </div>
 
-            <p id="publication-network-help" class="publication-network-help">In Citation topology, linked papers stay nearer one another while every paper repels its neighbours, producing dense and sparse regions without an artificial perimeter. A paper with no line has no direct within-map citation captured by the dated sources; it may still cite or be cited by work outside this 94-paper set, or by references an index could not match. Select a circle to distinguish its incoming and outgoing citations and inspect the full readiness assessment. Publication year provides a chronological arrangement.</p>
+            <p id="publication-network-help" class="publication-network-help">The map uses the August 2026 citation snapshot. Search narrows the papers and their connecting citations. A paper without a line may still cite work outside this set or references an index could not match. Select a paper to inspect separate publication evidence, template availability and native qualification. Publication year provides a chronological arrangement.</p>
 
             <details class="publication-network-results-panel">
               <summary><span>Audio–tactile study publications</span><strong id="publication-network-results-count">0 results</strong></summary>
@@ -840,7 +886,7 @@
                   <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
                   <span class="arch-node-kicker">UI Layer</span>
                   <strong>Dashboard</strong>
-                  <p>Researcher-facing browser interface for study profile, trajectory, timing, SOA, and trial-structure decisions, connected to the local backend via localhost.</p>
+                  <p>Prepare profiles and preview premade audio online. Windows Designer uses the same interface for custom audio generation and local session preparation.</p>
                   <div class="arch-hw-dep">
                     <a class="arch-hw-dep-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
                   </div>
@@ -851,13 +897,13 @@
             <div class="arch-vconnect"><div></div><div class="arch-vconnect-line"></div></div>
 
             <div class="arch-tier">
-              <div class="arch-tier-label">Local Backend</div>
+              <div class="arch-tier-label">Native Desktop</div>
               <div class="arch-tier-nodes">
                 <article class="arch-node">
                   <div class="arch-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
                   <span class="arch-node-kicker">Orchestration</span>
-                  <strong>Python Companion</strong>
-                  <p>Validates researcher decisions, writes project folders and manifests, and calls render and session preparation routines. Runs entirely on the lab PC and is not accessible externally.</p>
+                  <strong>Rust and Tauri</strong>
+                  <p>Windows Designer generates audio and prepares reviewed session files. Native Runner executes those sessions locally. The V1 Python companion remains a separate loopback mode; hosted and native Designer do not connect to it.</p>
                   <div class="arch-hw-dep">
                     <a class="arch-hw-dep-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
                   </div>
@@ -1136,7 +1182,7 @@
             <span class="segment-kicker">Native Runtime</span>
             <h2 id="docs-runner-title">How The Experiment Runner Works</h2>
           </div>
-          <p class="info-copy">The Experiment Runner is a native Windows application, PPSExperimentRunner.exe, launched from the Segment 6 setup package and entirely separate from the browser dashboard. It is responsible for all timing-sensitive work during data collection, opening the prepared session package, playing the three-channel ASIO stream to the lab hardware, and recording participant responses and event markers. All playback timing is handled natively to avoid the latency variability inherent in browser JavaScript execution. Session output folders contain event CSVs, XDF and marker mirrors for Lab Streaming Layer integrations, trigger dictionaries, timing quality-control reports, and analysis-ready trial rows.</p>
+          <p class="info-copy">The Windows Experiment Runner Preview opens verified prepared sessions from Designer. Native Rust playback handles the audio and tactile channels, participant responses, and durable event and result files. Output includes event journals, trial CSVs, and completion receipts. Physical timing remains unqualified. Live LSL streaming and XDF capture are not supported in this Preview; ASIO and optional LSL/LabRecorder workflows belong to the separately documented V1 Python/Qt route.</p>
           <div class="doc-link-row">
             <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/WINDOWS_APP.md">Open Windows App Guide</a>
             <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/For-AI/engineering/validation/docs/AUDIO_ROUTING_STRESS_TEST.md">Open Audio Stress Notes</a>
@@ -1147,10 +1193,13 @@
 
         <section id="docs-emulatable-studies" class="info-segment" aria-labelledby="docs-emulatable-studies-title">
           <div class="info-segment-heading">
-            <span class="segment-kicker">Published Profiles</span>
-            <h2 id="docs-emulatable-studies-title">Studies Currently Emulatable</h2>
+            <span class="segment-kicker">Configuration Examples</span>
+            <h2 id="docs-emulatable-studies-title">Archived Study Configurations</h2>
           </div>
-          <p class="info-copy">The toolkit can currently recreate six study profiles whose reported parameters pass the Segment 0&ndash;4 profile gate and can be materialized for native runner handoff, drawn from the five publications below.</p>
+          <p class="info-copy">The publications below are examples represented by archived configurations. Check the Audiotactile Map for each protocol's reviewed parameters, gaps and template links. Template availability and native software checks are separate from scientific equivalence and measured physical timing.</p>
+          <div class="doc-link-row">
+            <a class="button-link" href="#docs-publication-network" data-page-section-link="docs-publication-network" data-page-section-page="documentation" data-pretext>Open Audiotactile Map</a>
+          </div>
           <ol class="pub-reference-list">
             <li>Matsuda, Y., Sugimoto, M., Inami, M., &amp; Kitazaki, M. (2021). Peripersonal space in the front, rear, left and right directions for audio-tactile multisensory integration. <em>Scientific Reports, 11</em>, Article 11303. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-021-90784-5" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/s41598-021-90784-5</a></li>
             <li>Lamia, P., Shabani, N., &amp; Candidi, M. (2026). Somatotopy-independent reduction of audio-tactile intersensory facilitation for looming sounds within the peripersonal space during arm movements execution. <em>Scientific Reports, 16</em>, Article 7133. <a class="pub-doi-link" href="https://www.nature.com/articles/s41598-026-36796-5" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/s41598-026-36796-5</a></li>
@@ -1197,36 +1246,38 @@
         </div>
         <section id="downloads-installer" class="info-segment" aria-labelledby="downloads-installer-title">
           <div class="info-segment-heading">
-            <span class="segment-kicker">Windows</span>
+            <span class="segment-kicker">Windows x64 · Native Preview 0.1.0</span>
             <h2 id="downloads-installer-title">Choose an Application</h2>
           </div>
           <div class="download-page-grid">
             <article class="info-card download-card">
-            <h3>PPS Designer</h3>
-            <p>Install the stimulus and profile design framework with approved Shared templates and resources.</p>
-            <a id="download-designer" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Designer Releases</a>
+            <h3>PPS Designer Preview</h3>
+            <p>Create custom trajectories and audio, review full schedules, and prepare local sessions. Runs without Python.</p>
+            <a id="download-designer" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases/download/native-preview-v0.1.0/PPS%20Experiment%20Designer%20Preview_0.1.0_x64-setup.exe" target="_blank" rel="noopener noreferrer">Download Designer for Windows</a>
           </article>
             <article class="info-card download-card">
-            <h3>Experiment Runner</h3>
-            <p>Install the independent participant Runner, Qt runtime, Shared resources, and post-run review tools.</p>
-            <a id="download-runner" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Runner Releases</a>
+            <h3>Experiment Runner Preview</h3>
+            <p>Open prepared sessions, execute blocks and instructions, and record responses and result receipts. Runs without Python.</p>
+            <a id="download-runner" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases/download/native-preview-v0.1.0/PPS%20Experiment%20Runner%20Preview_0.1.0_x64-setup.exe" target="_blank" rel="noopener noreferrer">Download Runner for Windows</a>
           </article>
             <article class="info-card download-card primary-download">
-            <h3>Full PPS Toolkit</h3>
-            <p>Install Designer and Runner as separate applications with one compatible Shared component and two shortcuts.</p>
-            <a id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Full Toolkit Releases</a>
+            <h3>Native Preview Release</h3>
+            <p>Version 0.1.0 includes separate Designer and Runner installers, checksums, release notes, and the renderer source archive.</p>
+            <a id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases/tag/native-preview-v0.1.0" target="_blank" rel="noopener noreferrer">Open Preview Release</a>
           </article>
           </div>
+          <p class="info-copy">The V1 Python/Qt bootstrappers and a combined Toolkit installer are not available. These downloads are the separate native preview applications.</p>
         </section>
         <section id="downloads-package" class="info-segment" aria-labelledby="downloads-package-title">
           <div class="info-segment-heading">
             <span class="segment-kicker">Integrity</span>
-            <h2 id="downloads-package-title">Verified Component Payloads</h2>
+            <h2 id="downloads-package-title">Verify Your Download</h2>
           </div>
           <div class="download-page-grid single">
             <article class="info-card download-card">
-            <h3>How Downloads Are Verified</h3>
-            <p>Each bootstrapper pins its own payload, component manifest, and inventory hashes. Incompatible Shared versions are rejected instead of mixed.</p>
+            <h3>SHA-256 Checksums</h3>
+            <p>Compare your downloaded files with the SHA-256 values in this preview release's SHA256SUMS file.</p>
+            <a id="download-checksums" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases/download/native-preview-v0.1.0/SHA256SUMS" target="_blank" rel="noopener noreferrer">Download SHA256SUMS</a>
             <a id="download-full-package" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/PPS_DOWNLOADS.md" target="_blank" rel="noopener noreferrer">Read Download Notes</a>
           </article>
           </div>
@@ -1254,8 +1305,9 @@
               <h3>Runner Browser Companion</h3>
               <p>Open the no-install controller and exploratory smartphone experiment interface. GitHub Pages hosts the interface only; remote control requires a compatible BRSP transport.</p>
               <a id="open-runner-companion" class="button-link primary-link" href="https://ppskit.qzz.io/experiment-runner/" target="_blank" rel="noopener noreferrer">Open Runner Companion</a>
-              <p>For local Designer actions, start the separately trusted local companion after installation.</p>
-              <code>apps\designer\launchers\Start_Website_Companion.bat</code>
+              <p>Use Windows Designer for custom audio generation and local session preparation.</p>
+              <p data-companion-only hidden>For the separate V1 Designer, start its trusted loopback companion.</p>
+              <code data-companion-only hidden>apps\designer\launchers\Start_Website_Companion.bat</code>
             </article>
           </div>
         </section>
@@ -1274,6 +1326,7 @@
         </div>
         <button id="segment-info-modal-close" class="icon-action" type="button" aria-label="Close">X</button>
       </div>
+      <div class="segment-info-body" role="region" aria-label="Segment information" tabindex="0">
       <div class="segment-info-grid">
         <section>
           <h3>Purpose</h3>
@@ -1284,7 +1337,7 @@
           <p id="segment-info-inputs"></p>
         </section>
         <section>
-          <h3>Backend Work</h3>
+          <h3>What happens</h3>
           <p id="segment-info-backend"></p>
         </section>
         <section>
@@ -1383,6 +1436,7 @@
         <h3>Template Note</h3>
         <p id="segment-info-note"></p>
       </section>
+      </div>
     </div>
   </div>
   <div id="customize-modal" class="modal-backdrop" hidden>

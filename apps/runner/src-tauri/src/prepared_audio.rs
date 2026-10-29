@@ -1,12 +1,14 @@
 use std::sync::Arc;
 
+use crate::execution_owner::instruction::NativeStage;
 use pps_runner_audio::{
-    bind_and_decode_verified_wav, AudioFence, AudioLoadLimits, AudioPreparationError, OutputGains,
-    OutputPlanError, OutputRouteRequest, PpsChannelLayout, PreparedPcmBlock, PreparedPlaybackPlan,
-    ResolvedOutputRouteKind, RtScheduledEvent, VerifiedWavRequest, DEFAULT_MAXIMUM_DECODED_BYTES,
+    bind_and_decode_verified_instruction, bind_and_decode_verified_wav, AudioFence,
+    AudioLoadLimits, AudioPreparationError, OutputGains, OutputPlanError, OutputRouteRequest,
+    PpsChannelLayout, PreparedPcmBlock, PreparedPlaybackPlan, ResolvedOutputRouteKind,
+    RtScheduledEvent, VerifiedWavRequest, DEFAULT_MAXIMUM_DECODED_BYTES,
 };
 use pps_runner_execution::BlockEventSchedule;
-use pps_session_package::{VerifiedPreparedSession, VerifiedPreparedWav};
+use pps_session_package::{VerifiedInstruction, VerifiedPreparedSession, VerifiedPreparedWav};
 use serde::Serialize;
 
 pub(crate) const PREPARED_AUDIO_CACHE_CAPACITY_BLOCKS: u8 = 1;
@@ -24,6 +26,7 @@ pub(crate) struct PreparedAudioSourceReceipt {
     run_generation: u64,
     verified_session: Arc<VerifiedPreparedSession>,
     schedule: Arc<BlockEventSchedule>,
+    stage: NativeStage,
 }
 
 pub(crate) struct PreparedAudioSource {
@@ -34,7 +37,7 @@ pub(crate) struct PreparedAudioSource {
 /// existing path-free summary; misses hand one fenced source to the blocking
 /// decoder. No caller can request a filesystem path or bypass the actor.
 pub(crate) enum PreparedAudioLookup {
-    Cached(PreparedAudioSummary),
+    Cached(Box<PreparedAudioSummary>),
     Decode(PreparedAudioSource),
 }
 
@@ -47,12 +50,32 @@ impl PreparedAudioSourceReceipt {
         schedule: Arc<BlockEventSchedule>,
     ) -> Self {
         Self {
+            stage: NativeStage {
+                ordinal: fence.block_ordinal(),
+                block_ordinal: fence.block_ordinal(),
+                instruction: None,
+                needs_continue: false,
+                transition_without_audio: false,
+            },
             preparation_generation,
             fence,
             run_generation,
             verified_session,
             schedule,
         }
+    }
+
+    pub(crate) fn with_stage(mut self, stage: NativeStage) -> Self {
+        self.stage = stage;
+        self
+    }
+    pub(crate) const fn stage(&self) -> NativeStage {
+        self.stage
+    }
+    pub(crate) fn instruction(&self) -> Option<&VerifiedInstruction> {
+        self.stage
+            .instruction
+            .and_then(|index| self.verified_session.instructions().get(index))
     }
 
     pub(crate) const fn preparation_generation(&self) -> u64 {
@@ -72,6 +95,9 @@ impl PreparedAudioSourceReceipt {
     }
 
     pub(crate) fn wav_receipt(&self) -> Option<&VerifiedPreparedWav> {
+        if let Some(item) = self.instruction() {
+            return Some(item.wav());
+        }
         usize::try_from(self.fence.block_ordinal())
             .ok()
             .and_then(|ordinal| self.verified_session.blocks().get(ordinal))
@@ -140,9 +166,42 @@ impl PreparedAudioCandidate {
     }
 
     pub(crate) fn summary(&self) -> Result<PreparedAudioSummary, PreparedAudioError> {
+        let response_mode = if self.receipt.instruction().is_some() {
+            "go"
+        } else {
+            block_response_mode(self.schedule())
+        };
         Ok(PreparedAudioSummary {
+            response_mode,
+            response_choices: if response_mode == "left_right" {
+                vec!["left", "right"]
+            } else {
+                Vec::new()
+            },
+            stage_ordinal: self.receipt.stage().ordinal,
+            media_kind: if self.receipt.instruction().is_some() {
+                "instruction"
+            } else {
+                "block"
+            },
+            instruction_label: self
+                .receipt
+                .instruction()
+                .map(|item| item.label().to_owned()),
+            instruction_continue_mode: self.receipt.instruction().map(|item| {
+                match item.continue_mode() {
+                    pps_session_package::InstructionContinueMode::Click => "click",
+                    pps_session_package::InstructionContinueMode::Button => "button",
+                    pps_session_package::InstructionContinueMode::Delay => "delay",
+                }
+            }),
+            instruction_needs_continue: self.receipt.stage().needs_continue,
             schema: "pps-runner-prepared-audio-summary.v1",
-            preparation_scope: "pcm-and-output-plan-cache",
+            preparation_scope: if self.receipt.instruction().is_some() {
+                "instruction-pcm-and-output-plan-cache"
+            } else {
+                "pcm-and-output-plan-cache"
+            },
             output_qualification: "unqualified",
             executable: false,
             output_plan_prepared: true,
@@ -172,6 +231,13 @@ impl PreparedAudioCandidate {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct PreparedAudioSummary {
+    pub response_mode: &'static str,
+    pub response_choices: Vec<&'static str>,
+    pub stage_ordinal: u32,
+    pub media_kind: &'static str,
+    pub instruction_label: Option<String>,
+    pub instruction_continue_mode: Option<&'static str>,
+    pub instruction_needs_continue: bool,
     pub schema: &'static str,
     pub preparation_scope: &'static str,
     pub output_qualification: &'static str,
@@ -187,6 +253,32 @@ pub(crate) struct PreparedAudioSummary {
     pub decoded_bytes: u64,
     pub cache_capacity_blocks: u8,
     pub cache_byte_budget: u64,
+}
+
+fn block_response_mode(schedule: &BlockEventSchedule) -> &'static str {
+    use pps_runner_execution::{response_control_policy, ResponseControlPolicy};
+    let mut selected = None;
+    for event in schedule
+        .events()
+        .iter()
+        .filter(|e| e.event_type == "trial_start")
+    {
+        let Some(row) = event.payload.as_object() else {
+            return "unsupported";
+        };
+        let policy = response_control_policy(row);
+        if policy == ResponseControlPolicy::Unsupported
+            || selected.is_some_and(|previous| previous != policy)
+        {
+            return "unsupported";
+        }
+        selected = Some(policy);
+    }
+    match selected {
+        Some(ResponseControlPolicy::LeftRight) => "left_right",
+        Some(ResponseControlPolicy::Unsupported) => "unsupported",
+        _ => "go",
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -276,6 +368,7 @@ impl PreparedAudioError {
             AudioPreparationError::UnsupportedSampleFormat
             | AudioPreparationError::UnsupportedBitsPerSample
             | AudioPreparationError::UnsupportedChannelCount
+            | AudioPreparationError::InvalidInstructionSample
             | AudioPreparationError::SampleRateMismatch => Self::new(
                 "prepared_audio_format_unsupported",
                 "The prepared audio format does not match the native Runner contract.",
@@ -326,19 +419,35 @@ fn prepare_verified_audio_with_limits(
     limits.maximum_decoded_bytes = limits
         .maximum_decoded_bytes
         .min(MAXIMUM_CACHED_DECODED_BYTES);
-    let media = bind_and_decode_verified_wav(VerifiedWavRequest {
+    let request = VerifiedWavRequest {
         fence: receipt.fence(),
         path: wav_receipt.path(),
         expected_sha256: wav_receipt.sha256(),
         expected_encoded_byte_count: wav_receipt.encoded_byte_count(),
         expected_sample_rate_hz: schedule_sample_rate_hz,
         limits,
-    })
-    .map_err(PreparedAudioError::from_preparation)?;
+    };
+    let media = if let Some(instruction) = receipt.instruction() {
+        if instruction.sample_rate_hz() != schedule_sample_rate_hz {
+            return Err(PreparedAudioError::sample_rate_invalid());
+        }
+        let decoded = bind_and_decode_verified_instruction(request)
+            .map_err(PreparedAudioError::from_preparation)?;
+        if decoded.frames() != instruction.frames() {
+            return Err(PreparedAudioError::output_plan_unsupported());
+        }
+        decoded
+    } else {
+        bind_and_decode_verified_wav(request).map_err(PreparedAudioError::from_preparation)?
+    };
     if media.sample_rate_hz() != schedule_sample_rate_hz {
         return Err(PreparedAudioError::sample_rate_invalid());
     }
-    let scheduled_events = project_schedule_events(receipt.schedule(), media.frames())?;
+    let scheduled_events = if receipt.instruction().is_some() {
+        Box::default()
+    } else {
+        project_schedule_events(receipt.schedule(), media.frames())?
+    };
     let route = match media.layout() {
         PpsChannelLayout::LegacyStudy5TactileAudio => OutputRouteRequest::legacy_stereo(),
         PpsChannelLayout::BinauralLeftRightTactile => OutputRouteRequest::canonical_three(),
@@ -555,6 +664,25 @@ mod tests {
         .unwrap();
         assert_eq!(error.code(), "prepared_audio_resource_limit");
         fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn response_summary_is_block_scoped_and_never_projects_answer_keys() {
+        let row = |answer: &str, index: i64| {
+            let mut result = event("trial_start", index, &format!("trial{index}"));
+            result.payload = json!({"response_mode":"choice","response_choice_set":"left,right","correct_response":answer});
+            result
+        };
+        let schedule = BlockEventSchedule::new(vec![row("left", 0), row("right", 1)]).unwrap();
+        assert_eq!(block_response_mode(&schedule), "left_right");
+        let unsupported = BlockEventSchedule::new(vec![row("secret-other", 0)]).unwrap();
+        assert_eq!(block_response_mode(&unsupported), "unsupported");
+        let mut ordinary = event("trial_start", 1, "ordinary");
+        ordinary.payload = json!({});
+        assert_eq!(
+            block_response_mode(&BlockEventSchedule::new(vec![row("left", 0), ordinary]).unwrap()),
+            "unsupported"
+        );
     }
 
     #[test]

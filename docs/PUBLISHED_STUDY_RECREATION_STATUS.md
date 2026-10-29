@@ -1,23 +1,23 @@
 # Published Study Recreation Status
 
-This report separates three outcomes for catalogued audio-tactile PPS profiles:
+This is a configuration-compatibility report for catalogued audio-tactile PPS profiles. It does not replace the citation mapper's experiment-level review of eleven scientific contracts.
 
-- `GUI-recreatable`: Segment 0-4 profile parameters are complete and the toolkit can natively materialize later run artifacts.
+- `GUI-recreatable`: the saved configuration passes Segment 0-4 input checks, including any explicit software defaults or substitutions. This does not establish complete publication parameters or tested native capability.
 - `Missing publication parameters`: required details or original assets are not reported or not encoded with enough specificity.
 - `Toolkit structural gap`: the study uses an audiotactile task-execution structure, audio rendering mode, tactile/response option, or apparatus geometry that the current dashboard/backend does not yet model.
 
-Only profiles in `GUI-recreatable` pass the Segment 0-4 profile checks for runnable toolkit inclusion. Segments after 4 are native app materialization and runner handoff, so they do not reject a paper profile unless an earlier profile segment is incomplete.
+Only profiles in `GUI-recreatable` pass these Segment 0-4 configuration checks. Later materialization, native execution and physical qualification require separate evidence.
 
 Structural gaps are limited to standardization constraints in the PPS task itself: trial-family and baseline logic, auditory stimulus type/provenance/rendering/gain law, spatial trajectory and apparatus geometry, tactile site/channel/calibration, response capture, and core timing/repetition parameters.
 
-For integration decisions, the relevant question is whether the toolkit has a profile input/schema slot for the audiotactile task mechanic. The required published parameters must be complete through Segment 4: profile metadata/provenance, stimulus type/assets/trajectory, trial sequence including ITI or jitter boxes when task-relevant, SOAs and baseline/tactile strategy, and trial repetition count.
+These checks cover current input/schema support for profile metadata, stimulus assets and trajectories, trial sequence, ITI/jitter, SOAs, tactile/baseline strategy and repetitions. A populated field may be reported, derived or a software substitute; consult its provenance and the experiment's reviewed source limitations.
 
-Two-speaker analog looming/receding apparatus is treated as source-apparatus provenance, not as a separate audio-source type. When the paper reports enough trajectory/timing/source parameters, the profile recreates that task as a binaural spatialized trajectory; exact original gain/envelope files are tracked as missing provenance only when exact author-stimulus equivalence is required.
+A binaural spatialized profile derived from a two-speaker apparatus is a software approximation. Configuration support does not establish the original speaker transfer, gain law, envelope or stimulus-file equivalence; missing source details remain missing in the scientific review.
 
-Ordinary trial randomization and block order are treated as reproducible runner defaults, not publication-acceptance blockers, unless the paper's PPS task depends on a specific ITI/jitter, hazard, baseline, or repetition schedule.
+Ordinary trial randomization and block order may use explicitly labelled reproducible software defaults. A default never resolves an unreported publication parameter or becomes reported evidence.
 
-A recreated profile is a toolkit recreation of reported parameters, not a claim to reproduce the authors' exact original stimulus set.
-Clinical populations, interventions, and non-audiotactile experimental context are retained as notes but do not block profile inclusion unless they alter the audiotactile PPS task execution itself.
+Template availability, reviewed source parameters and tested native capability are separate states. A complete experiment inventory can still contain unresolved contracts and unavailable sources.
+Clinical populations, interventions, and non-audiotactile experimental context remain part of the source record even where the saved software configuration can be materialized.
 
 ## GUI-recreatable
 
@@ -57,7 +57,7 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
 | serino_2007_blind_cane_users | - | blocked_missing_parameters | exact white-noise source asset, seed, and spectral recipe; exact electrical tactile pulse duration, waveform, current, and electrode impedance calibration; exact ITI or jitter distribution and numeric response window |
 | taffou_2014_cynophobic_rear_looming | - | blocked_missing_parameters | exact dog/sheep source audio and Audacity amplitude/dynamic matching settings; LISTEN HRTF subject/filter identifier and renderer settings |
-| teneggi_2013_social_face_pps | - | blocked_missing_parameters | exact distance/timing table from supplement |
+| teneggi_2013_social_face_pps | - | blocked_missing_parameters | Experiment 3 exact repetition, integer catch and block counts are unreported; preview counts are software defaults; exact original pink-noise intensity envelope and speaker transfer; premade Gaussian burst train is a source substitution; 100-microsecond electrical pulse and voice-key response capture require external apparatus |
 
 ## Toolkit structural gap
 

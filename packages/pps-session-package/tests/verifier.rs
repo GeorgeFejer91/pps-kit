@@ -106,6 +106,89 @@ fn legacy_fixture(root: &TestDirectory) -> PathBuf {
     manifest_path
 }
 
+#[test]
+fn instructions_bind_actual_pcm_and_reject_stale_metadata_and_external_files() {
+    let root = TestDirectory::new();
+    let manifest_path = legacy_fixture(&root);
+    let wav_path = root.join("session/instructions/before.wav");
+    fs::create_dir_all(wav_path.parent().unwrap()).unwrap();
+    let mut writer = hound::WavWriter::create(
+        &wav_path,
+        hound::WavSpec {
+            channels: 1,
+            sample_rate: 8000,
+            bits_per_sample: 32,
+            sample_format: hound::SampleFormat::Float,
+        },
+    )
+    .unwrap();
+    for _ in 0..800 {
+        writer.write_sample(0.01f32).unwrap();
+    }
+    writer.finalize().unwrap();
+    let mut manifest: Value = serde_json::from_slice(&fs::read(&manifest_path).unwrap()).unwrap();
+    manifest["instruction_profile"] = json!({"schema":"pps-run-instructions.v1", "slots":[{
+        "slot":"before_experiment","label":"Before experiment","enabled":true,
+        "continue_mode":"click","delay_s":0.0,"button_label":"Continue",
+        "path":wav_path,"sha256":sha256(&wav_path),"sample_rate":8000,"channels":1,"duration_s":0.1
+    }]});
+    write_json(&manifest_path, &manifest);
+    let verified = verify_prepared_session(VerificationRequest::new(&manifest_path)).unwrap();
+    assert_eq!(verified.instructions().len(), 1);
+    assert_eq!(verified.instructions()[0].frames(), 800);
+    assert_eq!(verified.instructions()[0].sample_rate_hz(), 8000);
+    assert_eq!(
+        verified.instructions()[0].continue_mode(),
+        pps_session_package::InstructionContinueMode::Click
+    );
+    // Instruction receipts deliberately do not enter browser summaries.
+    assert!(!serde_json::to_string(verified.summary())
+        .unwrap()
+        .contains("before.wav"));
+    for (field, value) in [
+        ("duration_s", json!(0.2)),
+        ("channels", json!(2)),
+        ("sample_rate", json!(16000)),
+        ("sha256", json!("0".repeat(64))),
+        ("continue_mode", json!("auto")),
+        ("enabled", json!("true")),
+        ("delay_s", json!(-1)),
+    ] {
+        let mut altered = manifest.clone();
+        altered["instruction_profile"]["slots"][0][field] = value;
+        write_json(&manifest_path, &altered);
+        assert_eq!(
+            verify_prepared_session(VerificationRequest::new(&manifest_path))
+                .unwrap_err()
+                .kind(),
+            VerificationErrorCode::InstructionInvalid,
+            "{field}"
+        );
+    }
+    let mut duplicate = manifest.clone();
+    let slot = duplicate["instruction_profile"]["slots"][0].clone();
+    duplicate["instruction_profile"]["slots"]
+        .as_array_mut()
+        .unwrap()
+        .push(slot);
+    write_json(&manifest_path, &duplicate);
+    assert!(verify_prepared_session(VerificationRequest::new(&manifest_path)).is_err());
+    let outside = root.join("outside.wav");
+    fs::copy(&wav_path, &outside).unwrap();
+    manifest["instruction_profile"]["slots"][0]["path"] = json!(outside);
+    write_json(&manifest_path, &manifest);
+    assert!(verify_prepared_session(VerificationRequest::new(&manifest_path)).is_err());
+    manifest["instruction_profile"]["slots"][0]["path"] = json!(wav_path);
+    // A valid new hash cannot make a nonfinite PCM instruction executable.
+    let mut bytes = fs::read(&wav_path).unwrap();
+    let end = bytes.len();
+    bytes[end - 4..].copy_from_slice(&f32::NAN.to_le_bytes());
+    fs::write(&wav_path, bytes).unwrap();
+    manifest["instruction_profile"]["slots"][0]["sha256"] = json!(sha256(&wav_path));
+    write_json(&manifest_path, &manifest);
+    assert!(verify_prepared_session(VerificationRequest::new(&manifest_path)).is_err());
+}
+
 struct ParticipantFixture {
     manifest_path: PathBuf,
     run_setup_path: PathBuf,
@@ -188,6 +271,177 @@ fn participant_fixture(root: &TestDirectory, topup_marker: Option<Value>) -> Par
         run_setup_path,
         source_csv,
         trial_one,
+    }
+}
+
+#[test]
+fn group_receipt_requires_both_distinct_ordered_parts_and_shared_provenance() {
+    let root = TestDirectory::new();
+    let fixture = participant_fixture(&root, None);
+    let mut base: Value =
+        serde_json::from_slice(&fs::read(&fixture.manifest_path).unwrap()).unwrap();
+    let hash_json =
+        |value: &Value| format!("{:x}", Sha256::digest(serde_json::to_vec(value).unwrap()));
+    // Computed timing values must survive persisted JSON without changing the
+    // accepted snapshot digest. Exercise binary64 values between easy decimals.
+    let timings: Vec<_> = (1..100).map(|i| f64::from(i) / 44100.0).collect();
+    let design = json!({"participant_count":1,"timing_boundaries":timings});
+    let design_hash = hash_json(&design);
+    let mut source = json!({"accepted":false,"blocks":[{"block_index":1,"block_label":"Prepared block","trial_count":2}]});
+    let source_hash = hash_json(&source);
+    source["accepted"] = json!(true);
+    let mut order = json!({"schema":"pps-native-run-order-preview.v1","accepted":false,"experiment_structure":"pre_post",
+    "parts_per_participant":2,"assembly_preview_sha256":source_hash,"design_sha256":design_hash,
+    "csv_rows":[
+        {"participant_id":"P001","phase_index":1,"participant_block_position":1,"source_block_index":1,"phase":"pre","phase_label":"Before","block_label":"Prepared block","trial_count":2},
+        {"participant_id":"P001","phase_index":2,"participant_block_position":1,"source_block_index":1,"phase":"post","phase_label":"After","block_label":"Prepared block","trial_count":2}
+    ]});
+    let order_hash = hash_json(&order);
+    order["accepted"] = json!(true);
+    write_json(
+        &fixture.run_setup_path,
+        &json!({"schema":"pps-native-run-setup.v1","participant_id":"P001","session_group_id":"group",
+        "approved_segment5":source,"approved_segment6":order,"approved_preview_sha256":source_hash,
+        "approved_run_order_sha256":order_hash,"design":design,"design_sha256":design_hash}),
+    );
+    base["source_run_setup_sha256"] = json!(sha256(&fixture.run_setup_path));
+    let paths = [
+        root.join("part_01/session_manifest.json"),
+        root.join("part_02/session_manifest.json"),
+    ];
+    let mut entries = Vec::new();
+    let mut documents = Vec::new();
+    for index in 0..2 {
+        let mut part = base.clone();
+        let dir = paths[index].parent().unwrap();
+        let original = Path::new(base["session_dir"].as_str().unwrap());
+        for name in ["blocks/block_01.wav", "blocks/block_01.csv"] {
+            write(&dir.join(name), fs::read(original.join(name)).unwrap());
+        }
+        let id = format!("group_part_{:02}", index + 1);
+        part["session_id"] = json!(id);
+        part["part_session_id"] = json!(id);
+        part["session_group_id"] = json!("group");
+        part["part_number"] = json!(index + 1);
+        part["session_dir"] = json!(dir);
+        part["part_split_schema"] = json!("pps-runner-part-split.v1");
+        part["sibling_part_manifest_paths"] = json!([paths[1 - index]]);
+        part["approved_run_order_sha256"] = json!(order_hash);
+        part["approved_preview_sha256"] = json!(source_hash);
+        let metadata = part["blocks"][0]["metadata"].as_object_mut().unwrap();
+        for (key, value) in [
+            ("part_number", json!(index + 1)),
+            ("part_block_number", json!(1)),
+            ("global_block_index", json!(index + 1)),
+            ("source_block_index", json!(1)),
+            ("part_session_id", json!(id)),
+            ("session_group_id", json!("group")),
+            ("phase", json!(if index == 0 { "pre" } else { "post" })),
+            (
+                "phase_label",
+                json!(if index == 0 { "Before" } else { "After" }),
+            ),
+            (
+                "prepared_csv_sha256",
+                json!(sha256(&dir.join("blocks/block_01.csv"))),
+            ),
+            (
+                "prepared_wav_sha256",
+                json!(sha256(&dir.join("blocks/block_01.wav"))),
+            ),
+        ] {
+            metadata.insert(key.to_owned(), value);
+        }
+        write_json(&paths[index], &part);
+        entries.push(
+            json!({"part_number":index+1,"part_session_id":id,"session_manifest_path":paths[index],
+            "session_dir":dir,"block_count":1,"completed":false}),
+        );
+        documents.push(part);
+    }
+    let group = json!({"schema":"pps-run-session-group.v1","part_split_schema":"pps-runner-part-split.v1",
+        "experiment_structure":"pre_post","parts_per_participant":2,"parts":entries,
+        "participant_id":"P001","session_group_id":"group","approved_run_order_sha256":order_hash,
+        "source_run_setup_manifest_path":fixture.run_setup_path,"source_run_setup_sha256":sha256(&fixture.run_setup_path)});
+    let group_path = root.join("session_group_manifest.json");
+    write_json(&group_path, &group);
+    let receipt = pps_session_package::verify_prepared_group(&group_path).unwrap();
+    assert_eq!(receipt.parts().len(), 2);
+    assert_eq!(receipt.parts()[0].summary().part_number, Some(1));
+    assert_eq!(receipt.parts()[1].summary().part_number, Some(2));
+    for (field, value) in [
+        ("part_number", json!(1)),
+        ("participant_id", json!("other")),
+        ("session_group_id", json!("other")),
+        ("approved_run_order_sha256", json!("b".repeat(64))),
+        ("sibling_part_manifest_paths", json!([paths[1]])),
+    ] {
+        let mut changed = documents[1].clone();
+        changed[field] = value;
+        write_json(&paths[1], &changed);
+        assert!(
+            pps_session_package::verify_prepared_group(&group_path).is_err(),
+            "{field}"
+        );
+    }
+    write_json(&paths[1], &documents[1]);
+    // Matching declarations do not override the accepted run-setup digest.
+    let mut forged_group = group.clone();
+    forged_group["approved_run_order_sha256"] = json!("a".repeat(64));
+    for (path, original) in paths.iter().zip(&documents) {
+        let mut altered = original.clone();
+        altered["approved_run_order_sha256"] = json!("a".repeat(64));
+        write_json(path, &altered);
+    }
+    write_json(&group_path, &forged_group);
+    assert!(pps_session_package::verify_prepared_group(&group_path).is_err());
+    for (path, original) in paths.iter().zip(&documents) {
+        write_json(path, original);
+    }
+    // Directory uniqueness alone cannot protect distinct result identities.
+    let mut repeated = documents[1].clone();
+    repeated["session_id"] = documents[0]["session_id"].clone();
+    repeated["part_session_id"] = documents[0]["part_session_id"].clone();
+    let mut repeated_group = group.clone();
+    repeated_group["parts"][1]["part_session_id"] = documents[0]["part_session_id"].clone();
+    write_json(&paths[1], &repeated);
+    write_json(&group_path, &repeated_group);
+    assert!(pps_session_package::verify_prepared_group(&group_path).is_err());
+    write_json(&paths[1], &documents[1]);
+    for (field, value) in [
+        ("source_block_index", json!(2)),
+        ("phase", json!("pre")),
+        ("global_block_index", json!(1)),
+    ] {
+        let mut altered = documents[1].clone();
+        altered["blocks"][0]["metadata"][field] = value;
+        write_json(&paths[1], &altered);
+        write_json(&group_path, &group);
+        assert!(
+            pps_session_package::verify_prepared_group(&group_path).is_err(),
+            "{field}"
+        );
+    }
+    write_json(&paths[1], &documents[1]);
+    let mut reversed = group.clone();
+    reversed["parts"].as_array_mut().unwrap().reverse();
+    write_json(&group_path, &reversed);
+    assert!(pps_session_package::verify_prepared_group(&group_path).is_err());
+    write_json(&group_path, &group);
+    fs::remove_file(&paths[1]).unwrap();
+    assert!(pps_session_package::verify_prepared_group(&group_path).is_err());
+}
+
+#[test]
+#[ignore = "requires PPS_NATIVE_GROUP_FIXTURE pointing to an actual Rust-assembled participant group"]
+fn actual_native_participant_group_verifies_instructions_and_separate_parts() {
+    let path = std::env::var_os("PPS_NATIVE_GROUP_FIXTURE").unwrap();
+    let receipt = pps_session_package::verify_prepared_group(Path::new(&path)).unwrap();
+    assert_eq!(receipt.parts().len(), 2);
+    for (i, part) in receipt.parts().iter().enumerate() {
+        assert_eq!(part.summary().part_number, Some((i + 1) as i64));
+        assert!(!part.instructions().is_empty());
+        assert!(part.instructions().iter().all(|s| s.frames() > 0));
     }
 }
 

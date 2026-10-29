@@ -319,8 +319,13 @@ def test_dashboard_static_assets_are_packaged():
     assert "enforceExternalLinkTargets" in app_js
     assert 'id="download-designer"' in html
     assert 'id="download-runner"' in html
-    assert 'id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer"' in html
-    assert "Incompatible Shared versions are rejected instead of mixed." in html
+    native_release = "https://github.com/GeorgeFejer91/pps-kit/releases"
+    assert f'href="{native_release}/download/native-preview-v0.1.0/PPS%20Experiment%20Designer%20Preview_0.1.0_x64-setup.exe"' in html
+    assert f'href="{native_release}/download/native-preview-v0.1.0/PPS%20Experiment%20Runner%20Preview_0.1.0_x64-setup.exe"' in html
+    assert f'id="download-software" class="button-link primary-link" href="{native_release}/tag/native-preview-v0.1.0"' in html
+    assert f'href="{native_release}/download/native-preview-v0.1.0/SHA256SUMS"' in html
+    assert "V1 Python/Qt bootstrappers and a combined Toolkit installer are not available" in html
+    assert "/releases/latest" not in html
     assert "renderHardwarePixelArt" in app_js
     assert 'data-hardware-pixel="komplete-audio6"' in html
     assert 'data-hardware-pixel="woojer-strap-4"' in html
@@ -368,10 +373,12 @@ def test_dashboard_static_assets_are_packaged():
     assert "closeSegmentInfoModal" in app_js
     assert "Purpose" in html
     assert "Your Inputs" in html
-    assert "Backend Work" in html
+    assert "What happens" in html
     assert "Output" in html
     assert "Used Next" not in html
-    assert "Template Directory" in app_js
+    assert "bundled profile definitions" in app_js
+    assert "Hosted drafts stay in this browser" in app_js
+    assert "Choose an output folder later" in app_js
     assert "HOSTED_TEMPLATE_DIRECTORY_URL" in app_js
     for title in [
         "Choose or Create Study",
@@ -671,7 +678,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "study_templates/" in app_js
     assert "staticStateForTemplate" in app_js
     assert "DEFAULT_STUDY_TEMPLATE_ID = \"study5_box_breathing_pps\"" in app_js
-    assert "Loaded committed preload assets from GitHub" in app_js
+    assert "Premade audio is ready to prepare and preview" in app_js
     assert "Hosted mode can compose and export profiles" in app_js
     assert "Open Asset" in app_js
     assert "staticPreviewAssetForLabel" in app_js
@@ -3030,7 +3037,7 @@ def test_dashboard_sequence_bake_preserves_stereo_looming_after_mono_instruction
     custom = client.post("/api/templates/__custom__/load").json()
     sample_rate = 44100
     fixed_frames = 256
-    looming_frames = 512
+    looming_frames = 8820  # 200 ms contains the complete 100-ms tactile cue.
 
     custom["design"]["name"] = "Mono first stereo sequence"
     custom = client.post("/api/design", json={"design": custom["design"]}).json()
@@ -3140,7 +3147,7 @@ def test_dashboard_auditory_only_trials_are_stereo_response_trials(tmp_path: Pat
     client = _client(tmp_path)
     custom = client.post("/api/templates/__custom__/load").json()
     sample_rate = 44100
-    looming_frames = 256
+    looming_frames = 8820  # Keep the accompanying tactile trial physically complete.
     stereo_looming = np.column_stack(
         [
             np.linspace(0.05, 0.20, looming_frames, dtype=np.float32),
@@ -3873,7 +3880,7 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
     client = _client(tmp_path)
     custom = client.post("/api/templates/__custom__/load").json()
     sample_rate = 44100
-    frames = int(0.10 * sample_rate)
+    frames = int(0.20 * sample_rate)  # 5-ms SOA plus the complete 100-ms cue.
 
     near = _register_segment1_wav(
         client,

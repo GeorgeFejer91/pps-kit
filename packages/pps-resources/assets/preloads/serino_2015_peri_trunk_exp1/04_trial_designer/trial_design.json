@@ -41,6 +41,17 @@
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "serino_2015_peri_trunk_exp1-cue-tail",
+          "kind": "jitter",
+          "label": "Derived tactile-cue tail",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            100
+          ],
+          "randomized": false
         }
       ]
     }

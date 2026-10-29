@@ -10,6 +10,10 @@ current studies.
 This is an architecture and software-qualification preview. It is not yet a
 publication-qualified replacement for the existing Windows ASIO, LSL,
 LabRecorder, wired-loopback, tactile-calibration, top-up, or analysis paths.
+The [Windows preview workflow](NATIVE_WINDOWS_PREVIEW.md) records the current
+native capability boundary: verified ordered-part execution and durable
+journal/result receipts are implemented; LSL/LabRecorder and physical capture
+remain unavailable in this candidate.
 
 ## Architecture
 
@@ -48,8 +52,9 @@ The implementation is split into these boundaries:
   browser, network, or audio-device dependency.
 - `packages/pps-runner-audio/`: verified PCM decode plus the device-independent
   playback plan and callback renderer.
-- `packages/pps-runner-audio-cpal/`: reservation-only WASAPI/CoreAudio/ALSA
-  output owner; it is not connected to experiment media or authority yet.
+- `packages/pps-runner-audio-cpal/`: WASAPI/CoreAudio/ALSA output owner with
+  bounded reservations and callback-confirmed prepared-media playback, connected
+  to native authority. A supported backend is not a qualified physical route.
 - `apps/runner/`: Tauri desktop preview and the shared multi-page browser UI.
 - `apps/quest-runner/`: native Kotlin/Meta Spatial SDK immersive shell with a
   Rust `cdylib` through JNI. Tauri is deliberately not the Quest renderer.
@@ -97,7 +102,7 @@ The current closed action catalogue is:
 | --- | --- | --- |
 | `system.snapshot` | `session.read` | Read bounded authoritative state. |
 | `package.prepare_demo` | `session.prepare` | Deterministic preview package only. |
-| `setup.submit` | `session.prepare` | Participant name is redacted unless local sharing is enabled. |
+| `setup.submit` | local only | Participant setup stays on the target; a remote controller cannot submit it. |
 | `part.start` | `session.transport` | Requires target-local arming. |
 | `instruction.continue` | `session.transport` | Requires the current opaque gate identifier. |
 | `run.pause` / `run.resume` | `session.transport` | Reliable, revision-checked commands. |
@@ -114,9 +119,11 @@ unsigned 32-bit sequence. The target checks the granted scope and current
 precondition, deduplicates command-body retries even when they arrive in a
 fresh envelope, applies the transition once, increments the semantic revision,
 increments the preview's bounded audit-event counter for an accepted state
-change, and returns an `applied` result plus authoritative state. Durable audit
-records are still supplied by the validated V1 runner and remain a V2 migration
-gate.
+change, and returns an `applied` result plus authoritative state. That counter
+is not a durable acquisition record. Native prepared experiments separately
+write event journals, response datasets and part/group result receipts. Live
+LSL/LabRecorder integration remains a V1 feature; see the
+[current native workflow](NATIVE_WINDOWS_PREVIEW.md).
 
 Pairing uses a fresh 32-byte invitation secret held only in the URL fragment,
 24-byte nonces, complete canonical target/controller hello transcripts, and
@@ -136,8 +143,14 @@ the snapshot.
 
 ## Desktop preview
 
+The boundary descriptions below retain intermediate rollout checkpoints,
+including earlier non-executable caches. The prepared-execution summary near
+the end of this section and the [Windows preview guide](NATIVE_WINDOWS_PREVIEW.md)
+describe the current runnable capability; intermediate limits are not its
+current feature checklist.
+
 The desktop app uses Tauri v2 and a plain Vite/ES-module frontend. Tauri exposes
-seven local/configuration/inspection commands plus four remote-session commands: claim,
+explicit local/configuration/inspection commands plus four remote-session commands: claim,
 renew, dispatch, and revoke. Those four commands are restricted to the bundled
 `main` WebView and preserve remote origin, negotiated scopes, the exact owner
 token, canonical control sequence, and the native five-second watchdog. VDO
@@ -403,12 +416,13 @@ npm --prefix apps/runner run tauri build -- --debug --no-bundle
 ```
 
 The desktop UI retains the existing Runner's visual palette and high-level
-Experiment Control, Data Logging, and Phone Remote hierarchy. It can inspect
-and adopt a genuine verified V1 prepared plan, but that plan is intentionally
-not armable yet: only the deterministic compatibility demo has an execution
-adapter. The validated Python scheduler and acquisition stack remain the
-production Runner until their behavior has been ported behind supervised
-adapters and qualified.
+Experiment Control, Data Logging, and Phone Remote hierarchy. Verified prepared
+plans now execute through the native owner after media, output and journal
+checks. Ordered blocks and instruction gates have software callback evidence;
+whole-experiment completion requires every ordered part and its durable receipt.
+The existing V1 production workflow and qualification records remain separate
+from this native preview. Follow the [Windows preview workflow](NATIVE_WINDOWS_PREVIEW.md)
+for its supported preparation, execution and interruption behavior.
 
 CI also produces one host-native packaging-validation artifact per desktop
 platform: an unsigned Windows NSIS installer, an ad-hoc/not-notarized macOS DMG,
@@ -572,13 +586,13 @@ The migration order is:
    Tauri/Tokio queues.
 4. Port target-native audio/output routing, response timestamping, tactile, and
    acquisition boundaries, then qualify them with physical timing evidence.
-   Native bounded WAV receipts, a pure content-bound PCM16 decoder, and a
-   generation/receipt-fenced one-block actor cache have landed; persistent
-   platform output streams, callback scheduling/routing, response ingress, and
-   physical qualification remain.
-5. Port durable event/LSL evidence, artifact writers, persistence/recovery, and
-   the normal post-run review/analysis required by the Runner, using golden
-   outputs only as temporary Python-oracle evidence.
+   Native bounded WAV receipts, a pure content-bound PCM16 decoder, a fenced
+   one-block cache, persistent output ownership, callback scheduling/routing and
+   response ingress have landed. Physical qualification remains separate.
+5. Native durable event journals, response datasets, part/group result receipts
+   and read-only interruption assessment have landed. Live LSL/LabRecorder,
+   physical capture and the V1 analysis UI remain unavailable in this preview;
+   Python-oracle output is software evidence.
 6. Extend the landed native semantic-request diagnostics through effect
    initiation once the output owner exists, then qualify it in release builds.
    Current native observations cover adapter ingress/authorization, authority

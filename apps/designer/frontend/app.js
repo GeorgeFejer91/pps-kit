@@ -3,6 +3,9 @@ import {
   refreshDocumentationTypography,
 } from "./documentation_typography.js";
 import { DesignerApiError, createDesignerApi } from "./designer_api.js";
+import { nativeDesigner } from "./native_designer.js";
+import { ROW_CONTRACT_FIELDS, rowContractMetadata, trialFamilyContract } from "./row_contract.js";
+import { audioBoxLabels, countStripVariants, iterateStripVariants, previewStripVariants, assertSequenceLimit, assertCountLimit, variantCountLabel } from "./sequence_variants.js";
 import {
   NEXT_STEP,
   STEP_SEGMENT_FOLDERS,
@@ -54,6 +57,11 @@ const BLOCK_CSV_DOWNLOAD_COLUMNS = [
   "fractional_extra",
   "channels",
   "tactile_channel",
+  ...ROW_CONTRACT_FIELDS,
+  "native_iti_materialization_policy", "native_iti_anchor", "native_iti_seed_sha256",
+  "native_iti_range_min_ms", "native_iti_range_max_ms", "native_resolved_iti_ms", "native_iti_frames",
+  "native_session_duration_ms", "native_iti_source_distribution_reported", "native_iti_source_anchor_reported",
+  "native_iti_legacy_compatible",
 ];
 const DEFAULT_LOUDNESS_POLICY = {
   schema: "pps-loudness-policy.v1",
@@ -99,10 +107,10 @@ const SEGMENT_INFO = {
     title: "Choose or Create Study",
     purpose: "Choose an existing study profile or create a new custom experiment design.",
     inputs: "Select a built-in template or custom profile, or name a new clean-slate design.",
-    backendBeforeLink: "The application loads the selected profile from its ",
-    backendLinkLabel: "Template Directory",
-    backendAfterLink: ". New custom drafts are stored automatically in the researcher workspace. No folder selection is required.",
-    output: "A new template starts a dedicated folder for storing assets used to run the experiment.",
+    backendBeforeLink: "Loads design settings and available assets from the ",
+    backendLinkLabel: "bundled profile definitions",
+    backendAfterLink: ". Hosted drafts stay in this browser; the installed Designer saves drafts locally. Export a portable profile to transfer the design.",
+    output: "Selects a design for editing and preview. Choose an output folder later when preparing a participant in the installed Designer.",
     note: PROFILE_RECREATION_NOTICE
   },
   stimulus: {
@@ -110,7 +118,7 @@ const SEGMENT_INFO = {
     title: "Build Looming Stimuli",
     purpose: "Define the auditory ingredients available to the experiment.",
     inputs: "Trajectory values, one generated or imported source, an ingredient name, and the loudness policy. Calibration assumptions are available as advanced settings.",
-    backend: "Copies, imports, or bakes 1_core_audio_ingredients audio ingredients and records source metadata.",
+    backend: "Records the chosen source and trajectory. Hosted mode previews available audio; the installed Designer generates supported custom ingredients.",
     output: "Supplies stimulus ingredients for Trial Sequence Design."
   },
   trials: {
@@ -118,31 +126,31 @@ const SEGMENT_INFO = {
     title: "Trial Sequence Design",
     purpose: "Arrange ingredients into within-trial audio sequences.",
     inputs: "Trial-family rows, left-to-right box order, fixed clips, alternatives within a box, and jitter values.",
-    backend: "Bakes 2_trial_sequence_designs row-level sequence WAVs and a manifest mapping each file to its components and timing.",
-    output: "Feeds exact trial sequences into baseline/tactile trial generation."
+    backend: "Previews each ordered ingredient combination and its timing. Native preparation later assembles the accepted sequences into audio.",
+    output: "Provides sequence definitions for baseline/tactile trial design."
   },
   baseline: {
     kicker: "Segment 3",
     title: "Baseline and Tactile Trial Design",
     purpose: "Add tactile timing and define the baseline, catch, and auditory-only trial families.",
     inputs: "SOAs, one explicit baseline strategy, optional custom baseline SOAs, and separate catch/auditory-only choices.",
-    backend: "Creates 3_tactile_and_baseline_trials target and baseline WAVs with tactile on channel 3, optional audio-only families, and row-preserving manifests.",
-    output: "Supplies final trial files for repetition-pool construction."
+    backend: "Previews target, baseline, catch and auditory-only rows. Native preparation renders the reviewed audio and tactile channel.",
+    output: "Supplies trial definitions for repetition-pool construction."
   },
   block: {
     kicker: "Segment 4",
     title: "Trial Repetition Pool",
     purpose: "Decide how many times each trial family/file should appear.",
     inputs: "Global, folder, or file-level repetition counts.",
-    backend: "Writes the 4_trial_repetition_pool CSV and manifest without duplicating WAV files.",
+    backend: "Builds repetition-pool rows without duplicating audio. The pool can be reviewed and exported.",
     output: "Provides the trial rows that will be arranged into blocks."
   },
   schedule: {
     kicker: "Segment 5",
     title: "Generate and Review Blocks",
-    purpose: "Generate block CSVs and accept the final block set.",
+    purpose: "Generate block previews and accept the final block set.",
     inputs: "Block count, generated seed, reproducibility review, and regenerate/accept decision.",
-    backend: "Creates 5_block_csv_preview block CSV previews, then finalizes accepted block CSVs.",
+    backend: "Generates block rows for review and CSV export. The installed Designer verifies full timing and order before native preparation.",
     output: "Unlocks profile validation and provides the accepted block definitions."
   },
   run: {
@@ -150,8 +158,8 @@ const SEGMENT_INFO = {
     title: "Profile Validation and Save",
     purpose: "Validate and save a reusable design without fixing the eventual study size.",
     inputs: "Part membership, instruction policy, example-order preview count, and the versioned block-order policy.",
-    backend: "Stores the profile contract and deterministic order policy. The Runner materializes an immutable participant session later.",
-    output: "Exports a portable .pps-profile or registers the profile for Runner discovery."
+    backend: "Stores the profile contract and order policy. The installed Designer requires a complete native review and explicit acceptance before preparing an immutable participant session.",
+    output: "Exports a portable .pps-profile. Prepare participant files in the installed Designer, then open the prepared session or group in Runner."
   }
 };
 const DOWNSTREAM_STEPS = {
@@ -316,6 +324,8 @@ let templateLoadInFlight = false;
 let initialTemplateRequestHandled = !INITIAL_TEMPLATE_REQUEST;
 let pendingAudioImportMode = "preserve";
 let pendingInstructionSlot = "";
+let audioImportRequestId = 0;
+let audioImportHttpQueue = Promise.resolve();
 let pendingBakeRecipe = null;
 let selectedIngredientLabel = "";
 let ingredientEditorDirty = false;
@@ -328,6 +338,8 @@ let activeSourcePreviewNode = null;
 let activeSourcePreviewButton = null;
 let activeSourcePreviewClearTimer = null;
 let sourcePreviewAudioContext = null;
+let sourcePreviewRequestId = 0;
+let sourcePreviewAbort = null;
 let customizeModalReturnFocus = null;
 let customizeModalMode = "copy";
 let saveProfileModalReturnFocus = null;
@@ -440,10 +452,15 @@ function moveFocusFromBoundedSelect(reverse = false) {
 }
 
 function positionBoundedSelectMenu(button) {
-  const rect = button.getBoundingClientRect();
+  const box = button.getBoundingClientRect();
+  // offsetWidth rounds fractional layout pixels and would shift a far-right
+  // field's popup. Computed width preserves its actual CSS coordinate scale.
+  const scale = box.width / parseFloat(getComputedStyle(button).width) || 1;
+  const rect = { left: box.left / scale, top: box.top / scale, bottom: box.bottom / scale, width: box.width / scale };
+  const viewportHeight = window.innerHeight / scale;
   const viewportInset = 8;
   const menuGap = 4;
-  const availableBelow = Math.max(0, window.innerHeight - rect.bottom - viewportInset - menuGap);
+  const availableBelow = Math.max(0, viewportHeight - rect.bottom - viewportInset - menuGap);
   const availableAbove = Math.max(0, rect.top - viewportInset - menuGap);
   const openAbove = availableBelow < 200 && availableAbove > availableBelow;
   const available = openAbove ? availableAbove : availableBelow;
@@ -453,7 +470,7 @@ function positionBoundedSelectMenu(button) {
   boundedSelectMenu.style.maxHeight = `${menuHeight}px`;
   if (openAbove) {
     boundedSelectMenu.style.top = "auto";
-    boundedSelectMenu.style.bottom = `${window.innerHeight - rect.top + menuGap}px`;
+    boundedSelectMenu.style.bottom = `${viewportHeight - rect.top + menuGap}px`;
   } else {
     boundedSelectMenu.style.top = `${rect.bottom + menuGap}px`;
     boundedSelectMenu.style.bottom = "auto";
@@ -474,6 +491,10 @@ function openBoundedSelect(select) {
   closeBoundedSelect();
   activeBoundedSelect = select;
   activeBoundedOptionIndex = select.selectedIndex;
+  // A fullscreen element is the active top layer; body siblings cannot paint
+  // above it. Keep the existing popup in that layer for its actual owner.
+  const menuHost = document.fullscreenElement || document.body;
+  if (boundedSelectMenu.parentElement !== menuHost) menuHost.appendChild(boundedSelectMenu);
   boundedSelectMenu.replaceChildren();
   let lastGroup = null;
   let groupContainer = boundedSelectMenu;
@@ -633,10 +654,20 @@ function initializeBoundedSelects() {
   document.addEventListener("change", (event) => {
     if (event.target instanceof HTMLSelectElement) syncBoundedSelect(event.target);
   });
+  const repositionMenu = () => {
+    if (!activeBoundedSelect) return;
+    const button = boundedSelectButtons.get(activeBoundedSelect);
+    const box = button?.getBoundingClientRect();
+    if (!button?.isConnected || !box?.width || box.bottom <= 0 || box.top >= innerHeight) closeBoundedSelect();
+    else positionBoundedSelectMenu(button);
+  };
+  // Focus/preview reflow can scroll after opening a menu. Keep the same live
+  // field anchored; a detached or offscreen owner still closes its menu.
   document.addEventListener("scroll", (event) => {
-    if (activeBoundedSelect && !boundedSelectMenu.contains(event.target)) closeBoundedSelect();
+    if (activeBoundedSelect && !boundedSelectMenu.contains(event.target)) repositionMenu();
   }, true);
-  window.addEventListener("resize", () => closeBoundedSelect());
+  window.addEventListener("resize", repositionMenu);
+  document.addEventListener("fullscreenchange", () => closeBoundedSelect());
   new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.type === "attributes" && mutation.target instanceof HTMLSelectElement) {
@@ -651,11 +682,17 @@ function initializeBoundedSelects() {
   upgradeBoundedSelects();
 }
 let runSequencePreviewTimer = null;
+let runSequencePreviewRequestId = 0;
 let activePage = "toolkit";
 let editModeActive = false;
 let staticModeActive = false;
 let designerDirty = false;
 let workflowSaveInFlight = false;
+let hostedFinalizationInFlight = false;
+let nativeGenerationInFlight = false;
+let nativeReviewPage = 0;
+let nativePreparedResult = null;
+let nativeExecutionMessage = "Build a native review to verify audio and exact timing.";
 let staticModeReason = "";
 let staticPreloadInventory = null;
 let staticTemplatesCache = null;
@@ -677,6 +714,7 @@ const PAGE_ROUTE_SEGMENTS = {
 };
 
 async function api(path, options = {}) {
+  if (nativeDesigner.enabled) throw new Error("This action is not available in the native preparation build.");
   const { skipStaticGuard = false, rawResponse = false, ...fetchOptions } = options;
   if (staticModeActive && !skipStaticGuard) {
     throw new Error(STATIC_COMPANION_REQUIRED_MESSAGE);
@@ -727,12 +765,13 @@ function apiUrl(path) {
 function staticResourceUrl(path) {
   const cleanPath = String(path || "").trim().replace(/\\/g, "/").replace(/^\/+/, "");
   if (!cleanPath) return "";
+  if (nativeDesigner.enabled) return nativeDesigner.resourceUrl(cleanPath);
   if (/^https?:\/\//i.test(cleanPath)) return cleanPath;
   return new URL(cleanPath, STATIC_REPO_ROOT).href;
 }
 
 async function fetchStaticJson(path) {
-  const url = new URL(path, STATIC_REPO_ROOT);
+  const url = new URL(nativeDesigner.enabled ? nativeDesigner.resourceUrl(path) : new URL(path, STATIC_REPO_ROOT).href);
   url.searchParams.set("v", STATIC_RESOURCE_VERSION);
   const response = await fetch(url.href, { headers: { "Accept": "application/json" } });
   if (!response.ok) {
@@ -747,6 +786,15 @@ function isLocalDashboardOrigin() {
 
 function isCompanionDashboardOrigin() {
   return isLocalDashboardOrigin() && window.location.pathname.replace(/\\/g, "/").startsWith("/dashboard/");
+}
+
+function companionModeEnabled() {
+  return !nativeDesigner.enabled && isCompanionDashboardOrigin() && !forceStaticPreviewEnabled();
+}
+
+function renderAdapterChrome() {
+  const enabled = companionModeEnabled();
+  for (const element of document.querySelectorAll("[data-companion-only]")) element.hidden = !enabled;
 }
 
 function loadApiBase() {
@@ -882,9 +930,12 @@ function refreshHostedWorkflowSteps() {
     } else if (stepId === "stimulus" && !sources.length) {
       complete = false;
       missing = ["Add at least one stimulus or instruction source."];
-    } else if (stepId === "trials" && (!strips.length || strips.some((strip) => stripPreviewVariants(strip).length < 1))) {
+    } else if (stepId === "trials" && (!strips.length || strips.some((strip) => countStripVariants(strip) < 1))) {
       complete = false;
       missing = ["Add at least one complete trial family."];
+    } else if (stepId === "trials" && !Number.isSafeInteger(strips.reduce((total, strip) => total + countStripVariants(strip), 0))) {
+      complete = false;
+      missing = ["Too many variants to count exactly. Reduce choices before generating; your draft is preserved."];
     } else if (stepId === "baseline" && !(protocol.soa_values_ms || []).length) {
       complete = false;
       missing = ["Add at least one SOA value."];
@@ -915,7 +966,19 @@ function initializeHostedDesignerProgress(editStep = "stimulus") {
   });
 }
 
+function invalidateNativeAuthoring() {
+  if (nativeDesigner.enabled && state && editModeActive) {
+    nativeDesigner.invalidate();
+    state.native_execution_review = null;
+    nativePreparedResult = null;
+    nativeExecutionMessage = "The design changed. Build and accept a new native review.";
+    renderNativeExecution();
+  }
+}
+
 function markDesignerDirty() {
+  stopActiveSourcePreview();
+  invalidateNativeAuthoring();
   if (!state || !isCustomMode() || isProfileReadonlyMode() || !editModeActive || designerDirty) return;
   designerDirty = true;
   document.dispatchEvent(new CustomEvent("pps-designer-dirty"));
@@ -948,7 +1011,7 @@ function confirmDiscardUnsaved(actionLabel = "continue") {
     : ingredientEditorDirty
       ? `Discard the uncommitted Segment 1 ingredient draft and ${actionLabel}?`
       : `Discard unsaved changes and ${actionLabel}?`;
-  if (!window.confirm(message)) return false;
+  if (window.confirm(message) !== true) return false;
   if (ingredientEditorDirty) discardIngredientEditorDraft();
   return true;
 }
@@ -972,6 +1035,7 @@ async function restorePersistedDraftForView() {
 }
 
 async function reconnectBackendFromControls({ includeToken = true } = {}) {
+  if (!companionModeEnabled()) return;
   if (!confirmDiscardUnsaved("reconnect to the companion")) return;
   saveApiBase($("backend-url").value);
   if (includeToken) saveCompanionToken($("companion-token")?.value || "");
@@ -979,6 +1043,7 @@ async function reconnectBackendFromControls({ includeToken = true } = {}) {
 }
 
 async function setEditMode(active) {
+  if (workflowSaveInFlight) return editModeActive;
   if (active) {
     if (!state) {
       showToast("Wait for the dashboard state to load before editing.");
@@ -1048,7 +1113,7 @@ function renderEditModePanel() {
 // fields are locked (read-only profile or a not-yet-reached custom step), the
 // preview can still be viewed but the trajectory cannot be changed.
 function trajectoryEditingEnabled() {
-  if (staticModeActive) return false;
+  if (staticModeActive && !nativeDesigner.enabled) return false;
   const input = $("start-distance");
   const dynamicDraft = Boolean(pendingBakeRecipe && pendingBakeRecipe.kind !== "fixed_audio");
   return Boolean(dynamicDraft && input && !input.disabled);
@@ -1144,7 +1209,7 @@ function confirmDownstreamInvalidation(actionLabel, fromStep) {
   const affected = (DOWNSTREAM_STEPS[fromStep] || []).filter(segmentHasMaterializedOutput);
   if (!affected.length) return true;
   const labels = affected.map((step) => getWorkflowStep(step)?.label || humanize(step));
-  return window.confirm(`${actionLabel} will invalidate downstream segment outputs: ${labels.join(", ")}. Continue?`);
+  return window.confirm(`${actionLabel} will invalidate downstream segment outputs: ${labels.join(", ")}. Continue?`) === true;
 }
 
 function showToast(message) {
@@ -1239,6 +1304,16 @@ function studyProtocolPriority(templateId) {
   return 100;
 }
 
+function staticPremadeProvenance(asset) {
+  return Object.fromEntries(["native_generation_provenance", "native_generation_provenance_sha256", "proxy_policy"]
+    .filter(key => asset[key] !== undefined).map(key => [key, asset[key]]));
+}
+
+function staticPremadeDuration(asset) {
+  const duration = Number(asset.duration_s);
+  return Number.isFinite(duration) && duration > 0 ? { duration_s: duration } : {};
+}
+
 function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory) {
   const entry = staticInventoryProfile(templateId, inventory);
   if (!entry) {
@@ -1289,6 +1364,7 @@ function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory
       motion_mode: asset.motion_mode || "",
       render_mode: asset.render_mode || "",
       include_tactile: asset.include_tactile,
+      ...staticPremadeProvenance(asset),
       trajectory_snapshot: asset.trajectory_snapshot || {}
     };
   });
@@ -1324,7 +1400,7 @@ function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory
     catalog_segments: clone(entry.catalog_segments || []),
     message: status === "ready"
       ? "Static GitHub preload assets are available for browser inspection."
-      : (entry.message || "This profile is indexed, but its assets require the local companion.")
+      : (entry.message || "This profile is indexed, but its audio assets are not available for online preview.")
   };
 }
 
@@ -1406,7 +1482,7 @@ function staticCslJson(data) {
 async function staticStateForTemplate(templateId) {
   const cleanId = String(templateId || DEFAULT_STUDY_TEMPLATE_ID).trim();
   if (!cleanId || cleanId === CUSTOM_TEMPLATE_ID) {
-    throw new Error("Start the local companion backend before creating custom studies.");
+    throw new Error("Choose Create study to begin a custom profile.");
   }
   const inventory = await loadStaticInventory();
   const templates = await loadStaticTemplates();
@@ -1499,6 +1575,26 @@ function staticVariantNoiseType(variant, sourceInventory) {
   return "";
 }
 
+function staticVariantLoomingOnsetMs(variant, sourceInventory) {
+  let onsetMs = 0;
+  for (const choice of variant) {
+    if (choice.kind === "jitter") onsetMs += Math.max(0, Number(choice.value || 0));
+    else {
+      const source = sourceInventory.get(choice.label);
+      if (source && source.kind !== "prestimulus") return onsetMs;
+      onsetMs += Math.max(0, Number(source?.duration_ms || 0));
+    }
+  }
+  return 0;
+}
+
+function staticBaselineMode(protocol) {
+  const strategy = protocol.baseline_strategy || "none";
+  if (strategy === "custom") return protocol.baseline_custom_trial_mode === "audio_tactile" ? "audio_tactile" : "tactile_only";
+  if (["min_anchor", "max_anchor", "min_max", "soa_zero", "sound_offset"].includes(strategy)) return "audio_tactile";
+  return strategy;
+}
+
 function staticTrialFileRow({
   templateId,
   rowIndex,
@@ -1508,9 +1604,11 @@ function staticTrialFileRow({
   variant,
   variantIndex,
   durationMs,
+  loomingOnsetMs = 0,
   soaMs = "",
   baselineMode = "",
   noiseType = "",
+  metadata = {},
 }) {
   const rowFolderName = `row_${String(rowIndex + 1).padStart(2, "0")}__${slugify(rowLabel)}`;
   const sequenceLabels = variant.map((choice) => choice.label).join(" | ");
@@ -1534,8 +1632,9 @@ function staticTrialFileRow({
     sha256: "",
     duration_ms: durationMs,
     duration_s: Math.round((durationMs / 1000) * 1000) / 1000,
-    looming_segment_onset_s: "",
-    tactile_onset_s: Number.isFinite(Number(soaMs)) ? Math.round((Number(soaMs) / 1000) * 1000) / 1000 : "",
+    looming_segment_onset_s: loomingOnsetMs / 1000,
+    tactile_onset_s: ["audio_tactile", "baseline"].includes(family) && soaMs !== "" && Number.isFinite(Number(soaMs))
+      ? (loomingOnsetMs + Number(soaMs)) / 1000 : "",
     soa_ms: soaMs,
     baseline_mode: baselineMode,
     sequence_variant_key: variantKey,
@@ -1544,10 +1643,27 @@ function staticTrialFileRow({
     noise_type: noiseType,
     channels: ["catch", "auditory_only"].includes(family) ? 2 : 3,
     tactile_channel: ["catch", "auditory_only"].includes(family) ? "" : 3,
+    ...trialFamilyContract(metadata, family),
   };
 }
 
-function staticTrialFileBakePayload(design, status) {
+function staticTrialFileCount(design) {
+  const protocol = design.protocol || {};
+  const soas = (protocol.soa_values_ms || []).filter(value => Number.isFinite(Number(value))).map(Number);
+  const baselines = staticBaselineSoaValues(protocol, soas).length;
+  return (protocol.trial_strips || []).reduce((total, strip) => {
+    const variants = countStripVariants(strip);
+    const crossed = enabled => enabled !== false ? variants : Math.min(1, variants);
+    return total + variants * staticStripSoaValues(strip, soas).length
+      + (baselines ? crossed(protocol.baseline_crosses_sequence_variants) * baselines : 0)
+      + (protocol.include_catch_trials ? crossed(protocol.catch_crosses_sequence_variants) : 0)
+      + (protocol.include_auditory_only_trials ? crossed(protocol.auditory_only_crosses_sequence_variants) : 0);
+  }, 0);
+}
+
+function staticTrialFileBakePayload(design, status, limit = Number.MAX_SAFE_INTEGER) {
+  assertSequenceLimit(design.protocol?.trial_strips || [], limit);
+  assertCountLimit(staticTrialFileCount(design), limit);
   const protocol = design.protocol || {};
   const sourceInventory = staticSourceInventory(design);
   const soaValues = (protocol.soa_values_ms || []).filter((value) => Number.isFinite(Number(value))).map((value) => Number(value));
@@ -1560,10 +1676,13 @@ function staticTrialFileBakePayload(design, status) {
   const files = [];
   let variantCounter = 1;
   for (const [rowIndex, strip] of (protocol.trial_strips || []).entries()) {
-    const variants = stripPreviewVariants(strip);
+    const variants = iterateStripVariants(strip);
     const rowLabel = strip.label || `Trial type ${rowIndex + 1}`;
-    for (const [variantListIndex, variant] of variants.entries()) {
+    let variantListIndex = -1;
+    for (const variant of variants) {
+      variantListIndex++;
       const durationMs = staticVariantDurationMs(variant, sourceInventory);
+      const loomingOnsetMs = staticVariantLoomingOnsetMs(variant, sourceInventory);
       const noiseType = staticVariantNoiseType(variant, sourceInventory);
       const variantIndex = variantCounter;
       variantCounter += 1;
@@ -1573,10 +1692,12 @@ function staticTrialFileBakePayload(design, status) {
           rowIndex,
           rowLabel,
           family: "audio_tactile",
+          metadata: strip.metadata,
           folderName: "target_audio_tactile",
           variant,
           variantIndex,
           durationMs,
+          loomingOnsetMs,
           soaMs,
           noiseType,
         }));
@@ -1588,12 +1709,14 @@ function staticTrialFileBakePayload(design, status) {
             rowIndex,
             rowLabel,
             family: "baseline",
+            metadata: strip.metadata,
             folderName: "baseline",
             variant,
             variantIndex,
             durationMs,
+            loomingOnsetMs,
             soaMs,
-            baselineMode: protocol.baseline_custom_trial_mode || protocol.baseline_strategy || "tactile_only",
+            baselineMode: staticBaselineMode(protocol),
             noiseType,
           }));
         }
@@ -1604,10 +1727,12 @@ function staticTrialFileBakePayload(design, status) {
           rowIndex,
           rowLabel,
           family: "catch",
+          metadata: strip.metadata,
           folderName: "catch_trials",
           variant,
           variantIndex,
           durationMs,
+          loomingOnsetMs,
           noiseType,
         }));
       }
@@ -1617,10 +1742,12 @@ function staticTrialFileBakePayload(design, status) {
           rowIndex,
           rowLabel,
           family: "auditory_only",
+          metadata: strip.metadata,
           folderName: "auditory_only",
           variant,
           variantIndex,
           durationMs,
+          loomingOnsetMs,
           soaMs: 0,
           baselineMode: "auditory_only",
           noiseType,
@@ -1763,7 +1890,7 @@ function applyTrialPoolExactFamilyCounts(records, settings = {}, warnings = []) 
   return exactCounts;
 }
 
-function staticTrialPoolRows(files, settings) {
+function staticTrialPoolRows(files, settings, limit = Number.MAX_SAFE_INTEGER) {
   const records = files.map((file, index) => {
     const configured = staticConfiguredRepetitions(file, settings);
     const baseRepetitions = Math.floor(configured);
@@ -1800,6 +1927,7 @@ function staticTrialPoolRows(files, settings) {
     for (const record of rotated.slice(0, extraCount)) record.fractionalExtra = true;
   }
   applyTrialPoolExactFamilyCounts(records, settings);
+  assertCountLimit(records.reduce((total, record) => total + record.baseRepetitions + (record.fractionalExtra ? 1 : 0), 0), limit);
   const rows = [];
   let trialPoolIndex = 1;
   for (const record of records) {
@@ -1816,8 +1944,8 @@ function staticTrialPoolRows(files, settings) {
         source_sha256: record.file.sha256 || "",
         duration_ms: record.file.duration_ms || 0,
         duration_s: record.file.duration_s || "",
-        looming_segment_onset_s: record.file.looming_segment_onset_s || "",
-        tactile_onset_s: record.file.tactile_onset_s || "",
+        looming_segment_onset_s: record.file.looming_segment_onset_s ?? "",
+        tactile_onset_s: record.file.tactile_onset_s ?? "",
         repetition_index: repetitionIndex,
         configured_repetitions: record.configured,
         base_repetitions: record.baseRepetitions,
@@ -1827,13 +1955,14 @@ function staticTrialPoolRows(files, settings) {
         balancing_stratum: record.balancingStratum,
         balancing_signature: `static-${seed}`,
         source_lineage: record.sourceLineage,
-        soa_ms: record.file.soa_ms || "",
+        soa_ms: record.file.soa_ms ?? "",
         baseline_mode: record.file.baseline_mode || "",
         sequence_variant_key: record.file.sequence_variant_key || "",
         sequence_labels: record.file.sequence_labels || "",
         noise_type: record.file.noise_type || "",
         channels: record.file.channels || "",
         tactile_channel: record.file.tactile_channel || "",
+        ...rowContractMetadata(record.file),
       });
       trialPoolIndex += 1;
     }
@@ -1841,10 +1970,10 @@ function staticTrialPoolRows(files, settings) {
   return rows;
 }
 
-function staticTrialPoolBakePayload(design, trialFileBake) {
+function staticTrialPoolBakePayload(design, trialFileBake, limit = Number.MAX_SAFE_INTEGER) {
   const protocol = design.protocol || {};
   const settings = staticTrialPoolSettings(protocol);
-  const poolRows = staticTrialPoolRows(trialFileBake.files || [], settings);
+  const poolRows = staticTrialPoolRows(trialFileBake.files || [], settings, limit);
   const familyCounts = { audio_tactile: 0, baseline: 0, catch: 0, auditory_only: 0 };
   for (const row of poolRows) {
     if (Object.prototype.hasOwnProperty.call(familyCounts, row.family)) familyCounts[row.family] += 1;
@@ -2091,12 +2220,12 @@ function seededGellermannBlockRows(poolRows, blockCount, seed, maxRun = BLOCK_RA
   return { blocks, rowOrder };
 }
 
-function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax) {
+function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax, blockLabel = `Block ${String(blockIndex).padStart(2, "0")}`) {
   const family = trialPoolFamilyKey(row.family);
   const soaValue = Number(row.soa_ms || 0);
   return {
     block_index: blockIndex,
-    block_label: `Block ${String(blockIndex).padStart(2, "0")}`,
+    block_label: blockLabel,
     block_trial_index: blockTrialIndex,
     trial_pool_index: row.trial_pool_index,
     family,
@@ -2108,7 +2237,7 @@ function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax)
     folder_name: row.folder_name || "",
     noise_type: row.noise_type || "",
     noise_color_hex: row.noise_type ? sourceColor(row.noise_type) : "#d8dde2",
-    soa_ms: row.soa_ms || "",
+    soa_ms: row.soa_ms ?? "",
     soa_color_hex: soaValue > 0 ? staticSoaColor(soaValue, soaMin, soaMax) : "#d8dde2",
     baseline_mode: row.baseline_mode || "",
     sequence_variant_key: row.sequence_variant_key || "",
@@ -2118,13 +2247,14 @@ function staticBlockPreviewRow(row, blockIndex, blockTrialIndex, soaMin, soaMax)
     source_sha256: row.source_sha256 || "",
     duration_ms: row.duration_ms || 0,
     duration_s: row.duration_s || "",
-    looming_segment_onset_s: row.looming_segment_onset_s || "",
-    tactile_onset_s: row.tactile_onset_s || "",
+    looming_segment_onset_s: row.looming_segment_onset_s ?? "",
+    tactile_onset_s: row.tactile_onset_s ?? "",
     repetition_index: row.repetition_index || "",
     configured_repetitions: row.configured_repetitions || "",
     fractional_extra: row.fractional_extra || "",
     channels: row.channels || "",
     tactile_channel: row.tactile_channel || "",
+    ...rowContractMetadata(row),
   };
 }
 
@@ -2154,11 +2284,12 @@ function staticBlockCsvPreviewPayload(design, trialPoolBake, status) {
   );
   const blocks = scheduled.blocks.map((rows, index) => {
     const blockIndex = index + 1;
-    const previewRows = rows.map((row, rowIndex) => staticBlockPreviewRow(row, blockIndex, rowIndex + 1, soaMin, soaMax));
+    const blockLabel = String(design.protocol?.block_specs?.[index]?.label || "").trim() || `Block ${String(blockIndex).padStart(2, "0")}`;
+    const previewRows = rows.map((row, rowIndex) => staticBlockPreviewRow(row, blockIndex, rowIndex + 1, soaMin, soaMax, blockLabel));
     const durationMs = previewRows.reduce((total, row) => total + Number(row.duration_ms || 0), 0);
     return {
       block_index: blockIndex,
-      block_label: `Block ${String(blockIndex).padStart(2, "0")}`,
+      block_label: blockLabel,
       csv_path: "",
       csv_file_name: `static_block_${String(blockIndex).padStart(2, "0")}.csv`,
       trial_count: previewRows.length,
@@ -2271,6 +2402,9 @@ function hydrateStaticSourceAssets(design, status) {
     if (!asset) continue;
     consumed.add(key);
     noise.prebaked_path = noise.prebaked_path || asset.path;
+    if (asset.path && noise.prebaked_path === asset.path) {
+      Object.assign(noise, staticPremadeProvenance(asset), staticPremadeDuration(asset));
+    }
     noise.noise_type = noise.noise_type || asset.noise_type || asset.tone_type || "pink";
     noise.motion_mode = noise.motion_mode || asset.motion_mode || "looming";
     noise.trajectory_snapshot = Object.keys(noise.trajectory_snapshot || {}).length
@@ -2283,6 +2417,9 @@ function hydrateStaticSourceAssets(design, status) {
     if (!asset) continue;
     consumed.add(key);
     source.path = source.path || asset.path;
+    if (asset.path && source.path === asset.path) {
+      Object.assign(source, staticPremadeProvenance(asset), staticPremadeDuration(asset));
+    }
     source.tone_type = source.tone_type || asset.tone_type || asset.noise_type || "custom_audio";
     source.motion_mode = source.motion_mode || asset.motion_mode || "looming";
     source.trajectory_snapshot = Object.keys(source.trajectory_snapshot || {}).length
@@ -2297,11 +2434,13 @@ function hydrateStaticSourceAssets(design, status) {
     design.custom_looming_files.push({
       label,
       path,
-      target_duration_s: Number(asset.duration_s || design.trajectory?.total_duration_s || 4),
+      target_duration_s: staticPremadeDuration(asset).duration_s ?? Number(design.trajectory?.total_duration_s || 4),
       render_mode: "preserve",
       tone_type: asset.noise_type || asset.tone_type || "custom_audio",
       gain: 1.0,
       motion_mode: asset.motion_mode || "looming",
+      ...staticPremadeProvenance(asset),
+      ...staticPremadeDuration(asset),
       trajectory_snapshot: clone(asset.trajectory_snapshot || {}),
     });
   }
@@ -2370,7 +2509,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "1_core_audio_ingredients": segment(
       "1_core_audio_ingredients",
       Boolean(status.ready),
-      status.ready ? "Static source assets are available online." : "Profile source assets require the local companion."
+      status.ready ? "Premade source audio is available for preview." : "This profile's source audio is not available for online preview."
     ),
     "2_trial_sequence_designs": segment(
       "2_trial_sequence_designs",
@@ -2406,7 +2545,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "5_block_csv_preview": segment(
       "5_block_csv_preview",
       launchable,
-      launchable ? "Block CSVs are materialized by the local companion when the profile is launched." : "This profile is not Segment 6 launchable yet.",
+      launchable ? "Review and prepare executable blocks in Windows Designer." : "This profile still needs block review.",
       {
         accepted: launchable,
         block_count: blockCsvPreview.block_count || 0,
@@ -2417,7 +2556,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "6_experiment_run_setup": segment(
       "6_experiment_run_setup",
       launchable,
-      launchable ? "Start the local companion to materialize and open this finished profile." : "This profile is not Segment 6 launchable yet."
+      launchable ? "Open this profile in Windows Designer to review and prepare the participant session." : "This profile still needs participant-session review."
     )
   };
 }
@@ -2514,6 +2653,7 @@ function staticRenderStatus(status) {
       sample_rate: asset.sample_rate,
       channels: asset.channels,
       source_kind: asset.source_kind,
+      ...staticPremadeProvenance(asset),
       noise_type: asset.noise_type,
       tone_type: asset.tone_type,
       trajectory_snapshot: asset.trajectory_snapshot || {}
@@ -2535,7 +2675,9 @@ function staticRunSetupPreview(design, status) {
   }
   return {
     ready: Boolean(status.finished_profile),
-    prepared: Boolean(status.finished_profile),
+    prepared: false,
+    execution_plan_accepted: false,
+    preview_scope: "descriptive_summary",
     experiment_structure: experimentStructure,
     participant_count: participantCount,
     parts_per_participant: partCount,
@@ -2544,7 +2686,7 @@ function staticRunSetupPreview(design, status) {
     seed: runSetup.seed || design.protocol?.random_seed || 0,
     instruction_profile: runSetup.instruction_profile || {},
     message: status.finished_profile
-      ? "Static profile loaded; start the local companion to materialize and open the runner."
+      ? "Descriptive summary only. Review and accept the complete participant and phase order in the native Designer before preparing a run."
       : (status.message || "This static profile is not launchable yet.")
   };
 }
@@ -2632,11 +2774,14 @@ function auditSourceSnapshot() {
 }
 
 function auditTrialStripSnapshot(strip, index) {
-  const variants = stripPreviewVariants(strip);
+  const total = countStripVariants(strip);
+  const variants = previewStripVariants(strip, TRIAL_PREVIEW_LIMIT);
   return {
     index: index + 1,
     label: strip?.label || `Trial type ${index + 1}`,
-    variant_count: variants.length,
+    variant_count: Number.isFinite(total) ? total : null,
+    variant_count_overflow: !Number.isFinite(total),
+    variants_truncated: total > variants.length,
     variants: variants.map((variant) => variant.map((choice) => ({
       kind: choice.kind || "",
       label: choice.label || "",
@@ -2845,7 +2990,7 @@ async function loadStaticState(fallbackError = null) {
     request.error
       || (request.id
         ? "Opened the paper's Toolkit template in Experiment Designer."
-        : "Loaded committed preload assets from GitHub. Start the local companion for local generation or runner launch.")
+         : "Premade audio is ready to prepare and preview. Use Windows Designer to generate custom audio and prepare Runner sessions.")
   );
   return true;
 }
@@ -2888,9 +3033,18 @@ async function applyStaticProfileInspectionPreview() {
 
 async function loadState(options = {}) {
   const resetMode = options.resetEditMode === true;
-  if (forceStaticPreviewEnabled()) {
+  if (nativeDesigner.enabled) {
+    const response = await nativeDesigner.load();
+    staticModeActive = true; // Shared local planner; native generation is routed explicitly below.
+    state = response.snapshot || await staticStateForTemplate(DEFAULT_STUDY_TEMPLATE_ID);
     if (resetMode) resetEditMode();
-    await loadStaticState(new Error("Forced static preview audit mode."));
+    renderAll(); updateViewer();
+    setConnectionStatus(true, "native preparation");
+    return;
+  }
+  if (!companionModeEnabled()) {
+    if (resetMode) resetEditMode();
+    await loadStaticState(forceStaticPreviewEnabled() ? new Error("Forced static preview audit mode.") : null);
     return;
   }
   try {
@@ -2926,6 +3080,7 @@ async function loadState(options = {}) {
 
 function renderAll() {
   if (!state) return;
+  stopActiveSourcePreview();
   document.body.classList.toggle("static-dashboard-mode", staticModeActive);
   document.body.classList.toggle("dashboard-edit-mode", editModeActive);
   document.body.classList.toggle("dashboard-view-mode", !editModeActive);
@@ -2941,6 +3096,7 @@ function renderAll() {
   renderSegmentRegistryOutputs();
   renderWorkflow();
   renderCapabilityLocks();
+  renderNativeExecution();
   upgradeBoundedSelects();
 }
 
@@ -2953,6 +3109,8 @@ function renderCapabilityLocks() {
     "export-output-folder", "prepare-experiment",
   ];
   for (const id of unavailable) {
+    if (nativeDesigner.enabled && ["start-distance", "end-distance", "start-rotation", "end-rotation", "movement-duration",
+      "start-hold", "end-hold", "generated-noise-select", "bake-stimulus", "import-audio-spatialize"].includes(id)) continue;
     const control = $(id);
     if (!control) continue;
     control.disabled = true;
@@ -3041,7 +3199,10 @@ function pageRouteUrl(page, sectionId = "") {
   const cleanSection = String(sectionId || "").replace(/^#/, "");
   if (!publicRouteNavigationAvailable()) {
     const hash = cleanSection || (nextPage === "toolkit" ? "" : nextPage);
-    return `${window.location.pathname}${window.location.search}${hash ? `#${hash}` : ""}`;
+    const query = new URLSearchParams(window.location.search);
+    if (query.has("page")) query.set("page", nextPage);
+    const search = query.toString();
+    return `${window.location.pathname}${search ? `?${search}` : ""}${hash ? `#${hash}` : ""}`;
   }
   const base = publicRouteBasePath();
   const segment = PAGE_ROUTE_SEGMENTS[nextPage] || "";
@@ -3212,22 +3373,30 @@ function initializePublicationNetworkSurface() {
   const load = () => {
     if (publicationNetworkInitPromise) return publicationNetworkInitPromise;
     root.dataset.publicationNetworkState = "loading";
+    const loading = $("publication-network-loading");
+    const message = $("publication-network-loading-message");
+    const retry = $("publication-network-retry");
+    loading.hidden = false;
+    loading.classList.remove("error");
+    loading.querySelector(".publication-network-spinner").hidden = false;
+    message.textContent = "Preparing publication network…";
+    retry.hidden = true;
     publicationNetworkInitPromise = import("./publication_network.js")
       .then(({ initializePublicationNetwork }) => initializePublicationNetwork(root))
       .catch((error) => {
         root.dataset.publicationNetworkState = "error";
-        const loading = $("publication-network-loading");
-        if (loading) {
-          loading.hidden = false;
-          loading.classList.add("error");
-          const message = loading.querySelector("span:last-child");
-          if (message) message.textContent = "The publication network could not be loaded.";
-        }
+        publicationNetworkInitPromise = null;
+        loading.hidden = false;
+        loading.classList.add("error");
+        loading.querySelector(".publication-network-spinner").hidden = true;
+        message.textContent = "Publication data could not be loaded. Retry when your connection is available.";
+        retry.hidden = false;
+        $("publication-network-status").textContent = "Publication data unavailable.";
         console.error(error);
-        throw error;
       });
     return publicationNetworkInitPromise;
   };
+  $("publication-network-retry").addEventListener("click", load);
   if (!("IntersectionObserver" in window)) {
     load();
     return;
@@ -3478,7 +3647,7 @@ function hydrateIngredientEditor(entry, { preserveMode = false } = {}) {
 
 function confirmDiscardIngredientDraft(actionLabel = "continue") {
   if (!ingredientEditorDirty) return true;
-  return window.confirm(`Discard the uncommitted Segment 1 ingredient draft and ${actionLabel}?`);
+  return window.confirm(`Discard the uncommitted Segment 1 ingredient draft and ${actionLabel}?`) === true;
 }
 
 function selectIngredient(label, { force = false } = {}) {
@@ -3676,7 +3845,7 @@ function renderBakePanel() {
   const hasAudio = !isManual || Boolean(sourcePath);
   status.textContent = !hasName ? "Stimulus name is required" : !hasAudio ? "Choose an audio file" : `${remake ? "Ready to remake" : "Ready to create"}: ${kind}`;
   status.className = `status-label ${hasName && hasAudio ? "ready" : "required"}`;
-  button.disabled = controlsLocked || !hasName || !hasAudio;
+  button.disabled = controlsLocked || !hasName || !hasAudio || nativeGenerationInFlight;
   const activeSourceKind = pendingBakeRecipe.kind === "fixed_audio"
     ? "fixed_clip"
     : pendingBakeRecipe.kind === "imported_audio"
@@ -3746,7 +3915,8 @@ function renderAudioTable() {
 function compactTrajectorySummary(snapshot = {}) {
   if (!snapshot || snapshot.start_distance_cm === undefined) return "Trajectory saved with source";
   const duration = Number(snapshot.movement_duration_s || 0);
-  return `${Number(snapshot.start_distance_cm)} → ${Number(snapshot.end_distance_cm)} cm · ${Number(snapshot.start_rotation_deg || 0)}° → ${Number(snapshot.end_rotation_deg || 0)}° · ${duration.toFixed(1)} s`;
+  const spatial = value => Number(Number(value || 0).toFixed(2));
+  return `${spatial(snapshot.start_distance_cm)} → ${spatial(snapshot.end_distance_cm)} cm · ${spatial(snapshot.start_rotation_deg)}° → ${spatial(snapshot.end_rotation_deg)}° · ${duration.toFixed(1)} s`;
 }
 
 function renderAudioInventoryCard(audio, role) {
@@ -3979,6 +4149,7 @@ function readJsonField(field) {
 
 function sourceFolderAction(path, label = "source") {
   if (!path) return "";
+  if (nativeDesigner.enabled) return `<button type="button" class="source-folder-link" data-export-native-source="${escapeAttr(path)}" aria-label="Save ${escapeAttr(label)} WAV">Save WAV</button>`;
   if (staticModeActive) {
     return `<a class="source-folder-link" href="${escapeAttr(staticResourceUrl(path))}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeAttr(label)} asset">Open Asset</a>`;
   }
@@ -4306,10 +4477,33 @@ function renderBlockPreviewRow(row) {
       ${coloredPreviewCell(row.soa_ms ? `${row.soa_ms} ms` : "", row.soa_color_hex, "SOA")}
       ${coloredPreviewCell(row.noise_type || "", row.noise_color_hex, "Noise")}
       <td data-label="Sequence">${escapeHtml(row.sequence_labels || row.sequence_variant_key || "")}</td>
-      <td data-label="Duration">${escapeHtml(formatDurationMs(row.duration_ms || 0))}</td>
+      <td data-label="Duration">${escapeHtml(formatDurationMs(row.duration_ms || 0))}${renderNativeItiTiming(row)}</td>
       <td data-label="WAV"><details class="block-file-details"><summary>Audio file</summary><code>${escapeHtml(row.source_file_name || "")}</code></details></td>
     </tr>
   `;
+}
+
+function renderNativeItiTiming(row) {
+  if (!row.native_iti_materialization_policy) return "";
+  const policy = row.native_iti_materialization_policy === "toolkit_uniform_integer_ms_std_rng_0_8_8.v1"
+    ? "Toolkit uniform whole-millisecond sampling" : row.native_iti_materialization_policy;
+  const anchor = row.native_iti_anchor === "after_trial_audio_end" ? "after trial audio ends" : row.native_iti_anchor;
+  return `<div>Toolkit ITI: ${escapeHtml(row.native_resolved_iti_ms)} ms</div>
+    <details class="block-file-details native-iti-details"><summary>Timing details</summary>
+      <div>Reported range: ${escapeHtml(row.iti_ms)} ms. Source policy: ${escapeHtml(row.iti_policy)}.</div>
+      <div>${escapeHtml(policy)} from ${escapeHtml(row.native_iti_range_min_ms)} to ${escapeHtml(row.native_iti_range_max_ms)} ms; ${escapeHtml(anchor)}.</div>
+      <div>Selected gap: ${escapeHtml(row.native_iti_frames)} frames. Trial with gap: ${escapeHtml(formatDurationMs(row.native_session_duration_ms))}.</div>
+      <div>Toolkit seed (SHA-256): <code>${escapeHtml(row.native_iti_seed_sha256)}</code></div>
+      <div>Source distribution and anchor are unreported. This toolkit resolution is not source or legacy equivalence.</div>
+    </details>`;
+}
+
+function nativeItiReviewDisclosure(preview) {
+  let count = 0;
+  for (const block of preview?.blocks || []) for (const row of block.preview_rows || []) {
+    if (row.native_iti_materialization_policy) count++;
+  }
+  return count ? `Toolkit ITI substitution affects ${count} reviewed ${count === 1 ? "row" : "rows"}. Whole-millisecond gaps are sampled uniformly within the saved reported range and appended after each trial's audio ends. The source does not report this distribution, anchor or seed; source and legacy equivalence are not established. Review each selected delay and seed under Timing details in Segment 5 before accepting.` : "";
 }
 
 function coloredPreviewCell(value, color, label) {
@@ -5204,24 +5398,23 @@ function tactileSiteCount() {
 }
 
 function rowSourceCount(row) {
-  let count = 1;
-  for (const card of row.querySelectorAll(".filmstrip-element")) {
+  const lengths = [...row.querySelectorAll(".filmstrip-element")].map(card => {
     if (card.dataset.elementKind === "jitter") {
-      count *= Math.max(0, parseIntegerList(card.querySelector('[data-element-field="jitter_values_ms"]')?.value).length);
-    } else {
-      const hidden = card.querySelectorAll('input[data-element-field="source_labels"][type="hidden"]');
-      const checked = card.querySelectorAll('input[data-element-field="source_labels"]:checked');
-      const selectedOptions = card.querySelectorAll('select[data-element-field="source_labels"] option:checked');
-      count *= Math.max(0, hidden.length || checked.length || selectedOptions.length);
+      return parseIntegerList(card.querySelector('[data-element-field="jitter_values_ms"]')?.value).length;
     }
-  }
-  return count;
+    return card.querySelectorAll('input[data-element-field="source_labels"][type="hidden"]').length
+      || card.querySelectorAll('input[data-element-field="source_labels"]:checked').length
+      || card.querySelectorAll('select[data-element-field="source_labels"] option:checked').length;
+  });
+  if (!lengths.length || lengths.includes(0)) return 0;
+  const count = lengths.reduce((total, length) => total * length, 1);
+  return Number.isSafeInteger(count) ? count : Infinity;
 }
 
 function rowAudioCountPerBlock(row) {
   const soaCount = currentSoaValues().length;
   const repetitions = Math.max(1, Math.round(numberValue("repetitions", 1)));
-  return rowSourceCount(row) * Math.max(soaCount, 0) * repetitions * tactileSiteCount();
+  return soaCount ? rowSourceCount(row) * soaCount * repetitions * tactileSiteCount() : 0;
 }
 
 function defaultRowMix() {
@@ -5412,10 +5605,23 @@ function updateBaselineDecision() {
   renderBaselineTactileSummary();
 }
 
+function restoreFocusAfterRender(container) {
+  const active = document.activeElement;
+  if (!container.contains(active) || !active.id) return () => {};
+  const { id, selectionStart, selectionEnd } = active;
+  return () => {
+    const control = document.getElementById(id);
+    if (!control || control === active) return;
+    control.focus({ preventScroll: true });
+    if (selectionStart !== null && typeof selectionStart === "number") control.setSelectionRange?.(selectionStart, selectionEnd);
+  };
+}
+
 function renderTrialStrips() {
   const list = $("filmstrip-list");
   if (!list) return;
   const strips = state.design.protocol?.trial_strips || [];
+  const restoreFocus = restoreFocusAfterRender(list);
   list.innerHTML = "";
   if (!strips.length) {
     list.appendChild(renderAddRowControl(-1, true));
@@ -5427,6 +5633,7 @@ function renderTrialStrips() {
     list.appendChild(renderAddRowControl(index, false));
   });
   updateFilmstripCounts();
+  restoreFocus();
 }
 
 function stripMixValues(strip = {}) {
@@ -5463,12 +5670,12 @@ function renderTrialStripRow(strip, index, options = {}) {
     </div>`}
     <div class="filmstrip-row-body">
       <div class="field-row trial-condition-field">
-        <label>Condition label</label>
-        <input data-strip-field="label" value="${escapeAttr(strip.label || `Trial type ${index + 1}`)}">
+        <label for="trial-condition-${index}">Condition label</label>
+        <input id="trial-condition-${index}" data-strip-field="label" value="${escapeAttr(strip.label || `Trial type ${index + 1}`)}">
       </div>
       <div class="filmstrip-row-summary" aria-live="polite">
         <span class="filmstrip-row-expression">${escapeHtml(trialStripExpression(strip))}</span>
-        <span class="status-label optional filmstrip-row-variant-count">${stripPreviewVariants(strip).length} ${stripPreviewVariants(strip).length === 1 ? "variant" : "variants"}</span>
+        <span class="status-label optional filmstrip-row-variant-count">${variantCountLabel(strip)}</span>
       </div>
       <div class="filmstrip-sequence"></div>
     </div>
@@ -5489,7 +5696,7 @@ function renderTrialStripRow(strip, index, options = {}) {
   `;
   const sequence = row.querySelector(".filmstrip-sequence");
   for (const [elementIndex, element] of elements.entries()) {
-    sequence.appendChild(renderTrialStripElement(element, elementIndex));
+    sequence.appendChild(renderTrialStripElement(element, elementIndex, index));
     sequence.appendChild(renderAddEventControl(index, elementIndex + 1, strip));
   }
   if (!elements.length) {
@@ -5498,7 +5705,7 @@ function renderTrialStripRow(strip, index, options = {}) {
   return row;
 }
 
-function renderTrialStripElement(element, index) {
+function renderTrialStripElement(element, index, rowIndex) {
   const sourceType = element.kind === "fixed_audio" || element.kind === "jitter"
     ? element.kind
     : "looming_stimulus";
@@ -5509,10 +5716,12 @@ function renderTrialStripElement(element, index) {
   if (sourceType === "fixed_audio") {
     card.innerHTML = renderFixedBlock(element);
   } else if (sourceType === "jitter") {
-    card.innerHTML = renderJitterBlock(element);
+    card.innerHTML = renderJitterBlock(element, `trial-${rowIndex}-event-${index}-jitter`);
   } else {
     card.innerHTML = renderAudioPoolBlock(element);
   }
+  const mode = card.querySelector('[data-element-field="is_jitter"]');
+  if (mode) mode.id = `trial-${rowIndex}-event-${index}-mode`;
   return card;
 }
 
@@ -5538,14 +5747,6 @@ function renderFixedBlock(element) {
   return renderAudioPoolBlock(element);
 }
 
-function audioBoxLabels(element = {}) {
-  const labels = (element.source_labels || []).filter(Boolean);
-  if (!labels.length && element.source_label) labels.push(element.source_label);
-  const fallback = String(element.label || "").trim();
-  if (!labels.length && fallback && !genericAudioBoxLabel(fallback)) labels.push(fallback);
-  return Array.from(new Set(labels));
-}
-
 function trialStripExpression(strip = {}) {
   const expressions = (strip.elements || []).map((element) => {
     if (element.kind === "jitter") {
@@ -5557,10 +5758,6 @@ function trialStripExpression(strip = {}) {
     return labels.length === 1 ? labels[0] : `(${labels.join(" | ")})`;
   });
   return expressions.length ? expressions.join(" → ") : "Add an audio or jitter box to define this trial family.";
-}
-
-function genericAudioBoxLabel(label = "") {
-  return new Set(["Audio box", "Looming Stimulus", "Fixed audio clip", "Audio pool"]).has(String(label || "").trim());
 }
 
 function renderAudioPoolBlock(element) {
@@ -5596,7 +5793,7 @@ function renderAudioPoolBlock(element) {
   `;
 }
 
-function renderJitterBlock(element) {
+function renderJitterBlock(element, controlId) {
   const title = "Jitter / ITI event";
   const values = formatList(element.jitter_values_ms || []);
   return `
@@ -5609,8 +5806,8 @@ function renderJitterBlock(element) {
       Jitter / ITI box
     </label>
     <div class="field-row">
-      <label>Jitter values ms</label>
-      <textarea data-element-field="jitter_values_ms" rows="5" autocomplete="off" placeholder="500&#10;700&#10;1100&#10;2700">${escapeHtml((element.jitter_values_ms || []).join("\n"))}</textarea>
+      <label for="${controlId}">Jitter values ms</label>
+      <textarea id="${controlId}" data-element-field="jitter_values_ms" rows="5" autocomplete="off" placeholder="500&#10;700&#10;1100&#10;2700">${escapeHtml((element.jitter_values_ms || []).join("\n"))}</textarea>
     </div>
     <input data-element-field="label" type="hidden" value="${escapeAttr(element.label || title)}">
     <input data-element-field="randomized" type="hidden" value="true">
@@ -5759,6 +5956,7 @@ function stimulusSourceDetailsFromDom() {
 function collectTrialStrips() {
   const strips = [];
   for (const [stripIndex, row] of [...$("filmstrip-list").querySelectorAll(".filmstrip-row")].entries()) {
+    const original = state.design.protocol?.trial_strips?.[Number(row.dataset.stripIndex)] || {};
     const label = row.querySelector('[data-strip-field="label"]')?.value.trim() || `Trial type ${stripIndex + 1}`;
     const elements = [];
     for (const [elementIndex, card] of [...row.querySelectorAll(".filmstrip-element")].entries()) {
@@ -5792,7 +5990,8 @@ function collectTrialStrips() {
       elements.push(item);
     }
     strips.push({
-      strip_id: `strip-${stripIndex + 1}`,
+      ...clone(original),
+      strip_id: original.strip_id || `strip-${stripIndex + 1}`,
       label,
       audio_tactile_percentage: Number(row.querySelector('[data-strip-field="audio_tactile_percentage"]')?.value || 0),
       catch_percentage: Number(row.querySelector('[data-strip-field="catch_percentage"]')?.value || 0),
@@ -5810,11 +6009,10 @@ function updateFilmstripCounts() {
     const mixValid = Math.abs(rowCounts.mix.total - 100) <= 0.5 && rowCounts.mix.audioTactile > 0;
     row.classList.toggle("mix-warning", !mixValid);
     const strip = strips[index] || {};
-    const variants = stripPreviewVariants(strip).length;
     const expression = row.querySelector(".filmstrip-row-expression");
     const count = row.querySelector(".filmstrip-row-variant-count");
     if (expression) expression.textContent = trialStripExpression(strip);
-    if (count) count.textContent = `${variants} ${variants === 1 ? "variant" : "variants"}`;
+    if (count) count.textContent = variantCountLabel(strip);
   }
   renderProtocolSummary();
   renderLiveTrialPreviewTables();
@@ -5861,6 +6059,9 @@ async function previewSourceLabel(button) {
     stopActiveSourcePreview();
     return;
   }
+  stopActiveSourcePreview();
+  const requestId = sourcePreviewRequestId;
+  const requestedState = state;
   state.design.protocol = state.design.protocol || {};
   state.design.protocol.trial_strips = collectTrialStrips();
   const staticAsset = staticModeActive ? staticPreviewAssetForLabel(label) : null;
@@ -5873,31 +6074,37 @@ async function previewSourceLabel(button) {
   let started = false;
   try {
     if (staticAsset?.url) {
+      let previewUrl = staticAsset.url;
+      let ownedUrl = "";
+      if (previewUrl.startsWith("browser-asset:")) {
+        const asset = await window.PPSDesigner?.drafts?.asset(previewUrl.slice("browser-asset:".length));
+        if (requestId !== sourcePreviewRequestId || state !== requestedState) return;
+        if (!asset) throw new Error("The browser audio asset is missing. Import the clip again.");
+        ownedUrl = URL.createObjectURL(new Blob([asset.bytes], { type: asset.type || "audio/wav" }));
+        previewUrl = ownedUrl;
+      }
       button.disabled = false;
-      await playSourcePreviewAudio(
-        staticAsset.url,
-        button,
-        audioContext,
-        contextReady,
-        Number(staticAsset.duration_s || 0)
-      );
-      started = true;
-      showToast(`Soundcheck: ${staticAsset.label || label}`);
+      try {
+        started = await playSourcePreviewAudio(previewUrl, button, audioContext, contextReady,
+          Number(staticAsset.duration_s || 0), requestId);
+      } finally { if (ownedUrl) URL.revokeObjectURL(ownedUrl); }
+      if (started) showToast(`Soundcheck: ${staticAsset.label || label}`);
       return;
     }
     const preview = await designerApi.previewAudioSource(payload);
+    if (requestId !== sourcePreviewRequestId || state !== requestedState || !button.isConnected) return;
     button.disabled = false;
-    await playSourcePreviewAudio(
+    started = await playSourcePreviewAudio(
       apiUrl(`${preview.url}?v=${Date.now()}`),
       button,
       audioContext,
       contextReady,
-      Number(preview.duration_s) || 0
+      Number(preview.duration_s) || 0, requestId
     );
-    started = true;
-    showToast(`Soundcheck: ${preview.label || label}`);
+    if (started) showToast(`Soundcheck: ${preview.label || label}`);
   } catch (error) {
     button.classList.remove("playing");
+    if (requestId !== sourcePreviewRequestId || state !== requestedState) return;
     throw error;
   } finally {
     if (!started) button.classList.remove("playing");
@@ -5913,7 +6120,7 @@ function staticPreviewAssetForLabel(label) {
     if (normalizeSourceKey(asset.label) === target) {
       return {
         label: asset.label,
-        url: asset.url || staticResourceUrl(asset.path),
+        url: staticResourceUrl(asset.path),
         duration_s: asset.duration_s
       };
     }
@@ -5922,7 +6129,7 @@ function staticPreviewAssetForLabel(label) {
     if (normalizeSourceKey(noise.label) === target && noise.prebaked_path) {
       return {
         label: noise.label,
-        url: staticResourceUrl(noise.prebaked_path),
+        url: noise.prebaked_path.startsWith("browser-asset:") ? noise.prebaked_path : staticResourceUrl(noise.prebaked_path),
         duration_s: noise.duration_s || 0
       };
     }
@@ -5931,7 +6138,7 @@ function staticPreviewAssetForLabel(label) {
     if (normalizeSourceKey(source.label) === target && source.path) {
       return {
         label: source.label,
-        url: staticResourceUrl(source.path),
+        url: source.path.startsWith("browser-asset:") ? source.path : staticResourceUrl(source.path),
         duration_s: source.target_duration_s || source.duration_s || 0
       };
     }
@@ -5949,6 +6156,9 @@ function getSourcePreviewAudioContext() {
 }
 
 function stopActiveSourcePreview() {
+  sourcePreviewRequestId += 1;
+  sourcePreviewAbort?.abort();
+  sourcePreviewAbort = null;
   const previousButton = activeSourcePreviewButton;
   if (activeSourcePreviewNode) {
     try {
@@ -5967,6 +6177,10 @@ function stopActiveSourcePreview() {
 }
 
 function finishSourcePreview(button = activeSourcePreviewButton) {
+  if (button && activeSourcePreviewButton !== button) {
+    button.classList.remove("playing");
+    return;
+  }
   if (activeSourcePreviewClearTimer) {
     clearTimeout(activeSourcePreviewClearTimer);
     activeSourcePreviewClearTimer = null;
@@ -5984,31 +6198,25 @@ function armSourcePreviewCleanup(button, durationS) {
   activeSourcePreviewButton = button;
   activeSourcePreviewClearTimer = window.setTimeout(() => {
     if (activeSourcePreviewButton !== button) return;
-    if (activeSourcePreviewNode) {
-      try {
-        activeSourcePreviewNode.stop();
-      } catch (_error) {
-        // Already stopped.
-      }
-      activeSourcePreviewNode.disconnect();
-      activeSourcePreviewNode = null;
-    }
-    if (activeSourcePreviewAudio) {
-      activeSourcePreviewAudio.pause();
-      activeSourcePreviewAudio = null;
-    }
-    finishSourcePreview(button);
+    stopActiveSourcePreview();
   }, durationMs);
 }
 
-async function playSourcePreviewAudio(url, button, audioContext, contextReady, durationS = 0) {
-  stopActiveSourcePreview();
+async function playSourcePreviewAudio(url, button, audioContext, contextReady, durationS = 0, requestId = sourcePreviewRequestId) {
+  const current = () => requestId === sourcePreviewRequestId && button.isConnected;
+  if (!current()) return false;
+  const abort = new AbortController();
+  sourcePreviewAbort = abort;
   armSourcePreviewCleanup(button, durationS);
   if (audioContext) {
     if (contextReady) await Promise.race([contextReady, delay(250)]);
-    const response = await fetch(url);
+    if (!current()) return false;
+    let response;
+    try { response = await fetch(url, { signal: abort.signal }); }
+    catch (error) { if (!current()) return false; throw error; }
     if (!response.ok) throw new Error(`Preview audio unavailable: ${response.status}`);
     const buffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+    if (!current()) return false;
     const node = audioContext.createBufferSource();
     node.buffer = buffer;
     node.connect(audioContext.destination);
@@ -6021,7 +6229,7 @@ async function playSourcePreviewAudio(url, button, audioContext, contextReady, d
       finishSourcePreview(button);
     }, { once: true });
     node.start();
-    return;
+    return true;
   }
   const audio = new Audio(url);
   activeSourcePreviewAudio = audio;
@@ -6037,10 +6245,8 @@ async function playSourcePreviewAudio(url, button, audioContext, contextReady, d
     }
     finishSourcePreview(button);
   }, { once: true });
-  audio.play().catch((error) => {
-    finishSourcePreview(button);
-    showToast(error.message || String(error));
-  });
+  await audio.play();
+  return current();
 }
 
 function setTrialStrips(strips) {
@@ -6259,7 +6465,7 @@ function renderRun() {
   const saveProfileButton = $("save-study-profile");
   if (saveProfileButton) {
     saveProfileButton.hidden = finalized;
-    saveProfileButton.disabled = !profileValid;
+    saveProfileButton.disabled = !profileValid || workflowSaveInFlight;
     saveProfileButton.title = profileValid
       ? (staticModeActive ? "Lock this browser-local profile for portable export." : "Register and lock this validated profile in the researcher workspace.")
       : "Complete profile validation before finalizing.";
@@ -6294,6 +6500,95 @@ function renderRun() {
   renderRunInstructions(setup.instruction_profile || state.design?.study_profile_reference_parameters?.dashboard_run_setup?.instruction_profile || {});
   renderRunSequenceTable(setup.rows || []);
   renderProtocolSummary();
+}
+
+function renderNativeExecution() {
+  if (!nativeDesigner.enabled || !state) return;
+  $("native-execution").hidden = false;
+  const review = state.native_execution_review;
+  const hasReview = Boolean(review?.hashes && (review.available || review.accepted));
+  const rows = hasReview ? state.run_sequence_setup?.csv_rows || [] : [];
+  const pageCount = Math.max(1, Math.ceil(rows.length / 12));
+  nativeReviewPage = Math.min(nativeReviewPage, pageCount - 1);
+  $("native-review-detail").hidden = !hasReview;
+  $("native-order-page").textContent = `Page ${nativeReviewPage + 1} of ${pageCount} · ${rows.length} block occurrences`;
+  $("native-order-previous").disabled = nativeReviewPage === 0;
+  $("native-order-next").disabled = nativeReviewPage + 1 >= pageCount;
+  fillTable("native-occurrence-table", rows.slice(nativeReviewPage * 12, (nativeReviewPage + 1) * 12), ["participant_id", "phase_label", "participant_block_position", "source_block_index", "trial_count"]);
+  const slots = state.run_sequence_setup?.instruction_profile?.slots || [];
+  $("native-instruction-summary").textContent = `Instruction policy: ${slots.filter(s => s.enabled).map(s => `${s.label || s.slot}: ${s.continue_mode || "click"}`).join("; ") || "No standalone instruction slots enabled"}.`;
+  const timing = $("native-timing-summary");
+  timing.textContent = hasReview ? nativeItiReviewDisclosure(state.block_csv_preview) : "";
+  timing.hidden = !timing.textContent;
+  $("native-build-review").disabled = nativeGenerationInFlight;
+  $("native-cancel-work").disabled = !nativeGenerationInFlight;
+  $("native-download-review").disabled = !hasReview;
+  $("native-accept-review").disabled = nativeGenerationInFlight || !review?.available || !$("native-review-confirm").checked;
+  $("native-accept-review").textContent = review?.accepted ? "Native review accepted" : "Accept this native review";
+  $("native-review-confirm").disabled = Boolean(review?.accepted);
+  $("native-prepare-participant").disabled = nativeGenerationInFlight || !review?.accepted;
+  $("native-open-output").hidden = !nativePreparedResult;
+  $("native-execution-status").textContent = nativeExecutionMessage;
+  const needsBaseline = state.design.protocol?.baseline_strategy === "stationary_burst";
+  $("native-baseline-controls").hidden = !needsBaseline;
+  const select = $("native-baseline-source");
+  const selected = select.value;
+  select.innerHTML = (state.design.noises || []).map(source => `<option value="${escapeAttr(source.label)}">${escapeHtml(source.label)}${source.native_stationary_baseline_asset ? " (control available)" : " (control required)"}</option>`).join("");
+  if ([...select.options].some(option => option.value === selected)) select.value = selected;
+  const editable = isCustomMode() && !isProfileFinalized() && editModeActive;
+  $("native-generate-baseline").disabled = nativeGenerationInFlight || !editable || !select.value;
+  $("native-baseline-help").textContent = editable ? "Creates a separate control and invalidates later review. The moving ingredient is preserved." : "Use Edit to create an editable custom copy before generating a control.";
+}
+
+async function performNativeExecution(action) {
+  if (nativeGenerationInFlight) return;
+  nativeGenerationInFlight = true;
+  nativePreparedResult = null;
+  if (["review", "baseline"].includes(action)) $("native-review-confirm").checked = false;
+  renderNativeExecution(); renderBakePanel();
+  try {
+    let result;
+    if (action === "baseline") {
+      if (!ensureEditableProject()) return;
+      result = await nativeDesigner.baseline({ ...clone(state), design: collectPayload().design }, $("native-baseline-source").value,
+        { source_algorithm: "rand-0.8.8-std-rng-box-muller.v1", accept_non_legacy_source_algorithm: $("native-baseline-opt-in").checked });
+      nativeExecutionMessage = "Stationary control created. Build a new native review before accepting.";
+    } else if (action === "review") {
+      const snapshot = clone(state);
+      snapshot.design = collectPayload().design;
+      const limit = nativeAssemblyLimit(snapshot.design);
+      const previewStatus = { finished_profile: true, profile_checks_passed: true };
+      // Reuse the existing source-block planner only on this explicit new-review action.
+      snapshot.trial_file_bake = staticTrialFileBakePayload(snapshot.design, previewStatus, limit);
+      snapshot.trial_pool_bake = staticTrialPoolBakePayload(snapshot.design, snapshot.trial_file_bake, limit);
+      snapshot.block_csv_preview = staticBlockCsvPreviewPayload(snapshot.design, snapshot.trial_pool_bake, previewStatus);
+      const variants = assemblyVariants(snapshot.design, limit);
+      result = await nativeDesigner.review(snapshot, variants);
+      nativeReviewPage = 0;
+      nativeExecutionMessage = "Full native review ready. Review Segment 5 rows, every participant/part occurrence, and instruction policy before acceptance.";
+    } else if (action === "accept") {
+      const response = await nativeDesigner.accept(state.native_execution_review.hashes);
+      result = { snapshot: response.snapshot };
+      nativeExecutionMessage = "This revision is accepted. Choose a participant and destination to prepare immutable files.";
+    } else {
+      result = await nativeDesigner.prepare(Number($("native-participant").value), $("native-session-identity").value.trim());
+      if (!result) return;
+      nativePreparedResult = result.result;
+      nativeExecutionMessage = `Participant ${result.result.participant_index}: ${result.result.part_count} part(s) verified. Open the folder and select ${result.result.handoff_file} in Runner. Files have not been executed.`;
+    }
+    if (result?.snapshot) state = result.snapshot;
+    markDesignerSaved(); renderAll(); updateViewer();
+  } catch (error) {
+    const detail = error.message || String(error);
+    nativeExecutionMessage = detail.includes("assembly_stationary_comparator_required")
+      ? "Stationary controls are missing. Use an editable custom copy to create a control for each moving source, then rebuild the review."
+      : detail.includes("assembly_tactile_outside_trial")
+        ? "A tactile cue extends beyond its trial. Check the SOA and audio duration before rebuilding the review."
+        : /native_(review|acceptance)_required|revision_conflict|review_hash_mismatch/.test(detail)
+          ? "The native review is no longer current. Build and accept a new review."
+          : detail;
+    throw new Error(nativeExecutionMessage);
+  } finally { nativeGenerationInFlight = false; renderNativeExecution(); renderBakePanel(); }
 }
 
 function renderProfileValidationChecklist(profileValid = false, finalized = false) {
@@ -6342,6 +6637,7 @@ function normalizedRunInstructionSlots(profile = {}) {
       enabled: Boolean(item.enabled),
       required: false,
       path: item.path || "",
+      browser_asset_id: item.browser_asset_id || "",
       duration_s: Number(item.duration_s || 0),
       sample_rate: Number(item.sample_rate || 0),
       channels: Number(item.channels || 0),
@@ -6357,6 +6653,7 @@ function normalizedRunInstructionSlots(profile = {}) {
 function renderRunInstructions(profile = {}) {
   const container = $("run-instruction-slots");
   if (!container) return;
+  const restoreFocus = restoreFocusAfterRender(container);
   const prepared = isProfileFinalized();
   const slots = normalizedRunInstructionSlots(profile);
   const enabledCount = slots.filter((slot) => slot.enabled && slot.path).length;
@@ -6365,24 +6662,33 @@ function renderRunInstructions(profile = {}) {
     summary.textContent = enabledCount ? `${enabledCount} of ${slots.length} optional clips enabled` : "optional";
     summary.className = `status-label ${enabledCount ? "ready" : "optional"}`;
   }
+  // An identical debounced preview must not detach a select whose menu is open.
+  if (container.children.length && container.dataset.instructionFinalized === String(prepared)
+    && JSON.stringify(slots) === JSON.stringify(normalizedRunInstructionSlots(collectRunInstructionProfile()))) return;
+  if (activeBoundedSelect && container.contains(activeBoundedSelect)) closeBoundedSelect();
+  container.dataset.instructionFinalized = String(prepared);
   container.innerHTML = slots.map((slot) => {
-    const duration = slot.duration_s ? `${slot.duration_s.toFixed(slot.duration_s >= 10 ? 1 : 2)}s` : "no clip";
+    const slotName = RUN_INSTRUCTION_SLOTS.find((item) => item.slot === slot.slot)?.label || slot.slot;
+    const controlId = `instruction-${slot.slot}`;
+    const duration = slot.duration_s ? `${slot.duration_s.toFixed(slot.duration_s >= 10 ? 1 : 2)}s` : slot.path ? "duration unverified" : "no clip";
     const modeOptions = RUN_INSTRUCTION_CONTINUE_MODES.map((mode) => (
       `<option value="${mode.value}" ${mode.value === slot.continue_mode ? "selected" : ""}>${mode.label}</option>`
     )).join("");
     return `
       <article class="run-instruction-slot" data-run-instruction-slot="${escapeHtml(slot.slot)}">
         <label class="inline-toggle">
-          <input type="checkbox" data-instruction-field="enabled" ${slot.enabled ? "checked" : ""} ${prepared ? "disabled" : ""}>
-          <span>${escapeHtml(RUN_INSTRUCTION_SLOTS.find((item) => item.slot === slot.slot)?.label || slot.slot)}</span>
+          <input id="${controlId}-enabled" type="checkbox" data-instruction-field="enabled" ${slot.enabled ? "checked" : ""} ${prepared ? "disabled" : ""}>
+          <span>${escapeHtml(slotName)}</span>
         </label>
-        <input class="instruction-label-input" data-instruction-field="label" type="text" value="${escapeHtml(slot.label)}" ${prepared ? "disabled" : ""}>
-        <button type="button" class="instruction-import-button" data-instruction-import="${escapeHtml(slot.slot)}" ${prepared ? "disabled" : ""}>Load Audio</button>
+        <label class="visually-hidden" for="${controlId}-label">${escapeHtml(slotName)} audio label</label>
+        <input id="${controlId}-label" class="instruction-label-input" data-instruction-field="label" type="text" value="${escapeHtml(slot.label)}" ${prepared ? "disabled" : ""}>
+        <button id="${controlId}-import" type="button" class="instruction-import-button" aria-label="Load audio for ${escapeHtml(slotName)}" data-instruction-import="${escapeHtml(slot.slot)}" ${prepared ? "disabled" : ""}>Load Audio</button>
         <span class="status-label ${slot.path ? "ready" : "optional"}">${escapeHtml(duration)}</span>
-        <select data-instruction-field="continue_mode" ${prepared ? "disabled" : ""}>${modeOptions}</select>
-        <input data-instruction-field="delay_s" type="number" min="0" step="0.1" value="${slot.delay_s}" ${prepared ? "disabled" : ""} title="Delay seconds">
-        <input data-instruction-field="button_label" type="text" value="${escapeHtml(slot.button_label)}" ${prepared ? "disabled" : ""} title="Runner button label">
+        <select id="${controlId}-continue" aria-label="${escapeHtml(slotName)} continue mode" data-instruction-field="continue_mode" ${prepared ? "disabled" : ""}>${modeOptions}</select>
+        <input id="${controlId}-delay" aria-label="${escapeHtml(slotName)} delay seconds" data-instruction-field="delay_s" type="number" min="0" step="0.1" value="${slot.delay_s}" ${prepared ? "disabled" : ""} title="Delay seconds">
+        <input id="${controlId}-button" aria-label="${escapeHtml(slotName)} Runner button label" data-instruction-field="button_label" type="text" value="${escapeHtml(slot.button_label)}" ${prepared ? "disabled" : ""} title="Runner button label">
         <input data-instruction-field="path" type="hidden" value="${escapeHtml(slot.path)}">
+        <input data-instruction-field="browser_asset_id" type="hidden" value="${escapeHtml(slot.browser_asset_id)}">
         <input data-instruction-field="duration_s" type="hidden" value="${slot.duration_s}">
         <input data-instruction-field="sample_rate" type="hidden" value="${slot.sample_rate}">
         <input data-instruction-field="channels" type="hidden" value="${slot.channels}">
@@ -6391,6 +6697,8 @@ function renderRunInstructions(profile = {}) {
       </article>
     `;
   }).join("");
+  upgradeBoundedSelects(container);
+  restoreFocus();
 }
 
 function collectRunInstructionProfile() {
@@ -6404,6 +6712,7 @@ function collectRunInstructionProfile() {
       enabled: field("enabled")?.checked === true,
       required: false,
       path: field("path")?.value.trim() || "",
+      browser_asset_id: field("browser_asset_id")?.value.trim() || "",
       duration_s: Number(field("duration_s")?.value || 0),
       sample_rate: Number(field("sample_rate")?.value || 0),
       channels: Number(field("channels")?.value || 0),
@@ -6645,27 +6954,23 @@ function renderTrialPreviewTable(trialRows, totalRows = trialRows.length) {
   fillTable("trial-table", trialRows, ["index", "family", "row", "folder", "file", "repetition", "duration", "soa_ms", "sequence"]);
 }
 
-function cartesianProduct(factors) {
-  return factors.reduce((acc, factor) => acc.flatMap((prefix) => factor.map((choice) => [...prefix, choice])), [[]]);
+function assemblyVariants(design, limit = Number.MAX_SAFE_INTEGER) {
+  const strips = design?.protocol?.trial_strips || [];
+  assertSequenceLimit(strips, limit);
+  return strips.flatMap((strip, index) => Array.from(iterateStripVariants(strip), choices => ({
+    row_label: strip.label || `Trial type ${index + 1}`, sequence_variant_key: previewVariantKey(choices), choices,
+  })));
 }
 
-function stripPreviewVariants(strip) {
-  const factors = [];
-  for (const element of strip.elements || []) {
-    if (element.kind === "jitter") {
-      const values = (element.jitter_values_ms || []).filter((value) => Number.isFinite(Number(value)));
-      factors.push(values.map((value) => ({
-        kind: "jitter",
-        label: `${element.label || "Jitter"} (${value} ms)`,
-        value,
-      })));
-    } else {
-      const labels = audioBoxLabels(element);
-      factors.push(labels.map((label) => ({ kind: "audio", label })));
-    }
+function nativeAssemblyLimit(design) {
+  const limits = nativeDesigner.capabilities?.assembly;
+  if (!Number.isSafeInteger(limits?.max_rows) || limits.max_rows < 1 || !Number.isSafeInteger(limits?.max_blocks)) {
+    throw new Error("Native assembly limits are unavailable. Reload Designer before building a review.");
   }
-  if (!factors.length || factors.some((factor) => !factor.length)) return [];
-  return cartesianProduct(factors);
+  assertSequenceLimit(design.protocol?.trial_strips || [], limits.max_rows);
+  assertCountLimit(staticTrialFileCount(design), limits.max_rows);
+  assertCountLimit(Math.max(1, Math.round(Number(design.protocol?.blocks || 1))), limits.max_blocks);
+  return limits.max_rows;
 }
 
 function previewVariantLabel(variant, family = "Audio-Tactile") {
@@ -6795,15 +7100,20 @@ function collectPayload({ includeIngredientDraft = false } = {}) {
     design.protocol.participant_order_policy.preview_count = design.protocol.participants;
     design.protocol.participant_order_policy.seed = design.protocol.random_seed;
   }
+  const runSetup = {
+    experiment_structure: currentExperimentStructure(),
+    seed: design.protocol.random_seed,
+    instruction_profile: collectRunInstructionProfile(),
+  };
+  design.study_profile_reference_parameters = {
+    ...(design.study_profile_reference_parameters || {}),
+    dashboard_run_setup: { ...(design.study_profile_reference_parameters?.dashboard_run_setup || {}), ...runSetup },
+  };
   return {
     participant_id: state.participant_id || (state.custom_workflow?.is_custom ? "" : "P001"),
     design,
     trajectory_controls: trajectoryControls,
-    run_setup: {
-      experiment_structure: currentExperimentStructure(),
-      seed: design.protocol.random_seed,
-      instruction_profile: collectRunInstructionProfile(),
-    }
+    run_setup: runSetup
   };
 }
 
@@ -6821,6 +7131,7 @@ function collectNoises() {
   return [...$("noise-list").querySelectorAll(".noise-source-card")].map((card) => {
     const field = (name) => card.querySelector(`[data-field="${name}"]`);
     return {
+      ...clone((state.design.noises || []).find(source => source.label === card.dataset.selectIngredient || source.label === field("label").value.trim()) || {}),
       label: field("label").value.trim() || "Noise",
       noise_type: field("noise_type").value,
       azimuth_deg: Number(field("azimuth_deg").value || 0),
@@ -6846,6 +7157,7 @@ function collectAudioFiles() {
     const field = (name) => card.querySelector(`[data-field="${name}"]`);
     const role = field("audio_role").value;
     const item = {
+      ...clone([...(state.design.custom_looming_files || []), ...(state.design.prestimulus_files || [])].find(source => source.label === card.dataset.selectIngredient || source.label === field("label").value.trim()) || {}),
       label: field("label").value.trim() || "Audio file",
       path: field("path").value.trim(),
       target_duration_s: Number(field("target_duration_s").value || 4),
@@ -6921,6 +7233,17 @@ async function continueWorkflowStep(stepId) {
   try {
     if (staticModeActive) {
       state.design = payload.design;
+      if (stepId === "block") {
+        // Rebuild the complete edited plan only on the explicit transition into review.
+        const limit = nativeDesigner.enabled ? nativeAssemblyLimit(state.design) : Number.MAX_SAFE_INTEGER;
+        const previewStatus = state.preload_inventory || {};
+        const trialFiles = staticTrialFileBakePayload(state.design, previewStatus, limit);
+        const pool = staticTrialPoolBakePayload(state.design, trialFiles, limit);
+        const blocks = staticBlockCsvPreviewPayload(state.design, pool, previewStatus);
+        blocks.accepted = false;
+        Object.assign(state, { trial_file_bake: trialFiles, trial_pool_bake: pool, block_csv_preview: blocks,
+          project_segments: staticProjectSegments(previewStatus, trialFiles, pool, blocks) });
+      }
       refreshHostedWorkflowSteps();
       const step = getWorkflowStep(stepId) || profileStepStatus(stepId);
       if (step?.complete) {
@@ -6971,7 +7294,7 @@ async function reopenWorkflowStep(stepId) {
   const consequence = later.length
     ? ` Later saved segments (${later.map(stepLabel).join(", ")}) will need review.`
     : "";
-  if (!window.confirm(`Reopen ${stepLabel(stepId)} for editing?${consequence}`)) return;
+  if (window.confirm(`Reopen ${stepLabel(stepId)} for editing?${consequence}`) !== true) return;
   workflowSaveInFlight = true;
   try {
     if (staticModeActive) {
@@ -7011,34 +7334,38 @@ async function reopenWorkflowStep(stepId) {
 }
 
 async function loadTemplate() {
-  if (templateLoadInFlight) return;
+  if (templateLoadInFlight || workflowSaveInFlight) return false;
   const select = $("template-select");
   if (!confirmDiscardUnsaved("load another profile")) {
     renderStudy();
-    return;
+    return false;
   }
   if (designerDirty) markDesignerSaved();
   const choice = selectedProfileChoice(select.value);
   const id = choice.id;
-  if (!id) return;
+  if (!id) return false;
   if (choice.kind === "custom") {
     await loadCustomProject(id);
-    return;
+    return true;
   }
   if (staticModeActive) {
     if (choice.kind === "manual") {
       renderStudy();
-      showToast("Start the local companion backend before creating custom studies.");
-      return;
+      showToast("Choose Create study to begin a custom profile.");
+      return false;
     }
-    state = await staticStateForTemplate(id);
+    const previousState = state;
+    const loadedState = await staticStateForTemplate(id);
+    if (workflowSaveInFlight || state !== previousState) return false;
+    state = loadedState;
+    if (nativeDesigner.enabled) nativeDesigner.invalidate();
     staticModeActive = true;
     resetEditMode();
     setConnectionStatus(false, "static profile");
     renderAll();
     updateViewer();
     showToast("Static profile loaded from committed GitHub assets");
-    return;
+    return true;
   }
   templateLoadInFlight = true;
   select.disabled = true;
@@ -7049,6 +7376,7 @@ async function loadTemplate() {
     renderAll();
     updateViewer();
     showToast(choice.kind === "manual" ? "Custom design started" : "Profile loaded");
+    return true;
   } finally {
     templateLoadInFlight = false;
     $("template-select").disabled = false;
@@ -7056,13 +7384,17 @@ async function loadTemplate() {
 }
 
 async function loadCustomProject(projectIdOverride = "") {
+  if (workflowSaveInFlight) return;
   const select = $("existing-custom-project");
   const projectId = projectIdOverride || select?.value || "";
   if (!projectId) {
     showToast("Choose a custom study to open");
     return;
   }
-  state = await designerApi.loadProject(projectId);
+  const previousState = state;
+  const loadedState = await designerApi.loadProject(projectId);
+  if (workflowSaveInFlight || state !== previousState) return;
+  state = loadedState;
   resetEditMode();
   renderAll();
   updateViewer();
@@ -7086,7 +7418,7 @@ function syncModalEnvironment() {
   const open = Boolean(activeModalBackdrop());
   const shell = document.querySelector(".app-shell");
   const skipLink = document.querySelector(".skip-link");
-  if (shell) shell.inert = open;
+  if (shell) shell.inert = open || hostedFinalizationInFlight;
   if (skipLink) skipLink.inert = open;
   document.body.classList.toggle("modal-open", open);
 }
@@ -7195,6 +7527,7 @@ function openSegmentInfoModal(stepId, trigger = null) {
   $("segment-info-noise-guide").hidden = !showNoiseGuide;
   document.querySelector(".segment-info-card")?.classList.toggle("noise-guide-active", showNoiseGuide);
   $("segment-info-modal").hidden = false;
+  document.querySelector(".segment-info-body").scrollTop = 0;
   syncModalEnvironment();
   window.setTimeout(() => $("segment-info-modal-close")?.focus(), 0);
 }
@@ -7543,6 +7876,7 @@ async function customizeAsNewProject(name) {
 }
 
 async function startBakeStimulus() {
+  if (nativeGenerationInFlight) return;
   if (!ensureEditableProject()) return;
   const recipe = collectBakeRecipe();
   if (!recipe) {
@@ -7550,6 +7884,26 @@ async function startBakeStimulus() {
     return;
   }
   if (!confirmDownstreamInvalidation(recipe.action === "remake" ? "Remaking a Segment 1 ingredient" : "Creating a Segment 1 ingredient", "stimulus")) return;
+  if (nativeDesigner.enabled && recipe.kind !== "fixed_audio") {
+    const optIn = { source_algorithm: recipe.kind === "imported_audio" ? "wav-pcm-dry.v1" : "rand-0.8.8-std-rng-box-muller.v1",
+      accept_non_legacy_source_algorithm: $("native-source-opt-in").checked, seed: recipe.kind === "imported_audio" ? 0 : numberValue("native-source-seed", 0) };
+    const payload = collectPayload({ includeIngredientDraft: true });
+    payload.bake_recipe = recipe;
+    const snapshot = { ...clone(state), design: payload.design, trajectory_controls: payload.trajectory_controls };
+    $("native-cancel-generation").disabled = false;
+    nativeGenerationInFlight = true;
+    renderNativeExecution();
+    $("bake-stimulus").disabled = true;
+    try {
+      const generated = await nativeDesigner.generate(snapshot, payload, optIn);
+      state = generated.snapshot;
+      selectedIngredientLabel = generated.result.source_label;
+      ingredientEditorDirty = false; ingredientEditorMode = "inspect"; pendingBakeRecipe = null;
+      markDesignerSaved(); renderAll(); updateViewer();
+      showToast("Native ingredient created. Review later segments before preparing a run.");
+    } finally { nativeGenerationInFlight = false; $("native-cancel-generation").disabled = true; renderBakePanel(); renderNativeExecution(); }
+    return;
+  }
   if (staticModeActive) {
     if (recipe.kind !== "fixed_audio" || recipe.action === "remake") {
       showToast(STATIC_COMPANION_REQUIRED_MESSAGE);
@@ -7670,7 +8024,7 @@ async function startBakeBlockCsvs() {
     return;
   }
   if (projectSegment("5_block_csv_preview").accepted || state.block_csv_preview?.accepted) {
-    if (!window.confirm("Reopen the accepted Segment 5 blocks and generate a new set?")) return;
+    if (window.confirm("Reopen the accepted Segment 5 blocks and generate a new set?") !== true) return;
     if (staticModeActive) {
       showToast("Block generation needs the installed PPS Designer. Export this browser draft to continue locally.");
       return;
@@ -7762,7 +8116,7 @@ async function acceptBlockCsvs() {
 }
 
 function csvEscape(value) {
-  const text = String(value ?? "");
+  const text = value !== null && typeof value === "object" ? JSON.stringify(value) : String(value ?? "");
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
@@ -7866,15 +8220,17 @@ async function downloadBlockRandomization() {
 }
 
 function scheduleRunSequencePreview() {
+  runSequencePreviewRequestId += 1;
   window.clearTimeout(runSequencePreviewTimer);
-  renderRun();
   runSequencePreviewTimer = window.setTimeout(() => {
     previewRunSequence().catch(reportError);
   }, 300);
 }
 
 async function previewRunSequence() {
+  if (workflowSaveInFlight) return false;
   if (!ensureEditableProject()) return;
+  const requestId = ++runSequencePreviewRequestId;
   if (staticModeActive) {
     state.design = collectPayload().design;
     refreshHostedWorkflowSteps();
@@ -7883,16 +8239,31 @@ async function previewRunSequence() {
       message: "Browser-local order preview",
     });
     renderAll();
-    return;
+    return true;
   }
-  state = await designerApi.previewRunSequence(collectPayload());
-  renderAll();
+  const requestedState = state;
+  const payload = collectPayload();
+  const payloadKey = JSON.stringify(payload);
+  const current = () => requestId === runSequencePreviewRequestId
+    && state === requestedState && editModeActive && !workflowSaveInFlight && !templateLoadInFlight
+    && JSON.stringify(collectPayload()) === payloadKey;
+  try {
+    const preview = await designerApi.previewRunSequence(payload);
+    if (!current()) return false;
+    state = preview;
+    renderAll();
+    return true;
+  } catch (error) {
+    if (current()) throw error;
+    return false;
+  }
 }
 
 async function regenerateRunSequence() {
   if (!ensureEditableProject()) return;
-  await previewRunSequence();
-  showToast("Order preview refreshed. Save by locking the profile when review is complete.");
+  if (await previewRunSequence()) {
+    showToast("Order preview refreshed. Save by locking the profile when review is complete.");
+  }
 }
 
 async function ensureLocalBackendState() {
@@ -7907,6 +8278,7 @@ async function ensureLocalBackendState() {
 }
 
 async function savePreparedStudyProfile() {
+  if (workflowSaveInFlight || templateLoadInFlight) return;
   if (staticModeActive) {
     state.design = collectPayload().design;
     refreshHostedWorkflowSteps();
@@ -7924,14 +8296,41 @@ async function savePreparedStudyProfile() {
       showToast("Complete every required segment before finalizing this profile.");
       return;
     }
-    state.design.study_profile_reference_parameters.profile_status = "finalized";
-    state.design.study_profile_reference_parameters.finalized_at = new Date().toISOString();
-    state.custom_workflow.is_finalized = true;
-    editModeActive = false;
-    await window.PPSDesigner?.drafts?.save(state);
-    markDesignerSaved();
-    renderAll();
-    showToast("Profile finalized and locked. Use Edit to create another named custom copy.");
+    const draftState = state;
+    const payloadKey = JSON.stringify(collectPayload());
+    const finalizedState = clone(state);
+    finalizedState.design.study_profile_reference_parameters.profile_status = "finalized";
+    finalizedState.design.study_profile_reference_parameters.finalized_at = new Date().toISOString();
+    finalizedState.custom_workflow.is_finalized = true;
+    workflowSaveInFlight = true;
+    hostedFinalizationInFlight = true;
+    runSequencePreviewRequestId += 1;
+    window.clearTimeout(runSequencePreviewTimer);
+    const shell = document.querySelector(".app-shell");
+    const wasInert = shell?.inert || false;
+    if (shell) shell.inert = true;
+    renderRun();
+    showToast("Saving profile…");
+    try {
+      if (!window.PPSDesigner?.drafts?.save) throw new Error("Browser storage is unavailable. The profile remains editable.");
+      await window.PPSDesigner.drafts.save(finalizedState);
+      if (state !== draftState) return;
+      if (JSON.stringify(collectPayload()) !== payloadKey) {
+        markDesignerDirty();
+        throw new Error("The design changed while saving. Review the current draft and lock it again.");
+      }
+      state = finalizedState;
+      editModeActive = false;
+      markDesignerSaved();
+      renderAll();
+      showToast("Profile finalized and locked. Use Edit to create another named custom copy.");
+    } finally {
+      workflowSaveInFlight = false;
+      hostedFinalizationInFlight = false;
+      if (shell) shell.inert = wasInert;
+      renderRun();
+      $(state.custom_workflow?.is_finalized ? "export-profile-bundle" : "save-study-profile")?.focus({ preventScroll: true });
+    }
     return;
   }
   if (!(await ensureLocalBackendState())) return;
@@ -8258,6 +8657,7 @@ function applyTrajectoryControlUpdate(controls) {
     $(id).value = formatTrajectoryValue(key, controls[key]);
   }
   ingredientEditorDirty = true;
+  invalidateNativeAuthoring();
   updateViewer();
 }
 
@@ -8699,26 +9099,122 @@ function audioRoleTitle(role) {
 function openAudioPicker(renderMode) {
   pendingInstructionSlot = "";
   pendingAudioImportMode = ["spatialize", "prestimulus"].includes(renderMode) ? renderMode : "preserve";
+  if (nativeDesigner.enabled) { importNativeAudio().catch(reportError); return; }
   $("audio-file-input").click();
 }
 
 function openInstructionAudioPicker(slot) {
   pendingInstructionSlot = slot;
   pendingAudioImportMode = "instruction";
+  if (nativeDesigner.enabled) { importNativeAudio().catch(reportError); return; }
   $("audio-file-input").click();
 }
 
+function adoptInstructionAudio(instructionSlot, audio, source) {
+  const profile = collectRunInstructionProfile();
+  const slot = profile.slots.find(item => item.slot === instructionSlot);
+  if (!slot) throw new Error("The selected instruction slot is no longer available.");
+  Object.assign(slot, { label: audio.label, path: audio.path, browser_asset_id: audio.browser_asset_id || "",
+    sha256: audio.sha256 || "", duration_s: audio.duration_s || 0, sample_rate: audio.sample_rate || 0,
+    channels: audio.channels || 0, source });
+  const parameters = state.design.study_profile_reference_parameters ||= {};
+  parameters.dashboard_run_setup ||= {};
+  parameters.dashboard_run_setup.instruction_profile = profile;
+  state.run_sequence_setup = { ...(state.run_sequence_setup || {}), instruction_profile: profile };
+  if (pendingInstructionSlot === instructionSlot) pendingInstructionSlot = "";
+  markDesignerDirty();
+  renderRunInstructions(profile);
+  scheduleRunSequencePreview();
+}
+
+async function importNativeAudio() {
+  if (!ensureEditableProject() || workflowSaveInFlight) return;
+  const owner = state;
+  const requestId = ++audioImportRequestId;
+  const instructionSlot = pendingInstructionSlot;
+  const importMode = pendingAudioImportMode;
+  const importRecipe = instructionSlot ? null : pendingBakeRecipe;
+  const current = () => requestId === audioImportRequestId && state === owner && !workflowSaveInFlight && editModeActive
+    && (Boolean(instructionSlot) || pendingBakeRecipe === importRecipe);
+  const audio = await nativeDesigner.pickAudio().catch(error => { if (current()) throw error; return null; });
+  if (!audio || !current()) return;
+  audio.target_duration_s = audio.duration_s;
+  if (instructionSlot) {
+    adoptInstructionAudio(instructionSlot, audio, "native_import");
+  } else stageImportedAudioForBake(audio, importMode === "spatialize" ? "spatialize" : "preserve");
+  state.preload_inventory.assets.push({ ...audio, source_kind: "imported_audio" });
+  showToast(instructionSlot ? "Verified instruction audio selected. Review and save the profile."
+    : "Verified local WAV selected; create the ingredient to commit it.");
+}
+
+async function importNativeProfile() {
+  if (workflowSaveInFlight || !confirmDiscardUnsaved("open a portable profile")) return;
+  workflowSaveInFlight = true;
+  const shell = document.querySelector(".app-shell");
+  shell.inert = true;
+  try {
+    const imported = await nativeDesigner.importProfile();
+    if (!imported) return;
+    state.design = imported.design;
+    state.selected_template = CUSTOM_TEMPLATE_ID;
+    state.project = { project_id: "native_import", project_kind: "native_draft", display_name: imported.display_name };
+    state.preload_inventory = { ...state.preload_inventory, assets: imported.assets };
+    state.custom_workflow = { is_custom: true, is_finalized: false, edit_step: "stimulus", confirmed_steps: ["study"], needs_review_steps: [] };
+    state.trajectory_controls = staticTrajectoryControls(state.design);
+    const previewStatus = { finished_profile: true, profile_checks_passed: true };
+    let planNotice = "";
+    try {
+      const limit = nativeAssemblyLimit(state.design);
+      state.trial_file_bake = staticTrialFileBakePayload(state.design, previewStatus, limit);
+      state.trial_pool_bake = staticTrialPoolBakePayload(state.design, state.trial_file_bake, limit);
+      state.block_csv_preview = staticBlockCsvPreviewPayload(state.design, state.trial_pool_bake, previewStatus);
+    } catch (error) {
+      // Keep the verified editable import; no partial or truncated schedule is accepted.
+      state.trial_file_bake = { files: [], status: "missing" };
+      state.trial_pool_bake = { preview_rows: [], status: "missing" };
+      state.block_csv_preview = {};
+      planNotice = error.message || String(error);
+    }
+    state.block_csv_preview.accepted = false;
+    state.project_segments = staticProjectSegments(previewStatus, state.trial_file_bake, state.trial_pool_bake, state.block_csv_preview);
+    state.session = null; state.run_package = null;
+    editModeActive = false;
+    await nativeDesigner.save(state);
+    markDesignerSaved(); renderAll(); updateViewer();
+    showToast(planNotice || "Portable audio verified locally. Review the imported design and schedule before native acceptance.");
+  } finally { workflowSaveInFlight = false; shell.inert = false; }
+}
+
 async function importAudioFromPicker() {
+  if (workflowSaveInFlight) return;
+  const importState = state;
+  const instructionSlot = pendingInstructionSlot;
+  const importMode = pendingAudioImportMode;
+  const importColor = pendingDisplayColorHex;
+  const importRecipe = instructionSlot ? null : pendingBakeRecipe;
   const input = $("audio-file-input");
   const file = input.files && input.files[0];
   input.value = "";
   if (!file) return;
+  const requestId = ++audioImportRequestId;
+  const current = () => requestId === audioImportRequestId && state === importState && !workflowSaveInFlight && editModeActive
+    && (Boolean(instructionSlot) || pendingBakeRecipe === importRecipe);
+  // V1 import endpoints mutate the server; keep their dispatch order as well as fencing replies.
+  const importHttp = action => {
+    const pending = audioImportHttpQueue.then(() => current() ? action() : null);
+    audioImportHttpQueue = pending.catch(() => {});
+    return pending.catch(error => { if (current()) throw error; return null; });
+  };
   if (staticModeActive) {
-    if (pendingAudioImportMode === "spatialize") {
+    if (importMode === "spatialize") {
       showToast("Hosted mode can use fixed local audio, but cannot spatialize or generate looming audio.");
       return;
     }
-    const stored = await window.PPSDesigner?.drafts?.storeAudio(file);
+    const stored = await window.PPSDesigner?.drafts?.storeAudio(file).catch(error => { if (current()) throw error; return null; });
+    if (!current()) {
+      if (stored?.url) URL.revokeObjectURL(stored.url);
+      return;
+    }
     if (!stored) throw new Error("Browser audio storage is unavailable. Export the profile now or use the desktop app.");
     const audio = {
       label: file.name.replace(/\.[^.]+$/, ""),
@@ -8730,22 +9226,20 @@ async function importAudioFromPicker() {
       render_mode: "preserve",
       motion_mode: "stationary",
       tone_type: "custom_audio",
-      display_color_hex: pendingDisplayColorHex,
+      display_color_hex: importColor,
       source_input_path: `browser-asset:${stored.id}`,
       trajectory_snapshot: {}
     };
-    if (pendingInstructionSlot) {
-      const profile = state.design.study_profile_reference_parameters?.dashboard_run_setup || {};
-      profile.instruction_profile = profile.instruction_profile || { slots: [] };
-      profile.instruction_profile.slots = (profile.instruction_profile.slots || []).filter((item) => item.slot !== pendingInstructionSlot);
-      profile.instruction_profile.slots.push({ slot: pendingInstructionSlot, label: audio.label, path: audio.path, browser_asset_id: stored.id });
-      state.design.study_profile_reference_parameters.dashboard_run_setup = profile;
-      pendingInstructionSlot = "";
+    if (instructionSlot) {
+      URL.revokeObjectURL(stored.url); // Instructions use their stored asset ID, never this preview URL.
+      adoptInstructionAudio(instructionSlot, { ...audio, sha256: stored.sha256 }, "browser_upload");
+      showToast("Instruction audio selected locally. Review and save the profile; exact WAV timing is checked on desktop.");
+      return;
     } else {
       const remake = pendingBakeRecipe?.action === "remake";
       if (remake) {
         pendingBakeRecipe.audio = { ...audio, label: $("bake-label").value.trim() || audio.label };
-        pendingBakeRecipe.display_color_hex = pendingDisplayColorHex;
+        pendingBakeRecipe.display_color_hex = importColor;
         ingredientEditorDirty = true;
       } else {
         stageImportedAudioForBake(audio, "preserve");
@@ -8755,48 +9249,51 @@ async function importAudioFromPicker() {
     showToast("Local audio staged in this browser; create the clip to commit it");
     return;
   }
-  const contentBase64 = await fileToBase64(file);
-  if (pendingInstructionSlot) {
-    const current = collectRunInstructionProfile().slots.find((slot) => slot.slot === pendingInstructionSlot) || {};
-    const importedState = await designerApi.importRunInstructions({
-      slot: pendingInstructionSlot,
+  const contentBase64 = await fileToBase64(file).catch(error => { if (current()) throw error; return null; });
+  if (!current()) return;
+  if (instructionSlot) {
+    const selectedSlot = collectRunInstructionProfile().slots.find((slot) => slot.slot === instructionSlot) || {};
+    const importedState = await importHttp(() => designerApi.importRunInstructions({
+      slot: instructionSlot,
       filename: file.name,
       content_base64: contentBase64,
-      label: current.label || file.name.replace(/\.[^.]+$/, ""),
-    });
+      label: selectedSlot.label || file.name.replace(/\.[^.]+$/, ""),
+    }));
+    if (!current() || !importedState) return;
     state = importedState;
-    pendingInstructionSlot = "";
+    if (pendingInstructionSlot === instructionSlot) pendingInstructionSlot = "";
     markDesignerSaved();
     renderAll();
     showToast("Instruction audio clip imported locally");
     return;
   }
-  const imported = await designerApi.importAudio({
+  const imported = await importHttp(() => designerApi.importAudio({
     filename: file.name,
     content_base64: contentBase64,
-    use: pendingAudioImportMode === "prestimulus" ? "prestimulus" : "looming",
-    render_mode: pendingAudioImportMode === "spatialize" ? "spatialize" : "preserve",
-    motion_mode: pendingAudioImportMode === "preserve" || pendingAudioImportMode === "prestimulus" ? "stationary" : "looming",
+    use: importMode === "prestimulus" ? "prestimulus" : "looming",
+    render_mode: importMode === "spatialize" ? "spatialize" : "preserve",
+    motion_mode: importMode === "preserve" || importMode === "prestimulus" ? "stationary" : "looming",
     placement: "before",
     target_source_label: "",
     phase: "",
     gap_s: 0,
-    display_color_hex: pendingDisplayColorHex,
+    display_color_hex: importColor,
     stage_only: true,
-  });
+  }));
+  if (!current() || !imported) return;
   if (pendingBakeRecipe?.action === "remake") {
     pendingBakeRecipe.audio = {
       ...pendingBakeRecipe.audio,
       ...imported.audio,
       label: $("bake-label").value.trim() || imported.audio.label,
-      display_color_hex: pendingDisplayColorHex,
+      display_color_hex: importColor,
     };
-    pendingBakeRecipe.display_color_hex = pendingDisplayColorHex;
+    pendingBakeRecipe.display_color_hex = importColor;
     ingredientEditorDirty = true;
     renderBakePanel();
     showToast("Replacement audio staged; use the remake action to commit it");
   } else {
-    stageImportedAudioForBake(imported.audio, pendingAudioImportMode);
+    stageImportedAudioForBake(imported.audio, importMode);
     showToast("Audio staged; use the create action to commit it");
   }
 }
@@ -8883,16 +9380,29 @@ function enforceExternalLinkTargets(root = document) {
 
 function handoffExternalLinkToNative(event) {
   const link = event.target.closest?.("a[href]");
-  const nativeOpener = window.pywebview?.api?.open_external;
-  if (!link || typeof nativeOpener !== "function") return;
+  if (!link) return;
   let url;
   try {
     url = new URL(link.getAttribute("href"), window.location.href);
   } catch (_err) {
     return;
   }
+  if (nativeDesigner.enabled && url.origin === window.location.origin
+    && link.hasAttribute("data-open-designer-template")) {
+    const templateId = link.dataset.openDesignerTemplate;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openLinkedDesignerTemplate(templateId).catch(reportError);
+    return;
+  }
+  const nativeOpener = nativeDesigner.enabled
+    ? url => nativeDesigner.openExternal(url)
+    : window.pywebview?.api?.open_external;
+  if (typeof nativeOpener !== "function") return;
   const designerTemplateLink = link.hasAttribute("data-open-designer-template");
-  if (!/^(https?|mailto):$/i.test(url.protocol) || (url.origin === window.location.origin && !designerTemplateLink)) return;
+  const permittedScheme = nativeDesigner.enabled ? /^https?:$/i : /^(https?|mailto):$/i;
+  if (!permittedScheme.test(url.protocol)
+    || (url.origin === window.location.origin && (nativeDesigner.enabled || !designerTemplateLink))) return;
   event.preventDefault();
   event.stopImmediatePropagation();
   Promise.resolve(nativeOpener(url.href))
@@ -8903,6 +9413,24 @@ function handoffExternalLinkToNative(event) {
       console.error(error);
       showToast("The system browser could not open this link.");
     });
+}
+
+async function openLinkedDesignerTemplate(templateId) {
+  if (templateLoadInFlight || workflowSaveInFlight) {
+    showToast("Wait for the current profile operation to finish.");
+    return;
+  }
+  const select = $("template-select");
+  if (!state.templates.some(template => template.template_id === templateId)
+    || ![...select.options].some(option => option.value === templateId)) {
+    showToast("This preset is unavailable in the installed catalogue.");
+    return;
+  }
+  select.value = templateId;
+  if (!await loadTemplate()) return;
+  setActivePage("toolkit", { updateHash: true });
+  scrollToStep("study");
+  focusSectionNavigationTarget($("study-segment"));
 }
 
 function renderHardwarePixelArt() {
@@ -9419,6 +9947,7 @@ function wireEvents() {
   document.addEventListener("input", (event) => {
     if (event.target.closest?.(".ingredient-editor") || event.target.closest?.("#trajectory-settings")) {
       if (pendingBakeRecipe) ingredientEditorDirty = true;
+      invalidateNativeAuthoring();
       return;
     }
     const card = event.target.closest?.(".source-card");
@@ -9436,6 +9965,7 @@ function wireEvents() {
   document.addEventListener("change", (event) => {
     if (event.target.closest?.(".ingredient-editor") || event.target.closest?.("#trajectory-settings")) {
       if (pendingBakeRecipe) ingredientEditorDirty = true;
+      invalidateNativeAuthoring();
       return;
     }
     const sourceLabelCard = event.target.closest?.(".source-card");
@@ -9497,6 +10027,7 @@ function reportError(error) {
   showToast(error.message || String(error));
 }
 
+renderAdapterChrome();
 loadApiBase();
 loadCompanionToken();
 loadResizableLayoutSettings();
@@ -9508,16 +10039,38 @@ initializePageTabs();
 initializeDocumentationTypography();
 initializeLazySurfaces();
 initializePublicationNetworkSurface();
+if (nativeDesigner.enabled) {
+  $("native-generation-controls").hidden = false;
+  $("native-import-profile").hidden = false;
+  $("native-import-profile").addEventListener("click", () => importNativeProfile().catch(reportError));
+  $("native-cancel-generation").addEventListener("click", () => nativeDesigner.cancel().catch(reportError));
+  $("native-cancel-work").addEventListener("click", () => nativeDesigner.cancel().catch(reportError));
+  for (const [id, action] of [["native-generate-baseline", "baseline"], ["native-build-review", "review"], ["native-accept-review", "accept"], ["native-prepare-participant", "prepare"]]) $(id).addEventListener("click", () => performNativeExecution(action).catch(reportError));
+  $("native-review-confirm").addEventListener("change", renderNativeExecution);
+  $("native-order-previous").addEventListener("click", () => { nativeReviewPage--; renderNativeExecution(); });
+  $("native-order-next").addEventListener("click", () => { nativeReviewPage++; renderNativeExecution(); });
+  $("native-open-output").addEventListener("click", () => nativeDesigner.openPrepared().catch(reportError));
+  document.addEventListener("click", event => { const button=event.target.closest?.("[data-export-native-source]"); if(button) nativeDesigner.exportAudio(button.dataset.exportNativeSource).then(saved=>{ if(saved) showToast("Verified WAV saved."); }).catch(reportError); });
+  $("native-download-review").addEventListener("click", () => downloadTextFile("native-execution-review.json", JSON.stringify({ ...state.native_execution_review, blocks: state.block_csv_preview, run_order: state.run_sequence_setup }, null, 2), "application/json"));
+  document.addEventListener("pps-native-status", event => { $("native-generation-status").textContent = event.detail; nativeExecutionMessage = event.detail; $("native-execution-status").textContent = event.detail; });
+}
+let resolveInitialState;
+const initialStateReady = new Promise(resolve => { resolveInitialState = resolve; });
 window.PPSDesignerApp = Object.freeze({
+  ready: initialStateReady,
+  preloadAssetUrl: staticResourceUrl,
   getState: () => clone(state),
+  getAssemblyVariants: () => assemblyVariants(state?.design, nativeDesigner.enabled ? nativeAssemblyLimit(state.design) : Number.MAX_SAFE_INTEGER),
   exportProfile: (format) => {
     if (!["json", "bundle"].includes(format)) throw new Error("Unsupported profile export.");
     return api(`/api/profiles/export-${format}`, { method: "POST", rawResponse: true,
       body: JSON.stringify({ expected_revision: normalizedDesignerProgress().revision }) });
   },
-  isHosted: () => staticModeActive,
+  isHosted: () => staticModeActive && !nativeDesigner.enabled,
+  isNative: () => nativeDesigner.enabled,
   restoreHostedDraft: (snapshot) => {
-    if (!snapshot?.design) return false;
+    if (workflowSaveInFlight || !snapshot?.design) return false;
+    if (nativeDesigner.enabled) nativeDesigner.invalidate();
     state = clone(snapshot);
     staticModeActive = true;
     editModeActive = false;
@@ -9530,4 +10083,4 @@ window.PPSDesignerApp = Object.freeze({
   markSaved: markDesignerSaved,
 });
 
-loadState({ resetEditMode: true }).catch(reportError);
+loadState({ resetEditMode: true }).catch(reportError).finally(resolveInitialState);

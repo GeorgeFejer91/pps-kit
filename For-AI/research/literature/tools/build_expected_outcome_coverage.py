@@ -81,7 +81,7 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
         "condition_contrast": "congruent versus incongruent vestibular/auditory motion and no-rotation baselines",
         "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#pfeiffer_2018_vestibular",
-            "Consensus MCP 2026-07-15 query: audiotactile peripersonal space auditory tactile integration boundary looming",
+            "https://noel-lab.org/wp-content/uploads/2024/05/pfeiffer_et_al-2018-european_journal_of_neuroscience.pdf",
         ],
     },
     "matsuda_2021_four_directions": {
@@ -339,7 +339,7 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
         "condition_contrast": "sham, V1, posterior parietal, and premotor tDCS crossed with near/far hand-centered sounds",
         "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#avenanti_2012_motor_cortex",
-            "Consensus MCP 2026-07-15 query: 10.1016/j.neuroimage.2012.06.063 Avenanti motor cortex peripersonal space audio tactile",
+            "https://www.alessioavenanti.com/pdf_library/Avenanti_2012Neuroimage.pdf#published-pages-282-283",
         ],
     },
     "cimmino_2013_surgical_arm_elongation": {
@@ -509,7 +509,7 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
         ),
         "expected_effect_direction": "autism_smaller_sharper_pps_and_reduced_full_body_illusion",
         "observable_metric": "PPS boundary size/slope plus self-location and self-identification measures",
-        "condition_contrast": "autism versus neurotypical group and synchronous versus asynchronous full-body-illusion stroking",
+        "condition_contrast": "autism versus neurotypical group for the preceding PPS task; synchronous versus asynchronous stroking belongs to the subsequent full-body illusion, not a pre/post PPS contrast",
         "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#autism_2019",
             "Consensus MCP 2026-07-15 query: social perception shapes multisensory peripersonal space 2017 body image social cognition 2024 depersonalisation audio tactile",
@@ -540,11 +540,12 @@ EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
             "not expected to significantly modulate BR or PPS."
         ),
         "expected_effect_direction": "active_tool_use_modulates_pps_but_observation_does_not",
-        "observable_metric": "body-landmark localization and audio-tactile PPS boundary/facilitation before versus after training",
-        "condition_contrast": "active tool-use training versus observational tool-use training",
+        "observable_metric": "pre/post body-landmark localization in Group 1; post-training near/far audio-tactile facilitation in the separate Group 2",
+        "condition_contrast": "post-only audio-tactile task after active, observational and cognitive training sessions; separate pre/post body-landmark task",
         "source_basis": [
             "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json#ferroni_2020_tool_observation",
-            "Consensus MCP 2026-07-15 query: 10.1016/j.cortex.2020.11.021 ageing body space representations peripersonal space audio tactile",
+            "https://arodes.hes-so.ch/record/6098/files/Author%20postprint.pdf",
+            "https://iris.unito.it/retrieve/handle/2318/1763498/683145/Galigani%20et%20al.%2C%202020.%20Effect%20of%20tool-use%20observation.pdf#page=5",
         ],
     },
     "ferroni_2026_pps_plasticity": {
@@ -1185,7 +1186,7 @@ def build_expected_outcome_coverage(coverage: dict[str, Any]) -> dict[str, Any]:
     runnable_records = [record for record in records if record["runnable_status"] == "runnable_profile_parameters_ready"]
     return {
         "schema": SCHEMA,
-        "generated_on": "2026-07-15",
+        "generated_on": "2026-10-27",
         "source_literature_coverage": "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json",
         "scope": {
             "goal": (

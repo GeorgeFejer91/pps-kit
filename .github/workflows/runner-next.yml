@@ -7,7 +7,10 @@ on:
       - "Cargo.toml"
       - "pyproject.toml"
       - "apps/quest-runner/**"
+      - "apps/designer/**"
       - "apps/runner/**"
+      - "apps/native_file_dialogs.rs"
+      - "packages/pps-designer-core/**"
       - "packages/pps-brsp/**"
       - "packages/pps-contracts/**"
       - "packages/pps-runner-core/**"
@@ -16,13 +19,18 @@ on:
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
       - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
+      - "packages/pps-resources/assets/ui/**"
+      - "packages/pps-resources/study_templates/**"
+      - "For-AI/research/literature/tools/**"
+      - "For-AI/research/literature/audiotactile-paper-metadata-audit/**"
+      - "For-AI/research/literature/preload-ledgers/**"
       - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
-      - "For-AI/engineering/tests/test_rust_session_package_differential.py"
-      - "For-AI/engineering/tests/test_rust_timing_schedule_differential.py"
-      - "For-AI/engineering/tests/test_rust_response_differential.py"
-      - "For-AI/engineering/tests/test_native_result_file_audit.py"
+      - "For-AI/engineering/automation/check_all.ps1"
+      - "For-AI/engineering/tests/**"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
+      - "For-AI/engineering/validation/scripts/verify_bounded_text.mjs"
+      - "For-AI/engineering/validation/scripts/webview-layout-helpers.mjs"
       - ".github/workflows/runner-next.yml"
   push:
     branches: [main]
@@ -31,7 +39,10 @@ on:
       - "Cargo.toml"
       - "pyproject.toml"
       - "apps/quest-runner/**"
+      - "apps/designer/**"
       - "apps/runner/**"
+      - "apps/native_file_dialogs.rs"
+      - "packages/pps-designer-core/**"
       - "packages/pps-brsp/**"
       - "packages/pps-contracts/**"
       - "packages/pps-runner-core/**"
@@ -40,22 +51,219 @@ on:
       - "packages/pps-runner-execution/**"
       - "packages/pps-session-package/**"
       - "packages/pps-resources/assets/app/pps_toolkit_icon.*"
+      - "packages/pps-resources/assets/ui/**"
+      - "packages/pps-resources/study_templates/**"
+      - "For-AI/research/literature/tools/**"
+      - "For-AI/research/literature/audiotactile-paper-metadata-audit/**"
+      - "For-AI/research/literature/preload-ledgers/**"
       - "packages/pps-runtime/src/peripersonal_space_toolkit/**"
       - "For-AI/engineering/automation/check_runner_next.ps1"
-      - "For-AI/engineering/tests/test_rust_session_package_differential.py"
-      - "For-AI/engineering/tests/test_rust_timing_schedule_differential.py"
-      - "For-AI/engineering/tests/test_rust_response_differential.py"
-      - "For-AI/engineering/tests/test_native_result_file_audit.py"
+      - "For-AI/engineering/automation/check_all.ps1"
+      - "For-AI/engineering/tests/**"
       - "For-AI/engineering/validation/scripts/validate_native_results.py"
+      - "For-AI/engineering/validation/scripts/verify_bounded_text.mjs"
+      - "For-AI/engineering/validation/scripts/webview-layout-helpers.mjs"
       - ".github/workflows/runner-next.yml"
   workflow_dispatch:
+    inputs:
+      native_release:
+        description: Build both Windows installers and audit every complete preset
+        type: boolean
+        default: false
+      native_layout_run:
+        description: Successful candidate run to recheck installed WebView layouts (use with native_release)
+        type: string
+        default: ""
 
 permissions:
   contents: read
 
 jobs:
+  native-windows-candidate:
+    name: Complete Windows candidate and preset pipeline
+    if: github.event_name == 'workflow_dispatch' && inputs.native_release && !inputs.native_layout_run
+    runs-on: windows-2022
+    timeout-minutes: 360
+    env:
+      CARGO_INCREMENTAL: "0"
+      CARGO_BUILD_JOBS: "2"
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.19.0"
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+        with:
+          toolchain: "1.96.0"
+      - name: Install development tools and map compiler paths
+        run: |
+          $ErrorActionPreference = 'Stop'
+          npm install --global npm@10.9.4
+          if ($LASTEXITCODE) { throw 'Pinned npm installation failed' }
+          python -m pip install --disable-pip-version-check -e '.[dev]'
+          if ($LASTEXITCODE) { throw 'Development oracle installation failed' }
+          npm install --prefix artifacts/browser-tools --no-package-lock --ignore-scripts playwright@1.62.1
+          if ($LASTEXITCODE) { throw 'Pinned browser driver installation failed' }
+          node artifacts/browser-tools/node_modules/playwright/cli.js install chromium
+          if ($LASTEXITCODE) { throw 'Browser installation failed' }
+          "PPS_PLAYWRIGHT_MODULE=$env:GITHUB_WORKSPACE/artifacts/browser-tools/node_modules/playwright" >> $env:GITHUB_ENV
+          $flags = @()
+          foreach ($mapping in @(@($env:USERPROFILE, '/build/user'), @($env:GITHUB_WORKSPACE, '/build/pps-kit'))) {
+            foreach ($source in @($mapping[0], $mapping[0].Replace('\', '/')) | Select-Object -Unique) {
+              $flags += '--remap-path-prefix=' + $source + '=' + $mapping[1]
+            }
+          }
+          "CARGO_ENCODED_RUSTFLAGS=$($flags -join [char]31)" >> $env:GITHUB_ENV
+      - name: Build the committed C++ renderer and stage locked Microsoft runtimes
+        run: |
+          # The repository retains legacy binaries. Build in fresh ignored paths
+          # so none can masquerade as a renderer produced from this revision.
+          $build = Join-Path $env:RUNNER_TEMP 'pps-candidate-renderer-build'
+          $output = Join-Path $env:GITHUB_WORKSPACE 'artifacts/candidate-renderer'
+          cmake -S third_party/3dti_renderer -B $build "-DPPS_RENDERER_OUTPUT_DIR=$output" -DPPS_ENABLE_SOFA_READER=ON -DPPS_USE_BUNDLED_SOFA_READER=ON
+          if ($LASTEXITCODE) { throw 'Renderer configuration failed' }
+          cmake --build $build --config Release --parallel 2
+          if ($LASTEXITCODE) { throw 'Renderer build failed' }
+          ./For-AI/engineering/build/windows/Stage_PPS_Native_Runtime.ps1 -OutputDirectory artifacts/windows-runtime
+          $directory = (Resolve-Path (Join-Path $output 'Release')).Path
+          $lock = Get-Content For-AI/engineering/build/windows/native-runtime-lock.json -Raw | ConvertFrom-Json
+          foreach ($file in $lock.files | Where-Object { $_.kind -eq 'dll' }) {
+            Copy-Item -LiteralPath (Join-Path 'artifacts/windows-runtime' $file.file) -Destination (Join-Path $directory $file.file)
+          }
+          $renderer = (Resolve-Path (Join-Path $directory 'pps-3dti-renderer.exe')).Path
+          "PPS_CANDIDATE_RENDERER_DIR=$directory" >> $env:GITHUB_ENV
+          "PPS_CANDIDATE_RENDERER=$renderer" >> $env:GITHUB_ENV
+          "PPS_CANDIDATE_RENDERER_SHA256=$((Get-FileHash -LiteralPath $renderer -Algorithm SHA256).Hash.ToLowerInvariant())" >> $env:GITHUB_ENV
+      - name: Test complete native contract owners and retain exact test executable identities
+        run: |
+          cargo test --locked --release -p pps-designer-core -p pps-runner-audio -p pps-session-package -p pps-runner-execution
+          if ($LASTEXITCODE) { throw 'Native contract tests failed' }
+          $env:PPS_TEST_RENDERER = $env:PPS_CANDIDATE_RENDERER
+          foreach ($test in @('native_designer_payload_produces_verified_stereo_ingredient_and_custom_design', 'native_imported_dry_source_preserves_its_tone_and_records_import_algorithm', 'native_prepared_pcm_controls_and_final_waveform_are_measured')) {
+            cargo test --locked --release -p pps-designer-core --test native_spatializer $test -- --ignored --exact
+            if ($LASTEXITCODE) { throw "Rebuilt renderer waveform check failed: $test" }
+          }
+          cargo test --locked --release --lib -p pps-experiment-designer -p pps-experiment-runner
+          if ($LASTEXITCODE) { throw 'Native host tests failed' }
+          $records = @(cargo test --locked --release --lib -p pps-experiment-designer -p pps-experiment-runner --no-run --message-format=json | ForEach-Object { $_ | ConvertFrom-Json })
+          if ($LASTEXITCODE) { throw 'Native test inventory failed' }
+          foreach ($app in @('designer', 'runner')) {
+            $binaries = @($records | Where-Object { $_.reason -eq 'compiler-artifact' -and $_.target.name -eq "pps_experiment_${app}_lib" -and $_.profile.test -and $_.executable })
+            if ($binaries.Count -ne 1) { throw "Expected one exact $app test executable" }
+            "PPS_$($app.ToUpperInvariant())_TEST_EXE=$($binaries[0].executable)" >> $env:GITHUB_ENV
+          }
+      - name: Build both exact native installers
+        run: |
+          $revision = (git rev-parse HEAD).Trim()
+          ./For-AI/engineering/build/windows/Build_PPS_Native_Candidate.ps1 -OutputDirectory dist/native-windows-candidate -RendererDirectory $env:PPS_CANDIDATE_RENDERER_DIR -RuntimeDirectory artifacts/windows-runtime -RendererSha256 $env:PPS_CANDIDATE_RENDERER_SHA256 -RendererSourceCommit $revision
+      - name: Verify shared text and nested interface layouts
+        run: |
+          node For-AI/engineering/validation/scripts/verify_bounded_text.mjs
+          if ($LASTEXITCODE) { throw 'Actual bounded text checks failed' }
+          node apps/designer/frontend/tests/verify-stretch-layout.mjs
+          if ($LASTEXITCODE) { throw 'Designer stretch layout checks failed' }
+          node apps/runner/frontend/tests/verify-stretch-layout.mjs
+          if ($LASTEXITCODE) { throw 'Runner stretch layout checks failed' }
+      - name: Install and verify the exact packaged payloads
+        run: ./For-AI/engineering/build/windows/Test_PPS_Native_Candidate.ps1 -CandidateDirectory dist/native-windows-candidate -OutputDirectory artifacts/installed-native-candidate
+      - name: Join an actual hosted portable export to native preparation and results
+        if: ${{ !cancelled() && env.PPS_DESIGNER_TEST_EXE != '' && env.PPS_RUNNER_TEST_EXE != '' }}
+        run: |
+          node apps/designer/frontend/tests/verify-browser-workflows.mjs
+          if ($LASTEXITCODE) { throw 'Complete hosted workflow checks failed' }
+          python For-AI/engineering/validation/scripts/run_native_preset_pipeline.py --portable-binding artifacts/ui-workflow-check/browser-finalized-binding.json --resources packages/pps-resources --designer-test-exe $env:PPS_DESIGNER_TEST_EXE --runner-test-exe $env:PPS_RUNNER_TEST_EXE --renderer $env:PPS_CANDIDATE_RENDERER --renderer-sha256 $env:PPS_CANDIDATE_RENDERER_SHA256 --output artifacts/hosted-native-pipeline --work-root $env:RUNNER_TEMP
+          if ($LASTEXITCODE) { throw 'Hosted bundle to native results did not pass' }
+      - name: Capture every full browser plan and audit independent native results
+        if: ${{ !cancelled() && env.PPS_DESIGNER_TEST_EXE != '' && env.PPS_RUNNER_TEST_EXE != '' }}
+        run: |
+          node For-AI/engineering/validation/scripts/capture_preset_plans.mjs artifacts/preset-plan-capture
+          if ($LASTEXITCODE) { throw 'Browser capture failed' }
+          python -m pytest -q For-AI/engineering/tests/test_native_preset_pipeline_harness.py For-AI/engineering/tests/test_preset_population_audit.py
+          if ($LASTEXITCODE) { throw 'Independent audit regressions failed' }
+          # Noel's reported range lacks a sampling distribution/anchor. This
+          # explicit opt-in audits a disclosed toolkit customization; its source
+          # gaps remain in the capture and realized policy remains in receipts.
+          python For-AI/engineering/validation/scripts/run_native_preset_pipeline.py --captures artifacts/preset-plan-capture --resources packages/pps-resources --designer-test-exe $env:PPS_DESIGNER_TEST_EXE --runner-test-exe $env:PPS_RUNNER_TEST_EXE --renderer $env:PPS_CANDIDATE_RENDERER --renderer-sha256 $env:PPS_CANDIDATE_RENDERER_SHA256 --resolve-iti-ranges --output artifacts/native-preset-pipeline --work-root $env:RUNNER_TEMP
+          if ($LASTEXITCODE) { throw 'Complete preset pipeline did not pass' }
+      - name: Retain candidate installers and compact evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pps-native-windows-candidate-${{ github.sha }}
+          path: |
+            dist/native-windows-candidate/*-setup.exe
+            dist/native-windows-candidate/pps-native-renderer-source.zip
+            dist/native-windows-candidate/candidate-manifest.json
+            dist/native-windows-candidate/SHA256SUMS
+            artifacts/preset-plan-capture/
+            artifacts/native-preset-pipeline/
+            artifacts/hosted-native-pipeline/
+            artifacts/ui-workflow-check/browser-finalized.pps-profile
+            artifacts/ui-workflow-check/browser-finalized-full-block-plan.json
+            artifacts/ui-workflow-check/browser-finalized-binding.json
+            artifacts/ui-workflow-check/report.json
+            artifacts/ui-workflow-check/failure-*.json
+            artifacts/ui-workflow-check/failure-*.png
+            artifacts/installed-native-candidate/*.json
+            artifacts/designer-stretch/*.json
+            artifacts/designer-stretch/*.png
+            artifacts/runner-stretch/*.json
+            artifacts/runner-stretch/*.png
+            artifacts/ui-workflow-check/native-webview-report.json
+            artifacts/ui-workflow-check/native-generation.png
+            artifacts/ui-workflow-check/runner-actual-native-startup-report.json
+            artifacts/ui-workflow-check/runner-actual-native-startup.png
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+  native-windows-layout-followup:
+    name: Installed Windows layout follow-up
+    if: github.event_name == 'workflow_dispatch' && inputs.native_release && inputs.native_layout_run
+    runs-on: windows-2022
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.19.0"
+      - name: Install the locked CDP driver
+        run: |
+          npm install --prefix artifacts/browser-tools --no-package-lock --ignore-scripts playwright@1.62.1
+          if ($LASTEXITCODE) { throw 'Pinned browser driver installation failed' }
+          "PPS_PLAYWRIGHT_MODULE=$env:GITHUB_WORKSPACE/artifacts/browser-tools/node_modules/playwright" >> $env:GITHUB_ENV
+      - name: Verify the existing exact installers in actual WebViews
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PPS_LAYOUT_SOURCE_RUN: ${{ inputs.native_layout_run }}
+        run: ./For-AI/engineering/build/windows/Test_PPS_Packaged_Layouts.ps1 -SourceRunId $env:PPS_LAYOUT_SOURCE_RUN
+      - name: Retain installed layout evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: pps-native-windows-layout-${{ github.run_id }}
+          path: |
+            artifacts/packaged-layout-installed/packaged-layout-report.json
+            artifacts/ui-workflow-check/designer-native-layout/
+            artifacts/ui-workflow-check/runner-native-layout/
+          if-no-files-found: error
+          retention-days: 14
+
   rust-core:
     name: Rust core (${{ matrix.os }})
+    if: github.event_name != 'workflow_dispatch' || !inputs.native_release
     strategy:
       fail-fast: false
       matrix:
@@ -77,6 +285,7 @@ jobs:
 
   desktop-shell:
     name: Tauri desktop (${{ matrix.os }})
+    if: github.event_name != 'workflow_dispatch' || !inputs.native_release
     strategy:
       fail-fast: false
       matrix:
@@ -122,6 +331,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.88.0
       - name: Install the Python oracle and test dependencies
         run: python -m pip install --disable-pip-version-check -e ".[dev]"
+      - name: Install Windows Standard-suite dependencies
+        if: matrix.os == 'windows-latest'
+        run: python -m pip install --disable-pip-version-check -e ".[dev,web,gui,xdf]"
       - name: Read the same host's synthetic native writer files
         uses: actions/download-artifact@v5
         with:
@@ -137,8 +349,20 @@ jobs:
           For-AI/engineering/tests/test_rust_response_differential.py
           For-AI/engineering/tests/test_native_result_file_audit.py
 
+      - name: Run the full Windows Standard validation tier
+        if: matrix.os == 'windows-latest'
+        env:
+          PPS_NATIVE_RESULT_FIXTURE_DIR: ${{ runner.temp }}/native-result-fixture
+          QT_QPA_PLATFORM: offscreen
+        shell: pwsh
+        run: |
+          $validationDrive = Get-PSDrive -Name ([IO.Path]::GetPathRoot($env:RUNNER_TEMP).Substring(0, 1))
+          Write-Host "Standard validation free bytes: $($validationDrive.Free)"
+          ./For-AI/engineering/automation/check_all.ps1 -Tier Standard -Python python
+
   browser-companion:
     name: Browser companion
+    if: github.event_name != 'workflow_dispatch' || !inputs.native_release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -146,8 +370,10 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: apps/runner/package-lock.json
-      - name: Test and build bundled browser frontend
+          cache-dependency-path: |
+            apps/runner/package-lock.json
+            apps/designer/frontend/package-lock.json
+      - name: Test and build canonical Runner and Designer frontends
         shell: pwsh
         run: ./For-AI/engineering/automation/check_runner_next.ps1 -Mode Browser
 
@@ -254,7 +480,7 @@ jobs:
             "bundle=${{ matrix.bundle }}"
             "signing=${{ matrix.signing }}"
             "distribution_status=ci_validation_artifact_not_release"
-            "scientific_status=preview_only_real_packages_not_executable"
+            "scientific_status=preview_only_installed_acquisition_unqualified"
             "use_for_data_collection=false"
             "updater=false"
           ) | Set-Content -Encoding utf8 (Join-Path $stage "VALIDATION_ONLY.txt")
@@ -272,6 +498,7 @@ jobs:
 
   quest-apk:
     name: Optional native Quest APK
+    if: github.event_name != 'workflow_dispatch' || !inputs.native_release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

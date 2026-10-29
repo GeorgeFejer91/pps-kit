@@ -13,26 +13,21 @@ Pages use the exact same `apps/designer/frontend/compiled/` bytes.
 - The separate `/experiment-runner/` subpage serves the canonical Runner
   companion UI for controller and exploratory Phone Experiment modes. The
   Downloads page links to it.
-- The local companion backend runs on the PC at `http://127.0.0.1:8766`.
-- The hosted page calls the companion API for design state, render jobs, session
-  preparation, audio stress tests, and native Focus Mode launch.
-- If the local companion is not running, the hosted dashboard falls back to a
-  static read-only profile mode backed by committed GitHub assets. It loads the
-  preload inventory from `assets/preloads/preload_inventory.json`, loads study
-  profile design JSON from `study_templates/`, and opens on the Study 5
-  `study5_box_breathing_pps` profile by default. In this mode researchers can
-  inspect existing profile parameters, source inventories, trajectory previews,
-  and browser-play committed WAV assets. Creating new custom studies, importing
-  files, baking new looming stimuli, materializing trial/block/session files, or
-  opening Focus Mode still requires the local companion.
-- Segment 6 passes the prepared run setup to the local backend. Native Focus
-  Mode owns participant metadata and runtime options; live LSL/event markers,
-  local marker mirrors, trigger dictionaries, `events.csv`, and analysis CSVs
-  are standard runner outputs, while the fail-safe local recording WAV remains
-  an optional runner checkbox.
-- File imports are local companion actions. Selected stimulus audio is copied
-  into ignored local data on the research PC; it is not uploaded to GitHub
-  Pages or any online service.
+- The hosted Designer uses browser-local drafts and audio in IndexedDB. It can
+  inspect presets, configure premade assets, preview saved timing, save/reload,
+  import fixed audio and export a portable `.pps-profile` bundle, including
+  instruction audio. Selected files and drafts are not uploaded to Pages.
+- Hosted preparation cannot generate new spatial audio or execute participant
+  experiments. Changing a generation parameter invalidates the old preview;
+  use the native Designer for Rust/3DTI generation and experiment preparation.
+- Startup selects the hosted, Tauri or V1 local adapter explicitly. The hosted
+  page does not connect to localhost. The V1 companion route is restricted to
+  a loopback `/dashboard/` origin; a native error does not switch to hosted mode.
+- The [Python-free Windows preview](NATIVE_WINDOWS_PREVIEW.md) describes native
+  import, generation, ordered execution and result receipts. Its LSL, XDF and
+  physical-capture limitations are explicit. The existing V1 Focus Mode has a
+  separate Python/PySide workflow and acquisition outputs; those features are
+  not implied by opening the hosted Designer or installing the native preview.
 - Designer browser JavaScript does not own experiment timing. Timing-sensitive
   participant runs stay native-backed. The separate Runner companion can own an
   explicitly exploratory, locally armed phone demo using Web Audio and browser
@@ -81,18 +76,22 @@ All 750 eligible-set links remain visible; selecting a paper emphasizes and dist
 incoming from outgoing citations. The optional year layout
 anchors horizontal position to publication year while retaining collision separation.
 
-The map legend exposes two implementation states: 15 implemented and 79 not
-implemented yet. Selecting a node still exposes the full four-state assessment
-(15 runnable, 49 supported but parameter-incomplete, 29 not yet assessed, and
-1 adjacent/scope conflict) alongside bibliographic metadata, abstract
-availability/provenance, directional citation neighbours, and every exact-DOI
-Toolkit audit record and extracted parameter available for that publication.
+Search and stable selection links open publication and experiment-level details,
+including the eleven compact replication contracts, source/page pointers,
+derivation formulas and explanations of missing or conflicting evidence. The
+mapper displays parameter review, template availability and tested native
+capability separately. Counts and status summaries come from the generated
+network and study-review projection rather than a manually maintained total.
+Assessed source gaps remain visible; reviewed coverage does not make an
+incomplete preset replication-ready or establish native/physical qualification.
+Details also retain bibliographic metadata, abstract provenance and directional
+citation neighbours.
 When a paper record declares bundled Toolkit template IDs, its details show one
 new-tab Designer link for every deduplicated ID, including profiles that remain
 parameter-incomplete. The link targets the shared dashboard with
 `page=toolkit&template=<template_id>#study-segment`. The Designer validates the
-ID against its built-in template catalogue and loads it once through committed
-static assets or the existing local companion endpoint; papers without a
+ID against its built-in template catalogue and loads it once through the selected
+adapter; papers without a
 declared template show no template-link section.
 
 The canonical v1 source remains the broader dated snapshot of 1,712 publications
@@ -107,11 +106,12 @@ link. Raw provider payloads, PDFs, supplements, extracted full text, and fuzzy
 parameter matches do not belong in the public dashboard asset.
 
 The canonical public-safe source snapshot lives in `For-AI/research/literature/publication-network/`.
-Rebuild the generated dashboard asset after changing that snapshot, modality
-reviews, or DOI-linked parameter audits:
+Rebuild the network, then its sanitized study-review projection after changing
+that snapshot, source reviews, study inventories or DOI-linked parameter audits:
 
 ```bash
 node For-AI/research/literature/tools/build_publication_network_asset.mjs
+node For-AI/research/literature/tools/build_publication_parameter_review_matrix.mjs
 ```
 
 For a deliberate initial refresh from a locally held network bundle, pass the
@@ -162,9 +162,10 @@ https://georgefejer91.github.io/pps-kit/experiment-runner/
 
 The page files are byte-identical to the local compiled companion and contain
 no Tauri bridge. GitHub Pages does not provide WebSocket upgrades. Phone
-Experiment mode can run locally in the hosted page, but cross-device BRSP
-pairing requires a browser-side WSS/WebRTC adapter and endpoint to be
-implemented/configured, deployed, and qualified together.
+Experiment mode can run locally in the hosted page. The existing authenticated
+VDO/WSS/WebRTC companion route requires explicit activation and pairing; it
+still needs qualification for the advertised phone and network. Its presence
+does not establish publication-grade acquisition timing.
 
 The `github.com/GeorgeFejer91/pps-kit` URL is the GitHub repository/code view.
 The assembled Pages root `index.html` loads the copied compiled Designer, and
@@ -185,8 +186,10 @@ Start the local companion backend:
 apps\designer\launchers\Start_Website_Companion.bat
 ```
 
-Then open the GitHub Pages dashboard. The left rail shows the local companion
-status and lets the user set the backend URL if a non-default port is used.
+Open the local `/dashboard/` URL printed by the launcher for the V1 companion
+workflow. Opening GitHub Pages instead selects browser-local preparation. Use
+the [native preview guide](NATIVE_WINDOWS_PREVIEW.md) for the separate Windows
+Rust/Tauri route; the scripts above install the V1 compatibility environment.
 
 ## Safety Boundary
 

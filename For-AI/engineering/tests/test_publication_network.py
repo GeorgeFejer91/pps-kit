@@ -233,10 +233,13 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert section["aria-labelledby"] == "docs-publication-network-title"
         assert "data-publication-network-root" in section
 
-        rail_links = markup.with_attr("data-page-section-link", "docs-publication-network")
-        assert len(rail_links) == 1
-        assert rail_links[0][1]["href"] == "#docs-publication-network"
-        assert rail_links[0][1]["data-page-section-page"] == "documentation"
+        map_links = markup.with_attr("data-page-section-link", "docs-publication-network")
+        # The navigation rail and catalogue-coverage shortcut share the router.
+        assert len(map_links) == 2
+        for tag, attributes in map_links:
+            assert tag == "a"
+            assert attributes["href"] == "#docs-publication-network"
+            assert attributes["data-page-section-page"] == "documentation"
 
         topology = markup.by_id("publication-layout-topology")[1]
         timeline = markup.by_id("publication-layout-year")[1]
@@ -247,6 +250,10 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert "checked" in topology and "checked" not in timeline
 
         assert markup.by_id("publication-network-results-sort")[0] == "select"
+        search = markup.by_id("publication-network-search")[1]
+        assert search["type"] == "search"
+        assert search["aria-controls"] == "publication-network-results publication-network-graph"
+        assert markup.by_id("publication-network-retry")[0] == "button"
         assert markup.by_id("publication-network-workspace")[0] == "div"
         assert markup.by_id("publication-network-stage")[0] == "div"
 
@@ -290,7 +297,6 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
             "publication-network-zoom-out",
             "publication-network-reset-view",
             "publication-network-edge-mode",
-            "publication-network-search",
         ):
             assert f'id="{removed_contract}"' not in html
         assert 'value="prominence"' not in html
@@ -300,11 +306,11 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert "main experimental paradigms and design variations" in html
         assert "not a systematic or exhaustive review" in html
         assert "Each of the 94 non-review publications" not in html
-        assert "Implemented in Toolkit" in html
-        assert "Not implemented yet" in html
-        assert "Circle area increases with incoming citations from other papers" in html
+        assert "Linked Toolkit template" in html
+        assert "No linked template" in html
+        assert "Circle area reflects incoming citations" in html
         assert "Larger circle = cited by more included papers" in html
-        assert "without an artificial perimeter" in html
+        assert "publication evidence, template availability and native qualification" in html
 
 
 def test_publication_network_source_and_compiled_contracts_stay_in_sync() -> None:
@@ -330,6 +336,7 @@ def test_publication_network_source_and_compiled_contracts_stay_in_sync() -> Non
 
     source_compiled_assets = DASHBOARD / "compiled" / "assets"
     assert list(source_compiled_assets.glob("publication_network.v3-*.json"))
+    assert list(source_compiled_assets.glob("publication_study_reviews.v1-*.json"))
     assert not list(source_compiled_assets.glob("publication_network.v2-*.json"))
 
 
@@ -371,8 +378,19 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         'target: "_blank"',
         'rel: "noopener noreferrer"',
         '"data-open-designer-template": templateId',
-        "records.flatMap",
-        "Open in Experiment Designer",
+        "node.studyReview?.templateIds.length",
+        "publication_study_reviews.v1.json",
+        "pps-publication-study-reviews.v1",
+        "Publication evidence",
+        "Template availability",
+        "Native qualification",
+        "Study-level parameter review",
+        "data-study-id",
+        "data-contract-key",
+        "Linked preset for this study",
+        "study.experimentLabel",
+        "study.templateIds",
+        "publicationInclusionBasis(node)",
         'layout: "topology"',
         "nodes[index].network?.radius",
         "network?.inDegree",
@@ -409,7 +427,8 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "publication-network-edge-line",
         "publication-network-node-mark",
         "data-open-designer-template",
-        "Open in Experiment Designer",
+        "Linked preset for this study",
+        "No linked Toolkit template for this study",
         "study-segment",
         "template",
         "topology",
@@ -486,7 +505,6 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         "searchActive",
         "searchMatchCount",
         "matchSet",
-        "controls.search",
     ):
         assert removed_contract not in network_js
 
@@ -586,7 +604,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
 
     data = _load_network()
     assert data["schema"] == "pps-publication-citation-network.v3"
-    assert data["generatorVersion"] == "3.4.0"
+    assert data["generatorVersion"] == "3.4.1"
     assert data["sourceCounts"] == {
         "nodes": 1712,
         "edges": 10109,
@@ -600,16 +618,16 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "audiotactileConfirmed": 90,
         "laterAuditAdditions": 4,
         "toolkitRecordJoins": 69,
-        "toolkitInScopeRecordJoins": 68,
+        "toolkitInScopeRecordJoins": 64,
         "toolkitNodeJoins": 65,
-        "toolkitInScopeNodeJoins": 64,
-        "toolkitRunnableNodes": 15,
-        "toolkitRunnableRecords": 17,
-        "toolkitSupportedIncompleteNodes": 49,
+        "toolkitInScopeNodeJoins": 60,
+        "toolkitRunnableNodes": 12,
+        "toolkitRunnableRecords": 12,
+        "toolkitSupportedIncompleteNodes": 48,
         "toolkitNotAssessedNodes": 29,
-        "toolkitAdjacentConflictNodes": 1,
-        "toolkitManualReviewRecords": 24,
-        "toolkitManualReviewNodes": 21,
+        "toolkitAdjacentConflictNodes": 5,
+        "toolkitManualReviewRecords": 25,
+        "toolkitManualReviewNodes": 22,
         "connectedNodes": 91,
         "isolatedNodes": 3,
         "weakComponents": 4,
@@ -670,7 +688,7 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
             and (
                 node["modality"]["audiotactile"]["verified"]
                 or any(
-                    _record_is_in_scope(record)
+                    _record_is_in_scope(record) or record.get("retained_frozen_corpus_boundary") is True
                     for record in records_by_doi.get(_normalize_doi(node["doi"]), [])
                 )
             )
@@ -679,6 +697,13 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     )
     assert len(expected_nodes) == 94
     assert node_ids == [node["id"] for node in expected_nodes]
+    retained_boundary = next(node for node in nodes if node["doi"] == "10.1016/j.neuropsychologia.2014.09.043")
+    assert source_by_id[retained_boundary["id"]]["modality"]["audiotactile"]["verified"] is False
+    assert retained_boundary["toolkit"]["status"] == "adjacent_scope_conflict"
+    assert retained_boundary["toolkit"]["inScopeRecordCount"] == 0
+    assert retained_boundary["toolkit"]["records"][0]["retainedFrozenCorpusBoundary"] is True
+    assert retained_boundary["toolkit"]["records"][0]["recreatable"] is False
+    assert "frozen corpus" in retained_boundary["scope"]["basis"]
 
     expected_later_dois = {
         "10.1016/j.neuroimage.2012.06.063",
@@ -697,10 +722,10 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "later_exact_doi_audit": 4,
     }
     assert Counter(node["toolkit"]["status"] for node in nodes) == {
-        "runnable": 15,
-        "supported_incomplete": 49,
+        "runnable": 12,
+        "supported_incomplete": 48,
         "not_assessed": 29,
-        "adjacent_scope_conflict": 1,
+        "adjacent_scope_conflict": 5,
     }
     assert Counter(node["corpus"]["documentRole"] for node in nodes) == {
         "empirical": 62,
@@ -751,13 +776,13 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
 
     toolkit_records = [record for node in nodes for record in node["toolkit"]["records"]]
     assert len(toolkit_records) == 69
-    assert sum(record["inScope"] for record in toolkit_records) == 68
-    assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 17
-    assert sum(record["manualReview"] is not None for record in toolkit_records) == 24
+    assert sum(record["inScope"] for record in toolkit_records) == 64
+    assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 12
+    assert sum(record["manualReview"] is not None for record in toolkit_records) == 25
     assert sum(
         any(record["manualReview"] is not None for record in node["toolkit"]["records"])
         for node in nodes
-    ) == 21
+    ) == 22
     assert Counter(node["abstract"]["status"] for node in nodes) == {
         "available": 37,
         "source_link_only": 48,
@@ -769,10 +794,10 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "legacy_confirmed": 90,
     }
     assert data["facets"]["toolkitStatuses"] == {
-        "adjacent_scope_conflict": 1,
+        "adjacent_scope_conflict": 5,
         "not_assessed": 29,
-        "runnable": 15,
-        "supported_incomplete": 49,
+        "runnable": 12,
+        "supported_incomplete": 48,
     }
     assert data["facets"]["edgeProvenance"]["openalex_live_20260808"] == 127
     assert data["facets"]["edgeProvenance"]["primary_source_audit_20260808"] == 52
@@ -821,7 +846,7 @@ def test_publication_network_edges_are_the_complete_tracked_snapshot_overlay_uni
         and (
             node["modality"]["audiotactile"]["verified"]
             or any(
-                _record_is_in_scope(record)
+                _record_is_in_scope(record) or record.get("retained_frozen_corpus_boundary") is True
                 for record in records_by_doi.get(_normalize_doi(node["doi"]), [])
             )
         )

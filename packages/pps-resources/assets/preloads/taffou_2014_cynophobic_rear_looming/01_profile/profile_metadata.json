@@ -6,7 +6,7 @@
   "doi": "10.3389/fpsyt.2014.00122",
   "source_url": "https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2014.00122/full",
   "verification_status": "partial",
-  "notes": "Rear hemi-field binaural looming dog/sheep design. The GUI expands the reported rear-left and rear-right paths into separate source assets, but exact dog/sheep source audio and LISTEN-HRTF rendering are not bundled.",
+  "notes": "Rear hemi-field binaural looming dog/sheep design. The GUI expands the reported rear-left and rear-right paths into separate source assets, but exact dog/sheep source audio and LISTEN-HRTF rendering are not bundled. The sequence uses the reported 1000-ms prefix and a fixed 2700-ms suffix at the lower bound of the reported 2700-3300-ms range. This fixed choice does not reproduce the unreported jitter distribution. The shared 100-ms audio-channel cue substitutes for the reported 20-ms vibration.",
   "reference_parameters": {
     "source_database": "LISTEN HRTF in original paper",
     "headphones": "Sennheiser HD650",
@@ -48,7 +48,14 @@
     "implementation_gaps": [
       "exact dog/sheep source audio and Audacity amplitude/dynamic matching settings",
       "LISTEN HRTF subject/filter identifier and renderer settings"
-    ]
+    ],
+    "reported_tactile_duration_ms": 20,
+    "software_tactile_cue_duration_ms": 100,
+    "software_trial_padding_ms": {
+      "pre": 1000,
+      "post": 2700
+    },
+    "software_trial_padding_basis": "Derived software choice: pre=1000 ms as reported; post=min(reported 2700-3300 ms range)=2700 ms. The paper gives no sampling distribution, so this fixed lower-bound proxy does not reproduce its variable trial timing."
   },
   "provenance": [
     {
@@ -58,6 +65,10 @@
     {
       "field": "SOAs/trials",
       "source": "Frontiers methods report T1-T5 at 0, 750, 1500, 2250, and 3000 ms from sound onset, 224 tactile trials and 32 catch trials."
+    },
+    {
+      "field": "trial envelope and cue substitution",
+      "source": "Taffou and Viaud-Delmon 2014, Main experiment pp.2-3, DOI 10.3389/fpsyt.2014.00122: 1000-ms pre-sound silence, 3000-ms sound, 2700-3300-ms post-sound silence, 20-ms 250-Hz vibration, baseline trial times 350/4650 ms. Shared 100-ms cue and fixed 2700-ms post margin are software substitutions."
     }
   ]
 }

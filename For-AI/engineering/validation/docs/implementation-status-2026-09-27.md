@@ -1,32 +1,129 @@
 # Approved implementation status
 
-Reviewed 2026-10-27 against the existing 2026-09-27 product checkpoint.
+Updated 2026-10-28 during publication-plan implementation. Historical checkpoint
+evidence below remains revision-specific; [CURRENT_WORK](../../../CURRENT_WORK.md)
+owns the active checklist and current catalogue totals.
 Current evidence for the 17 approved
 [audit items](unification-and-critical-audit-2026-09-27.md).
 Each status applies to its stated surface, not to the whole product.
 
 | Item | Implemented / observed surface | Remaining gate |
 | --- | --- | --- |
-| 1 | VERIFIED: locked Core/Desktop fmt, Clippy and tests on three CI platforms | Retain these checks through further execution work |
-| 2 | PARTIAL: migrated validators, fresh editable setup, bounded fixtures and retained scratch evidence | Complete Standard tier still pending; storage blocker no longer observed on 2026-10-27 |
-| 3 | PARTIAL: one compact source/package/capability record; conservative readiness | Complete native adapter and measured evidence |
+| 1 | VERIFIED source at `9dfd1760`: locked Core/Desktop fmt, Clippy, tests and Python/Rust oracle checks pass on all three CI platforms | Installed evidence remains separate |
+| 2 | VERIFIED final source at `9dfd1760`: full Standard 717 passed/9 assessed skips, Quick 38 passed and release/privacy audit passed on fresh Windows CI | No remaining source-validation blocker; installed evidence remains separate |
+| 3 | VERIFIED catalogue/source separation: 94 assessed publications, 178 study rows, 1,958 dispositions; separate source/template/native capability records and explicit hosted/Tauri adapters | Installed evidence; disclosed scientific gaps withhold readiness |
 | 4 | VERIFIED: shared profile/limits/scoring/text/job owners; concise For-AI routing; one native actor/scheduler/file worker | Extract only seams changed by further work |
 | 5 | VERIFIED browser source: planner disclosures/JSON action, phone Pair/state/action flow, participant response, local output picker and inline notifications | Installed UI inspection |
 | 6 | PARTIAL: actual Pretext, explicit no-fit, complete labels, keyboard input, narrow/enlarged text and spacing | Actual WebViews and full accessibility qualification |
-| 7 | PARTIAL: frozen approved Segment 5/6 CSV plan, inventory hashes, review revision/lineage fences | Full scheduling UI and native profile assembly |
+| 7 | VERIFIED source: frozen Segment 5/6 plan, inventory hashes, review fences, native profile assembly and real 408-trial participant preparation | Installed end-to-end schedule journey |
 | 8 | VERIFIED: plan/resource preflight, source/cancel/publication fences, shared job completion and rollback | Qualify additional generation routes if selected |
-| 9 | PARTIAL: exact CPAL port, local output preflight, callback-confirmed controls, local input, shared V1 scoring/CSV and receipt-gated result publication | Activation, full-profile execution and an installed experiment; candidate remains non-executable |
-| 10 | PARTIAL: shared Rust/browser contracts; JSON to existing compatibility assembler; sample/tactile/response/CSV oracle checks | Native JSON assembly and complete execution capability |
-| 11 | PARTIAL: authenticated local/phone commands use one dispatch/control owner, shared scope fixture and fresh-state gate | Complete real-package execution |
-| 12 | PARTIAL: retry/input fences, durable intent versus callback confirmation, bounded deadlines, per-run journal and exclusive hashed result publication | Installed filesystems, recovery and complete execution |
+| 9 | VERIFIED source/software: actual CPAL silent fixtures, manifest-order blocks/instructions, response scoring and whole-group completion receipts | Installed experiment and declared route evidence |
+| 10 | VERIFIED source: Python-free Rust assembly, actual browser bundle extraction/rebinding and sample/order/provenance checks | Complete installed Designer-to-Runner journey |
+| 11 | VERIFIED source/software: real-package activation uses the same native authority, scopes and fresh-state gate | Installed and advertised phone-route qualification |
+| 12 | VERIFIED source/software: durable journals and read-only interrupted/orphaned group assessment; no acquisition replay | Installed filesystem/crash qualification |
 | 13 | PARTIAL: secure hosted companion, inert discovery, existing authenticated VDO route | Physical phone direct/relay/network-loss qualification |
 | 14 | PARTIAL: suspension/resume, no replay, stale-state denial, disarmed phone outputs and pending-activation cancellation | Physical Safari/Chrome lock and BFCache cases |
 | 15 | VERIFIED source policy: local setup, observer scope, participant-free public projection and fresh invitations | Physical expiry/revocation; remembered phones remain unselected |
-| 16 | VERIFIED: locked Designer Vite 6.4.3/nanoid patch; both npm audits report zero advisories | Retain locked byte checks |
-| 17 | PARTIAL: exact-revision CI validation packages; source/Pages checks | Installed packages, measured output/response/calibration and supported routes |
+| 16 | VERIFIED source: Designer/Runner lock Vite 6.4.5 and preserve the nanoid repair; canonical byte checks pass | Repeat advisory checks at release revision |
+| 17 | PARTIAL: Runner preview NSIS rebuilt and installed at 9dfd1760; all 16 installed application/runtime/web files match its audited 24-file payload; canonical source/Pages staging pass | Fresh installed launch/full journey, clean Windows and Designer identity approval; physical calibration deferred by user |
 
 ## Current source evidence
 
+- The bounded frozen-corpus audit is complete with disclosed gaps: 74 Methods-
+  backed inventories, 19 documented access blockers and one project-lineage
+  entry. An independent review passes 32 projection/identity/privacy checks.
+  Final mapper controls pass actual Chromium search, study ownership, preset
+  navigation, focus, narrow/enlarged-text checks. Designer has 42 passing JS
+  tests; two Pages assembly tests and canonical staging pass. The complete
+  Chromium hosted-workflow check also passes against the final projection,
+  including desktop/phone Edit visibility, playback, save failure/retry,
+  export, stale preview and participant-draft handling. The explicit V1 HTTP
+  race case remains separate from hosted and native adapters.
+- Follow-up F1/F2 and import checks preserve exact variant order/counts while
+  bounding preview/allocation work. Actual chooser-to-export checks retain new
+  WAV bytes/hash and instruction policy after reversed imports, preview, lock
+  and reload. Shared native adoption preserves verified metadata and setup state.
+  Native request fences and serialized V1 mutations prevent stale replacement.
+  Real IndexedDB abort-after-put-success tests verify rejection, connection closure,
+  old/live data retention and retry; the production abort handler was missing.
+  Root passes 42 Designer/79 Runner JS checks, 20 Python UI checks and the complete
+  Chromium workflow. Installed WebView/picker and AT qualification remain open.
+- The existing validation owner now selects Designer core/host code and both
+  frontends; its workflow also checks the six scientific projection suites on
+  Windows. With pinned Rust 1.88, Core passes 183 tests/nine opt-in skips and
+  Desktop passes 169/seven skips, with formatting, compilation and strict Clippy.
+  Browser mode passes 79 Runner/23 Designer tests, frozen installs with zero
+  reported advisories and canonical build-drift checks. These are local Windows
+  results. [CI run 40593624592](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40593624592)
+  at product revision `0f76534d` passes Core, Desktop and Python/Rust oracle
+  checks on all three platforms plus Browser, optional Quest and all three
+  validation bundles (14/14 jobs passed). The prior missing shared PNG and CRLF source-map failures
+  are fixed using existing assets and a scoped LF rule. CI package builds do
+  not establish installed behavior or supported macOS/Linux qualification.
+- [CI 40597111467](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40597111467)
+  at `d1b30ec6` also passes all 14 jobs and now runs the entire Windows Standard
+  tier: 717 passed, nine skipped, one warning in 1950.39 s; Quick passes 38.
+  The final UI/import/storage integration at `9dfd1760` passes all 14 jobs in
+  [CI 40605429247](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40605429247),
+  including all three validation bundles. Final Windows Standard passes 717
+  tests in 2039.46 s, with nine assessed skips and one warning; Quick passes 38
+  and the four native oracle suites pass 13. Eight skips cover out-of-scope
+  Android companion/administration cases; the ninth needs an ignored PubMed
+  abstract cache. Tracked public/scientific data checks run normally. The warning
+  is a Python Starlette TestClient/httpx deprecation. The worker had 157 GB free.
+  No measured or installed claim follows. Later documentation-only checkpoints
+  preserve the same tested product/package bytes.
+- The Runner-only candidate at `9dfd1760` rebuilt with pinned tooling and installed
+  successfully in the existing isolated current-user preview location. All 16
+  installed application/runtime/web files match the independently extracted
+  24-file payload; all ten web files match canonical source bytes. The installer
+  is 220,505,585 bytes, SHA256
+  `3fdbe2bd33c3fef3b444b44441e362e34ea5b3a67c98e2319d145788bfa2873f`.
+  It contains no Python or source checkout. Fresh startup remains unverified:
+  the earlier automatic approval rejection was retained, with no alternate launch.
+  See the [candidate build record](native-windows-candidate-build.md).
+- Integrated provenance checkpoint `c389449a`: 23 Designer frontend tests,
+  ten native bundle tests, actual Chromium export/offline re-export/native import,
+  strict package Clippy and inspected mapper/Pages checks pass. The subsequent
+  Designer host regression run passes ten tests with four explicit opt-in skips.
+  Records bind the exact native receipt text to its WAV hash without asserting
+  scientific source conformance. The existing profile ZIP inventory is unchanged.
+- Cue/native-catalogue checkpoints `c6c92728` and `0826aa21`: actual trial
+  baking now rejects clipped tactile cues; source silence and derived margins
+  remain distinguished. Thirty presets pass cue containment. The mixed FLOAT/PCM
+  concatenation repair retains exact frames. Native Serino assets have versioned
+  Rust/3DTI evidence, and ordinary catalogue rebuilding verifies their hashes,
+  geometry, timing, level, attenuation and HRTF bindings. These checks do not
+  establish protocol equivalence for source-conflicted presets.
+- Software run artifacts remain ignored under `artifacts/`: the completed
+  `standard-integrated-cue-repair-r2.log`, stable `science-stable-checkpoint.log`,
+  `provenance-portability-integrated.log`, `provenance-browser-native-import.log`
+  and `designer-after-provenance-tests.log` identify the bounded evidence above.
+  Do not report the Standard snapshot whose inputs changed during execution as
+  fully green.
+
+## Retained checkpoint evidence
+
+- Manifest-order checkpoint (2026-10-27, review branch): 25 core/143 desktop
+  tests and strict Clippy pass. Both opt-in one-/two-block silent CPAL tests pass;
+  the independent Python file auditor verifies 16/30 events and 1/2 scored rows.
+  No complete result exists between blocks. A deterministic output-policy race
+  regression failed before reconciliation was moved before request processing;
+  all 11 native-output tests pass. Independent source review found no blocking
+  state/evidence issue. This is software/file evidence, not installed qualification.
+- Publication implementation checkpoint (2026-10-27, review branch): the
+  native owner now activates only the current, staged single-block package after
+  media, output and journal checks. Core activation does not arm or play.
+  `real_single_block_package_completes_through_native_dispatch` separately passes
+  on this Windows host with actual CPAL output and silent four-frame PCM, through
+  setup, reservation, local Arm/Start, callback acknowledgement, scoring and final
+  result files. The suite passes 24 core/140 desktop tests plus this opt-in test.
+  Results remain `unqualified`; no installed UI or physical timing claim follows.
+- UI checkpoint `ed0e15a6` (integrated as `9030caf2`) repairs preview races,
+  instruction bundle assets, failed-save locking and polled participant drafts.
+  Worker evidence: 4 Designer/68 Runner/2 Pages tests, canonical builds and
+  headless Chromium real-control checks. Public projection and first bounded
+  extraction batch integrate as `057c0150`; 77 inventories remain unassessed.
 - Native control/input product source: `43566f52cdb2835ce629b18da8fe5da592a3e2af`.
   [Validation run](https://github.com/GeorgeFejer91/pps-kit/actions/runs/36351078594)
   passes all 14 source/oracle/browser/optional-Quest/validation-package jobs, including Core and
@@ -78,20 +175,26 @@ The same bounded worker freezes and syncs events/18-column Data_min CSV,
 exclusively publishes final names, checks hashes and writes the result manifest
 last. The native receipt must match the frozen package/run/count/sequence before
 completion. Independent Python validation checks actual synthetic Rust worker
-files, event/CSV projection and substituted or malformed evidence. First closure
-covers a whole single-block package, closed response windows and an elapsed final
-software submission estimate. Interrupted/missing trials cannot complete.
+files, event/CSV projection and substituted or malformed evidence. Current closure
+covers the whole manifest-ordered package, closed response windows and each final
+software submission estimate. Only a contiguous completed block prefix contributes
+to the final count; the same journal/run persists between successfully closed
+blocks, with fresh local preparation and Arm/Start. Interrupted/missing trials cannot complete.
 
 Unsupported hard-link filesystems fail closed. Partial/pending/orphan files remain;
 no final data are overwritten or automatically removed. Power-loss recovery,
 directory durability, device drain and physical onset require separate evidence.
 Callback observations, sample positions and CPAL driver predictions are explicitly
-unqualified. Preparation does not enable execution or qualify a device route.
-Native activation, whole profiles/multiple blocks, complete local validation,
-installed inspection and calibrated physical acquisition remain outstanding.
-The workspace volume has approximately 65.5 GiB free as of 2026-10-27; the
-former storage blocker is no longer observed. This documentation review did
-not rerun the Standard tier, native builds, hosted parity or installed checks.
+unqualified. Cache inspection does not qualify a device route. Current verified
+media/output/journal binding now enables explicit local Arm/Start per block.
+Whole profile assembly and ordered native instruction/block execution now have
+software evidence. Installed end-to-end inspection, a stable complete Standard
+gate and public promotion remain outstanding. Runner preview `468c8241` is
+installed with payload hashes verified; startup evidence belongs to earlier
+`b8e0e789`. Automatic approval review rejected the fresh launch check as
+"blocked by policy" without a more specific reason, and no alternate launch
+was attempted. Public products and V1 installations remain unchanged.
 
-No installed application change, participant acquisition, scientific replication,
-physical onset or newly qualified route is claimed by this record.
+The user deferred new physical calibration on 2026-10-27 and asked to assume
+hardware works. Retain that assumption explicitly; it does not establish
+measured onset, participant acquisition, replication or a newly qualified route.

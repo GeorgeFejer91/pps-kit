@@ -393,12 +393,15 @@ def test_manual_reviews_are_schema_valid_and_source_pointer_only():
                 assert "C:\\" not in field["source_file"]
                 assert "/Users/" not in field["source_file"]
                 assert not field["value"].startswith("Auto-mined candidates:")
-                if status in {"reported", "derived", "not_reported_after_review"}:
+                if status in {"reported", "derived", "protocol_lineage_derived", "not_reported_after_review"}:
                     assert field["source_file"], f"{path.name}:{field_key}"
                     assert field["page_or_section"], f"{path.name}:{field_key}"
 
         assert field_count == TOTAL_SEGMENT_FIELD_COUNT
         assert review["field_status_counts"] == dict(sorted(status_counts.items()))
+        if review["confidence_label"] == "high_confidence_extraction_with_protocol_lineage":
+            assert status_counts.get("protocol_lineage_derived", 0) > 0
+            assert any(check["source_type"] == "protocol_lineage_manual_review" for check in review["source_checks"])
 
 
 def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():
@@ -410,7 +413,12 @@ def test_missing_pdf_request_list_tracks_main_pdfs_and_supplements():
         if record["coverage_category"] != "adjacent_out_of_scope"
     }
 
-    assert len(in_scope_ids) == 71
+    # Serino 2009's two sound-to-TMS experiments are a reviewed mechanistic boundary.
+    assert len(in_scope_ids) == 67
+    assert "avenanti_2012_motor_cortex" not in in_scope_ids
+    assert "social_perception_2017" not in in_scope_ids
+    assert "serino_2009_tms" not in in_scope_ids
+    assert "finisguerra_2015_moving_sounds_motor" not in in_scope_ids
     by_record: dict[str, set[str]] = {}
     for request in requests:
         by_record.setdefault(request["record_id"], set()).add(request["requested_item"])

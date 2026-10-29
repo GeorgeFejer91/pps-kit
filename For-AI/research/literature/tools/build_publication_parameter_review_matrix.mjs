@@ -52,7 +52,16 @@ if (outputArgumentIndex >= 0 && !outputArgument) {
 const OUTPUT_DIR = outputArgument
   ? path.resolve(REPO_ROOT, outputArgument)
   : path.join(AUDIT_DIR, "publication-parameter-matrix");
-const GENERATED_ON = "2026-08-12";
+const publicArgumentIndex = process.argv.indexOf("--public-output");
+const publicArgument = publicArgumentIndex >= 0 ? process.argv[publicArgumentIndex + 1] : "";
+if (publicArgumentIndex >= 0 && !publicArgument) {
+  throw new Error("--public-output requires a file path");
+}
+// Temporary matrix builds must not overwrite the tracked browser asset.
+const PUBLIC_OUTPUT = publicArgument
+  ? path.resolve(REPO_ROOT, publicArgument)
+  : outputArgument ? null : path.join(REPO_ROOT, "apps/designer/frontend/publication_study_reviews.v1.json");
+const GENERATED_ON = "2026-10-27";
 const PARSIMONIOUS_CONTRACT_COUNT = 11;
 const PYTHON_EXECUTABLE = process.env.PYTHON || (process.platform === "win32" ? "python" : "python3");
 const GENERATED_OUTPUT_FILENAMES = [
@@ -75,6 +84,7 @@ const GENERATED_OUTPUT_FILENAMES = [
   "publication_current_input_review_matrix.csv",
   "publication_current_toolkit_input_matrix.csv",
   "publication_current_toolkit_input_values.csv",
+  "publication_inventory_audit.csv",
   "publication_parameter_dictionary.csv",
   "publication_parameter_evidence_detail.csv",
   "publication_parameter_matrix.csv",
@@ -1336,8 +1346,8 @@ for (const node of network.nodes) {
   }
 }
 
-if (studyInstanceRows.length !== 124) {
-  throw new Error(`Expected 124 registered study-instance rows, found ${studyInstanceRows.length}`);
+if (studyInstanceRows.length !== 178) {
+  throw new Error(`Expected 148 registered study-instance rows, found ${studyInstanceRows.length}`);
 }
 if (atomicEvidenceRows.length !== studyInstanceRows.length * PAPER_PARAMETERS.length) {
   throw new Error("Atomic evidence ledger is not a complete study-by-parameter Cartesian product");
@@ -2158,7 +2168,7 @@ const markdown = `# Publication-to-Toolkit Input Review Matrix
 
 Generated ${GENERATED_ON} from the tracked \`pps-publication-citation-network.v3\` asset, exact-DOI audit joins, manual-review overrides, current profile manifests, and the repository's code/schema surfaces.
 
-The primary paper-review deliverable is a **${studyInstanceRows.length}-row × ${PARSIMONIOUS_CONTRACT_COUNT}-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the ${publicationAtomicRows.length} citation-network publications is represented, and a strict ${publicationAtomicRows.length}-row aggregate is supplied. The registered view has ${studyInstanceRows.length} rows because ${studyInstanceRegistry.entries.length} publications have tracked multi-experiment or multi-profile splits.
+The primary paper-review deliverable is a **${studyInstanceRows.length}-row × ${PARSIMONIOUS_CONTRACT_COUNT}-contract categorical matrix** aligned to Toolkit Segments 1-5 and runtime: auditory stimulus; trajectory geometry plus kinematics; trial sequence; task/response behavior; jitter/ITI; SOA schedule; tactile target; baseline trials; catch trials; repetition allocation; and block composition/order. Every one of the ${publicationAtomicRows.length} citation-network publications is represented, and a strict ${publicationAtomicRows.length}-row aggregate is supplied. The registered view has ${studyInstanceRows.length} rows because ${studyInstanceRegistry.entries.length} publications have tracked experiment inventories (including single-task inventories).
 
 The exact **${studyInstanceRows.length}-row × ${currentInputSchema.input_count}-input** current design/profile matrices remain the implementation crosswalk. The broader **${studyInstanceRows.length}-row × ${PAPER_PARAMETERS.length}-leaf** target matrix remains a scientific-method and validation-gap inventory—not claims about fields accepted by the current serializer. Publications without a registry entry remain one review unit and are explicitly marked \`experiment_count_not_assessed\`; do not infer that they contain only one experiment. Only ${publicationNodesWithAbstract} of ${publicationAtomicRows.length} nodes have tracked abstract text, and ${publicationNodesWithoutAbstractOrAudit} have neither abstract text nor an exact-DOI audit record, so ${studyInstanceRows.length} is an evidence-backed review-row count rather than an exhaustive true experiment count.
 
@@ -2490,7 +2500,8 @@ const currentMatrixBuild = JSON.parse(
 const parsimoniousMatrixBuild = JSON.parse(
   execFileSync(
     PYTHON_EXECUTABLE,
-    [PARSIMONIOUS_BUILDER_PATH, "--output", OUTPUT_DIR],
+    [PARSIMONIOUS_BUILDER_PATH, "--output", OUTPUT_DIR,
+      ...(PUBLIC_OUTPUT ? ["--public-output", PUBLIC_OUTPUT] : [])],
     { cwd: REPO_ROOT, encoding: "utf8" },
   ),
 );
@@ -2500,7 +2511,7 @@ await fs.writeFile(
     {
       schema: "pps-publication-parameter-matrix-output.v1",
       generated_on: GENERATED_ON,
-      generator: "tools/build_publication_parameter_review_matrix.mjs",
+      generator: "For-AI/research/literature/tools/build_publication_parameter_review_matrix.mjs",
       files: GENERATED_OUTPUT_FILENAMES,
     },
     null,
@@ -2521,6 +2532,7 @@ console.log(
       parsimoniousReviewCells: parsimoniousMatrixBuild.evidence_cell_count,
       parsimoniousReviewQueueRows: parsimoniousMatrixBuild.review_queue_count,
       parsimoniousStatusCounts: parsimoniousMatrixBuild.status_counts,
+      inventoryAudit: parsimoniousMatrixBuild.inventory_audit,
       currentInputReviewCells: currentInputReviewQueueRows.length,
       currentInputsOutsideTargetInventory: currentInputsOutsideTargetInventory.length,
       targetMethodValidationParameters: PAPER_PARAMETERS.length,

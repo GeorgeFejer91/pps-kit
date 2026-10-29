@@ -1,5 +1,142 @@
 # PPS Kit completion review and multi-agent plan
 
+## Approved implementation extension — 2026-10-27
+
+The user approved implementation of the expanded publication-ready plan.
+This section supersedes the earlier setup-only scope and wave assignments;
+the source review below remains the finding/evidence inventory.
+
+Subsequent user direction on 2026-10-27: proceed without new calibrations and
+assume hardware operation for now. This defers physical calibration work for
+the current delivery; it does not turn an assumption into measured timing or
+behavioral replication evidence. Installed/software, catalogue and provenance
+gates remain required. Retain unqualified physical labels until real measurements
+support stronger claims.
+
+Implementation now has verified single-/multi-block native activation,
+the hosted persistence/preview/participant fixes, experiment-level mapper,
+bounded Rust source generation and corrected 3DTI bridge. Native portable
+import verifies inventories and media hashes in a temporary directory, then
+publishes and rebinds all four authoring audio groups; original bundle records
+remain unchanged alongside a local rebinding receipt. A real nine-asset browser
+export passes this offline path. Premade native generation receipts also survive
+the existing profile design unchanged, with exact UTF-8/hash/WAV checks before
+export and native adoption. Actual browser export, offline re-export and native
+import pass; this preserves provenance without asserting source equivalence.
+Pages assembly now includes only referenced
+spoken assets and their checked manifests. Native immutable participant/part
+assembly, ordered instruction/block execution and durable group receipts now
+have software evidence. Installed journeys remain separate. The native preview
+explicitly excludes V1 LSL/LabRecorder capture; the existing V1 evidence does
+not transfer to the Rust preview. CURRENT_WORK remains
+the current acceptance checklist; later review findings below are historical
+starting conditions, not claims that these implementations are absent.
+
+### Product contract
+
+- First release: audiotactile PPS, Windows, online preparation/preview with
+  premade assets, and installed native acquisition. Broader modalities,
+  browser research acquisition, macOS/Linux qualification and a new freehand
+  spline editor are deferred.
+- One canonical HTML Designer and existing viewer, with explicit hosted and
+  Tauri adapters. Native errors never silently switch the application to
+  hosted mode. Retain endpoint-based polar/Cartesian trajectories, including
+  existing angular interpolation, holds and stationary modes.
+- Generation, validation, imports, levels, tactile assembly, resource checks,
+  jobs and transactional publication move to Rust. Python is an oracle in
+  development/CI only, not a shipped fallback. Retain the existing C++ 3DTI
+  spatial engine behind a corrected bounded dry-audio interface.
+- Preserve editable portable `.pps-profile` bundles and local immutable
+  experiment/session formats. Native import must extract, verify and rebind
+  assets before success; never invent online native absolute paths.
+- Review the current 94-publication corpus, candidate/boundary records and
+  experiment splits; perform a bounded foundational-paradigm check, then
+  freeze the inclusion inventory. Complete the existing 11-contract review
+  with experiment identity, source/page pointers and derivation formulas.
+  Keep expanded diagnostic matrices secondary.
+- Audited gaps may be published: not reported, explicitly absent/not
+  applicable, substitution required, contradiction, or inaccessible after
+  documented attempts. Unreviewed blanks/defaults/composite values are not
+  verified extraction. Missing evidence withholds replication-ready status.
+- Generate public review data from the existing component-gated resolver:
+  citation network → review projection → frontend. Preserve stable IDs,
+  source authority and build direction; no second database or circular build.
+  Separate parameter review, template availability and tested native capability.
+- Apply Ponytail, existing Pretext, accessibility and measured-performance
+  guidance. MobX guidance governs state-boundary assessment; this release
+  retains current state owners without a broad library/framework migration.
+
+### Parallel ownership and handoffs
+
+| Owner | Exclusive work | Consumed / produced boundary |
+| --- | --- | --- |
+| Coordinator/runtime integrator | Runner Rust actor/core, root Cargo files, shared contracts, integration and current checklist | Verified single-block activation then manifest-order completion; integrates dependency/schema changes serially |
+| Scientific catalogue worker | Literature sources/review generators, focused tests, generated network/review JSON | Existing study IDs and 11-contract resolver → sanitized `pps-publication-study-reviews.v1` projection; no native-qualification inference |
+| Rust generation worker | `packages/pps-designer-core`, 3DTI wrapper, focused PCM/QC fixtures; later profile assembly | Validated design/immutable source inventory/seed → bounded dry audio and motion → spatial audio → levels/tactile/QC/provenance |
+| UI/desktop worker | Existing Designer/Runner HTML frontend, mapper and tests; new Designer Tauri host | Shared Designer façade → explicit adapter; versioned generation requests and revision-bound jobs; public review projection → paper/study/preset UI |
+
+Use one coordinator plus at most three workers and managed worktrees.
+Independent implementations are authorized by the approved plan, overriding
+the generic skill's serial default. Do not spawn nested coordinators. Rotate
+a worker into independent review when a checkpoint finishes; share evidence
+rather than running duplicate broad review/test loops.
+
+Wave 1: scientific extraction/projection, frontend defect/mapper work and
+Rust generation proceed concurrently; coordinator completes A1 using an
+existing verified package. Wave 2: generation/profile assembly connects to
+the Tauri host while the actor gains complete block progression and science
+continues. Wave 3: close catalogue and UI verification, build/install exact
+Windows artifacts, qualify advertised routes, then promote verified outputs.
+
+Preflight ownership decisions: science owns both public data JSON files;
+UI alone owns frontend JS/HTML/CSS; coordinator alone owns root dependency
+files and Runner actor. Generation never writes the actor, and UI never
+duplicates scientific generation. Workers may temporarily enable their new
+workspace member for isolated tests; root-file changes are integrated once.
+All scope/evidence remains in this plan and CURRENT_WORK, rather than the
+generic skills' separate session/test/planning ledgers.
+
+### Acceptance and critical checks
+
+1. Every included publication has an experiment inventory or explicit access
+   blocker; every experiment's 11 contracts has a reviewed disposition.
+   Presets require resolved necessary evidence and software/route verification.
+2. Find paper → inspect study values/limitations → choose correct preset.
+   Counts, links and distinct review/template/native labels agree with data.
+3. Hosted preset selection → preview → save/reload → portable export includes
+   all instruction/media assets. Stale replies and storage failure preserve
+   recoverable draft state. Editing a generation-only parameter invalidates
+   the premade preview rather than misrepresenting it.
+4. Rust outputs satisfy actual waveform and metadata checks: exact sample
+   counts, timing/channel maps, explicit seeded algorithms and existing
+   numerical tolerances, including applicable ±0.02 dB loudness checks.
+   Current C++ continuous-only generation, hidden normalization/attenuation,
+   stationary motion and channel/hash defects must be corrected. Incorrect
+   legacy behavior is not the scientific oracle.
+5. A clean Windows install with no Python imports an online bundle offline,
+   customizes its trajectory, generates, reviews the immutable schedule,
+   executes every supported block and yields independently verified results.
+6. Corruption, missing renderer/HRTF, excessive allocation, low storage,
+   cancellation, crash and stale revisions cannot publish partial output or
+   advance review. Preserve native callback/journal and authorization fences.
+7. Actual browser/WebView controls pass keyboard/focus/names, resizing, long
+   labels and zoom checks. Canonical frontend and Pages bytes agree; verify
+   deployed routes after promotion. Builds do not prove installed behavior.
+8. Each advertised physical route passes its declared timing/calibration
+   requirements. Simulation, installation and catalogue completeness never
+   stand in for physical onset or behavioral replication.
+
+Runtime compatibility ruling: a proposed new seeded RNG is an explicit V2
+generator, never an implicit replacement for NumPy-source profiles. Request,
+provenance and fixtures must carry its algorithm version. Legacy compatibility
+stays unsupported until demonstrated or deliberately customized; regenerated
+catalogue evidence is required before promotion. This keeps a small first
+kernel from making a false scientific-equivalence claim.
+
+Source completion, deployed Pages, downloadable packages and scientific
+qualification each require their own evidence. The overall goal stays open
+until all applicable gates pass.
+
 Reviewed source: `e53a3621ec22697e9748792048e1fff98bfb33d9` (2026-10-27).
 Three independent read-only reviews covered runtime/data, authoring/UI, and
 science/release. The coordinator checked the main boundaries and consolidated

@@ -501,6 +501,10 @@ code {
   border-color: #dfb9b4;
 }
 
+[data-companion-only][hidden] {
+  display: none !important;
+}
+
 .profile-mode-panel,
 .companion-panel {
   display: grid;
@@ -1338,8 +1342,33 @@ code {
   background: var(--surface-2);
 }
 
+.publication-network-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.publication-network-search-row input {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+}
+
+.publication-network-readiness {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.publication-network-readiness dt { font-weight: 700; }
+.publication-network-readiness dd { margin: var(--space-1) 0 0; overflow-wrap: break-word; }
+.publication-network-contract-evidence { display: grid; gap: var(--space-2); padding: var(--space-3); min-width: 0; }
+.publication-network-contract-evidence > * { min-width: 0; overflow-wrap: anywhere; }
+
 .publication-network-workspace.detail-open {
-  grid-template-columns: minmax(320px, 720px) minmax(320px, 420px);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
 }
 
 .publication-network-stage {
@@ -1873,10 +1902,18 @@ code {
   flex: 1 0 auto;
 }
 
-@media (max-width: 1040px) {
-  .publication-network-workspace.detail-open {
-    grid-template-columns: minmax(300px, 1fr) minmax(320px, 40%);
+.publication-network-shell { container-type: inline-size; }
+
+@container (max-width: 700px) {
+  .publication-network-summary-row,
+  .publication-network-utilities,
+  .publication-network-results-toolbar {
+    grid-template-columns: minmax(0, 1fr);
   }
+
+  .publication-network-detail { max-height: none; overflow: visible; }
+  .publication-network-detail-heading { position: static; }
+  .publication-network-summary-row button { min-height: 44px; }
 }
 
 @media (max-width: 760px) {
@@ -3845,13 +3882,18 @@ a:focus-visible,
 }
 
 .noise-type-row-secondary {
-  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  /* These three ordered choices share a row, keeping the middle hint centred
+     between the existing edge-anchored hints even with classic scrollbars. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .noise-type-button {
   position: relative;
   width: 100%;
 }
+
+/* Measure the label's text track, independently of the button's hint popup. */
+.noise-type-label { display: block; inline-size: 100%; min-inline-size: 0; }
 
 .noise-type-primary {
   min-height: 46px;
@@ -3991,6 +4033,7 @@ a:focus-visible,
 .bake-action-row {
   grid-column: 1 / -1;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin-top: 4px;
@@ -5962,6 +6005,16 @@ a:focus-visible,
   overflow-wrap: anywhere;
 }
 
+.native-iti-details {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.native-iti-details > summary {
+  display: block;
+}
+
 .profile-validation-panel:not([open]) { margin-bottom: 8px; }
 
 .block-preview-table td[data-label="WAV"] {
@@ -6858,7 +6911,7 @@ body.modal-open {
   }
 
   .site-tab[data-page-tab="documentation"] .tab-label-short {
-    display: inline;
+    display: inline-block;
   }
 
   .site-tab[data-page-tab="toolkit"] .tab-label-full {
@@ -6866,7 +6919,7 @@ body.modal-open {
   }
 
   .site-tab[data-page-tab="toolkit"] .tab-label-short {
-    display: inline;
+    display: inline-block;
   }
 
   .info-page,
@@ -7279,22 +7332,59 @@ body:not(.desktop-applet) .legacy-session-action {
   display: none;
 }
 
-body.desktop-applet [data-page-tab="documentation"],
-body.desktop-applet [data-page-tab="downloads"],
+body.desktop-applet:not(.native-designer) [data-page-tab="documentation"],
+body.desktop-applet:not(.native-designer) [data-page-tab="downloads"],
 body.desktop-applet .companion-panel,
 body.desktop-applet .rail-note {
   display: none !important;
 }
 
-body.desktop-applet .topbar {
+body.desktop-applet:not(.native-designer) .topbar {
   display: none;
 }
 
-body.desktop-applet .workspace {
+body.native-designer .legacy-session-action {
+  display: none;
+}
+
+#native-generation-controls:not([hidden]) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding-block: 12px;
+}
+
+#native-generation-controls > label:first-child,
+#native-generation-status {
+  flex-basis: 100%;
+  min-width: 0;
+}
+
+#native-generation-controls > label:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#native-source-opt-in {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+}
+
+#native-source-seed {
+  width: 10ch;
+}
+
+body.desktop-applet:not(.native-designer) .workspace {
   padding-top: var(--layout-gutter);
 }
 
-body.desktop-applet .segment-heading {
+body.desktop-applet:not(.native-designer) .segment-heading {
   top: var(--layout-gutter);
 }
 
@@ -7683,6 +7773,8 @@ body.desktop-applet .segment-heading {
     width: 100%;
     min-width: 0;
   }
+
+  .filmstrip-element.sequence-event { flex-basis: auto; }
 
   .panel.profile-readonly [data-add-strip-element],
   .panel.profile-readonly [data-add-strip-row],
@@ -8198,8 +8290,275 @@ body.desktop-applet .segment-heading {
     outline-color: Highlight;
   }
 }
-.decision-segment [data-pretext-result="no-fit"] {
-  overflow-wrap: anywhere;
+#native-execution { margin-top: 16px; min-width: 0; }
+.native-execution-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-block: 12px; min-width: 0; }
+.native-execution-actions label { display: flex; flex-direction: column; gap: 6px; min-width: 0; max-width: 100%; }
+.native-execution-actions label:has(input[type="checkbox"]), .native-review-confirm { display: flex; flex-direction: row; align-items: start; gap: 8px; }
+#native-execution input[type="checkbox"] { width: 18px; height: 18px; flex: 0 0 18px; }
+#native-execution input[type="number"] { width: 100px; }
+#native-execution button, #native-execution select { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+#native-occurrence-table { table-layout: fixed; width: 100%; }
+#native-occurrence-table td, #native-occurrence-table th { overflow-wrap: anywhere; }
+
+/* Outside-in stretch: the workflow is a document; each resizable utility panel
+   owns its header, ordered groups and footer. Content that outgrows its budget
+   expands the document, never an inner settings scrollbar. */
+:root {
+  --stretch-space: clamp(.75rem, min(1.2vw, 1.8dvh), 1.5rem);
+  --stretch-gap: clamp(.5rem, min(.8vw, 1.2dvh), 1rem);
+  --stretch-type: clamp(1rem, min(.85rem + .16vw, .85rem + .24dvh), 1.125rem);
+  --panel-padding: var(--stretch-space);
+  --panel-gap: var(--stretch-space);
+}
+
+.app-shell, .workspace, .page-view, .decision-segment,
+.panel, .panel > *, .ingredient-editor > *, .trajectory-settings > *,
+.field-row, .panel-heading > *, .action-row > *, .step-footer > * {
+  min-inline-size: 0;
+}
+
+.decision-segment { margin-block-start: var(--stretch-space); }
+.decision-segment > .segment-heading { gap: var(--stretch-gap); }
+.panel[data-resizable-panel] {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--stretch-space);
+  min-block-size: clamp(18rem, 52dvh, 38rem);
+  overflow: visible;
+}
+.panel[data-resizable-panel].user-sized {
+  min-block-size: max(18rem, var(--panel-user-height));
+}
+.panel[data-resizable-panel] > :is(.panel-heading, .step-footer, .action-row),
+.panel[data-resizable-panel] > .source-module {
+  margin-block: 0;
+}
+.panel[data-resizable-panel] > :not(.panel-resize-handle) { flex-shrink: 0; }
+.panel[data-resizable-panel] > .step-footer { position: static; }
+.panel[data-resizable-panel] > [hidden] { display: none; }
+.panel-heading, .toolbar-actions, .preview-actions, .run-preview-toolbar {
+  flex-wrap: wrap;
+  gap: var(--stretch-gap);
+}
+.panel-title { flex-wrap: wrap; }
+
+/* Ordered subpanels stretch with their allocated row; labels stay with inputs. */
+.ingredient-editor:not([hidden]), .trajectory-settings:not([hidden]),
+.source-module:not([hidden]), .run-instructions-panel:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--stretch-gap);
+  min-inline-size: 0;
+}
+.ingredient-editor > *, .trajectory-settings > *, .source-module > * {
+  flex-shrink: 0;
+  margin-block: 0;
+}
+.stimulus-editor-grid, .source-action-grid, .source-mode-choice-grid,
+.run-decision-grid, .run-instruction-slots, .baseline-option-grid,
+.split-fields, .loudness-grid, .count-strip, .run-instruction-slot {
+  gap: var(--stretch-gap);
+  min-inline-size: 0;
+  align-content: space-between;
+}
+.field-row { align-content: start; gap: .375rem; }
+.field-row label { font-size: max(.875rem, calc(var(--stretch-type) - .125rem)); }
+.decision-segment :is(button, input, select, textarea),
+.modal-card :is(button, input, select, textarea) { font-size: var(--stretch-type); }
+.decision-segment :is(button, .button-link), .modal-actions button {
+  min-block-size: max(var(--control-height), 2.5rem, var(--pretext-min-height, 0px));
+  max-inline-size: 100%;
   white-space: normal;
+  overflow-wrap: break-word;
+}
+.site-tab > .tab-label-full, .brand-name, .brand-subtitle { display: inline-block; }
+.decision-segment :is(.bounded-select-button, .bounded-select-value, .audio-source-file-status) {
+  block-size: auto;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-overflow: clip;
+}
+.segment-zero-picker :is(.bounded-select-button, #start-new-custom-design) {
+  height: 100%;
+  min-height: max(var(--control-height), var(--pretext-min-height, 0px));
+}
+.segment-zero-picker { align-items: stretch; }
+.segment-zero-profile-field { grid-template-rows: auto minmax(0, 1fr); }
+.segment-zero-picker > #start-new-custom-design { align-self: end; height: auto; }
+.stimulus-editor-grid > .stimulus-preview-panel {
+  display: grid;
+  grid-template-rows: auto minmax(18rem, 1fr);
+  gap: var(--stretch-gap);
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+.stimulus-preview-panel > .panel-heading { margin: 0; }
+.stimulus-preview-panel > iframe { min-height: max(18rem, var(--trajectory-hud-min-height, 0px)); height: 100%; }
+.baseline-tactile-workbench, .block-workbench, .run-grid { align-items: stretch; }
+.run-instruction-slot { grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); }
+.run-instruction-slot > * { min-inline-size: 0; }
+.run-instruction-slot .instruction-import-button { white-space: normal; }
+.source-card-heading { flex-wrap: wrap; }
+.source-card-heading strong { min-inline-size: 0; overflow-wrap: anywhere; }
+.source-card-actions { min-inline-size: 0; max-inline-size: 100%; }
+.workspace { container-type: inline-size; }
+.stimulus-editor-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr)); }
+@container (max-width: 58rem) {
+  .baseline-tactile-workbench, .block-workbench, .table-grid,
+  .capture-option-grid, .run-decision-grid { grid-template-columns: minmax(0, 1fr); }
+  .baseline-tactile-panel .baseline-option-card.baseline-custom {
+    grid-template-columns: 18px minmax(0, 1fr);
+    grid-template-areas: "radio graphic" ". title" ". copy";
+  }
+  .workspace-splitter { display: none; }
+}
+@container (max-width: 35rem) {
+  .segment-zero-picker, .source-action-grid, .baseline-option-grid,
+  .trial-family-toggles, .run-preview-controls { grid-template-columns: minmax(0, 1fr); }
+  .noise-picker-card { grid-column: auto; }
+}
+/* Scientific row tables need their existing labelled-card/reveal policy before
+   their 1040px minimum could be clipped by a narrower open block detail. */
+@container (max-width: 76rem) {
+  table.mobile-card-table, table.mobile-card-table tbody, table.mobile-card-table tr,
+  table.mobile-card-table td { display: block; width: 100%; min-width: 0; }
+  table.mobile-card-table { table-layout: auto; }
+  .block-preview-table { min-width: 0; }
+  table.mobile-card-table thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%);
+  }
+  table.mobile-card-table tbody { display: grid; gap: var(--stretch-gap); }
+  table.mobile-card-table td, .block-preview-table.mobile-card-table td {
+    display: grid; width: 100% !important; max-width: 100%;
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+    gap: var(--stretch-gap); white-space: normal; overflow-wrap: anywhere;
+  }
+  table.mobile-card-table td::before { content: attr(data-label); color: var(--muted); }
+  .block-preview-table:not(.mobile-show-all) tbody tr:nth-child(n + 7) { display: none; }
+  .mobile-table-more { display: block; width: 100%; margin-block-start: var(--stretch-gap); }
+}
+
+/* Documents, inventories and scientific tables retain their existing detail /
+   pagination policy. The selected publication detail joins document flow. */
+.publication-network-detail { max-block-size: none; overflow: visible; }
+.publication-network-detail-heading { position: static; }
+.publication-network-summary-row {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--stretch-gap);
+}
+.publication-network-summary-row > * { min-inline-size: 0; overflow-wrap: break-word; }
+.publication-network-shell:fullscreen { margin: 0; inset: 0; }
+.publication-network-shell:fullscreen > * { flex-shrink: 0; }
+.publication-network-shell:fullscreen .publication-network-workspace { flex-grow: 0; }
+.publication-network-shell:fullscreen .publication-network-stage {
+  inline-size: min(100%, var(--network-fullscreen-graph-size, 60dvh));
+}
+.publication-network-tooltip { overflow-wrap: break-word; font-size: max(.875rem, 12px); }
+.publication-network-tooltip[data-inline="true"] {
+  position: static;
+  margin: 12px;
+}
+.publication-network-stage:has(.publication-network-tooltip[data-inline="true"]:not([hidden])) {
+  aspect-ratio: auto;
+}
+.publication-network-stage:has(.publication-network-tooltip[data-inline="true"]:not([hidden])) #publication-network-graph {
   height: auto;
+  aspect-ratio: 1;
+}
+.info-card, .metric-card, .workflow-summary-grid > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--stretch-gap);
+}
+.info-card > *, .metric-card > *, .workflow-summary-grid > div > * { min-inline-size: 0; }
+
+/* A form dialog is bounded at normal sizes; under zoom/short-window pressure
+   the overlay scrolls as one document, leaving no nested form scroll area. */
+.modal-backdrop { overflow: auto; padding: var(--stretch-space); }
+.modal-card {
+  max-height: none;
+  overflow: visible;
+  margin-block: auto;
+  padding: var(--stretch-space);
+  min-inline-size: 0;
+}
+.modal-card > form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--stretch-space);
+  min-block-size: clamp(15rem, 36dvh, 24rem);
+}
+.modal-card > form > * { margin-block: 0; min-inline-size: 0; }
+.modal-heading { position: static; margin: 0; padding: 0 0 var(--stretch-gap); gap: var(--stretch-gap); }
+.modal-heading > div { min-inline-size: 0; overflow-wrap: break-word; }
+.modal-heading > button { flex-shrink: 0; }
+/* About is an unbounded reading document, separate from the utility forms.
+   Keep its title/close anchor visible while the reading region scrolls. */
+#segment-info-modal { grid-template-rows: minmax(0, 1fr); }
+.segment-info-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  /* The fixed overlay owns the zoom-adjusted budget; viewport units do not. */
+  max-block-size: 100%;
+  min-block-size: 0;
+}
+.segment-info-body {
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.segment-info-body:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.modal-actions { flex-wrap: wrap; gap: var(--stretch-gap); }
+.modal-actions > button { flex: 1 1 8rem; }
+
+@media (min-width: 761px) {
+  .app-shell {
+    display: grid;
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: var(--layout-gutter);
+    padding: var(--layout-gutter);
+    min-block-size: 100dvh;
+  }
+  .rail {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    position: sticky;
+    inset: var(--layout-gutter) auto auto;
+    align-self: start;
+    width: auto;
+    min-block-size: calc(100dvh - 2 * var(--layout-gutter));
+    padding: var(--stretch-space);
+    gap: var(--stretch-space);
+    overflow: visible;
+  }
+  .rail .rail-nav-group.active {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--stretch-gap);
+  }
+  .rail-nav-group a { min-block-size: 2.5rem; }
+  .rail .rail-note { margin-block-start: 0; }
+  .topbar { grid-column: 2; grid-row: 1; margin: 0; top: 0; }
+  .workspace { grid-column: 2; grid-row: 2; margin: 0; padding: 0; }
+  body.desktop-applet:not(.native-designer) .workspace { grid-row: 1 / span 2; }
+  .topbar, .segment-heading { position: static; }
+}
+@media (min-width: 761px) and (max-height: 760px) {
+  .rail { position: static; }
+}
+@media (max-width: 760px) {
+  .panel[data-resizable-panel] { min-block-size: 0; }
+  .rail, .topbar { position: static; }
+  .modal-backdrop { place-items: start center; }
+  .modal-card { margin-block: auto; }
 }
