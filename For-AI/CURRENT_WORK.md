@@ -468,7 +468,9 @@ The next candidate repeats actual Cancel/Confirm and the whole pipeline. Fresh
 scientific pipelines now continue after an installed UI failure when the native
 test owners are available, retaining evidence without masking the failed job.
 At `ff72fa98`, [source CI](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40780012977)
-passes all 14 jobs. The [Windows candidate](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40780005491)
+passes all 14 jobs; Windows Standard passes 762 tests with nine assessed scope
+skips and one Python deprecation warning (1,949.10 s).
+The [Windows candidate](https://github.com/GeorgeFejer91/pps-kit/actions/runs/40780005491)
 builds both installers and passes exact installed payload checks, genuine
 Designer generation/preview, external-browser acknowledgement, actual mapper
 Cancel/Confirm and Runner startup. Fresh captures cover all 30 presets and all

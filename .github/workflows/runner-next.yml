@@ -208,6 +208,8 @@ jobs:
             artifacts/ui-workflow-check/browser-finalized-full-block-plan.json
             artifacts/ui-workflow-check/browser-finalized-binding.json
             artifacts/ui-workflow-check/report.json
+            artifacts/ui-workflow-check/failure-*.json
+            artifacts/ui-workflow-check/failure-*.png
             artifacts/installed-native-candidate/*.json
             artifacts/designer-stretch/*.json
             artifacts/designer-stretch/*.png
