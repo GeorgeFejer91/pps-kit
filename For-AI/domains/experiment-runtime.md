@@ -49,6 +49,8 @@ publication. Segment jobs reuse one completion handler and the existing rebuild
 rollback owner. Cancellation after publication begins is reported as completion,
 not as an unpublished result. Use the existing renderer's `auto` selection and
 retain its explicit native/reference provenance.
+Accepted Segment 5 block CSVs reject regeneration before a job is queued. The
+segment worker rechecks acceptance before building to retain the race guard.
 
 `resource_limits.py` owns bounded assembly CSV reads, plan-entry limits, and
 conservative PCM16/scratch/float32 estimates. Generation and block preparation
