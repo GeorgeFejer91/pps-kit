@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -375,4 +376,4 @@ def test_protocol12_matrix_materializes_session_packages_under_each_profile_root
         assert result["template_id"] in str(expected_root)
         assert session_dir == expected_root or expected_root in session_dir.parents
         assert session_manifest == expected_root or expected_root in session_manifest.parents
-        assert session_manifest.exists()
+        assert os.path.isfile(matrix._filesystem_path(session_manifest))

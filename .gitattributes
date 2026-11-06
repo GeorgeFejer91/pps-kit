@@ -21,6 +21,7 @@ apps/runner/**/*.html text eol=lf
 apps/runner/**/*.js text eol=lf
 apps/runner/**/*.json text eol=lf
 packages/pps-resources/assets/ui/*.mjs text eol=lf
+packages/pps-resources/assets/app/*.svg text eol=lf
 
 # Pages copies these public text inputs directly; keep their bytes portable.
 website/.nojekyll text eol=lf
