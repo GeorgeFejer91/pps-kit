@@ -1,72 +1,81 @@
 # Current work
 
-Reviewed: 2026-10-27. Overall completion goal: **OPEN**.
+Reviewed: 2026-11-06. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
 - **Goal:** complete Designer → immutable experiment profile → native Runner →
   inspectable results, then a reproducible installed candidate and measured
-  qualification for its explicitly supported profiles/platforms/routes.
-  The [completion review and multi-agent plan](engineering/validation/docs/completion-review-2026-10-27.md)
-  defines the finish criteria and extends the original 17 audit items.
-- **Current milestone:** M0, agent setup and critical review, delivered.
-  The user requested installation, integration, domain suggestions and a plan;
-  this checkpoint does not implement the product fixes or publish a release.
-- **Owners:** one coordinator and at most three workers, with the domain/path
-  ownership and ordered waves in the completion plan. Keep the existing
-  3DTI/viewer, Segment 0–6, schemas, Rust authority and Python oracle.
-- **Product source:** existing generation, JSON/compatibility handoff,
-  callback-confirmed controls, response scoring and journal safeguards remain.
-  Real native package activation, native profile assembly and multi-block
-  execution are incomplete. Four reproduced frontend consistency/portability
-  defects and release/documentation gaps are recorded in the completion review.
-- **Evidence:** the single [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md)
-  identifies exact source and checks. Source, CI packages, installed behavior,
-  physical timing, participant results and replication remain distinct gates.
-  Neither installed application nor public downloads changed in this task.
-- **Next action:** select the named release support matrix, capture the A1
-  activation regression through normal IPC, and begin Wave 1's independent
-  UI and validation/build work. A1 acceptance is one real single-block package
-  with existing stale-state, safety and durable-result denials preserved.
-  Do not bypass readiness flags to make a demo appear executable.
-- **Local validation:** the previous storage blocker is no longer observed:
-  approximately 65.5 GiB is free on the workspace volume as of 2026-10-27,
-  above the 15 GiB working allowance. Full native builds, installed verification
-  and the complete Standard tier were not rerun during this documentation task.
-  Recheck free space, then resume those existing validation gates when selected.
-- **Installed agent baseline:** updated For-AI, 23 GSD skills/35 converted roles,
-  15 prefixed Superpowers skills and three Agents Inc companions. Existing
-  RTK/Ponytail/Tauri/Pretext retained. See [provenance](skills/baseline-lock.json).
-  Metadata checks passed for all 42 installed/updated skills and six unchanged
-  supporting skills; role TOMLs, runtime references and GSD identity/discovery
-  smoke checks passed. Live Codex settings/hooks were preserved.
-- **Checkpoint checks:** repository-structure and release-audit tests passed
-  (5 tests); 106 local guidance links and patch whitespace checks passed.
-  Four bounded source-function reproductions confirmed B1–B3 and C1; the
-  ignored reproduction artifact is recorded in the completion review.
-- **Git observation:** review began on clean `main` at `e53a3621`, synchronized
-  with `origin/main` after fetch/pull. This checkpoint changes guidance and
-  agent skill packages only; report and verify its final commit/push at handoff.
+  qualification for explicitly supported profiles/platforms/routes. The
+  [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
+  owns the finish criteria and work packages.
+- **Current milestone:** M1, partial. The requested validation task delivered
+  verified source fixes and a retained validation run; full validation sign-off
+  remains open. M0 setup/review is complete.
+- **Source checkpoints:** `ba088bb9` pins shared browser modules to LF;
+  `3baff2dd` rejects accepted-block regeneration before queueing while retaining
+  the worker race guard; `e2676481` fixes SVG newline, minified CSS, routed
+  guidance and Windows long-path validation; `0208ca0d` pins Vite 6.4.5 and
+  source-map-js 1.2.2 in both frontend locks. All four were committed/pushed.
+  Rebuilt canonical frontend bytes remain identical to the prior committed
+  artifacts. No installed application or public download was rebuilt here.
+- **Verified locally:** Quick (30 tests), Rust 1.88 Core fmt/check/Clippy and
+  127 tests/doctests; three Python/Rust differential tests; 55 session/diary/
+  response checks; two block regressions and eight generation/job checks;
+  two prepared-profile/loopback software smokes; the Windows profile-local
+  package regression; 21 frontend contract checks; Runner's 65 frontend tests;
+  both clean npm installs/builds and zero-advisory audits; Go 1.22.12 downloader
+  tests; two Pages assembly checks. These are software evidence.
+- **Rendered/public evidence:** inspected Designer audit (12 cases), participant
+  and output audits (six each), and shared text/lifecycle audit (15). Runner
+  audits use a mocked native bridge. Public byte audit passed 470 files and
+  four main routes after the dependency-patch deployment. Latest CI/deployment
+  observations are retained in the implementation record and checked at handoff.
+- **Standard gate: BLOCKED / NON-GREEN.** The first complete run collected 639
+  tests: 573 passed, 19 failed, 37 setup errors, 10 skipped. Fourteen failures
+  and all 37 setup errors subsequently passed owning rechecks. Five independent
+  publication/evidence checks still fail: a review's schema/provenance metadata,
+  catalogue status/determinism, and orientation-review counts. Their assertions
+  and scientific records were preserved. A fresh guarded Standard retry stopped
+  below 192 MiB free; it did not finish. Do not aggregate focused passes into a
+  claimed Standard pass. See the [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
+- **Storage:** the former shortage has returned. The volume began near 2.2 GiB
+  free, reached zero during the first combined run, and recovered to under
+  1 GiB after generated-cache compression and test cleanup. Allow approximately
+  15 GiB before another complete Python/native run. No unrelated files,
+  worktrees or failed-run records were removed. Detailed logs, screenshots,
+  schema findings and the temporary Go toolchain stay in ignored artifacts.
+- **Next action:** recover the working disk allowance; reconcile the five
+  scientific evidence/derived-catalogue failures through their existing owners;
+  then finish Standard and the applicable native/installed gates. Continue
+  M1's B1–B3/C1 and build/release work, followed by A1 through normal IPC.
+  Keep the release support matrix explicit and never bypass readiness flags.
+- **Git observation:** branch `main`; source fixes pushed through `0208ca0d`
+  using the explicit repository URL and checked against the remote. The active
+  local origin configuration is missing; fetch also fails on
+  `refs/heads/codex/pps-publication-integration (# Name clash 2026-11-03 mvwxhkC #)`.
+  Saved configuration conflicts, the earlier bundle/backup and worktrees were
+  preserved. Three executable-mode changes present on entry remain unstaged
+  (the two Designer Linux launch/package files and Quest gradlew). This record
+  is handed off by the following documentation checkpoint; check fresh Git state.
+- **Installed agent baseline:** retain the [reviewed baseline lock](skills/baseline-lock.json)
+  and existing RTK/GSD/Superpowers routes. No configuration/hooks or agent
+  packages were changed by this validation task.
 
 ## Active completion checklist
 
-- [x] M0 — Install the current baseline, integrate routes and produce the
-  evidence-linked domain review and conflict-safe multi-agent plan.
-- [ ] M1 — Fix authoring/participant defects and complete the validation/build
-  baseline: B1–B3, C1, G1–G2, H1–H2; owning regressions and applicable CI pass.
+- [x] M0 — Install the baseline, integrate routes and produce the completion review/plan.
+- [ ] M1 — Authoring/participant fixes and validation/build baseline: B1–B3, C1,
+  G1–G2, H1–H2. Validation has verified checkpoints but remains non-green.
 - [ ] M2 — Execute one real single-block package through native authority (A1).
-- [ ] M3 — Complete native profile assembly, all-block execution and the
-  operator journey (A2–A3, C2); Python/Rust handoff and result parity pass.
-- [ ] M4 — Close supported acquisition/recovery, accessibility/performance and
-  evidence-record gaps (D1–D2, F1–F2, I1) with their named checks.
-- [ ] M5 — Build and inspect exact-revision installed packages, then qualify
-  advertised phone and physical routes (G3, E1, D3, I2).
-- [ ] M6 — Review all finish criteria, supported-scope claims and release
-  artifacts; publish only under the matching release authorization.
+- [ ] M3 — Native profile assembly, all-block execution and operator journey
+  (A2–A3, C2), with Python/Rust handoff and result parity.
+- [ ] M4 — Supported acquisition/recovery, accessibility/performance and
+  evidence-record gates (D1–D2, F1–F2, I1).
+- [ ] M5 — Exact-revision installed packages and advertised phone/physical
+  qualification (G3, E1, D3, I2).
+- [ ] M6 — Finish-criteria/claims/artifact review; publish only under matching
+  release authorization.
 
-Current blockers are incomplete product paths and missing installed/physical
-evidence, not the former storage shortage. Hardware availability and measured
-route decisions remain explicit external gates. No new participant study,
-optional XR work, MobX dependency or additional transport is implied.
-
-Detailed run artifacts stay in ignored validation folders. Preserve the pre-sync
-Git bundle and dirty-file backup until reconciliation is verified.
+Native activation/profile assembly/multi-block capability, installed inspection,
+physical timing/calibration and phone qualification remain distinct open gates.
+No participant study, optional XR work, new transport or MobX adoption is implied.
