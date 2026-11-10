@@ -20,31 +20,35 @@ This file is the active checklist and handoff owner; replace state, do not appen
   the test app before the harness timed out during shutdown. Public source
   promotion remains open. All 28 canonical Designer files match the local
   Pages assembly byte for byte.
-- **Suite candidate:** source through `38166fc1` is pushed to the review
+- **Suite candidate:** source through `ecdadf98` is installed locally and pushed to the review
   branch. Frozen Planner and Runner use one installed Shared directory.
   The Full downloader packages 3DTI, its native DLLs and FABIAN HRTF data,
   Microsoft Visual C++ 2013 and v14 x64, and standalone WebView2 x64.
   The build verified Microsoft signatures and the pinned hashes. Setup
   verifies those hashes before starting any missing runtime's installer.
   The Native Instruments ASIO driver remains a separate lab hardware step.
-- **Installer evidence:** a fresh loopback install of the 565,392,489-byte
+- **Installer evidence:** a fresh loopback install of the 565,392,920-byte
   Full package passed 23 required inventory checks and created shortcuts for
   both apps in a disposable Windows profile. Reuse passed. The Windows test
   host already had all three Microsoft runtimes. Go tests exercised missing
   and modified bundle files and simulated runtime provisioning. Test actual
   provisioning on a clean Windows host before release.
-- **Desktop baseline:** installed 3DTI generated a fresh 3 s brown-noise WAV
-  with two audio channels and a tactile channel at 44.1 kHz. The native CLI
-  now also accepts a relative render output directory. The installed Planner
-  exposed its three bridge actions and generated a 4 s brown-noise stimulus
-  from its normal controls. The UI job succeeded and an extended-path read
-  verified the WAV after the harness missed the long output path. The bundled
-  Runner imported a synthetic one-block JSON profile using the Planner's
-  generated WAV and materialized a `pps-run-session.v1` session. Both the
-  bundled-study smoke and synthetic fixture timed out before the run-window
-  checks finished. Three source checks for profiles, Runner software and
-  marker loopback passed. Complete normal Planner export and installed Runner
-  execution with inspectable results.
+- **Installed software handoff:** the installed Planner generated a 4 s brown
+  stimulus in native 3DTI, built four trials, passed sequential review, locked
+  the plan and exported a JSON referencing eight verified files. The installed
+  Runner imported those exact export bytes through `--experiment-profile`.
+  Its realtime software validation completed all four trials, logged four
+  response windows and produced a four-row final outcomes CSV. Ordinary lab
+  playback remains subject to the hardware preflight.
+- **Native workflow:** `ecdadf98` adds **Open Experiment JSON** to the Runner
+  launcher and fixes long Windows paths in Planner export and Runner import.
+  Eighty-three focused tests passed and eight were skipped. The locked-plan
+  export regression passed. `52fe94af` restores pointer input on the Planner's
+  locked export button. The correction was tested as a local style override in
+  the installed WebView and opened the native Save As dialog. A Windows firewall
+  prompt for Node covered the Save button, so the handoff used captured export
+  bytes. The rebuilt source matched 28 Pages files byte for byte and passed the
+  study preview audit. The installed candidate predates this CSS checkpoint.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.
@@ -72,19 +76,21 @@ This file is the active checklist and handoff owner; replace state, do not appen
   and all 37 setup errors subsequently passed owning rechecks. Five independent
   publication/evidence checks still fail: a review's schema/provenance metadata,
   catalogue status/determinism, and orientation-review counts. Their assertions
-  and scientific records were preserved. A fresh guarded Standard retry stopped
+  and scientific records were preserved. A targeted Designer static-assets
+  check also expects a legacy Runner URL. A fresh guarded Standard retry stopped
   below 192 MiB free; it did not finish. Do not aggregate focused passes into a
   claimed Standard pass. See the [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
-- **Storage:** approximately 9.4 GiB free after the Full candidate verification.
+- **Storage:** approximately 5.2 GiB free after the Full candidate verification.
   Allow approximately 15 GiB before another complete Python/native run. Keep
   candidate binaries, logs, screenshots, schema findings and the temporary Go
   toolchain in ignored artifacts.
 - **Next gates:** verify the public PWA routes and bytes at source promotion.
-  In the native track, qualify missing-runtime setup and the installed Planner
-  to Runner handoff. Recover the working disk allowance, reconcile the five
-  evidence/catalogue failures through their owners, and complete Standard.
-  Continue M1 and A1 through normal IPC with the applicable native and
-  installed gates. Public suite release remains open.
+  Repackage the pointer fix and complete the native Save As and graphical
+  Runner import on the installed copy. Verify missing-runtime setup on clean
+  Windows and qualify the lab audio route. Recover the working disk allowance,
+  reconcile the Standard failures through their owners, and complete Standard.
+  Continue M1 and A1 through normal IPC with applicable native and installed
+  gates. Public suite release remains open.
 - **Hosted credits:** `5b269569` moved the George Fejer credit into the hosted
   Designer header as a linked profile box with the portrait from his academic
   site. The BIAL Foundation credit remains beside it. The 12-case Designer
