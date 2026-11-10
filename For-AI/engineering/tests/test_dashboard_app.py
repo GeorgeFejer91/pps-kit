@@ -2872,8 +2872,7 @@ def test_dashboard_failed_generated_remake_preserves_original_and_downstream(tmp
 
 def test_dashboard_bake_generated_noise_can_use_continuous_source_mode(tmp_path: Path, monkeypatch):
     client = _client(tmp_path)
-    custom = client.post("/api/templates/__custom__/load").json()
-    custom["design"]["name"] = "Continuous source bake"
+    custom = client.post("/api/project/new-custom", json={"name": "Continuous source bake"}).json()
     custom["design"]["protocol"]["soa_values_ms"] = [300]
     custom["design"]["protocol"]["spatial_values_cm"] = [100.0]
     custom["design"]["protocol"]["include_baseline_trials"] = False
@@ -2924,12 +2923,14 @@ def test_dashboard_bake_generated_noise_can_use_continuous_source_mode(tmp_path:
         },
     ).json()
     done = _wait_job(client, job["job_id"])
-    state = client.get("/api/state").json()
-
     assert done["status"] == "succeeded"
+    reopened = client.post(f"/api/projects/{custom['project']['project_id']}/load", json={})
+    assert reopened.status_code == 200
+    state = reopened.json()
     baked_noise = next(noise for noise in state["design"]["noises"] if noise["label"] == "Continuous blue")
     assert baked_noise["source_profile"] == "continuous_noise"
     assert baked_noise["source_profile_parameters"] == {}
+    assert baked_noise["prebaked_path"] == done["result"]["wav_path"]
 
 
 def test_dashboard_batch_bakes_trial_sequence_row_variant_folders(tmp_path: Path):

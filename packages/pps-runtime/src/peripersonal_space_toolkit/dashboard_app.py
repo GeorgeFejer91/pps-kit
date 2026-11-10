@@ -1609,6 +1609,16 @@ class DashboardController:
             if isinstance(recipe.get("audio"), dict)
             else ""
         )
+
+        def commit_ingredient_design(active_project: DashboardProjectContext, updated_design: StimulusDesign) -> Path:
+            self.design = updated_design
+            _clear_downstream_segment_outputs(active_project, from_segment=1)
+            _write_project_context_files(active_project, self.design)
+            report = _write_segment_validation_report(active_project, self.design)
+            self.current_run_package = None
+            save_design(self.design, self.design_path)
+            return report
+
         if recipe_kind == "fixed_audio":
             audio_payload = dict(recipe.get("audio") or {})
             source_input_path = str(audio_payload.get("source_input_path") or audio_payload.get("path") or "").strip()
@@ -1682,11 +1692,7 @@ class DashboardController:
                                 },
                                 replace_label=original_label if action == "remake" else "",
                             )
-                            self.design = commit_design
-                            _clear_downstream_segment_outputs(active_project, from_segment=1)
-                            report = _write_segment_validation_report(active_project, self.design)
-                            self.current_run_package = None
-                            save_design(self.design, self.design_path)
+                            report = commit_ingredient_design(active_project, commit_design)
                 finally:
                     _remove_tree(staging_dir)
                 _remove_replaced_ingredient_file(original_entry, staged_copy, active_project.segment1_dir, keep_paths={source_path})
@@ -1744,11 +1750,7 @@ class DashboardController:
                                 },
                                 replace_label=original_label,
                             )
-                            self.design = commit_design
-                            _clear_downstream_segment_outputs(active_project, from_segment=1)
-                            report = _write_segment_validation_report(active_project, self.design)
-                            self.current_run_package = None
-                            save_design(self.design, self.design_path)
+                            report = commit_ingredient_design(active_project, commit_design)
                     return {
                         "status": "baked",
                         "source_kind": "imported_audio",
@@ -1841,11 +1843,7 @@ class DashboardController:
                             saved_source = asdict(source)
                         _replace_stimulus_source(commit_design, source, source_kind, original_label=original_label if action == "remake" else "")
                         _propagate_source_label_rename(commit_design, original_label, label)
-                        self.design = commit_design
-                        _clear_downstream_segment_outputs(active_project, from_segment=1)
-                        report = _write_segment_validation_report(active_project, self.design)
-                        self.current_run_package = None
-                        save_design(self.design, self.design_path)
+                        report = commit_ingredient_design(active_project, commit_design)
             finally:
                 _remove_tree(staging_dir)
             _remove_replaced_ingredient_file(original_entry, wav_path, active_project.segment1_dir, keep_paths={Path(str(source_payload.get("source_input_path") or "."))})
