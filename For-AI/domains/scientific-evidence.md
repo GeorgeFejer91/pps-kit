@@ -34,7 +34,11 @@ observed behavioral replication are distinct tiers. Synthetic data/runnable
 templates cannot demonstrate a published PPS effect. Simplification must
 retain validation and calibration.
 
-Track compact provenance/verdicts/blockers. Raw papers, extracted text,
-participant data, recordings, and generated runs stay ignored. Only reviewed
-public catalogue projections enter product assets. Update the owning source,
-ledger, and focused checks; do not append research narratives to startup memory.
+Track compact provenance/verdicts/blockers. Maintain original publications and
+working paper-extraction protocols in the separate private research archive.
+Any local working copies of raw papers and extracted text stay ignored in PPS
+Kit, along with participant data, recordings, and generated runs. Keep the
+research archive out of Pages and installer inputs. Reviewed public catalogue
+projections and runnable profiles remain Toolkit assets. Update the owning
+source, ledger, and focused checks; do not append research narratives to startup
+memory.

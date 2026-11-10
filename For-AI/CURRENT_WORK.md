@@ -64,6 +64,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - **Installed agent baseline:** retain the [reviewed baseline lock](skills/baseline-lock.json)
   and existing RTK/GSD/Superpowers routes. No configuration/hooks or agent
   packages were changed by this validation task.
+- **Publication archive:** original PDFs and working extraction protocols
+  have a separate private home. The current Pages assembly tests pass, and the
+  component manifests exclude `For-AI/` and local research artifacts. Continue
+  paper acquisition from the archive's DOI inventory. No release was rebuilt.
 
 ## Domain migration — 2026-11-10
 
