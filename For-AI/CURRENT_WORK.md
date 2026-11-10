@@ -1,8 +1,13 @@
 # Current work
 
-Reviewed: 2026-11-10. Overall completion goal: **OPEN**.
+Reviewed: 2026-11-10. Overall completion goal: **OPEN, PAUSED** at the user's request.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
+- **Resume point:** await an explicit resume. The source checkpoint
+  `82566d64` is on `codex/pps-standalone-preview`. The latest verified
+  installed package is still `2f94ba0f` in `dist/ferri-candidate/`.
+  Public `main` was observed at `8b684954`. The draft fix is ready for a
+  frozen Planner rebuild. The cleanup job was stopped and all test apps are closed.
 - **Goal:** deliver the [standalone study preview PWA and offline Planner +
   Runner suite](evolving_goals.md#2026-11-10--two-ways-to-use-pps-kit), with the
   refreshed UI and one suite installer. The existing
@@ -46,15 +51,23 @@ This file is the active checklist and handoff owner; replace state, do not appen
   The installed WebView test used loopback with external HTTP blocked in the
   test clients. The host network remained connected. Twelve preload tests,
   four focused Designer tests and all 32 Quick tests passed.
-- **Installed software handoff:** the installed Planner generated a 4 s brown
-  stimulus in native 3DTI, built four trials, passed sequential review, locked
-  the plan and exported a JSON referencing eight verified files. Runner from
-  the `f2ca0b2b` install imported those exact bytes through `--experiment-profile`.
-  Its offscreen Qt validation completed one block and all four trials with
-  realtime software audio. A second run recorded four synthetic hits.
-  The four-row outcomes CSV matched the trial IDs and click event IDs.
-  Its reaction times matched an independent calculation from the recorded
-  tactile and click timestamps. Physical timing remains open.
+- **Installed software handoff:** the `2f94ba0f` install carried the new Ferri
+  stimulus through a reduced four-trial pilot with 300 and 800 ms SOAs.
+  Planner generated the sequence, trial files, pool, and block, then passed
+  review and reopened the locked profile. Its keyboard Export produced a JSON
+  with eight hash-verified inputs. The test captured the exact bytes at the
+  native save bridge. Installed Runner imported them through
+  `--experiment-profile`, preserved the approved trial order, and scored four
+  synthetic responses in realtime software audio mode. The CSV reaction times
+  matched independent calculations from the recorded events. The host
+  remained connected and physical timing remains open.
+  Evidence and replay scripts are under ignored `artifacts/windows-suite-candidate/`.
+  Start with `ferri-pilot-export-evidence.json` and `ferri-pilot-runner-evidence.json`.
+- **Draft persistence:** `82566d64` saves the named project snapshot during
+  ingredient publication. Before the fix, a successful bake could lose its
+  ingredient from the reopened draft if the session closed before a state
+  refresh. The reopen regression, five related bake tests, and all 32 Quick
+  tests passed. This is verified source evidence.
 - **Native workflow:** `ecdadf98` adds **Open Experiment JSON** to the Runner
   launcher and fixes long Windows paths in Planner export and Runner import.
   Eighty-three focused tests passed and eight were skipped. The locked-plan
@@ -93,14 +106,19 @@ This file is the active checklist and handoff owner; replace state, do not appen
   now expects the canonical Runner URL and standalone preview assets. Quick
   passed with 32 tests and the release audit. A fresh full Standard run remains
   required. See the [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
-- **Storage:** approximately 1.2 GiB free after the new Full install and
-  removal of byte-identical downloads from disposable test profiles.
+- **Storage:** approximately 1.7 GiB free at pause. The older pointer and import
+  disposable extractions were removed after byte comparison to their retained
+  ZIPs. Their receipts and separate Runner results remain. Cleanup of the
+  autonomous-next extraction was interrupted before any reported removal.
   Allow approximately 15 GiB before another complete Python/native run. Keep
   candidate binaries, logs, screenshots, schema findings and the temporary Go
   toolchain in ignored artifacts.
-- **Next gates:** verify the public PWA routes and bytes at source promotion.
-  Complete native Save As and graphical Runner import. Carry a named study
-  stimulus through the full installed handoff with the host disconnected.
+- **Next gates:** on resume, recheck storage and rebuild Planner at `82566d64`.
+  In a disposable install, bake a Ferri ingredient, close before the first
+  post-bake state refresh, reopen the named draft, and verify the WAV hash.
+  Repackage and fresh-install the Full candidate. Verify the public PWA routes
+  and bytes at source promotion. Complete native Save As and graphical Runner
+  import, and repeat the named-study handoff with Windows disconnected.
   Verify missing-runtime provisioning on clean Windows and qualify the lab
   audio route. The current host has no Windows Sandbox and the Komplete output
   dry run found no matching device. Recover the disk allowance and complete
