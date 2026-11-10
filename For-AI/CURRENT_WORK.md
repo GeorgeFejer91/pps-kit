@@ -20,29 +20,31 @@ This file is the active checklist and handoff owner; replace state, do not appen
   the test app before the harness timed out during shutdown. Public source
   promotion remains open. All 28 canonical Designer files match the local
   Pages assembly byte for byte.
-- **Suite candidate:** source through `606431a5`, including the Planner pointer
-  fix, was installed locally. The newer `f2ca0b2b` catalogue package passed all
-  23 inventory checks and ZIP CRC verification. Its 28 compiled Planner files
-  match Pages, and both native executables match the installed candidate.
-  Frozen Planner and Runner use one installed Shared directory.
+- **Suite candidate:** the `f2ca0b2b` catalogue package passed ZIP CRC and
+  was installed from the Full downloader in its normal Windows mode, using a
+  loopback manifest and the default install path in a disposable profile.
+  All 28 installed Planner frontend files match the canonical build and local
+  Pages assembly. Frozen Planner and Runner use one installed Shared directory.
   The Full downloader packages 3DTI, its native DLLs and FABIAN HRTF data,
   Microsoft Visual C++ 2013 and v14 x64, and standalone WebView2 x64.
   The build verified Microsoft signatures and the pinned hashes. Setup
   verifies those hashes before starting any missing runtime's installer.
   The Native Instruments ASIO driver remains a separate lab hardware step.
-- **Installer evidence:** a fresh loopback install of the 565,392,930-byte
-  Full package passed 23 required inventory checks and created shortcuts for
-  both apps in a disposable Windows profile. Reuse passed. The Windows test
-  host already had all three Microsoft runtimes. Go tests exercised missing
-  and modified bundle files and simulated runtime provisioning. Test actual
-  provisioning on a clean Windows host before release.
+- **Installer evidence:** the 565,394,986-byte Full package passed all 23
+  inventory checks, created both Desktop and Start Menu shortcuts, and passed
+  the installed-version reuse check. The bundled 3DTI rendered a three-channel
+  WAV at 44.1 kHz. This host already had the three Microsoft runtimes. Go tests
+  exercised missing and modified bundle files and simulated provisioning.
+  Actual runtime provisioning on clean Windows remains open.
 - **Installed software handoff:** the installed Planner generated a 4 s brown
   stimulus in native 3DTI, built four trials, passed sequential review, locked
-  the plan and exported a JSON referencing eight verified files. The installed
-  Runner imported those exact export bytes through `--experiment-profile`.
-  Its realtime software validation completed all four trials, logged four
-  response windows and produced a four-row final outcomes CSV. Ordinary lab
-  playback remains subject to the hardware preflight.
+  the plan and exported a JSON referencing eight verified files. Runner from
+  the `f2ca0b2b` install imported those exact bytes through `--experiment-profile`.
+  Its offscreen Qt validation completed one block and all four trials with
+  realtime software audio. A second run recorded four synthetic hits.
+  The four-row outcomes CSV matched the trial IDs and click event IDs.
+  Its reaction times matched an independent calculation from the recorded
+  tactile and click timestamps. Physical timing remains open.
 - **Native workflow:** `ecdadf98` adds **Open Experiment JSON** to the Runner
   launcher and fixes long Windows paths in Planner export and Runner import.
   Eighty-three focused tests passed and eight were skipped. The locked-plan
@@ -81,17 +83,19 @@ This file is the active checklist and handoff owner; replace state, do not appen
   now expects the canonical Runner URL and standalone preview assets. Quick
   passed with 32 tests and the release audit. A fresh full Standard run remains
   required. See the [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
-- **Storage:** approximately 2.5 GiB free after the catalogue package build.
+- **Storage:** approximately 1.6 GiB free after the fresh catalogue install
+  and removal of its byte-identical disposable download cache.
   Allow approximately 15 GiB before another complete Python/native run. Keep
   candidate binaries, logs, screenshots, schema findings and the temporary Go
   toolchain in ignored artifacts.
 - **Next gates:** verify the public PWA routes and bytes at source promotion.
-  Fresh-install the catalogue package and complete native Save As and graphical
-  Runner import. Verify missing-runtime provisioning on clean Windows and
-  qualify the lab audio route. The current host has no Windows Sandbox and
-  the Komplete output dry run found no matching device. Recover the disk
-  allowance and complete Standard. Continue M1 and A1 through normal IPC with
-  applicable native and installed gates. Public suite release remains open.
+  Complete native Save As and graphical Runner import, and verify the
+  installed journey for a named study stimulus with networking disconnected.
+  Verify missing-runtime provisioning on clean Windows and qualify the lab
+  audio route. The current host has no Windows Sandbox and the Komplete output
+  dry run found no matching device. Recover the disk allowance and complete
+  Standard. Continue M1 and A1 through normal IPC with applicable native and
+  installed gates. Public suite release remains open.
 - **Hosted credits:** `5b269569` moved the George Fejer credit into the hosted
   Designer header as a linked profile box with the portrait from his academic
   site. The BIAL Foundation credit remains beside it. The 12-case Designer
