@@ -1586,15 +1586,15 @@ def render_design_with_3dti(
         )
 
     command = [
-        str(backend),
+        str(backend.resolve()),
         "--config",
-        str(config_path),
+        str(config_path.resolve()),
         "--output-dir",
-        str(output_dir),
+        str(output_dir.resolve()),
         "--manifest",
-        str(manifest_path),
+        str(manifest_path.resolve()),
         "--qc",
-        str(qc_path),
+        str(qc_path.resolve()),
     ]
     completed = subprocess.run(
         command,
