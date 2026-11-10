@@ -20,22 +20,32 @@ This file is the active checklist and handoff owner; replace state, do not appen
   the test app before the harness timed out during shutdown. Public source
   promotion remains open. All 28 canonical Designer files match the local
   Pages assembly byte for byte.
-- **Suite candidate:** the `f2ca0b2b` catalogue package passed ZIP CRC and
-  was installed from the Full downloader in its normal Windows mode, using a
-  loopback manifest and the default install path in a disposable profile.
+- **Suite candidate:** the `2f94ba0f` package includes the Windows long-path
+  preload fix. It passed ZIP CRC and a fresh loopback install with the Full
+  downloader in quiet mode at the default path in a disposable profile.
   All 28 installed Planner frontend files match the canonical build and local
-  Pages assembly. Frozen Planner and Runner use one installed Shared directory.
+  Pages assembly. Runner matches the executable used in the scored handoff.
+  Frozen Planner and Runner use one installed Shared directory.
   The Full downloader packages 3DTI, its native DLLs and FABIAN HRTF data,
   Microsoft Visual C++ 2013 and v14 x64, and standalone WebView2 x64.
   The build verified Microsoft signatures and the pinned hashes. Setup
   verifies those hashes before starting any missing runtime's installer.
   The Native Instruments ASIO driver remains a separate lab hardware step.
-- **Installer evidence:** the 565,394,986-byte Full package passed all 23
+- **Installer evidence:** the 565,361,140-byte Full package passed all 23
   inventory checks, created both Desktop and Start Menu shortcuts, and passed
   the installed-version reuse check. The bundled 3DTI rendered a three-channel
   WAV at 44.1 kHz. This host already had the three Microsoft runtimes. Go tests
   exercised missing and modified bundle files and simulated provisioning.
   Actual runtime provisioning on clean Windows remains open.
+- **Named-study generation:** loading the Ferri 2015 artificial looming
+  template initially tried to download two bundled WAVs at paths over 260
+  characters. The regression now verifies the WAV hash without downloading.
+  The fresh install loaded both bundled files, copied the template, and used
+  native 3DTI to generate a three-second continuous brown-noise WAV at 44.1 kHz.
+  The staged browser preview supplies burst-train WAVs for that template.
+  The installed WebView test used loopback with external HTTP blocked in the
+  test clients. The host network remained connected. Twelve preload tests,
+  four focused Designer tests and all 32 Quick tests passed.
 - **Installed software handoff:** the installed Planner generated a 4 s brown
   stimulus in native 3DTI, built four trials, passed sequential review, locked
   the plan and exported a JSON referencing eight verified files. Runner from
@@ -83,14 +93,14 @@ This file is the active checklist and handoff owner; replace state, do not appen
   now expects the canonical Runner URL and standalone preview assets. Quick
   passed with 32 tests and the release audit. A fresh full Standard run remains
   required. See the [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
-- **Storage:** approximately 1.6 GiB free after the fresh catalogue install
-  and removal of its byte-identical disposable download cache.
+- **Storage:** approximately 1.2 GiB free after the new Full install and
+  removal of byte-identical downloads from disposable test profiles.
   Allow approximately 15 GiB before another complete Python/native run. Keep
   candidate binaries, logs, screenshots, schema findings and the temporary Go
   toolchain in ignored artifacts.
 - **Next gates:** verify the public PWA routes and bytes at source promotion.
-  Complete native Save As and graphical Runner import, and verify the
-  installed journey for a named study stimulus with networking disconnected.
+  Complete native Save As and graphical Runner import. Carry a named study
+  stimulus through the full installed handoff with the host disconnected.
   Verify missing-runtime provisioning on clean Windows and qualify the lab
   audio route. The current host has no Windows Sandbox and the Komplete output
   dry run found no matching device. Recover the disk allowance and complete
