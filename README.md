@@ -122,10 +122,10 @@ canonical compiled companion page is likewise copied byte-for-byte from
 
 Public routes:
 
-- [PPS Kit](https://ppskit.qzz.io/)
-- [Documentation](https://ppskit.qzz.io/documentation/)
-- [Downloads](https://ppskit.qzz.io/download/)
-- [Experiment Runner Companion](https://ppskit.qzz.io/experiment-runner/)
+- [PPS Kit](https://ppskit.com/)
+- [Documentation](https://ppskit.com/documentation/)
+- [Downloads](https://ppskit.com/download/)
+- [Experiment Runner Companion](https://ppskit.com/experiment-runner/)
 - [GitHub Pages fallback](https://georgefejer91.github.io/pps-kit/)
 - [Runner Companion fallback](https://georgefejer91.github.io/pps-kit/experiment-runner/)
 

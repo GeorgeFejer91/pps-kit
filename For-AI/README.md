@@ -49,8 +49,9 @@ RTK, fallback workflows, accessibility, performance and MobX suitability guides.
 - Designer `apps/designer/frontend/compiled/` and Runner
   `apps/runner/compiled/` are canonical frontend artifacts. Pages consumes
   those bytes; keep local and hosted-facing sources aligned at promotion.
-- Preserve `ppskit.qzz.io`, `/`, `/documentation`, `/download`,
+- Preserve `ppskit.com`, `/`, `/documentation`, `/download`,
   `/experiment-runner/`, and the existing GitHub Pages fallback routes.
+  Treat `ppskit.qzz.io` as a legacy origin, not the canonical domain.
 
 Update only the owning domain/current decision when behavior changes. See
 [agent_update_protocol.md](agent_update_protocol.md). Detailed former memory is

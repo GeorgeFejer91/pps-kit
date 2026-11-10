@@ -97,7 +97,7 @@ export async function assemblePages(output = canonicalOutput) {
   }
 
   const cname = (await readFile(join(website, "CNAME"), "utf8")).trim();
-  if (cname !== "ppskit.qzz.io") throw new Error(`Unexpected CNAME: ${cname}`);
+  if (cname !== "ppskit.com") throw new Error(`Unexpected CNAME: ${cname}`);
 
   const companionHtml = await readFile(companionIndex, "utf8");
   const referencedResources = referencedCompanionResources(companionHtml);

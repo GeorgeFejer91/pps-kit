@@ -144,7 +144,7 @@ approved catalogues, and `website/CNAME` into ignored `dist/pages/`. The public
 dashboard URL is:
 
 ```text
-https://ppskit.qzz.io/
+https://ppskit.com/
 ```
 
 The GitHub Pages fallback URL is:
@@ -156,7 +156,7 @@ https://georgefejer91.github.io/pps-kit/
 The Runner companion URLs are:
 
 ```text
-https://ppskit.qzz.io/experiment-runner/
+https://ppskit.com/experiment-runner/
 https://georgefejer91.github.io/pps-kit/experiment-runner/
 ```
 
@@ -170,6 +170,42 @@ The `github.com/GeorgeFejer91/pps-kit` URL is the GitHub repository/code view.
 The assembled Pages root `index.html` loads the copied compiled Designer, and
 the assembled root `CNAME` comes from `website/CNAME`. Relative static paths
 allow the same compiled files to work on Pages and through local FastAPI.
+
+## Custom Domain Cutover: `ppskit.com`
+
+This repository uses **GitHub Actions** for Pages publication. Set
+`ppskit.com` under **Repository Settings → Pages → Custom domain → Save**.
+For Actions-based Pages, GitHub reads the custom-domain setting, **not** the
+`CNAME` file in the deployed artifact; `website/CNAME` is retained as the
+project's tracked, tested domain marker.
+
+In Namecheap Advanced DNS, replace the registrar parking/URL-forwarding
+records with the following GitHub Pages records. Do not modify unrelated mail
+or TXT records:
+
+| Type | Host | Value |
+| --- | --- | --- |
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| CNAME | `www` | `georgefejer91.github.io` |
+
+Optionally add the four IPv6 AAAA records documented at
+[GitHub Pages custom-domain instructions](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site).
+Do not set a `www` URL redirect at Namecheap: GitHub Pages can redirect
+`www.ppskit.com` to the configured apex domain itself.
+
+The migration is **not verified** merely because source files or DNS records
+change. Confirm the custom domain is saved in GitHub Pages settings, the
+Pages workflow deploys successfully, the apex A records and `www` CNAME
+resolve as expected, the HTTPS certificate is issued and **Enforce HTTPS**
+is active, `https://www.ppskit.com` redirects to the apex, and the homepage,
+`/documentation/`, `/download/`, and `/experiment-runner/` serve the
+expected site. Check a locally running companion accepts
+`Origin: https://ppskit.com` before claiming full parity. The old
+`ppskit.qzz.io` hostname is not guaranteed to redirect unless its separate
+DNS/hosting arrangements are maintained.
 
 ## Use On A Research PC
 
@@ -198,8 +234,10 @@ each downloader verifies its component-specific payload and inventory hashes
 before extraction or launch.
 
 The companion backend allows the default project GitHub Pages origin
-(`https://georgefejer91.github.io`) and the custom domain
-(`https://ppskit.qzz.io`). For forks or institutional Pages domains, start the
+(`https://georgefejer91.github.io`), the primary custom domain
+(`https://ppskit.com`), and its `www` variant. The former
+`https://ppskit.qzz.io` origin remains on the allowlist for compatibility;
+this does not guarantee that the old hostname continues to resolve or redirect. For forks or institutional Pages domains, start the
 companion with an explicit origin:
 
 ```bat

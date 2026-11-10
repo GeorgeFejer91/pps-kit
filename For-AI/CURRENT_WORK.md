@@ -61,6 +61,35 @@ This file is the active checklist and handoff owner; replace state, do not appen
   and existing RTK/GSD/Superpowers routes. No configuration/hooks or agent
   packages were changed by this validation task.
 
+## Active domain migration goal — 2026-11-10
+
+**Goal: OPEN.** Publish the existing PPS Kit GitHub Pages website at
+`https://ppskit.com/` as its canonical domain and **verify the live site
+actually uses that domain**, without changing the public routes or native
+experiment timing and data boundaries. Preserve the GitHub Pages fallback
+and retain the old `ppskit.qzz.io` CORS origin for compatibility only.
+
+- [x] Identify the live-source repository, Actions Pages workflow, tracked
+  `CNAME`, strict Pages assembly expectation, and companion allowlist.
+- [x] Align `website/CNAME`, Pages assembly/tests, public links and
+  documentation with `ppskit.com`; allow the new apex/`www` origins locally.
+- [ ] Save `ppskit.com` in GitHub repository Settings → Pages as the Actions
+  custom domain; verify GitHub reports the configured domain.
+- [ ] In Namecheap remove the apex redirect to `www` and the parked
+  `www` CNAME; add the four GitHub Pages apex A records and
+  `www → georgefejer91.github.io` CNAME. Preserve unrelated mail/TXT.
+- [ ] Confirm deployed main commit, successful Pages Action, public DNS
+  resolution, GitHub Pages domain check, HTTPS certificate/enforcement and
+  `www` → apex redirect.
+- [ ] Open `https://ppskit.com/`, `/documentation/`, `/download/` and
+  `/experiment-runner/`, checking expected content, static assets and
+  GitHub Pages fallback; test local companion CORS from the new origin.
+
+**Evidence/status:** Repository source migration committed; registrar and
+GitHub Pages administration, certificate issue, and live DNS/content
+verification remain outstanding. Do not close this goal on a successful
+source build alone. See `docs/GITHUB_PAGES_DASHBOARD.md`.
+
 ## Active completion checklist
 
 - [x] M0 — Install the baseline, integrate routes and produce the completion review/plan.

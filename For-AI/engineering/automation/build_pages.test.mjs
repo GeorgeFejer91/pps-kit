@@ -54,7 +54,7 @@ test("Pages assembly publishes only the canonical browser companion bytes", asyn
     for (const route of ["index.html", "documentation/index.html", "download/index.html", ".nojekyll"]) {
       assert.equal(await exists(join(output, route)), true, `missing existing Pages route ${route}`);
     }
-    assert.equal((await readFile(join(output, "CNAME"), "utf8")).trim(), "ppskit.qzz.io");
+    assert.equal((await readFile(join(output, "CNAME"), "utf8")).trim(), "ppskit.com");
 
     const sourceIndex = await readFile(join(runnerCompiled, "companion", "index.html"));
     const stagedIndex = await readFile(join(output, "experiment-runner", "index.html"));
@@ -78,7 +78,7 @@ test("Pages assembly publishes only the canonical browser companion bytes", asyn
     assert.equal(await exists(join(output, "experiment-runner", "src-tauri")), false);
     const html = stagedIndex.toString("utf8");
     for (const [base, expectedAssetsRoot] of [
-      ["https://ppskit.qzz.io/experiment-runner/", "https://ppskit.qzz.io/assets/"],
+      ["https://ppskit.com/experiment-runner/", "https://ppskit.com/assets/"],
       ["https://georgefejer91.github.io/pps-kit/experiment-runner/", "https://georgefejer91.github.io/pps-kit/assets/"],
     ]) {
       assert.equal(new URL("../assets/companion.js", base).href, `${expectedAssetsRoot}companion.js`);
