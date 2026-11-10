@@ -49,14 +49,14 @@ This file is the active checklist and handoff owner; replace state, do not appen
   then finish Standard and the applicable native/installed gates. Continue
   M1's B1–B3/C1 and build/release work, followed by A1 through normal IPC.
   Keep the release support matrix explicit and never bypass readiness flags.
-- **Hosted funding credit:** `c0a6f444` added the linked BIAL Foundation credit
-  to the right side of the landing header. The 12-case Designer audit passed.
-  The live browser verified the link, logo, and layout at desktop and emulated
-  phone widths down to 320 CSS px. Pages run `42835284236` deployed to
-  `https://ppskit.qzz.io/`. The public byte audit matched 470 files and all four
-  main routes returned HTTP 200.
+- **Hosted credits:** `c0a6f444` added the linked BIAL Foundation credit and
+  `b491a67d` added the linked George Fejer developer byline below it. The 12-case
+  Designer audit passed. The live browser verified both links and their layout
+  at desktop and emulated phone widths down to 320 CSS px. Pages run
+  `42849552258` deployed to `https://ppskit.qzz.io/` on retry. The public byte
+  audit matched 470 files and all four main routes returned HTTP 200.
 - **Git observation:** `main` was fast-forwarded to domain source checkpoint
-  `8ce15ed6` and the verified funding change was pushed using the repository URL.
+  `8ce15ed6` and the verified credit changes were pushed using the repository URL.
   Ordinary fetch is still blocked by the malformed local
   `refs/heads/codex/pps-publication-integration (# Name clash 2026-11-03 mvwxhkC #)`
   ref. An isolated transfer imported the upstream commit while preserving the
