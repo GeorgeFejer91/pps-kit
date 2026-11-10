@@ -286,7 +286,7 @@ def test_dashboard_static_assets_are_packaged():
     assert f"app/index.html?page=documentation&v={static_version}" in public_docs
     assert f"app/index.html?page=downloads&v={static_version}" in public_download
     assert 'id="open-runner-companion"' in html
-    assert 'href="https://ppskit.qzz.io/experiment-runner/"' in html
+    assert 'href="https://ppskit.com/experiment-runner/"' in html
     assert "seededGellermannBlockRows" in app_js
     assert "downloadBlockRandomization" in app_js
     assert 'control.id === "download-block-randomization"' in app_js
@@ -398,6 +398,7 @@ def test_dashboard_static_assets_are_packaged():
     assert "collectProfileRunPayload" in app_js
     assert 'control.id === "export-profile-bundle"' in app_js
     assert ".panel.profile-readonly #export-profile-bundle" in styles_css
+    assert ".panel.profile-readonly #export-experiment-json" in styles_css
     assert ".modal-backdrop[hidden]" in styles_css
     assert ".panel.user-sized" in styles_css
     assert "min-height: var(--panel-user-height);" in styles_css
@@ -671,8 +672,8 @@ def test_dashboard_static_assets_are_packaged():
     assert "study_templates/" in app_js
     assert "staticStateForTemplate" in app_js
     assert "DEFAULT_STUDY_TEMPLATE_ID = \"study5_box_breathing_pps\"" in app_js
-    assert "Loaded committed preload assets from GitHub" in app_js
-    assert "Hosted mode can compose and export profiles" in app_js
+    assert 'new URL("../", window.location.href).href' in app_js
+    assert "Use the installed Experiment Planner to generate audio and prepare an experiment for Runner." in app_js
     assert "Open Asset" in app_js
     assert "staticPreviewAssetForLabel" in app_js
     assert "Remove trial sequence row" in app_js
