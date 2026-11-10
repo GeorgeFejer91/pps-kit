@@ -3290,6 +3290,7 @@ body.sequential-edit-mode .step-footer > :not([data-continue-step]):not(#accept-
 .panel.profile-readonly #download-block-randomization,
 .panel.profile-readonly #save-study-profile,
 .panel.profile-readonly #export-profile-bundle,
+.panel.profile-readonly #export-experiment-json,
 .panel.profile-readonly .bounded-select-button,
 .panel.profile-readonly .mobile-table-more,
 .panel.profile-readonly [data-preview-source-label],
