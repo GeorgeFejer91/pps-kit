@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 
@@ -15,11 +16,16 @@ def test_packaged_runner_entry_enables_asio_before_focus_import():
     assert source.index(asio_guard) < source.index(focus_import)
 
 
-def test_packaged_runner_spec_includes_tactile_click_assets():
-    source = (REPO_ROOT / "apps" / "runner" / "packaging" / "PPSExperimentRunner.spec").read_text(encoding="utf-8")
-
-    assert '"assets" / "click"' in source
-    assert '"assets/click"' in source
+def test_packaged_runner_installs_click_and_tactile_assets_through_shared():
+    manifests = REPO_ROOT / "distributions" / "manifests"
+    runner = json.loads((manifests / "runner.v1.json").read_text(encoding="utf-8"))
+    shared = json.loads((manifests / "shared.v1.json").read_text(encoding="utf-8"))
+    assert {"component_id": "shared", "version": shared["version"]} in runner["dependencies"]
+    assets = next(mapping for mapping in shared["source_to_install"] if mapping["install"] == "shared/assets")
+    assert assets["kind"] == "tree"
+    source = REPO_ROOT / assets["source"]
+    assert (source / "click" / "mouse_click_tone_1200Hz_50ms.wav").is_file()
+    assert (source / "tactile" / "runner_output_test_tactile.wav").is_file()
 
 
 def test_packaged_runner_build_has_iconless_retry_fallback():

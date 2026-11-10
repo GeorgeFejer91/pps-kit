@@ -20,9 +20,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   tests passed. Native 3DTI rendered a 3 s brown-noise trajectory with two
   audio channels and a tactile channel at 44.1 kHz. An absolute output path
   worked. The relative CLI output path failed because the renderer runs
-  from the resource root. Next, verify the generated stimulus → profile →
-  Runner handoff through the installed entrypoints. Reuse the Full manifest
-  for Planner, Runner and one Shared payload.
+  from the resource root.
+- **Suite source:** frozen Planner and Runner now resolve the installer-owned
+  Shared directory and workspace. Planner resolves Runner and native 3DTI in
+  the suite. Removed duplicate scientific assets from the frozen app specs.
+  Twenty-five focused Python checks, the Qt preflight and the downloader
+  tests passed. Rebuild the Windows Full package and verify the generated
+  stimulus → profile → Runner handoff through installed entrypoints.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.

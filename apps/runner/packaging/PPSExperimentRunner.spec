@@ -18,7 +18,7 @@ disable_icon = os.environ.get("PPS_EXPERIMENT_RUNNER_DISABLE_ICON", "").strip().
     "on",
 }
 
-datas = [(str(resource_root / "assets" / "app"), "assets/app")]
+datas = []
 companion_hiddenimports = (
     collect_submodules("h11")
     + collect_submodules("sniffio")
@@ -33,20 +33,6 @@ if pyside_spec and pyside_spec.submodule_search_locations:
         plugin_dir = pyside_root / "plugins" / plugin_name
         if plugin_dir.exists():
             datas.append((str(plugin_dir), f"PySide6/plugins/{plugin_name}"))
-
-for source, target in (
-    (
-        resource_root / "assets" / "0. Head-Related Impulse Response (HRIR) model",
-        "assets/0. Head-Related Impulse Response (HRIR) model",
-    ),
-    (resource_root / "assets" / "preloads", "assets/preloads"),
-    (resource_root / "assets" / "breathing", "assets/breathing"),
-    (resource_root / "assets" / "click", "assets/click"),
-    (resource_root / "assets" / "tactile", "assets/tactile"),
-    (resource_root / "study_templates", "study_templates"),
-):
-    if source.exists():
-        datas.append((str(source), target))
 
 a = Analysis(
     [str(root / "apps" / "runner" / "launchers" / "focus_runner_entry.py")],

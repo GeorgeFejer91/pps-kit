@@ -12,7 +12,7 @@ from .session_runner import (
     WIRED_LOOPBACK_OUTPUT4_TACTILE_PROXY,
     normalize_wired_loopback_mode,
 )
-from .runtime_paths import product_root
+from .runtime_paths import installed_suite_root, product_root
 
 
 REPO_ROOT = product_root()
@@ -34,7 +34,11 @@ def resolve_packaged_focus_runner(env: Mapping[str, str] | None = None) -> Path 
     override = str(env_map.get(FOCUS_RUNNER_ENV_VAR) or "").strip()
     if override:
         candidates.append(Path(override))
-    candidates.append(DEFAULT_PACKAGED_FOCUS_RUNNER)
+    suite = installed_suite_root()
+    if suite is not None:
+        candidates.append(suite / "apps" / "PPSExperimentRunner" / "PPSExperimentRunner.exe")
+    else:
+        candidates.append(DEFAULT_PACKAGED_FOCUS_RUNNER)
     for candidate in candidates:
         if candidate.is_file():
             return candidate
@@ -52,6 +56,8 @@ def build_focus_runner_command(
     """Build the command for launching the active packaged experiment runner."""
     runner_exe = resolve_packaged_focus_runner(env)
     if runner_exe is None:
+        if installed_suite_root() is not None:
+            raise FileNotFoundError("Install Experiment Runner alongside Planner using the PPS Toolkit installer.")
         raise FileNotFoundError(
             "The active experiment runner is the packaged PPSExperimentRunner.exe, but no runner exe was found. "
             "Build it with For-AI\\engineering\\build\\windows\\Build_Experiment_Runner_Exe.ps1 "

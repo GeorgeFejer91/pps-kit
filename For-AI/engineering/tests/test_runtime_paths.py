@@ -63,6 +63,44 @@ def test_writable_root_env_override_wins(tmp_path, monkeypatch):
     assert runtime_paths.writable_root() == target.resolve()
 
 
+def test_installed_planner_and_runner_use_the_same_suite(tmp_path, monkeypatch):
+    from peripersonal_space_toolkit import focus_launch, runtime_paths
+
+    suite = tmp_path / "installed-suite"
+    shared = suite / "shared"
+    _resource_root(shared)
+    manifests = suite / "component-manifests"
+    manifests.mkdir()
+    (manifests / "shared.v1.json").write_text("{}", encoding="utf-8")
+    planner = suite / "apps" / "PPSDesigner" / "PPSDesigner.exe"
+    runner = suite / "apps" / "PPSExperimentRunner" / "PPSExperimentRunner.exe"
+    frontend = planner.parent / "_internal" / "apps" / "designer" / "frontend"
+    (frontend / "compiled").mkdir(parents=True)
+    (frontend / "compiled" / "index.html").touch()
+    runner.parent.mkdir(parents=True)
+    runner.touch()
+
+    other_checkout = tmp_path / "other-checkout"
+    _resource_root(other_checkout)
+    monkeypatch.chdir(other_checkout)
+    monkeypatch.delenv("PPS_TOOLKIT_ROOT", raising=False)
+    monkeypatch.delenv("PPS_TOOLKIT_DATA_ROOT", raising=False)
+    monkeypatch.setattr(runtime_paths.sys, "frozen", True, raising=False)
+    for executable in (planner, runner):
+        internal = executable.parent / "_internal"
+        _resource_root(internal)
+        monkeypatch.setattr(runtime_paths.sys, "_MEIPASS", str(internal), raising=False)
+        monkeypatch.setattr(runtime_paths.sys, "executable", str(executable))
+        assert runtime_paths.product_root() == suite
+        assert runtime_paths.resource_root() == shared
+        assert runtime_paths.writable_root() == suite
+
+    monkeypatch.setattr(runtime_paths.sys, "executable", str(planner))
+    monkeypatch.setattr(runtime_paths.sys, "_MEIPASS", str(planner.parent / "_internal"), raising=False)
+    assert runtime_paths.designer_frontend_root() == frontend
+    assert focus_launch.resolve_packaged_focus_runner({}) == runner
+
+
 def test_render_backend_resolves_relative_assets_from_runtime_resource_root(tmp_path, monkeypatch):
     from peripersonal_space_toolkit import render_backend, runtime_paths
 

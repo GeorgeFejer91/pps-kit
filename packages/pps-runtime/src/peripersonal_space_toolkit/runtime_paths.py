@@ -11,6 +11,7 @@ _PRELOAD_INVENTORY = Path("assets") / "preloads" / "preload_inventory.json"
 _STUDY_TEMPLATES = Path("study_templates")
 _SOURCE_RESOURCE_DIR = Path("packages") / "pps-resources"
 _DESIGNER_FRONTEND_DIR = Path("apps") / "designer" / "frontend"
+_SUITE_MARKER = Path("component-manifests") / "shared.v1.json"
 
 
 def _dedupe(paths: list[Path]) -> list[Path]:
@@ -46,10 +47,12 @@ def _looks_like_product_root(path: Path) -> bool:
     return (
         (path / "pyproject.toml").is_file()
         and (path / "packages" / "pps-runtime").is_dir()
-    ) or _has_resource_root(path)
+    ) or (path / _SUITE_MARKER).is_file() or _has_resource_root(path)
 
 
 def _resource_root_for(path: Path) -> Path | None:
+    if (path / _SUITE_MARKER).is_file():
+        return path / "shared"
     source_resources = path / _SOURCE_RESOURCE_DIR
     if _has_resource_root(source_resources):
         return source_resources
@@ -64,6 +67,15 @@ def _frozen_executable_dir() -> Path | None:
     return Path(sys.executable).resolve().parent
 
 
+def installed_suite_root() -> Path | None:
+    """Find the installer-owned root for an application in the suite."""
+    executable_dir = _frozen_executable_dir()
+    if executable_dir is None or executable_dir.parent.name.lower() != "apps":
+        return None
+    suite = executable_dir.parent.parent
+    return suite if (suite / _SUITE_MARKER).is_file() else None
+
+
 def _development_workspace_from_exe(executable_dir: Path) -> Path:
     if executable_dir.parent.name.lower() == "dist":
         return executable_dir.parent.parent
@@ -75,6 +87,9 @@ def product_root() -> Path:
     candidates: list[Path] = []
     if os.environ.get("PPS_TOOLKIT_ROOT"):
         candidates.append(Path(os.environ["PPS_TOOLKIT_ROOT"]))
+    suite = installed_suite_root()
+    if suite is not None:
+        candidates.append(suite)
     candidates.append(Path.cwd())
 
     executable_dir = _frozen_executable_dir()
@@ -105,6 +120,9 @@ def resource_root() -> Path:
     candidates: list[Path] = []
     if os.environ.get("PPS_TOOLKIT_ROOT"):
         candidates.append(Path(os.environ["PPS_TOOLKIT_ROOT"]))
+    suite = installed_suite_root()
+    if suite is not None:
+        candidates.append(suite)
 
     executable_dir = _frozen_executable_dir()
     if executable_dir is not None:
@@ -164,6 +182,9 @@ def writable_root() -> Path:
     if os.environ.get("PPS_TOOLKIT_ROOT"):
         return Path(os.environ["PPS_TOOLKIT_ROOT"]).expanduser().resolve()
 
+    suite = installed_suite_root()
+    if suite is not None:
+        return suite
     executable_dir = _frozen_executable_dir()
     if executable_dir is not None:
         return _development_workspace_from_exe(executable_dir).resolve()

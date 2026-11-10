@@ -84,6 +84,13 @@ Logical installed paths remain `assets/...`, `study_templates/...`, and related
 scientific/profile paths even though the repository sources live under
 `packages/pps-resources/`.
 
+Frozen Planner and Runner find the suite root from `apps/<app>/` and the
+installed Shared component manifest. Both read scientific inputs from `shared/`,
+and generated data defaults to the suite workspace. The Planner keeps its
+compiled UI within its own application directory and launches the Runner
+entrypoint in the same suite. Use the component assembler for distributable
+packages. A development executable in `dist/` uses the checkout's resources.
+
 ## Explicit Exclusions
 
 No component, package inventory, payload, or download manifest may include:

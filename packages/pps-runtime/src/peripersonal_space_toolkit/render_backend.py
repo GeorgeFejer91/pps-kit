@@ -54,11 +54,12 @@ from .resource_limits import audio_generation_preflight
 
 REPO_ROOT = repo_root()
 PRODUCT_ROOT = product_root()
-THIRD_PARTY_3DTI_DIR = PRODUCT_ROOT / "third_party" / "3dti_AudioToolkit"
+THIRD_PARTY_ROOT = (REPO_ROOT if REPO_ROOT == PRODUCT_ROOT / "shared" else PRODUCT_ROOT) / "third_party"
+THIRD_PARTY_3DTI_DIR = THIRD_PARTY_ROOT / "3dti_AudioToolkit"
 THREEDTI_REPOSITORY = "https://github.com/3DTune-In/3dti_AudioToolkit"
 THREEDTI_COMMIT = "6bfee08705675308a8c348b4c3a4d582586d2f99"
 THREEDTI_ARCHIVE_SHA256 = "a96038866bf9d86420c6f871e611b1888add245d2cc3307341fedcb41cef6b82"
-DEFAULT_BACKEND_EXE = PRODUCT_ROOT / "third_party" / "3dti_renderer" / "bin" / "pps-3dti-renderer.exe"
+DEFAULT_BACKEND_EXE = THIRD_PARTY_ROOT / "3dti_renderer" / "bin" / "pps-3dti-renderer.exe"
 DEFAULT_RENDER_SAMPLE_RATE = 44100
 DEFAULT_RENDER_FRAME_MS = 20.0
 DEFAULT_RENDER_HOP_MS = 5.0
