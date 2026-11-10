@@ -50,17 +50,7 @@ func TestExtractZipRejectsZipSlip(t *testing.T) {
 	}
 }
 
-func TestHandleExternalDependenciesOpensProviderPageWhenRedistributionBlocked(t *testing.T) {
-	var opened []string
-	previous := openExternalURL
-	openExternalURL = func(rawURL string) error {
-		opened = append(opened, rawURL)
-		return nil
-	}
-	t.Cleanup(func() {
-		openExternalURL = previous
-	})
-
+func TestHandleExternalDependenciesReportsProviderPageWhenRedistributionBlocked(t *testing.T) {
 	statuses, err := handleExternalDependencies(
 		context.Background(),
 		[]ExternalDependency{{
@@ -79,8 +69,8 @@ func TestHandleExternalDependenciesOpensProviderPageWhenRedistributionBlocked(t 
 	if len(statuses) != 1 || statuses[0].Status != "provider_action_required" {
 		t.Fatalf("unexpected statuses: %#v", statuses)
 	}
-	if len(opened) != 1 || opened[0] != "https://provider.example/drivers" {
-		t.Fatalf("provider URL was not opened: %#v", opened)
+	if statuses[0].ProviderURL != "https://provider.example/drivers" {
+		t.Fatalf("unexpected provider URL: %#v", statuses[0])
 	}
 }
 
@@ -89,8 +79,8 @@ func TestSharedComponentMismatchIsRejected(t *testing.T) {
 	payload := Payload{Kind: "designer_windows_x64", SHA256: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
 	installed := DownloadManifest{Component: ComponentSelection{
 		ID: "designer", Version: "0.1.0",
-		ManifestSHA256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-		SharedVersion: "0.1.0",
+		ManifestSHA256:       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		SharedVersion:        "0.1.0",
 		SharedManifestSHA256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 	}}
 	if err := writeInstallMarker(root, installed, payload); err != nil {
@@ -98,8 +88,8 @@ func TestSharedComponentMismatchIsRejected(t *testing.T) {
 	}
 	requested := DownloadManifest{Component: ComponentSelection{
 		ID: "runner", Version: "0.1.0",
-		ManifestSHA256: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-		SharedVersion: "0.2.0",
+		ManifestSHA256:       "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+		SharedVersion:        "0.2.0",
 		SharedManifestSHA256: "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
 	}}
 	if err := verifyCompatibleComponentInstall(root, requested); err == nil {
@@ -113,7 +103,7 @@ func TestCompatibleStandaloneComponentsCanShareInstallRoot(t *testing.T) {
 	designer := DownloadManifest{Component: ComponentSelection{
 		ID: "designer", Version: "0.1.0",
 		ManifestSHA256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-		SharedVersion: "0.1.0", SharedManifestSHA256: sharedHash,
+		SharedVersion:  "0.1.0", SharedManifestSHA256: sharedHash,
 	}}
 	if err := writeInstallMarker(root, designer, Payload{Kind: "designer_windows_x64", SHA256: sharedHash}); err != nil {
 		t.Fatal(err)
@@ -121,7 +111,7 @@ func TestCompatibleStandaloneComponentsCanShareInstallRoot(t *testing.T) {
 	runner := DownloadManifest{Component: ComponentSelection{
 		ID: "runner", Version: "0.1.0",
 		ManifestSHA256: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-		SharedVersion: "0.1.0", SharedManifestSHA256: sharedHash,
+		SharedVersion:  "0.1.0", SharedManifestSHA256: sharedHash,
 	}}
 	if err := verifyCompatibleComponentInstall(root, runner); err != nil {
 		t.Fatalf("compatible component was rejected: %v", err)

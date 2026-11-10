@@ -51,6 +51,7 @@ def test_build_download_manifest_hashes_payload(tmp_path: Path):
     assert len(manifest["component"]["manifest_sha256"]) == 64
     assert len(manifest["component"]["shared_manifest_sha256"]) == 64
     assert manifest["payloads"][0]["kind"] == "full_windows_x64"
+    assert manifest["payloads"][0]["windows_runtime_bundle"] is True
     assert manifest["payloads"][0]["filename"] == payload.name
     assert manifest["payloads"][0]["size_bytes"] == len(b"offline-package")
     assert len(manifest["payloads"][0]["sha256"]) == 64
@@ -66,10 +67,7 @@ def test_build_download_manifest_hashes_payload(tmp_path: Path):
     assert dependencies["native_instruments_komplete_audio_asio"]["auto_download"] is False
     assert dependencies["native_instruments_komplete_audio_asio"]["redistribution_permitted"] is False
     assert "written redistribution permission" in dependencies["native_instruments_komplete_audio_asio"]["license_policy"]
-    assert dependencies["flexasio_optional_fallback"]["provider"] == "Etienne Dechamps"
-    assert dependencies["flexasio_optional_fallback"]["auto_download"] is True
-    assert dependencies["flexasio_optional_fallback"]["redistribution_permitted"] is True
-    assert len(dependencies["flexasio_optional_fallback"]["sha256"]) == 64
+    assert set(dependencies) == {"native_instruments_komplete_audio_asio"}
 
 
 def test_build_download_manifest_requires_payload(tmp_path: Path):

@@ -14,19 +14,18 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 )
 
 type InstallOptions struct {
-	ManifestSource  string
-	PayloadKind     string
+	ManifestSource    string
+	PayloadKind       string
 	ExpectedComponent string
-	InstallDir      string
-	CreateShortcuts bool
-	Launch          bool
-	Force           bool
+	InstallDir        string
+	CreateShortcuts   bool
+	Launch            bool
+	Force             bool
 }
 
 type InstallResult struct {
@@ -48,14 +47,12 @@ type ProgressEvent struct {
 
 type ProgressFunc func(ProgressEvent)
 
-var openExternalURL = openURL
-
 type ExternalDependencyStatus struct {
-	Kind       string
-	Label      string
-	Status     string
-	Path       string
-	Message    string
+	Kind        string
+	Label       string
+	Status      string
+	Path        string
+	Message     string
 	ProviderURL string
 }
 
@@ -79,6 +76,9 @@ func InstallFromManifest(ctx context.Context, options InstallOptions, progress P
 	if err != nil {
 		return InstallResult{}, err
 	}
+	if (options.ExpectedComponent == "full" || options.ExpectedComponent == "designer") && !payload.WindowsRuntimeBundle {
+		return InstallResult{}, errors.New("this downloader requires a package with the bundled Windows runtimes")
+	}
 
 	installDir := strings.TrimSpace(options.InstallDir)
 	if installDir == "" {
@@ -95,6 +95,11 @@ func InstallFromManifest(ctx context.Context, options InstallOptions, progress P
 	payloadPath := filepath.Join(downloadDir, payload.Filename)
 
 	if !options.Force && existingInstallLooksValid(installDir, payload) {
+		if payload.WindowsRuntimeBundle {
+			if err := installWindowsPrerequisites(ctx, installDir, progress); err != nil {
+				return InstallResult{}, err
+			}
+		}
 		dependencyStatuses, err := handleExternalDependencies(ctx, manifest.ExternalDependencies, downloadDir, progress)
 		if err != nil {
 			return InstallResult{}, err
@@ -134,9 +139,6 @@ func InstallFromManifest(ctx context.Context, options InstallOptions, progress P
 		if !canReplaceInstallDir(installDir) {
 			return InstallResult{}, fmt.Errorf("refusing to replace install dir outside the PPS version root: %s", installDir)
 		}
-		if err := os.RemoveAll(installDir); err != nil {
-			return InstallResult{}, fmt.Errorf("remove old install dir: %w", err)
-		}
 	}
 	partialDir := installDir + ".partial"
 	_ = os.RemoveAll(partialDir)
@@ -148,6 +150,12 @@ func InstallFromManifest(ctx context.Context, options InstallOptions, progress P
 		_ = os.RemoveAll(partialDir)
 		return InstallResult{}, err
 	}
+	if payload.WindowsRuntimeBundle {
+		if err := installWindowsPrerequisites(ctx, partialDir, progress); err != nil {
+			_ = os.RemoveAll(partialDir)
+			return InstallResult{}, err
+		}
+	}
 	if mergeExisting {
 		if err := mergeCompatibleTree(partialDir, installDir); err != nil {
 			_ = os.RemoveAll(partialDir)
@@ -155,6 +163,10 @@ func InstallFromManifest(ctx context.Context, options InstallOptions, progress P
 		}
 		_ = os.RemoveAll(partialDir)
 	} else {
+		if err := os.RemoveAll(installDir); err != nil {
+			_ = os.RemoveAll(partialDir)
+			return InstallResult{}, fmt.Errorf("remove old install dir: %w", err)
+		}
 		if err := os.MkdirAll(filepath.Dir(installDir), 0o755); err != nil {
 			_ = os.RemoveAll(partialDir)
 			return InstallResult{}, fmt.Errorf("create install parent: %w", err)
@@ -205,8 +217,6 @@ func handleExternalDependencies(ctx context.Context, dependencies []ExternalDepe
 				ProviderURL: dependency.ProviderPageURL,
 				Message:     fmt.Sprintf("%s must be installed from the provider source: %s", label, dependency.ProviderPageURL),
 			})
-			progress(ProgressEvent{Stage: "external-dependency", Message: fmt.Sprintf("%s requires provider install: %s", label, dependency.ProviderPageURL)})
-			_ = openExternalURL(dependency.ProviderPageURL)
 			continue
 		}
 		if !dependency.RedistributionPermitted {
@@ -639,25 +649,6 @@ func launchEntrypoint(path string) error {
 		return exec.Command("cmd", "/c", "start", "", path).Start()
 	}
 	return exec.Command(path).Start()
-}
-
-func openURL(rawURL string) error {
-	rawURL = strings.TrimSpace(rawURL)
-	if rawURL == "" {
-		return nil
-	}
-	parsed, err := url.Parse(rawURL)
-	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") {
-		return fmt.Errorf("refusing to open non-http URL: %s", rawURL)
-	}
-	switch runtime.GOOS {
-	case "windows":
-		return exec.Command("rundll32", "url.dll,FileProtocolHandler", rawURL).Start()
-	case "darwin":
-		return exec.Command("open", rawURL).Start()
-	default:
-		return exec.Command("xdg-open", rawURL).Start()
-	}
 }
 
 func pathExists(path string) bool {

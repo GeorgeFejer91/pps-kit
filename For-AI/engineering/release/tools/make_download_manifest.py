@@ -16,9 +16,6 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_OUTPUT = REPO_ROOT / "dist" / "pps_download_manifest.v1.json"
 MANIFEST_SCHEMA = "pps-download-manifest.v1"
 NI_DRIVER_PAGE_URL = "https://www.native-instruments.com/en/support/downloads/drivers-other-files/"
-FLEXASIO_URL = "https://github.com/dechamps/FlexASIO/releases/download/flexasio-1.10b/FlexASIO-1.10b.exe"
-FLEXASIO_SHA256 = "fe496bcc08d6c421c6244c8a60ac7b538560bda138000fd1a54ab8ebce031209"
-FLEXASIO_SIZE_BYTES = 13749698
 
 
 def project_version() -> str:
@@ -143,20 +140,6 @@ def build_manifest(
                     "Install it, reconnect the interface, and restart PPSExperimentRunner.exe.",
                 ],
             },
-            {
-                "kind": "flexasio_optional_fallback",
-                "label": "FlexASIO optional diagnostic fallback",
-                "required_for": "diagnostic fallback only; not publication timing validation",
-                "provider": "Etienne Dechamps",
-                "provider_page_url": "https://github.com/dechamps/FlexASIO/releases",
-                "download_url": FLEXASIO_URL,
-                "filename": "FlexASIO-1.10b.exe",
-                "size_bytes": FLEXASIO_SIZE_BYTES,
-                "sha256": FLEXASIO_SHA256,
-                "license_policy": "MIT-licensed diagnostic fallback; publisher release is SHA256-verified.",
-                "redistribution_permitted": True,
-                "auto_download": True,
-            },
         ] if includes_runner else []
     return {
         "schema": MANIFEST_SCHEMA,
@@ -176,6 +159,7 @@ def build_manifest(
                 "size_bytes": payload.stat().st_size,
                 "sha256": sha256_file(payload),
                 "platform": platform,
+                "windows_runtime_bundle": platform == "windows-amd64" and component_id in {"designer", "full"},
                 "package_inventory": inventory_payload,
                 "contains": [component_id, "shared"],
             }

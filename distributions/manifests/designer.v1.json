@@ -5,7 +5,19 @@
   "platform": "windows-x64",
   "dependencies": [{"component_id": "shared", "version": "0.1.0"}],
   "source_to_install": [
-    {"source": "dist/PPSDesigner", "install": "apps/PPSDesigner", "kind": "generated_tree"}
+    {"source": "dist/PPSDesigner", "install": "apps/PPSDesigner", "kind": "generated_tree"},
+    {"source": "dist/windows-prerequisites/vc2013_redist.x64.exe", "install": "support/windows-prerequisites/vc2013_redist.x64.exe", "kind": "file"},
+    {"source": "dist/windows-prerequisites/vc_redist.x64.exe", "install": "support/windows-prerequisites/vc_redist.x64.exe", "kind": "file"},
+    {"source": "dist/windows-prerequisites/MicrosoftEdgeWebView2RuntimeInstallerX64.exe", "install": "support/windows-prerequisites/MicrosoftEdgeWebView2RuntimeInstallerX64.exe", "kind": "file"}
+  ],
+  "required_runtime_paths": [
+    "shared/third_party/3dti_renderer/bin/pps-3dti-renderer.exe",
+    "shared/third_party/3dti_renderer/bin/hdf5.dll",
+    "shared/third_party/3dti_renderer/bin/hdf5_hl.dll",
+    "shared/third_party/3dti_renderer/bin/libcurl.dll",
+    "shared/third_party/3dti_renderer/bin/netcdf.dll",
+    "shared/third_party/3dti_renderer/bin/zlib1.dll",
+    "shared/assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa"
   ],
   "entrypoints": [
     {"id": "pps-designer", "path": "apps/PPSDesigner/PPSDesigner.exe", "shortcut": "PPS Experiment Designer"},

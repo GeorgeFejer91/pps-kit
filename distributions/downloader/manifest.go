@@ -9,6 +9,7 @@ import (
 )
 
 const manifestSchema = "pps-download-manifest.v1"
+
 var defaultPayloadKind = "full_windows_x64"
 
 type DownloadManifest struct {
@@ -34,15 +35,16 @@ type ComponentSelection struct {
 }
 
 type Payload struct {
-	Kind             string            `json:"kind"`
-	Label            string            `json:"label"`
-	Filename         string            `json:"filename"`
-	URL              string            `json:"url"`
-	SizeBytes        int64             `json:"size_bytes"`
-	SHA256           string            `json:"sha256"`
-	Platform         string            `json:"platform"`
-	PackageInventory *PackageInventory `json:"package_inventory,omitempty"`
-	Contains         []string          `json:"contains"`
+	Kind                 string            `json:"kind"`
+	Label                string            `json:"label"`
+	Filename             string            `json:"filename"`
+	URL                  string            `json:"url"`
+	SizeBytes            int64             `json:"size_bytes"`
+	SHA256               string            `json:"sha256"`
+	Platform             string            `json:"platform"`
+	PackageInventory     *PackageInventory `json:"package_inventory,omitempty"`
+	WindowsRuntimeBundle bool              `json:"windows_runtime_bundle,omitempty"`
+	Contains             []string          `json:"contains"`
 }
 
 type PackageInventory struct {
@@ -123,6 +125,9 @@ func (m DownloadManifest) Validate() error {
 		}
 		if payload.SizeBytes < 0 {
 			return fmt.Errorf("payload %q has a negative size", payload.Kind)
+		}
+		if payload.WindowsRuntimeBundle && payload.Platform != "windows-amd64" {
+			return fmt.Errorf("payload %q declares a Windows x64 runtime bundle for %q", payload.Kind, payload.Platform)
 		}
 		if payload.PackageInventory != nil {
 			if strings.TrimSpace(payload.PackageInventory.Schema) == "" {

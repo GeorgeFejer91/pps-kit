@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -46,14 +47,15 @@ func TestInstallFromManifestDownloadsVerifiesAndExtracts(t *testing.T) {
 					"shared_manifest_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 				},
 				"payloads": []map[string]any{{
-					"kind":       "full_windows_x64",
-					"label":      "Full PPS Toolkit package",
-					"filename":   "payload.zip",
-					"url":        serverURL + "/payload.zip",
-					"size_bytes": len(payloadData),
-					"sha256":     payloadHash,
-					"platform":   currentPlatform(),
-					"contains":   []string{"full", "shared"},
+					"kind":                   "full_windows_x64",
+					"label":                  "Full PPS Toolkit package",
+					"filename":               "payload.zip",
+					"url":                    serverURL + "/payload.zip",
+					"size_bytes":             len(payloadData),
+					"sha256":                 payloadHash,
+					"platform":               currentPlatform(),
+					"windows_runtime_bundle": request.URL.Query().Get("runtime-bundle") == "1",
+					"contains":               []string{"full", "shared"},
 				}},
 				"entrypoints": []map[string]any{{
 					"kind":     "designer",
@@ -94,6 +96,27 @@ func TestInstallFromManifestDownloadsVerifiesAndExtracts(t *testing.T) {
 	if !pathExists(filepath.Join(installDir, "pps_install_manifest.json")) {
 		t.Fatal("expected install marker to be written")
 	}
+	t.Run("missing bundled runtimes prevent readiness", func(t *testing.T) {
+		if currentPlatform() != "windows-amd64" {
+			t.Skip("Windows x64 payload")
+		}
+		installDir := filepath.Join(temp, "incomplete")
+		_, err := InstallFromManifest(context.Background(), InstallOptions{
+			ManifestSource:    server.URL + "/manifest.json?runtime-bundle=1",
+			ExpectedComponent: "full",
+			InstallDir:        installDir,
+		}, func(event ProgressEvent) {
+			if event.Stage == "ready" {
+				t.Error("an incomplete runtime bundle was reported ready")
+			}
+		})
+		if err == nil || !strings.Contains(err.Error(), "verify bundled Microsoft Visual C++ 2013 Runtime") {
+			t.Fatalf("expected a bundled runtime verification error, got %v", err)
+		}
+		if pathExists(installDir) || pathExists(installDir+".partial") {
+			t.Fatal("incomplete install was left on disk")
+		}
+	})
 }
 
 func writeTestZip(t *testing.T, path string, name string, data []byte) {

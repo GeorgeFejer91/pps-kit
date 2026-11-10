@@ -20,9 +20,13 @@ Designer being installed.
 
 ### Full PPS Toolkit
 
-`PPS-Toolkit-Downloader.exe` installs Designer, Runner, and one Shared
-component. It creates separate Designer and Runner shortcuts; V1 does not add a
-central hub.
+`PPS-Toolkit-Downloader.exe` downloads and verifies one package, then installs
+the Experiment Planner, Experiment Runner, and their shared resources. The
+package includes the 3DTI sound generator, its DLLs and HRTF data, the Microsoft
+Visual C++ x64 redistributables it needs, and the offline WebView2 Runtime
+installer for the Planner. Setup installs missing runtimes from that package
+and creates a shortcut for each app. Windows may ask you to approve elevation
+to install a missing runtime. After setup, both apps can work offline.
 
 Until a GitHub Release contains the matching downloader and manifest assets,
 use the [PPS Kit Releases page](https://github.com/GeorgeFejer91/pps-kit/releases)
@@ -47,10 +51,11 @@ executables and download manifests are attached to GitHub Releases.
 - Designer: `PPSDesigner.exe`
 - Runner: `PPSExperimentRunner.exe`
 
-The Runner package includes the Windows Qt platform plugin (`qwindows.dll`)
-and performs its own audio/ASIO preflight. A successful installation alone does
-not prove that the lab audio interface and native multichannel driver are
-ready.
+The Runner package includes the Windows Qt platform plugin (`qwindows.dll`).
+Runner checks the available audio and ASIO devices. To use the validated
+Komplete Audio hardware route, obtain its proprietary ASIO driver from
+Native Instruments and complete the lab preflight. See the
+[Windows hardware and software requirements](WINDOWS_PC_SOFTWARE_REQUIREMENTS.md).
 
 ## Data and Privacy
 
@@ -73,7 +78,7 @@ under `For-AI/engineering/` and are not installed with the products.
 .\For-AI\engineering\build\windows\Build_PPS_Designer.ps1
 .\For-AI\engineering\build\windows\Build_Experiment_Runner_Exe.ps1
 .\For-AI\engineering\build\windows\Build_PPS_Downloader.ps1
-.\For-AI\engineering\build\windows\Build_PPS_Distribution.ps1 -Version 0.1.0 -ZenodoPayloadUrl "https://zenodo.org/records/<record>/files/<payload>.zip?download=1" -ZenodoDoi "10.5281/zenodo.<record>"
+.\For-AI\engineering\build\windows\Build_PPS_Distribution.ps1 -Version 0.1.0 -PayloadBaseUrl "https://zenodo.org/records/<record>/files" -ZenodoDoi "10.5281/zenodo.<record>"
 ```
 
 Generated binaries, package inventories, manifests, and ZIPs remain under the

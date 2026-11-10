@@ -60,6 +60,9 @@ Designer inventory includes:
 - `dist/PPSDesigner/PPSDesigner.exe` and required onedir support
 - `apps/designer/frontend/compiled/` as the offline UI
 - Designer launch/support material declared by its manifest
+- 3DTI renderer, its native DLLs, and the FABIAN SOFA asset from Shared
+- pinned Microsoft Visual C++ 2013 and v14 x64 redistributables and the
+  standalone x64 WebView2 Runtime installer
 - compatible Shared component
 
 Runner inventory includes:
@@ -123,8 +126,11 @@ packaged-path evidence.
 4. Generate component-specific `pps_download_manifest.v1.json` files with final
    URLs and hashes.
 5. Build all three downloader executables from the parameterized Go source.
-6. On clean Windows folders verify Designer-only, Runner-only, and Full. Full
-   must install two shortcuts and one compatible Shared component.
+6. Verify Designer-only, Runner-only, and Full on clean Windows. Full must
+   install two shortcuts and one compatible Shared component. Test a host
+   missing the bundled runtimes and one with them already installed. In both
+   cases verify a new render from the installed generator. Record the lab
+   interface driver and calibrated playback in the separate hardware preflight.
 7. Verify the public `/download` route references only assets that exist on the
    release; use the Releases page until direct assets exist.
 

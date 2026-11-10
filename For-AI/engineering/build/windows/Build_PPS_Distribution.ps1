@@ -36,6 +36,36 @@ if (-not $SkipApplicationBuilds) {
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
+# Use the same signed redistributables pinned in the downloader. A populated
+# cache allows a rebuild without contacting the prerequisite providers.
+$PrerequisiteDir = Join-Path $DistDir "windows-prerequisites"
+$PrerequisiteLock = Join-Path $Root "distributions\downloader\windows_prerequisites.json"
+New-Item -ItemType Directory -Force -Path $PrerequisiteDir | Out-Null
+foreach ($Runtime in (Get-Content -Raw -LiteralPath $PrerequisiteLock | ConvertFrom-Json)) {
+    $Destination = Join-Path $PrerequisiteDir $Runtime.filename
+    if ((Test-Path -LiteralPath $Destination) -and
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $Destination).Hash -eq $Runtime.sha256) {
+        continue
+    }
+    Write-Host "Staging $($Runtime.label)"
+    $Partial = "$Destination.part.exe"
+    try {
+        & curl.exe --fail --silent --show-error --location --retry 2 --connect-timeout 20 --max-time 300 --output $Partial $Runtime.url
+        if ($LASTEXITCODE -ne 0) { throw "Could not download $($Runtime.filename)." }
+        if ((Get-FileHash -Algorithm SHA256 -LiteralPath $Partial).Hash -ne $Runtime.sha256) {
+            throw "Unexpected SHA256 for $($Runtime.filename)."
+        }
+        $Signature = Get-AuthenticodeSignature -LiteralPath $Partial
+        if ($Signature.Status -ne "Valid" -or $Signature.SignerCertificate.Subject -notmatch '(^|, )O=Microsoft Corporation(,|$)') {
+            throw "Expected a valid Microsoft Authenticode signature for $($Runtime.filename)."
+        }
+        Move-Item -LiteralPath $Partial -Destination $Destination -Force
+    }
+    finally {
+        if (Test-Path -LiteralPath $Partial) { Remove-Item -LiteralPath $Partial -Force }
+    }
+}
+
 $Products = @(
     [pscustomobject]@{ Id = "designer"; Stem = "PPS-Designer"; Manifest = "pps_designer_download_manifest.v1.json" },
     [pscustomobject]@{ Id = "runner"; Stem = "PPS-Experiment-Runner"; Manifest = "pps_runner_download_manifest.v1.json" },

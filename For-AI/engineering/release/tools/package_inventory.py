@@ -87,8 +87,14 @@ def build_inventory(stage_root: Path | None = None, component_id: str = "full") 
     components = resolve_components(component_id, manifests)
     root = stage_root.resolve() if stage_root else None
     items: list[dict[str, Any]] = []
+    required_runtime_paths: list[str] = []
     missing_required: list[str] = []
     install_owners: dict[str, str] = {}
+    runtime_lock = REPO_ROOT / "distributions" / "downloader" / "windows_prerequisites.json"
+    prerequisite_hashes = {
+        f"support/windows-prerequisites/{runtime['filename']}": runtime["sha256"]
+        for runtime in json.loads(runtime_lock.read_text(encoding="utf-8"))
+    }
 
     for manifest in components:
         owner = str(manifest["component_id"])
@@ -116,12 +122,20 @@ def build_inventory(stage_root: Path | None = None, component_id: str = "full") 
                 elif target.is_file():
                     entry["size_bytes"] = target.stat().st_size
                     entry["sha256"] = sha256_file(target)
+                    if install in prerequisite_hashes and entry["sha256"] != prerequisite_hashes[install]:
+                        raise ValueError(f"Unexpected SHA256 for {install}")
+                elif install in prerequisite_hashes:
+                    missing_required.append(install)
                 else:
                     filesystem_target = _filesystem_path(target)
                     files = [path for path in filesystem_target.rglob("*") if path.is_file()]
                     entry["file_count"] = len(files)
                     entry["size_bytes"] = sum(path.stat().st_size for path in files)
             items.append(entry)
+        for install in manifest.get("required_runtime_paths", []):
+            required_runtime_paths.append(install)
+            if root is not None and not _filesystem_path(root / install).is_file():
+                missing_required.append(install)
 
     component_hashes = {
         str(manifest["component_id"]): sha256_file(manifest["_path"])
@@ -131,16 +145,17 @@ def build_inventory(stage_root: Path | None = None, component_id: str = "full") 
         "schema": INVENTORY_SCHEMA,
         "component_id": component_id,
         "version": str(manifests[component_id]["version"]),
-        "stage_root": str(root) if root is not None else "",
+        "stage_root": "." if root is not None else "",
         "created_utc": datetime.now(timezone.utc).isoformat() if root is not None else "",
         "resolved_components": [str(manifest["component_id"]) for manifest in components],
         "component_manifest_sha256": component_hashes,
         "summary": {
             "item_count": len(items),
-            "required_item_count": len(items),
+            "required_item_count": len(items) + len(required_runtime_paths),
             "missing_required_count": len(missing_required),
         },
         "missing_required": missing_required,
+        "required_runtime_paths": required_runtime_paths,
         "items": items,
     }
 
