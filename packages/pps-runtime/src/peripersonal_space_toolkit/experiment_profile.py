@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .design import StimulusDesign, audio_file_summary, design_from_dict, design_to_dict
+from .design import StimulusDesign, _filesystem_path, audio_file_summary, design_from_dict, design_to_dict
 from .designer_segments.registry import manifest_sha256
 from .resource_limits import MAX_DOCUMENT_BYTES, read_csv_rows
 
@@ -20,11 +20,11 @@ MAX_PROFILE_BYTES = MAX_DOCUMENT_BYTES
 
 def _path(value: str | Path, base: Path) -> Path:
     path = Path(value).expanduser()
-    return (path if path.is_absolute() else base / path).resolve(strict=True)
+    return (path if path.is_absolute() else base / path).resolve()
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
-    rows = read_csv_rows(path)
+    rows = read_csv_rows(_filesystem_path(path))
     if not rows:
         raise ValueError("An assembly CSV must contain at least one row.")
     return rows
@@ -34,27 +34,26 @@ def create_experiment_profile(
     design: StimulusDesign, run_setup_path: Path, *, source_revision: int
 ) -> dict[str, Any]:
     """Freeze the already validated local plan; callers retain review gates."""
-    run_setup_path = Path(run_setup_path).resolve(strict=True)
+    run_setup_path = Path(run_setup_path).resolve()
     files: dict[str, dict[str, Any]] = {}
 
     def record(path: Path, *, audio: bool = False) -> dict[str, Any]:
-        path = path.resolve(strict=True)
         key = str(path)
         if key not in files:
-            before = path.stat()
-            value = {"path": key, "bytes": before.st_size, "sha256": manifest_sha256(path)}
+            storage_path = Path(_filesystem_path(path))
+            before = storage_path.stat()
+            value = {"path": key, "bytes": before.st_size, "sha256": manifest_sha256(storage_path)}
             if audio:
-                value["audio"] = audio_file_summary(path)
-            after = path.stat()
+                value["audio"] = audio_file_summary(storage_path)
+            after = storage_path.stat()
             if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
                 raise ValueError("An ingredient changed while the profile was being exported.")
             files[key] = value
         return files[key]
 
-    record(run_setup_path)
-    if run_setup_path.stat().st_size > MAX_PROFILE_BYTES:
+    if record(run_setup_path)["bytes"] > MAX_PROFILE_BYTES:
         raise ValueError("Run setup exceeds the 8 MiB profile limit.")
-    run_setup = json.loads(run_setup_path.read_text(encoding="utf-8-sig"))
+    run_setup = json.loads(Path(_filesystem_path(run_setup_path)).read_text(encoding="utf-8-sig"))
     if run_setup.get("schema") != "pps-experiment-run-setup.v1" or not run_setup.get("prepared"):
         raise ValueError("Export requires a prepared Segment 6 assembly plan.")
     source_manifest = record(_path(run_setup["source_segment5_manifest"], run_setup_path.parent))
@@ -109,12 +108,13 @@ def verify_profile_files(files: list[dict[str, Any]]) -> None:
         if not path.is_absolute() or str(path) in seen:
             raise ValueError("Profile ingredients require unique absolute local paths.")
         seen.add(str(path))
-        if path.stat().st_size != item["bytes"] or manifest_sha256(path) != item["sha256"]:
+        storage_path = Path(_filesystem_path(path))
+        if storage_path.stat().st_size != item["bytes"] or manifest_sha256(storage_path) != item["sha256"]:
             raise ValueError(f"Profile ingredient changed or is missing: {path.name}")
 
 
 def read_experiment_profile(path: Path) -> dict[str, Any]:
-    path = Path(path)
+    path = Path(_filesystem_path(path))
     if path.stat().st_size > MAX_PROFILE_BYTES:
         raise ValueError("Experiment profile exceeds the 8 MiB limit.")
     profile = json.loads(path.read_text(encoding="utf-8-sig"))

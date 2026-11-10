@@ -3957,7 +3957,7 @@ def test_validation_realtime_audio_engine_waits_for_buffer_deadlines(tmp_path: P
     assert engine.played_block_durations_s == pytest.approx([duration_s])
 
 
-def test_launcher_first_screen_is_three_option_environment_gate(tmp_path: Path, monkeypatch):
+def test_launcher_first_screen_offers_environment_and_planner_export(tmp_path: Path, monkeypatch):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         from PIL import Image, ImageStat
@@ -4013,7 +4013,7 @@ def test_launcher_first_screen_is_three_option_environment_gate(tmp_path: Path, 
             assert session_field.property("gateState") == "locked"
             step_label = dialog.findChild(q["QLabel"], "gateStepLabel")
             assert step_label is not None
-            assert step_label.text() == "Choose 1 Resume Last Session, 2 Resume Custom Session, or 3 Start New Session."
+            assert step_label.text() == "Resume a session, start a new one from a bundled study, or open a Planner export."
             assert step_label.property("attention") == "current"
             resume_button = dialog.findChild(q["QPushButton"], "resumeLastSessionButton")
             assert resume_button is not None
@@ -4027,6 +4027,9 @@ def test_launcher_first_screen_is_three_option_environment_gate(tmp_path: Path, 
             assert start_button is not None
             assert start_button.text() == "3 Start New Session"
             assert start_button.property("decisionTone") == "start"
+            open_profile = dialog.findChild(q["QPushButton"], "openExperimentProfileButton")
+            assert open_profile.isVisible()
+            assert open_profile.text().replace("&", "") == "Open Experiment JSON…"
             assert dialog.findChild(q["QPushButton"], "sendToPhoneButton") is None
             assert dialog.findChild(q["QPushButton"], "initiateEnvironmentButton") is None
             assert dialog.findChild(q["QPushButton"], "chooseOutputFolderButton") is None
@@ -4415,6 +4418,91 @@ def test_phone_transfer_lsl_admin_command_forwards_operator_note(tmp_path: Path,
         "target_part_session_id": "part-001",
         "target_session_group_id": "group-001",
     }
+
+
+def test_launcher_opens_a_planner_export_for_the_chosen_participant(tmp_path: Path):
+    pytest.importorskip("PySide6")
+    # The normal launcher starts with a fresh QApplication and event dispatcher.
+    result = subprocess.run(
+        [sys.executable, "-c", """
+import runpy
+import sys
+from pathlib import Path
+from pytest import MonkeyPatch
+
+with MonkeyPatch.context() as patch:
+    exercise = runpy.run_path(sys.argv[1])["_exercise_launcher_export_import"]
+    exercise(Path(sys.argv[2]), patch)
+""", str(Path(__file__).resolve()), str(tmp_path)],
+        env=dict(os.environ, QT_QPA_PLATFORM="offscreen"),
+        capture_output=True,
+        text=True,
+        timeout=20,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+def _exercise_launcher_export_import(tmp_path: Path, monkeypatch):
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QInputDialog
+
+    from peripersonal_space_toolkit import experiment_profile, focus_app
+
+    q = focus_app._require_qt()
+    app = q["QApplication"].instance() or q["QApplication"]([])
+    export = tmp_path / "experiment.json"
+    manifest = tmp_path / "session_manifest.json"
+    monkeypatch.setattr(focus_app, "load_profile_runner_settings", lambda **_: {"active_output_folder": str(tmp_path)})
+    monkeypatch.setattr(focus_app, "load_runner_settings", lambda: {})
+    monkeypatch.setattr(focus_app, "current_runner_diary_path", lambda: None)
+    monkeypatch.setattr(focus_app, "finished_profile_options", lambda: [])
+    monkeypatch.setattr(q["QFileDialog"], "getOpenFileName", lambda *_: (str(export), ""))
+    monkeypatch.setattr(QInputDialog, "getText", lambda *_, **_kwargs: ("P002", True))
+    prepared = []
+    opened = []
+
+    def prepare(path, participant, **options):
+        prepared.append((path, participant, options["session_root"]))
+        options["progress_callback"]({"message": "Preparing participant", "current": 1, "total": 1})
+        return SimpleNamespace(manifest_path=manifest)
+
+    def open_focus(path, **options):
+        opened.append((path, options["manual_start"]))
+        return 58
+
+    monkeypatch.setattr(experiment_profile, "prepare_experiment_profile", prepare)
+    monkeypatch.setattr(focus_app, "run_focus_window", open_focus)
+
+    errors = []
+
+    def click_export_import():
+        dialog = app.activeModalWidget()
+        button = dialog.findChild(q["QPushButton"], "openExperimentProfileButton")
+        if button is None:
+            errors.append("The launcher has no Open Experiment JSON action.")
+            dialog.reject()
+            return
+        QTest.mouseClick(button, q["Qt"].MouseButton.LeftButton)
+
+    def reject_if_still_open():
+        dialog = app.activeModalWidget()
+        status = dialog.findChild(q["QLabel"], "gateStatusLabel")
+        errors.append(f"Launcher did not open the prepared session. Status: {status.text()}")
+        dialog.reject()
+
+    timeout = q["QTimer"]()
+    timeout.setSingleShot(True)
+    timeout.timeout.connect(reject_if_still_open)
+    timeout.start(3000)
+    q["QTimer"].singleShot(50, click_export_import)
+    try:
+        exit_code = focus_app.run_launcher_window()
+    finally:
+        timeout.stop()
+    assert errors == [], (prepared, opened)
+    assert exit_code == 58
+    assert prepared == [(export, "P002", tmp_path)]
+    assert opened == [(manifest, True)]
 
 
 def test_launcher_resume_shortcut_opens_environment_operations(tmp_path: Path, monkeypatch):

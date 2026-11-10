@@ -118,6 +118,13 @@ dashboard experiment or choosing a finished study/profile preset:
 apps\runner\launchers\Launch_Experiment_Runner.bat
 ```
 
+To run a custom plan from the installed suite, lock the validated profile in
+Planner and choose **Export experiment JSON**. In Experiment Runner, choose
+**Open Experiment JSON…**, select the file, and enter a participant ID from
+the plan. Keep the profile's source files in place so Runner can verify their
+hashes. Runner prepares the session in the output folder shown on the launcher
+and opens Focus Mode for a manual start.
+
 The HTML dashboard is the standard researcher-facing interface. It runs as a
 local browser UI on `127.0.0.1`, launched by Python/FastAPI, and keeps
 rendering, session packaging, audio stress tests, and participant running in

@@ -805,6 +805,7 @@ def _require_qt() -> dict[str, Any]:
             QFrame,
             QGridLayout,
             QHBoxLayout,
+            QInputDialog,
             QLabel,
             QHeaderView,
             QLineEdit,
@@ -842,6 +843,7 @@ def _require_qt() -> dict[str, Any]:
         "QFont": QFont,
         "QGridLayout": QGridLayout,
         "QHBoxLayout": QHBoxLayout,
+        "QInputDialog": QInputDialog,
         "QHeaderView": QHeaderView,
         "QFontDatabase": QFontDatabase,
         "QFontMetrics": QFontMetrics,
@@ -14606,7 +14608,7 @@ def run_launcher_window(
     heading.setWordWrap(True)
     panel_layout.addWidget(heading)
     step_label = q["QLabel"](
-        "Choose 1 Resume Last Session, 2 Resume Custom Session, or 3 Start New Session."
+        "Resume a session, start a new one from a bundled study, or open a Planner export."
     )
     step_label.setObjectName("gateStepLabel")
     step_label.setWordWrap(True)
@@ -14668,6 +14670,10 @@ def run_launcher_window(
     buttons.addStretch(1)
     buttons.addWidget(close_button)
     panel_layout.addLayout(buttons)
+    open_profile_button = q["QPushButton"]("&Open Experiment JSON…")
+    open_profile_button.setObjectName("openExperimentProfileButton")
+    open_profile_button.setToolTip("Open a local Planner export for a participant in its run plan.")
+    panel_layout.addWidget(open_profile_button, alignment=q["Qt"].AlignmentFlag.AlignLeft)
     layout.addWidget(panel)
     layout.addStretch(1)
 
@@ -14727,9 +14733,6 @@ def run_launcher_window(
             start_shortcut.setEnabled(_decision_shortcuts_enabled())
 
     def _refresh_gate_attention() -> None:
-        step_label.setText(
-            "Choose 1 Resume Last Session, 2 Resume Custom Session, or 3 Start New Session."
-        )
         _set_attention(step_label, "current")
         _set_widget_gate_state(output_folder_input, "locked")
         _set_widget_gate_state(profile_combo, "locked")
@@ -14745,6 +14748,7 @@ def run_launcher_window(
         resume_button.setEnabled((not busy) and _resume_ready())
         resume_custom_button.setEnabled(not busy)
         start_new_button.setEnabled(not busy)
+        open_profile_button.setEnabled(not busy)
         close_button.setEnabled(not busy)
         output_folder_input.setEnabled(not busy)
         profile_combo.setEnabled(False)
@@ -14860,6 +14864,53 @@ def run_launcher_window(
         selected_action["open_environment"] = True
         dialog.accept()
 
+    def _start_gate_work(
+        label: str,
+        prepare: Callable[[Callable[[dict[str, Any]], None]], Any],
+        result_kind: str,
+    ) -> None:
+        _set_environment_busy(True)
+        message.setText(label)
+
+        def _progress_callback(payload: dict[str, Any]) -> None:
+            messages.put(("progress", dict(payload)))
+
+        def _worker() -> None:
+            try:
+                result = prepare(_progress_callback)
+            except Exception as exc:
+                messages.put(("error", str(exc)))
+            else:
+                messages.put((result_kind, result))
+
+        threading.Thread(target=_worker, name="pps-environment-init", daemon=True).start()
+
+    def _open_experiment_profile() -> None:
+        filename, _selected_filter = q["QFileDialog"].getOpenFileName(
+            dialog, "Open Planner Export", str(_selected_parent()), "Experiment JSON (*.json)"
+        )
+        if not filename:
+            return
+        participant, accepted = q["QInputDialog"].getText(
+            dialog, "Prepare Participant", "Participant ID from the exported plan", text=initial_participant
+        )
+        if not accepted:
+            return
+        if not participant.strip():
+            message.setText("Enter a participant ID from the exported plan.")
+            return
+
+        from .experiment_profile import prepare_experiment_profile
+
+        output_root = _selected_parent()
+        _start_gate_work(
+            "Verifying experiment profile and preparing session…",
+            lambda progress_callback: prepare_experiment_profile(
+                Path(filename), participant.strip(), session_root=output_root, progress_callback=progress_callback
+            ).manifest_path,
+            "profile_ready",
+        )
+
     def _start_environment_initialization(parent: Path, profile_id: str, session_name: str) -> None:
         parent = Path(parent).expanduser()
         profile = str(profile_id or "").strip()
@@ -14873,28 +14924,18 @@ def run_launcher_window(
         if not slugify_identifier(label, fallback=""):
             message.setText("Enter a Windows-safe session name.")
             return
-        _set_environment_busy(True)
-        message.setText("Creating new session environment...")
-
-        def _progress_callback(payload: dict[str, Any]) -> None:
-            messages.put(("progress", dict(payload)))
-
-        def _worker() -> None:
-            try:
-                result = initiate_data_collection_environment(
-                    parent_folder=parent,
-                    profile_id=profile,
-                    session_name=label,
-                    participant_id="P001",
-                    capture_options=capture_options,
-                    progress_callback=_progress_callback,
-                )
-            except Exception as exc:
-                messages.put(("error", str(exc)))
-            else:
-                messages.put(("done", result))
-
-        threading.Thread(target=_worker, name="pps-environment-init", daemon=True).start()
+        _start_gate_work(
+            "Creating new session environment...",
+            lambda progress_callback: initiate_data_collection_environment(
+                parent_folder=parent,
+                profile_id=profile,
+                session_name=label,
+                participant_id="P001",
+                capture_options=capture_options,
+                progress_callback=progress_callback,
+            ),
+            "done",
+        )
 
     def _new_session_default_parent() -> Path:
         current_root = Path(str(active_environment.get("root") or initial_output_root)).expanduser()
@@ -15044,6 +15085,9 @@ def run_launcher_window(
             elif kind == "error":
                 message.setText(str(payload))
                 _set_environment_busy(False)
+            elif kind == "profile_ready":
+                selected_action["profile_manifest"] = payload
+                dialog.accept()
             elif kind == "done":
                 root_text = str(payload.get("environment_root") or "").strip()
                 if root_text:
@@ -15088,6 +15132,7 @@ def run_launcher_window(
     resume_custom_button.clicked.connect(_choose_custom_session_folder)
     resume_button.clicked.connect(lambda _checked=False: _resume_environment(event_type="resume_last_session_clicked"))
     start_new_button.clicked.connect(_start_new_session)
+    open_profile_button.clicked.connect(_open_experiment_profile)
     close_button.clicked.connect(dialog.reject)
     gate_shortcuts["resume"] = q["QShortcut"](q["QKeySequence"]("1"), dialog)
     gate_shortcuts["resume"].setContext(q["Qt"].ShortcutContext.ApplicationShortcut)
@@ -15111,7 +15156,16 @@ def run_launcher_window(
         q["QTimer"].singleShot(200, _validation_auto_environment)
 
     accepted = dialog.exec() == q["QDialog"].DialogCode.Accepted
-    if not accepted or not selected_action.get("open_environment"):
+    if not accepted:
+        return 1
+    if profile_manifest := selected_action.get("profile_manifest"):
+        return run_focus_window(
+            profile_manifest,
+            capture_options=capture_options,
+            enable_missed_trial_topup=enable_missed_trial_topup,
+            manual_start=True,
+        )
+    if not selected_action.get("open_environment"):
         return 1
     return _run_environment_operations_window(
         capture_options=capture_options,

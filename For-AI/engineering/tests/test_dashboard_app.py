@@ -3744,6 +3744,20 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     saved_run_payload = json.loads(saved_run_manifest.read_text(encoding="utf-8"))
     assert str(saved_project_dir) in saved_run_payload["csv_path"]
     assert str(run_manifest.parent.parent) not in saved_run_payload["csv_path"]
+    profile_response = client.post(
+        "/api/profiles/export-json",
+        json={"expected_revision": saved["custom_workflow"]["review_revision"]},
+    )
+    assert profile_response.status_code == 200, profile_response.text
+    from peripersonal_space_toolkit.experiment_profile import read_experiment_profile
+
+    exported_profile = tmp_path / "my_lab_pilot.json"
+    exported_profile.write_bytes(profile_response.content)
+    profile = read_experiment_profile(exported_profile)
+    assert profile["schema"] == "pps-experiment-profile.v1"
+    assert Path(profile["run_setup_path"]) == saved_run_manifest
+    assert len(profile["assembly"]["block_order"]) == len(run_rows)
+    assert all(Path(item["path"]).is_relative_to(saved_project_dir) for item in profile["files"])
     catalog = client.get("/api/profile-catalog").json()
     catalog_entry = next(item for item in catalog["entries"] if item["profile_id"] == saved_result["profile_id"])
     assert catalog_entry["kind"] == "custom"
