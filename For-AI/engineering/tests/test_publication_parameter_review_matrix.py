@@ -59,9 +59,9 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(summary["targetConfigurationCandidates"], 275)
         self.assertEqual(summary["targetValidationLeaves"], 6)
         self.assertEqual(summary["targetMethodReviewCells"], 34_844)
-        self.assertEqual(summary["structuredOrientationReviewRecords"], 7)
+        self.assertEqual(summary["structuredOrientationReviewRecords"], 8)
         self.assertEqual(summary["experimentSpecificOrientationRows"], 4)
-        self.assertEqual(summary["combinedOrientationRows"], 8)
+        self.assertEqual(summary["combinedOrientationRows"], 10)
         self.assertEqual(summary["automatedVisualizationCandidates"], 173)
         self.assertEqual(summary["studyVisualizationCandidateRows"], 247)
         self.assertEqual(summary["confirmedVisualizationRows"], 0)
@@ -359,7 +359,16 @@ class PublicationParameterReviewMatrixTests(unittest.TestCase):
         self.assertEqual(orientation_counts["structured_orientation_review_present"], 4)
         self.assertEqual(
             orientation_counts["combined_record_orientation_requires_experiment_check"],
-            8,
+            10,
+        )
+        tool_use_rows = [row for row in orientation if row["record_id"] == "canzoneri_2013_tool_use_reshaping"]
+        self.assertEqual(
+            {row["study_row_id"] for row in tool_use_rows},
+            {"doi:10.1007/s00221-013-3532-2::a", "doi:10.1007/s00221-013-3532-2::b"},
+        )
+        self.assertTrue(
+            all(row["orientation_review_status"] == "combined_record_orientation_requires_experiment_check"
+                for row in tool_use_rows)
         )
 
         visualization_header, visualizations = read_csv(
