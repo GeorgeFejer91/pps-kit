@@ -37,6 +37,10 @@ screenshots under ignored `artifacts/`; check clipping, overlap, focus,
 disabled/read-only behavior, and relevant errors. Use silent isolated browser
 sessions unless a visible test is requested.
 
+The hosted Designer header carries a linked funding credit with the English
+wordmark from the [BIAL Foundation site](https://www.fundacaobial.com/en-GB).
+Keep the credit visible on the right of the header on desktop and phone layouts.
+
 For exploration, present the working local preview and remain at
 **local-preview** until accepted. Preview completion does not start packaging.
 At source promotion, check Pages uses identical allowlisted compiled bytes.
