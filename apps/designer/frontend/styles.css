@@ -799,55 +799,67 @@ code {
   display: none;
 }
 
-.funding-credit {
+.header-credits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  justify-self: end;
+  min-width: 0;
+  max-width: 100%;
+  gap: var(--space-2);
+}
+
+.header-credits > a {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  justify-self: end;
-  gap: 8px;
+  gap: var(--space-2);
+  min-width: 0;
   min-height: 44px;
-  padding: 4px 8px;
-  border: 1px solid #a7b6d0;
+  padding: var(--space-1) var(--space-2);
+  border-width: 1px;
+  border-style: solid;
   border-radius: 6px;
-  background: #fff;
-  color: #1f3880;
   font: 1rem/1.3 Arial, sans-serif;
   text-decoration: none;
 }
 
-.funding-credit-copy {
+.header-credit-copy {
   min-width: 0;
   overflow-wrap: break-word;
 }
 
-.funding-credit-copy > * {
+.header-credit-copy > * {
   display: block;
-  min-block-size: var(--pretext-min-height, 0px);
 }
 
-.funding-credit strong {
+.header-credit-copy strong {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.funding-credit img {
+.header-credits img {
   display: block;
   flex: none;
 }
 
+.funding-credit {
+  border-color: #a7b6d0;
+  background: #fff;
+  color: #1f3880;
+}
+
 .developer-credit {
-  display: grid;
-  align-content: center;
-  inline-size: fit-content;
-  max-inline-size: calc(100% - var(--rail-width) - 5 * var(--layout-gutter));
-  min-block-size: max(var(--control-height), var(--pretext-min-height, 0px));
-  margin-block-start: var(--space-1);
-  margin-inline: auto calc(var(--layout-gutter) + var(--space-4) + 1px);
+  border-color: var(--line-strong);
+  background: var(--surface-2);
   color: var(--primary);
-  font: 600 1rem/1.3 Arial, sans-serif;
-  overflow-wrap: break-word;
-  text-underline-offset: 2px;
+}
+
+.developer-credit:hover {
+  border-color: var(--primary);
+}
+
+.developer-credit .header-credit-copy > span {
+  color: var(--muted);
 }
 
 .page-view[hidden] {
@@ -6674,6 +6686,16 @@ body.modal-open {
   line-height: 1.45;
 }
 
+@media (max-width: 1400px) {
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .site-tab-list {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 1180px) {
   .app-shell {
     display: block;
@@ -6690,11 +6712,6 @@ body.modal-open {
 
   .topbar {
     margin-left: calc(var(--rail-width) + var(--space-4) + var(--layout-gutter));
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .site-tab-list {
-    grid-column: 1 / -1;
   }
 
   .grid,
@@ -7338,8 +7355,7 @@ body.desktop-applet .rail-note {
   display: none !important;
 }
 
-body.desktop-applet .topbar,
-body.desktop-applet .developer-credit {
+body.desktop-applet .topbar {
   display: none;
 }
 
@@ -7461,15 +7477,6 @@ body.desktop-applet .segment-heading {
     background: color-mix(in srgb, var(--surface) 97%, transparent);
     backdrop-filter: blur(10px);
     align-items: center;
-  }
-
-  .funding-credit {
-    max-inline-size: 65vw;
-  }
-
-  .developer-credit {
-    max-inline-size: calc(100% - 2 * var(--layout-gutter));
-    margin-inline-end: var(--layout-gutter);
   }
 
   .site-tab-list {
@@ -8014,36 +8021,41 @@ body.desktop-applet .segment-heading {
   }
 }
 
-@media (max-width: 460px) {
-  .funding-credit {
-    gap: 6px;
-  }
-
-  .funding-credit img {
-    width: 44px;
-    height: auto;
-  }
-
+@media (min-width: 761px) and (max-width: 860px), (max-width: 540px) {
+  .header-credits,
   .designer-status-chrome {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .designer-status-chrome .status-label {
-    justify-self: start;
-    min-height: 0;
-    padding: 2px 4px;
-  }
-
-  .designer-status-chrome #designer-help {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    min-width: 44px;
-    padding-inline: 6px;
+    grid-column: 1 / -1;
   }
 }
 
-@media (min-width: 761px) and (max-width: 1180px) {
+@media (max-width: 540px) {
+  html:has(body:not(.desktop-applet)) {
+    scroll-padding-top: 168px;
+  }
+}
+
+@media (max-width: 460px) {
+  .header-credits {
+    gap: var(--space-1);
+  }
+
+  .header-credits > a {
+    gap: var(--space-1);
+    padding-inline: var(--space-1);
+  }
+
+  .developer-credit img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .funding-credit img {
+    width: 40px;
+    height: auto;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1400px) {
   .topbar {
     position: static;
   }
