@@ -836,6 +836,20 @@ code {
   flex: none;
 }
 
+.developer-credit {
+  display: grid;
+  align-content: center;
+  inline-size: fit-content;
+  max-inline-size: calc(100% - var(--rail-width) - 5 * var(--layout-gutter));
+  min-block-size: max(var(--control-height), var(--pretext-min-height, 0px));
+  margin-block-start: var(--space-1);
+  margin-inline: auto calc(var(--layout-gutter) + var(--space-4) + 1px);
+  color: var(--primary);
+  font: 600 1rem/1.3 Arial, sans-serif;
+  overflow-wrap: break-word;
+  text-underline-offset: 2px;
+}
+
 .page-view[hidden] {
   display: none !important;
 }
@@ -7324,7 +7338,8 @@ body.desktop-applet .rail-note {
   display: none !important;
 }
 
-body.desktop-applet .topbar {
+body.desktop-applet .topbar,
+body.desktop-applet .developer-credit {
   display: none;
 }
 
@@ -7450,6 +7465,11 @@ body.desktop-applet .segment-heading {
 
   .funding-credit {
     max-inline-size: 65vw;
+  }
+
+  .developer-credit {
+    max-inline-size: calc(100% - 2 * var(--layout-gutter));
+    margin-inline-end: var(--layout-gutter);
   }
 
   .site-tab-list {

@@ -40,6 +40,7 @@ sessions unless a visible test is requested.
 The hosted Designer header carries a linked funding credit with the English
 wordmark from the [BIAL Foundation site](https://www.fundacaobial.com/en-GB).
 Keep the credit visible on the right of the header on desktop and phone layouts.
+The developer credit directly below it links to George Fejer's academic site.
 
 For exploration, present the working local preview and remain at
 **local-preview** until accepted. Preview completion does not start packaging.
