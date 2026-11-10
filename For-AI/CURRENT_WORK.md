@@ -57,12 +57,14 @@ This file is the active checklist and handoff owner; replace state, do not appen
   then finish Standard and the applicable native/installed gates. Continue
   M1's B1–B3/C1 and build/release work, followed by A1 through normal IPC.
   Keep the release support matrix explicit and never bypass readiness flags.
-- **Hosted credits:** `c0a6f444` added the linked BIAL Foundation credit and
-  `b491a67d` added the linked George Fejer developer byline below it. The 12-case
-  Designer audit passed. The live browser verified both links and their layout
-  at desktop and emulated phone widths down to 320 CSS px. Pages run
-  `42849552258` deployed to `https://ppskit.qzz.io/` on retry. The public byte
-  audit matched 470 files and all four main routes returned HTTP 200.
+- **Hosted credits:** `5b269569` moved the George Fejer credit into the hosted
+  Designer header as a linked profile box with the portrait from his academic
+  site. The BIAL Foundation credit remains beside it. The 12-case Designer
+  audit and narrow-phone rechecks passed; live desktop and 320 CSS px phone
+  checks verified the portrait, keyboard focus, and link activation. Pages run
+  `42867609777` deployed to `https://ppskit.com/`; 470 public files matched
+  the assembled bytes and all four main routes returned HTTP 200. No installer
+  was rebuilt.
 - **Git observation:** `main` was fast-forwarded to domain source checkpoint
   `8ce15ed6` and the verified credit changes were pushed using the repository URL.
   Ordinary fetch is still blocked by the malformed local
