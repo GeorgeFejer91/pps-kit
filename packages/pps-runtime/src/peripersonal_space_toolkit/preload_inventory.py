@@ -12,6 +12,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from .output_layout import _filesystem_path
 from .runtime_paths import repo_root
 
 
@@ -22,14 +23,14 @@ INVENTORY_SCHEMA = "pps-preload-asset-inventory.v1"
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
-    with path.open("rb") as f:
+    with open(_filesystem_path(path), "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
 
 
 def load_preload_inventory(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
-    path = Path(repo_root) / INVENTORY_RELATIVE_PATH
+    path = Path(_filesystem_path(Path(repo_root) / INVENTORY_RELATIVE_PATH))
     if not path.exists():
         return {
             "schema": INVENTORY_SCHEMA,
@@ -154,7 +155,7 @@ def ensure_preload_assets(
         rel_path = str(asset.get("path") or asset.get("local_path") or "").strip()
         if not rel_path:
             continue
-        local_path = Path(repo_root) / rel_path
+        local_path = Path(_filesystem_path(Path(repo_root) / rel_path))
         if local_path.exists():
             continue
         remote_url = str(asset.get("url") or "").strip()
@@ -178,7 +179,7 @@ def _profile_entry(template_id: str, inventory: dict[str, Any]) -> dict[str, Any
 
 def _asset_status(asset: dict[str, Any], *, inventory: dict[str, Any], repo_root: Path) -> dict[str, Any]:
     rel_path = str(asset.get("path") or asset.get("local_path") or "").strip()
-    local_path = Path(repo_root) / rel_path
+    local_path = Path(_filesystem_path(Path(repo_root) / rel_path))
     exists = bool(rel_path and local_path.exists())
     expected_sha = str(asset.get("sha256") or "").strip()
     actual_sha = sha256_file(local_path) if exists else ""

@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from collections import Counter
+import hashlib
 import json
+import os
 import wave
 from pathlib import Path
 
 import pytest
 
-from peripersonal_space_toolkit import dashboard_app
+from peripersonal_space_toolkit import dashboard_app, preload_inventory
 from peripersonal_space_toolkit.dashboard_app import DashboardController
 from peripersonal_space_toolkit.design import (
     PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
@@ -37,6 +39,37 @@ def test_study5_is_first_default_preload():
     templates = load_templates(root / "packages" / "pps-resources" / "study_templates")
 
     assert templates[0].template_id == DEFAULT_STUDY_TEMPLATE_ID
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows extended-length paths")
+def test_preload_uses_verified_bundled_wav_at_long_windows_path(tmp_path: Path, monkeypatch):
+    relative_wav = Path("assets", "preloads", "looming-" + "a" * 220 + ".wav")
+    wav_path = tmp_path / relative_wav
+    assert len(str(wav_path)) >= 260
+    extended_wav = Path("\\\\?\\" + str(wav_path))
+    extended_wav.parent.mkdir(parents=True)
+    with wave.open(str(extended_wav), "wb") as wav:
+        wav.setparams((1, 2, 44100, 0, "NONE", "not compressed"))
+        wav.writeframes(b"\x01\x00" * 16)
+    inventory = {
+        "base_url": "https://example.invalid",
+        "profiles": [{
+            "template_id": "deep_install_fixture",
+            "assets": [{
+                "path": relative_wav.as_posix(),
+                "sha256": hashlib.sha256(extended_wav.read_bytes()).hexdigest(),
+            }],
+        }],
+    }
+
+    def fail_download(*args, **kwargs):
+        pytest.fail("A verified bundled WAV must be used without a download")
+
+    monkeypatch.setattr(preload_inventory.urllib.request, "urlopen", fail_download)
+    status = preload_inventory.ensure_preload_assets("deep_install_fixture", inventory=inventory, repo_root=tmp_path)
+    assert status["status"] == "ready"
+    assert status["assets"][0]["sha256_ok"] is True
+    assert status["assets"][0]["path"] == relative_wav.as_posix()
 
 
 def test_white_pink_profile_remains_default_with_lateral_study5_variant_available():
