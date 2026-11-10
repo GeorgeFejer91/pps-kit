@@ -14,8 +14,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   verified Study 5 and Canzoneri selection/playback, a saved-backend isolation
   check, keyboard focus, Chromium installability, offline Study 5 replay, and
   320 CSS px layout with enlarged text. The built cache contains 60 files
-  (5.4 MB), including two verified Study 5 WAVs. Chrome's headless install
-  command timed out. An installed PWA launch and source promotion remain open.
+  (5.4 MB), including two verified Study 5 WAVs. A disposable Chrome 157
+  profile installed the PWA, launched it in standalone mode after selecting
+  that mode in the test profile, and replayed Study 5 offline. Chrome removed
+  the test app before the harness timed out during shutdown. Public source
+  promotion remains open. All 28 canonical Designer files match the local
+  Pages assembly byte for byte.
 - **Desktop baseline:** three profile, Runner software and marker loopback
   tests passed. Native 3DTI rendered a 3 s brown-noise trajectory with two
   audio channels and a tactile channel at 44.1 kHz. An absolute output path
@@ -25,8 +29,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Shared directory and workspace. Planner resolves Runner and native 3DTI in
   the suite. Removed duplicate scientific assets from the frozen app specs.
   Twenty-five focused Python checks, the Qt preflight and the downloader
-  tests passed. Rebuild the Windows Full package and verify the generated
-  stimulus → profile → Runner handoff through installed entrypoints.
+  tests passed. Source `d4dcd0b8` is pushed on the review branch. The Full
+  downloader built. The two app builds were restarted with only the project
+  dependencies after PyInstaller picked up host packages in the first build.
+  Verify the generated stimulus → profile → Runner handoff through installed
+  entrypoints after the isolated Full install.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.
@@ -63,9 +70,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   15 GiB before another complete Python/native run. No unrelated files,
   worktrees or failed-run records were removed. Detailed logs, screenshots,
   schema findings and the temporary Go toolchain stay in ignored artifacts.
-- **Next gates:** verify an installed PWA launch and the public bytes at
-  source promotion. In the native track, recover the working disk allowance
-  (about 8.2 GiB free at this checkpoint), reconcile the five evidence/catalogue
+- **Next gates:** verify the public PWA routes and bytes at source promotion.
+  In the native track, finish the isolated Windows candidate and recover the
+  working disk allowance, reconcile the five evidence/catalogue
   failures through their owners, and complete Standard. Continue M1 and A1
   through normal IPC with the applicable native and installed gates.
 - **Hosted credits:** `5b269569` moved the George Fejer credit into the hosted
@@ -135,8 +142,10 @@ recheck that cache variant if the old redirect is reported again. See
 - [x] Record the two product goals, acceptance criteria, and lean For-AI protocols.
 - [x] PWA local preview — Study 5 and Canzoneri playback, browser UI, and cached
   Study 5 revisit verified against the assembled site.
-- [ ] PWA promotion — Verify standalone launch after installation, then verify
-  the public routes and byte parity on the promoted revision.
+- [x] PWA installed preview — Chrome installed, launched standalone and
+  replayed Study 5 offline in a disposable profile.
+- [ ] PWA promotion — Verify the public routes and byte parity on the promoted
+  revision.
 - [ ] M1 — Authoring/participant fixes and validation/build baseline: B1–B3, C1,
   G1–G2, H1–H2. Validation has verified checkpoints but remains non-green.
 - [ ] M2 — Execute one real single-block package through native authority (A1).
