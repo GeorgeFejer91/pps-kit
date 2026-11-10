@@ -3,11 +3,15 @@
 Reviewed: 2026-11-10. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
-- **Goal:** complete Designer → immutable experiment profile → native Runner →
-  inspectable results, then a reproducible installed candidate and measured
-  qualification for explicitly supported profiles/platforms/routes. The
+- **Goal:** deliver the [standalone study preview PWA and offline Planner +
+  Runner suite](evolving_goals.md#2026-11-10--two-ways-to-use-pps-kit), with the
+  refreshed UI and one suite installer. The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
-  owns the finish criteria and work packages.
+  owns native work packages and qualification gates.
+- **Current stage:** goals and For-AI guidance. The scope of this checkpoint is
+  product direction, [skill nesting](SKILLS.md#skill-nesting-and-ownership), and
+  [delegation](WORKFLOW.md#delegation-and-handoffs). Product implementation,
+  installed validation and release remain open.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.
@@ -44,7 +48,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   15 GiB before another complete Python/native run. No unrelated files,
   worktrees or failed-run records were removed. Detailed logs, screenshots,
   schema findings and the temporary Go toolchain stay in ignored artifacts.
-- **Next action:** recover the working disk allowance; reconcile the five
+- **Next product slice:** choose one cleared, premade study fixture and trace
+  the shortest browser-only preview from study selection to playback. Use a
+  local UI preview to verify it never prompts for pairing. Confirm a cached
+  revisit for that fixture before expanding coverage. In the native track,
+  recover the working disk allowance; reconcile the five
   scientific evidence/derived-catalogue failures through their existing owners;
   then finish Standard and the applicable native/installed gates. Continue
   M1's B1–B3/C1 and build/release work, followed by A1 through normal IPC.
@@ -61,6 +69,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   `refs/heads/codex/pps-publication-integration (# Name clash 2026-11-03 mvwxhkC #)`
   ref. An isolated transfer imported the upstream commit while preserving the
   local refs, saved configuration, and worktrees.
+- **Goals checkpoint:** For-AI documentation only, based on `5b269569`
+  already on GitHub `main`. Fetch still hits the malformed ref above.
+  Guidance links/anchors, diff whitespace, and five repository/release audit
+  tests passed. These documentation paths do not trigger the Pages workflow.
 - **Installed agent baseline:** retain the [reviewed baseline lock](skills/baseline-lock.json)
   and existing RTK/GSD/Superpowers routes. No configuration/hooks or agent
   packages were changed by this validation task.
@@ -107,6 +119,9 @@ recheck that cache variant if the old redirect is reported again. See
 ## Active completion checklist
 
 - [x] M0 — Install the baseline, integrate routes and produce the completion review/plan.
+- [x] Record the two product goals, acceptance criteria, and lean For-AI protocols.
+- [ ] PWA — Verify a standalone preview and cached revisit for one supported
+  premade study, then validate the browser UI and expand only to supported assets.
 - [ ] M1 — Authoring/participant fixes and validation/build baseline: B1–B3, C1,
   G1–G2, H1–H2. Validation has verified checkpoints but remains non-green.
 - [ ] M2 — Execute one real single-block package through native authority (A1).
@@ -114,8 +129,10 @@ recheck that cache variant if the old redirect is reported again. See
   (A2–A3, C2), with Python/Rust handoff and result parity.
 - [ ] M4 — Supported acquisition/recovery, accessibility/performance and
   evidence-record gates (D1–D2, F1–F2, I1).
-- [ ] M5 — Exact-revision installed packages and advertised phone/physical
-  qualification (G3, E1, D3, I2).
+- [ ] M5 — Build one exact-revision installer for Planner and Runner with one
+  Shared payload. Verify offline generation, profile handoff and a supported
+  run on a clean installation; qualify advertised phone/physical routes
+  separately (G3, E1 when advertised, D3, I2).
 - [ ] M6 — Finish-criteria/claims/artifact review; publish only under matching
   release authorization.
 

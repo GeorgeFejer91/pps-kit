@@ -11,6 +11,29 @@ Documentation/tooling-only work goes straight to its relevant source checks.
 | Packaged candidate | Build exact verified revision; component inventory, runtime dependencies, installed executable/UI checks. | Evidence from the installed path, with scientific qualification gaps stated. |
 | Qualified release | Clean-install/download checks, platform/hardware/scientific gates matching release claims, final URLs/hashes/metadata. | Authorized release publication with retained evidence. |
 
+## Delegation and handoffs
+
+Default to one agent. When delegation is authorized and there is useful
+independent work, the coordinator assigns bounded work packages to up to
+three workers, within the harness limit. Organize packages under their owning
+domain; keep the running hierarchy to coordinator → workers or reviewers.
+A worker that needs help returns the proposed subtask to the coordinator to
+assign as a sibling. No nested orchestrator or separate progress ledger.
+
+- **Assignment:** give each worker the outcome, one domain and its
+  [skill route](SKILLS.md#skill-nesting-and-ownership), exclusive write paths
+  (or read-only scope), dependencies, and a named acceptance check. Use a
+  managed worktree for independent edits when it helps. Workers preserve
+  changes outside their scope and report overlaps to the coordinator.
+- **Order:** split only when separate owners can deliver verifiable results.
+  Keep shared schema, actor and compiled artifact changes with a single owner
+  and integrate them serially. Use a read-only reviewer when independent
+  review is required and the harness has capacity.
+- **Return:** workers report changed paths or commit, check results, and open
+  blockers. The coordinator checks diffs and evidence, runs the shared gate,
+  updates [CURRENT_WORK.md](CURRENT_WORK.md), and owns the Git checkpoint.
+  Delegation does not extend release or publication authorization.
+
 ## UI exploration and promotion
 
 Use existing source/build paths. Run previews locally with real controls and

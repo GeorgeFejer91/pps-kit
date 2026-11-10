@@ -4,37 +4,36 @@ This is a compact decision summary, not an append-only session transcript.
 Replace superseded direction here; retain evidence in its owning domain.
 Prior decisions remain searchable in [the historical ledger](archive/evolving_goals.md).
 
-## 2026-10-27 — completion goal and reviewed skill baseline
+## 2026-11-10 — two ways to use PPS Kit
 
-- The goal is a complete Designer/profile/native-run/results workflow,
-  reproducible installed candidate, and qualification of the specific
-  profiles/platforms/routes advertised. Source, installation, physical timing,
-  perception and behavioral replication retain separate acceptance evidence.
-- [CURRENT_WORK.md](CURRENT_WORK.md) owns the active completion checklist.
-  The [domain review and multi-agent plan](engineering/validation/docs/completion-review-2026-10-27.md)
-  owns findings, work packages, dependencies and finish criteria. Keep the
-  original implementation record as evidence history; create no second plan tree.
-- Use the installed RTK/GSD/Superpowers baseline and conditional Tauri,
-  Pretext, accessibility/performance and MobX-suitability routes. Installation
-  provenance is in [baseline-lock.json](skills/baseline-lock.json). These are
-  agent dependencies; no product state-library migration follows from setup.
-- Use one coordinator with up to three workers. Assign exclusive path owners;
-  integrate actor/schema changes serially. Every completed task needs its
-  named evidence, and the overall goal stays open until all finish gates pass.
-- The current request delivers setup, critical review and the completion plan.
-  Product implementation, installed qualification and release publication
-  remain distinct stages under the existing authorization boundaries.
+| Goal | Acceptance evidence |
+| --- | --- |
+| **Browser PWA: study preview.** Recreate and preview supported studies using approved premade assets. | In a clean browser with no PPS Kit desktop process, open a public study, assemble it through the existing profile rules, and preview its stimuli and sequence. Verify installation and a cached revisit with the first supported study after initial load. The preview never requires a local companion, a backend URL, or a mutation token. Label it as a preview so browser playback is not mistaken for qualified acquisition. |
+| **Downloadable suite: offline Experiment Planner and Experiment Runner.** One installer delivers both tools. | On a clean supported machine, install both entrypoints with one compatible Shared payload. With the network disconnected, generate a stimulus for a supported study from local inputs, inspect and validate the plan, export its profile, import it in Runner, and complete a supported experiment with inspectable results. Prove the path can generate a study-backed stimulus type beyond the browser's premade choices. |
+| **UI refresh.** Make the two paths and their capabilities clear where people start. | In the browser preview, replace the pictured Local Companion status, URL, token and Connect controls with a clear study choice and an explanation of what the download adds. In the installed suite, expose plan, generate, validate/export and run as the normal path. Check real controls, keyboard/focus, and readable layout at supported widths and zoom before promoting source. |
+
+**Reuse:** Experiment Planner is the existing Designer role. Reuse its renderer,
+the Segment 0–6 rules, the verified profile/package handoff and native Runner
+authority. The public preview uses assets cleared for redistribution. The
+offline suite keeps experiment data and stimulus generation local. V1 remains
+a compatibility path; existing optional remote routes are outside the default
+journey and retain their own evidence gates when advertised. Reuse the current
+Full component composition; select the packaging mechanism when testing the
+first supported install. No new hub, transport, or generic stimulus framework
+is required by this decision.
+
+[CURRENT_WORK.md](CURRENT_WORK.md) owns the checklist. The existing
+[completion review](engineering/validation/docs/completion-review-2026-10-27.md)
+owns native work packages and validation gates. Its separation of source,
+installed operation, physical timing, perception and behavioral replication
+still applies. Qualification remains specific to the supported profiles,
+platforms and routes; release remains a separate stage.
 
 ## 2026-09-27 — task-scoped research software workflow
 
 - PPS Kit creates and replicates PPS experiments. Scientific contracts,
   reproducibility, native timing, and usable authoring govern scope.
   Voice cloning and XR/VR are not routine project dependencies.
-- Designer has two responsibilities: create/preview controllable spatial stimuli
-  using the existing renderer and 3D view; export a JSON experiment profile with
-  ingredients, file locations, and assembly rules. Runner reads that profile,
-  assembles the experiment, owns native execution, and records specified data.
-  This is the scope test for simplification and new modules.
 - Start with the short entry page/current work record; route to design/UI,
   experiment runtime, scientific evidence, or release operations. Load only
   relevant references and skills. Detailed history is preserved.

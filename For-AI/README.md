@@ -4,12 +4,13 @@ PPS Kit creates, prepares, and replicates peripersonal-space experiments. Its
 priority is scientific contracts, reproducibility, native timing, and usable
 authoring. Voice cloning and XR/VR are not default work.
 
-The product has one central flow: Designer creates and previews spatial stimuli
-through the existing 3DTI/SOFA renderer and 3D viewer, then exports a JSON
-experiment profile describing its ingredients, file locations, and assembly
-rules. Runner consumes that profile, assembles and executes the experiment,
-and records responses and results. Reuse the existing profile, segment, render,
-schedule, and execution owners; add no competing planner or command authority.
+The [product direction](evolving_goals.md) defines two experiences around the
+same experiment contracts: a standalone browser PWA for study previews with
+premade assets, and an offline downloadable suite with Experiment Planner
+(Designer) and Experiment Runner in one installer. The Planner generates
+stimuli locally and exports a verified profile. Native Runner consumes the
+profile, executes the experiment and records responses and results. Reuse the
+existing profile, segment, render, schedule, and execution owners.
 
 Read this page and [CURRENT_WORK.md](CURRENT_WORK.md), choose a domain below,
 then load only its relevant references and skills. Do not read all of `For-AI/`,
@@ -26,6 +27,8 @@ then load only its relevant references and skills. Do not read all of `For-AI/`,
 For cross-domain work, select one owning domain and read the neighboring
 handoff contract. [SKILLS.md](SKILLS.md) maps skills to tasks;
 [WORKFLOW.md](WORKFLOW.md) separates preview, source, packaging, and release.
+[Delegation](WORKFLOW.md#delegation-and-handoffs) defines when work is worth
+splitting and who integrates it.
 [module_map.md](module_map.md) locates code without loading history.
 The skill index records the installed GSD/Superpowers baseline and bundled
 RTK, fallback workflows, accessibility, performance and MobX suitability guides.
@@ -36,14 +39,15 @@ RTK, fallback workflows, accessibility, performance and MobX suitability guides.
 - Product source lives in `apps/`, `packages/`, `distributions/`, `docs/`,
   `third_party/`, and `website/`. `For-AI/` holds development execution,
   validation, research, memory, and experiments; it never enters an installer.
-- Designer and Runner ship independently with exactly one compatible Shared
-  component. `.pps-profile`, prepared-experiment packages, Segment 0-6
-  manifests, and scientific schemas remain stable handoffs.
+- Designer and Runner retain separate component ownership. The suite installer
+  uses one compatible Shared component. `.pps-profile`, prepared-experiment
+  packages, Segment 0-6 manifests, and scientific schemas remain stable handoffs.
 - V1 Python/PySide compatibility and candidate V2 Rust/Tauri have different
   evidence states. Qualification belongs to a recoverable, named route and
   profile record; compilation or demos cannot establish research acquisition.
-- Browser controls request native actions. Scientific timing, privileged
-  storage, and native participant execution stay with their native authority.
+- The public preview stands on its own. Installed UI and any separately
+  supported remote controls request native actions. Scientific timing,
+  privileged storage, and participant execution stay with native authority.
 - Keep participant data, recordings, credentials, downloaded papers, generated
   sessions, and private paths out of tracked memory and public assets.
 - Designer `apps/designer/frontend/compiled/` and Runner

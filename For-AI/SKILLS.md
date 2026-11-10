@@ -3,11 +3,27 @@
 Select skills by the task below. Read the selected `SKILL.md` completely and
 only its relevant references. Do not load every skill on every task.
 
-Load in order: foundation (`ponytail` for code/tooling), task domain,
-implementation surface, then verification. Routes below are conditional on
-their task; `ponytail` and the named project contracts are required for code
-work. Missing external skills use the disclosed existing-tooling fallback
-below, never an invented claim that a skill ran.
+## Skill nesting and ownership
+
+1. Start with the [shared baseline](#shared-project-skill-baseline) and the
+   owning domain from [README.md](README.md). For code/tooling, use `ponytail`
+   and the named project contracts.
+2. Choose one primary task skill. Nest a supporting skill or reference under
+   it only for a concrete need the primary route does not cover. For example,
+   Designer HTML uses `html-dashboard-orchestrator` for Segment 0–6 behavior,
+   `uncodixfy-pretext` for measured layout, and `agents-inc-accessibility`
+   for control semantics. Verify both UI concerns in the same rendered matrix.
+3. Load each skill once. Follow only the relevant links; if a supporting
+   skill routes back to an already loaded skill, stop there. The owning
+   domain decides project behavior, the primary skill guides the task, and
+   supporting skills contribute their specific checks. GSD/Superpowers use
+   the existing checklist and evidence owner. They do not add a second plan.
+4. Prefer a link to an existing route. Add a skill or reference only when an
+   active task has a named consumer, a gap in the existing owner, and a check
+   that can show the benefit. Remove redundant routes when the need ends.
+
+Use exact skill identifiers from the active catalog. Routes below are
+conditional on their task. Use the disclosed fallback for unavailable skills.
 
 | Task | Skills | Scope |
 |---|---|---|
@@ -19,7 +35,7 @@ below, never an invented claim that a skill ran.
 | Measured browser/WebView loading, interaction or memory cost | [agents-inc-web-performance](skills/agents-inc-web-performance/SKILL.md) | Profile a representative workload; preserve native timing and readable layout. |
 | MobX suitability or an existing MobX boundary | [mobx-integration](skills/mobx-integration/SKILL.md) | Conditional assessment only. Current PPS frontends retain their state owners; no MobX adoption is approved by installation. |
 | Candidate Rust/Tauri core, IPC, persistence, native integration | [tauri-rust-developer](https://github.com/GeorgeFejer91/tauri-rust-developer-skill) | Existing V2 code; does not authorize a broader framework migration. |
-| Remote Runner commands/authentication/state/transport | [tauri-browser-remote-control](https://github.com/GeorgeFejer91/tauri-browser-remote-control) | Typed actions through one native authority; keep routing, authorization, and timing evidence distinct. |
+| Optional remote Runner commands/authentication/state/transport | [tauri-browser-remote-control](https://github.com/GeorgeFejer91/tauri-browser-remote-control) | Typed actions through one native authority. Neither the browser preview nor normal offline operation needs this route. |
 | Papers, scientific methods, evidence or replication claims | consensus-mcp | Discover the configured Consensus tools first; follow its fallback/citation rules. |
 | Current technical documentation and primary-source lookup | multi-source-web-search | Load current sources when needed; ordinary code edits do not require a literature review. |
 | Scientific manuscript/argument work | [academic-writing-style](https://github.com/GeorgeFejer91/academic-writing-style) | Evidence-calibrated scholarly writing, conditional on access to the private skill. |

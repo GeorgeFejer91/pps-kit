@@ -8,6 +8,8 @@ and replicating research-grade peripersonal-space experiments.
 Use Ponytail/YAGNI: reuse existing code, add only what the task needs, and retain
 scientific validation, calibration, accessibility, privacy, and safety boundaries.
 [For-AI/SKILLS.md](For-AI/SKILLS.md) maps skills to actual tasks.
+Use its [skill nesting rules](For-AI/SKILLS.md#skill-nesting-and-ownership)
+and the [delegation protocol](For-AI/WORKFLOW.md#delegation-and-handoffs).
 
 Follow [For-AI/WORKFLOW.md](For-AI/WORKFLOW.md): local UI preview first, verified
 source promotion second, packaging and release as separate deliverables.
