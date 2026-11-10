@@ -52,7 +52,7 @@ def audit(pages: Path, base_url: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pages", type=Path, default=REPO_ROOT / "dist/pages")
-    parser.add_argument("--url", default="https://ppskit.qzz.io")
+    parser.add_argument("--url", default="https://ppskit.com")
     parser.add_argument("--report", type=Path,
                         default=REPO_ROOT / "artifacts/validation_runs/public-pages-byte-audit.json")
     args = parser.parse_args()

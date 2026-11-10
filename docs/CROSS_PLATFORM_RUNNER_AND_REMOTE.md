@@ -432,7 +432,7 @@ owned response headers should additionally send
 `Content-Security-Policy: frame-ancestors 'none'`.
 
 The canonical public copy is
-`https://ppskit.qzz.io/experiment-runner/`, with
+`https://ppskit.com/experiment-runner/`, with
 `https://georgefejer91.github.io/pps-kit/experiment-runner/` as the project-Pages
 fallback. Pages assembly copies the compiled companion HTML, browser-only
 assets, and pinned VDO.Ninja vendor files byte-for-byte; it does not publish
