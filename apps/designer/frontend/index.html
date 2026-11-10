@@ -133,6 +133,10 @@
         <input id="companion-token" type="password" autocomplete="off">
         <button id="connect-backend" type="button">Connect</button>
       </div>
+      <div id="preview-download" class="preview-download" hidden>
+        <a href="../download/" target="_top" data-pretext>Desktop suite</a>
+        <p data-pretext>Generate stimuli and run experiments offline.</p>
+      </div>
       <div class="rail-note">
         <span>Qt UI remains available as</span>
         <code>pps-design</code>
@@ -160,6 +164,11 @@
               </div>
               <button id="start-new-custom-design" type="button" class="primary">Start New Custom Design</button>
             </div>
+            <section id="study-preview" class="study-preview" aria-labelledby="study-preview-title" hidden>
+              <h3 id="study-preview-title" data-pretext>Preview study audio</h3>
+              <p data-pretext>Listen to premade stimuli. For calibrated experiments, use the desktop suite.</p>
+              <div id="study-preview-audio" class="study-preview-audio"></div>
+            </section>
             <section class="profile-inspection-card" aria-label="Selected profile information">
               <dl class="profile-inspection-details">
                 <div>
@@ -1268,7 +1277,7 @@
               <h3>Runner Browser Companion</h3>
               <p>Open the no-install controller and exploratory smartphone experiment interface. GitHub Pages hosts the interface only; remote control requires a compatible BRSP transport.</p>
               <a id="open-runner-companion" class="button-link primary-link" href="https://ppskit.com/experiment-runner/" target="_blank" rel="noopener noreferrer">Open Runner Companion</a>
-              <p>For local Designer actions, start the separately trusted local companion after installation.</p>
+              <p>Open the installed Experiment Planner to generate stimuli and the Experiment Runner to run your study.</p>
               <code>apps\designer\launchers\Start_Website_Companion.bat</code>
             </article>
           </div>

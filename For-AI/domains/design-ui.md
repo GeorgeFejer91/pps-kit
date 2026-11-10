@@ -25,6 +25,23 @@ Use `agents-inc-accessibility` with the same rendered interaction matrix, and
 draft ownership, request fencing, persistence and bounded-count work; it did
 not justify adding MobX to either current frontend.
 
+## Standalone study preview
+
+The assembled Pages site opens the canonical Designer in browser preview mode
+at `/app/`. It reads the staged study inventory and plays premade audio from
+the same origin. The existing profile and sequence views remain the source for
+study inspection. The preview links to the desktop suite for stimulus generation
+and experiment execution. The installed Planner opens through its own local
+application path.
+
+Pages builds the preview cache from the compiled shell, template metadata, and
+the two hash-checked Study 5 box-breathing WAVs. Study 5 is the offline audio
+fixture. Other study audio loads on demand. Assemble Pages and run
+`python For-AI/engineering/validation/scripts/run_study_preview_audit.py`
+to check study selection, keyboard playback, installability and cached playback
+after disconnecting. Browser playback supports study inspection. Native
+acquisition and timing use their own validation gates.
+
 ## Scoped implementation and completion
 
 Trace the existing control/state/backend flow, then change one requested screen

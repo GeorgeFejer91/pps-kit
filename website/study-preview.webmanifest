@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "PPS Study Preview",
+  "short_name": "PPS Preview",
+  "description": "Preview peripersonal space studies with premade stimuli.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f5f1",
+  "theme_color": "#f4f5f1",
+  "icons": [
+    { "src": "study-preview-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "app/pps_toolkit_icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -186,7 +186,10 @@ function applyTheme(theme) {
 function initializeChrome() {
   const desktop = new URLSearchParams(location.search).get("desktop") === "1";
   document.body.classList.toggle("desktop-applet", desktop);
-  document.getElementById("designer-capability-badge").textContent = desktop ? "desktop full" : "hosted compose";
+  const browserPreview = document.body.classList.contains("browser-study-preview");
+  document.getElementById("designer-capability-badge").textContent = browserPreview
+    ? "browser preview"
+    : desktop ? "desktop full" : "hosted compose";
   applyTheme(localStorage.getItem("ppsDesigner.theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
   document.getElementById("designer-theme-toggle")?.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
   document.getElementById("designer-help")?.addEventListener("click", () => document.querySelector('[data-segment-info="study"]')?.click());

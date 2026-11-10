@@ -33,6 +33,7 @@ website/**/*.json text eol=lf
 website/**/*.md text eol=lf
 website/**/*.svg text eol=lf
 website/**/*.txt text eol=lf
+website/**/*.webmanifest text eol=lf
 packages/pps-resources/study_templates/**/*.json text eol=lf
 packages/pps-resources/assets/preloads/**/*.json text eol=lf
 packages/pps-resources/assets/preloads/**/*.csv text eol=lf

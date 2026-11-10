@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /** Assemble the ignored GitHub Pages artifact from canonical product inputs. */
 
-import { cp, lstat, mkdir, readFile, rm, stat } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { createHash } from "node:crypto";
+import { cp, lstat, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 
@@ -82,6 +83,43 @@ function referencedCompanionResources(html) {
   return [...scripts, ...links].sort();
 }
 
+async function stageStudyPreviewCache(output) {
+  const inventoryPath = "assets/preloads/preload_inventory.json";
+  const inventory = JSON.parse(await readFile(join(output, inventoryPath), "utf8"));
+  const offlineStudy = inventory.profiles.find(({ template_id }) => template_id === "study5_box_breathing_pps");
+  if (!offlineStudy?.assets?.length) throw new Error("Offline Study 5 preload is missing its audio inventory.");
+
+  const assetRoot = `assets/preloads/${offlineStudy.template_id}/`;
+  for (const asset of offlineStudy.assets) {
+    if (!asset.path?.startsWith(assetRoot) || !/^[a-zA-Z0-9_/ .-]+$/u.test(asset.path)
+        || asset.path.split("/").includes("..") || extname(asset.path) !== ".wav") {
+      throw new Error(`Unexpected offline audio path: ${asset.path}`);
+    }
+    const digest = createHash("sha256").update(await readFile(join(output, asset.path))).digest("hex");
+    if (digest !== asset.sha256) throw new Error(`Offline audio hash mismatch: ${asset.path}`);
+  }
+
+  const extensions = new Set([".html", ".js", ".css", ".png", ".webp", ".svg", ".json"]);
+  const appFiles = (await readdir(join(output, "app"), { recursive: true, withFileTypes: true }))
+    .filter((entry) => entry.isFile() && extensions.has(extname(entry.name)))
+    .map((entry) => join(entry.parentPath, entry.name).slice(output.length + 1).replaceAll("\\", "/"));
+  const templateFiles = (await readdir(join(output, "study_templates")))
+    .filter((name) => /^[a-z0-9_]+\.json$/u.test(name))
+    .map((name) => `study_templates/${name}`);
+  const files = [
+    "index.html", "study-preview.webmanifest", "study-preview-icon-192.png",
+    inventoryPath, ...appFiles, ...templateFiles, ...offlineStudy.assets.map(({ path }) => path),
+  ].sort();
+  const hash = createHash("sha256");
+  for (const file of files) {
+    const digest = createHash("sha256").update(await readFile(join(output, file))).digest("hex");
+    hash.update(`${file}\0${digest}\n`);
+  }
+  const revision = hash.digest("hex");
+  await writeFile(join(output, "study-preview-cache.js"),
+    `self.PPS_STUDY_PREVIEW_CACHE = ${JSON.stringify({ revision, files })};\n`);
+}
+
 export async function assemblePages(output = canonicalOutput) {
   const resolvedOutput = resolve(output);
   const companionIndex = join(runnerCompiled, "companion", "index.html");
@@ -113,6 +151,7 @@ export async function assemblePages(output = canonicalOutput) {
   await cp(join(designerFrontend, "pps_toolkit_icon.png"), join(resolvedOutput, "app", "pps_toolkit_icon.png"));
   await cp(join(resources, "assets", "preloads"), join(resolvedOutput, "assets", "preloads"), { recursive: true });
   await cp(join(resources, "study_templates"), join(resolvedOutput, "study_templates"), { recursive: true });
+  await stageStudyPreviewCache(resolvedOutput);
 
   await copyVerified(
     companionIndex,

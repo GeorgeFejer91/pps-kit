@@ -78,7 +78,10 @@ const DEFAULT_LOUDNESS_POLICY = {
     windows_volume_policy: "not_part_of_asio_calibration"
   }
 };
-const STATIC_REPO_ROOT = new URL(import.meta.url.includes("/compiled/assets/") ? "../../../../../" : "../../../", import.meta.url).href;
+const BROWSER_STUDY_PREVIEW = /\/app\/(?:index\.html)?$/.test(window.location.pathname);
+const STATIC_REPO_ROOT = BROWSER_STUDY_PREVIEW
+  ? new URL("../", window.location.href).href
+  : new URL(import.meta.url.includes("/compiled/assets/") ? "../../../../../" : "../../../", import.meta.url).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "/assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "/study_templates/";
 const HOSTED_TEMPLATE_DIRECTORY_URL = "https://github.com/GeorgeFejer91/pps-kit/tree/main/packages/pps-resources/study_templates";
@@ -88,7 +91,7 @@ const STATIC_FORCE_QUERY_PARAM = "forceStaticPreview";
 const TEMPLATE_QUERY_PARAM = "template";
 const INITIAL_TEMPLATE_REQUEST = String(new URLSearchParams(window.location.search || "").get(TEMPLATE_QUERY_PARAM) || "").trim();
 const STATIC_COMPANION_REQUIRED_MESSAGE =
-  "This action needs the installed PPS Designer. Hosted mode can compose and export profiles, but cannot render audio, write workspace folders, or launch the Runner.";
+  "Use the installed Experiment Planner to generate audio and prepare an experiment for Runner.";
 const PROFILE_RECREATION_NOTICE =
   "Be aware: this is not the exact stimulus set used in the original study. This preload recreates the study's reported parameters within this interface, using the toolkit's local rendering and bundled profile assets.";
 const DESIGNER_PROGRESS_KEY = "designer_progress";
@@ -328,6 +331,7 @@ let activeSourcePreviewNode = null;
 let activeSourcePreviewButton = null;
 let activeSourcePreviewClearTimer = null;
 let sourcePreviewAudioContext = null;
+let sourcePreviewAttempt = 0;
 let customizeModalReturnFocus = null;
 let customizeModalMode = "copy";
 let saveProfileModalReturnFocus = null;
@@ -678,7 +682,7 @@ const PAGE_ROUTE_SEGMENTS = {
 
 async function api(path, options = {}) {
   const { skipStaticGuard = false, rawResponse = false, ...fetchOptions } = options;
-  if (staticModeActive && !skipStaticGuard) {
+  if (BROWSER_STUDY_PREVIEW || (staticModeActive && !skipStaticGuard)) {
     throw new Error(STATIC_COMPANION_REQUIRED_MESSAGE);
   }
   let response;
@@ -732,7 +736,7 @@ function staticResourceUrl(path) {
 }
 
 async function fetchStaticJson(path) {
-  const url = new URL(path, STATIC_REPO_ROOT);
+  const url = new URL(staticResourceUrl(path));
   url.searchParams.set("v", STATIC_RESOURCE_VERSION);
   const response = await fetch(url.href, { headers: { "Accept": "application/json" } });
   if (!response.ok) {
@@ -1020,6 +1024,7 @@ function renderEditModePanel() {
   const editButton = $("edit-mode-button");
   const panel = $("profile-mode-panel");
   if (!editButton || !panel) return;
+  panel.hidden = BROWSER_STUDY_PREVIEW && !isCustomMode();
   if (editModeActive && isProfileReadonlyMode()) editModeActive = false;
   const canEnterEdit = Boolean(state);
   panel.dataset.lockState = editModeActive ? "open" : "closed";
@@ -1275,7 +1280,7 @@ function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory
     return {
       label: String(asset.label || path.split("/").pop() || "Asset"),
       path,
-      url: asset.url || staticResourceUrl(path),
+      url: BROWSER_STUDY_PREVIEW && path.startsWith("assets/preloads/") ? staticResourceUrl(path) : asset.url || staticResourceUrl(path),
       exists: Boolean(path),
       sha256: asset.sha256 || "",
       expected_sha256: asset.sha256 || "",
@@ -1406,7 +1411,7 @@ function staticCslJson(data) {
 async function staticStateForTemplate(templateId) {
   const cleanId = String(templateId || DEFAULT_STUDY_TEMPLATE_ID).trim();
   if (!cleanId || cleanId === CUSTOM_TEMPLATE_ID) {
-    throw new Error("Start the local companion backend before creating custom studies.");
+    throw new Error("Open the installed Experiment Planner to create a study with new stimuli.");
   }
   const inventory = await loadStaticInventory();
   const templates = await loadStaticTemplates();
@@ -2370,7 +2375,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "1_core_audio_ingredients": segment(
       "1_core_audio_ingredients",
       Boolean(status.ready),
-      status.ready ? "Static source assets are available online." : "Profile source assets require the local companion."
+      status.ready ? "Static source assets are available online." : "Open the installed Experiment Planner to prepare the source assets."
     ),
     "2_trial_sequence_designs": segment(
       "2_trial_sequence_designs",
@@ -2417,7 +2422,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "6_experiment_run_setup": segment(
       "6_experiment_run_setup",
       launchable,
-      launchable ? "Start the local companion to materialize and open this finished profile." : "This profile is not Segment 6 launchable yet."
+      launchable ? "Open this profile in the desktop suite to prepare and run the experiment." : "This profile is not Segment 6 launchable yet."
     )
   };
 }
@@ -2544,7 +2549,7 @@ function staticRunSetupPreview(design, status) {
     seed: runSetup.seed || design.protocol?.random_seed || 0,
     instruction_profile: runSetup.instruction_profile || {},
     message: status.finished_profile
-      ? "Static profile loaded; start the local companion to materialize and open the runner."
+      ? "Preview loaded. The desktop suite prepares the experiment and opens Runner."
       : (status.message || "This static profile is not launchable yet.")
   };
 }
@@ -2841,12 +2846,9 @@ async function loadStaticState(fallbackError = null) {
   setConnectionStatus(false, "static profile");
   renderAll();
   updateViewer();
-  showToast(
-    request.error
-      || (request.id
-        ? "Opened the paper's Toolkit template in Experiment Designer."
-        : "Loaded committed preload assets from GitHub. Start the local companion for local generation or runner launch.")
-  );
+  if (request.error) showToast(request.error);
+  else if (request.id) showToast("Opened the requested study profile.");
+  else if (!BROWSER_STUDY_PREVIEW) showToast("Loaded committed preload assets.");
   return true;
 }
 
@@ -2888,6 +2890,11 @@ async function applyStaticProfileInspectionPreview() {
 
 async function loadState(options = {}) {
   const resetMode = options.resetEditMode === true;
+  if (BROWSER_STUDY_PREVIEW) {
+    if (resetMode) resetEditMode();
+    await loadStaticState();
+    return;
+  }
   if (forceStaticPreviewEnabled()) {
     if (resetMode) resetEditMode();
     await loadStaticState(new Error("Forced static preview audit mode."));
@@ -3272,6 +3279,23 @@ function renderStudy() {
     select.value = customProfileSelectValue(activeProjectId);
   }
   renderProfileSummary();
+  renderStudyPreview();
+}
+
+function renderStudyPreview() {
+  if (!BROWSER_STUDY_PREVIEW) return;
+  const preview = $("study-preview");
+  const assets = isCustomMode() ? [] : (state.preload_inventory?.assets || []);
+  preview.hidden = assets.length === 0;
+  $("study-preview-audio").replaceChildren(...assets.map((asset) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = `Play ${asset.label}`;
+    button.dataset.previewSourceLabel = asset.label;
+    button.dataset.pretext = "";
+    button.setAttribute("aria-pressed", "false");
+    return button;
+  }));
 }
 
 function profileCatalogEntries() {
@@ -5861,19 +5885,14 @@ async function previewSourceLabel(button) {
     stopActiveSourcePreview();
     return;
   }
-  state.design.protocol = state.design.protocol || {};
-  state.design.protocol.trial_strips = collectTrialStrips();
   const staticAsset = staticModeActive ? staticPreviewAssetForLabel(label) : null;
-  const payload = collectPayload();
-  payload.label = label;
-  button.disabled = true;
+  if (!staticAsset?.url) button.disabled = true;
   button.classList.add("playing");
   const audioContext = getSourcePreviewAudioContext();
   const contextReady = audioContext?.resume().catch(() => {});
   let started = false;
   try {
     if (staticAsset?.url) {
-      button.disabled = false;
       await playSourcePreviewAudio(
         staticAsset.url,
         button,
@@ -5882,9 +5901,13 @@ async function previewSourceLabel(button) {
         Number(staticAsset.duration_s || 0)
       );
       started = true;
-      showToast(`Soundcheck: ${staticAsset.label || label}`);
+      if (!button.closest("#study-preview")) showToast(`Soundcheck: ${staticAsset.label || label}`);
       return;
     }
+    state.design.protocol = state.design.protocol || {};
+    state.design.protocol.trial_strips = collectTrialStrips();
+    const payload = collectPayload();
+    payload.label = label;
     const preview = await designerApi.previewAudioSource(payload);
     button.disabled = false;
     await playSourcePreviewAudio(
@@ -5949,6 +5972,7 @@ function getSourcePreviewAudioContext() {
 }
 
 function stopActiveSourcePreview() {
+  sourcePreviewAttempt += 1;
   const previousButton = activeSourcePreviewButton;
   if (activeSourcePreviewNode) {
     try {
@@ -5967,14 +5991,16 @@ function stopActiveSourcePreview() {
 }
 
 function finishSourcePreview(button = activeSourcePreviewButton) {
+  if (button && button !== activeSourcePreviewButton) return;
   if (activeSourcePreviewClearTimer) {
     clearTimeout(activeSourcePreviewClearTimer);
     activeSourcePreviewClearTimer = null;
   }
-  if (button) button.classList.remove("playing");
-  if (!button || activeSourcePreviewButton === button) {
-    activeSourcePreviewButton = null;
+  if (button) {
+    button.classList.remove("playing");
+    if (button.hasAttribute("aria-pressed")) button.setAttribute("aria-pressed", "false");
   }
+  activeSourcePreviewButton = null;
 }
 
 function armSourcePreviewCleanup(button, durationS) {
@@ -6003,12 +6029,24 @@ function armSourcePreviewCleanup(button, durationS) {
 
 async function playSourcePreviewAudio(url, button, audioContext, contextReady, durationS = 0) {
   stopActiveSourcePreview();
+  const attempt = sourcePreviewAttempt;
   armSourcePreviewCleanup(button, durationS);
   if (audioContext) {
     if (contextReady) await Promise.race([contextReady, delay(250)]);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Preview audio unavailable: ${response.status}`);
-    const buffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+    let buffer;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Preview audio unavailable: ${response.status}`);
+      buffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+    } catch (error) {
+      if (attempt !== sourcePreviewAttempt) return;
+      finishSourcePreview(button);
+      if (BROWSER_STUDY_PREVIEW && !navigator.onLine) {
+        throw new Error("Reconnect to play this study's audio. Box Breathing PPS is available offline.");
+      }
+      throw error;
+    }
+    if (attempt !== sourcePreviewAttempt || activeSourcePreviewButton !== button) return;
     const node = audioContext.createBufferSource();
     node.buffer = buffer;
     node.connect(audioContext.destination);
@@ -6018,29 +6056,33 @@ async function playSourcePreviewAudio(url, button, audioContext, contextReady, d
         activeSourcePreviewNode = null;
       }
       node.disconnect();
-      finishSourcePreview(button);
+      if (attempt === sourcePreviewAttempt) finishSourcePreview(button);
     }, { once: true });
     node.start();
+    if (button.hasAttribute("aria-pressed")) button.setAttribute("aria-pressed", "true");
     return;
   }
   const audio = new Audio(url);
   activeSourcePreviewAudio = audio;
   audio.addEventListener("ended", () => {
-    if (activeSourcePreviewAudio === audio) {
-      activeSourcePreviewAudio = null;
-    }
+    if (activeSourcePreviewAudio !== audio) return;
+    activeSourcePreviewAudio = null;
     finishSourcePreview(button);
   }, { once: true });
   audio.addEventListener("pause", () => {
-    if (activeSourcePreviewAudio === audio) {
-      activeSourcePreviewAudio = null;
-    }
+    if (activeSourcePreviewAudio !== audio) return;
+    activeSourcePreviewAudio = null;
     finishSourcePreview(button);
   }, { once: true });
-  audio.play().catch((error) => {
-    finishSourcePreview(button);
-    showToast(error.message || String(error));
-  });
+  try {
+    await audio.play();
+    if (activeSourcePreviewAudio === audio && button.hasAttribute("aria-pressed")) {
+      button.setAttribute("aria-pressed", "true");
+    }
+  } catch (error) {
+    if (attempt === sourcePreviewAttempt) finishSourcePreview(button);
+    throw error;
+  }
 }
 
 function setTrialStrips(strips) {
@@ -7028,16 +7070,26 @@ async function loadTemplate() {
   if (staticModeActive) {
     if (choice.kind === "manual") {
       renderStudy();
-      showToast("Start the local companion backend before creating custom studies.");
+      showToast("Open the installed Experiment Planner to create a study with new stimuli.");
       return;
     }
-    state = await staticStateForTemplate(id);
-    staticModeActive = true;
-    resetEditMode();
-    setConnectionStatus(false, "static profile");
-    renderAll();
-    updateViewer();
-    showToast("Static profile loaded from committed GitHub assets");
+    templateLoadInFlight = true;
+    try {
+      const preview = await staticStateForTemplate(id);
+      stopActiveSourcePreview();
+      state = preview;
+      resetEditMode();
+      setConnectionStatus(false, "static profile");
+      renderAll();
+      updateViewer();
+      showToast("Study profile loaded");
+    } catch (error) {
+      renderStudy();
+      upgradeBoundedSelects();
+      throw error;
+    } finally {
+      templateLoadInFlight = false;
+    }
     return;
   }
   templateLoadInFlight = true;
@@ -9497,8 +9549,19 @@ function reportError(error) {
   showToast(error.message || String(error));
 }
 
-loadApiBase();
-loadCompanionToken();
+if (BROWSER_STUDY_PREVIEW) {
+  document.body.classList.add("browser-study-preview");
+  $("preview-download").hidden = false;
+  const toolkitTab = $("page-tab-toolkit");
+  toolkitTab.setAttribute("aria-label", "Study Preview");
+  toolkitTab.querySelector(".tab-label-full").textContent = "Study Preview";
+  toolkitTab.querySelector(".tab-label-short").textContent = "Preview";
+  $("study-segment-title").textContent = "Choose a Study";
+  document.querySelector(".brand-subtitle").textContent = "Study preview";
+} else {
+  loadApiBase();
+  loadCompanionToken();
+}
 loadResizableLayoutSettings();
 enforceExternalLinkTargets();
 exposeDashboardAuditHook();

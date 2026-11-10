@@ -8,10 +8,21 @@ This file is the active checklist and handoff owner; replace state, do not appen
   refreshed UI and one suite installer. The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
-- **Current stage:** goals and For-AI guidance. The scope of this checkpoint is
-  product direction, [skill nesting](SKILLS.md#skill-nesting-and-ownership), and
-  [delegation](WORKFLOW.md#delegation-and-handoffs). Product implementation,
-  installed validation and release remain open.
+- **Current stage:** local browser preview on
+  `codex/pps-standalone-preview` from public base `8b684954`. The
+  [browser audit](engineering/validation/scripts/run_study_preview_audit.py)
+  verified Study 5 and Canzoneri selection/playback, a saved-backend isolation
+  check, keyboard focus, Chromium installability, offline Study 5 replay, and
+  320 CSS px layout with enlarged text. The built cache contains 60 files
+  (5.4 MB), including two verified Study 5 WAVs. Chrome's headless install
+  command timed out. An installed PWA launch and source promotion remain open.
+- **Desktop baseline:** three profile, Runner software and marker loopback
+  tests passed. Native 3DTI rendered a 3 s brown-noise trajectory with two
+  audio channels and a tactile channel at 44.1 kHz. An absolute output path
+  worked. The relative CLI output path failed because the renderer runs
+  from the resource root. Next, verify the generated stimulus → profile →
+  Runner handoff through the installed entrypoints. Reuse the Full manifest
+  for Planner, Runner and one Shared payload.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.
@@ -48,15 +59,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   15 GiB before another complete Python/native run. No unrelated files,
   worktrees or failed-run records were removed. Detailed logs, screenshots,
   schema findings and the temporary Go toolchain stay in ignored artifacts.
-- **Next product slice:** choose one cleared, premade study fixture and trace
-  the shortest browser-only preview from study selection to playback. Use a
-  local UI preview to verify it never prompts for pairing. Confirm a cached
-  revisit for that fixture before expanding coverage. In the native track,
-  recover the working disk allowance; reconcile the five
-  scientific evidence/derived-catalogue failures through their existing owners;
-  then finish Standard and the applicable native/installed gates. Continue
-  M1's B1–B3/C1 and build/release work, followed by A1 through normal IPC.
-  Keep the release support matrix explicit and never bypass readiness flags.
+- **Next gates:** verify an installed PWA launch and the public bytes at
+  source promotion. In the native track, recover the working disk allowance
+  (about 8.2 GiB free at this checkpoint), reconcile the five evidence/catalogue
+  failures through their owners, and complete Standard. Continue M1 and A1
+  through normal IPC with the applicable native and installed gates.
 - **Hosted credits:** `5b269569` moved the George Fejer credit into the hosted
   Designer header as a linked profile box with the portrait from his academic
   site. The BIAL Foundation credit remains beside it. The 12-case Designer
@@ -122,8 +129,10 @@ recheck that cache variant if the old redirect is reported again. See
 
 - [x] M0 — Install the baseline, integrate routes and produce the completion review/plan.
 - [x] Record the two product goals, acceptance criteria, and lean For-AI protocols.
-- [ ] PWA — Verify a standalone preview and cached revisit for one supported
-  premade study, then validate the browser UI and expand only to supported assets.
+- [x] PWA local preview — Study 5 and Canzoneri playback, browser UI, and cached
+  Study 5 revisit verified against the assembled site.
+- [ ] PWA promotion — Verify standalone launch after installation, then verify
+  the public routes and byte parity on the promoted revision.
 - [ ] M1 — Authoring/participant fixes and validation/build baseline: B1–B3, C1,
   G1–G2, H1–H2. Validation has verified checkpoints but remains non-green.
 - [ ] M2 — Execute one real single-block package through native authority (A1).
