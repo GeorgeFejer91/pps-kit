@@ -1,6 +1,6 @@
 # Current work
 
-Reviewed: 2026-11-06. Overall completion goal: **OPEN**.
+Reviewed: 2026-11-10. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
 - **Goal:** complete Designer → immutable experiment profile → native Runner →
@@ -49,14 +49,18 @@ This file is the active checklist and handoff owner; replace state, do not appen
   then finish Standard and the applicable native/installed gates. Continue
   M1's B1–B3/C1 and build/release work, followed by A1 through normal IPC.
   Keep the release support matrix explicit and never bypass readiness flags.
-- **Git observation:** branch `main`; source fixes pushed through `0208ca0d`
-  using the explicit repository URL and checked against the remote. The active
-  local origin configuration is missing; fetch also fails on
-  `refs/heads/codex/pps-publication-integration (# Name clash 2026-11-03 mvwxhkC #)`.
-  Saved configuration conflicts, the earlier bundle/backup and worktrees were
-  preserved. Three executable-mode changes present on entry remain unstaged
-  (the two Designer Linux launch/package files and Quest gradlew). This record
-  is handed off by the following documentation checkpoint; check fresh Git state.
+- **Hosted funding credit:** `c0a6f444` added the linked BIAL Foundation credit
+  to the right side of the landing header. The 12-case Designer audit passed.
+  The live browser verified the link, logo, and layout at desktop and emulated
+  phone widths down to 320 CSS px. Pages run `42835284236` deployed to
+  `https://ppskit.qzz.io/`. The public byte audit matched 470 files and all four
+  main routes returned HTTP 200.
+- **Git observation:** `main` was fast-forwarded to domain source checkpoint
+  `8ce15ed6` and the verified funding change was pushed using the repository URL.
+  Ordinary fetch is still blocked by the malformed local
+  `refs/heads/codex/pps-publication-integration (# Name clash 2026-11-03 mvwxhkC #)`
+  ref. An isolated transfer imported the upstream commit while preserving the
+  local refs, saved configuration, and worktrees.
 - **Installed agent baseline:** retain the [reviewed baseline lock](skills/baseline-lock.json)
   and existing RTK/GSD/Superpowers routes. No configuration/hooks or agent
   packages were changed by this validation task.
