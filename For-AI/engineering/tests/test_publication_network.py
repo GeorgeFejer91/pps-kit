@@ -603,13 +603,13 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "toolkitInScopeRecordJoins": 68,
         "toolkitNodeJoins": 65,
         "toolkitInScopeNodeJoins": 64,
-        "toolkitRunnableNodes": 15,
-        "toolkitRunnableRecords": 17,
-        "toolkitSupportedIncompleteNodes": 49,
+        "toolkitRunnableNodes": 16,
+        "toolkitRunnableRecords": 18,
+        "toolkitSupportedIncompleteNodes": 48,
         "toolkitNotAssessedNodes": 29,
         "toolkitAdjacentConflictNodes": 1,
-        "toolkitManualReviewRecords": 24,
-        "toolkitManualReviewNodes": 21,
+        "toolkitManualReviewRecords": 25,
+        "toolkitManualReviewNodes": 22,
         "connectedNodes": 91,
         "isolatedNodes": 3,
         "weakComponents": 4,
@@ -697,8 +697,8 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
         "later_exact_doi_audit": 4,
     }
     assert Counter(node["toolkit"]["status"] for node in nodes) == {
-        "runnable": 15,
-        "supported_incomplete": 49,
+        "runnable": 16,
+        "supported_incomplete": 48,
         "not_assessed": 29,
         "adjacent_scope_conflict": 1,
     }
@@ -752,12 +752,12 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     toolkit_records = [record for node in nodes for record in node["toolkit"]["records"]]
     assert len(toolkit_records) == 69
     assert sum(record["inScope"] for record in toolkit_records) == 68
-    assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 17
-    assert sum(record["manualReview"] is not None for record in toolkit_records) == 24
+    assert sum(record["inScope"] and record["recreatable"] for record in toolkit_records) == 18
+    assert sum(record["manualReview"] is not None for record in toolkit_records) == 25
     assert sum(
         any(record["manualReview"] is not None for record in node["toolkit"]["records"])
         for node in nodes
-    ) == 21
+    ) == 22
     assert Counter(node["abstract"]["status"] for node in nodes) == {
         "available": 37,
         "source_link_only": 48,
@@ -771,8 +771,8 @@ def test_publication_network_asset_has_the_exact_decision_landscape_scope() -> N
     assert data["facets"]["toolkitStatuses"] == {
         "adjacent_scope_conflict": 1,
         "not_assessed": 29,
-        "runnable": 15,
-        "supported_incomplete": 49,
+        "runnable": 16,
+        "supported_incomplete": 48,
     }
     assert data["facets"]["edgeProvenance"]["openalex_live_20260808"] == 127
     assert data["facets"]["edgeProvenance"]["primary_source_audit_20260808"] == 52

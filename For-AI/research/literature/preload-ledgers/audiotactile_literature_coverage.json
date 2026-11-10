@@ -1080,6 +1080,7 @@
       "missing_publication_parameters": [],
       "recreation_caveats": [
         "exact original SoundForge pink-noise/gain files and room transfer are not available",
+        "the 188-row allocation and tactile-only T0/T6 baselines come from the 2012 protocol lineage, while the 2013 assessment reports T1-T5 and percentages",
         "participant-level electrical tactile calibration and voice-key threshold/latency are represented as provenance and emulated by mouse-click response proxies",
         "physical tool-use and pointing-control interventions are retained as context; the runnable profile validates the reusable PPS assessment task"
       ],
