@@ -20,14 +20,17 @@ This file is the active checklist and handoff owner; replace state, do not appen
   the test app before the harness timed out during shutdown. Public source
   promotion remains open. All 28 canonical Designer files match the local
   Pages assembly byte for byte.
-- **Suite candidate:** source through `ecdadf98` is installed locally and pushed to the review
-  branch. Frozen Planner and Runner use one installed Shared directory.
+- **Suite candidate:** source through `606431a5`, including the Planner pointer
+  fix, was installed locally. The newer `f2ca0b2b` catalogue package passed all
+  23 inventory checks and ZIP CRC verification. Its 28 compiled Planner files
+  match Pages, and both native executables match the installed candidate.
+  Frozen Planner and Runner use one installed Shared directory.
   The Full downloader packages 3DTI, its native DLLs and FABIAN HRTF data,
   Microsoft Visual C++ 2013 and v14 x64, and standalone WebView2 x64.
   The build verified Microsoft signatures and the pinned hashes. Setup
   verifies those hashes before starting any missing runtime's installer.
   The Native Instruments ASIO driver remains a separate lab hardware step.
-- **Installer evidence:** a fresh loopback install of the 565,392,920-byte
+- **Installer evidence:** a fresh loopback install of the 565,392,930-byte
   Full package passed 23 required inventory checks and created shortcuts for
   both apps in a disposable Windows profile. Reuse passed. The Windows test
   host already had all three Microsoft runtimes. Go tests exercised missing
@@ -44,11 +47,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   launcher and fixes long Windows paths in Planner export and Runner import.
   Eighty-three focused tests passed and eight were skipped. The locked-plan
   export regression passed. `52fe94af` restores pointer input on the Planner's
-  locked export button. The correction was tested as a local style override in
-  the installed WebView and opened the native Save As dialog. A Windows firewall
-  prompt for Node covered the Save button, so the handoff used captured export
-  bytes. The rebuilt source matched 28 Pages files byte for byte and passed the
-  study preview audit. The installed candidate predates this CSS checkpoint.
+  locked export button. The installed `606431a5` candidate includes the fix and
+  completed the same four-trial software run. An unrelated Windows firewall
+  prompt for Node still intercepts native dialog input. The handoff used the
+  captured export bytes. Native Save As and graphical import remain open.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.
@@ -71,26 +73,25 @@ This file is the active checklist and handoff owner; replace state, do not appen
   audits use a mocked native bridge. Public byte audit passed 470 files and
   four main routes after the dependency-patch deployment. Latest CI/deployment
   observations are retained in the implementation record and checked at handoff.
-- **Standard gate: BLOCKED / NON-GREEN.** The first complete run collected 639
-  tests: 573 passed, 19 failed, 37 setup errors, 10 skipped. Fourteen failures
-  and all 37 setup errors subsequently passed owning rechecks. Five independent
-  publication/evidence checks still fail: a review's schema/provenance metadata,
-  catalogue status/determinism, and orientation-review counts. Their assertions
-  and scientific records were preserved. A targeted Designer static-assets
-  check also expects a legacy Runner URL. A fresh guarded Standard retry stopped
-  below 192 MiB free; it did not finish. Do not aggregate focused passes into a
-  claimed Standard pass. See the [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
-- **Storage:** approximately 5.2 GiB free after the Full candidate verification.
+- **Standard gate: OPEN.** The last complete run was non-green. All five
+  remaining evidence checks passed in the targeted review, catalogue, and
+  orientation run (47 passed, one skipped). The Canzoneri source review records
+  the 188-row allocation as protocol lineage. The regenerated catalogue changes
+  only that study's toolkit entry and aggregate counts. The static asset check
+  now expects the canonical Runner URL and standalone preview assets. Quick
+  passed with 32 tests and the release audit. A fresh full Standard run remains
+  required. See the [implementation record](engineering/validation/docs/implementation-status-2026-09-27.md).
+- **Storage:** approximately 2.5 GiB free after the catalogue package build.
   Allow approximately 15 GiB before another complete Python/native run. Keep
   candidate binaries, logs, screenshots, schema findings and the temporary Go
   toolchain in ignored artifacts.
 - **Next gates:** verify the public PWA routes and bytes at source promotion.
-  Repackage the pointer fix and complete the native Save As and graphical
-  Runner import on the installed copy. Verify missing-runtime setup on clean
-  Windows and qualify the lab audio route. Recover the working disk allowance,
-  reconcile the Standard failures through their owners, and complete Standard.
-  Continue M1 and A1 through normal IPC with applicable native and installed
-  gates. Public suite release remains open.
+  Fresh-install the catalogue package and complete native Save As and graphical
+  Runner import. Verify missing-runtime provisioning on clean Windows and
+  qualify the lab audio route. The current host has no Windows Sandbox and
+  the Komplete output dry run found no matching device. Recover the disk
+  allowance and complete Standard. Continue M1 and A1 through normal IPC with
+  applicable native and installed gates. Public suite release remains open.
 - **Hosted credits:** `5b269569` moved the George Fejer credit into the hosted
   Designer header as a linked profile box with the portrait from his academic
   site. The BIAL Foundation credit remains beside it. The 12-case Designer
