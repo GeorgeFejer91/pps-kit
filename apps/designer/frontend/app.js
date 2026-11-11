@@ -4238,7 +4238,9 @@ function renderBlockCsvPreview() {
       (preview.accepted || segment5.accepted) ? "accepted" : "ready"
     );
   } else {
-    setBlockProgress(0, protocolBlocks, segment5.last_validation_message || "waiting");
+    const waitingForOrder = segment5.status === "missing" && projectSegment("4_trial_repetition_pool").status === "ready";
+    setBlockProgress(0, Number(blockInput?.value) || protocolBlocks,
+      waitingForOrder ? "waiting for block order" : segment5.last_validation_message || "waiting");
   }
 
   const list = $("block-csv-preview-list");
