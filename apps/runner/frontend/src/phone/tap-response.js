@@ -10,11 +10,11 @@ export class TapResponseWindow {
   contacts = new Set();
   candidate = null;
 
-  open(anchorMs, trialNumber = null) {
+  open(anchorMs, trialNumber = null, { sideChoice = false } = {}) {
     if (!Number.isFinite(anchorMs) || anchorMs < 0) throw new TypeError("Invalid response anchor.");
     if (trialNumber === null) this.close();
     this.windows = this.windows.filter((window) => window.anchorMs + RESPONSE_MAX_MS >= anchorMs);
-    this.windows.push({ anchorMs, trialNumber });
+    this.windows.push({ anchorMs, trialNumber, sideChoice });
   }
 
   close() {
@@ -22,7 +22,7 @@ export class TapResponseWindow {
     this.candidate = null;
   }
 
-  down({ pointerId, timeStamp, clientX, clientY }) {
+  down({ pointerId, timeStamp, clientX, clientY }, side = null) {
     this.contacts.add(pointerId);
     if (this.contacts.size !== 1) {
       this.candidate = null;
@@ -34,7 +34,9 @@ export class TapResponseWindow {
       const elapsed = timeStamp - anchorMs;
       return elapsed >= RESPONSE_MIN_MS && elapsed <= RESPONSE_MAX_MS;
     });
-    if (window && !window.answered) this.candidate = { pointerId, timeStamp, clientX, clientY, window };
+    if (!window || window.answered) return;
+    if (window.sideChoice && side !== "left" && side !== "right") return;
+    this.candidate = { pointerId, timeStamp, clientX, clientY, window, choice: window.sideChoice ? side : null };
   }
 
   move({ pointerId, clientX, clientY }) {
@@ -63,6 +65,7 @@ export class TapResponseWindow {
       atMs: tap.timeStamp,
       reactionTimeMs: tap.timeStamp - anchorMs,
       ...(trialNumber === null ? {} : { trialNumber }),
+      ...(tap.choice === null ? {} : { choice: tap.choice }),
     };
   }
 }

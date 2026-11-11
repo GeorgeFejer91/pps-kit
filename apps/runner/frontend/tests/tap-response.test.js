@@ -54,3 +54,28 @@ test("uses contact onset at the deadline and confirms the tap on release", () =>
   capture.down(touch(1, 5_950));
   assert.equal(capture.up(touch(1, 6_451)), null);
 });
+
+test("a lateralization trial records the side selected at first contact", () => {
+  const capture = new TapResponseWindow();
+  capture.open(1_000, 1, { sideChoice: true });
+  capture.down(touch(1, 1_300), "center");
+  assert.equal(capture.up(touch(1, 1_340)), null);
+  capture.down(touch(1, 3_000, 159), "left");
+  assert.deepEqual(capture.up(touch(1, 3_140, 161)), {
+    atMs: 3_000, reactionTimeMs: 2_000, trialNumber: 1, choice: "left",
+  });
+  capture.down(touch(1, 3_000), "right");
+  assert.equal(capture.up(touch(1, 3_150)), null);
+});
+
+test("an invalid choice cannot fall back to an overlapping detection trial", () => {
+  const capture = new TapResponseWindow();
+  capture.open(1_000, 1);
+  capture.open(1_500, 2, { sideChoice: true });
+  capture.down(touch(1, 1_750));
+  assert.equal(capture.up(touch(1, 1_800)), null);
+  capture.down(touch(1, 1_850), "right");
+  assert.deepEqual(capture.up(touch(1, 1_900)), {
+    atMs: 1_850, reactionTimeMs: 350, trialNumber: 2, choice: "right",
+  });
+});

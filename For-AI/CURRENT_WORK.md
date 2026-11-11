@@ -31,10 +31,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   400 electrical tactile cue samples, the stimulated hand, the correct
   external-side choice, and the native response scoring policy. The exports
   use a separate schema that the current phone-vibration Runner rejects.
-  The next steps are to identify the independent tactile hardware or
-  trigger interface, add side-choice capture for these profiles, and verify
-  physical phone timing. The live site has the previous browser Runner
-  deployment.
+  The tap capture component now supports one left/right choice at first
+  contact. Chromium verified touch input and simulated capture across
+  both 300-trial schedules. The participant UI and controller integration
+  still depend on a specified independent tactile interface. Physical
+  phone timing remains unverified. The live site has the previous browser
+  Runner deployment.
 - **Browser launch: VERIFIED.** Pages [run 43051771734](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43051771734)
   deployed source checkpoint 48b42e1 to [ppskit.com](https://ppskit.com/).
   All 474 staged files matched the public site and the four public routes
@@ -191,9 +193,10 @@ recheck that cache variant if the old redirect is reported again. See
   consent-based beacon pairing over the public HTTPS route.
 - [ ] Full phone studies — Verify the 25 complete profiles on the supported
   phone route. All 23 staged profiles completed a simulated-clock software
-  playback audit. The two Tajadura schedules preserve left/right stimuli
-  and choices. Separate tactile output and side-choice capture still need
-  an end-to-end route. Physical phone timing is unverified.
+  playback audit. The two Tajadura schedules and side-choice capture have
+  software evidence. An independently controlled tactile interface is
+  needed to integrate them into the live run. Physical phone timing is
+  unverified.
 - [ ] M1 — Authoring/participant fixes and validation/build baseline: B1–B3, C1,
   G1–G2, H1–H2. Validation has verified checkpoints but remains non-green.
 - [ ] M2 — Execute one real single-block package through native authority (A1).
