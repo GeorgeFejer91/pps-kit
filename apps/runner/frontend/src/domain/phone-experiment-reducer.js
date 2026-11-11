@@ -1,4 +1,5 @@
 import { SNAPSHOT_SCHEMA } from "./runner-contract.js";
+import { DEMO_DURATION_MS } from "../phone/browser-output-engine.js";
 
 const ACTIVE_PHASES = new Set(["instruction_gate", "running", "paused", "stopping"]);
 const PARTICIPANT_CODE = /^[A-Za-z0-9_-]{1,64}$/u;
@@ -33,14 +34,17 @@ function advance(snapshot, clock) {
 export function allowedPhoneActions(snapshot) {
   const actions = ["system.snapshot", "session.note"];
   if (!ACTIVE_PHASES.has(snapshot.run.phase)) actions.push("setup.submit");
-  if (["idle", "prepared", "ready", "completed", "interrupted"].includes(snapshot.run.phase)) {
+  if (!snapshot.browser_study && ["idle", "prepared", "ready", "completed", "interrupted"].includes(snapshot.run.phase)) {
     actions.push("package.prepare_demo");
   }
   if (snapshot.package_verified && snapshot.setup.ready && !snapshot.safety.local_armed) actions.push("target.arm");
   if (snapshot.safety.local_armed) actions.push("target.disarm");
   if (snapshot.run.phase === "ready") actions.push("part.start");
   if (snapshot.run.phase === "instruction_gate") actions.push("instruction.continue", "run.stop", "run.abort");
-  if (snapshot.run.phase === "running") actions.push("run.pause", "run.stop", "run.abort", "run.complete_demo");
+  if (snapshot.run.phase === "running") {
+    actions.push("run.stop", "run.abort", "run.complete_demo");
+    if (!snapshot.browser_study) actions.push("run.pause");
+  }
   if (snapshot.run.phase === "paused") actions.push("run.resume", "run.stop", "run.abort");
   return [...new Set(actions)];
 }
@@ -268,6 +272,14 @@ export function applyPhoneAction(current, action, args = {}, {
       }
       case "part.start": {
         snapshot.run.phase = "running";
+        if (snapshot.browser_study) {
+          snapshot.browser_trial = null;
+          snapshot.browser_trials = [];
+          snapshot.run.progress_label = snapshot.browser_study.title;
+          snapshot.run.event_label = "Starting study";
+          effects.push({ type: "study.start" });
+          break;
+        }
         snapshot.run.progress_label = "Exploratory looming demo running";
         snapshot.run.event_label = "Looming audio and tactile demo started";
         snapshot.active_block = {
@@ -277,7 +289,7 @@ export function applyPhoneAction(current, action, args = {}, {
           block_index: 0,
           block_label: "Phone demo",
           display_block_index: 1,
-          duration_s: 3,
+          duration_s: DEMO_DURATION_MS / 1_000,
           elapsed_s: 0,
           last_anchor_server_monotonic_ns: snapshot.server_monotonic_ns,
         };
@@ -285,11 +297,14 @@ export function applyPhoneAction(current, action, args = {}, {
         break;
       }
       case "instruction.continue": {
+        if (snapshot.browser_study && args.gate_id !== snapshot.instruction_gate.gate_id) {
+          return rejected(current, action, "instruction_gate_changed", clock);
+        }
         snapshot.run.phase = "running";
         snapshot.instruction_gate.gate_id = "";
         snapshot.instruction_gate.instruction_label = "";
         snapshot.run.event_label = "Instruction gate continued";
-        effects.push({ type: "demo.start" });
+        effects.push({ type: snapshot.browser_study ? "study.continue" : "demo.start" });
         break;
       }
       case "run.pause": {
@@ -305,9 +320,9 @@ export function applyPhoneAction(current, action, args = {}, {
         break;
       }
       case "run.stop": {
-        snapshot.run.phase = "completed";
-        snapshot.run.progress_label = "Exploratory demo stopped";
-        snapshot.run.event_label = "Stopped cleanly";
+        snapshot.run.phase = snapshot.browser_study ? "interrupted" : "completed";
+        snapshot.run.progress_label = snapshot.browser_study ? "Study stopped" : "Exploratory demo stopped";
+        snapshot.run.event_label = snapshot.browser_study ? "Study interrupted by Stop" : "Stopped cleanly";
         snapshot.active_block.active = false;
         effects.push({ type: "demo.stop" });
         break;
@@ -323,8 +338,8 @@ export function applyPhoneAction(current, action, args = {}, {
       }
       case "run.complete_demo": {
         snapshot.run.phase = "completed";
-        snapshot.run.progress_label = "Exploratory phone trial complete";
-        snapshot.run.event_label = "Browser demo completed locally";
+        snapshot.run.progress_label = snapshot.browser_study ? "All study trials complete" : "Exploratory phone trial complete";
+        snapshot.run.event_label = snapshot.browser_study ? "Study completed" : "Browser demo completed locally";
         snapshot.active_block.active = false;
         snapshot.active_block.elapsed_s = snapshot.active_block.duration_s;
         effects.push({ type: "demo.stop" });
@@ -343,6 +358,56 @@ export function applyPhoneAction(current, action, args = {}, {
     return rejected(current, action, "invalid_arguments", clock);
   }
   return accepted(snapshot, previousRevision, action, clock, effects);
+}
+
+export function prepareBrowserStudy(current, study, clock) {
+  if (ACTIVE_PHASES.has(current.run.phase)) throw new Error("Finish the active run before changing studies.");
+  const snapshot = clone(current);
+  if (study) {
+    snapshot.browser_study = { id: study.plan.profile_id, title: study.plan.title, trial_count: study.totalTrials };
+    snapshot.package_label = study.plan.title;
+  } else {
+    delete snapshot.browser_study;
+    snapshot.package_label = "No demo prepared";
+  }
+  delete snapshot.browser_trial;
+  delete snapshot.browser_trials;
+  snapshot.package_verified = Boolean(study);
+  snapshot.safety.local_armed = false;
+  snapshot.safety.audio_route_ready = false;
+  snapshot.run.phase = study ? "prepared" : "idle";
+  snapshot.run.progress_label = study ? study.totalTrials + " trials prepared" : "Waiting for a study";
+  snapshot.run.event_label = "Arm outputs on this device";
+  advance(snapshot, clock);
+  updateDerived(snapshot);
+  return snapshot;
+}
+
+export function browserStudyStep(current, eventLabel, clock, gate = null) {
+  const snapshot = clone(current);
+  snapshot.run.event_label = eventLabel;
+  if (gate) {
+    snapshot.run.phase = "instruction_gate";
+    snapshot.instruction_gate.gate_id = "phone_instruction_" + snapshot.revision;
+    snapshot.instruction_gate.instruction_label = gate.label;
+    snapshot.instruction_gate.button_label = gate.button_label;
+    snapshot.instruction_gate.next_action = "instruction.continue";
+  }
+  advance(snapshot, clock);
+  updateDerived(snapshot);
+  return snapshot;
+}
+
+export function recordBrowserTrial(current, browserTrial, clock, { advanceRevision = true } = {}) {
+  const snapshot = { ...current, browser_trial: browserTrial };
+  if (current.browser_study) {
+    const number = Math.max(browserTrial.number, current.browser_trials?.at(-1)?.number ?? 0);
+    snapshot.run = { ...snapshot.run, progress_label: "Trial " + number + " of " + current.browser_study.trial_count };
+    snapshot.browser_trials = [...(current.browser_trials ?? []).filter(({ number }) => number !== browserTrial.number), browserTrial]
+      .sort((a, b) => a.number - b.number).slice(-12);
+  }
+  if (advanceRevision) advance(snapshot, clock);
+  return snapshot;
 }
 
 export function expirePhoneLease(current, {

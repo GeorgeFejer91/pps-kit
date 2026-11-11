@@ -9,6 +9,25 @@ This file is the active checklist and handoff owner; replace state, do not appen
   The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
+- **Standalone phone Runner: PARTIAL.** The active goal is a full
+  participant run with an external browser controller, a single tap surface
+  and Stop, and controller audio, vibration and response markers. The local
+  capture interval is 100–2,000 ms with one isolated tap per trial. The most
+  recent eligible cue owns a tap when response windows overlap. This pass
+  covers the 25 native-ready profiles; five unfinished profiles are deferred.
+  The review branch stages 17 verified phone packs using one prepared order
+  per profile. A paired Chromium run completed all 90 Biggio common-racket
+  trials with an instrumented vibration API; the Canzoneri amputation smoke
+  captured a late tap and exported its matching RT. A two-block fixture
+  exercised both remote instruction gates and terminal completion.
+- **Phone catalogue gap:** Tonelli echolocation, Lerner, and Serino peri-hand
+  have overlapping tactile pulses that one motor cannot replay independently.
+  Both Tajadura posture profiles require left/right responses. Canzoneri
+  dynamic sounds has a response cue after a prepared block ends. Two Serino
+  trunk profiles hit native per-file or working-memory limits. Next resolve
+  these with their existing profile and schedule owners, then verify physical
+  vibration and timing on a supported phone. The live site still has the
+  previous browser Runner deployment.
 - **Browser launch: VERIFIED.** Pages [run 43051771734](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43051771734)
   deployed source checkpoint 48b42e1 to [ppskit.com](https://ppskit.com/).
   All 474 staged files matched the public site and the four public routes
@@ -163,6 +182,9 @@ recheck that cache variant if the old redirect is reported again. See
 - [x] PWA — Verify installability and a cached revisit for the supported Study 5 preview.
 - [x] Browser Runner — Publish the Runner tab and verify the built-in demo and
   consent-based beacon pairing over the public HTTPS route.
+- [ ] Full phone studies — Verify the 25 complete profiles on the supported
+  phone route. The review checkpoint has 17 prepared phone packs and a
+  complete paired software run.
 - [ ] M1 — Authoring/participant fixes and validation/build baseline: B1–B3, C1,
   G1–G2, H1–H2. Validation has verified checkpoints but remains non-green.
 - [ ] M2 — Execute one real single-block package through native authority (A1).

@@ -440,9 +440,9 @@ the Tauri desktop entry or native capabilities.
 
 The browser has two modes:
 
-1. **Run on this device** runs the built-in exploratory PPS demo. Submit local
-   setup, prepare the demo, and arm outputs before starting. Local response
-   taps go into a downloadable JSON event log.
+1. **Run on this device** prepares the selected study or practice demo. After
+   local setup and arming, the participant sees a tap surface and Stop control.
+   Download the local JSON log to inspect the full set of recorded trials.
 2. **Control another device** pairs with another browser Runner or a compatible
    desktop, phone, or Quest target. It can request only granted actions.
 
@@ -450,11 +450,22 @@ To pair two browsers, keep both Runner pages open and in the foreground. On the
 device that will play the stimuli, press **Send beacon**. On the controller,
 press **Scan beacon**, select the matching code, and request a private session.
 On the target, choose **Allow to pair**, then press **Connect** on the controller.
-The beacon closes after approval or after two minutes. Complete setup and arm
-outputs on the target; either device can prepare the demo after pairing. To
+The beacon closes after approval or after two minutes. Choose and prepare the
+study on the target, then complete local setup and arm outputs. Use **Start
+part** on the controller to run the prepared study and **Continue** at an
+instruction gate. The timeline shows audio scheduling, vibration requests and
+response markers. The target accepts one isolated tap per trial from 100 to
+2,000 ms after its local response anchor. If windows overlap, the most recent
+eligible cue owns the tap. To
 grant remote stop and abort, enable that permission on the target before
 approving. The target can disconnect the controller at any time. Pairing needs
 Internet access.
+
+Each phone pack carries one prepared block order, verified stereo clips and
+sample-based cue timing. The browser converts each tactile cue to a phone
+vibration request using its configured duration. Preparing a pack requires a
+complete native session for a repository study. The maintainer exporter lives
+in For-AI and its verified output is staged under the phone study catalogue.
 
 Browser audio and vibration depend on user activation, foreground operation,
 browser support, and device hardware. Treat the browser demo as exploratory;

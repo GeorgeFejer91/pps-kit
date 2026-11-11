@@ -1,3 +1,9 @@
+import { RESPONSE_MAX_MS } from "./tap-response.js";
+
+export const DEMO_AUDIO_MS = 3_000;
+export const DEMO_TACTILE_MS = 2_300;
+export const DEMO_DURATION_MS = DEMO_TACTILE_MS + RESPONSE_MAX_MS;
+
 function audioContextConstructor() {
   return globalThis.AudioContext || globalThis.webkitAudioContext;
 }
@@ -38,7 +44,7 @@ export class BrowserOutputEngine extends EventTarget {
     this.armed = true;
   }
 
-  startDemo({ durationMs = 3_000, tactileAtMs = 2_300 } = {}) {
+  startDemo() {
     if (!this.armed) throw new Error("Arm phone outputs locally before starting the demo.");
     this.stopDemo();
     const startAt = performance.now();
@@ -48,27 +54,31 @@ export class BrowserOutputEngine extends EventTarget {
       const gain = this.context.createGain();
       oscillator.type = "sine";
       oscillator.frequency.setValueAtTime(220, now);
-      oscillator.frequency.exponentialRampToValueAtTime(660, now + durationMs / 1_000);
+      oscillator.frequency.exponentialRampToValueAtTime(660, now + DEMO_AUDIO_MS / 1_000);
       gain.gain.setValueAtTime(0.003, now);
-      gain.gain.exponentialRampToValueAtTime(0.42, now + durationMs / 1_000);
+      gain.gain.exponentialRampToValueAtTime(0.42, now + DEMO_AUDIO_MS / 1_000);
       oscillator.connect(gain);
       gain.connect(this.master);
       oscillator.start(now);
-      oscillator.stop(now + durationMs / 1_000);
+      oscillator.stop(now + DEMO_AUDIO_MS / 1_000);
       this.oscillator = oscillator;
     }
-    if (this.vibrationEnabled && this.capabilities().vibration) {
-      this.timeout = setTimeout(() => this.navigatorObject.vibrate([70, 45, 130, 55, 210]), tactileAtMs);
-    }
+    const useTactile = this.vibrationEnabled && this.capabilities().vibration;
+    const tactile = useTactile ? setTimeout(() => {
+      const atMs = performance.now();
+      if (this.navigatorObject.vibrate([70, 45, 130, 55, 210])) {
+        this.dispatchEvent(new CustomEvent("vibration-requested", { detail: { atMs } }));
+      }
+    }, DEMO_TACTILE_MS) : null;
+    const finishAt = startAt + (useTactile ? DEMO_DURATION_MS : DEMO_AUDIO_MS);
     const completed = setTimeout(() => {
       this.timeout = null;
-      this.oscillator = null;
       const event = new Event("complete");
       Object.defineProperty(event, "detail", { value: { startAt, endedAt: performance.now() } });
       this.dispatchEvent(event);
-    }, durationMs + 40);
-    this.timeout = { tactile: this.timeout, completed };
-    return { startAt, durationMs, tactileAtMs };
+    }, Math.max(0, finishAt + 40 - performance.now()));
+    this.timeout = { tactile, completed };
+    return { startAt, useTactile };
   }
 
   stopDemo() {

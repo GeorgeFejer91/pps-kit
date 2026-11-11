@@ -2,6 +2,7 @@
 
 import argparse
 from functools import partial
+import json
 import re
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -119,8 +120,9 @@ def audit_routes(browser, origin):
         expect(page.get_by_role("button", name="Start locally")).to_be_disabled()
         page.get_by_role("button", name="Arm outputs locally").click()
         page.get_by_role("button", name="Start locally").click()
-        expect(page.get_by_role("button", name="Tap response")).to_be_enabled()
-        page.get_by_role("button", name="Tap response").click()
+        expect(page.locator("#phone-response")).to_be_visible()
+        expect(page.get_by_role("button", name="Stop experiment")).to_be_focused()
+        assert page.locator(".phone-shell").evaluate("(shell) => shell.inert")
         expect(page.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
         expect(page.get_by_role("button", name="Download event log")).to_be_enabled()
 
@@ -131,13 +133,65 @@ def audit_routes(browser, origin):
         )
 
 
-def audit_live_beacon(browser, origin):
+def stage_completion_fixture(context):
+    """Serve a two-block test plan without modifying the assembled site."""
+    root = PAGES / "assets" / "phone-studies"
+    reference = root / "canzoneri_2013_amputation_prosthesis"
+    plan = json.loads((reference / "study.json").read_text(encoding="utf-8"))
+    block = plan["parts"][0]["blocks"][0]
+    block["trials"] = block["trials"][:1]
+    block["length_samples"] = block["trials"][0]["end_sample"]
+    clip = plan["clips"][block["trials"][0]["clip"]]
+    plan["clips"] = {block["trials"][0]["clip"]: clip}
+    plan["profile_id"] = "phone_timing_fixture"
+    plan["title"] = "Phone timing validation fixture"
+    plan["parts"] = [{
+        "number": 1,
+        "instructions": [{
+            "slot": "after_each_block", "label": "Continue to next stage", "continue_mode": "click",
+            "delay_s": 0, "button_label": "Continue", "clip": None,
+        }],
+        "blocks": [block, {**block, "label": "Second block"}],
+    }]
+    context.route("**/phone-studies/index.json", lambda route: route.fulfill(json=[
+        {"id": plan["profile_id"], "title": plan["title"]},
+    ]))
+    context.route("**/phone-studies/phone_timing_fixture/study.json", lambda route: route.fulfill(json=plan))
+    context.route("**/phone-studies/phone_timing_fixture/" + clip["file"],
+                  lambda route: route.fulfill(path=reference / clip["file"]))
+    return plan["profile_id"]
+
+
+def audit_phone_catalogue(browser, origin):
+    expected = json.loads((PAGES / "assets" / "phone-studies" / "index.json").read_text(encoding="utf-8"))
+    with browser.new_context(viewport={"width": 320, "height": 780}, has_touch=True) as context:
+        context.add_init_script("Object.defineProperty(navigator, 'vibrate', { value: () => true });")
+        page = context.new_page()
+        page.goto(f"{origin}/experiment-runner/")
+        selection = page.locator("#phone-study")
+        expect(selection.locator("option")).to_have_count(len(expected) + 1)
+        for study in expected:
+            selection.select_option(study["id"])
+            page.get_by_role("button", name="Prepare study", exact=True).click()
+            expect(page.locator("#phone-run-state")).to_have_text("Prepared")
+            assert not page.locator("#phone-participant-view").is_visible()
+        print(f"Prepared all {len(expected)} phone catalogue profiles in Chromium.")
+
+
+def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_study=False):
     # Two independent browser contexts. Only the physical vibration API is instrumented.
-    with browser.new_context(viewport={"width": 390, "height": 844}) as target_context, browser.new_context() as controller_context:
+    with browser.new_context(viewport={"width": 390, "height": 844}, has_touch=True) as target_context, browser.new_context() as controller_context:
         target_context.add_init_script("""
           window.ppsVibrationCalls = [];
-          Object.defineProperty(navigator, 'vibrate', { value: (value) => (ppsVibrationCalls.push(value), true) });
+          window.ppsCueMs = null;
+          Object.defineProperty(navigator, 'vibrate', { value: (value) => {
+            ppsVibrationCalls.push(value);
+            if (Array.isArray(value) || value > 30) ppsCueMs = performance.now();
+            return true;
+          }});
         """)
+        if complete_fixture:
+            study = stage_completion_fixture(target_context)
         target = target_context.new_page()
         controller = controller_context.new_page()
         target.goto(f"{origin}/experiment-runner/")
@@ -160,14 +214,61 @@ def audit_live_beacon(browser, origin):
         expect(target.locator("#target-qr")).to_be_hidden()
         expect(controller.get_by_role("button", name="Start part")).to_be_disabled()
         target.get_by_role("button", name="Submit setup").click()
-        controller.get_by_role("button", name="Prepare demo").click()
+        if study:
+            target.locator("#phone-study").select_option(study)
+            target.get_by_role("button", name="Prepare study", exact=True).click()
+            expect(controller.locator("#controller-study")).to_be_visible()
+        else:
+            controller.get_by_role("button", name="Prepare demo").click()
         expect(controller.get_by_role("button", name="Start part")).to_be_disabled()
         target.get_by_role("button", name="Arm outputs locally").click()
         expect(controller.get_by_role("button", name="Start part")).to_be_enabled(timeout=12000)
         controller.get_by_role("button", name="Start part").click()
-        expect(target.locator("#phone-run-state")).to_have_text("Running", timeout=12000)
-        expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
-        assert target.evaluate("ppsVibrationCalls.some(Array.isArray)"), "No scheduled tactile output call"
+        surface = target.locator("#phone-response")
+        expect(surface).to_be_visible(timeout=12000)
+        assert surface.evaluate("(node) => node.scrollWidth <= node.clientWidth && node.scrollHeight <= node.clientHeight")
+        target.screenshot(path=ARTIFACTS / "participant-during-run.png")
+        if full_study:
+            expect(controller.locator("#controller-timeline-list")).to_contain_text("Vibration requested", timeout=10000)
+        else:
+            surface.tap()
+            target.wait_for_function("() => ppsCueMs !== null && performance.now() - ppsCueMs >= 1450", timeout=7000)
+            surface.tap()
+            surface.tap()
+            timeline = controller.locator("#controller-timeline-list")
+            expect(timeline).to_contain_text("Audio scheduled")
+            expect(timeline).to_contain_text("Vibration requested")
+            responses = timeline.get_by_role("listitem").filter(has_text=" ms RT")
+            expect(responses).to_have_count(1)
+            reaction_time = int(re.search(r"(\d+) ms RT", responses.inner_text())[1])
+            assert 1300 < reaction_time <= 2000, reaction_time
+        if study:
+            if complete_fixture:
+                for _ in range(2):
+                    expect(controller.locator("#controller-run-state")).to_have_text("Instruction Gate", timeout=15000)
+                    controller.get_by_role("button", name="Continue", exact=True).click()
+                    expect(controller.locator("#controller-run-state")).not_to_have_text("Instruction Gate")
+                expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
+            elif full_study:
+                expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=90000)
+            else:
+                target.get_by_role("button", name="Stop experiment").click()
+                expect(target.locator("#phone-run-state")).to_have_text("Interrupted", timeout=6000)
+            with target.expect_download() as download:
+                target.get_by_role("button", name="Download event log").click()
+            exported = json.loads(download.value.path().read_text(encoding="utf-8"))
+            assert exported["final_snapshot"]["browser_study"]["id"] == study
+            if full_study:
+                expected = exported["final_snapshot"]["browser_study"]["trial_count"]
+                assert len(exported["trials"]) == expected
+                assert [trial["number"] for trial in exported["trials"]] == list(range(1, expected + 1))
+                print(f"Completed {expected} trials for {study}.")
+            else:
+                assert exported["trials"][0]["rt_ms"] == reaction_time
+            if complete_fixture:
+                assert len(exported["trials"]) == 2 and exported["trials"][1]["rt_ms"] is None
+        else:
+            expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
         target.get_by_role("button", name="Disconnect controller").click()
         expect(controller.get_by_role("button", name="Start part")).to_be_hidden(timeout=15000)
 
@@ -175,6 +276,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live-beacon", action="store_true", help="also use the live VDO.Ninja service")
     parser.add_argument("--runner-only", action="store_true", help="skip the install and cached study audit")
+    parser.add_argument("--study", help="prepared browser study ID staged under assets/phone-studies")
+    parser.add_argument("--complete-fixture", action="store_true", help="complete the two-block instruction fixture")
+    parser.add_argument("--full-study", action="store_true", help="wait for completion of a short prepared study")
     args = parser.parse_args()
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     if not (PAGES / "index.html").is_file():
@@ -192,8 +296,9 @@ def main():
                         audit(browser, origin)
                     audit_routes(browser, origin)
                     print("Downloads, top-level Runner navigation, and the local browser demo passed.")
+                    audit_phone_catalogue(browser, origin)
                     if args.live_beacon:
-                        audit_live_beacon(browser, origin)
+                        audit_live_beacon(browser, origin, args.study, args.complete_fixture, args.full_study)
                         print("Live two-browser beacon pairing and remote start passed.")
                 finally:
                     browser.close()

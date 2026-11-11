@@ -44,3 +44,6 @@ packages/pps-resources/assets/preloads/**/*.txt text eol=lf
 # Reviewed third-party bytes are hash-pinned and must never receive newline conversion.
 apps/runner/frontend/public/vendor/vdoninja/1.5.5/* -text whitespace=-trailing-space
 apps/runner/compiled/vendor/vdoninja/1.5.5/* -text whitespace=-trailing-space
+
+/packages/pps-resources/assets/phone-studies/**/*.json text eol=lf
+/packages/pps-resources/assets/phone-studies/**/*.flac -text

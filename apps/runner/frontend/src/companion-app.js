@@ -8,11 +8,16 @@ import {
 import {
   allowedPhoneActions,
   applyPhoneAction,
+  browserStudyStep,
+  prepareBrowserStudy,
   createPhoneExperimentSnapshot,
   expirePhoneLease,
+  recordBrowserTrial,
   setPhoneConnectionMetadata,
 } from "./domain/phone-experiment-reducer.js";
-import { BrowserOutputEngine } from "./phone/browser-output-engine.js";
+import { BrowserOutputEngine, DEMO_AUDIO_MS, DEMO_DURATION_MS } from "./phone/browser-output-engine.js";
+import { TapResponseWindow } from "./phone/tap-response.js";
+import { loadPhoneStudy, phoneStudyCatalog, PhoneStudyPlayback } from "./phone/phone-study-playback.js";
 import {
   createVdoInvitation,
   parseInvitation,
@@ -31,6 +36,28 @@ initializeTextLayout();
 
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));
 const outputEngine = new BrowserOutputEngine();
+const responseWindow = new TapResponseWindow();
+let trialStartMs = null;
+let loadedStudy = null;
+let studyLoading = false;
+let armPending = false;
+const studyBase = new URL("../assets/phone-studies/", location.href);
+const studyPlayback = new PhoneStudyPlayback(outputEngine, {
+  instruction: (label) => updateStudyStep(label),
+  gate: (gate) => updateStudyStep(gate.label, gate),
+  trial: (record, startMs, anchorMs) => {
+    trialStartMs = startMs;
+    responseWindow.open(anchorMs, record.number);
+    phoneSnapshot = recordBrowserTrial(phoneSnapshot, { ...record }, clock);
+    appendEvent({ action: "study.trial", ...record }, "browser-output");
+    publishPhoneSnapshot();
+  },
+  complete: () => applyPhone("run.complete_demo", {}, { source: "browser-output" }),
+  error: (error) => {
+    applyPhone("target.disarm", {}, { source: "browser-output" });
+    showToast(error.message, { error: true });
+  },
+});
 let controllerInvitation = null;
 let controllerSession = null;
 let controllerBeacon = null;
@@ -42,6 +69,7 @@ let phoneTarget = null;
 let phoneSnapshot = null;
 let targetInvitationUrl = "";
 let eventLog = [];
+let eventSequence = 0;
 let toastTimer = null;
 let browserActive = true;
 let resumeController = false;
@@ -94,13 +122,51 @@ function renderControllerSnapshot(snapshot) {
   if (!snapshot) return;
   const phase = snapshot.run?.phase ?? "unknown";
   text("controller-run-state", snapshot.run?.state_label || titleCase(phase));
+  elements["controller-study"].hidden = !snapshot.browser_study;
+  if (snapshot.browser_study) text("controller-study", snapshot.browser_study.title);
   text("controller-revision", `rev ${snapshot.revision ?? 0}`);
   text("controller-progress", snapshot.run?.progress_label, "No progress reported.");
   text("controller-event", snapshot.run?.event_label, "No current event.");
   const elapsed = Number(snapshot.active_block?.elapsed_s) || 0;
   const duration = Number(snapshot.active_block?.duration_s) || 0;
   elements["controller-progress-bar"].style.width = `${duration > 0 ? Math.min(100, elapsed / duration * 100) : 0}%`;
+  renderControllerTimeline(snapshot.browser_trial, snapshot.browser_trials ?? []);
   updateControllerActions();
+}
+
+function renderControllerTimeline(trial, recent) {
+  const panel = elements["controller-timeline"];
+  panel.hidden = !trial;
+  if (!trial) return;
+  text("controller-trial-number", "Trial " + trial.number + (trial.response_required ? "" : " · Withhold"));
+  const cues = [
+    ["Audio scheduled", trial.audio_ms, "audio"],
+    ["Vibration requested", trial.tactile_ms, "tactile"],
+    [trial.rt_ms === null ? "Response" : "Response · " + trial.rt_ms + " ms RT", trial.response_ms, "response"],
+  ].filter(([, offset]) => offset !== null).sort((a, b) => a[1] - b[1]);
+  const track = elements["controller-timeline-track"];
+  const list = elements["controller-timeline-list"];
+  track.replaceChildren();
+  list.replaceChildren();
+  for (const [label, offset, kind] of cues) {
+    const mark = document.createElement("span");
+    mark.dataset.cue = kind;
+    mark.style.left = (100 * offset / trial.duration_ms) + "%";
+    track.append(mark);
+    const item = document.createElement("li");
+    item.textContent = "+" + offset + " ms · " + label;
+    list.append(item);
+  }
+  elements["controller-recent-trials"].hidden = recent.length === 0;
+  const history = elements["controller-recent-trial-list"];
+  history.replaceChildren();
+  for (const entry of recent) {
+    const item = document.createElement("li");
+    const response = entry.rt_ms === null ? "No tap recorded" :
+      entry.response_required ? entry.rt_ms + " ms RT" : entry.rt_ms + " ms · catch tap";
+    item.textContent = "Trial " + entry.number + " · " + response;
+    history.append(item);
+  }
 }
 
 function updateControllerActions() {
@@ -443,7 +509,7 @@ function bindControllerControls() {
 
 function appendEvent(event, source) {
   eventLog.push({
-    sequence: eventLog.length + 1,
+    sequence: ++eventSequence,
     source,
     browser_monotonic_ms: performance.now(),
     ...event,
@@ -452,22 +518,64 @@ function appendEvent(event, source) {
   elements["download-phone-log"].disabled = eventLog.length === 0;
 }
 
+function publishPhoneSnapshot() {
+  if (phoneTarget?.session.phase === "ready") phoneTarget.session.publishState(publicRunnerSnapshot(phoneSnapshot));
+}
+
+function updateStudyStep(label, gate) {
+  responseWindow.close();
+  trialStartMs = null;
+  phoneSnapshot = browserStudyStep(phoneSnapshot, label, clock, gate);
+  renderPhoneSnapshot();
+  publishPhoneSnapshot();
+}
+
+function recordTrialMarker(patch, action, source) {
+  const trial = phoneSnapshot.browser_trial;
+  if (!trial || trialStartMs === null) return;
+  const durationMs = Math.max(trial.duration_ms, patch.tactile_ms ?? 0, patch.response_ms ?? 0);
+  phoneSnapshot = recordBrowserTrial(phoneSnapshot, { ...trial, ...patch, duration_ms: durationMs }, clock);
+  appendEvent({ action, revision: phoneSnapshot.revision, ...patch }, source);
+  publishPhoneSnapshot();
+}
+
 function applyEffects(effects) {
   for (const effect of effects) {
-    if (effect.type === "demo.start") {
+    if (effect.type === "study.start") {
+      const study = loadedStudy;
+      setTimeout(() => {
+        if (study && loadedStudy === study && phoneSnapshot.run.phase === "running") void studyPlayback.start(study);
+      }, 0);
+    } else if (effect.type === "study.continue") {
+      studyPlayback.continue();
+    } else if (effect.type === "demo.start") {
       try {
-        outputEngine.startDemo();
-        elements["looming-orbit"].classList.remove("is-running");
-        requestAnimationFrame(() => elements["looming-orbit"].classList.add("is-running"));
+        const { startAt, useTactile } = outputEngine.startDemo();
+        trialStartMs = startAt;
+        responseWindow.close();
+        if (!useTactile && outputEngine.audioEnabled) responseWindow.open(startAt);
+        phoneSnapshot = recordBrowserTrial(phoneSnapshot, {
+          number: (phoneSnapshot.browser_trial?.number ?? 0) + 1,
+          response_required: true,
+          duration_ms: useTactile ? DEMO_DURATION_MS : DEMO_AUDIO_MS,
+          audio_ms: outputEngine.audioEnabled ? 0 : null,
+          tactile_ms: null,
+          response_ms: null,
+          rt_ms: null,
+        }, clock, { advanceRevision: false });
       } catch (error) {
         showToast(error.message, { error: true });
       }
     } else if (["demo.pause", "demo.stop"].includes(effect.type)) {
+      studyPlayback.stop();
       outputEngine.stopDemo();
-      elements["looming-orbit"].classList.remove("is-running");
+      trialStartMs = null;
+      responseWindow.close();
     } else if (effect.type === "outputs.stop") {
+      studyPlayback.stop();
       outputEngine.disarm();
-      elements["looming-orbit"].classList.remove("is-running");
+      trialStartMs = null;
+      responseWindow.close();
     }
   }
 }
@@ -480,13 +588,30 @@ function renderPhoneSnapshot() {
   text("phone-event", phoneSnapshot.run.event_label);
   const allowed = new Set(phoneSnapshot.allowed_actions);
   elements["phone-setup"].disabled = !allowed.has("setup.submit");
-  elements["phone-prepare"].disabled = !allowed.has("package.prepare_demo");
+  elements["phone-study"].disabled = phoneSnapshot.run.thread_alive || studyLoading;
+  elements["phone-prepare"].disabled = phoneSnapshot.run.thread_alive || studyLoading;
+  elements["phone-start"].hidden = Boolean(phoneSnapshot.browser_study);
   elements["phone-start"].disabled = !allowed.has("part.start");
   elements["phone-pause"].disabled = !allowed.has("run.pause");
   elements["phone-resume"].disabled = !allowed.has("run.resume");
   elements["phone-stop"].disabled = !allowed.has("run.stop");
-  elements["phone-response"].disabled = phase !== "running";
-  elements["arm-phone"].disabled = !allowed.has("target.arm");
+  const participant = elements["phone-participant-view"];
+  const showing = phase === "running" || (phase === "instruction_gate" && Boolean(phoneSnapshot.browser_study));
+  if (participant.hidden === showing) {
+    participant.hidden = !showing;
+    document.querySelector(".phone-shell").inert = showing;
+    document.querySelector(".runner-site-nav").inert = showing;
+    if (showing) {
+      text("phone-response-instruction", outputEngine.vibrationEnabled
+        ? "Tap when you feel the vibration."
+        : "Tap when you hear the sound.");
+      elements["participant-stop"].focus({ preventScroll: true });
+    } else {
+      responseWindow.contacts.clear();
+      elements["phone-run-state"].focus({ preventScroll: true });
+    }
+  }
+  elements["arm-phone"].disabled = armPending || studyLoading || !allowed.has("target.arm");
   elements["disarm-phone"].disabled = !allowed.has("target.disarm");
   text("target-state-badge", phoneTarget?.session?.phase === "ready" ? "Remote ready" : titleCase(phoneSnapshot.connection_state));
   elements["target-state-badge"].dataset.tone = phoneTarget?.session?.phase === "ready" ? "ready" : "";
@@ -500,7 +625,7 @@ function applyPhone(action, args = {}, { source = "local", expectedRevision = nu
   if (outcome.status === "accepted") applyEffects(outcome.effects);
   renderPhoneSnapshot();
   if (publish && phoneTarget?.session?.phase === "ready") phoneTarget.session.publishState(publicRunnerSnapshot(phoneSnapshot));
-  return outcome;
+  return { ...outcome, snapshot: phoneSnapshot };
 }
 
 function targetCommandOutcome(command) {
@@ -514,6 +639,10 @@ function targetCommandOutcome(command) {
 
 function expirePhoneControllerLease() {
   if (!phoneSnapshot) return;
+  if (phoneSnapshot.browser_study && phoneSnapshot.run.thread_alive) {
+    applyPhone("target.disarm", {}, { source: "controller-disconnected", publish: false });
+    return;
+  }
   const outcome = expirePhoneLease(phoneSnapshot, { clock });
   phoneSnapshot = outcome.snapshot;
   appendEvent(outcome.event, "target");
@@ -597,7 +726,9 @@ async function createPhoneTarget({ pairing = null, autoConnect = false } = {}) {
   const availableScopes = pairing?.acceptedScopes ?? availablePhoneScopes();
   const actions = Object.keys(ACTION_SCOPE);
   phoneSnapshot = createPhoneExperimentSnapshot({ targetId, epoch, clock });
+  if (loadedStudy) phoneSnapshot = prepareBrowserStudy(phoneSnapshot, loadedStudy, clock);
   eventLog = [];
+  eventSequence = 0;
   targetInvitationUrl = pairing ? "" : createVdoInvitation({
     pageUrl: location.href,
     room,
@@ -730,6 +861,38 @@ function bindPublicBeaconControls() {
   });
 }
 
+async function prepareSelectedStudy() {
+  const id = elements["phone-study"].value;
+  if (!id) {
+    if (loadedStudy) {
+      loadedStudy = null;
+      outputEngine.disarm();
+      phoneSnapshot = prepareBrowserStudy(phoneSnapshot, null, clock);
+    }
+    applyPhone("package.prepare_demo");
+    return;
+  }
+  studyLoading = true;
+  renderPhoneSnapshot();
+  try {
+    const study = await loadPhoneStudy(studyBase, id);
+    if (phoneSnapshot.run.thread_alive) throw new Error("Stop the active run before changing studies.");
+    if (!outputEngine.capabilities().audio || (study.needsVibration && !outputEngine.capabilities().vibration)) {
+      throw new Error("This study needs a phone browser with audio and vibration.");
+    }
+    outputEngine.disarm();
+    loadedStudy = study;
+    studyPlayback.results = [];
+    phoneSnapshot = prepareBrowserStudy(phoneSnapshot, study, clock);
+    appendEvent({ action: "study.prepared", profile_id: id }, "local");
+    publishPhoneSnapshot();
+    showToast("Study prepared. Arm outputs, then start from the controller.");
+  } finally {
+    studyLoading = false;
+    renderPhoneSnapshot();
+  }
+}
+
 function bindPhoneTargetControls() {
   const capabilities = outputEngine.capabilities();
   for (const [id, supported] of [["phone-audio-enabled", capabilities.audio], ["phone-vibration-enabled", capabilities.vibration]]) {
@@ -750,14 +913,34 @@ function bindPhoneTargetControls() {
   elements["target-disconnect"].addEventListener("click", () => phoneTarget?.session.stop());
 
   elements["arm-phone"].addEventListener("click", async () => {
+    if (armPending || studyLoading || !phoneSnapshot.allowed_actions.includes("target.arm")) return;
+    armPending = true;
+    const study = loadedStudy;
+    const target = phoneTarget;
+    const participantCode = phoneSnapshot.setup.participant_code;
+    renderPhoneSnapshot();
     try {
-      await outputEngine.arm({
-        audioEnabled: elements["phone-audio-enabled"].checked,
-        vibrationEnabled: elements["phone-vibration-enabled"].checked,
-      });
-      applyPhone("target.arm", { audio_enabled: elements["phone-audio-enabled"].checked }, { source: "local-gesture" });
-      showToast("Phone outputs armed by local gesture.");
-    } catch (error) { showToast(error.message, { error: true }); }
+      const audioEnabled = elements["phone-audio-enabled"].checked;
+      const vibrationEnabled = elements["phone-vibration-enabled"].checked;
+      if (study && (!audioEnabled || (study.needsVibration && !vibrationEnabled))) {
+        throw new Error("Enable this study’s audio and vibration outputs.");
+      }
+      await outputEngine.arm({ audioEnabled, vibrationEnabled });
+      if (!browserActive || studyLoading || study !== loadedStudy || target !== phoneTarget ||
+          participantCode !== phoneSnapshot.setup.participant_code ||
+          !phoneSnapshot.allowed_actions.includes("target.arm")) {
+        outputEngine.disarm();
+        return;
+      }
+      applyPhone("target.arm", { audio_enabled: audioEnabled }, { source: "local-gesture" });
+      showToast("Phone outputs armed.");
+    } catch (error) {
+      outputEngine.disarm();
+      showToast(error.message, { error: true });
+    } finally {
+      armPending = false;
+      renderPhoneSnapshot();
+    }
   });
   elements["disarm-phone"].addEventListener("click", () => applyPhone("target.disarm", {}, { source: "local-gesture" }));
   elements["phone-setup"].addEventListener("click", () => applyPhone("setup.submit", {
@@ -769,20 +952,61 @@ function bindPhoneTargetControls() {
     gender: "unspecified",
     part_labels: { "1": "Phone demo", "2": "Phone demo" },
   }));
-  elements["phone-prepare"].addEventListener("click", () => applyPhone("package.prepare_demo"));
+  elements["phone-prepare"].addEventListener("click", () => {
+    void prepareSelectedStudy().catch((error) => showToast(error.message, { error: true }));
+  });
+  elements["phone-study"].addEventListener("change", () => {
+    if (loadedStudy || phoneSnapshot.package_verified) {
+      outputEngine.disarm();
+      loadedStudy = null;
+      phoneSnapshot = prepareBrowserStudy(phoneSnapshot, null, clock);
+      publishPhoneSnapshot();
+    }
+    text("phone-prepare", elements["phone-study"].value ? "Prepare study" : "Prepare demo");
+    renderPhoneSnapshot();
+  });
+  void phoneStudyCatalog(studyBase).then((catalogue) => {
+    for (const study of catalogue) elements["phone-study"].add(new Option(study.title, study.id));
+  }).catch(() => {});
   elements["phone-start"].addEventListener("click", () => applyPhone("part.start"));
   elements["phone-pause"].addEventListener("click", () => applyPhone("run.pause"));
   elements["phone-resume"].addEventListener("click", () => applyPhone("run.resume"));
   elements["phone-stop"].addEventListener("click", () => applyPhone("run.stop"));
-  elements["phone-response"].addEventListener("click", () => {
-    if (phoneSnapshot?.run.phase !== "running") return;
-    appendEvent({
-      action: "response.tap",
-      revision: phoneSnapshot.revision,
-      unix_ms: Date.now(),
-      timing_tier: "browser_exploratory",
-    }, "local-participant");
-    showToast("Local phone response captured in the exploratory event log.");
+  elements["participant-stop"].addEventListener("click", () => applyPhone("run.stop", {}, { source: "local-participant" }));
+  const surface = elements["phone-response"];
+  surface.addEventListener("pointerdown", (event) => {
+    if (!event.isTrusted || event.button !== 0 || phoneSnapshot?.run.phase !== "running") return;
+    surface.setPointerCapture(event.pointerId);
+    responseWindow.down(event);
+  });
+  surface.addEventListener("pointermove", (event) => responseWindow.move(event));
+  surface.addEventListener("pointercancel", (event) => responseWindow.cancel(event));
+  surface.addEventListener("lostpointercapture", (event) => responseWindow.cancel(event));
+  surface.addEventListener("contextmenu", (event) => event.preventDefault());
+  surface.addEventListener("pointerup", (event) => {
+    if (!event.isTrusted || trialStartMs === null) return;
+    const response = responseWindow.up(event);
+    if (!response) return;
+    if (response.trialNumber !== undefined) {
+      const record = studyPlayback.results[response.trialNumber - 1];
+      record.response_ms = Math.round(response.atMs - record.trial_start_ms);
+      record.rt_ms = Math.round(response.reactionTimeMs);
+      const { trial_start_ms, response_anchor_ms, ...publicTrial } = record;
+      phoneSnapshot = recordBrowserTrial(phoneSnapshot, publicTrial, clock);
+      appendEvent({ action: "response.tap", ...publicTrial }, "local-participant");
+      publishPhoneSnapshot();
+    } else {
+      recordTrialMarker({
+        response_ms: Math.round(response.atMs - trialStartMs),
+        rt_ms: Math.round(response.reactionTimeMs),
+      }, "response.tap", "local-participant");
+    }
+  });
+  outputEngine.addEventListener("vibration-requested", (event) => {
+    if (trialStartMs === null || phoneSnapshot?.run.phase !== "running") return;
+    const { atMs } = event.detail;
+    responseWindow.open(atMs);
+    recordTrialMarker({ tactile_ms: Math.round(atMs - trialStartMs) }, "tactile.requested", "browser-output");
   });
   outputEngine.addEventListener("complete", (event) => {
     if (phoneSnapshot?.run.phase === "running") {
@@ -798,6 +1022,8 @@ function bindPhoneTargetControls() {
       exported_at: new Date().toISOString(),
       target_id: phoneSnapshot?.target_id,
       final_snapshot: phoneSnapshot,
+      trials: loadedStudy ? studyPlayback.results.filter(Boolean) : [],
+      earlier_events: eventSequence - eventLog.length,
       events: eventLog,
     };
     const url = URL.createObjectURL(new Blob([JSON.stringify(artifact, null, 2)], { type: "application/json" }));

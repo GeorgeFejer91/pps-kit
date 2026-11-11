@@ -275,6 +275,27 @@ function validateRemoteSafety(value) {
   ]) snapshotBoolean(safety[field], `snapshot.safety.${field}`);
 }
 
+function validateBrowserTrial(value) {
+  const trial = exactObject(value, [
+    "number", "duration_ms", "audio_ms", "tactile_ms", "response_ms", "rt_ms", "response_required",
+  ], "snapshot.browser_trial");
+  snapshotUint(trial.number, "browser trial number", 100_000);
+  snapshotBoolean(trial.response_required, "browser trial response requirement");
+  if (!trial.number || !trial.duration_ms) throw new TypeError("Invalid browser trial number or duration.");
+  snapshotUint(trial.duration_ms, "browser trial duration", 3_600_000);
+  for (const field of ["audio_ms", "tactile_ms", "response_ms", "rt_ms"]) {
+    nullable(trial[field], (entry) => snapshotUint(entry, field, trial.duration_ms));
+  }
+  if ((trial.response_ms === null) !== (trial.rt_ms === null)) {
+    throw new TypeError("A response marker and reaction time must be recorded together.");
+  }
+}
+
+function browserTrialFields(value) {
+  const snapshot = plainObject(value, "snapshot");
+  return ["browser_trial", "browser_trials", "browser_study"].filter((field) => Object.hasOwn(snapshot, field));
+}
+
 function validateCommonSnapshot(snapshot, expectedSchema) {
   if (snapshot.schema !== expectedSchema || snapshot.protocol !== PROTOCOL) {
     throw new TypeError("snapshot schema or protocol is unsupported.");
@@ -299,6 +320,22 @@ function validateCommonSnapshot(snapshot, expectedSchema) {
   validateRun(snapshot.run);
   validateInstructionGate(snapshot.instruction_gate);
   validateActiveBlock(snapshot.active_block);
+  if (Object.hasOwn(snapshot, "browser_trial")) {
+    if (snapshot.target_kind !== "browser_phone") throw new TypeError("Unexpected browser trial.");
+    nullable(snapshot.browser_trial, validateBrowserTrial);
+  }
+  if (Object.hasOwn(snapshot, "browser_trials")) {
+    if (snapshot.target_kind !== "browser_phone" || !Array.isArray(snapshot.browser_trials) ||
+        snapshot.browser_trials.length > 12) throw new TypeError("Invalid recent browser trials.");
+    snapshot.browser_trials.forEach(validateBrowserTrial);
+  }
+  if (Object.hasOwn(snapshot, "browser_study")) {
+    if (snapshot.target_kind !== "browser_phone") throw new TypeError("Unexpected browser study.");
+    const study = exactObject(snapshot.browser_study, ["id", "title", "trial_count"], "snapshot.browser_study");
+    snapshotString(study.id, "browser study identifier", 100);
+    snapshotString(study.title, "browser study title", 256);
+    snapshotUint(study.trial_count, "browser study trials", 8192);
+  }
 }
 
 /** Validate the complete versioned PPS authority snapshot before UI adoption. */
@@ -307,7 +344,7 @@ export function validateRunnerSnapshot(value) {
     "schema", "protocol", "target_id", "target_kind", "epoch", "revision", "server_unix_ms",
     "server_monotonic_ns", "connection_state", "timing_tier", "package_verified", "package_label",
     "allowed_actions", "identity", "setup", "part", "run", "instruction_gate", "active_block",
-    "safety", "audit_event_count", "last_note",
+    "safety", "audit_event_count", "last_note", ...browserTrialFields(value),
   ], "snapshot");
   validateCommonSnapshot(snapshot, SNAPSHOT_SCHEMA);
   snapshotString(snapshot.package_label, "snapshot.package_label", 256);
@@ -325,6 +362,7 @@ export function validatePublicRunnerSnapshot(value) {
     "schema", "protocol", "target_id", "target_kind", "epoch", "revision", "server_unix_ms",
     "server_monotonic_ns", "connection_state", "timing_tier", "package_verified",
     "allowed_actions", "setup", "part", "run", "instruction_gate", "active_block", "safety",
+    ...browserTrialFields(value),
   ], "snapshot");
   validateCommonSnapshot(snapshot, PUBLIC_SNAPSHOT_SCHEMA);
   validateRemoteSetup(snapshot.setup);
@@ -341,6 +379,7 @@ export function publicRunnerSnapshot(value) {
     "server_monotonic_ns", "connection_state", "timing_tier", "package_verified",
     "part", "run", "instruction_gate", "active_block",
   ]) projection[field] = current[field];
+  for (const field of browserTrialFields(current)) projection[field] = current[field];
   projection.schema = PUBLIC_SNAPSHOT_SCHEMA;
   projection.allowed_actions = current.allowed_actions.filter(isRemoteAction);
   projection.setup = {

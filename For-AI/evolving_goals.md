@@ -4,6 +4,22 @@ This is a compact decision summary, not an append-only session transcript.
 Replace superseded direction here; retain evidence in its owning domain.
 Prior decisions remain searchable in [the historical ledger](archive/evolving_goals.md).
 
+## 2026-11-11 — standalone phone study runs
+
+The browser Experiment Runner can act as the participant device for a full
+prepared study. The controller pairs, starts the run, advances instruction gates,
+and sees audio, vibration, and response markers. The phone keeps a single tap
+surface and a local Stop action during the run. It captures one isolated tap
+per trial from 100 to 2,000 ms after its response anchor. Overlapping response
+windows assign a tap to the most recent eligible cue. The phone supplies all
+reaction-time timestamps.
+
+Scope this pass to the 25 catalogue profiles marked ready. The five unfinished
+profiles stay outside the phone catalogue. Preserve approved order, audio, trial
+timing, instruction gates, and response semantics when adapting output to a
+phone. The initial phone packs each use one prepared participant order. Qualify
+specific physical phones separately from browser software tests.
+
 ## 2026-11-10 — two ways to use PPS Kit
 
 | Goal | Acceptance evidence |
