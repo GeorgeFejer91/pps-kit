@@ -1,18 +1,19 @@
 # GitHub Pages Dashboard
 
-GitHub Pages publishes the standalone Designer preview. The downloadable
-toolkit installs Designer and Experiment Runner for local experiment work.
-Local packaging and Pages use the exact same `apps/designer/frontend/compiled/` bytes.
+GitHub Pages publishes an installable study preview and the browser Experiment
+Runner. The same compiled Planner and Runner frontend bytes are used for local
+verification and Pages.
 
 ## Architecture
 
-- GitHub Pages serves the visible dashboard UI.
-- The hosted shell has three top tabs: `PPS Toolkit` for the Segment 0-6
-  experiment workflow, `Documentation` for local/reference guides, and
-  `Downloads` for installer/package links.
-- The separate `/experiment-runner/` subpage serves the canonical Runner
-  companion UI for controller and exploratory Phone Experiment modes. The
-  Downloads page links to it.
+- The site navigation opens **Experiment Planner**, **Experiment Runner**,
+  **Documentation**, and **Downloads** in that order.
+- The Planner is an installable PWA. Its service worker caches the app and the
+  verified Study 5 preview assets. The Runner stays on its own top-level route,
+  with separate **Run on this device** and **Control another device** modes.
+  See [browser pairing](CROSS_PLATFORM_RUNNER_AND_REMOTE.md#browser-companion).
+- Downloads groups the PWA separately from the three Windows installer
+  editions. [Installation notes](PPS_DOWNLOADS.md) describe the packages.
 - The hosted Designer loads the committed preload inventory and profile JSON
   directly. It opens on Study 5 by default and supports profile inspection,
   trajectory and block previews, playback of available prebuilt audio, and
@@ -201,17 +202,16 @@ DNS/hosting arrangements are maintained.
 
 ## Use On A Research PC
 
-Open the [download page](https://ppskit.com/download/) and choose the Full
-Toolkit release for Designer and Runner. Launch the installed Designer to
+Open the [download page](https://ppskit.com/download/) and choose the Experiment
+Planner + Runner Suite when its release is available. Launch the installed Designer to
 generate stimuli and prepare profiles. Open the prepared profile in the
 installed Runner to execute an experiment.
 
 ## Safety Boundary
 
 A public website cannot silently install Python, packages, audio drivers, or
-experiment dependencies. The download route offers separate Designer, Runner,
-and Full bootstrapper artifacts when their matching GitHub Release assets
-exist. Heavy payloads may live on Zenodo. Installation happens locally, and
+experiment dependencies. The download route lists Planner, Runner, and Suite. Their bootstrapper
+artifacts are available only when attached to a published GitHub Release. Heavy payloads may live on Zenodo. Installation happens locally, and
 each downloader verifies its component-specific payload and inventory hashes
 before extraction or launch.
 

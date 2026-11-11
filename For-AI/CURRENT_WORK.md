@@ -5,9 +5,22 @@ This file is the active checklist and handoff owner; replace state, do not appen
 
 - **Goal:** deliver the [standalone study preview PWA and offline Planner +
   Runner suite](evolving_goals.md#2026-11-10--two-ways-to-use-pps-kit), with the
-  refreshed UI and one suite installer. The existing
+  refreshed UI and three Windows editions (Planner, Runner, and their suite).
+  The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
+- **Browser launch: VERIFIED.** Pages [run 43051771734](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43051771734)
+  deployed source checkpoint 48b42e1 to [ppskit.com](https://ppskit.com/).
+  All 474 staged files matched the public site and the four public routes
+  returned HTTP 200. Chromium verified PWA installability, keyboard playback
+  and an offline revisit for Study 5, plus Downloads reflow at 320 CSS px.
+  The Experiment Runner tab opens a top-level browser Runner. Two independent
+  Chromium contexts paired over live VDO.Ninja on both local Pages staging
+  and public HTTPS. The controller could start only after local arming; the
+  test observed the vibration API call through an instrumented adapter.
+  Physical vibration, device timing and native acquisition are separate
+  qualification gates. The Windows release remains a draft with no installer
+  assets; Downloads lists the three editions without inventing asset URLs.
 - **Current stage:** verified Designer source. The public Designer opens
   directly as a browser preview with bundled study assets. The connection
   panel and localhost probe were removed in `d45c0c8`. Live Chromium checked
@@ -63,8 +76,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   15 GiB before another complete Python/native run. No unrelated files,
   worktrees or failed-run records were removed. Detailed logs, screenshots,
   schema findings and the temporary Go toolchain stay in ignored artifacts.
-- **Next product slice:** verify installation and a cached revisit for the
-  standalone Study 5 preview before expanding PWA coverage. In the native track,
+- **Next product slice:** expand PWA coverage only to cleared, verified assets.
+  Exercise browser audio and vibration on a physical supported phone before
+  qualifying that device route. In the native track,
   recover the working disk allowance; reconcile the five
   scientific evidence/derived-catalogue failures through their existing owners;
   then finish Standard and the applicable native/installed gates. Continue
@@ -146,8 +160,9 @@ recheck that cache variant if the old redirect is reported again. See
 
 - [x] M0 — Install the baseline, integrate routes and produce the completion review/plan.
 - [x] Record the two product goals, acceptance criteria, and lean For-AI protocols.
-- [ ] PWA — Verify a standalone preview and cached revisit for one supported
-  premade study, then validate the browser UI and expand only to supported assets.
+- [x] PWA — Verify installability and a cached revisit for the supported Study 5 preview.
+- [x] Browser Runner — Publish the Runner tab and verify the built-in demo and
+  consent-based beacon pairing over the public HTTPS route.
 - [ ] M1 — Authoring/participant fixes and validation/build baseline: B1–B3, C1,
   G1–G2, H1–H2. Validation has verified checkpoints but remains non-green.
 - [ ] M2 — Execute one real single-block package through native authority (A1).
