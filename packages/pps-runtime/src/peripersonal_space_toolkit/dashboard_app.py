@@ -5560,8 +5560,13 @@ def _validate_tactile_trial_manifest(manifest: dict[str, Any], *, design: Stimul
         expected_duration = int(item.get("duration_ms") or 0)
         if expected_duration and abs(expected_duration - int(info["duration_ms"])) > 1:
             errors.append(f"Segment 3 trial file duration changed: {path.name}.")
-        if family not in {"catch", "auditory_only"} and int(item.get("tactile_channel") or 0) != 3:
-            errors.append(f"Segment 3 manifest does not mark channel 3 as tactile: {path.name}.")
+        if family not in {"catch", "auditory_only"}:
+            if int(item.get("tactile_channel") or 0) != 3:
+                errors.append(f"Segment 3 manifest does not mark channel 3 as tactile: {path.name}.")
+            onset = float(item.get("tactile_onset_s") or 0)
+            cue_duration_ms = int(item.get("tactile_duration_ms") or 0)
+            if onset < 0 or onset * 1000 + cue_duration_ms > int(info["duration_ms"]) + 1:
+                errors.append(f"Segment 3 trial file ends outside its tactile cue interval: {path.name}. Re-bake Segment 3.")
     return errors
 
 
@@ -6122,25 +6127,26 @@ def _tactile_cue_duration_ms(sample_rate: int) -> int:
     return _duration_ms_from_seconds(len(cue) / float(sample_rate or 1))
 
 
-def _tactile_channel(sample_rate: int, frames: int, tactile_onset_s: float) -> Any:
-    import numpy as np
+@dataclass(frozen=True)
+class _TactileTrialLayout:
+    sample_rate: int
+    audio_frames: int
+    audio_start: int
+    tactile_start: int
+    cue: Any
 
-    channel = np.zeros(max(0, frames), dtype="float32")
-    cue = _load_tactile_cue(sample_rate)
-    start = int(round(float(tactile_onset_s) * sample_rate))
-    cue_start = 0
-    if start < 0:
-        cue_start = min(len(cue), -start)
-        start = 0
-    if start >= len(channel) or cue_start >= len(cue):
-        return channel
-    end = min(len(channel), start + len(cue) - cue_start)
-    if end > start:
-        channel[start:end] += cue[cue_start: cue_start + (end - start)]
-    peak = float(np.max(np.abs(channel))) if channel.size else 0.0
-    if peak > 1.0:
-        channel /= peak
-    return channel
+    @property
+    def frame_count(self) -> int:
+        return max(self.audio_start + self.audio_frames, self.tactile_start + len(self.cue))
+
+
+def _tactile_trial_layout(source_path: Path, tactile_onset_s: float) -> _TactileTrialLayout:
+    import soundfile as sf
+
+    info = sf.info(_soundfile_path(source_path))
+    rate = int(info.samplerate)
+    offset = int(round(tactile_onset_s * rate))
+    return _TactileTrialLayout(rate, info.frames, max(0, -offset), max(0, offset), _load_tactile_cue(rate))
 
 
 def _ffmpeg_merge_three_channel(source_stereo_path: Path, tactile_mono_path: Path, output_path: Path) -> bool:
@@ -6176,14 +6182,29 @@ def _ffmpeg_merge_three_channel(source_stereo_path: Path, tactile_mono_path: Pat
     return completed.returncode == 0 and _path_exists(output_path)
 
 
-def _write_three_channel_trial_wav(output_path: Path, source_audio_path: Path, tactile_onset_s: float, work_dir: Path) -> tuple[float, str]:
+def _write_three_channel_trial_wav(
+    output_path: Path, source_audio_path: Path, layout: _TactileTrialLayout, work_dir: Path,
+) -> tuple[float, str]:
     import numpy as np
     import soundfile as sf
 
+    sample_rate = layout.sample_rate
+    duration_s = layout.frame_count / sample_rate
+    audio_generation_preflight(output_path.parent, duration_s=duration_s, sample_rate=sample_rate, channels=3)
     _ensure_dir(output_path.parent)
     _ensure_dir(work_dir)
-    source_data, sample_rate = _read_stereo_audio(Path(source_audio_path))
-    tactile = _tactile_channel(sample_rate, source_data.shape[0], tactile_onset_s)
+    source_data, source_rate = _read_stereo_audio(source_audio_path)
+    if source_rate != sample_rate or source_data.shape[0] != layout.audio_frames:
+        raise ValueError(f"Trial audio changed after layout: {source_audio_path.name}")
+    if layout.frame_count != layout.audio_frames:
+        source_data = np.pad(source_data, (
+            (layout.audio_start, layout.frame_count - layout.audio_start - layout.audio_frames), (0, 0),
+        ))
+    tactile = np.zeros(layout.frame_count, dtype=np.float32)
+    tactile[layout.tactile_start:layout.tactile_start + len(layout.cue)] = layout.cue
+    peak = float(np.max(np.abs(tactile)))
+    if peak > 1.0:
+        tactile /= peak
     digest = hashlib.sha256(str(output_path).encode("utf-8")).hexdigest()[:12]
     source_stereo_path = work_dir / f"{digest}_source_stereo.wav"
     tactile_path = work_dir / f"{digest}_tactile.wav"
@@ -6203,7 +6224,7 @@ def _write_three_channel_trial_wav(output_path: Path, source_audio_path: Path, t
                 and audio_diff <= pcm_tolerance
                 and tactile_diff <= pcm_tolerance
             ):
-                return float(source_data.shape[0] / sample_rate) if sample_rate else 0.0, "ffmpeg"
+                return duration_s, "ffmpeg"
         except Exception:
             pass
     combined = np.column_stack([source_data, tactile])
@@ -6214,7 +6235,7 @@ def _write_three_channel_trial_wav(output_path: Path, source_audio_path: Path, t
     if tactile_peak > 0.99:
         combined[:, 2] = combined[:, 2] / tactile_peak * 0.99
     sf.write(_soundfile_path(output_path), combined, sample_rate, subtype="PCM_16")
-    return float(combined.shape[0] / sample_rate) if sample_rate else 0.0, "python_soundfile"
+    return duration_s, "python_soundfile"
 
 
 def _silence_segment_for_baseline(
@@ -6462,6 +6483,7 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
         tactile_onset_s: float,
         spatial_value_cm: float | str,
         row_folder: Path,
+        audio_lead_s: float = 0.0,
     ) -> None:
         digest = _local_file_sha256(output_path)
         output_info = _audio_file_info(output_path)
@@ -6503,7 +6525,7 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                 "soa_ms": int(soa_ms),
                 "baseline_anchor_label": anchor_label,
                 "baseline_mode": baseline_mode,
-                "looming_segment_onset_s": float(variant.get("looming_segment_onset_s") or 0.0),
+                "looming_segment_onset_s": round(float(variant.get("looming_segment_onset_s") or 0.0) + audio_lead_s, 9),
                 "tactile_onset_s": round(float(tactile_onset_s), 6),
                 "sequence_labels": str(variant.get("sequence_labels") or ""),
                 "source_labels": str(variant.get("source_labels") or ""),
@@ -6605,9 +6627,9 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
             variant_soa_values = _variant_soa_values(variant, design.protocol)
             for soa_index, soa_ms in enumerate(variant_soa_values):
                 tactile_onset_s = looming_onset_s + int(soa_ms) / 1000.0
-                source_info = _audio_file_info(source_path)
-                tactile_duration_ms = _tactile_cue_duration_ms(int(source_info["sample_rate"]))
-                total_duration_ms = int(source_info["duration_ms"])
+                layout = _tactile_trial_layout(source_path, tactile_onset_s)
+                tactile_duration_ms = _duration_ms_from_seconds(len(layout.cue) / layout.sample_rate)
+                total_duration_ms = _duration_ms_from_seconds(layout.frame_count / layout.sample_rate)
                 output_stem = _trial_bake_file_stem(
                     family="audio_tactile",
                     variant=variant,
@@ -6616,7 +6638,7 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                     total_duration_ms=total_duration_ms,
                 )
                 output_path = _unique_output_path(audio_folder, output_stem, ".wav")
-                duration_s, merge_engine = _write_three_channel_trial_wav(output_path, source_path, tactile_onset_s, work_dir)
+                duration_s, merge_engine = _write_three_channel_trial_wav(output_path, source_path, layout, work_dir)
                 add_manifest_row(
                     family="audio_tactile",
                     variant=variant,
@@ -6627,7 +6649,8 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                     output_path=output_path,
                     duration_s=duration_s,
                     merge_engine=merge_engine,
-                    tactile_onset_s=tactile_onset_s,
+                    tactile_onset_s=layout.tactile_start / layout.sample_rate,
+                    audio_lead_s=layout.audio_start / layout.sample_rate,
                     spatial_value_cm=_variant_spatial_value_for_soa(variant, design.protocol, soa_index),
                     row_folder=audio_folder,
                 )
@@ -6668,9 +6691,9 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                             silence_looming_audio=True,
                         )
                     tactile_onset_s = looming_onset_s + soa_ms / 1000.0
-                    baseline_info = _audio_file_info(baseline_source_path)
-                    tactile_duration_ms = _tactile_cue_duration_ms(int(baseline_info["sample_rate"]))
-                    total_duration_ms = int(baseline_info["duration_ms"])
+                    layout = _tactile_trial_layout(baseline_source_path, tactile_onset_s)
+                    tactile_duration_ms = _duration_ms_from_seconds(len(layout.cue) / layout.sample_rate)
+                    total_duration_ms = _duration_ms_from_seconds(layout.frame_count / layout.sample_rate)
                     output_stem = _trial_bake_file_stem(
                         family="baseline",
                         variant=variant,
@@ -6681,7 +6704,7 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                         baseline_mode=mode,
                     )
                     output_path = _unique_output_path(baseline_folder, output_stem, ".wav")
-                    duration_s, merge_engine = _write_three_channel_trial_wav(output_path, baseline_source_path, tactile_onset_s, work_dir)
+                    duration_s, merge_engine = _write_three_channel_trial_wav(output_path, baseline_source_path, layout, work_dir)
                     add_manifest_row(
                         family="baseline",
                         variant=variant,
@@ -6692,7 +6715,8 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                         output_path=output_path,
                         duration_s=duration_s,
                         merge_engine=merge_engine,
-                        tactile_onset_s=tactile_onset_s,
+                        tactile_onset_s=layout.tactile_start / layout.sample_rate,
+                        audio_lead_s=layout.audio_start / layout.sample_rate,
                         spatial_value_cm=_variant_spatial_value_for_soa(variant, design.protocol, 0),
                         row_folder=baseline_folder,
                     )

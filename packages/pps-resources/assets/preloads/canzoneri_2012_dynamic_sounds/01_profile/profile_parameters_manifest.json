@@ -136,17 +136,20 @@
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "jitter_values_ms",
-      "status": "defaulted",
-      "value": [],
-      "note": "No explicit jitter box is encoded."
+      "status": "reported",
+      "value": [
+        1000,
+        1000
+      ],
+      "note": "Explicit jitter values encoded."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "iti_jitter_policy",
-      "status": "defaulted",
-      "value": "no explicit Segment 2 ITI/jitter box",
-      "note": "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."
+      "status": "reported",
+      "value": "jitter/iti box",
+      "note": "Segment 2 encodes explicit ITI/jitter timing values."
     },
     {
       "segment": "3",

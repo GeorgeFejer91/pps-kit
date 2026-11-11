@@ -55,7 +55,7 @@ PRELOAD_ROOT = RESOURCE_ROOT / "assets" / "preloads"
 RECREATION_STATUS_PATH = PRELOAD_ROOT / "profile_recreation_status.json"
 RECREATION_STATUS_DOC = REPO_ROOT / "docs" / "PUBLISHED_STUDY_RECREATION_STATUS.md"
 BUILD_ROOT = REPO_ROOT / "artifacts" / "preload_catalog_build"
-BASE_URL = "https://georgefejer91.github.io/pps-kit/catalog/assets/preloads"
+BASE_URL = "https://georgefejer91.github.io/pps-kit/assets/preloads"
 SEGMENTS = [
     ("01_profile", "Profile"),
     ("02_looming_stimuli", "Looming Stimuli Builder"),
@@ -723,11 +723,11 @@ def resolve_path(path: str | Path) -> Path:
     target = Path(path).expanduser()
     if target.is_absolute():
         return target
-    return REPO_ROOT / target
+    return RESOURCE_ROOT / target
 
 
 def rel(path: Path) -> str:
-    return str(Path(path).resolve().relative_to(REPO_ROOT).as_posix())
+    return str(Path(path).resolve().relative_to(RESOURCE_ROOT).as_posix())
 
 
 def safe_name(value: str) -> str:

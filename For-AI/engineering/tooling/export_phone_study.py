@@ -86,7 +86,7 @@ def phone_block(block, out: Path, clips: dict) -> dict:
             duration = None
             if tactile is not None:
                 duration = math.ceil(float(row["Tactile_Duration_ms"]))
-                if duration <= 0 or duration > 1000:
+                if duration <= 0 or duration > 1000 or tactile + round(duration * rate / 1000) > end + 1:
                     raise ValueError(f"{block.label}, trial {number} has an invalid tactile pulse.")
             trial_type = str(row.get("Trial_Type") or "")
             family = str(row.get("Family") or "")

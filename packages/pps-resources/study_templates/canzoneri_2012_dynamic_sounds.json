@@ -87,12 +87,24 @@
           "label": "Dynamic sound PPS trial",
           "elements": [
             {
+              "element_id": "canzoneri-2012-pre-sound-silence",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [1000]
+            },
+            {
               "element_id": "canzoneri-2012-moving-sound",
               "kind": "looming_stimulus",
               "label": "Pink moving sound",
               "source_label": "Pink moving sound",
               "source_labels": ["Pink moving sound"],
               "randomized": true
+            },
+            {
+              "element_id": "canzoneri-2012-post-sound-silence",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [1000]
             }
           ]
         }

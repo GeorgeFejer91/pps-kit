@@ -1259,6 +1259,11 @@ def test_canzoneri_profile_distributes_reported_trial_pool_across_two_blocks():
     templates = load_templates(Path(__file__).resolve().parents[3] / "packages" / "pps-resources" / "study_templates")
     canzoneri = next(template for template in templates if template.template_id == "canzoneri_2012_dynamic_sounds")
 
+    elements = canzoneri.design.protocol.trial_strips[0].elements
+    assert [(element.kind, element.jitter_values_ms) for element in elements] == [
+        ("jitter", [1000]), ("looming_stimulus", []), ("jitter", [1000]),
+    ]
+
     rows = block_trial_rows(canzoneri.design)
 
     assert len(rows) == 188

@@ -60,8 +60,32 @@
     "title": "Canzoneri 2013 tool-use PPS reshaping"
   },
   {
+    "id": "canzoneri_2012_dynamic_sounds",
+    "title": "Dynamic sounds capture PPS boundaries"
+  },
+  {
+    "id": "tonelli_2019_echolocation",
+    "title": "Enhanced audio-tactile PPS after echolocation training"
+  },
+  {
     "id": "galli_2015_wheelchair_full_body",
     "title": "Galli 2015 wheelchair full-body PPS"
+  },
+  {
+    "id": "lerner_2021_3d_audio_tactile_boundary",
+    "title": "Lerner 2021 3D audio-tactile PPS boundary"
+  },
+  {
+    "id": "serino_2015_front_back_trunk_exp2",
+    "title": "Serino 2015 front/back peri-trunk Experiment 2"
+  },
+  {
+    "id": "serino_2015_peri_hand_exp3",
+    "title": "Serino 2015 peri-hand PPS Experiment 3"
+  },
+  {
+    "id": "serino_2015_peri_trunk_exp1",
+    "title": "Serino 2015 peri-trunk PPS Experiment 1"
   },
   {
     "id": "serino_2015_toolless_sync_training",

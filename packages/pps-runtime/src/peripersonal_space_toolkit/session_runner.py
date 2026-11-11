@@ -15,6 +15,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 import threading
 import time
 from dataclasses import asdict, dataclass, field
@@ -7881,7 +7882,6 @@ def _materialize_segment_block_wav(
     except ImportError as exc:
         raise RuntimeError("Install numpy and soundfile to prepare participant block WAVs.") from exc
 
-    clips: list[Any] = []
     sample_rate = 0
     target_channels = 3
     trial_rows: list[dict[str, Any]] = []
@@ -7891,7 +7891,8 @@ def _materialize_segment_block_wav(
     ordered_rows = sorted(source_rows, key=lambda row: _as_int(row.get("block_trial_index"), default=len(trial_rows) + 1))
     require_plan_size(len(ordered_rows), "Prepared block")
     # Read headers and routing metadata before allocating any decoded audio.
-    duration_estimate = 0.0
+    estimated_frames = 0
+    peak_trial_frames = 0
     info_cache = {}
     for row in ordered_rows:
         trial_path = _resolve_relative_path(_row_value(row, "trial_file_path", "Trial_File_Path", default=""), source_block_csv_path.parent)
@@ -7903,110 +7904,118 @@ def _materialize_segment_block_wav(
             raise ValueError(f"Segment 5 block contains mixed sample rates: {source_block_csv_path.name}")
         sample_rate = int(info.samplerate)
         duration = info.frames / sample_rate
-        duration_estimate += duration + max(0.0, _as_float(
-            _row_value(row, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""), default=0.0)) / 1000
+        iti_ms = max(0.0, _as_float(
+            _row_value(row, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""), default=0.0))
+        trial_frames = info.frames + int(round(iti_ms / 1000 * sample_rate))
+        estimated_frames += trial_frames
+        peak_trial_frames = max(peak_trial_frames, trial_frames)
         switching = _speaker_switching_spec(row, duration_s=duration)
         target_channels = max(target_channels, info.channels, max(switching["_channels"]) if switching else 0)
-    if ordered_rows:
-        audio_generation_preflight(output_path.parent, duration_s=duration_estimate,
-                                   sample_rate=sample_rate, channels=target_channels)
-    for trial_index, row in enumerate(ordered_rows, start=1):
-        trial_path = _resolve_relative_path(_row_value(row, "trial_file_path", "Trial_File_Path", default=""), source_block_csv_path.parent)
-        if not _path_exists(trial_path):
-            raise FileNotFoundError(f"Segment 5 trial row references a missing WAV: {trial_path}")
-        expected_hash = str(_row_value(row, "source_sha256", "Source_SHA256", default="")).strip()
-        actual_hash = _sha256_file(trial_path)
-        if expected_hash and expected_hash != actual_hash:
-            raise ValueError(f"Trial WAV hash mismatch for {trial_path.name}. Re-bake upstream segments before running.")
-        data, rate = sf.read(_soundfile_path(trial_path), dtype="float32", always_2d=True)
-        if sample_rate and int(rate) != sample_rate:
-            raise ValueError(f"Segment 5 block contains mixed sample rates: {source_block_csv_path.name}")
-        sample_rate = int(rate)
-        looming_onset_s = _segment_looming_onset_s(row)
-        tactile_onset_s = _segment_tactile_onset_s(row, looming_onset_s)
-        family = _segment_family(row)
-        data, tactile_waveform = _apply_tactile_waveform_profile(
-            data,
-            row,
-            sample_rate=sample_rate,
-            family=family,
-            tactile_onset_s=tactile_onset_s,
-        )
-        data, tactile_compensation = _apply_tactile_drive_compensation(
-            data,
-            sample_rate=sample_rate,
-            family=family,
-            tactile_onset_s=tactile_onset_s,
-        )
-        data, speaker_switching = _apply_speaker_switching_profile(
-            data,
-            row,
-            sample_rate=sample_rate,
-        )
-        iti_ms = max(
-            0.0,
-            _as_float(
-                _row_value(row, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""),
-                default=0.0,
-            ),
-        )
-        if iti_ms > 0.0:
-            iti_frames = int(round((iti_ms / 1000.0) * sample_rate))
-            if iti_frames > 0:
-                silence = np.zeros((iti_frames, data.shape[1]), dtype=data.dtype)
-                data = np.concatenate([data, silence], axis=0)
-        target_channels = max(target_channels, int(data.shape[1]))
-        clips.append(data)
-        wav_infos.append(_wav_info(trial_path, sha256=actual_hash, label=trial_path.stem))
-        duration_frames = int(data.shape[0])
-        trial_start_sample = frame_cursor
-        trial_end_sample = frame_cursor + duration_frames
-        duration_s = float(duration_frames / sample_rate) if sample_rate else 0.0
-        trial_rows.append(
-            _segment_session_trial_row(
-                row,
-                participant_id=participant_id,
-                session_id=session_id,
-                part_number=part_number,
-                phase=phase,
-                phase_label=phase_label,
-                output_block_index=output_block_index,
-                participant_block_position=participant_block_position,
-                source_block_index=source_block_index,
-                source_block_label=source_block_label,
-                source_block_csv_path=source_block_csv_path,
-                source_block_csv_sha256=source_block_hash,
-                trial_index=trial_index,
-                family=family,
-                trial_file_path=trial_path,
-                trial_file_sha256=actual_hash,
-                sample_rate=sample_rate,
-                source_channels=int(data.shape[1]),
-                trial_start_sample=trial_start_sample,
-                trial_end_sample=trial_end_sample,
-                duration_s=duration_s,
-                looming_onset_s=looming_onset_s,
-                tactile_onset_s=tactile_onset_s,
-                tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
-                tactile_compensation=tactile_compensation,
-                tactile_waveform=tactile_waveform,
-                speaker_switching=speaker_switching,
-            )
-        )
-        frame_cursor = trial_end_sample
-    if not clips or not sample_rate:
+    if not ordered_rows or not sample_rate:
         raise ValueError(f"Segment 5 block contains no usable audio rows: {source_block_csv_path}")
-
-    padded = []
-    for data in clips:
-        if data.shape[1] < target_channels:
-            pad = np.zeros((data.shape[0], target_channels - data.shape[1]), dtype=data.dtype)
-            data = np.concatenate([data, pad], axis=1)
-        padded.append(data)
-    block = np.concatenate(padded, axis=0)
+    audio_generation_preflight(output_path.parent, duration_s=estimated_frames / sample_rate,
+                               sample_rate=sample_rate, channels=target_channels,
+                               peak_working_frames=peak_trial_frames)
     _mkdir(output_path.parent)
-    sf.write(_soundfile_path(output_path), block, sample_rate, subtype="PCM_16")
-    return float(block.shape[0] / sample_rate), sample_rate, target_channels, trial_rows, wav_infos
+    fd, staging_path = tempfile.mkstemp(dir=_filesystem_path(output_path.parent), suffix=".wav")
+    os.close(fd)
+    try:
+        with sf.SoundFile(staging_path, mode="w", samplerate=sample_rate, channels=target_channels, subtype="PCM_16") as wav:
+            for trial_index, row in enumerate(ordered_rows, start=1):
+                trial_path = _resolve_relative_path(_row_value(row, "trial_file_path", "Trial_File_Path", default=""), source_block_csv_path.parent)
+                if not _path_exists(trial_path):
+                    raise FileNotFoundError(f"Segment 5 trial row references a missing WAV: {trial_path}")
+                expected_hash = str(_row_value(row, "source_sha256", "Source_SHA256", default="")).strip()
+                actual_hash = _sha256_file(trial_path)
+                if expected_hash and expected_hash != actual_hash:
+                    raise ValueError(f"Trial WAV hash mismatch for {trial_path.name}. Re-bake upstream segments before running.")
+                expected_info = info_cache[trial_path]
+                with sf.SoundFile(_soundfile_path(trial_path)) as source:
+                    if (source.samplerate, source.frames, source.channels) != (
+                        sample_rate, expected_info.frames, expected_info.channels
+                    ):
+                        raise ValueError(f"Trial WAV changed after block preflight: {trial_path.name}")
+                    data = source.read(dtype="float32", always_2d=True)
+                looming_onset_s = _segment_looming_onset_s(row)
+                tactile_onset_s = _segment_tactile_onset_s(row, looming_onset_s)
+                family = _segment_family(row)
+                data, tactile_waveform = _apply_tactile_waveform_profile(
+                    data,
+                    row,
+                    sample_rate=sample_rate,
+                    family=family,
+                    tactile_onset_s=tactile_onset_s,
+                )
+                data, tactile_compensation = _apply_tactile_drive_compensation(
+                    data,
+                    sample_rate=sample_rate,
+                    family=family,
+                    tactile_onset_s=tactile_onset_s,
+                )
+                data, speaker_switching = _apply_speaker_switching_profile(
+                    data,
+                    row,
+                    sample_rate=sample_rate,
+                )
+                iti_ms = max(
+                    0.0,
+                    _as_float(
+                        _row_value(row, "iti_ms", "ITI_ms", "Intertrial_Interval_ms", default=""),
+                        default=0.0,
+                    ),
+                )
+                if iti_ms > 0.0:
+                    iti_frames = int(round((iti_ms / 1000.0) * sample_rate))
+                    if iti_frames > 0:
+                        silence = np.zeros((iti_frames, data.shape[1]), dtype=data.dtype)
+                        data = np.concatenate([data, silence], axis=0)
+                source_channels = int(data.shape[1])
+                if source_channels > target_channels:
+                    raise ValueError(f"Trial output channels exceed the prepared block layout: {trial_path.name}")
+                if source_channels < target_channels:
+                    data = np.pad(data, ((0, 0), (0, target_channels - source_channels)))
+                wav.write(data)
+                wav_infos.append(_wav_info(trial_path, sha256=actual_hash, label=trial_path.stem))
+                duration_frames = int(data.shape[0])
+                trial_start_sample = frame_cursor
+                trial_end_sample = frame_cursor + duration_frames
+                duration_s = float(duration_frames / sample_rate) if sample_rate else 0.0
+                trial_rows.append(
+                    _segment_session_trial_row(
+                        row,
+                        participant_id=participant_id,
+                        session_id=session_id,
+                        part_number=part_number,
+                        phase=phase,
+                        phase_label=phase_label,
+                        output_block_index=output_block_index,
+                        participant_block_position=participant_block_position,
+                        source_block_index=source_block_index,
+                        source_block_label=source_block_label,
+                        source_block_csv_path=source_block_csv_path,
+                        source_block_csv_sha256=source_block_hash,
+                        trial_index=trial_index,
+                        family=family,
+                        trial_file_path=trial_path,
+                        trial_file_sha256=actual_hash,
+                        sample_rate=sample_rate,
+                        source_channels=source_channels,
+                        trial_start_sample=trial_start_sample,
+                        trial_end_sample=trial_end_sample,
+                        duration_s=duration_s,
+                        looming_onset_s=looming_onset_s,
+                        tactile_onset_s=tactile_onset_s,
+                        tactile_drive_onset_s=float(tactile_compensation.get("drive_onset_s") or tactile_onset_s),
+                        tactile_compensation=tactile_compensation,
+                        tactile_waveform=tactile_waveform,
+                        speaker_switching=speaker_switching,
+                    )
+                )
+                frame_cursor = trial_end_sample
+        os.replace(staging_path, _filesystem_path(output_path))
+    finally:
+        Path(staging_path).unlink(missing_ok=True)
+    return frame_cursor / sample_rate, sample_rate, target_channels, trial_rows, wav_infos
 
 
 def _segment_session_trial_row(

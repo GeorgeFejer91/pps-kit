@@ -35,7 +35,7 @@ def read_csv_rows(path: str | Path) -> list[dict[str, str]]:
 
 def audio_generation_preflight(
     output_dir: str | Path, *, duration_s: float, sample_rate: int, channels: int,
-    file_count: int = 1, source_bytes: int = 0,
+    file_count: int = 1, source_bytes: int = 0, peak_working_frames: int | None = None,
 ) -> dict[str, int | float]:
     """Conservative PCM16 output/scratch and three float32 working buffers."""
     if not math.isfinite(duration_s) or duration_s < 0 or sample_rate <= 0 or not 1 <= channels <= 32:
@@ -43,7 +43,10 @@ def audio_generation_preflight(
     require_plan_size(file_count, "Generated audio files")
     samples = math.ceil(duration_s * sample_rate)
     wav_bytes = 44 + samples * channels * 2
-    working_bytes = samples * channels * 4 * 3
+    if peak_working_frames is not None and not 0 <= peak_working_frames <= samples:
+        raise ResourceLimit("The working audio frame count exceeds the output bounds.")
+    working_frames = samples if peak_working_frames is None else peak_working_frames
+    working_bytes = working_frames * channels * 4 * 3
     if wav_bytes > MAX_WAV_BYTES or working_bytes > MAX_WORKING_AUDIO_BYTES:
         raise ResourceLimit("Audio generation exceeds the per-file or working-memory limit. Shorten the stimulus or block.")
     output_bytes = max(wav_bytes * file_count, source_bytes)

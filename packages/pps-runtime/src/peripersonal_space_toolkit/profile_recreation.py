@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .design import StimulusDesign, has_trial_strips, validate_design
-from .runtime_paths import product_root
+from .runtime_paths import resource_root
 from .templates import StudyTemplate
 
 
@@ -728,7 +728,7 @@ def _segment_artifact_summary(profile_dir: Path, source_assets: list[dict[str, A
 
 def _rel_if_possible(path: Path) -> str:
     try:
-        root = product_root()
+        root = resource_root()
         return str(Path(path).resolve().relative_to(root).as_posix())
     except ValueError:
         return str(path)
