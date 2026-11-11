@@ -6572,6 +6572,7 @@ function renderWorkflow() {
       panel.title = "";
     }
     for (const control of panel.querySelectorAll("input, select, textarea, button")) {
+      if (control.matches(".decision-help-trigger, .decision-help-close")) continue;
       // Preview view-controls (2D/3D, zoom, Fit Radius, Reset Camera) only change
       // the camera/view, never the trajectory data, so they stay usable even when
       // the step is read-only or locked. People can always look at the preview;
@@ -8930,7 +8931,23 @@ function renderHardwarePixelArt() {
   }
 }
 
+function wireDecisionHelpFallback() {
+  if ("popover" in HTMLElement.prototype) return;
+  for (const trigger of document.querySelectorAll(".decision-help-trigger")) {
+    const dialog = $(trigger.getAttribute("popovertarget"));
+    trigger.setAttribute("aria-controls", dialog.id);
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.addEventListener("click", () => {
+      dialog.showModal();
+      trigger.setAttribute("aria-expanded", "true");
+    });
+    dialog.querySelector(".decision-help-close").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("close", () => trigger.setAttribute("aria-expanded", "false"));
+  }
+}
+
 function wireEvents() {
+  wireDecisionHelpFallback();
   document.addEventListener("click", handoffExternalLinkToNative, true);
   document.addEventListener("pointerdown", (event) => {
     const control = event.target.closest?.("#toolkit-page input:disabled, #toolkit-page select:disabled, #toolkit-page textarea:disabled, #toolkit-page button:disabled");

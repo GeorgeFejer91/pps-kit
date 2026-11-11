@@ -201,7 +201,30 @@
             </div>
             <div class="source-action-grid">
               <div class="source-action source-picker-card noise-picker-card" data-source-kind-card="generated_noise">
-                <span class="noise-picker-label">Generate Looming Noise</span>
+                <div class="decision-help-heading">
+                  <span class="noise-picker-label" data-pretext>Generate Looming Noise</span>
+                  <button type="button" class="decision-help-trigger" popovertarget="help-noise-types"
+                    aria-label="About noise types" aria-haspopup="dialog"><span aria-hidden="true" data-pretext>i</span></button>
+                </div>
+                <dialog class="decision-help" id="help-noise-types" popover="auto" aria-labelledby="help-noise-types-title">
+                  <header class="decision-help-heading">
+                    <h3 id="help-noise-types-title" data-pretext>Noise types</h3>
+                    <button type="button" class="decision-help-close" popovertarget="help-noise-types" popovertargetaction="hide"
+                      data-pretext autofocus>Close</button>
+                  </header>
+                  <p data-pretext>Noise colour describes how the signal’s power is distributed across frequencies.</p>
+                  <ul>
+                    <li data-pretext><strong>White</strong> has equal power per hertz.</li>
+                    <li data-pretext><strong>Pink</strong> has equal power per octave (−3 dB/octave).</li>
+                    <li data-pretext><strong>Brown</strong> emphasizes low frequencies (−6 dB/octave).</li>
+                    <li data-pretext><strong>Blue</strong> and <strong>violet</strong> emphasize high frequencies (+3 and +6 dB/octave).</li>
+                  </ul>
+                  <p data-pretext>Canzoneri and colleagues used pink noise for their moving sound. Ferri and colleagues compared all five colours and selected white and brown for the neutral and negative conditions in their experiment.</p>
+                  <p class="decision-help-citations">
+                    <a data-pretext href="https://doi.org/10.1371/journal.pone.0044306">Canzoneri et al. (2012)</a>
+                    <a data-pretext href="https://doi.org/10.1016/j.neuropsychologia.2015.03.001">Ferri et al. (2015)</a>
+                  </p>
+                </dialog>
                 <select id="generated-noise-select" class="state-only" tabindex="-1" aria-hidden="true">
                   <option value="">Choose noise type to bake...</option>
                 </select>
@@ -262,7 +285,31 @@
                 </div>
               </div>
               <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode" hidden>
-                <span>Source mode</span>
+                <div class="decision-help-heading">
+                  <span class="source-mode-label" data-pretext>Source mode</span>
+                  <button type="button" class="decision-help-trigger" popovertarget="help-source-mode"
+                    aria-label="About source mode" aria-haspopup="dialog"><span aria-hidden="true" data-pretext>i</span></button>
+                </div>
+                <dialog class="decision-help" id="help-source-mode" popover="auto" aria-labelledby="help-source-mode-title">
+                  <header class="decision-help-heading">
+                    <h3 id="help-source-mode-title" data-pretext>Source mode</h3>
+                    <button type="button" class="decision-help-close" popovertarget="help-source-mode" popovertargetaction="hide"
+                      data-pretext autofocus>Close</button>
+                  </header>
+                  <p data-pretext>Source mode sets the timing of the noise. The trajectory controls how the sound moves.</p>
+                  <dl>
+                    <dt data-pretext>Burst train</dt>
+                    <dd>
+                      <p data-pretext>Choose repeated short bursts when matching a burst-based protocol. Hobeika and colleagues used 30 ms Gaussian white-noise bursts and timed tactile targets relative to individual bursts.</p>
+                      <a data-pretext href="https://doi.org/10.1016/j.jneumeth.2019.108534">Hobeika et al. (2020)</a>
+                    </dd>
+                    <dt data-pretext>Smooth linear</dt>
+                    <dd>
+                      <p data-pretext>Choose continuous noise for an approach without gaps between bursts. Canzoneri and colleagues used continuous pink noise with changing intensity across two loudspeakers.</p>
+                      <a data-pretext href="https://doi.org/10.1371/journal.pone.0044306">Canzoneri et al. (2012)</a>
+                    </dd>
+                  </dl>
+                </dialog>
                 <div class="source-mode-choice-grid" role="radiogroup" aria-label="Generated source mode">
                   <label class="source-mode-widget">
                     <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
@@ -451,7 +498,41 @@
 
             <div id="tactile-timing-summary" class="decision-summary-strip" aria-live="polite"></div>
 
-            <fieldset id="baseline-options" class="baseline-option-grid" aria-label="Baseline strategy">
+            <div class="decision-help-heading">
+              <h3 id="baseline-strategy-heading" data-pretext>Baseline strategy</h3>
+              <button type="button" class="decision-help-trigger" popovertarget="help-baseline-strategy"
+                aria-label="About baseline strategy" aria-haspopup="dialog"><span aria-hidden="true" data-pretext>i</span></button>
+            </div>
+            <dialog class="decision-help" id="help-baseline-strategy" popover="auto" aria-labelledby="help-baseline-strategy-title">
+              <header class="decision-help-heading">
+                <h3 id="help-baseline-strategy-title" data-pretext>Baseline strategy</h3>
+                <button type="button" class="decision-help-close" popovertarget="help-baseline-strategy" popovertargetaction="hide"
+                  data-pretext autofocus>Close</button>
+              </header>
+              <p data-pretext>SOA is the delay from sound onset to the tactile target.</p>
+              <dl>
+                <dt data-pretext>No baseline</dt>
+                <dd><p data-pretext>Compare experimental conditions directly.</p></dd>
+                <dt data-pretext>Minimum and maximum SOA anchors</dt>
+                <dd><p data-pretext>Keep the trial audio at the first, last, or both entered SOAs.</p></dd>
+                <dt data-pretext>Full SOA tactile-only</dt>
+                <dd>
+                  <p data-pretext>Silence looming at every SOA. Serino’s VR task used matched tactile-only delays to measure response times without the approaching stimulus.</p>
+                  <a data-pretext href="https://doi.org/10.3389/fict.2017.00031">Serino et al. (2018)</a>
+                </dd>
+                <dt data-pretext>Full SOA stationary bursts</dt>
+                <dd>
+                  <p data-pretext>Replace looming with fixed-position bursts. Hobeika’s study used a distant burst train to estimate temporal expectancy across delays.</p>
+                  <a data-pretext href="https://doi.org/10.1016/j.jneumeth.2019.108534">Hobeika et al. (2020)</a>
+                </dd>
+                <dt data-pretext>Custom timings</dt>
+                <dd>
+                  <p data-pretext>Choose control delays and whether to keep the trial audio. Canzoneri’s study placed tactile targets in silent intervals before and after the sound.</p>
+                  <a data-pretext href="https://doi.org/10.1371/journal.pone.0044306">Canzoneri et al. (2012)</a>
+                </dd>
+              </dl>
+            </dialog>
+            <fieldset id="baseline-options" class="baseline-option-grid" aria-labelledby="baseline-strategy-heading">
               <label class="baseline-option-card" data-baseline-option="none">
                 <input type="radio" name="baseline-option" value="none">
                 <img class="baseline-option-graphic native-signal-graphic" src="baseline_none.svg" alt="" aria-hidden="true" width="320" height="96">

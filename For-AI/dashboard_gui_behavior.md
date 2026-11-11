@@ -113,6 +113,13 @@ Missing generated looming source profiles should resolve to `Burst train` when
 designs are loaded/saved/rendered, while imported/fixed custom clips remain
 outside this generated-noise toggle.
 
+## Decision help
+
+The information buttons beside Generate Looming Noise, Source mode, and
+Baseline strategy open contextual help in both View and Edit modes. Citation
+links point to published methods. In baseline help, keep PPS Kit’s audio-bearing
+SOA anchors distinct from published tactile targets placed in silent windows.
+
 ## Static Profile Segment 3-5 Previews
 
 Hosted/static mode cannot write WAVs or CSVs, but finished bundled profiles must still show the same downstream decisions that the local companion would materialize. `staticStateForTemplate()` therefore derives read-only virtual Segment 3 trial files, Segment 4 repetition-pool rows, and already-randomized Segment 5 block previews from the committed profile parameters. Canonical Study 5 should show 44 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and 6 accepted static block previews of 34 trials each. The lateral DynaSpace Study 5 profile should show 52 virtual Segment 3 WAVs, 204 planned Segment 4 pool rows, and the same six 34-trial block previews. Static previews must use the same seeded, row-order-preserving Gellermann-style block scheduler concept as the local companion and expose `Download Randomization` for the browser-generated CSV/manifest. The local companion materializes Designer-owned WAV/CSV artifacts; the Experiment Runner later materializes participant sessions from finalized profiles.

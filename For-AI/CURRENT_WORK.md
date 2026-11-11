@@ -48,6 +48,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   15 GiB before another complete Python/native run. No unrelated files,
   worktrees or failed-run records were removed. Detailed logs, screenshots,
   schema findings and the temporary Go toolchain stay in ignored artifacts.
+- **Designer decision help preview:** the noise type, source mode, and baseline
+  controls have cited popovers on the `codex/pps-designer-context-help` review
+  branch. The compiled build, six focused contract checks, and Chromium
+  desktop/phone interactions passed. The preview preserves selections in View
+  mode. Source promotion and installed verification remain open for this slice. Review the help text and placement before merging it into the current
+  Designer layout.
 - **Next product slice:** choose one cleared, premade study fixture and trace
   the shortest browser-only preview from study selection to playback. Use a
   local UI preview to verify it never prompts for pairing. Confirm a cached
