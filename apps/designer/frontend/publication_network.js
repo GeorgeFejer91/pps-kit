@@ -97,15 +97,16 @@ function designerTemplateUrl(templateId) {
   return url.href;
 }
 
-function designerTemplateLink(templateId) {
+function designerTemplateLink(templateId, { label = titleCase(templateId), target = "_blank" } = {}) {
   return element("a", {
-    text: titleCase(templateId),
+    text: label,
     attributes: {
       href: designerTemplateUrl(templateId),
-      target: "_blank",
-      rel: "noopener noreferrer",
+      target,
+      rel: target === "_blank" ? "noopener noreferrer" : null,
       title: `Open ${titleCase(templateId)} in Experiment Designer`,
       "data-open-designer-template": templateId,
+      "data-pretext-fit": "",
     },
   });
 }
@@ -129,6 +130,7 @@ export async function initializePublicationNetwork(root) {
   const resultMore = root.querySelector("#publication-network-results-more");
   const detail = root.querySelector("#publication-network-detail");
   const detailTitle = root.querySelector("#publication-network-detail-title");
+  const templateActions = root.querySelector("#publication-network-template-actions");
   const detailKicker = root.querySelector("#publication-network-detail-kicker");
   const detailBody = root.querySelector("#publication-network-detail-body");
   const detailClose = root.querySelector("#publication-network-detail-close");
@@ -540,6 +542,12 @@ export async function initializePublicationNetwork(root) {
     const provenance = node.scope?.provenance || "legacy_confirmed";
     detailTitle.textContent = node.title;
     detailKicker.textContent = `${node.year || "Year unavailable"} · ${node.venue || "Venue unavailable"}`;
+    const templateIds = [...new Set(records.flatMap((record) => record.templateIds || []))];
+    const runnable = isRunnable(node);
+    templateActions.replaceChildren(...(runnable ? templateIds.map((id) => designerTemplateLink(id, {
+      label: templateIds.length === 1 ? "Open template" : `Open ${titleCase(id)}`,
+      target: "_top",
+    })) : []));
     const badges = [
       makeBadge("Audio–tactile publication", "publication-network-badge-at"),
       makeBadge(
@@ -592,14 +600,13 @@ export async function initializePublicationNetwork(root) {
       element("p", { text: inclusionBasis }),
       element("p", { text: statusExplanation }),
     ]);
-    const templateIds = [...new Set(records.flatMap((record) => record.templateIds || []))];
-    const templateSection = templateIds.length
+    const templateSection = !runnable && templateIds.length
       ? makeSection("Open in Experiment Designer", [
         element("p", {
           className: "publication-network-detail-muted",
-          text: "Load this paper's available Toolkit template in a new browser tab.",
+          text: "Preview this paper's available Toolkit template in a new browser tab.",
         }),
-        element("div", { className: "publication-network-detail-links publication-network-template-links" }, templateIds.map(designerTemplateLink)),
+        element("div", { className: "publication-network-detail-links publication-network-template-links" }, templateIds.map((id) => designerTemplateLink(id))),
       ])
       : null;
 
@@ -643,6 +650,7 @@ export async function initializePublicationNetwork(root) {
     state.selected = null;
     detail.hidden = true;
     workspace.classList.remove("detail-open");
+    templateActions.replaceChildren();
     detailBody.replaceChildren();
     renderResults();
     updateStatus();

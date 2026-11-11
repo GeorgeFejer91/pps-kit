@@ -8856,7 +8856,7 @@ function handoffExternalLinkToNative(event) {
   } catch (_err) {
     return;
   }
-  const designerTemplateLink = link.hasAttribute("data-open-designer-template");
+  const designerTemplateLink = link.target === "_blank" && link.hasAttribute("data-open-designer-template");
   if (!/^(https?|mailto):$/i.test(url.protocol) || (url.origin === window.location.origin && !designerTemplateLink)) return;
   event.preventDefault();
   event.stopImmediatePropagation();
@@ -9473,7 +9473,7 @@ window.PPSDesignerApp = Object.freeze({
   },
   isHosted: () => staticModeActive,
   restoreHostedDraft: (snapshot) => {
-    if (!snapshot?.design) return false;
+    if (INITIAL_TEMPLATE_REQUEST || !snapshot?.design) return false;
     state = clone(snapshot);
     staticModeActive = true;
     editModeActive = false;

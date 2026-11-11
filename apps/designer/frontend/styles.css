@@ -1696,9 +1696,21 @@ code {
   background: var(--surface-2);
 }
 
+.publication-network-template-actions:not(:empty) {
+  margin-top: var(--space-2);
+}
+
+.publication-network-template-actions a,
 .publication-network-template-links a {
-  align-items: flex-start;
+  min-width: 0;
+  max-width: 100%;
+  min-height: max(32px, var(--pretext-min-height, 0px));
   line-height: 1.35;
+}
+
+.publication-network-detail [data-open-designer-template] {
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .publication-network-detail-metrics {

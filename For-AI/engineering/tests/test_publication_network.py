@@ -272,6 +272,11 @@ def test_publication_network_section_is_semantic_and_defaults_to_the_network() -
         assert detail["tabindex"] == "-1"
         assert "hidden" in detail
         assert markup.by_id("publication-network-detail-close")[0] == "button"
+        assert markup.by_id("publication-network-template-actions")[0] == "div"
+        title_position = html.index('id="publication-network-detail-title"')
+        template_actions_position = html.index('id="publication-network-template-actions"')
+        detail_body_position = html.index('id="publication-network-detail-body"')
+        assert title_position < template_actions_position < detail_body_position
         assert markup.by_id("publication-network-results")[0] == "ol"
 
         workspace_position = html.index('id="publication-network-workspace"')
@@ -371,6 +376,8 @@ def test_publication_network_module_is_topological_and_keyboard_accessible() -> 
         'target: "_blank"',
         'rel: "noopener noreferrer"',
         '"data-open-designer-template": templateId',
+        'target: "_top"',
+        '"Open template"',
         "records.flatMap",
         "Open in Experiment Designer",
         'layout: "topology"',
