@@ -165,7 +165,7 @@ def export_study(template_id: str, manifest: Path, out: Path) -> dict:
         } for part in parts],
         "clips": clips,
     }
-    (out / "study.json").write_text(json.dumps(plan, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
+    (out / "study.json").write_text(json.dumps(plan, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8", newline="\n")
     return plan
 
 

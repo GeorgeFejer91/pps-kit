@@ -46,3 +46,6 @@ packages/pps-resources/assets/0. Head-Related Impulse Response (HRIR) model/*
 !packages/pps-resources/assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.sofa
 !packages/pps-resources/assets/0. Head-Related Impulse Response (HRIR) model/FABIAN_HRIR_measured_HATO_0.manifest.json
 background_music/
+
+# Reviewed phone study clips are shipped with their hashed manifests.
+!/packages/pps-resources/assets/phone-studies/*/audio/*.flac
