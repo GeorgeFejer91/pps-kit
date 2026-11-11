@@ -83,6 +83,15 @@ This file is the active checklist and handoff owner; replace state, do not appen
   both themes at 320 to 1920 CSS px, including selection, focus, label contrast
   and text spacing. The canonical build and Pages assembly passed. Installed
   validation remains a separate gate.
+- Runnable citation-map papers now open their linked study in Experiment
+  Designer in the same tab. Source commit `342560e` reached GitHub `main`.
+  Chrome verified Serino, Biggio, and Noel trajectory loads, keyboard launch,
+  320 CSS px reflow, 200% label sizing, and saved-draft preservation on the
+  live site. All 28 Designer files matched the local build and four public
+  routes returned HTTP 200. Eight network tests and two Pages assembly tests
+  passed. The catalogue status and determinism failures reproduced on the
+  baseline. Installed verification remains open.
+  [Pages deployment](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43050622016).
 - **Git observation:** the standalone browser source checkpoint was pushed
   to `main` and `codex/pps-browser-standalone` from a clean secondary checkout.
   The primary checkout's cloud-provider read error blocked Git worktree creation.
