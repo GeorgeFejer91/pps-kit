@@ -203,9 +203,9 @@ def test_visual_layout_audit_rejects_phone_navigation_target_and_breakpoint_regr
             "select_button_overlap_px": 0.0,
             "topbar_visible": 1.0,
             "mobile_topbar_above_rail": 1.0,
-            "mobile_rail_toggles_visible": 0.0,
+            "mobile_section_toggle_visible": 0.0,
             "mobile_sections_collapsed": 0.0,
-            "mobile_companion_collapsed": 0.0,
+            "legacy_companion_controls": 1.0,
             "mobile_rail_height_px": 420.0,
             "site_tab_labels_fit": 1.0,
             "site_tab_overlap_px": 0.0,
@@ -223,8 +223,9 @@ def test_visual_layout_audit_rejects_phone_navigation_target_and_breakpoint_regr
 
     failures = audit.assess_geometry(phone, geometry)
 
-    assert any("compact section and connection disclosures" in failure for failure in failures)
+    assert any("missing its section toggle" in failure for failure in failures)
     assert any("expanded before" in failure for failure in failures)
+    assert any("obsolete companion controls" in failure for failure in failures)
     assert any("taller than 300" in failure for failure in failures)
     assert any("below 44x44" in failure for failure in failures)
     assert any("resize handles remain" in failure for failure in failures)

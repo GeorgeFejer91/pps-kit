@@ -501,8 +501,7 @@ code {
   border-color: #dfb9b4;
 }
 
-.profile-mode-panel,
-.companion-panel {
+.profile-mode-panel {
   display: grid;
   gap: 7px;
   padding: 10px 4px;
@@ -649,30 +648,13 @@ code {
   opacity: 0.55;
 }
 
-.profile-mode-panel button,
-.companion-panel button,
-.companion-panel .button-link {
+.profile-mode-panel button {
   width: 100%;
 }
 
 .download-links {
   display: grid;
   gap: 8px;
-}
-
-.companion-panel label {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.companion-panel input {
-  min-height: 30px;
-  font-size: 12px;
-  padding: 5px 7px;
-}
-
-.companion-panel .status-label {
-  width: fit-content;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -724,20 +706,6 @@ code {
   font-size: 12px;
   font-weight: 700;
   color: var(--text);
-}
-
-.rail-note {
-  margin-top: auto;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.45;
-  padding: 10px 4px;
-  border-top: 1px solid var(--line);
-}
-
-.rail-note span,
-.rail-note code {
-  display: block;
 }
 
 .workspace {
@@ -7471,9 +7439,7 @@ body:not(.desktop-applet) .legacy-session-action {
 }
 
 body.desktop-applet [data-page-tab="documentation"],
-body.desktop-applet [data-page-tab="downloads"],
-body.desktop-applet .companion-panel,
-body.desktop-applet .rail-note {
+body.desktop-applet [data-page-tab="downloads"] {
   display: none !important;
 }
 
@@ -7720,9 +7686,7 @@ body.desktop-applet .segment-heading {
     transform: rotate(225deg) translate(-2px, -1px);
   }
 
-  .rail .rail-nav-group,
-  .rail .companion-panel,
-  .rail-note {
+  .rail .rail-nav-group {
     display: none;
   }
 
@@ -7731,15 +7695,6 @@ body.desktop-applet .segment-heading {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 4px;
     padding: 2px;
-  }
-
-  .rail.mobile-companion-open .companion-panel {
-    display: grid;
-    padding: 8px 2px 10px;
-  }
-
-  body.desktop-applet .mobile-companion-toggle {
-    display: none;
   }
 
   .rail nav a,
@@ -8080,12 +8035,8 @@ body.desktop-applet .segment-heading {
 
   .rail {
     display: grid;
-    grid-template-columns: 64px minmax(92px, 0.75fr) repeat(2, minmax(0, 1fr));
-    align-items: center;
-  }
-
-  body.desktop-applet .rail {
     grid-template-columns: 64px minmax(92px, 0.75fr) minmax(0, 1fr);
+    align-items: center;
   }
 
   .rail .brand {
@@ -8127,13 +8078,12 @@ body.desktop-applet .segment-heading {
     grid-template-columns: minmax(0, 1fr) 12px;
   }
 
-  .rail.mobile-sections-open .rail-nav-group.active,
-  .rail.mobile-companion-open .companion-panel {
+  .rail.mobile-sections-open .rail-nav-group.active {
     grid-column: 1 / -1;
   }
 
   body[data-active-page]:not([data-active-page="toolkit"]) .rail {
-    grid-template-columns: 64px repeat(2, minmax(0, 1fr));
+    grid-template-columns: 64px minmax(0, 1fr);
   }
 
   .decision-segment,

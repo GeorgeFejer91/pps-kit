@@ -166,16 +166,16 @@ def assess_geometry(case: ViewportCase, geometry: dict[str, Any]) -> list[str]:
         failures.append("hosted layout is missing its page-navigation top bar")
     if case.phone and metrics.get("mobile_topbar_above_rail", 0) < 1:
         failures.append("mobile page navigation is not above the sidebar")
-    if case.phone and metrics.get("mobile_rail_toggles_visible", 1) < 1:
-        failures.append("mobile sidebar is missing its compact section and connection disclosures")
+    if case.phone and metrics.get("mobile_section_toggle_visible", 1) < 1:
+        failures.append("mobile sidebar is missing its section toggle")
     if case.phone and metrics.get("mobile_sections_collapsed", 1) < 1:
         failures.append("mobile section navigation is expanded before the user requests it")
-    if case.phone and metrics.get("mobile_companion_collapsed", 1) < 1:
-        failures.append("mobile companion controls are expanded before the user requests them")
+    if metrics.get("legacy_companion_controls", 0) > 0:
+        failures.append("obsolete companion controls are present")
     if case.phone and metrics.get("mobile_rail_height_px", 0) > 300:
         failures.append("collapsed mobile sidebar is taller than 300 CSS px")
-    if case.width == 761 and metrics.get("mobile_rail_toggles_visible", 0) > 0:
-        failures.append("mobile sidebar disclosures remain visible above the 760px breakpoint")
+    if case.width == 761 and metrics.get("mobile_section_toggle_visible", 0) > 0:
+        failures.append("mobile section toggle remains visible above the 760px breakpoint")
     if metrics.get("site_tab_labels_fit", 0) < 1:
         failures.append("page-navigation tab labels are clipped")
     if metrics.get("site_tab_overlap_px", 0) > 0:
@@ -383,9 +383,7 @@ def _geometry_script() -> str:
         return Math.max(maximum, ...overlaps, 0);
       }, 0);
       const mobileSectionToggle = document.querySelector('#mobile-rail-nav-toggle');
-      const mobileCompanionToggle = document.querySelector('#mobile-companion-toggle');
       const activeRailNav = document.querySelector('.rail-nav-group.active');
-      const companionPanel = document.querySelector('#companion-panel');
       const resizeHandles = [...document.querySelectorAll('.panel-resize-handle')];
       return {
         rects: { panel, picker, card, select, button, headingKicker, panelTitle, modePanel, modeIcon, modeSwitch, modeViewLabel, modeEditLabel, topbar, rail },
@@ -411,9 +409,9 @@ def _geometry_script() -> str:
             Math.abs((modeViewLabel.y + modeViewLabel.height / 2) - (modeSwitch.y + modeSwitch.height / 2)),
             Math.abs((modeEditLabel.y + modeEditLabel.height / 2) - (modeSwitch.y + modeSwitch.height / 2)),
           ),
-          mobile_rail_toggles_visible: visible(mobileSectionToggle) && visible(mobileCompanionToggle),
+          mobile_section_toggle_visible: visible(mobileSectionToggle),
           mobile_sections_collapsed: !visible(activeRailNav) && mobileSectionToggle?.getAttribute('aria-expanded') === 'false',
-          mobile_companion_collapsed: !visible(companionPanel) && mobileCompanionToggle?.getAttribute('aria-expanded') === 'false',
+          legacy_companion_controls: document.querySelectorAll('#companion-panel, #mobile-companion-toggle, .rail-note').length,
           mobile_rail_height_px: rail.height,
           resize_handles_visible: resizeHandles.filter(visible).length,
         },
@@ -659,7 +657,6 @@ def run_audit(
                 mobile_rail_interaction: dict[str, Any] = {}
                 if case.phone:
                     section_toggle = page.locator("#mobile-rail-nav-toggle")
-                    companion_toggle = page.locator("#mobile-companion-toggle")
                     section_toggle.click()
                     section_open = (
                         section_toggle.get_attribute("aria-expanded") == "true"
@@ -678,29 +675,12 @@ def run_audit(
                         section_toggle.get_attribute("aria-expanded") == "false"
                         and not page.locator(".rail-nav-group.active").is_visible()
                     )
-                    companion_toggle.click()
-                    companion_open = (
-                        companion_toggle.get_attribute("aria-expanded") == "true"
-                        and page.locator("#companion-panel").is_visible()
-                    )
-                    companion_targets = page.evaluate(_phone_target_script())
-                    phone_target_checks["companion_open"] = companion_targets
-                    if companion_targets:
-                        labels = ", ".join(item["selector"] for item in companion_targets[:6])
-                        failures.append(f"mobile expanded companion targets are below 44x44 CSS px: {labels}")
-                    companion_toggle.click()
-                    companion_closed = (
-                        companion_toggle.get_attribute("aria-expanded") == "false"
-                        and not page.locator("#companion-panel").is_visible()
-                    )
                     mobile_rail_interaction = {
                         "section_open": section_open,
                         "section_closed": section_closed,
-                        "companion_open": companion_open,
-                        "companion_closed": companion_closed,
                     }
                     if not all(mobile_rail_interaction.values()):
-                        failures.append("mobile sidebar disclosures do not open and return to their compact state")
+                        failures.append("mobile sections do not open and return to their compact state")
 
                 page_tab_interaction: dict[str, Any] = {}
                 if case.phone:

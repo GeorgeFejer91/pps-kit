@@ -87,8 +87,8 @@ const STATIC_AUDIT_QUERY_PARAM = "auditStaticPreview";
 const STATIC_FORCE_QUERY_PARAM = "forceStaticPreview";
 const TEMPLATE_QUERY_PARAM = "template";
 const INITIAL_TEMPLATE_REQUEST = String(new URLSearchParams(window.location.search || "").get(TEMPLATE_QUERY_PARAM) || "").trim();
-const STATIC_COMPANION_REQUIRED_MESSAGE =
-  "This action needs the installed PPS Designer. Hosted mode can compose and export profiles, but cannot render audio, write workspace folders, or launch the Runner.";
+const INSTALLED_DESIGNER_REQUIRED_MESSAGE =
+  "This action needs the installed PPS Designer. Use the browser preview to compose and export profiles. Use the installed Designer to render audio, write workspace files, or open the Runner.";
 const PROFILE_RECREATION_NOTICE =
   "Be aware: this is not the exact stimulus set used in the original study. This preload recreates the study's reported parameters within this interface, using the toolkit's local rendering and bundled profile assets.";
 const DESIGNER_PROGRESS_KEY = "designer_progress";
@@ -162,8 +162,6 @@ const DOWNSTREAM_STEPS = {
   schedule: ["run"],
   run: []
 };
-const LOCAL_BACKEND_DEFAULT = "http://127.0.0.1:8766";
-const COMPANION_TOKEN_STORAGE_KEY = "ppsDashboard.companionToken";
 const STATIC_AUDIT_CONTROL_IDS = [
   "edit-mode-button",
   "start-new-custom-design",
@@ -310,8 +308,6 @@ let activeBoundedOptionIndex = -1;
 let boundedSelectTypeahead = "";
 let boundedSelectTypeaheadTimer = 0;
 let boundedSelectSequence = 0;
-let apiBase = "";
-let companionToken = "";
 let templateLoadInFlight = false;
 let initialTemplateRequestHandled = !INITIAL_TEMPLATE_REQUEST;
 let pendingAudioImportMode = "preserve";
@@ -678,21 +674,13 @@ const PAGE_ROUTE_SEGMENTS = {
 
 async function api(path, options = {}) {
   const { skipStaticGuard = false, rawResponse = false, ...fetchOptions } = options;
-  if (staticModeActive && !skipStaticGuard) {
-    throw new Error(STATIC_COMPANION_REQUIRED_MESSAGE);
+  if (!isLocalDesignerPage() || (staticModeActive && !skipStaticGuard)) {
+    throw new Error(INSTALLED_DESIGNER_REQUIRED_MESSAGE);
   }
-  let response;
-  try {
-    const headers = { "Content-Type": "application/json", ...(fetchOptions.headers || {}) };
-    if (companionToken) headers["X-PPS-Companion-Token"] = companionToken;
-    response = await fetch(apiUrl(path), {
-      ...fetchOptions,
-      headers
-    });
-  } catch (error) {
-    setConnectionStatus(false);
-    throw error;
-  }
+  const response = await fetch(path, {
+    ...fetchOptions,
+    headers: { "Content-Type": "application/json", ...fetchOptions.headers },
+  });
   if (!response.ok) {
     let detail = `${response.status} ${response.statusText}`;
     let boundaryError = {};
@@ -704,8 +692,6 @@ async function api(path, options = {}) {
     } catch (_err) {
       // Keep the status line when the response is not JSON, such as a static-site 404.
     }
-    // HTTP errors still mean the companion answered; only fetch failures are disconnected.
-    setConnectionStatus(true);
     throw new DesignerApiError(detail, {
       code: boundaryError.code,
       retryable: boundaryError.retryable,
@@ -713,16 +699,10 @@ async function api(path, options = {}) {
       status: response.status,
     });
   }
-  setConnectionStatus(true);
   return rawResponse ? response : response.json();
 }
 
 const designerApi = createDesignerApi(api);
-
-function apiUrl(path) {
-  if (/^https?:\/\//i.test(path)) return path;
-  return `${apiBase}${path}`;
-}
 
 function staticResourceUrl(path) {
   const cleanPath = String(path || "").trim().replace(/\\/g, "/").replace(/^\/+/, "");
@@ -741,56 +721,9 @@ async function fetchStaticJson(path) {
   return response.json();
 }
 
-function isLocalDashboardOrigin() {
-  return ["127.0.0.1", "localhost", "[::1]", "::1"].includes(window.location.hostname);
-}
-
-function isCompanionDashboardOrigin() {
-  return isLocalDashboardOrigin() && window.location.pathname.replace(/\\/g, "/").startsWith("/dashboard/");
-}
-
-function loadApiBase() {
-  const companionOrigin = isCompanionDashboardOrigin();
-  const stored = localStorage.getItem("ppsDashboard.apiBase");
-  apiBase = companionOrigin ? "" : (stored || LOCAL_BACKEND_DEFAULT);
-  $("backend-url").value = apiBase || (companionOrigin ? window.location.origin : LOCAL_BACKEND_DEFAULT);
-}
-
-function saveApiBase(value) {
-  const trimmed = String(value || "").trim().replace(/\/+$/, "");
-  const companionOrigin = isCompanionDashboardOrigin();
-  apiBase = trimmed && !(companionOrigin && trimmed === window.location.origin) ? trimmed : "";
-  if (apiBase) {
-    localStorage.setItem("ppsDashboard.apiBase", apiBase);
-  } else {
-    localStorage.removeItem("ppsDashboard.apiBase");
-  }
-  $("backend-url").value = apiBase || (companionOrigin ? window.location.origin : LOCAL_BACKEND_DEFAULT);
-}
-
-function loadCompanionToken() {
-  const params = new URLSearchParams(window.location.search || "");
-  companionToken = String(params.get("ppsToken") || localStorage.getItem(COMPANION_TOKEN_STORAGE_KEY) || "").trim();
-  const field = $("companion-token");
-  if (field) field.value = companionToken;
-}
-
-function saveCompanionToken(value) {
-  companionToken = String(value || "").trim();
-  if (companionToken) {
-    localStorage.setItem(COMPANION_TOKEN_STORAGE_KEY, companionToken);
-  } else {
-    localStorage.removeItem(COMPANION_TOKEN_STORAGE_KEY);
-  }
-  const field = $("companion-token");
-  if (field) field.value = companionToken;
-}
-
-function setConnectionStatus(connected, label = "") {
-  const status = $("connection-status");
-  if (!status) return;
-  status.textContent = label || (connected ? "connected" : "disconnected");
-  status.className = `status-label ${connected ? "ready" : label ? "optional" : "required"}`;
+function isLocalDesignerPage() {
+  return ["127.0.0.1", "localhost", "[::1]"].includes(window.location.hostname)
+    && window.location.pathname.startsWith("/dashboard/");
 }
 
 function clone(value) {
@@ -968,13 +901,6 @@ async function restorePersistedDraftForView() {
   }
   editModeActive = false;
   markDesignerSaved();
-  await loadState({ resetEditMode: true });
-}
-
-async function reconnectBackendFromControls({ includeToken = true } = {}) {
-  if (!confirmDiscardUnsaved("reconnect to the companion")) return;
-  saveApiBase($("backend-url").value);
-  if (includeToken) saveCompanionToken($("companion-token")?.value || "");
   await loadState({ resetEditMode: true });
 }
 
@@ -1275,7 +1201,7 @@ function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory
     return {
       label: String(asset.label || path.split("/").pop() || "Asset"),
       path,
-      url: asset.url || staticResourceUrl(path),
+      url: staticResourceUrl(path) || asset.url,
       exists: Boolean(path),
       sha256: asset.sha256 || "",
       expected_sha256: asset.sha256 || "",
@@ -1324,7 +1250,7 @@ function staticProfileAssetStatus(templateId, inventory = staticPreloadInventory
     catalog_segments: clone(entry.catalog_segments || []),
     message: status === "ready"
       ? "Static GitHub preload assets are available for browser inspection."
-      : (entry.message || "This profile is indexed, but its assets require the local companion.")
+      : (entry.message || "This profile is indexed. Use the installed Designer to generate its assets.")
   };
 }
 
@@ -1406,7 +1332,7 @@ function staticCslJson(data) {
 async function staticStateForTemplate(templateId) {
   const cleanId = String(templateId || DEFAULT_STUDY_TEMPLATE_ID).trim();
   if (!cleanId || cleanId === CUSTOM_TEMPLATE_ID) {
-    throw new Error("Start the local companion backend before creating custom studies.");
+    throw new Error("Open PPS Designer on your computer to create a study from scratch.");
   }
   const inventory = await loadStaticInventory();
   const templates = await loadStaticTemplates();
@@ -2370,7 +2296,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "1_core_audio_ingredients": segment(
       "1_core_audio_ingredients",
       Boolean(status.ready),
-      status.ready ? "Static source assets are available online." : "Profile source assets require the local companion."
+      status.ready ? "Static source assets are available online." : "Use the installed Designer to generate the profile source assets."
     ),
     "2_trial_sequence_designs": segment(
       "2_trial_sequence_designs",
@@ -2406,7 +2332,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "5_block_csv_preview": segment(
       "5_block_csv_preview",
       launchable,
-      launchable ? "Block CSVs are materialized by the local companion when the profile is launched." : "This profile is not Segment 6 launchable yet.",
+      launchable ? "Open this profile in the installed Designer to prepare block CSVs for a run." : "This profile is not Segment 6 launchable yet.",
       {
         accepted: launchable,
         block_count: blockCsvPreview.block_count || 0,
@@ -2417,7 +2343,7 @@ function staticProjectSegments(status, trialFileBake = {}, trialPoolBake = {}, b
     "6_experiment_run_setup": segment(
       "6_experiment_run_setup",
       launchable,
-      launchable ? "Start the local companion to materialize and open this finished profile." : "This profile is not Segment 6 launchable yet."
+      launchable ? "Open this profile in the installed Designer to prepare it for Experiment Runner." : "This profile is not Segment 6 launchable yet."
     )
   };
 }
@@ -2544,7 +2470,7 @@ function staticRunSetupPreview(design, status) {
     seed: runSetup.seed || design.protocol?.random_seed || 0,
     instruction_profile: runSetup.instruction_profile || {},
     message: status.finished_profile
-      ? "Static profile loaded; start the local companion to materialize and open the runner."
+      ? "Browser preview loaded. Use the installed toolkit to prepare and run the experiment."
       : (status.message || "This static profile is not launchable yet.")
   };
 }
@@ -2838,15 +2764,10 @@ async function loadStaticState(fallbackError = null) {
   state = await staticStateForTemplate(selected);
   if (request.id) initialTemplateRequestHandled = true;
   staticModeActive = true;
-  setConnectionStatus(false, "static profile");
   renderAll();
   updateViewer();
-  showToast(
-    request.error
-      || (request.id
-        ? "Opened the paper's Toolkit template in Experiment Designer."
-        : "Loaded committed preload assets from GitHub. Start the local companion for local generation or runner launch.")
-  );
+  if (request.error) showToast(request.error);
+  if (request.id) showToast("Opened the paper's Toolkit template in Experiment Designer.");
   return true;
 }
 
@@ -2858,7 +2779,7 @@ function mergeStaticProfileSegment(localSegment = {}, staticSegment = {}) {
     folder_exists: localSegment.folder_exists ?? staticSegment.folder_exists,
     manifest_exists: localSegment.manifest_exists || staticSegment.manifest_exists,
     static_profile_preview: true,
-    last_validation_message: "Committed profile preview; local companion will materialize files for runner launch."
+    last_validation_message: "Profile preview. The installed Designer prepares files for Experiment Runner."
   };
 }
 
@@ -2888,9 +2809,9 @@ async function applyStaticProfileInspectionPreview() {
 
 async function loadState(options = {}) {
   const resetMode = options.resetEditMode === true;
-  if (forceStaticPreviewEnabled()) {
+  if (forceStaticPreviewEnabled() || !isLocalDesignerPage()) {
     if (resetMode) resetEditMode();
-    await loadStaticState(new Error("Forced static preview audit mode."));
+    await loadStaticState();
     return;
   }
   try {
@@ -2956,7 +2877,7 @@ function renderCapabilityLocks() {
     const control = $(id);
     if (!control) continue;
     control.disabled = true;
-    control.title = STATIC_COMPANION_REQUIRED_MESSAGE;
+    control.title = INSTALLED_DESIGNER_REQUIRED_MESSAGE;
   }
 }
 
@@ -3078,7 +2999,7 @@ function setActivePage(page, options = {}) {
   }
   if (nextPage === "documentation") refreshDocumentationTypography();
   syncRailForPage(nextPage);
-  if (!options.preserveMobileDisclosures) closeMobileRailDisclosures();
+  if (!options.preserveMobileDisclosures) closeMobileSections();
   if (options.updateHash) {
     replaceRouteForPage(nextPage);
   }
@@ -3101,12 +3022,11 @@ function syncRailForPage(page) {
   syncMobileRailSummary();
 }
 
-function closeMobileRailDisclosures() {
+function closeMobileSections() {
   const rail = document.querySelector(".rail");
   if (!rail) return;
-  rail.classList.remove("mobile-sections-open", "mobile-companion-open");
+  rail.classList.remove("mobile-sections-open");
   $("mobile-rail-nav-toggle")?.setAttribute("aria-expanded", "false");
-  $("mobile-companion-toggle")?.setAttribute("aria-expanded", "false");
 }
 
 function mobileSectionsDisclosureOpen() {
@@ -3127,19 +3047,10 @@ function focusSectionNavigationTarget(target) {
   target.addEventListener("blur", () => target.removeAttribute("tabindex"), { once: true });
 }
 
-function toggleMobileRailDisclosure(kind) {
+function toggleMobileSections() {
   const rail = document.querySelector(".rail");
-  if (!rail) return;
-  const sections = kind === "sections";
-  const className = sections ? "mobile-sections-open" : "mobile-companion-open";
-  const otherClass = sections ? "mobile-companion-open" : "mobile-sections-open";
-  const toggle = $(sections ? "mobile-rail-nav-toggle" : "mobile-companion-toggle");
-  const otherToggle = $(sections ? "mobile-companion-toggle" : "mobile-rail-nav-toggle");
-  const expanded = !rail.classList.contains(className);
-  rail.classList.toggle(className, expanded);
-  rail.classList.remove(otherClass);
-  toggle?.setAttribute("aria-expanded", String(expanded));
-  otherToggle?.setAttribute("aria-expanded", "false");
+  const expanded = rail.classList.toggle("mobile-sections-open");
+  $("mobile-rail-nav-toggle").setAttribute("aria-expanded", String(expanded));
 }
 
 function syncMobileRailSummary() {
@@ -5838,7 +5749,7 @@ async function previewFilmstripRow(button) {
       activeTrialRowPreviewAudio.pause();
       activeTrialRowPreviewAudio = null;
     }
-    const audio = new Audio(apiUrl(`${preview.url}?v=${Date.now()}`));
+    const audio = new Audio(`${preview.url}?v=${Date.now()}`);
     activeTrialRowPreviewAudio = audio;
     audio.addEventListener("ended", () => button.classList.remove("playing"), { once: true });
     audio.addEventListener("pause", () => button.classList.remove("playing"), { once: true });
@@ -5888,7 +5799,7 @@ async function previewSourceLabel(button) {
     const preview = await designerApi.previewAudioSource(payload);
     button.disabled = false;
     await playSourcePreviewAudio(
-      apiUrl(`${preview.url}?v=${Date.now()}`),
+      `${preview.url}?v=${Date.now()}`,
       button,
       audioContext,
       contextReady,
@@ -7028,16 +6939,15 @@ async function loadTemplate() {
   if (staticModeActive) {
     if (choice.kind === "manual") {
       renderStudy();
-      showToast("Start the local companion backend before creating custom studies.");
+      showToast("Open PPS Designer on your computer to create a study from scratch.");
       return;
     }
     state = await staticStateForTemplate(id);
     staticModeActive = true;
     resetEditMode();
-    setConnectionStatus(false, "static profile");
     renderAll();
     updateViewer();
-    showToast("Static profile loaded from committed GitHub assets");
+    showToast("Study preview loaded.");
     return;
   }
   templateLoadInFlight = true;
@@ -7552,7 +7462,7 @@ async function startBakeStimulus() {
   if (!confirmDownstreamInvalidation(recipe.action === "remake" ? "Remaking a Segment 1 ingredient" : "Creating a Segment 1 ingredient", "stimulus")) return;
   if (staticModeActive) {
     if (recipe.kind !== "fixed_audio" || recipe.action === "remake") {
-      showToast(STATIC_COMPANION_REQUIRED_MESSAGE);
+      showToast(INSTALLED_DESIGNER_REQUIRED_MESSAGE);
       return;
     }
     state.design.prestimulus_files = state.design.prestimulus_files || [];
@@ -7900,7 +7810,7 @@ async function ensureLocalBackendState() {
     await loadState();
   }
   if (!state || staticModeActive) {
-    showToast(STATIC_COMPANION_REQUIRED_MESSAGE);
+    showToast(INSTALLED_DESIGNER_REQUIRED_MESSAGE);
     return false;
   }
   return true;
@@ -8994,8 +8904,6 @@ function wireEvents() {
     openCustomizeModal();
   }, true);
   $("edit-mode-button")?.addEventListener("click", () => setEditMode(!editModeActive).catch(reportError));
-  $("connect-backend").addEventListener("click", () => reconnectBackendFromControls().catch(reportError));
-  $("companion-token")?.addEventListener("change", () => saveCompanionToken($("companion-token").value));
   const pageTabs = [...document.querySelectorAll("[data-page-tab]")];
   for (const button of pageTabs) {
     button.addEventListener("click", () => setActivePage(button.dataset.pageTab, { updateHash: true, scrollTop: true }));
@@ -9014,8 +8922,7 @@ function wireEvents() {
       next.focus();
     });
   }
-  $("mobile-rail-nav-toggle")?.addEventListener("click", () => toggleMobileRailDisclosure("sections"));
-  $("mobile-companion-toggle")?.addEventListener("click", () => toggleMobileRailDisclosure("companion"));
+  $("mobile-rail-nav-toggle").addEventListener("click", toggleMobileSections);
   for (const link of document.querySelectorAll("[data-page-section-link]")) {
     link.addEventListener("click", (event) => {
       event.preventDefault();
@@ -9033,11 +8940,11 @@ function wireEvents() {
         replaceRouteForPage(page, targetId);
         setActivePageSection(targetId);
         if (moveFocus) focusSectionNavigationTarget(target);
-        closeMobileRailDisclosures();
+        closeMobileSections();
         target.scrollIntoView({ behavior: "smooth", block: "start" });
         window.setTimeout(() => setActivePageSection(targetId), 350);
       } else {
-        closeMobileRailDisclosures();
+        closeMobileSections();
       }
     });
   }
@@ -9086,11 +8993,6 @@ function wireEvents() {
       closeSaveProfileModal();
     } else if (!$("audio-color-modal")?.hidden) {
       closeAudioColorModal();
-    }
-  });
-  $("backend-url").addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      reconnectBackendFromControls({ includeToken: false }).catch(reportError);
     }
   });
   $("template-select").addEventListener("change", () => {
@@ -9376,7 +9278,7 @@ function wireEvents() {
       });
       const target = $(STEP_TARGETS[stepId] || stepId);
       if (moveFocus) focusSectionNavigationTarget(target);
-      closeMobileRailDisclosures();
+      closeMobileSections();
       scrollToStep(stepId);
       if (link.classList.contains("locked")) {
         const active = normalizedDesignerProgress().edit_step;
@@ -9553,8 +9455,6 @@ function reportError(error) {
   showToast(error.message || String(error));
 }
 
-loadApiBase();
-loadCompanionToken();
 loadResizableLayoutSettings();
 enforceExternalLinkTargets();
 exposeDashboardAuditHook();

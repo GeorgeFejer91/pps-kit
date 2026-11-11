@@ -152,47 +152,37 @@ def test_mobile_landmarks_and_tabs_are_semantic_in_source_and_compiled() -> None
         assert compiled_contract in compiled_js
 
 
-def test_mobile_rail_disclosures_are_compact_and_mutually_exclusive() -> None:
+def test_mobile_section_navigation_is_compact() -> None:
     source_html, styles, app_js, _designer_main = _read_sources()
     compiled_html, compiled_css, compiled_js = _read_compiled()
 
     for html in (source_html, compiled_html):
         markup = _Markup(html)
         sections = markup.by_id("mobile-rail-nav-toggle")[1]
-        companion = markup.by_id("mobile-companion-toggle")[1]
         assert sections["aria-expanded"] == "false"
         assert set((sections["aria-controls"] or "").split()) == {
             "toolkit-workflow-nav",
             "documentation-section-nav",
             "download-section-nav",
         }
-        assert companion["aria-expanded"] == "false"
-        assert companion["aria-controls"] == "companion-panel"
         assert markup.by_id("mobile-rail-nav-current")[0] == "strong"
 
     mobile_css = "\n".join(_at_rule_blocks(styles, "@media (max-width: 760px)"))
     for contract in (
         ".rail .rail-nav-group",
-        ".rail .companion-panel",
         "display: none",
         ".rail.mobile-sections-open .rail-nav-group.active",
-        ".rail.mobile-companion-open .companion-panel",
     ):
         assert contract in mobile_css
     for contract in (
-        'toggleMobileRailDisclosure("sections")',
-        'toggleMobileRailDisclosure("companion")',
-        'rail.classList.remove("mobile-sections-open", "mobile-companion-open")',
-        "rail.classList.remove(otherClass)",
-        'otherToggle?.setAttribute("aria-expanded", "false")',
+        'addEventListener("click", toggleMobileSections)',
+        'rail.classList.remove("mobile-sections-open")',
         "syncMobileRailSummary()",
     ):
         assert contract in app_js
     for contract in (
         "mobile-rail-nav-toggle",
-        "mobile-companion-toggle",
         "mobile-sections-open",
-        "mobile-companion-open",
     ):
         assert contract in compiled_html + compiled_css + compiled_js
 
@@ -211,7 +201,7 @@ def test_phone_css_is_content_first_and_uses_touch_sized_static_controls() -> No
     assert _rule_has(mobile_css, r"\.workspace", r"margin-left:\s*0")
     assert _rule_has(mobile_css, r"\.segment-heading", r"position:\s*static")
     assert _rule_has(mobile_css, r"\.step-footer,[^{]+", r"position:\s*static")
-    assert _rule_has(mobile_css, r"\.rail \.rail-nav-group,[^{]+", r"display:\s*none")
+    assert _rule_has(mobile_css, r"\.rail \.rail-nav-group", r"display:\s*none")
 
     landscape_css = "\n".join(
         _at_rule_blocks(
@@ -221,8 +211,8 @@ def test_phone_css_is_content_first_and_uses_touch_sized_static_controls() -> No
     )
     assert _rule_has(
         landscape_css,
-        r"\.topbar",
-        r"grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto",
+        r"\.rail",
+        r"grid-template-columns:\s*64px\s+minmax\(92px,\s*0\.75fr\)\s+minmax\(0,\s*1fr\)",
     )
 
     narrow_css = "\n".join(_at_rule_blocks(styles, "@media (max-width: 760px)"))
@@ -235,7 +225,7 @@ def test_phone_css_is_content_first_and_uses_touch_sized_static_controls() -> No
         "--control-height:44px",
         ".segment-heading{position:static",
         ".panel-resize-handle{display:none!important}",
-        ".rail .rail-nav-group,.rail .companion-panel,.rail-note{display:none}",
+        ".rail .rail-nav-group{display:none}",
     ):
         assert contract in compact_compiled_css
     assert "(max-width: 760px)" in compiled_js
@@ -323,11 +313,6 @@ def test_phone_hides_unavailable_actions_and_keeps_dark_labels_readable() -> Non
             ".panel.profile-readonly [data-remove-audio]",
         ):
             assert _selector_has(css, selector, r"display:\s*none\s*!important")
-        assert _selector_has(
-            css,
-            "body.desktop-applet .mobile-companion-toggle",
-            r"display:\s*none",
-        )
 
     dark_css = styles[styles.index(':root[data-theme="dark"]') :]
     compiled_dark_css = compiled_css[compiled_css.index(":root[data-theme=dark]") :]
@@ -499,7 +484,6 @@ def test_compiled_dashboard_and_public_wrappers_share_one_cache_token() -> None:
         'class="skip-link"',
         'role="tablist"',
         'id="mobile-rail-nav-toggle"',
-        'id="mobile-companion-toggle"',
         'class="data-table mobile-card-table"',
         'role="dialog" aria-modal="true"',
     ):

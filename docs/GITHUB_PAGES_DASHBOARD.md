@@ -1,8 +1,8 @@
 # GitHub Pages Dashboard
 
-The compiled Designer can be published as a static GitHub Pages interface while
-the experiment software runs locally on the research PC. Local packaging and
-Pages use the exact same `apps/designer/frontend/compiled/` bytes.
+GitHub Pages publishes the standalone Designer preview. The downloadable
+toolkit installs Designer and Experiment Runner for local experiment work.
+Local packaging and Pages use the exact same `apps/designer/frontend/compiled/` bytes.
 
 ## Architecture
 
@@ -13,26 +13,19 @@ Pages use the exact same `apps/designer/frontend/compiled/` bytes.
 - The separate `/experiment-runner/` subpage serves the canonical Runner
   companion UI for controller and exploratory Phone Experiment modes. The
   Downloads page links to it.
-- The local companion backend runs on the PC at `http://127.0.0.1:8766`.
-- The hosted page calls the companion API for design state, render jobs, session
-  preparation, audio stress tests, and native Focus Mode launch.
-- If the local companion is not running, the hosted dashboard falls back to a
-  static read-only profile mode backed by committed GitHub assets. It loads the
-  preload inventory from `assets/preloads/preload_inventory.json`, loads study
-  profile design JSON from `study_templates/`, and opens on the Study 5
-  `study5_box_breathing_pps` profile by default. In this mode researchers can
-  inspect existing profile parameters, source inventories, trajectory previews,
-  and browser-play committed WAV assets. Creating new custom studies, importing
-  files, baking new looming stimuli, materializing trial/block/session files, or
-  opening Focus Mode still requires the local companion.
-- Segment 6 passes the prepared run setup to the local backend. Native Focus
+- The hosted Designer loads the committed preload inventory and profile JSON
+  directly. It opens on Study 5 by default and supports profile inspection,
+  trajectory and block previews, playback of available prebuilt audio, and
+  browser-local composition and profile export.
+- The installed Designer uses its own same-origin service for rendering, file
+  generation, and Runner handoff.
+- In the installed Designer, Segment 6 passes the prepared run setup to the local backend. Native Focus
   Mode owns participant metadata and runtime options; live LSL/event markers,
   local marker mirrors, trigger dictionaries, `events.csv`, and analysis CSVs
   are standard runner outputs, while the fail-safe local recording WAV remains
   an optional runner checkbox.
-- File imports are local companion actions. Selected stimulus audio is copied
-  into ignored local data on the research PC; it is not uploaded to GitHub
-  Pages or any online service.
+- Imported stimulus audio stays in browser storage when composing online or in
+  local files when using the installed Designer.
 - Designer browser JavaScript does not own experiment timing. Timing-sensitive
   participant runs stay native-backed. The separate Runner companion can own an
   explicitly exploratory, locally armed phone demo using Web Audio and browser
@@ -92,7 +85,7 @@ new-tab Designer link for every deduplicated ID, including profiles that remain
 parameter-incomplete. The link targets the shared dashboard with
 `page=toolkit&template=<template_id>#study-segment`. The Designer validates the
 ID against its built-in template catalogue and loads it once through committed
-static assets or the existing local companion endpoint; papers without a
+static assets or the installed Designer’s same-origin endpoint; papers without a
 declared template show no template-link section.
 
 The canonical v1 source remains the broader dated snapshot of 1,712 publications
@@ -202,27 +195,16 @@ Pages workflow deploys successfully, the apex A records and `www` CNAME
 resolve as expected, the HTTPS certificate is issued and **Enforce HTTPS**
 is active, `https://www.ppskit.com` redirects to the apex, and the homepage,
 `/documentation/`, `/download/`, and `/experiment-runner/` serve the
-expected site. Check a locally running companion accepts
-`Origin: https://ppskit.com` before claiming full parity. The old
+expected site. The old
 `ppskit.qzz.io` hostname is not guaranteed to redirect unless its separate
 DNS/hosting arrangements are maintained.
 
 ## Use On A Research PC
 
-Install the toolkit once:
-
-```powershell
-.\For-AI\engineering\build\windows\Setup_Windows_App.ps1
-```
-
-Start the local companion backend:
-
-```bat
-apps\designer\launchers\Start_Website_Companion.bat
-```
-
-Then open the GitHub Pages dashboard. The left rail shows the local companion
-status and lets the user set the backend URL if a non-default port is used.
+Open the [download page](https://ppskit.com/download/) and choose the Full
+Toolkit release for Designer and Runner. Launch the installed Designer to
+generate stimuli and prepare profiles. Open the prepared profile in the
+installed Runner to execute an experiment.
 
 ## Safety Boundary
 
@@ -233,15 +215,4 @@ exist. Heavy payloads may live on Zenodo. Installation happens locally, and
 each downloader verifies its component-specific payload and inventory hashes
 before extraction or launch.
 
-The companion backend allows the default project GitHub Pages origin
-(`https://georgefejer91.github.io`), the primary custom domain
-(`https://ppskit.com`), and its `www` variant. The former
-`https://ppskit.qzz.io` origin remains on the allowlist for compatibility;
-this does not guarantee that the old hostname continues to resolve or redirect. For forks or institutional Pages domains, start the
-companion with an explicit origin:
-
-```bat
-apps\designer\launchers\Start_Website_Companion.bat --web-origin https://example.github.io
-```
-
-Use `--no-default-web-origin` if only a custom origin should be allowed.
+The public Designer preview makes no requests to the installed toolkit.

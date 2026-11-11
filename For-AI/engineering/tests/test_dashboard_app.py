@@ -286,7 +286,7 @@ def test_dashboard_static_assets_are_packaged():
     assert f"app/index.html?page=documentation&v={static_version}" in public_docs
     assert f"app/index.html?page=downloads&v={static_version}" in public_download
     assert 'id="open-runner-companion"' in html
-    assert 'href="https://ppskit.qzz.io/experiment-runner/"' in html
+    assert 'href="https://ppskit.com/experiment-runner/"' in html
     assert "seededGellermannBlockRows" in app_js
     assert "downloadBlockRandomization" in app_js
     assert 'control.id === "download-block-randomization"' in app_js
@@ -664,15 +664,13 @@ def test_dashboard_static_assets_are_packaged():
     assert "TRIAL_PREVIEW_LIMIT" in app_js
     assert "field.dataset.rowMixOverride" in app_js
     assert "min_max" in app_js
-    assert "isCompanionDashboardOrigin" in app_js
-    assert "http://127.0.0.1:8766" in app_js
     assert 'import.meta.url.includes("/compiled/assets/")' in app_js
     assert "STATIC_PRELOAD_INVENTORY_PATH" in app_js
     assert "study_templates/" in app_js
     assert "staticStateForTemplate" in app_js
     assert "DEFAULT_STUDY_TEMPLATE_ID = \"study5_box_breathing_pps\"" in app_js
-    assert "Loaded committed preload assets from GitHub" in app_js
-    assert "Hosted mode can compose and export profiles" in app_js
+    assert "Browser preview loaded." in app_js
+    assert "Use the browser preview to compose and export profiles" in app_js
     assert "Open Asset" in app_js
     assert "staticPreviewAssetForLabel" in app_js
     assert "Remove trial sequence row" in app_js
@@ -685,7 +683,6 @@ def test_dashboard_static_assets_are_packaged():
     assert "/api/local/open-folder" in designer_api_js
     assert "data-open-folder" in app_js
     assert "Open Folder" in app_js
-    assert "HTTP errors still mean the companion answered" in app_js
     assert "renderStimulusFeedback" not in app_js
     assert "callTrajectoryViewer" in app_js
     assert "fitTrajectoryRadius" in app_js
@@ -1183,14 +1180,18 @@ def test_dashboard_companion_token_can_gate_mutating_routes(tmp_path: Path):
     assert security["rejected_mutating_requests"] == 2
 
 
-def test_dashboard_static_assets_include_companion_token_header_control():
+def test_dashboard_browser_preview_has_no_companion_connection():
     dashboard_dir = designer_frontend_root()
-    html = (dashboard_dir / "index.html").read_text(encoding="utf-8")
+    for page in ("index.html", "compiled/index.html"):
+        html = (dashboard_dir / page).read_text(encoding="utf-8")
+        for control in ("mobile-companion-toggle", "companion-panel", "backend-url", "companion-token", "connect-backend"):
+            assert f'id="{control}"' not in html
+        assert "Qt UI remains available as" not in html
     app_js = (dashboard_dir / "app.js").read_text(encoding="utf-8")
-
-    assert 'id="companion-token"' in html
-    assert "X-PPS-Companion-Token" in app_js
-    assert "ppsDashboard.companionToken" in app_js
+    assert "if (forceStaticPreviewEnabled() || !isLocalDesignerPage())" in app_js
+    assert "fetch(path," in app_js
+    for setting in ("http://127.0.0.1:8766", "ppsDashboard.apiBase", "ppsDashboard.companionToken", "ppsToken"):
+        assert setting not in app_js
 
 
 def test_dashboard_loads_unpublished_study5_preload_with_instruction_events(tmp_path: Path):
