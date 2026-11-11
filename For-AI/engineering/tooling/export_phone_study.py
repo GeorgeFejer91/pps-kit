@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT / "packages/pps-runtime/src"))
 from peripersonal_space_toolkit.session_runner import (  # noqa: E402
     _filesystem_path,
     _trial_is_catch,
+    _trial_response_choice_metadata,
     _trial_response_metadata,
     load_run_package,
 )
@@ -40,7 +41,7 @@ def store_clip(out: Path, pcm: np.ndarray, rate: int, clips: dict) -> str | None
     return digest
 
 
-def phone_block(block, out: Path, clips: dict) -> dict:
+def phone_block(block, out: Path, clips: dict, *, lateralization: bool = False) -> dict:
     with sf.SoundFile(_filesystem_path(block.wav_path)) as wav:
         if wav.channels != 3 or wav.subtype != "PCM_16":
             raise ValueError(f"{block.label} requires canonical stereo and tactile PCM16 channels.")
@@ -69,11 +70,38 @@ def phone_block(block, out: Path, clips: dict) -> dict:
             anchor = tactile if tactile is not None else samples.get("response_window_onset")
             if not previous_end <= start < end <= len(wav) or anchor is None or not start <= anchor <= len(wav):
                 raise ValueError(f"{block.label}, trial {number} has an invalid or missing response anchor.")
-            if any(row.get(key) for key in (
-                "Response_Choice_Set", "Correct_Response", "Voice_Key_Response_Label",
-                "Visual_Stimulus_Type", "Speaker_Switch_Sequence",
-            )):
+            choice = _trial_response_choice_metadata(row)
+            if any(row.get(key) for key in ("Voice_Key_Response_Label", "Visual_Stimulus_Type", "Speaker_Switch_Sequence")) or (
+                not lateralization and (choice["response_choice_set"] or choice["correct_response"])
+            ):
                 raise ValueError(f"{block.label}, trial {number} requires an additional stimulus or response device.")
+            trial_type = str(row.get("Trial_Type") or "")
+            family = str(row.get("Family") or "")
+            expected = _trial_response_metadata(
+                row, trial_type=trial_type, family=family, tactile_present=tactile is not None,
+                catch_trial=_trial_is_catch(trial_type, family),
+            )
+            side_choice = {}
+            if lateralization:
+                location = f"{block.label}, trial {number}"
+                choices = {value.strip().lower() for value in choice["response_choice_set"].split(",")}
+                correct_response = choice["correct_response"].lower()
+                if not expected["response_required"] or expected["response_rule"] != "choose_external_stimulus_side" or (
+                    choices != {"left", "right"} or correct_response not in choices
+                ):
+                    raise ValueError(f"{location} requires a left/right external-side choice.")
+                hand = None
+                if tactile is not None:
+                    if str(row.get("Tactile_Stimulation_Modality") or "").strip().lower() != "electrical":
+                        raise ValueError(f"{location} does not specify electrical tactile stimulation.")
+                    hand = str(row.get("Body_Side") or "").strip().lower()
+                    if hand not in choices:
+                        raise ValueError(f"{location} does not specify the stimulated hand.")
+                side_choice = {
+                    "tactile_hand": hand,
+                    "correct_response": correct_response,
+                    "response_scoring_policy": choice["response_scoring_policy"],
+                }
             previous_end = end
             wav.seek(start)
             pcm = wav.read(end - start, dtype="int16", always_2d=True)
@@ -88,12 +116,6 @@ def phone_block(block, out: Path, clips: dict) -> dict:
                 duration = math.ceil(float(row["Tactile_Duration_ms"]))
                 if duration <= 0 or duration > 1000 or tactile + round(duration * rate / 1000) > end + 1:
                     raise ValueError(f"{block.label}, trial {number} has an invalid tactile pulse.")
-            trial_type = str(row.get("Trial_Type") or "")
-            family = str(row.get("Family") or "")
-            expected = _trial_response_metadata(
-                row, trial_type=trial_type, family=family, tactile_present=tactile is not None,
-                catch_trial=_trial_is_catch(trial_type, family),
-            )
             trials.append({
                 "number": number,
                 "kind": family or trial_type,
@@ -105,12 +127,13 @@ def phone_block(block, out: Path, clips: dict) -> dict:
                 "response_anchor_sample": anchor,
                 "response_required": expected["response_required"],
                 "clip": clip,
+                **side_choice,
             })
         pulses = sorted((trial["tactile_onset_sample"], trial["tactile_duration_ms"])
                         for trial in trials if trial["tactile_onset_sample"] is not None)
         for (start, duration), (next_start, _) in zip(pulses, pulses[1:]):
             if (next_start - start) * 1000 < duration * rate:
-                raise ValueError(f"{block.label} has overlapping tactile pulses for one phone motor.")
+                raise ValueError(f"{block.label} has overlapping tactile cue intervals.")
         return {"label": block.label, "sample_rate": rate, "length_samples": len(wav), "trials": trials}
 
 
@@ -136,7 +159,7 @@ def instruction_slots(package, out: Path, clips: dict) -> list[dict]:
     return slots
 
 
-def export_study(template_id: str, manifest: Path, out: Path) -> dict:
+def export_study(template_id: str, manifest: Path, out: Path, *, lateralization: bool = False) -> dict:
     inventory = json.loads((ROOT / "packages/pps-resources/assets/preloads/preload_inventory.json").read_text(encoding="utf-8"))
     profile = next((item for item in inventory["profiles"] if item["template_id"] == template_id), None)
     if not profile or profile["runner_readiness"] != "ready":
@@ -154,17 +177,20 @@ def export_study(template_id: str, manifest: Path, out: Path) -> dict:
     (out / "audio").mkdir()
     clips = {}
     plan = {
-        "schema": "pps-phone-study.v1",
+        "schema": "pps-phone-lateralization-schedule.v1" if lateralization else "pps-phone-study.v1",
         "profile_id": template_id,
         "title": profile["title"],
-        "timing_tier": "browser_exploratory",
+        "timing_tier": "prepared_schedule" if lateralization else "browser_exploratory",
         "parts": [{
             "number": part.part_number or 1,
             "instructions": instruction_slots(part, out, clips),
-            "blocks": [phone_block(block, out, clips) for block in part.blocks],
+            "blocks": [phone_block(block, out, clips, lateralization=lateralization) for block in part.blocks],
         } for part in parts],
         "clips": clips,
     }
+    if lateralization:
+        plan["required_output"] = "independent_electrical_tactile"
+        plan["response_choices"] = ["left", "right"]
     (out / "study.json").write_text(json.dumps(plan, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8", newline="\n")
     return plan
 
@@ -174,6 +200,10 @@ if __name__ == "__main__":
     cli.add_argument("template_id")
     cli.add_argument("prepared_session", type=Path)
     cli.add_argument("output", type=Path)
+    cli.add_argument(
+        "--lateralization-schedule", action="store_true",
+        help="export stereo and side-choice scheduling for independently controlled electrical tactile output",
+    )
     args = cli.parse_args()
-    plan = export_study(args.template_id, args.prepared_session, args.output)
+    plan = export_study(args.template_id, args.prepared_session, args.output, lateralization=args.lateralization_schedule)
     print(f'{len(plan["parts"])} parts, {len(plan["clips"])} unique audio clips')

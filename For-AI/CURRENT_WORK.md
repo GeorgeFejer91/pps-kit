@@ -23,19 +23,16 @@ This file is the active checklist and handoff owner; replace state, do not appen
   trials. The paired two-block fixture recorded a tap begun near 1,900 ms
   and released after 2,000 ms, then exercised both instruction gates and
   completion. The controller marker matched the exported RT.
-- **Phone catalogue gap:** The two Tajadura posture profiles require
-  independently addressable left/right tactile stimulation, including
-  tactile-only trials, and a side choice. Each native schedule has 300 trials
-  and records the stimulated hand separately from the correct external side.
-  A phone's vibration API cannot address separate sides. Six other profiles
-  now export after
-  preserving full tactile pulses in the trial WAV and streaming long
-  native blocks within the existing resource limits. An audit matched 1,944
-  trials in ten regenerated packs to native WAV audio and prepared cue
-  samples. The next steps are to identify the separate tactile hardware or
-  trigger interface for the two lateralization profiles and verify physical
-  vibration and timing on a supported phone. The live site has the previous
-  browser Runner deployment.
+- **Phone catalogue gap:** Both Tajadura posture profiles now export as
+  separate hardware schedules via `export_phone_study.py --lateralization-schedule`.
+  An audit matched all 600 trials to the prepared WAV and CSV, including
+  400 electrical tactile cue samples, the stimulated hand, the correct
+  external-side choice, and the native response scoring policy. The exports
+  use a separate schema that the current phone-vibration Runner rejects.
+  The next steps are to identify the independent tactile hardware or
+  trigger interface, add side-choice capture for these profiles, and verify
+  physical phone timing. The live site has the previous browser Runner
+  deployment.
 - **Browser launch: VERIFIED.** Pages [run 43051771734](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43051771734)
   deployed source checkpoint 48b42e1 to [ppskit.com](https://ppskit.com/).
   All 474 staged files matched the public site and the four public routes
@@ -192,8 +189,9 @@ recheck that cache variant if the old redirect is reported again. See
   consent-based beacon pairing over the public HTTPS route.
 - [ ] Full phone studies — Verify the 25 complete profiles on the supported
   phone route. All 23 staged profiles completed a simulated-clock software
-  playback audit. The two Tajadura profiles require separate tactile outputs
-  and side-choice capture. Physical phone timing is unverified.
+  playback audit. The two Tajadura schedules preserve left/right stimuli
+  and choices. Separate tactile output and side-choice capture still need
+  an end-to-end route. Physical phone timing is unverified.
 - [ ] M1 — Authoring/participant fixes and validation/build baseline: B1–B3, C1,
   G1–G2, H1–H2. Validation has verified checkpoints but remains non-green.
 - [ ] M2 — Execute one real single-block package through native authority (A1).
