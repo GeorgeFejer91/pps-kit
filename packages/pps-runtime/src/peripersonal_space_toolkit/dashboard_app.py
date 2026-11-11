@@ -24,7 +24,7 @@ import time
 import urllib.request
 import uuid
 import webbrowser
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, nullcontext
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
@@ -115,6 +115,7 @@ from .runtime_paths import designer_frontend_root, resource_root, writable_root
 from .subprocess_utils import windows_no_console_kwargs
 from .dashboard_backend.security import CompanionSecurity, TOKEN_HEADER
 from .dashboard_backend.jobs import DashboardJob, JobManager, JobProgress, JobSourceChanged
+from .designer_segments.manual_block_order import MANUAL_BLOCK_ORDER, apply_manual_block_order, manual_block_template
 from .resource_limits import MAX_BLOCKS, audio_generation_preflight, read_csv_rows, require_plan_size
 from .dashboard_backend.contracts import ApplicationError, application_error_from_exception
 from .designer_segments import (
@@ -1528,7 +1529,8 @@ class DashboardController:
         recipe_kind = str(recipe.get("kind") or "").strip().lower()
         ingredient_recipe = recipe_kind in {"generated_noise", "imported_audio", "fixed_audio"}
         design_payload = {key: value for key, value in payload.items() if key != "bake_recipe"}
-        if design_payload and not ingredient_recipe:
+        manual_order = recipe_kind == "block_csv_preview" and "manual_block_csvs" in recipe
+        if design_payload and not ingredient_recipe and not manual_order:
             self.update_design(design_payload)
         self._require_artifact_mutation_allowed()
         with self._lock:
@@ -1536,6 +1538,19 @@ class DashboardController:
             saved_design = _copy_design(self.design)
             design = _candidate_design_from_payload(saved_design, design_payload) if ingredient_recipe else saved_design
             source_signature = _stable_json_hash(design_to_dict(saved_design))
+            if manual_order:
+                progress = _designer_progress(saved_design)
+                if not _is_custom_design(saved_design) or (
+                    progress["edit_step"] != "schedule" or recipe.get("expected_revision") != progress["revision"]
+                ):
+                    raise ValueError("Open the current Segment 5 revision before importing block CSVs.")
+                design = _copy_design(saved_design)
+                design.protocol.blocks = _manual_block_count(recipe.get("block_count"))
+                _set_designer_progress(
+                    design, edit_step="schedule", confirmed_steps=progress["confirmed_steps"],
+                    needs_review_steps=progress["needs_review_steps"], revision=progress["revision"] + 1,
+                )
+                design.study_profile_reference_parameters["block_sequence_method"] = MANUAL_BLOCK_ORDER
 
         def require_current_source() -> None:
             if _stable_json_hash(design_to_dict(self.design)) != source_signature:
@@ -1561,7 +1576,9 @@ class DashboardController:
                 progress(0, 1, "Preparing segment outputs")
                 # Existing segment builders share one rollback owner. Holding the
                 # design lock keeps incomplete folders out of dashboard snapshots.
-                with self._lock:
+                # Block publication also serializes with the workflow acceptance.
+                workflow_guard = self._workflow_lock if recipe_kind == "block_csv_preview" else nullcontext()
+                with workflow_guard, self._lock:
                     require_current_source()
                     report_path = ""
 
@@ -1569,16 +1586,23 @@ class DashboardController:
                         nonlocal report_path
                         require_current_source()
                         with progress.commit():
+                            published_design = design if manual_order else self.design
+                            if recipe_kind == "block_csv_preview" and not manual_order and (
+                                "block_sequence_method" in published_design.study_profile_reference_parameters
+                            ):
+                                published_design = _copy_design(published_design)
+                                published_design.study_profile_reference_parameters.pop("block_sequence_method")
                             _clear_downstream_segment_outputs(project, from_segment=from_segment)
-                            report_path = str(_write_segment_validation_report(project, self.design))
+                            report_path = str(_write_segment_validation_report(project, published_design))
                             self.current_run_package = None
-                            save_design(self.design, self.design_path)
+                            save_design(published_design, self.design_path)
+                            self.design = published_design
 
                     options: dict[str, Any] = {"publish": publish}
                     if recipe_kind == "block_csv_preview":
                         _raise_if_current_block_csvs_accepted(project.project_dir, saved_design)
                         options["progress"] = progress
-                    args = (saved_design, project.project_dir)
+                    args = (design if manual_order else saved_design, project.project_dir)
                     if recipe_kind in {"trial_repetition_pool", "block_csv_preview"}:
                         args += (recipe,)
                     result = build(*args, **options)
@@ -1962,6 +1986,12 @@ class DashboardController:
         )
         return self.snapshot() if snapshot else {"session_manifest": str(package.manifest_path), "session_dir": str(package.session_dir)}
 
+    def manual_block_templates(self, block_count: Any) -> dict[str, Any]:
+        self._require_artifact_mutation_allowed()
+        with self._lock:
+            project = self._ensure_project_context(self.design)
+            return {"templates": _manual_block_templates(self.design, project.project_dir, _manual_block_count(block_count))}
+
     def _accept_block_csv_preview_now(self) -> dict[str, Any]:
         self._require_artifact_mutation_allowed()
         with self._lock:
@@ -1993,9 +2023,10 @@ class DashboardController:
         payload = payload or {}
         action = payload.get("workflow_action") if isinstance(payload.get("workflow_action"), dict) else None
         if not action or str(action.get("type") or "").strip().lower() != "accept_and_continue":
-            if payload:
-                self.update_design(payload)
-            return self._accept_block_csv_preview_now()
+            with self._workflow_lock:
+                if payload:
+                    self.update_design(payload)
+                return self._accept_block_csv_preview_now()
 
         try:
             expected_revision = int(action["expected_revision"])
@@ -2009,6 +2040,14 @@ class DashboardController:
                 raise ValueError("Save the active segment before accepting Segment 5 blocks.")
             if int(workflow.get("review_revision") or 0) != expected_revision:
                 raise ValueError("This study changed in another view. Reload it before accepting blocks.")
+            expected_method = action.get("block_sequence_method")
+            if expected_method is not None:
+                with self._lock:
+                    project = self._ensure_project_context(self.design)
+                    manifest = _load_json(_block_csv_preview_manifest_path(project.project_dir))
+                actual_method = "manual" if manifest.get("randomization_strategy") == MANUAL_BLOCK_ORDER else "toolkit"
+                if expected_method != actual_method:
+                    raise ValueError("Build and review blocks using the selected trial order method first.")
             save_payload = {key: value for key, value in payload.items() if key != "workflow_action"}
             candidate = _candidate_design_from_payload(self.design, save_payload)
             if any(segment != 5 for segment in _changed_design_segments(self.design, candidate)):
@@ -2039,33 +2078,34 @@ class DashboardController:
             return result
 
     def edit_block_csv_preview(self) -> dict[str, Any]:
-        self._require_artifact_mutation_allowed()
-        with self._lock:
-            project = self._ensure_project_context(self.design)
-            design = _copy_design(self.design)
-        manifest_path = _block_csv_preview_manifest_path(project.project_dir)
-        manifest = _load_json(manifest_path)
-        errors = _validate_block_csv_preview_manifest(manifest, project_dir=project.project_dir, design=design)
-        if errors:
-            raise ValueError(f"Cannot reopen Segment 5 block CSVs: {errors[0]}")
-        if bool(manifest.get("accepted")):
-            manifest = _reopen_block_csv_manifest(manifest)
-        manifest["accepted"] = False
-        manifest["accepted_at"] = ""
-        manifest["accepted_source_segment4_manifest_sha256"] = ""
-        manifest["reopened_at"] = datetime.now().isoformat(timespec="seconds")
-        errors = _validate_block_csv_preview_manifest(manifest, project_dir=project.project_dir, design=design)
-        if errors:
-            raise ValueError(f"Cannot reopen Segment 5 block CSVs: {errors[0]}")
-        _write_json(manifest_path, manifest)
-        _clear_downstream_segment_outputs(project, from_segment=5)
-        self._append_dashboard_diary_event(
-            "dashboard_block_csvs_reopened",
-            design=design,
-            project=project,
-            payload={"manifest_path": str(manifest_path)},
-        )
-        return self.snapshot()
+        with self._workflow_lock:
+            self._require_artifact_mutation_allowed()
+            with self._lock:
+                project = self._ensure_project_context(self.design)
+                design = _copy_design(self.design)
+            manifest_path = _block_csv_preview_manifest_path(project.project_dir)
+            manifest = _load_json(manifest_path)
+            errors = _validate_block_csv_preview_manifest(manifest, project_dir=project.project_dir, design=design)
+            if errors:
+                raise ValueError(f"Cannot reopen Segment 5 block CSVs: {errors[0]}")
+            if bool(manifest.get("accepted")):
+                manifest = _reopen_block_csv_manifest(manifest)
+            manifest["accepted"] = False
+            manifest["accepted_at"] = ""
+            manifest["accepted_source_segment4_manifest_sha256"] = ""
+            manifest["reopened_at"] = datetime.now().isoformat(timespec="seconds")
+            errors = _validate_block_csv_preview_manifest(manifest, project_dir=project.project_dir, design=design)
+            if errors:
+                raise ValueError(f"Cannot reopen Segment 5 block CSVs: {errors[0]}")
+            _write_json(manifest_path, manifest)
+            _clear_downstream_segment_outputs(project, from_segment=5)
+            self._append_dashboard_diary_event(
+                "dashboard_block_csvs_reopened",
+                design=design,
+                project=project,
+                payload={"manifest_path": str(manifest_path)},
+            )
+            return self.snapshot()
 
     def preview_run_sequence(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         if not payload:
@@ -2256,6 +2296,11 @@ class DashboardController:
         block_manifest = _load_json(block_manifest_path)
         block_errors = _validate_block_csv_preview_manifest(block_manifest, project_dir=project_dir, design=design)
         if block_errors:
+            if (
+                design.study_profile_reference_parameters.get("block_sequence_method") == MANUAL_BLOCK_ORDER
+                or block_manifest.get("randomization_strategy") == MANUAL_BLOCK_ORDER
+            ):
+                raise ValueError("The manual block order needs review. Import current Segment 5 CSVs and accept them.")
             record_step(
                 "5_block_csv_preview",
                 _bake_block_csv_preview(
@@ -2271,6 +2316,8 @@ class DashboardController:
             block_manifest = _load_json(block_manifest_path)
 
         if block_manifest and not bool(block_manifest.get("accepted")):
+            if block_manifest.get("randomization_strategy") == MANUAL_BLOCK_ORDER:
+                raise ValueError("Review and accept the manual CSV order in Segment 5 before launching the profile.")
             accepted_manifest = _finalize_block_csv_manifest(block_manifest)
             accepted_manifest["accepted"] = True
             accepted_manifest["accepted_at"] = accepted_manifest.get("accepted_at") or datetime.now().isoformat(timespec="seconds")
@@ -3050,6 +3097,13 @@ def create_app(
         except Exception as exc:
             raise api_error(exc) from exc
         return _job_to_dict(job)
+
+    @app.post("/api/block-csv/templates")
+    def api_manual_block_templates(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+        try:
+            return controller.manual_block_templates(payload.get("block_count"))
+        except Exception as exc:
+            raise api_error(exc) from exc
 
     @app.post("/api/block-csv/accept")
     def api_accept_block_csv(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
@@ -5293,7 +5347,13 @@ def _block_csv_preview_status(project_dir: Path, design: StimulusDesign | None =
         "block_count": len(blocks),
         "total_count": int(manifest.get("total_trials", 0) or 0) if isinstance(manifest, dict) else 0,
         "estimated_total_duration_ms": int(manifest.get("estimated_total_duration_ms", 0) or 0) if isinstance(manifest, dict) else 0,
-        "csv_columns": manifest.get("csv_columns", []) if isinstance(manifest, dict) else [],
+        "csv_columns": manifest.get("csv_columns", []),
+        "randomization_strategy": manifest.get("randomization_strategy", ""),
+        "randomization_seed": manifest.get("randomization_seed"),
+        "balancing_strategy": manifest.get("balancing_strategy", ""),
+        "row_sequence_strategy": manifest.get("row_sequence_strategy", ""),
+        "max_consecutive_same_feature": manifest.get("max_consecutive_same_feature"),
+        "row_order": manifest.get("row_order", []),
         "blocks": blocks,
         "validation_errors": errors,
     }
@@ -5630,11 +5690,16 @@ def _validate_block_csv_preview_manifest(
     blocks = manifest.get("blocks", []) if isinstance(manifest.get("blocks"), list) else []
     if not blocks:
         return ["Segment 5 manifest does not contain any block CSVs."]
+    manual = manifest.get("randomization_strategy") == MANUAL_BLOCK_ORDER
+    if manual and design is not None and len(blocks) != design.protocol.blocks:
+        return ["Segment 5 manual order is stale because the block count changed."]
     total_rows = 0
     for block in blocks:
         csv_path = Path(str(block.get("csv_path") or ""))
         if not _path_exists(csv_path):
             return [f"Segment 5 block CSV is missing: {csv_path.name}."]
+        if manual and _local_file_sha256(csv_path) != block.get("csv_sha256"):
+            return [f"Segment 5 manual order changed on disk: {csv_path.name}. Re-import the block CSVs."]
         try:
             with open(_filesystem_path(csv_path), encoding="utf-8") as handle:
                 row_count = sum(1 for _row in csv.DictReader(handle))
@@ -7738,13 +7803,9 @@ def _bake_block_csv_preview(
     )
 
 
-def _build_block_csv_preview(
-    design: StimulusDesign,
-    render_dir: Path,
-    recipe: dict[str, Any],
-    *,
-    progress: Callable[[int, int, str], None] | None = None,
-) -> dict[str, Any]:
+def _block_trial_pool(
+    design: StimulusDesign, render_dir: Path,
+) -> tuple[Path, Path, list[dict[str, Any]]]:
     source_manifest_path = _trial_pool_manifest_path(render_dir)
     source_manifest = _load_json(source_manifest_path)
     source_errors = _validate_trial_pool_manifest(source_manifest, project_dir=render_dir, design=design)
@@ -7754,11 +7815,70 @@ def _build_block_csv_preview(
     pool_rows = _read_csv_dict_rows(pool_csv_path)
     if not pool_rows:
         raise ValueError("Segment 4 trial-pool CSV does not contain any rows.")
+    return source_manifest_path, pool_csv_path, pool_rows
+
+
+def _manual_block_count(value: Any) -> int:
+    if type(value) is not int or not 1 <= value <= MAX_BLOCKS:
+        raise ValueError(f"Choose a whole number of blocks from 1 to {MAX_BLOCKS}.")
+    return value
+
+
+def _manual_block_scope(
+    manifest_path: Path, csv_path: Path, block_count: int, seed: int, repeat: bool,
+) -> str:
+    return "pps-" + _stable_json_hash([
+        _local_file_sha256(manifest_path), _local_file_sha256(csv_path), block_count, seed, repeat,
+    ])
+
+
+def _manual_block_templates(
+    design: StimulusDesign, project_dir: Path, block_count: int,
+) -> list[dict[str, Any]]:
+    manifest_path, csv_path, rows = _block_trial_pool(design, project_dir)
+    seed = design.protocol.random_seed
+    repeat = design.protocol.repeat_trial_pool_per_block
+    require_plan_size(len(rows) * (block_count if repeat else 1), "Block schedule")
+    blocks = _manual_template_blocks(rows, block_count, seed, repeat)
+    scope = _manual_block_scope(manifest_path, csv_path, block_count, seed, repeat)
+    return [
+        {"block_index": index, "block_label": _preview_block_label(design, index),
+         "csv": manual_block_template(block, f"{scope}-{index}")}
+        for index, block in enumerate(blocks, start=1)
+    ]
+
+
+def _manual_template_blocks(
+    rows: list[dict[str, Any]], block_count: int, seed: int, repeat: bool,
+) -> list[list[dict[str, Any]]]:
+    if not repeat and block_count > len(rows):
+        raise ValueError("Choose no more blocks than trials in the pool.")
+    blocks = [list(rows) for _ in range(block_count)] if repeat else _assign_trial_pool_rows_to_blocks(rows, block_count, seed=seed)
+    if any(not block for block in blocks):
+        raise ValueError("Every manual block needs at least one trial. Choose fewer blocks.")
+    return blocks
+
+
+def _preview_block_label(design: StimulusDesign, index: int) -> str:
+    specs = design.protocol.block_specs or []
+    label = str(specs[index - 1].label or "").strip() if index <= len(specs) else ""
+    return label or f"Block {index:02d}"
+
+
+def _build_block_csv_preview(
+    design: StimulusDesign,
+    render_dir: Path,
+    recipe: dict[str, Any],
+    *,
+    progress: Callable[[int, int, str], None] | None = None,
+) -> dict[str, Any]:
+    source_manifest_path, pool_csv_path, pool_rows = _block_trial_pool(design, render_dir)
+    manual = "manual_block_csvs" in recipe
 
     block_count = max(1, int(recipe.get("block_count") or getattr(design.protocol, "blocks", 1) or 1))
-    recipe_seed = recipe.get("seed")
+    recipe_seed = None if manual else recipe.get("seed")
     seed = int(getattr(design.protocol, "random_seed", 20250604) if recipe_seed is None else recipe_seed)
-    recipe_repeat = recipe.get("repeat_trial_pool_per_block")
+    recipe_repeat = None if manual else recipe.get("repeat_trial_pool_per_block")
     if isinstance(recipe_repeat, str):
         recipe_repeat = recipe_repeat.strip().lower() in {"1", "true", "yes", "on"}
     repeat_trial_pool_per_block = bool(recipe_repeat or getattr(design.protocol, "repeat_trial_pool_per_block", False))
@@ -7781,12 +7901,14 @@ def _build_block_csv_preview(
         progress(0, block_count, "Reading Segment 4 trial pool")
 
     row_order = _block_csv_row_order(pool_rows)
-    if repeat_trial_pool_per_block:
+    if manual:
+        blocks = _manual_template_blocks(pool_rows, block_count, seed, repeat_trial_pool_per_block)
+        scope = _manual_block_scope(source_manifest_path, pool_csv_path, block_count, seed, repeat_trial_pool_per_block)
+        blocks = apply_manual_block_order(blocks, recipe["manual_block_csvs"], scope)
+    elif repeat_trial_pool_per_block:
         blocks = [list(pool_rows) for _ in range(block_count)]
     else:
         blocks = _assign_trial_pool_rows_to_blocks(pool_rows, block_count, seed=seed)
-    explicit_block_specs = list(getattr(design.protocol, "block_specs", []) or [])
-    block_spec_labels = [str(block.label or "").strip() for block in explicit_block_specs]
     fieldnames = [
         "block_index",
         "block_label",
@@ -7823,10 +7945,7 @@ def _build_block_csv_preview(
     block_summaries: list[dict[str, Any]] = []
     total_duration_ms = 0
     for block_index, source_rows in enumerate(blocks, start=1):
-        if block_index <= len(block_spec_labels) and block_spec_labels[block_index - 1]:
-            block_label = block_spec_labels[block_index - 1]
-        else:
-            block_label = f"Block {block_index:02d}"
+        block_label = _preview_block_label(design, block_index)
         csv_path = root / f"block_{block_index:02d}.csv"
         rows = [
             _block_csv_row(
@@ -7844,6 +7963,8 @@ def _build_block_csv_preview(
             writer.writeheader()
             writer.writerows(rows)
         summary = _block_csv_summary(block_index, block_label, csv_path, rows)
+        if manual:
+            summary["csv_sha256"] = _local_file_sha256(csv_path)
         block_summaries.append(summary)
         total_duration_ms += int(summary["duration_ms"])
         if progress:
@@ -7893,6 +8014,14 @@ def _build_block_csv_preview(
         "csv_columns": fieldnames,
         "blocks": block_summaries,
     }
+    if manual:
+        manifest_payload.update(
+            randomization_seed=None,
+            randomization_strategy=MANUAL_BLOCK_ORDER,
+            max_consecutive_same_feature=None,
+            balancing_strategy="toolkit_block_membership",
+            row_sequence_strategy="uploaded_csv_row_order",
+        )
     errors = _validate_block_csv_preview_manifest(manifest_payload, project_dir=render_dir, design=design)
     if errors:
         _remove_tree(root)
@@ -9390,7 +9519,7 @@ def _carry_forward_project_metadata(previous: StimulusDesign, incoming: Stimulus
     if same_project_context:
         # Finalization state is server-owned. Ordinary design payloads cannot
         # lock a draft or clear the timestamp on a finalized profile.
-        for key in ("profile_status", "finalized_at"):
+        for key in ("profile_status", "finalized_at", "block_sequence_method"):
             if key in previous.study_profile_reference_parameters:
                 incoming.study_profile_reference_parameters[key] = previous.study_profile_reference_parameters[key]
             else:

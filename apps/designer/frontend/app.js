@@ -652,6 +652,9 @@ let editModeActive = false;
 let staticModeActive = false;
 let designerDirty = false;
 let workflowSaveInFlight = false;
+let blockOrderDraft = {};
+const MANUAL_BLOCK_ORDER = "manual_csv_order";
+const MAX_BLOCK_IMPORT_BYTES = 8 * 1024 * 1024;
 let staticModeReason = "";
 let staticPreloadInventory = null;
 let staticTemplatesCache = null;
@@ -1008,7 +1011,7 @@ function setWorkflowDisabled(control, disabled) {
 
 function profileReadonlyControlAllowed(control) {
   if (!control) return false;
-  if (control.matches?.("[data-preview-source-label], .mobile-table-more")) return true;
+  if (control.matches?.("[data-preview-source-label], .mobile-table-more, [data-copy-block]")) return true;
   return Boolean(
     control.id
     && (
@@ -1023,7 +1026,7 @@ function profileReadonlyControlAllowed(control) {
 
 function viewModeControlAllowed(control) {
   if (!control) return false;
-  if (control.matches?.("[data-preview-source-label], [data-select-ingredient], .mobile-table-more")) return true;
+  if (control.matches?.("[data-preview-source-label], [data-select-ingredient], .mobile-table-more, [data-copy-block]")) return true;
   if (control.id?.startsWith("open-")) return true;
   if (control.id === "download-block-randomization") return true;
   return Boolean(
@@ -2861,6 +2864,7 @@ function renderAll() {
   renderPreviewTables();
   renderSegmentRegistryOutputs();
   renderWorkflow();
+  renderBlockOrderControls();
   renderCapabilityLocks();
   upgradeBoundedSelects();
 }
@@ -4072,17 +4076,153 @@ function setBlockProgress(current, total, label) {
   if ($("block-build-progress-percent")) $("block-build-progress-percent").textContent = `${percent}%`;
 }
 
+function blockOrderEditable() {
+  return !staticModeActive && isCustomMode() && !isProfileReadonlyMode()
+    && editModeActive && normalizedDesignerProgress().edit_step === "schedule";
+}
+
+function savedBlockOrderMethod() {
+  const preview = state?.block_csv_preview || {};
+  if (preview.randomization_strategy === MANUAL_BLOCK_ORDER) return "manual";
+  if (preview.blocks?.length) return "toolkit";
+  return state?.design?.study_profile_reference_parameters?.block_sequence_method === MANUAL_BLOCK_ORDER ? "manual" : "";
+}
+
+function renderBlockOrderControls() {
+  const editable = blockOrderEditable();
+  const project = state?.project?.project_id;
+  if (!editable || blockOrderDraft.project !== project) {
+    blockOrderDraft = { project, method: savedBlockOrderMethod() };
+    clearManualBlockFiles();
+  }
+  const method = editable ? blockOrderDraft.method : savedBlockOrderMethod();
+  const manual = method === "manual";
+  const segment = projectSegment("5_block_csv_preview");
+  const poolReady = projectSegment("4_trial_repetition_pool").status === "ready";
+  const accepted = segment.status === "ready" && Boolean(segment.accepted || state.block_csv_preview?.accepted);
+  const job = latestBlockCsvJob();
+  const busy = blockOrderDraft.pending || ["queued", "running"].includes(job?.status);
+  const files = [...$("manual-block-files").querySelectorAll("input")];
+  const hasFiles = files.some((input) => input.files.length);
+  const matchesPreview = method && method === savedBlockOrderMethod()
+    && Number($("block-count").value) === Number(state.block_csv_preview?.block_count);
+  const choices = $("block-order-method");
+  choices.hidden = !editable;
+  choices.disabled = Boolean(busy);
+  for (const radio of choices.querySelectorAll("input")) radio.checked = radio.value === method;
+  const explanation = $("block-toolkit-explanation");
+  $("toolkit-block-order").hidden = !editable || method !== "toolkit";
+  explanation.textContent = state?.design?.protocol?.repeat_trial_pool_per_block
+    ? "This design repeats the full trial pool in each block in its configured order."
+    : "A seed makes the order reproducible. The toolkit balances trials across blocks, preserves the trial-type row pattern, and avoids immediate repeats and long runs of the same feature where possible.";
+  $("block-seed-controls").hidden = manual || (editable && !method);
+  $("block-order-policy-summary").hidden = editable && !matchesPreview;
+  $("manual-block-order").hidden = !editable || !manual;
+  $("block-count").disabled = Boolean((editable && (busy || accepted)) || $("block-count").dataset.workflowLockDisabled);
+  $("prepare-block-templates").disabled = !editable || !poolReady || Boolean(busy);
+  $("reopen-block-files").hidden = !editable || !accepted;
+  $("reopen-block-files").disabled = Boolean(busy);
+  $("regenerate-block-csvs").hidden = editable && (method !== "toolkit" || accepted);
+  if (editable) $("regenerate-block-csvs").disabled = !poolReady || Boolean(busy);
+  $("import-block-csvs").hidden = !editable || !manual || accepted || !files.length;
+  $("import-block-csvs").disabled = !poolReady || Boolean(busy) || !files.length || files.some((input) => !input.files.length);
+  for (const input of files) input.disabled = Boolean(busy);
+  if (editable) {
+    $("accept-block-csvs").disabled = segment.status !== "ready" || !matchesPreview || Boolean(busy) || hasFiles;
+  }
+  $("download-block-randomization").textContent = savedBlockOrderMethod() === "manual" ? "Download Block Order" : "Download Randomization";
+}
+
+function renderManualBlockFiles(templates) {
+  const container = $("manual-block-files");
+  container.innerHTML = templates.map(({ block_index: index, block_label: label }) => `
+    <div class="manual-block-file">
+      <button type="button" data-block-template="${index}" aria-label="Download CSV template for ${escapeAttr(label)}">Download ${escapeHtml(label)} template</button>
+      <label><span data-pretext>${escapeHtml(label)} CSV</span><input type="file" accept=".csv,text/csv" aria-describedby="manual-block-message"></label>
+    </div>
+  `).join("");
+}
+
+function clearManualBlockFiles(message = "") {
+  blockOrderDraft.templates = [];
+  renderManualBlockFiles([]);
+  $("manual-block-message").textContent = message;
+}
+
+async function prepareManualBlockTemplates() {
+  const draft = blockOrderDraft;
+  clearManualBlockFiles();
+  draft.pending = true;
+  renderBlockOrderControls();
+  try {
+    const result = await designerApi.manualBlockTemplates(Number($("block-count").value));
+    if (draft !== blockOrderDraft) return;
+    draft.templates = result.templates;
+    renderManualBlockFiles(draft.templates);
+    $("manual-block-message").textContent = "Templates are ready. Select the edited CSV for each block.";
+  } finally {
+    draft.pending = false;
+    renderBlockOrderControls();
+  }
+}
+
+async function importManualBlockOrders() {
+  const draft = blockOrderDraft;
+  const files = [...$("manual-block-files").querySelectorAll("input")].map((input) => input.files[0]);
+  if (!files.length || files.some((file) => !file)) return;
+  if (files.reduce((size, file) => size + file.size, 0) > MAX_BLOCK_IMPORT_BYTES) {
+    throw new Error("The selected CSVs exceed the 8 MiB import limit.");
+  }
+  if (!confirmDownstreamInvalidation("Importing Segment 5 block order", "schedule")) return;
+  draft.pending = true;
+  $("manual-block-message").textContent = "Checking the selected CSVs…";
+  renderBlockOrderControls();
+  try {
+    const manual_block_csvs = await Promise.all(files.map((file) => file.text()));
+    if (draft !== blockOrderDraft) return;
+    const job = await designerApi.bakeStimulus({
+      bake_recipe: {
+        kind: "block_csv_preview",
+        label: "5_block_csv_preview",
+        block_count: files.length,
+        expected_revision: normalizedDesignerProgress().revision,
+        manual_block_csvs,
+      },
+    });
+    draft.importJobId = job.job_id;
+    pollJob(job.job_id).catch(reportError);
+    await loadState();
+  } finally {
+    draft.pending = false;
+    renderBlockOrderControls();
+  }
+}
+
+function reportManualBlockError(error) {
+  $("manual-block-message").textContent = error.message;
+}
+
+async function reopenAcceptedBlockFiles() {
+  if (!confirmDownstreamInvalidation("Editing accepted Segment 5 blocks", "schedule")) return;
+  state = await designerApi.editBlockCsv();
+  renderAll();
+  (blockOrderDraft.method === "manual" ? $("prepare-block-templates") : $("regenerate-block-csvs")).focus();
+}
+
 function renderBlockCsvPreview() {
   const blockInput = $("block-count");
   const seedInput = $("block-randomization-seed");
   const protocolBlocks = Math.max(1, Math.round(Number(state?.design?.protocol?.blocks || $("blocks")?.value || 1)));
   const protocolSeed = normalizedRandomizationSeed(state?.design?.protocol?.random_seed, 20250604);
-  if (blockInput && document.activeElement !== blockInput) blockInput.value = protocolBlocks;
+  const draftCount = blockOrderEditable() && blockOrderDraft.project === state.project?.project_id
+    ? blockOrderDraft.count
+    : undefined;
+  if (blockInput && document.activeElement !== blockInput) blockInput.value = draftCount ?? protocolBlocks;
   if (seedInput && document.activeElement !== seedInput) seedInput.value = protocolSeed;
   const segment5 = projectSegment("5_block_csv_preview");
   const preview = state.block_csv_preview || {};
   renderBlockPolicySummary(preview);
-  const blockAccepted = Boolean(segment5.accepted || preview.accepted);
+  const blockAccepted = segment5.status === "ready" && Boolean(segment5.accepted || preview.accepted);
   if (blockInput) blockInput.disabled = blockAccepted;
   if (seedInput) seedInput.disabled = blockAccepted;
   if ($("generate-block-randomization-seed")) $("generate-block-randomization-seed").disabled = blockAccepted;
@@ -4126,6 +4266,10 @@ function newRandomizationSeed() {
 function renderBlockPolicySummary(preview = {}) {
   const container = $("block-order-policy-summary");
   if (!container) return;
+  if (preview.randomization_strategy === MANUAL_BLOCK_ORDER) {
+    container.innerHTML = "<span><strong>Method</strong> Manual CSV order</span>";
+    return;
+  }
   const strategy = preview.randomization_strategy || "seeded row-preserving randomization";
   const seed = preview.randomization_seed ?? state.design?.protocol?.random_seed;
   container.innerHTML = `
@@ -4168,6 +4312,10 @@ function renderBlockPreviewCard(block, index = 0) {
       </summary>
       <div class="block-preview-body">
         <details class="block-file-details"><summary>Source file</summary><code>${escapeHtml(csvName)}</code></details>
+        <div class="block-table-actions">
+          ${rows.length ? `<button type="button" data-copy-block="${tableId}" data-preview-view-control aria-label="Copy table for ${escapeAttr(block.block_label || "this block")} to Excel">Copy table to Excel</button>` : ""}
+          ${total > rows.length ? `<span class="summary-text">Preview of ${rows.length} of ${total} trials</span>` : ""}
+        </div>
         <div class="block-preview-meta">${meta}</div>
         <div class="scroll-table compact">
           <table id="${tableId}" class="data-table compact block-preview-table mobile-card-table">
@@ -7579,7 +7727,8 @@ async function startBakeBlockCsvs() {
     showToast("Bake Segment 4 trial pool first");
     return;
   }
-  if (projectSegment("5_block_csv_preview").accepted || state.block_csv_preview?.accepted) {
+  const segment5 = projectSegment("5_block_csv_preview");
+  if (segment5.status === "ready" && (segment5.accepted || state.block_csv_preview?.accepted)) {
     if (!window.confirm("Reopen the accepted Segment 5 blocks and generate a new set?")) return;
     if (staticModeActive) {
       showToast("Block generation needs the installed PPS Designer. Export this browser draft to continue locally.");
@@ -7654,11 +7803,12 @@ async function acceptBlockCsvs() {
     await window.PPSDesigner?.drafts?.save(state);
     state.workflow_action_result = { type: "accept_and_continue", advanced: true, unlocked_step: "run" };
   } else {
-    const payload = collectPayload();
+    const payload = blockOrderDraft.method === "manual" ? {} : collectPayload();
     payload.workflow_action = {
       type: "accept_and_continue",
       step_id: "schedule",
       expected_revision: progress.revision,
+      block_sequence_method: blockOrderDraft.method,
     };
     state = await designerApi.acceptBlockCsv(payload);
   }
@@ -7674,6 +7824,16 @@ async function acceptBlockCsvs() {
 function csvEscape(value) {
   const text = String(value ?? "");
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+async function copyBlockTable(table) {
+  const text = [...table.rows].map((row) => [...row.cells].map((cell) => {
+    const value = (cell.querySelector("code")?.textContent ?? cell.textContent).trim();
+    const safe = /^[=+@-]/.test(value) && !/^-?\d+(?:\.\d+)?$/.test(value) ? "'" + value : value;
+    return /["\t\r\n]/.test(safe) ? `"${safe.replaceAll('"', '""')}"` : safe;
+  }).join("\t")).join("\r\n");
+  await navigator.clipboard.writeText(text);
+  showToast(`Copied ${table.tBodies[0].rows.length} trial rows. Paste into Excel.`);
 }
 
 function rowsToCsv(rows, columns) {
@@ -7698,7 +7858,8 @@ function downloadTextFile(fileName, text, mimeType) {
 
 function blockRandomizationDownloadStem(preview) {
   const profile = slugify(state?.design?.study_profile_id || state?.design?.name || "pps_profile") || "pps_profile";
-  const seed = String(preview?.randomization_seed || state?.design?.protocol?.random_seed || "seed");
+  if (preview?.randomization_strategy === MANUAL_BLOCK_ORDER) return `${profile}_segment5_manual`;
+  const seed = String(preview?.randomization_seed ?? state?.design?.protocol?.random_seed ?? "seed");
   return `${profile}_segment5_seed${seed}`;
 }
 
@@ -7718,9 +7879,11 @@ function blockRandomizationManifestForDownload(preview, columns) {
     block_count: preview.block_count || (preview.blocks || []).length,
     csv_count: preview.csv_count || (preview.blocks || []).length,
     total_trials: preview.total_trials || preview.total_count || blockRandomizationRows(preview).length,
-    randomization_seed: preview.randomization_seed || state?.design?.protocol?.random_seed || "",
+    randomization_seed: preview.randomization_strategy === MANUAL_BLOCK_ORDER ? null
+      : (preview.randomization_seed ?? state?.design?.protocol?.random_seed ?? ""),
     randomization_strategy: preview.randomization_strategy || BLOCK_RANDOMIZATION_STRATEGY,
-    max_consecutive_same_feature: preview.max_consecutive_same_feature || BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE,
+    max_consecutive_same_feature: preview.randomization_strategy === MANUAL_BLOCK_ORDER ? null
+      : (preview.max_consecutive_same_feature ?? BLOCK_RANDOMIZATION_MAX_CONSECUTIVE_FEATURE),
     balancing_strategy: preview.balancing_strategy || "",
     row_sequence_strategy: preview.row_sequence_strategy || "cycle_preserved_segment_row_order_within_each_block",
     row_order: preview.row_order || [],
@@ -7772,7 +7935,7 @@ async function downloadBlockRandomization() {
     const manifest = blockRandomizationManifestForDownload(preview, columns);
     downloadTextFile(`${stem}_manifest.json`, JSON.stringify(manifest, null, 2) + "\n", "application/json;charset=utf-8");
   }, 120);
-  showToast("Segment 5 randomization downloaded");
+  showToast("Segment 5 block order downloaded");
 }
 
 function scheduleRunSequencePreview() {
@@ -7955,6 +8118,17 @@ async function pollJob(jobId) {
     await loadState();
     if (["succeeded", "failed", "cancelled"].includes(job.status)) {
       activePolls.delete(jobId);
+      const manualImport = blockOrderDraft.importJobId === jobId;
+      if (manualImport) {
+        delete blockOrderDraft.importJobId;
+        if (job.status === "succeeded") {
+          clearManualBlockFiles("CSV order ready. Review the blocks, then accept them to continue.");
+          markDesignerSaved();
+        } else {
+          $("manual-block-message").textContent = job.error || job.message;
+        }
+        renderBlockOrderControls();
+      }
       if (job.status === "succeeded" && (job.kind === "stimulus_bake" || job.kind === "block_csv_preview")) {
         if (!["audiotactile_trial_batch", "trial_sequence_batch", "trial_repetition_pool"].includes(job.result?.source_kind)) {
           selectedIngredientLabel = String(job.result?.source_label || job.result?.source?.label || selectedIngredientLabel || "");
@@ -7969,7 +8143,7 @@ async function pollJob(jobId) {
         renderBlockCsvPreview();
         renderProtocolSummary();
       }
-      showToast(`${humanize(job.kind)} ${job.status}`);
+      if (!manualImport) showToast(`${humanize(job.kind)} ${job.status}`);
       break;
     }
   }
@@ -9005,6 +9179,27 @@ function wireEvents() {
   $("bake-trial-files")?.addEventListener("click", () => startBakeTrialFiles().catch(reportError));
   $("bake-trial-pool")?.addEventListener("click", () => startBakeTrialPool().catch(reportError));
   $("regenerate-block-csvs")?.addEventListener("click", () => startBakeBlockCsvs().catch(reportError));
+  $("block-order-method").addEventListener("change", (event) => {
+    blockOrderDraft.method = event.target.value;
+    clearManualBlockFiles();
+    renderBlockOrderControls();
+  });
+  $("prepare-block-templates").addEventListener("click", () => prepareManualBlockTemplates().catch(reportManualBlockError));
+  $("import-block-csvs").addEventListener("click", () => importManualBlockOrders().catch(reportManualBlockError));
+  $("reopen-block-files").addEventListener("click", () => reopenAcceptedBlockFiles().catch(reportError));
+  $("manual-block-files").addEventListener("change", (event) => {
+    event.target.title = event.target.files[0]?.name || "";
+    $("manual-block-message").textContent = "";
+    renderBlockOrderControls();
+  });
+  $("manual-block-files").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-block-template]");
+    if (!button) return;
+    const template = blockOrderDraft.templates.find((entry) => entry.block_index === Number(button.dataset.blockTemplate));
+    if (!template) return;
+    const name = `block_${String(template.block_index).padStart(2, "0")}_template.csv`;
+    downloadTextFile(name, "\ufeff" + template.csv, "text/csv;charset=utf-8");
+  });
   $("accept-block-csvs")?.addEventListener("click", () => acceptBlockCsvs().catch((error) => {
     const button = $("accept-block-csvs");
     if (button) button.disabled = false;
@@ -9125,9 +9320,12 @@ function wireEvents() {
   });
   $("blocks").addEventListener("input", updateFilmstripCounts);
   $("block-count")?.addEventListener("input", () => {
+    if (blockOrderEditable()) blockOrderDraft.count = $("block-count").value;
     const blockCount = Math.max(1, Math.round(numberValue("block-count", 1)));
     if ($("blocks")) $("blocks").value = blockCount;
+    clearManualBlockFiles();
     renderBlockCsvPreview();
+    renderBlockOrderControls();
   });
   $("block-randomization-seed")?.addEventListener("input", () => {
     const seed = normalizedRandomizationSeed($("block-randomization-seed").value);
@@ -9308,6 +9506,13 @@ function wireEvents() {
     updateViewer();
   });
   document.addEventListener("click", (event) => {
+    const copyButton = event.target.closest?.("[data-copy-block]");
+    if (copyButton) {
+      copyBlockTable($(copyButton.dataset.copyBlock)).catch(() => {
+        showToast("Clipboard unavailable. Use the Segment 5 download to open the CSV in Excel.");
+      });
+      return;
+    }
     const mobileTableToggle = event.target.closest?.("[data-mobile-table-toggle]");
     if (mobileTableToggle) {
       const table = $(mobileTableToggle.dataset.mobileTableToggle || "");

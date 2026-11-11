@@ -24,6 +24,7 @@ export function createDesignerApi(request) {
     previewTrialRow: (payload) => post("/api/trials/preview-row", payload),
     previewAudioSource: (payload) => post("/api/audio/preview-source", payload),
     bakeStimulus: (payload) => post("/api/stimulus/bake", payload),
+    manualBlockTemplates: (blockCount) => post("/api/block-csv/templates", { block_count: blockCount }),
     acceptBlockCsv: (payload = {}) => post("/api/block-csv/accept", payload),
     editBlockCsv: () => post("/api/block-csv/edit"),
     previewRunSequence: (payload) => post("/api/run-sequence/preview", payload),

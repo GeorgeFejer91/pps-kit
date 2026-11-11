@@ -14,8 +14,8 @@
       }
     }
   </script>
-  <script type="module" crossorigin src="./assets/index-06h353cD.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DrHVuPzw.css">
+  <script type="module" crossorigin src="./assets/index-aglclTgZ.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BMCbOYXh.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -584,12 +584,20 @@
             <span id="block-csv-bake-status" class="status-label">waiting</span>
           </div>
 
+          <fieldset id="block-order-method" class="block-order-method" hidden>
+            <legend data-pretext>How should trials be ordered within blocks?</legend>
+            <div class="block-order-choices">
+              <label data-pretext><input type="radio" name="block-order-method" value="toolkit"> Toolkit randomization</label>
+              <label data-pretext><input type="radio" name="block-order-method" value="manual"> My own CSV order</label>
+            </div>
+          </fieldset>
+
           <div class="split-fields block-csv-controls">
             <div class="field-row">
               <label for="block-count">Blocks</label>
               <input id="block-count" type="number" min="1" max="200" step="1">
             </div>
-            <div class="field-row block-seed-row">
+            <div id="block-seed-controls" class="field-row block-seed-row">
               <label for="block-randomization-seed">Seed</label>
               <input id="block-randomization-seed" type="number" min="0" max="2147483647" step="1" inputmode="numeric">
               <button id="generate-block-randomization-seed" type="button">New Seed</button>
@@ -598,6 +606,21 @@
               <span class="field-label">Export</span>
               <button id="download-block-randomization" type="button">Download Randomization</button>
             </div>
+          </div>
+
+          <div id="toolkit-block-order" class="block-order-branch" hidden>
+            <p id="block-toolkit-explanation" class="summary-text" data-pretext></p>
+            <button id="regenerate-block-csvs" type="button">Generate Blocks</button>
+          </div>
+
+          <button id="reopen-block-files" type="button" hidden>Edit accepted blocks</button>
+
+          <div id="manual-block-order" class="block-order-branch" hidden>
+            <p class="summary-text" data-pretext>Download one template per block. Move whole rows in Excel, keeping each trial in its assigned block. Keep the template and trial ID columns. Save as CSV UTF-8, then select each file for its block.</p>
+            <button id="prepare-block-templates" type="button">Prepare CSV templates</button>
+            <div id="manual-block-files" class="manual-block-files"></div>
+            <button id="import-block-csvs" type="button">Review CSV order</button>
+            <p id="manual-block-message" class="summary-text" role="status" data-pretext></p>
           </div>
 
           <div id="block-order-policy-summary" class="decision-summary-strip block-policy-summary" aria-live="polite">
@@ -624,7 +647,6 @@
           </div>
 
           <div class="step-footer block-csv-decision-actions">
-            <button id="regenerate-block-csvs" type="button">Generate Blocks</button>
             <button id="accept-block-csvs" type="button" class="primary">Accept Blocks &amp; Continue</button>
           </div>
         </section>

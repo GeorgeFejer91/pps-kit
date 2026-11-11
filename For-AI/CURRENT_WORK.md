@@ -8,7 +8,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   refreshed UI and one suite installer. The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
-- **Current stage:** verified Designer source. The
+- **Current stage on main:** verified Designer source. The
   [HTML layout standard](interface_design_principles.md#default-html-layout-uncodixfy-pretext-stretch-accordion)
   is now the stretch accordion. The ingredient configuration row has a
   mouse/keyboard divider and a square, centered 2D preview. Chromium checks
@@ -21,6 +21,16 @@ This file is the active checklist and handoff owner; replace state, do not appen
   confirmed the same interaction and layout; all 470 public files matched
   staging and the four main routes returned HTTP 200. The offline suite and
   installed validation remain open.
+- **Segment 5 review branch:** Designer offers toolkit randomization or local
+  CSV ordering and copies each block preview as Excel-compatible cells. The
+  manual branch preserves block membership and applies the row order of one
+  validated template per block. Chromium verified both choices, wrong-block
+  rejection, a corrected three-block import, clipboard cells, 320 CSS px
+  reflow with text spacing, and exact order through Segment 6 export and
+  compatibility Runner package assembly with synthetic WAVs. Focused Python
+  checks and canonical Pages assembly passed. Review branch
+  `codex/pps-manual-block-order` holds the source checkpoint. The next stage is
+  promotion after review, followed by installed verification if packaged.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.

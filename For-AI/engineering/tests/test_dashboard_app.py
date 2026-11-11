@@ -757,6 +757,62 @@ def test_dashboard_static_assets_are_packaged():
     assert "/api/" not in html
 
 
+def test_manual_block_csv_bake_preserves_uploaded_order_and_rejects_invalid_sets(tmp_path, monkeypatch):
+    design = default_design()
+    design.protocol.blocks = 2
+    design.protocol.repeat_trial_pool_per_block = False
+    source_manifest = dashboard_app._trial_pool_manifest_path(tmp_path)
+    source_manifest.parent.mkdir()
+    source_csv = source_manifest.with_name("trial_pool.csv")
+    source_csv.write_text(
+        "trial_pool_index,family,row_label,duration_ms\n"
+        + "".join(f"{i},audio_tactile,Row A,100\n" for i in range(1, 9)),
+        encoding="utf-8",
+    )
+    source_data = json.dumps({"csv_path": str(source_csv)})
+    source_manifest.write_text(source_data, encoding="utf-8")
+    monkeypatch.setattr(dashboard_app, "_validate_trial_pool_manifest", lambda *args, **kwargs: [])
+    templates = dashboard_app._manual_block_templates(design, tmp_path, 2)
+    orders = []
+    expected = []
+    for template in templates:
+        header, *rows = template["csv"].splitlines()
+        orders.append("\ufeff" + "\r\n".join([header, *reversed(rows)]))
+        expected.append([row["trial_pool_index"] for row in csv.DictReader(orders[-1].lstrip("\ufeff").splitlines())])
+    recipe = {"kind": "block_csv_preview", "block_count": 2, "manual_block_csvs": orders}
+    result = dashboard_app._bake_block_csv_preview(design, tmp_path, recipe)
+    manifest_path = Path(result["manifest_path"])
+    original = manifest_path.read_bytes()
+    manifest = json.loads(original)
+    assert manifest["randomization_strategy"] == "manual_csv_order"
+    assert manifest["randomization_seed"] is None
+    for index, block in enumerate(manifest["blocks"]):
+        with Path(block["csv_path"]).open(encoding="utf-8") as handle:
+            rows = list(csv.DictReader(handle))
+        assert [row["trial_pool_index"] for row in rows] == expected[index]
+        assert [int(row["block_trial_index"]) for row in rows] == list(range(1, len(rows) + 1))
+    for invalid, message in [
+        (orders[:1], "one CSV per block"),
+        (orders[::-1], "current template"),
+        ([orders[0] + "\r\n" + orders[0].splitlines()[1], orders[1]], "duplicate"),
+        (["\r\n".join(orders[0].splitlines()[:-1]), orders[1]], "missing"),
+    ]:
+        with pytest.raises(ValueError, match=message):
+            dashboard_app._bake_block_csv_preview(design, tmp_path, {**recipe, "manual_block_csvs": invalid})
+        assert manifest_path.read_bytes() == original
+    source_manifest.write_text(json.dumps({"csv_path": str(source_csv), "rebaked": True}), encoding="utf-8")
+    with pytest.raises(ValueError, match="current template"):
+        dashboard_app._bake_block_csv_preview(design, tmp_path, recipe)
+    assert manifest_path.read_bytes() == original
+
+    source_manifest.write_text(source_data, encoding="utf-8")
+    block_csv = Path(manifest["blocks"][0]["csv_path"])
+    header, *rows = block_csv.read_text(encoding="utf-8").splitlines()
+    block_csv.write_text("\n".join([header, *reversed(rows)]) + "\n", encoding="utf-8")
+    errors = dashboard_app._validate_block_csv_preview_manifest(manifest, project_dir=tmp_path, design=design)
+    assert "manual order changed on disk" in errors[0]
+
+
 def test_segment5_block_scheduler_is_seeded_gellermann_and_row_order_preserving():
     rows = []
     trial_pool_index = 1

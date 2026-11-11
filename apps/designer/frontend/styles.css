@@ -5600,6 +5600,101 @@ a:focus-visible,
   background: var(--surface-2);
 }
 
+#schedule [hidden] {
+  display: none;
+}
+
+.block-order-method,
+.block-order-branch {
+  min-inline-size: 0;
+  margin: 0 0 12px;
+}
+
+.block-order-branch > .summary-text {
+  color: var(--text);
+  overflow-wrap: break-word;
+}
+
+.block-order-method {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.block-order-method legend {
+  padding-inline: 4px;
+  max-inline-size: 100%;
+  overflow-wrap: break-word;
+}
+
+.block-order-choices,
+.block-table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.block-order-choices label {
+  display: flex;
+  min-inline-size: 0;
+  min-block-size: 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.block-order-choices input[type="radio"] {
+  inline-size: auto;
+  flex: none;
+}
+
+.manual-block-files {
+  display: grid;
+  gap: 8px;
+}
+
+.manual-block-files:not(:empty) {
+  margin-block: 8px;
+}
+
+#reopen-block-files {
+  margin-block-end: 8px;
+}
+
+.manual-block-file {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 6px 12px;
+  max-inline-size: 680px;
+}
+
+.manual-block-file label {
+  display: grid;
+  gap: 4px;
+  min-inline-size: 0;
+  overflow-wrap: break-word;
+}
+
+.manual-block-file input {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.block-table-actions {
+  margin-block-end: 6px;
+}
+
+@media (max-width: 560px) {
+  .manual-block-file {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .block-order-choices label {
+    min-block-size: 44px;
+  }
+}
+
 .block-csv-controls {
   align-items: end;
   margin-bottom: 11px;
