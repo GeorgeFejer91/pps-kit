@@ -16,7 +16,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   2D/3D controls, light/dark, and 320 CSS px reflow with text spacing.
   The canonical rebuild and both Pages assembly tests passed from a clean
   snapshot after the primary checkout's cloud file provider blocked a preload
-  read. The offline suite and installed validation remain open.
+  read. GitHub Pages [run 43048600160](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43048600160)
+  deployed source checkpoint `0b76e118` to `https://ppskit.com/`. Live Chromium
+  confirmed the same interaction and layout; all 470 public files matched
+  staging and the four main routes returned HTTP 200. The offline suite and
+  installed validation remain open.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.
