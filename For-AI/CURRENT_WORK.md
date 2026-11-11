@@ -8,7 +8,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   refreshed UI and one suite installer. The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
-- **Current stage:** verified Designer source. The
+- **Current stage:** verified Designer source. The public Designer opens
+  directly as a browser preview with bundled study assets. The connection
+  panel and localhost probe were removed in `d45c0c8`. Live Chromium checked
+  Study 5 playback and Downloads at desktop and phone widths after
+  [Pages run 43049923380](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43049923380).
+  The local source launcher passed its cookie-authenticated profile change.
+  The Windows installer release is still a draft. The
   [HTML layout standard](interface_design_principles.md#default-html-layout-uncodixfy-pretext-stretch-accordion)
   is now the stretch accordion. The ingredient configuration row has a
   mouse/keyboard divider and a square, centered 2D preview. Chromium checks
@@ -57,10 +63,8 @@ This file is the active checklist and handoff owner; replace state, do not appen
   15 GiB before another complete Python/native run. No unrelated files,
   worktrees or failed-run records were removed. Detailed logs, screenshots,
   schema findings and the temporary Go toolchain stay in ignored artifacts.
-- **Next product slice:** choose one cleared, premade study fixture and trace
-  the shortest browser-only preview from study selection to playback. Use a
-  local UI preview to verify it never prompts for pairing. Confirm a cached
-  revisit for that fixture before expanding coverage. In the native track,
+- **Next product slice:** verify installation and a cached revisit for the
+  standalone Study 5 preview before expanding PWA coverage. In the native track,
   recover the working disk allowance; reconcile the five
   scientific evidence/derived-catalogue failures through their existing owners;
   then finish Standard and the applicable native/installed gates. Continue
@@ -79,14 +83,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   both themes at 320 to 1920 CSS px, including selection, focus, label contrast
   and text spacing. The canonical build and Pages assembly passed. Installed
   validation remains a separate gate.
-- **Git observation:** `main` was fast-forwarded to domain source checkpoint
-  `8ce15ed6` and the verified credit changes were pushed using the repository URL.
-  Ordinary fetch is still blocked by the malformed local
-  `refs/heads/codex/pps-publication-integration (# Name clash 2026-11-03 mvwxhkC #)`
-  ref. An isolated transfer imported the upstream commit while preserving the
-  local refs, saved configuration, and worktrees.
+- **Git observation:** the standalone browser source checkpoint was pushed
+  to `main` and `codex/pps-browser-standalone` from a clean secondary checkout.
+  The primary checkout's cloud-provider read error blocked Git worktree creation.
 - **Goals checkpoint:** For-AI documentation only, based on `5b269569`
-  already on GitHub `main`. Fetch still hits the malformed ref above.
+  already on GitHub `main`.
   Guidance links/anchors, diff whitespace, and five repository/release audit
   tests passed. These documentation paths do not trigger the Pages workflow.
 - **Installed agent baseline:** retain the [reviewed baseline lock](skills/baseline-lock.json)
