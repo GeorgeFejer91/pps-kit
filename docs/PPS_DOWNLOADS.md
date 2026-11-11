@@ -1,24 +1,31 @@
 # PPS Kit Downloads
 
-PPS Kit V1 publishes two independent Windows programs and one combined suite.
+PPS Kit offers a browser app and three Windows editions.
 
-## Choose a Download
+## Browser app (PWA)
 
-### PPS Designer
+Open [PPS Kit](https://ppskit.com/) and use your browser's Install app or Add to
+Home Screen command when available. The Planner previews approved premade
+stimuli. The Experiment Runner tab runs the built-in browser demo and can pair
+with another compatible device; see [browser Runner instructions](CROSS_PLATFORM_RUNNER_AND_REMOTE.md#browser-companion).
+
+## Windows installers
+
+### Experiment Planner
 
 `PPS-Designer-Downloader.exe` installs the stimulus/profile Designer, its
 compiled offline interface, approved templates/resources, documentation, and
 the compatible Shared component. It does not require the Experiment Runner to
 launch.
 
-### PPS Experiment Runner
+### Experiment Runner
 
 `PPS-Experiment-Runner-Downloader.exe` installs the participant Runner, Qt
 runtime, runtime assets, normal post-run analysis/review, documentation, and the
 compatible Shared component. It can open a prepared experiment without the
 Designer being installed.
 
-### Full PPS Toolkit
+### Experiment Planner + Runner Suite
 
 `PPS-Toolkit-Downloader.exe` installs Designer, Runner, and one Shared
 component. It creates separate Designer and Runner shortcuts; V1 does not add a

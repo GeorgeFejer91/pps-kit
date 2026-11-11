@@ -422,8 +422,8 @@ production releases, updater channels, or data-collection-qualified installers.
 The same frontend build emits `compiled/companion/index.html` and local bundled
 assets, including reviewed, hash-pinned VDO.Ninja 1.5.5 SDK bytes and their MPL
 notice. No runtime CDN is required. Loading the page constructs no SDK client
-and opens no network connection: a visitor must explicitly press **Browse
-public targets**, **Start public beacon**, or connect a private invitation.
+and opens no signaling connection. A visitor must explicitly press **Scan
+beacon**, **Send beacon**, or connect a private invitation.
 Because GitHub Pages cannot set a response-level `frame-ancestors` policy, the
 companion also fails closed at startup when it detects an embedded frame: it
 strips invitation material, binds no controls or networking, disables every
@@ -440,17 +440,33 @@ the Tauri desktop entry or native capabilities.
 
 The browser has two modes:
 
-1. **Controller** authenticates to a desktop, phone, or Quest target and sends
-   only actions within the granted scopes.
-2. **Phone Experiment** is a browser-owned exploratory target. A local gesture
-   arms Web Audio and vibration, another browser may control its semantic run
-   state, local participant taps are timestamped into a bounded event log, and
-   that JSON log can be downloaded.
+1. **Run on this device** runs the built-in exploratory PPS demo. Submit local
+   setup, prepare the demo, and arm outputs before starting. Local response
+   taps go into a downloadable JSON event log.
+2. **Control another device** pairs with another browser Runner or a compatible
+   desktop, phone, or Quest target. It can request only granted actions.
 
-Browser audio and vibration are subject to foreground, user-activation,
-visibility, device, and operating-system scheduling rules. Phone Experiment
-mode is therefore labelled exploratory and must not be treated as physical
-onset or publication-grade timing evidence without device-specific measurement.
+To pair two browsers, keep both Runner pages open and in the foreground. On the
+device that will play the stimuli, press **Send beacon**. On the controller,
+press **Scan beacon**, select the matching code, and request a private session.
+On the target, choose **Allow to pair**, then press **Connect** on the controller.
+The beacon closes after approval or after two minutes. Complete setup and arm
+outputs on the target; either device can prepare the demo after pairing. To
+grant remote stop and abort, enable that permission on the target before
+approving. The target can disconnect the controller at any time. Pairing needs
+Internet access.
+
+Browser audio and vibration depend on user activation, foreground operation,
+browser support, and device hardware. Treat the browser demo as exploratory;
+its event log is not physical onset or research acquisition evidence.
+
+External HTML apps can interoperate by implementing PPS Kit's
+[beacon framing](../apps/runner/frontend/src/remote/beacon-contract.js),
+[VDO.Ninja discovery and private transport](../apps/runner/frontend/src/remote/vdo-beacon.js),
+and [Runner actions and scopes](../apps/runner/frontend/src/domain/runner-contract.js)
+over [BRSP](https://github.com/GeorgeFejer91/browser-remote-sync-protocol).
+Immersive Video Player uses the same pairing pattern; it has its own product
+namespace and actions.
 
 The hosted page carries a fixed public VDO.Ninja data-only rendezvous namespace.
 Any visitor may explicitly browse sanitized, unverified target labels and send

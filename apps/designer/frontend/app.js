@@ -78,7 +78,8 @@ const DEFAULT_LOUDNESS_POLICY = {
     windows_volume_policy: "not_part_of_asio_calibration"
   }
 };
-const STATIC_REPO_ROOT = new URL(import.meta.url.includes("/compiled/assets/") ? "../../../../../" : "../../../", import.meta.url).href;
+const HOSTED_SITE = /\/app\/(?:index\.html)?$/.test(window.location.pathname);
+const STATIC_REPO_ROOT = HOSTED_SITE ? new URL("../", window.location.href).href : new URL(import.meta.url.includes("/compiled/assets/") ? "../../../../../" : "../../../", import.meta.url).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "/assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "/study_templates/";
 const HOSTED_TEMPLATE_DIRECTORY_URL = "https://github.com/GeorgeFejer91/pps-kit/tree/main/packages/pps-resources/study_templates";
@@ -2986,6 +2987,12 @@ function setActivePage(page, options = {}) {
     import("./hardware_pixel_art.js").then(renderHardwarePixelArt).catch(console.error);
   }
   document.body.dataset.activePage = nextPage;
+  for (const link of document.querySelectorAll("[data-hosted-page]")) {
+    const current = link.dataset.hostedPage === nextPage;
+    link.classList.toggle("active", current);
+    if (current) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  }
   document.body.classList.toggle("info-page-active", nextPage !== "toolkit");
   for (const button of document.querySelectorAll("[data-page-tab]")) {
     const active = button.dataset.pageTab === nextPage;
@@ -5777,14 +5784,13 @@ async function previewSourceLabel(button) {
   const staticAsset = staticModeActive ? staticPreviewAssetForLabel(label) : null;
   const payload = collectPayload();
   payload.label = label;
-  button.disabled = true;
+  if (!staticAsset?.url) button.disabled = true;
   button.classList.add("playing");
   const audioContext = getSourcePreviewAudioContext();
   const contextReady = audioContext?.resume().catch(() => {});
   let started = false;
   try {
     if (staticAsset?.url) {
-      button.disabled = false;
       await playSourcePreviewAudio(
         staticAsset.url,
         button,
@@ -9370,7 +9376,7 @@ function wireEvents() {
   });
   document.addEventListener("keydown", (event) => {
     const card = event.target.closest?.("[data-select-ingredient]");
-    if (!card || !["Enter", " "].includes(event.key)) return;
+    if (event.target !== card || !["Enter", " "].includes(event.key)) return;
     event.preventDefault();
     selectIngredient(card.dataset.selectIngredient || "");
   });
@@ -9456,6 +9462,11 @@ function reportError(error) {
 }
 
 loadResizableLayoutSettings();
+if (HOSTED_SITE) {
+  $("hosted-page-nav").hidden = false;
+  $("local-page-tabs").hidden = true;
+  $("open-browser-app").href = "../";
+}
 enforceExternalLinkTargets();
 exposeDashboardAuditHook();
 initializeBoundedSelects();

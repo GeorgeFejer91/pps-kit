@@ -742,6 +742,30 @@ code {
   max-width: 570px;
 }
 
+.site-tab-list[hidden] { display: none; }
+
+.site-tab-list.hosted-page-nav {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(8rem, 1.12fr) minmax(0, 0.9fr);
+  max-width: 740px;
+}
+
+.hosted-page-nav .site-tab {
+  min-height: max(44px, var(--pretext-min-height, 0px));
+  overflow-wrap: anywhere;
+  white-space: normal;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .site-tab-list.hosted-page-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-tab-list.hosted-page-nav:has([data-pretext-result="dom-fallback"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .site-tab {
   min-width: 0;
   min-height: 50px;
@@ -749,6 +773,8 @@ code {
   font-size: 16px;
   font-weight: 800;
 }
+
+.hosted-page-nav .site-tab { font-size: 0.9375rem; }
 
 .site-tab.active,
 .site-tab[aria-selected="true"] {
@@ -2086,6 +2112,12 @@ code {
 .download-page-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+
+.download-page-grid.windows-installers {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+#downloads-installer .info-copy { margin-top: var(--space-3); }
 
 .download-page-grid.single {
   grid-template-columns: minmax(0, 720px);

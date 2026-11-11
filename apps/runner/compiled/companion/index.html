@@ -8,36 +8,58 @@
     <meta name="description" content="Control a PPS experiment target or run the exploratory phone audio and vibration interface directly in a smartphone browser.">
     <meta name="referrer" content="no-referrer">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' wss://wss.vdo.ninja https://turnservers.vdo.ninja; object-src 'none'; base-uri 'none'; form-action 'self'">
-    <title>PPS Experiment Runner Companion</title>
+    <title>PPS Experiment Runner</title>
     <script type="module" crossorigin src="../assets/companion.js"></script>
     <link rel="modulepreload" crossorigin href="../assets/text-layout.js">
     <link rel="stylesheet" crossorigin href="../assets/style.css">
   </head>
   <body class="companion-page">
+    <nav class="runner-site-nav" aria-label="PPS Kit">
+      <a class="button" href="../" data-pretext>Experiment Planner</a>
+      <a class="button button-primary" href="./" aria-current="page" data-pretext>Experiment Runner</a>
+      <a class="button" href="../documentation/" data-pretext>Documentation</a>
+      <a class="button" href="../download/" data-pretext>Downloads</a>
+    </nav>
     <div class="phone-shell">
       <header class="phone-header">
         <div class="brand-block">
           <span class="brand-mark" aria-hidden="true">PPS</span>
-          <div><p class="eyebrow">PPS Runner</p><h1>Phone companion</h1></div>
+          <h1>Experiment Runner</h1>
         </div>
         <span id="companion-status" class="connection-pill" data-phase="idle">Not connected</span>
       </header>
 
       <div id="embedding-warning" class="exploratory-banner embedding-warning" role="alert" hidden>
         <strong>Open this page directly</strong>
-        <span>For pairing safety, the Runner Companion is disabled inside embedded frames.</span>
+        <span>For pairing safety, the browser Runner is disabled inside embedded frames.</span>
       </div>
 
-      <nav class="mode-switch" aria-label="Companion mode">
-        <button type="button" class="is-active" data-mode="controller" aria-selected="true">Control a computer</button>
-        <button type="button" data-mode="target" aria-selected="false">Experiment on this phone</button>
-      </nav>
+      <div class="mode-switch" role="group" aria-label="Runner mode">
+        <button type="button" class="is-active" data-mode="target" aria-pressed="true" aria-controls="target-mode">Run on this device</button>
+        <button type="button" data-mode="controller" aria-pressed="false" aria-controls="controller-mode">Control another device</button>
+      </div>
 
       <main>
-        <section id="controller-mode" class="mode-panel is-active" data-mode-panel="controller">
+        <section id="controller-mode" class="mode-panel" data-mode-panel="controller" hidden>
+          <section class="panel beacon-panel" aria-labelledby="scan-beacon-title">
+            <h2 id="scan-beacon-title">Find a runner</h2>
+            <div class="stack compact-stack">
+              <span id="beacon-status" class="badge" role="status">Beacon off</span>
+              <p class="subtle">On the device that will run the experiment, press Send beacon. Then scan here, select that device, and request access.</p>
+              <div class="inline-actions">
+                <button id="beacon-browse" class="button" type="button">Scan beacon</button>
+                <button id="beacon-stop" class="button" type="button" disabled>Stop scanning</button>
+              </div>
+              <div id="beacon-targets" class="beacon-target-list" aria-live="polite"><p class="subtle">Browsing is off.</p></div>
+              <p id="beacon-selection" class="subtle" role="status">Match the beacon code shown on the target before requesting access.</p>
+              <button id="beacon-request" class="button" type="button" disabled>Request private session</button>
+              <details><summary>Discovery and privacy</summary><p class="safety-copy">Listings and requests carry no participant state or runner commands. After target-local approval, fresh credentials go only to that exact requester over its encrypted peer data channel. VDO signaling and peer selection remain part of the trust boundary. Internet access is required.</p></details>
+            </div>
+          </section>
+
           <section class="panel stack compact-stack">
-            <div class="section-heading"><h2>Pair your phone</h2><span id="invite-badge" class="badge">No invite</span></div>
-            <p id="invite-summary" class="subtle">Scan the QR code in the computer's PPS Runner, then press Connect.</p>
+            <div class="section-heading"><h2>Private connection</h2><span id="invite-badge" class="badge">No invite</span></div>
+            <p id="invite-summary" class="subtle">Scan for a beacon above or open a private invitation link from the target.</p>
             <label>Access requested<select id="controller-role"><option value="controller">Run controls</option><option value="observer">Observe only</option></select></label>
             <div class="inline-actions">
               <button id="controller-connect" class="button button-primary" type="button" disabled>Connect</button>
@@ -70,7 +92,7 @@
               <button class="button remote-action" type="button" data-remote-action="run.stop">Stop</button>
               <button class="button button-danger remote-action" type="button" data-remote-action="run.abort">Abort</button>
             </div>
-            <p class="subtle">Complete participant setup and arm outputs on the computer.</p>
+            <p class="subtle">Complete participant setup and arm outputs on the device running the experiment.</p>
             <details>
               <summary>Add a session note</summary>
               <div class="stack compact-stack">
@@ -80,50 +102,42 @@
             </details>
           </section>
 
-          <details class="panel beacon-panel">
-            <summary>Find a runner without a QR code</summary>
-            <div class="stack compact-stack">
-              <span id="beacon-status" class="badge">Beacon off</span>
-              <p class="subtle">Browse public labels and request access. The computer's operator must approve your request.</p>
-              <div class="inline-actions">
-                <button id="beacon-browse" class="button" type="button">Browse public targets</button>
-                <button id="beacon-stop" class="button" type="button" disabled>Stop browsing</button>
-              </div>
-              <div id="beacon-targets" class="beacon-target-list" aria-live="polite"><p class="subtle">Browsing is off.</p></div>
-              <p id="beacon-selection" class="subtle">Select one unverified public target before requesting access.</p>
-              <button id="beacon-request" class="button" type="button" disabled>Request private session</button>
-              <details><summary>Discovery and privacy</summary><p class="safety-copy">Listings and requests carry no participant state or runner commands. After target-local approval, fresh credentials go only to that exact requester over its encrypted peer data channel. VDO signaling and peer selection remain part of the trust boundary. Internet access is required.</p></details>
-            </div>
-          </details>
+
         </section>
 
-        <section id="target-mode" class="mode-panel" data-mode-panel="target">
+        <section id="target-mode" class="mode-panel is-active" data-mode-panel="target">
           <div class="exploratory-banner" role="note">
             <strong>Exploratory browser timing</strong>
-            <span>Phone audio and vibration are not publication-grade stimulus timing. This page carries a data-only connection beacon; the authenticated target remains authoritative.</span>
+            <span>Run the built-in PPS demo with generated audio and vibration on supported devices. Browser timing is exploratory. Use the desktop Runner for research acquisition.</span>
           </div>
-          <details class="panel beacon-panel">
-            <summary>Advertise this phone</summary>
+          <section class="panel beacon-panel" aria-labelledby="send-beacon-title">
+            <h2 id="send-beacon-title">Allow remote control</h2>
             <div class="stack compact-stack">
-            <span id="target-beacon-status" class="badge">Beacon off</span>
-            <details><summary>Discovery and privacy</summary><p class="safety-copy">Advertising publishes only a random beacon ID and the label “PPS phone experiment.” Requests remain untrusted until you approve one here. Approval sends fresh private credentials only to that requester’s encrypted peer data channel; VDO signaling, peer selection, and ordinary WebRTC connection metadata remain part of the trust boundary.</p></details>
+            <p class="subtle">Send a beacon before preparing the demo if another device will control this run. Only approve a request you expect.</p>
             <div class="inline-actions">
-              <button id="target-beacon-start" class="button button-primary" type="button">Start public beacon</button>
+              <span id="target-beacon-status" class="badge" role="status">Beacon off</span>
+              <span id="target-beacon-code" class="badge" role="status" hidden></span>
+            </div>
+            <div class="inline-actions">
+              <button id="target-beacon-start" class="button button-primary" type="button">Send beacon</button>
               <button id="target-beacon-stop" class="button" type="button" disabled>Stop beacon</button>
             </div>
             <div id="target-pairing-request" class="beacon-request-card" hidden>
               <p><strong id="target-request-label">Browser controller</strong> requests <span id="target-request-scopes">no scopes</span>.</p>
               <p class="subtle">The public label is unverified. Approve creates new pairing material and sends it only to this requester’s peer channel; it does not arm phone audio or vibration.</p>
               <div class="inline-actions">
-                <button id="target-request-approve" class="button button-primary" type="button">Approve privately</button>
+                <button id="target-request-approve" class="button button-primary" type="button">Allow to pair</button>
                 <button id="target-request-deny" class="button" type="button">Deny</button>
               </div>
             </div>
+            <button id="target-disconnect" class="button" type="button" disabled hidden>Disconnect controller</button>
+            <details><summary>Discovery and privacy</summary><p class="safety-copy">Advertising publishes only a random beacon ID and the label “PPS browser runner.” Requests remain untrusted until you approve one here. Approval sends fresh private credentials only to that requester’s encrypted peer data channel; VDO signaling, peer selection, and ordinary WebRTC connection metadata remain part of the trust boundary.</p></details>
             </div>
-          </details>
+          </section>
 
-          <section class="panel stack compact-stack">
-            <div class="section-heading"><div><p class="eyebrow">Browser target</p><h2>Phone Experiment Room</h2></div><span id="target-state-badge" class="badge">Local only</span></div>
+          <details class="panel stack compact-stack">
+            <summary>Remote permissions and QR invitation</summary>
+            <div class="section-heading"><h2>Private invitation</h2><span id="target-state-badge" class="badge">Local only</span></div>
             <label>Private room<input id="target-room" maxlength="64" readonly aria-readonly="true" placeholder="Created with fresh pairing material"></label>
             <label class="check-row"><input id="target-allow-notes" type="checkbox" checked> Allow remote session notes</label>
             <label class="check-row"><input id="target-allow-abort" type="checkbox"> Allow remote stop / abort</label>
@@ -132,17 +146,16 @@
               <canvas id="target-qr" width="212" height="212" aria-label="Controller invitation QR code"></canvas>
               <button id="copy-target-invite" class="button" type="button">Copy controller invitation</button>
               <button id="target-connect" class="button button-primary" type="button">Start private data target</button>
-              <button id="target-disconnect" class="button" type="button" disabled>Stop private target</button>
             </div>
-          </section>
+          </details>
 
           <section class="panel stack compact-stack">
-            <div class="section-heading"><div><p class="eyebrow">Local safety gate</p><h2>Phone Outputs</h2></div><span id="output-capability" class="badge">Checking</span></div>
+            <div class="section-heading"><div><p class="eyebrow">Local safety gate</p><h2>Device outputs</h2></div><span id="output-capability" class="badge">Checking</span></div>
             <label class="check-row"><input id="phone-audio-enabled" type="checkbox" checked> Enable generated looming audio</label>
-            <label class="check-row"><input id="phone-vibration-enabled" type="checkbox" checked> Enable browser vibration when supported</label>
-            <button id="arm-phone" class="button button-primary" type="button" disabled>Arm phone outputs locally</button>
+            <label class="check-row"><input id="phone-vibration-enabled" type="checkbox" checked> Enable vibration when supported by this device</label>
+            <button id="arm-phone" class="button button-primary" type="button" disabled>Arm outputs locally</button>
             <button id="disarm-phone" class="button" type="button" disabled>Disarm outputs</button>
-            <p class="safety-copy">Remote peers cannot arm phone audio or vibration. A person holding this phone must perform the local gesture.</p>
+            <p class="safety-copy">Remote peers cannot arm phone audio or vibration. A person at this device must press Arm outputs locally.</p>
           </section>
 
           <section class="panel stack compact-stack">
@@ -158,7 +171,7 @@
             </div>
             <div class="looming-orbit" id="looming-orbit" aria-hidden="true"><span></span></div>
             <button id="phone-response" class="button button-primary" type="button" disabled>Tap response</button>
-            <p id="phone-event" class="timeline-event">Create a target to begin.</p>
+            <p id="phone-event" class="timeline-event">Submit setup and prepare the demo to begin.</p>
             <button id="download-phone-log" class="button button-quiet" type="button" disabled>Download event log</button>
           </section>
         </section>

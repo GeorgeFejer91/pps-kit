@@ -324,6 +324,29 @@ input[type="checkbox"] {
 .desktop-page .toast.is-visible { display: block; }
 
 .companion-page { padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(1rem, env(safe-area-inset-bottom)); }
+.companion-page #target-disconnect[hidden],
+.companion-page #target-beacon-code[hidden] { display: none; }
+
+.runner-site-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+  width: min(100%, 640px);
+  margin: 0 auto 1rem;
+}
+
+.runner-site-nav .button {
+  min-width: 0;
+  min-height: max(44px, var(--pretext-min-height, 0px));
+  text-decoration: none;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 520px) {
+  .runner-site-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .phone-shell { width: min(100%, 640px); margin: 0 auto; }
 .phone-header { margin: -0.75rem -0.75rem 0; padding: 0.85rem max(0.75rem, env(safe-area-inset-right)) 0.85rem max(0.75rem, env(safe-area-inset-left)); }
 .phone-header .brand-mark { flex-shrink: 0; min-width: 2.5em; width: auto; height: auto; min-height: 2.5em; padding: 0.4em; }

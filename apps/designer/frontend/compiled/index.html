@@ -14,14 +14,20 @@
       }
     }
   </script>
-  <script type="module" crossorigin src="./assets/index-DmLc8DQ1.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-SZnfGejT.css">
+  <script type="module" crossorigin src="./assets/index-s9yrGwwU.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-JI5d1wfn.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
   <div class="app-shell">
     <header class="topbar site-tabs" aria-label="Primary dashboard pages">
-      <div class="site-tab-list" role="tablist" aria-label="Dashboard pages">
+      <nav id="hosted-page-nav" class="site-tab-list hosted-page-nav" aria-label="PPS Kit" hidden>
+        <a class="button-link site-tab" data-hosted-page="toolkit" href="../" target="_top" data-pretext>Experiment Planner</a>
+        <a class="button-link site-tab" href="../experiment-runner/" target="_top" data-pretext>Experiment Runner</a>
+        <a class="button-link site-tab" data-hosted-page="documentation" href="../documentation/" target="_top" data-pretext>Documentation</a>
+        <a class="button-link site-tab" data-hosted-page="downloads" href="../download/" target="_top" data-pretext>Downloads</a>
+      </nav>
+      <div id="local-page-tabs" class="site-tab-list" role="tablist" aria-label="Dashboard pages">
         <button id="page-tab-toolkit" class="site-tab active" type="button" role="tab" data-page-tab="toolkit" aria-controls="toolkit-page" aria-selected="true" aria-label="Experiment Designer"><span class="tab-label-full">Experiment Designer</span><span class="tab-label-short" aria-hidden="true">Experiment</span></button>
         <button id="page-tab-documentation" class="site-tab" type="button" role="tab" data-page-tab="documentation" aria-controls="documentation-page" aria-selected="false" aria-label="Documentation" tabindex="-1"><span class="tab-label-full">Documentation</span><span class="tab-label-short" aria-hidden="true">Docs</span></button>
         <button id="page-tab-downloads" class="site-tab" type="button" role="tab" data-page-tab="downloads" aria-controls="downloads-page" aria-selected="false" tabindex="-1">Downloads</button>
@@ -116,10 +122,8 @@
       </nav>
       <nav id="download-section-nav" class="rail-nav-group" aria-label="Download sections" data-rail-page="downloads" hidden>
         <div class="rail-nav-kicker">Downloads</div>
-        <a href="#downloads-installer" data-page-section-link="downloads-installer" data-page-section-page="downloads"><span>Installer</span></a>
-        <a href="#downloads-package" data-page-section-link="downloads-package" data-page-section-page="downloads"><span>Offline Package</span></a>
-        <a href="#downloads-source" data-page-section-link="downloads-source" data-page-section-page="downloads"><span>Source</span></a>
-        <a href="#downloads-companion" data-page-section-link="downloads-companion" data-page-section-page="downloads"><span>Companion</span></a>
+        <a href="#downloads-browser" data-page-section-link="downloads-browser" data-page-section-page="downloads"><span>Browser app</span></a>
+        <a href="#downloads-installer" data-page-section-link="downloads-installer" data-page-section-page="downloads"><span>Windows installers</span></a>
       </nav>
     </aside>
 
@@ -1197,69 +1201,39 @@
 
       <section id="downloads-page" class="page-view info-page" data-page-panel="downloads" role="tabpanel" aria-labelledby="page-tab-downloads" tabindex="0" hidden>
         <div class="info-page-heading">
-          <span class="segment-kicker">Downloads</span>
-          <h1>Install and Run Locally</h1>
+          <h1>Downloads</h1>
         </div>
+        <section id="downloads-browser" class="info-segment" aria-labelledby="downloads-browser-title">
+          <div class="info-segment-heading">
+            <h2 id="downloads-browser-title">Browser app (PWA)</h2>
+          </div>
+          <article class="info-card download-card">
+            <p data-pretext>Preview studies with ready-to-play stimuli. To install, open the app and use your browser’s Install app or Add to Home Screen command when available.</p>
+            <a id="open-browser-app" class="button-link primary-link" href="https://ppskit.com/" target="_top" data-pretext>Open web app</a>
+          </article>
+        </section>
         <section id="downloads-installer" class="info-segment" aria-labelledby="downloads-installer-title">
           <div class="info-segment-heading">
-            <span class="segment-kicker">Windows</span>
-            <h2 id="downloads-installer-title">Choose an Application</h2>
+            <h2 id="downloads-installer-title">Windows installers</h2>
           </div>
-          <div class="download-page-grid">
+          <div class="download-page-grid windows-installers">
             <article class="info-card download-card">
-            <h3>PPS Designer</h3>
-            <p>Install the stimulus and profile design framework with approved Shared templates and resources.</p>
-            <a id="download-designer" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Designer Releases</a>
-          </article>
-            <article class="info-card download-card">
-            <h3>Experiment Runner</h3>
-            <p>Install the independent participant Runner, Qt runtime, Shared resources, and post-run review tools.</p>
-            <a id="download-runner" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Runner Releases</a>
-          </article>
-            <article class="info-card download-card primary-download">
-            <h3>Full PPS Toolkit</h3>
-            <p>Install PPS Designer and Experiment Runner to generate stimuli, prepare studies, and run experiments on your computer.</p>
-            <a id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer">Open Full Toolkit Releases</a>
-          </article>
-          </div>
-        </section>
-        <section id="downloads-package" class="info-segment" aria-labelledby="downloads-package-title">
-          <div class="info-segment-heading">
-            <span class="segment-kicker">Integrity</span>
-            <h2 id="downloads-package-title">Verified Component Payloads</h2>
-          </div>
-          <div class="download-page-grid single">
-            <article class="info-card download-card">
-            <h3>How Downloads Are Verified</h3>
-            <p>Each bootstrapper pins its own payload, component manifest, and inventory hashes. Incompatible Shared versions are rejected instead of mixed.</p>
-            <a id="download-full-package" class="button-link secondary-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/PPS_DOWNLOADS.md" target="_blank" rel="noopener noreferrer">Read Download Notes</a>
-          </article>
-          </div>
-        </section>
-        <section id="downloads-source" class="info-segment" aria-labelledby="downloads-source-title">
-          <div class="info-segment-heading">
-            <span class="segment-kicker">Source</span>
-            <h2 id="downloads-source-title">Repository</h2>
-          </div>
-          <div class="download-page-grid single">
-            <article class="info-card download-card">
-            <h3>Source Repository</h3>
-            <p>Browse source, issues, release notes, and development documentation on GitHub.</p>
-            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit" target="_blank" rel="noopener noreferrer">Open GitHub Repository</a>
-          </article>
-          </div>
-        </section>
-        <section id="downloads-companion" class="info-segment" aria-labelledby="downloads-companion-title">
-          <div class="info-segment-heading">
-            <span class="segment-kicker">Browser Companion</span>
-            <h2 id="downloads-companion-title">Experiment Runner Companion</h2>
-          </div>
-          <div class="download-page-grid single">
-            <article class="info-card download-card">
-              <h3>Runner Browser Companion</h3>
-              <p>Open the no-install controller and exploratory smartphone experiment interface. GitHub Pages hosts the interface only; remote control requires a compatible BRSP transport.</p>
-              <a id="open-runner-companion" class="button-link primary-link" href="https://ppskit.com/experiment-runner/" target="_blank" rel="noopener noreferrer">Open Runner Companion</a>
+              <h3 data-pretext>Experiment Planner</h3>
+              <p data-pretext>Design experiments, generate stimuli, and export profiles.</p>
             </article>
+            <article class="info-card download-card">
+              <h3 data-pretext>Experiment Runner</h3>
+              <p data-pretext>Run prepared experiments and review results.</p>
+            </article>
+            <article class="info-card download-card">
+              <h3 data-pretext>Experiment Planner + Runner Suite</h3>
+              <p data-pretext>Install both apps together with one shared set of resources.</p>
+            </article>
+          </div>
+          <p class="info-copy" data-pretext>The Windows installer files are not yet available in a public release.</p>
+          <div class="doc-link-row">
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer" data-pretext>View releases</a>
+            <a class="button-link" href="https://github.com/GeorgeFejer91/pps-kit/blob/main/docs/PPS_DOWNLOADS.md" target="_blank" rel="noopener noreferrer" data-pretext>Installation notes</a>
           </div>
         </section>
       </section>

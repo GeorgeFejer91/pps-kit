@@ -285,8 +285,8 @@ def test_dashboard_static_assets_are_packaged():
     assert f"app/index.html?page=toolkit&v={static_version}" in public_index
     assert f"app/index.html?page=documentation&v={static_version}" in public_docs
     assert f"app/index.html?page=downloads&v={static_version}" in public_download
-    assert 'id="open-runner-companion"' in html
-    assert 'href="https://ppskit.com/experiment-runner/"' in html
+    assert 'href="../experiment-runner/" target="_top"' in html
+    assert 'rel="manifest" href="study-preview.webmanifest"' in public_index
     assert "seededGellermannBlockRows" in app_js
     assert "downloadBlockRandomization" in app_js
     assert 'control.id === "download-block-randomization"' in app_js
@@ -317,10 +317,8 @@ def test_dashboard_static_assets_are_packaged():
     assert "pageFromLocation" in app_js
     assert "replaceRouteForPage" in app_js
     assert "enforceExternalLinkTargets" in app_js
-    assert 'id="download-designer"' in html
-    assert 'id="download-runner"' in html
-    assert 'id="download-software" class="button-link primary-link" href="https://github.com/GeorgeFejer91/pps-kit/releases" target="_blank" rel="noopener noreferrer"' in html
-    assert "Incompatible Shared versions are rejected instead of mixed." in html
+    assert 'id="open-browser-app"' in html
+    assert "Experiment Planner + Runner Suite" in html
     assert "renderHardwarePixelArt" in app_js
     assert 'data-hardware-pixel="komplete-audio6"' in html
     assert 'data-hardware-pixel="woojer-strap-4"' in html

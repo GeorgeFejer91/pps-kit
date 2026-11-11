@@ -22,11 +22,11 @@ const vdoSdk = await readFile(
 );
 
 test("hosted companion declares a restrictive browser-only document policy", () => {
-  assert.match(companionHtml, /<title>PPS Experiment Runner Companion<\/title>/u);
+  assert.match(companionHtml, /<title>PPS Experiment Runner<\/title>/u);
   assert.match(companionHtml, /name="referrer" content="no-referrer"/u);
   assert.match(companionHtml, /Content-Security-Policy/u);
   assert.match(companionHtml, /connect-src 'self' wss:\/\/wss\.vdo\.ninja https:\/\/turnservers\.vdo\.ninja/u);
-  assert.match(companionHtml, /This page carries a data-only connection beacon/u);
+  assert.match(companionHtml, /Browser timing is exploratory/u);
   assert.match(companionHtml, /id="beacon-browse"/u);
   assert.match(companionHtml, /id="target-beacon-start"/u);
   assert.match(companionHtml, /id="phone-response"[^>]*disabled>Tap response/u);

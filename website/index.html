@@ -3,8 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PPS Experiment Designer</title>
-  <meta name="description" content="Compose and export portable PPS experiment profiles in the browser without uploading local audio.">
+  <title>PPS Study Preview</title>
+  <meta name="description" content="Preview PPS studies in your browser with premade stimuli. Download the desktop suite to generate stimuli and run experiments.">
+  <meta name="theme-color" content="#f4f5f1">
+  <link rel="manifest" href="study-preview.webmanifest">
+  <script type="module">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./study-preview-sw.js", { updateViaCache: "none" })
+        .catch((error) => console.warn("Offline study preview could not be enabled.", error));
+    }
+  </script>
   <link rel="icon" type="image/png" href="app/pps_toolkit_icon.png">
   <style>
     html,
@@ -53,13 +61,13 @@
 <body>
   <iframe
     class="dashboard-frame"
-    title="PPS Experiment Designer"
+    title="PPS Study Preview"
     src="app/index.html?page=toolkit&v=20260823-modular-monorepo"
   ></iframe>
   <noscript>
     <div class="fallback">
       JavaScript is required for the dashboard.
-      <a href="app/index.html?page=toolkit&v=20260823-modular-monorepo">Open the designer directly</a>.
+      <a href="app/index.html?page=toolkit&v=20260823-modular-monorepo">Open the study preview directly</a>.
     </div>
   </noscript>
 </body>

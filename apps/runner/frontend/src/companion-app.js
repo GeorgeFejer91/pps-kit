@@ -36,6 +36,7 @@ let controllerSession = null;
 let controllerBeacon = null;
 let controllerBeaconRequestId = "";
 let targetBeacon = null;
+let targetBeaconExpiry = null;
 let pendingTargetRequest = null;
 let phoneTarget = null;
 let phoneSnapshot = null;
@@ -77,9 +78,12 @@ function activateMode(mode) {
   document.querySelectorAll("[data-mode]").forEach((button) => {
     const active = button.dataset.mode === mode;
     button.classList.toggle("is-active", active);
-    button.setAttribute("aria-selected", String(active));
+    button.setAttribute("aria-pressed", String(active));
   });
-  document.querySelectorAll("[data-mode-panel]").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.modePanel === mode));
+  document.querySelectorAll("[data-mode-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.modePanel !== mode;
+    panel.classList.toggle("is-active", !panel.hidden);
+  });
 }
 
 function bindModeSwitch() {
@@ -114,15 +118,15 @@ function updateControllerActions() {
   text("controller-pending", status?.pendingCommands ?? 0);
   elements["controller-session-panel"].hidden = !ready;
   elements["controller-role"].disabled = Boolean(status && !["idle", "closed", "error", "disconnected"].includes(status.phase));
-  let next = controllerInvitation ? "Invitation ready. Press Connect." : "Scan the runner's QR code to begin.";
+  let next = controllerInvitation ? "Invitation ready. Press Connect." : "Scan for a beacon or open an invitation to begin.";
   if (!browserActive) next = "Control suspended while this page is hidden or offline.";
   else if (status?.phase === "ready" && !ready) next = "Authenticated. Waiting for fresh target state…";
   else if (ready) {
     const current = status.snapshot;
     next = !granted.has(SCOPES.TRANSPORT) ? "Observe only. State comes from the target."
       : busy ? "Command sent. Waiting for the target's acknowledgement…"
-        : !current.setup?.ready ? "Complete participant setup on the computer."
-          : !current.safety?.local_armed ? "Arm outputs on the computer."
+        : !current.setup?.ready ? "Complete participant setup on the device running the experiment."
+          : !current.safety?.local_armed ? "Arm outputs on the device running the experiment."
             : current.run?.phase === "running" ? "Running. Pause or stop when needed."
               : current.run?.phase === "paused" ? "Paused. Review the target, then resume when ready."
                 : "Ready. Choose the next permitted action below.";
@@ -214,7 +218,7 @@ function renderBeaconTargets(targets = []) {
     const name = document.createElement("strong");
     name.textContent = target.label;
     const identifier = document.createElement("span");
-    identifier.textContent = `Unverified public ID · ${target.streamId.slice(-12)}`;
+    identifier.textContent = `Beacon code · ${target.streamId.slice(-12)}`;
     button.append(name, identifier);
     button.addEventListener("click", async () => {
       try {
@@ -237,7 +241,7 @@ async function stopControllerBeacon() {
   elements["beacon-stop"].disabled = true;
   elements["beacon-browse"].disabled = false;
   renderBeaconTargets();
-  text("beacon-selection", "Select one unverified public target before requesting access.");
+  text("beacon-selection", "Match the beacon code shown on the target before requesting access.");
   if (beacon) await beacon.stop();
   text("beacon-status", "Beacon off");
 }
@@ -312,6 +316,9 @@ function renderPendingTargetRequest() {
 async function stopTargetBeacon() {
   const beacon = targetBeacon;
   targetBeacon = null;
+  clearTimeout(targetBeaconExpiry);
+  targetBeaconExpiry = null;
+  elements["target-beacon-code"].hidden = true;
   pendingTargetRequest = null;
   elements["target-pairing-request"].hidden = true;
   elements["target-beacon-stop"].disabled = true;
@@ -322,7 +329,11 @@ async function stopTargetBeacon() {
 
 function bindTargetBeacon(beacon) {
   beacon.addEventListener("status", (event) => {
+    if (targetBeacon !== beacon) return;
     text("target-beacon-status", event.detail.error ? "Beacon error" : titleCase(event.detail.phase));
+    const advertising = event.detail.phase === "advertising" && !event.detail.error;
+    elements["target-beacon-code"].hidden = !advertising;
+    if (advertising) text("target-beacon-code", "Beacon code: " + event.detail.streamId.slice(-12));
     elements["target-beacon-status"].dataset.tone = event.detail.error ? "danger" : "";
   });
   beacon.addEventListener("pairingrequest", () => {
@@ -371,7 +382,7 @@ function connectController() {
         controllerInvitation = null;
         elements["controller-connect"].disabled = true;
         text("invite-badge", "Offer expired");
-        throw new Error("The approved private offer expired. Browse the public beacon and request a new one.");
+        throw new Error("The approved private offer expired. Scan for the beacon and request access again.");
       }
       controllerSession?.stop();
       const transport = controllerInvitation.transport === "vdo"
@@ -482,7 +493,7 @@ function renderPhoneSnapshot() {
 }
 
 function applyPhone(action, args = {}, { source = "local", expectedRevision = null, publish = true } = {}) {
-  if (!phoneSnapshot) throw new Error("Create the phone target first.");
+  if (!phoneSnapshot) throw new Error("The browser experiment is not ready.");
   const outcome = applyPhoneAction(phoneSnapshot, action, args, { clock, expectedRevision });
   phoneSnapshot = outcome.snapshot;
   appendEvent(outcome.event, source);
@@ -527,6 +538,7 @@ function bindTargetSession(session) {
     }
     elements["target-connect"].disabled = !["idle", "closed", "error"].includes(event.detail.phase);
     elements["target-disconnect"].disabled = ["idle", "closed"].includes(event.detail.phase);
+    elements["target-disconnect"].hidden = elements["target-disconnect"].disabled;
   });
   on("ready", () => {
     if (phoneTarget?.session === session && phoneTarget.offerExpiresUnixMs
@@ -573,6 +585,7 @@ function bindTargetSession(session) {
 }
 
 async function createPhoneTarget({ pairing = null, autoConnect = false } = {}) {
+  if (phoneSnapshot.run.thread_alive) throw new Error("Stop the local run before creating a new connection.");
   if (phoneTarget?.offerTimer) clearTimeout(phoneTarget.offerTimer);
   phoneTarget?.session.stop();
   outputEngine.disarm();
@@ -585,7 +598,7 @@ async function createPhoneTarget({ pairing = null, autoConnect = false } = {}) {
   const actions = Object.keys(ACTION_SCOPE);
   phoneSnapshot = createPhoneExperimentSnapshot({ targetId, epoch, clock });
   eventLog = [];
-  targetInvitationUrl = createVdoInvitation({
+  targetInvitationUrl = pairing ? "" : createVdoInvitation({
     pageUrl: location.href,
     room,
     targetId,
@@ -624,8 +637,8 @@ async function createPhoneTarget({ pairing = null, autoConnect = false } = {}) {
     }, Math.max(0, pairing.expiresUnixMs - Date.now()));
   }
   elements["target-room"].value = room;
-  elements["target-pairing"].hidden = false;
-  await renderQrCode(elements["target-qr"], targetInvitationUrl);
+  elements["target-pairing"].hidden = Boolean(pairing);
+  if (!pairing) await renderQrCode(elements["target-qr"], targetInvitationUrl);
   text("target-state-badge", "Target created");
   elements["target-connect"].disabled = false;
   renderPhoneSnapshot();
@@ -665,12 +678,18 @@ function bindPublicBeaconControls() {
   elements["target-beacon-start"].addEventListener("click", async () => {
     try {
       await stopTargetBeacon();
-      const beacon = new PpsPublicBeacon({ role: "target", label: "PPS phone experiment" });
+      const beacon = new PpsPublicBeacon({ role: "target", label: "PPS browser runner" });
       targetBeacon = beacon;
       bindTargetBeacon(beacon);
       elements["target-beacon-start"].disabled = true;
       elements["target-beacon-stop"].disabled = false;
       await beacon.startAdvertising();
+      if (targetBeacon === beacon) {
+        targetBeaconExpiry = setTimeout(() => {
+          void stopTargetBeacon().catch((error) => showToast(error.message, { error: true }));
+          showToast("Beacon expired. Send a new beacon when ready.");
+        }, 120_000);
+      }
     } catch (error) {
       showToast(error.message, { error: true });
       if (targetBeacon) await stopTargetBeacon();
@@ -687,6 +706,10 @@ function bindPublicBeaconControls() {
   });
   elements["target-request-approve"].addEventListener("click", async () => {
     if (!pendingTargetRequest || !targetBeacon) return;
+    if (phoneSnapshot.run.thread_alive) {
+      showToast("Stop the local run before allowing a new controller.", { error: true });
+      return;
+    }
     const request = pendingTargetRequest;
     const allowed = new Set(availablePhoneScopes());
     const acceptedScopes = request.requestedScopes.filter((scope) => allowed.has(scope)).sort();
@@ -709,7 +732,11 @@ function bindPublicBeaconControls() {
 
 function bindPhoneTargetControls() {
   const capabilities = outputEngine.capabilities();
-  text("output-capability", `${capabilities.audio ? "Audio" : "No audio"} • ${capabilities.vibration ? "Vibration" : "No vibration"}`);
+  for (const [id, supported] of [["phone-audio-enabled", capabilities.audio], ["phone-vibration-enabled", capabilities.vibration]]) {
+    elements[id].checked = supported;
+    elements[id].disabled = !supported;
+  }
+  text("output-capability", `${capabilities.audio ? "Audio" : "No audio"} • ${capabilities.vibration ? "Vibration API" : "No vibration API"}`);
   elements["create-phone-target"].addEventListener("click", () => void createPhoneTarget().catch((error) => showToast(error.message, { error: true })));
   elements["copy-target-invite"].addEventListener("click", async () => {
     try {
@@ -809,6 +836,10 @@ function start() {
   bindControllerControls();
   bindPublicBeaconControls();
   bindPhoneTargetControls();
+  phoneSnapshot = createPhoneExperimentSnapshot({
+    targetId: createProtocolIdentity("phone_target"), epoch: createProtocolEpoch(), clock,
+  });
+  renderPhoneSnapshot();
   updateControllerActions();
   setConnectionStatus("idle", "Not connected");
   installBrowserLifecycle({
