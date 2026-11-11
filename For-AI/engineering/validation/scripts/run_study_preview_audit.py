@@ -136,7 +136,8 @@ def audit_routes(browser, origin):
 def stage_completion_fixture(context):
     """Serve a two-block test plan without modifying the assembled site."""
     root = PAGES / "assets" / "phone-studies"
-    reference = root / "canzoneri_2013_amputation_prosthesis"
+    # Its first trial ends before the final response window closes.
+    reference = root / "serino_2015_peri_trunk_exp1"
     plan = json.loads((reference / "study.json").read_text(encoding="utf-8"))
     block = plan["parts"][0]["blocks"][0]
     block["trials"] = block["trials"][:1]
@@ -232,16 +233,25 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
             expect(controller.locator("#controller-timeline-list")).to_contain_text("Vibration requested", timeout=10000)
         else:
             surface.tap()
-            target.wait_for_function("() => ppsCueMs !== null && performance.now() - ppsCueMs >= 1450", timeout=7000)
-            surface.tap()
-            surface.tap()
+            if complete_fixture:
+                bounds = surface.bounding_box()
+                center = {"x": bounds["x"] + bounds["width"] / 2, "y": bounds["y"] + bounds["height"] / 2}
+                touch = target_context.new_cdp_session(target)
+                target.wait_for_function("() => ppsCueMs !== null && performance.now() - ppsCueMs >= 1900", timeout=7000)
+                touch.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [center]})
+                target.wait_for_function("() => performance.now() - ppsCueMs >= 2130")
+                touch.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
+            else:
+                target.wait_for_function("() => ppsCueMs !== null && performance.now() - ppsCueMs >= 1450", timeout=7000)
+                surface.tap()
+                surface.tap()
             timeline = controller.locator("#controller-timeline-list")
             expect(timeline).to_contain_text("Audio scheduled")
             expect(timeline).to_contain_text("Vibration requested")
             responses = timeline.get_by_role("listitem").filter(has_text=" ms RT")
             expect(responses).to_have_count(1)
             reaction_time = int(re.search(r"(\d+) ms RT", responses.inner_text())[1])
-            assert 1300 < reaction_time <= 2000, reaction_time
+            assert (1850 if complete_fixture else 1300) < reaction_time <= 2000, reaction_time
         if study:
             if complete_fixture:
                 for _ in range(2):
@@ -267,6 +277,7 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
                 assert exported["trials"][0]["rt_ms"] == reaction_time
             if complete_fixture:
                 assert len(exported["trials"]) == 2 and exported["trials"][1]["rt_ms"] is None
+                print(f"Controller and export recorded a {reaction_time} ms tap released after the deadline.")
         else:
             expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
         target.get_by_role("button", name="Disconnect controller").click()

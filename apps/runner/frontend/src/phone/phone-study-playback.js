@@ -1,4 +1,4 @@
-import { RESPONSE_MAX_MS } from "./tap-response.js";
+import { RESPONSE_MAX_MS, RESPONSE_SETTLE_MS } from "./tap-response.js";
 
 const ID = /^[a-z0-9_]{1,100}$/u;
 const HASH = /^[a-f0-9]{64}$/u;
@@ -253,7 +253,7 @@ export class PhoneStudyPlayback {
       };
       this.results[number - 1] = { ...record, trial_start_ms: startMs, response_anchor_ms: anchorMs };
       this.callbacks.trial(record, startMs, anchorMs);
-      blockEndMs = Math.max(blockEndMs, anchorMs + RESPONSE_MAX_MS);
+      blockEndMs = Math.max(blockEndMs, anchorMs + RESPONSE_SETTLE_MS);
     }
     await wait(blockEndMs - performance.now(), signal);
   }

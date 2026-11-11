@@ -454,9 +454,9 @@ The beacon closes after approval or after two minutes. Choose and prepare the
 study on the target, then complete local setup and arm outputs. Use **Start
 part** on the controller to run the prepared study and **Continue** at an
 instruction gate. The timeline shows audio scheduling, vibration requests and
-response markers. The target accepts one isolated tap per trial from 100 to
-2,000 ms after its local response anchor. If windows overlap, the most recent
-eligible cue owns the tap. To
+response markers. One isolated tap per trial can begin 100 to 2,000 ms
+after its local response anchor. The tap must end within 500 ms of contact
+onset. If windows overlap, the most recent eligible cue owns the tap. To
 grant remote stop and abort, enable that permission on the target before
 approving. The target can disconnect the controller at any time. Pairing needs
 Internet access.

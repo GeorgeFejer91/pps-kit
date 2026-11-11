@@ -41,3 +41,16 @@ test("overlap uses the most recent eligible cue and discards repeated taps", () 
   capture.down(touch(1, 1_940));
   assert.equal(capture.up(touch(1, 1_975)), null);
 });
+
+test("uses contact onset at the deadline and confirms the tap on release", () => {
+  const capture = new TapResponseWindow();
+  capture.open(1_000, 1);
+  capture.down(touch(1, 3_000));
+  assert.deepEqual(capture.up(touch(1, 3_140)), {
+    atMs: 3_000, reactionTimeMs: 2_000, trialNumber: 1,
+  });
+
+  capture.open(4_000, 2);
+  capture.down(touch(1, 5_950));
+  assert.equal(capture.up(touch(1, 6_451)), null);
+});

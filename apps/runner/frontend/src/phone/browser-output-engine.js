@@ -1,8 +1,8 @@
-import { RESPONSE_MAX_MS } from "./tap-response.js";
+import { RESPONSE_SETTLE_MS } from "./tap-response.js";
 
 export const DEMO_AUDIO_MS = 3_000;
 export const DEMO_TACTILE_MS = 2_300;
-export const DEMO_DURATION_MS = DEMO_TACTILE_MS + RESPONSE_MAX_MS;
+export const DEMO_DURATION_MS = DEMO_TACTILE_MS + RESPONSE_SETTLE_MS;
 
 function audioContextConstructor() {
   return globalThis.AudioContext || globalThis.webkitAudioContext;
@@ -64,20 +64,27 @@ export class BrowserOutputEngine extends EventTarget {
       this.oscillator = oscillator;
     }
     const useTactile = this.vibrationEnabled && this.capabilities().vibration;
-    const tactile = useTactile ? setTimeout(() => {
-      const atMs = performance.now();
-      if (this.navigatorObject.vibrate([70, 45, 130, 55, 210])) {
-        this.dispatchEvent(new CustomEvent("vibration-requested", { detail: { atMs } }));
-      }
-    }, DEMO_TACTILE_MS) : null;
-    const finishAt = startAt + (useTactile ? DEMO_DURATION_MS : DEMO_AUDIO_MS);
-    const completed = setTimeout(() => {
-      this.timeout = null;
-      const event = new Event("complete");
-      Object.defineProperty(event, "detail", { value: { startAt, endedAt: performance.now() } });
-      this.dispatchEvent(event);
-    }, Math.max(0, finishAt + 40 - performance.now()));
-    this.timeout = { tactile, completed };
+    const timers = { tactile: null, completed: null };
+    this.timeout = timers;
+    const finish = (atMs) => {
+      timers.completed = setTimeout(() => {
+        this.timeout = null;
+        const event = new Event("complete");
+        Object.defineProperty(event, "detail", { value: { startAt, endedAt: performance.now() } });
+        this.dispatchEvent(event);
+      }, Math.max(0, atMs - performance.now()));
+    };
+    if (useTactile) {
+      timers.tactile = setTimeout(() => {
+        const atMs = performance.now();
+        finish(atMs + RESPONSE_SETTLE_MS);
+        if (this.navigatorObject.vibrate([70, 45, 130, 55, 210])) {
+          this.dispatchEvent(new CustomEvent("vibration-requested", { detail: { atMs } }));
+        }
+      }, DEMO_TACTILE_MS);
+    } else {
+      finish(startAt + DEMO_AUDIO_MS);
+    }
     return { startAt, useTactile };
   }
 

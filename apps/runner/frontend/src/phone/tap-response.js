@@ -1,6 +1,7 @@
 export const RESPONSE_MIN_MS = 100;
 export const RESPONSE_MAX_MS = 2_000;
 const TAP_MAX_DURATION_MS = 500;
+export const RESPONSE_SETTLE_MS = RESPONSE_MAX_MS + TAP_MAX_DURATION_MS;
 const TAP_MAX_TRAVEL_PX = 24;
 
 /** Timestamp the first isolated tap from contact onset, once release validates the gesture. */
@@ -56,8 +57,7 @@ export class TapResponseWindow {
     if (tap?.pointerId !== event.pointerId) return null;
     const { anchorMs, trialNumber } = tap.window;
     const duration = event.timeStamp - tap.timeStamp;
-    if (!Number.isFinite(duration) || duration < 0 || duration > TAP_MAX_DURATION_MS ||
-        event.timeStamp > anchorMs + RESPONSE_MAX_MS) return null;
+    if (!Number.isFinite(duration) || duration < 0 || duration > TAP_MAX_DURATION_MS) return null;
     tap.window.answered = true;
     return {
       atMs: tap.timeStamp,
