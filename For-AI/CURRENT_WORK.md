@@ -1,6 +1,6 @@
 # Current work
 
-Reviewed: 2026-11-10. Overall completion goal: **OPEN**.
+Reviewed: 2026-11-11. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
 - **Goal:** deliver the [standalone study preview PWA and offline Planner +
@@ -65,6 +65,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   `42867609777` deployed to `https://ppskit.com/`; 470 public files matched
   the assembled bytes and all four main routes returned HTTP 200. No installer
   was rebuilt.
+- **Designer noise picker:** White, Pink, Blue, Violet and Brown retain their
+  named fills in Edit and use muted tints in View. Chromium checks passed in
+  both themes at 320 to 1920 CSS px, including selection, focus, label contrast
+  and text spacing. The canonical build and Pages assembly passed. Installed
+  validation remains a separate gate.
 - **Git observation:** `main` was fast-forwarded to domain source checkpoint
   `8ce15ed6` and the verified credit changes were pushed using the repository URL.
   Ordinary fetch is still blocked by the malformed local
