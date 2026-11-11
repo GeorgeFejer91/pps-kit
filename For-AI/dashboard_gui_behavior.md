@@ -66,6 +66,13 @@ Remake is atomic at the local companion boundary: render/import and validate a t
 
 ## Trajectory Preview
 
+The `2 · Configure ingredient` row places **Sound Ingredient Settings** beside
+the trajectory preview where both panes fit. Drag the vertical divider or use
+its Left/Right arrow keys (Home/End go to the width limits). This works in View
+and Edit modes. The panes stack in reading order when space is limited. The
+preview starts with a square 2D canvas, with the radius circle centered and
+inset from all four edges.
+
 The Segment 1 trajectory preview is an embedded Three.js viewer that is lazy-loaded as it approaches the viewport. The right-side preview controls (`2D`, `3D`, view presets, zoom, fit radius, reset) are view-only camera controls and must stay usable in read-only, locked, and hosted/static modes. Source-owned trajectories remain visible together: the selected trajectory is thicker and opaque, inactive trajectories are muted, arbitrary imported-audio colours use a contrast outline, and coincident paths receive small deterministic offsets. Both 2D and 3D paths are clickable and select their matching inventory card. A fixed-clip selection reports `Preserved audio clip — no trajectory` while leaving the spatialized paths visible but muted.
 
 Path clicks must remain distinguishable from endpoint dragging, 2D pan, and 3D orbit/pan. Viewer-to-card and card-to-viewer selection, camera navigation, and audio preview remain available in View mode; endpoint and form mutation are gated by Edit mode. Saved source trajectories always render from each source's `trajectory_snapshot`; the design-level trajectory is only the initial geometry for a new spatialized draft.

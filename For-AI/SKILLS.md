@@ -123,7 +123,7 @@ acceptance criteria pass. Do not create a duplicate progress ledger.
 | Integrated app/CLI/browser-companion creation or broad migration | `tauri-remote-app-builder`; preserve the requested product scope |
 | Remote browser/phone authority and transport | `tauri-browser-remote-control` |
 | Text-bearing HTML/CSS or WebView UI | `uncodixfy-pretext` with `ponytail`; actual Pretext measurement plus rendered checks |
-| Bounded panels that stretch in width and height without scrolling | `uncodixfy-pretext` → `references/accordion-stretch.md`; preserve anchors, group order, readable type, and full-text access |
+| Default HTML layout, including bounded panels that stretch without scrolling | `uncodixfy-pretext` → `references/accordion-stretch.md`; follow the [PPS layout contract](interface_design_principles.md#default-html-layout-uncodixfy-pretext-stretch-accordion) |
 | MobX suitability or existing MobX state | `mobx-integration`; preserve current framework and state owners |
 | HTML keyboard/focus/name semantics | `agents-inc-accessibility`; share Pretext's rendered verification matrix |
 | Measured browser/WebView costs | `agents-inc-web-performance`; use representative target workloads |

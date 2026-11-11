@@ -8442,6 +8442,61 @@ function wireSplitters() {
   }
 }
 
+function wireIngredientSplitter() {
+  const handle = $("ingredient-splitter");
+  const settings = $("ingredient-editor");
+  const grid = handle.parentElement;
+  let startX = 0;
+  let startWidth = 0;
+
+  function widths() {
+    const style = getComputedStyle(grid);
+    const min = Number.parseFloat(style.getPropertyValue("--settings-min"));
+    const max = grid.clientWidth - handle.offsetWidth - Number.parseFloat(style.getPropertyValue("--preview-min"));
+    return { min, max, current: Math.round(settings.getBoundingClientRect().width) };
+  }
+
+  function setWidth(value) {
+    const { min, max } = widths();
+    grid.style.setProperty("--settings-width", `${Math.min(max, Math.max(min, value))}px`);
+  }
+
+  const observer = new ResizeObserver(() => {
+    if (!handle.offsetWidth) return;
+    const { min, max, current } = widths();
+    handle.setAttribute("aria-valuemin", min);
+    handle.setAttribute("aria-valuemax", max);
+    handle.setAttribute("aria-valuenow", current);
+    handle.setAttribute("aria-valuetext", `${Math.round(current / grid.clientWidth * 100)}% of workspace width`);
+  });
+  observer.observe(grid);
+  observer.observe(settings);
+
+  handle.addEventListener("pointerdown", (event) => {
+    if (!event.isPrimary || event.button !== 0) return;
+    handle.focus({ preventScroll: true });
+    startX = event.clientX;
+    startWidth = settings.getBoundingClientRect().width;
+    handle.setPointerCapture(event.pointerId);
+    handle.classList.add("active");
+    document.body.classList.add("resizing-layout");
+  });
+  handle.addEventListener("pointermove", (event) => {
+    if (handle.hasPointerCapture(event.pointerId)) setWidth(startWidth + event.clientX - startX);
+  });
+  handle.addEventListener("lostpointercapture", () => {
+    handle.classList.remove("active");
+    document.body.classList.remove("resizing-layout");
+  });
+  handle.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const { min, max, current } = widths();
+    setWidth(event.key === "Home" ? min : event.key === "End" ? max
+      : current + (event.key === "ArrowLeft" ? -1 : 1) * PANEL_RESIZE_SNAP_PX);
+  });
+}
+
 function startSplitterResize(event, gutter) {
   if (event.button !== 0) return;
   event.preventDefault();
@@ -9299,6 +9354,7 @@ function wireEvents() {
     });
   }
   wireSplitters();
+  wireIngredientSplitter();
   for (const button of document.querySelectorAll("[data-preview-mode]")) {
     button.addEventListener("click", () => setPreviewMode(button.dataset.previewMode));
   }

@@ -47,10 +47,8 @@ const HEAD_CENTER_Y = 1.33;
 const DISTANCE_CM_MIN = 1;
 const DISTANCE_CM_MAX = 1000;
 // Fraction of extra room around the PPS circle when it is fitted to the view.
-// ~1.08 makes the circle fill the centered square almost to the border (the
-// radius "reaches" the square edges) while leaving a small margin so the ring
-// stroke and endpoint markers are not clipped.
-const TWO_D_RADIUS_PADDING = 1.08;
+// Keep a visible margin around the centered ring and its lifted endpoint markers.
+const TWO_D_RADIUS_PADDING = 1.18;
 const TWO_D_MIN_WORLD_SPAN = 0.5;
 const TWO_D_MIN_ZOOM_FACTOR = 0.22;
 const TWO_D_MAX_ZOOM_OUT_FACTOR = 3.0;

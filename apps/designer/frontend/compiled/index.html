@@ -14,8 +14,8 @@
       }
     }
   </script>
-  <script type="module" crossorigin src="./assets/index-CmG2ARJF.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-Bnl6rjZ8.css">
+  <script type="module" crossorigin src="./assets/index-D7ebZLY5.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DjXIo_xM.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to page content</a>
@@ -231,77 +231,83 @@
           </section>
 
           <div class="stimulus-editor-grid">
-            <section class="ingredient-editor" aria-labelledby="ingredient-editor-heading">
+            <section id="ingredient-editor" class="ingredient-editor" aria-labelledby="ingredient-editor-heading">
               <div class="ingredient-editor-heading">
                 <div>
-                  <span class="decision-sequence-label">2 · Configure ingredient</span>
-                  <h3 id="ingredient-editor-heading">Ingredient Settings</h3>
+                  <span class="decision-sequence-label" data-pretext>2 · Configure ingredient</span>
+                  <h3 id="ingredient-editor-heading" data-pretext>Sound Ingredient Settings</h3>
                 </div>
-                <span id="ingredient-editor-mode" class="status-label optional">Select an ingredient</span>
+                <span id="ingredient-editor-mode" class="status-label optional" data-pretext>Select an ingredient</span>
               </div>
-              <div class="field-row">
-                <label for="bake-label">Stimulus name</label>
-                <input id="bake-label" type="text" autocomplete="off" required>
-              </div>
-              <div id="manual-audio-settings" class="manual-audio-settings" hidden>
+              <div class="ingredient-editor-body">
                 <div class="field-row">
-                  <label>Uploaded audio</label>
-                  <div class="audio-source-file-row">
-                    <span id="selected-audio-file-status" class="audio-source-file-status">No audio selected</span>
-                    <button id="choose-editor-audio" type="button">Choose Audio File</button>
+                  <label for="bake-label">Stimulus name</label>
+                  <input id="bake-label" type="text" autocomplete="off" required>
+                </div>
+                <div id="manual-audio-settings" class="manual-audio-settings" hidden>
+                  <div class="field-row">
+                    <label>Uploaded audio</label>
+                    <div class="audio-source-file-row">
+                      <span id="selected-audio-file-status" class="audio-source-file-status">No audio selected</span>
+                      <button id="choose-editor-audio" type="button">Choose Audio File</button>
+                    </div>
+                  </div>
+                  <div class="field-row">
+                    <label for="manual-audio-color">Display colour</label>
+                    <button id="manual-audio-color" class="color-picker-button" type="button" aria-haspopup="dialog">
+                      <span id="manual-audio-color-swatch" class="color-picker-swatch" aria-hidden="true"></span>
+                      <span id="manual-audio-color-value">#1C7A86</span>
+                    </button>
+                  </div>
+                  <div id="fixed-audio-duration-field" class="field-row" hidden>
+                    <label for="fixed-audio-duration">Duration s</label>
+                    <input id="fixed-audio-duration" type="number" min="0.1" max="3600" step="0.1" value="4">
                   </div>
                 </div>
-                <div class="field-row">
-                  <label for="manual-audio-color">Display colour</label>
-                  <button id="manual-audio-color" class="color-picker-button" type="button" aria-haspopup="dialog">
-                    <span id="manual-audio-color-swatch" class="color-picker-swatch" aria-hidden="true"></span>
-                    <span id="manual-audio-color-value">#1C7A86</span>
-                  </button>
+                <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode" hidden>
+                  <span>Source mode</span>
+                  <div class="source-mode-choice-grid" role="radiogroup" aria-label="Generated source mode">
+                    <label class="source-mode-widget">
+                      <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
+                      <span class="source-mode-widget-body">
+                        <img class="native-signal-graphic" src="./assets/looming_burst_train_widget-HLYUYvl9.svg" alt="" aria-hidden="true" width="320" height="96">
+                        <span class="source-mode-widget-copy"><strong>Burst train</strong><span>Hobeika et al. (2020)</span></span>
+                      </span>
+                    </label>
+                    <label class="source-mode-widget">
+                      <input type="radio" name="generated-source-mode" value="continuous_noise">
+                      <span class="source-mode-widget-body">
+                        <img class="native-signal-graphic" src="./assets/looming_smooth_linear_approach_widget-6HvDtxuv.svg" alt="" aria-hidden="true" width="320" height="96">
+                        <span class="source-mode-widget-copy"><strong>Smooth linear</strong><span>Approach envelope</span></span>
+                      </span>
+                    </label>
+                  </div>
                 </div>
-                <div id="fixed-audio-duration-field" class="field-row" hidden>
-                  <label for="fixed-audio-duration">Duration s</label>
-                  <input id="fixed-audio-duration" type="number" min="0.1" max="3600" step="0.1" value="4">
-                </div>
+                <fieldset id="trajectory-settings" class="trajectory-settings">
+                  <legend>Trajectory</legend>
+                  <div class="split-fields">
+                    <div class="field-row"><label for="start-distance">Start distance cm</label><input id="start-distance" type="number" min="1" max="1000" step="1"></div>
+                    <div class="field-row"><label for="end-distance">End distance cm</label><input id="end-distance" type="number" min="1" max="1000" step="1"></div>
+                    <div class="field-row"><label for="start-rotation">Start rotation deg</label><input id="start-rotation" type="number" min="0" max="360" step="1"></div>
+                    <div class="field-row"><label for="end-rotation">End rotation deg</label><input id="end-rotation" type="number" min="0" max="360" step="1"></div>
+                    <div class="field-row"><label for="movement-duration">Movement duration s</label><input id="movement-duration" type="number" min="0.1" max="30" step="0.1"></div>
+                    <div class="field-row"><label for="start-hold">Start hold s</label><input id="start-hold" type="number" min="0" max="30" step="0.1"></div>
+                    <div class="field-row"><label for="end-hold">End hold s</label><input id="end-hold" type="number" min="0" max="30" step="0.1"></div>
+                  </div>
+                  <p id="trajectory-derived-note" class="decision-note" hidden></p>
+                </fieldset>
+                <div id="fixed-clip-trajectory-note" class="fixed-clip-trajectory-note" hidden>Preserved audio clip — no trajectory</div>
               </div>
-              <div id="generated-source-mode-control" class="source-mode-row" aria-label="Generated source mode" hidden>
-                <span>Source mode</span>
-                <div class="source-mode-choice-grid" role="radiogroup" aria-label="Generated source mode">
-                  <label class="source-mode-widget">
-                    <input type="radio" name="generated-source-mode" value="dynaspace_gaussian_burst_train" checked>
-                    <span class="source-mode-widget-body">
-                      <img class="native-signal-graphic" src="./assets/looming_burst_train_widget-HLYUYvl9.svg" alt="" aria-hidden="true" width="320" height="96">
-                      <span class="source-mode-widget-copy"><strong>Burst train</strong><span>Hobeika et al. (2020)</span></span>
-                    </span>
-                  </label>
-                  <label class="source-mode-widget">
-                    <input type="radio" name="generated-source-mode" value="continuous_noise">
-                    <span class="source-mode-widget-body">
-                      <img class="native-signal-graphic" src="./assets/looming_smooth_linear_approach_widget-6HvDtxuv.svg" alt="" aria-hidden="true" width="320" height="96">
-                      <span class="source-mode-widget-copy"><strong>Smooth linear</strong><span>Approach envelope</span></span>
-                    </span>
-                  </label>
-                </div>
-              </div>
-              <fieldset id="trajectory-settings" class="trajectory-settings">
-                <legend>Trajectory</legend>
-                <div class="split-fields">
-                  <div class="field-row"><label for="start-distance">Start distance cm</label><input id="start-distance" type="number" min="1" max="1000" step="1"></div>
-                  <div class="field-row"><label for="end-distance">End distance cm</label><input id="end-distance" type="number" min="1" max="1000" step="1"></div>
-                  <div class="field-row"><label for="start-rotation">Start rotation deg</label><input id="start-rotation" type="number" min="0" max="360" step="1"></div>
-                  <div class="field-row"><label for="end-rotation">End rotation deg</label><input id="end-rotation" type="number" min="0" max="360" step="1"></div>
-                  <div class="field-row"><label for="movement-duration">Movement duration s</label><input id="movement-duration" type="number" min="0.1" max="30" step="0.1"></div>
-                  <div class="field-row"><label for="start-hold">Start hold s</label><input id="start-hold" type="number" min="0" max="30" step="0.1"></div>
-                  <div class="field-row"><label for="end-hold">End hold s</label><input id="end-hold" type="number" min="0" max="30" step="0.1"></div>
-                </div>
-                <p id="trajectory-derived-note" class="decision-note" hidden></p>
-              </fieldset>
-              <div id="fixed-clip-trajectory-note" class="fixed-clip-trajectory-note" hidden>Preserved audio clip — no trajectory</div>
               <input id="bake-gain" type="hidden" value="1">
             </section>
 
-            <section class="preview-panel stimulus-preview-panel" data-panel-id="trajectory-preview">
+            <div id="ingredient-splitter" role="separator" aria-orientation="vertical"
+              aria-label="Resize sound ingredient settings" aria-controls="ingredient-editor"
+              tabindex="0"></div>
+
+            <section class="preview-panel stimulus-preview-panel" data-panel-id="trajectory-preview" aria-labelledby="trajectory-preview-heading">
               <div class="panel-heading">
-                <div>Trajectory Preview</div>
+                <h3 id="trajectory-preview-heading" data-pretext>Trajectory Preview</h3>
                 <div class="preview-actions">
                   <div class="segmented-control" aria-label="Trajectory preview mode">
                     <button id="preview-mode-2d" type="button" class="mode-toggle active" data-preview-mode="2d" data-preview-view-control>2D</button>

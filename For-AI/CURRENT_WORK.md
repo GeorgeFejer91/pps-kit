@@ -8,10 +8,15 @@ This file is the active checklist and handoff owner; replace state, do not appen
   refreshed UI and one suite installer. The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
-- **Current stage:** goals and For-AI guidance. The scope of this checkpoint is
-  product direction, [skill nesting](SKILLS.md#skill-nesting-and-ownership), and
-  [delegation](WORKFLOW.md#delegation-and-handoffs). Product implementation,
-  installed validation and release remain open.
+- **Current stage:** verified Designer source. The
+  [HTML layout standard](interface_design_principles.md#default-html-layout-uncodixfy-pretext-stretch-accordion)
+  is now the stretch accordion. The ingredient configuration row has a
+  mouse/keyboard divider and a square, centered 2D preview. Chromium checks
+  covered Study 5 in View mode, both drag directions, keyboard focus/resize,
+  2D/3D controls, light/dark, and 320 CSS px reflow with text spacing.
+  The canonical rebuild and both Pages assembly tests passed from a clean
+  snapshot after the primary checkout's cloud file provider blocked a preload
+  read. The offline suite and installed validation remain open.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.

@@ -22,11 +22,14 @@
       position: absolute;
       left: 14px;
       top: 12px;
+      max-width: calc(50% - 42px);
+      box-sizing: border-box;
       padding: 8px 10px;
       border: 1px solid rgba(242, 231, 216, 0.18);
       background: rgba(17, 16, 14, 0.58);
       border-radius: 6px;
       line-height: 1.35;
+      overflow-wrap: break-word;
       font-size: 12px;
       pointer-events: none;
     }
@@ -34,6 +37,13 @@
       display: block;
       margin-bottom: 2px;
       font-size: 13px;
+    }
+    @media (max-width: 480px) {
+      #hud {
+        inset: auto 10px 10px;
+        max-width: calc(100% - 20px);
+        width: fit-content;
+      }
     }
   </style>
   <script type="importmap">

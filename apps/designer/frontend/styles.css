@@ -4180,7 +4180,7 @@ a:focus-visible,
   font-size: 11px;
   font-weight: 700;
   text-align: right;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .source-mode-widget:hover .source-mode-widget-body,
@@ -4204,17 +4204,9 @@ a:focus-visible,
   outline: none;
 }
 
-@media (max-width: 760px) {
-  .source-mode-row {
-    grid-template-columns: 1fr;
-  }
-
+@container (max-width: 280px) {
   .source-mode-choice-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .source-mode-widget img {
-    height: auto;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -4340,6 +4332,7 @@ a:focus-visible,
 /* Segment 1 is one task workspace: the source decision feeds a single draft
    editor, the shared viewer, and a compact read-only inventory. */
 .stimulus-workspace-panel {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -4370,36 +4363,125 @@ a:focus-visible,
 }
 
 .stimulus-editor-grid {
+  --settings-min: 320px;
+  --preview-min: 352px;
+  --divider-width: 24px;
+  --editor-gap: clamp(8px, min(1.4cqi, 1.4svh), 16px);
   display: grid;
-  grid-template-columns: minmax(360px, 0.82fr) minmax(480px, 1.18fr);
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--editor-gap);
   align-items: stretch;
+}
+
+#ingredient-splitter {
+  display: none;
+  place-items: center;
+  min-height: 0;
+  border-radius: 6px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+#ingredient-splitter::before {
+  content: "";
+  width: 4px;
+  height: 48px;
+  border-radius: 2px;
+  background: var(--line-strong);
+}
+
+#ingredient-splitter:is(:hover, :focus-visible, .active)::before {
+  background: var(--primary);
+}
+
+@media (min-width: 761px) {
+  @container (min-width: 720px) {
+    .stimulus-editor-grid {
+      grid-template-columns:
+        clamp(var(--settings-min), var(--settings-width, 46%), calc(100% - var(--divider-width) - var(--preview-min)))
+        var(--divider-width) minmax(0, 1fr);
+    }
+
+    #ingredient-splitter {
+      display: grid;
+    }
+  }
 }
 
 .ingredient-editor,
 .stimulus-editor-grid > .stimulus-preview-panel {
   min-width: 0;
+  min-height: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
-  padding: 12px;
+  padding: var(--editor-gap);
+}
+
+.ingredient-editor {
+  container-type: inline-size;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--editor-gap);
+}
+
+.ingredient-editor-body {
+  display: grid;
+  align-content: space-between;
+  min-width: 0;
+  min-height: 0;
+  gap: var(--editor-gap);
+}
+
+.ingredient-editor-body > :is(.field-row, .trajectory-settings, .fixed-clip-trajectory-note),
+.ingredient-editor .trajectory-settings .field-row {
+  margin: 0;
 }
 
 .ingredient-editor-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.ingredient-editor-heading h3 {
-  margin: 3px 0 0;
-  font-size: 15px;
+.ingredient-editor-heading .decision-sequence-label {
+  display: block;
 }
 
-.ingredient-editor > .field-row:last-child {
-  margin-bottom: 0;
+.ingredient-editor-heading > div {
+  min-width: 0;
+}
+
+.ingredient-editor-heading h3,
+.stimulus-preview-panel h3 {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.stimulus-editor-grid [data-pretext-result] {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.stimulus-editor-grid [data-pretext-result="reflow"] {
+  min-height: var(--pretext-min-height, 0px);
+}
+
+@container (max-width: 33rem) {
+  .ingredient-editor .source-mode-widget-copy {
+    grid-template-columns: 16px minmax(0, 1fr);
+    row-gap: 4px;
+  }
+
+  .ingredient-editor .source-mode-widget-copy span {
+    grid-column: 2;
+    text-align: left;
+  }
 }
 
 .audio-source-file-row {
@@ -4411,9 +4493,7 @@ a:focus-visible,
 
 .audio-source-file-status {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--surface-2);
@@ -5848,20 +5928,66 @@ a:focus-visible,
   box-shadow: inset 3px 0 0 var(--family-catch);
 }
 
-.preview-panel iframe {
-  width: 100%;
+.stimulus-preview-panel iframe {
+  width: min(100%, clamp(24rem, 66svh, 42rem));
+  height: auto;
+  aspect-ratio: 1;
   border: 1px solid #272d29;
   border-radius: 6px;
   display: block;
-  flex: 1;
-  min-height: 260px;
+  place-self: center;
+  min-width: 0;
   background: #11100e;
 }
 
-.preview-panel {
-  display: flex;
-  flex-direction: column;
-  min-height: 360px;
+.stimulus-preview-panel {
+  --preview-button-height: 34px;
+  --preview-group-button-height: 32px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--editor-gap);
+}
+
+.stimulus-preview-panel .panel-heading {
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.stimulus-preview-panel .panel-heading button {
+  min-height: var(--preview-group-button-height);
+}
+
+.stimulus-preview-panel .panel-heading > .preview-actions > button {
+  min-height: var(--preview-button-height);
+}
+
+.stimulus-preview-panel .panel-heading button[data-pretext-result="reflow"] {
+  min-height: max(var(--preview-button-height), var(--pretext-min-height, 0px));
+}
+
+.stimulus-preview-panel .view-preset-control {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  max-width: 100%;
+}
+
+.stimulus-preview-panel .view-preset-control button {
+  padding-inline: 5px;
+  min-width: 24px;
+}
+
+@media (max-width: 760px) {
+  .stimulus-preview-panel {
+    --preview-button-height: 44px;
+    --preview-group-button-height: 44px;
+  }
+
+  .stimulus-preview-panel .view-preset-control {
+    grid-template-columns: repeat(3, minmax(44px, 1fr));
+  }
+
+  .stimulus-preview-panel .view-preset-control button {
+    min-width: 44px;
+  }
 }
 
 .preview-actions {
@@ -6823,10 +6949,6 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
-  .stimulus-editor-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .workspace-splitter {
     display: none;
   }
@@ -7034,19 +7156,12 @@ body.modal-open {
     justify-content: space-between;
   }
 
-  .ingredient-editor,
-  .stimulus-editor-grid > .stimulus-preview-panel,
   .stimulus-type-module {
     padding: 10px;
   }
 
-  .ingredient-editor-heading,
   .audio-source-file-row {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .ingredient-editor-heading {
-    display: grid;
   }
 
   .audio-source-file-row button,

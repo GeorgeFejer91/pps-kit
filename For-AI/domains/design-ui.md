@@ -10,7 +10,7 @@ a spacing-only change does not require the experiment literature.
 - Designer behavior: relevant headings in
   [dashboard_gui_behavior.md](../dashboard_gui_behavior.md) and
   [segment_registry_contract.md](../segment_registry_contract.md).
-- Layout/typography: [interface principles](../interface_design_principles.md).
+- Layout/typography: [Uncodixfy Pretext stretch accordion standard](../interface_design_principles.md#default-html-layout-uncodixfy-pretext-stretch-accordion).
 - Designer orchestration: [the local skill](../skills/html-dashboard-orchestrator/SKILL.md).
 - Saved schema/native action: [runtime](experiment-runtime.md).
 - Promotion/Pages/installer: [WORKFLOW.md](../WORKFLOW.md).

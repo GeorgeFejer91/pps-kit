@@ -36,6 +36,25 @@ The PPS implementation uses a 4 px base unit and an 8 px primary rhythm. This is
 | Responsiveness and reflow | Preserve meaning and operation as space changes. | Grids collapse deliberately at breakpoints; labels remain attached; fixed/sticky surfaces do not obscure focus; no page-level horizontal overflow. | Laptop, desktop, wide, and narrow viewport captures pass clipping/overflow checks. |
 | Accessibility | Keyboard, focus, semantics, contrast, and zoom are product requirements. | Semantic labels, logical focus order, 2 px focus ring, target size, contrast, and reflow are maintained in desktop and hosted modes. | Automated checks are combined with keyboard and manual visual inspection; automation alone is insufficient. |
 
+## Default HTML Layout: Uncodixfy Pretext Stretch Accordion
+
+Use the [Uncodixfy Pretext stretch accordion](https://github.com/GeorgeFejer91/uncodixfy-pretext/blob/main/references/accordion-stretch.md)
+as the reference layout for PPS Kit HTML, including hosted views and desktop
+WebViews. Allocate the outside box first. For bounded panels, define a
+content-driven minimum, keep the heading and actions anchored, and distribute
+surplus space between ordered groups and cells. Use shrinkable Grid or Flex
+tracks, keep labels attached to controls, and bound spacing and preferred
+type by both dimensions. Preserve readable type and user text enlargement.
+Reflow or revise the minimum when a layout cannot fit; a bounded panel must
+not gain an internal scrollbar. Long pages still grow in document flow, and
+unbounded collections need an explicit pagination or detail policy.
+
+Use the locked Pretext dependency to check bounded labels against their actual
+inner boxes after fonts load. CSS owns geometry and wrapping. Confirm fit in
+the rendered browser or supported WebView at minimum and expanded dimensions,
+on both sides of breakpoints, and with long content, zoom, and text spacing.
+Clipping or hiding overflow does not count as fit.
+
 ## Segment 0 Layout Contract
 
 - The profile selector and `Start New Custom Design` are one action row. Their rendered heights and vertical centers match.
