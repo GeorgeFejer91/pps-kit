@@ -27,6 +27,12 @@ This file is the active checklist and handoff owner; replace state, do not appen
   confirmed the same interaction and layout; all 470 public files matched
   staging and the four main routes returned HTTP 200. The offline suite and
   installed validation remain open.
+- **Designer header preview:** The sticky segment heading meets the page tabs
+  in the wide hosted layout, and standalone sticky headings have their own
+  border. Chromium checked all seven segment headings, light/dark, enlarged
+  text, and reflow down to 320 CSS px. The canonical build matches the local
+  Pages assembly. The next gate is visual review of the preview on
+  `codex/pps-designer-joined-header` before source promotion.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.

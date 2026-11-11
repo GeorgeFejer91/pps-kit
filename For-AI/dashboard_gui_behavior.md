@@ -16,6 +16,8 @@ The applet retains the long Segment 0-6 scroll surface, per-stage headings/actio
 
 All layout and styling changes follow `interface_design_principles.md`: a 4 px base/8 px primary rhythm, shared panel and control geometry, explicit alignment meridians, hierarchy-driven salience, WCAG-aware target/focus/reflow behavior, and iterative screenshot inspection after every visual change.
 
+When both the hosted page tabs and the Designer segment heading are sticky, their edges align and the two rows share a continuous frame. The segment row docks below the measured tab-bar height and switches with the scrolled section. Sticky segment headings shown without the page tabs have a complete border.
+
 ## Documentation Typography
 
 The opening `What Is Peripersonal Space` section uses `@chenglou/pretext` for bounded text fitting while preserving ordinary semantic HTML, links, selection, and accessibility. After named fonts are ready, the lead is fitted to a six-line desktop budget and the canonical-measure paragraph is fitted against the media column's available height; a width observer recalculates those values without DOM measurement loops. Sizes remain within declared readable minimum/maximum bounds, and any unsupported or failed measurement removes the computed values so CSS typography remains a complete fallback.

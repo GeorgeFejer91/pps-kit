@@ -31,7 +31,7 @@ def test_designer_layout_uses_shared_grid_and_control_tokens() -> None:
         "--control-height: 36px",
         "--panel-padding: 16px",
         "height: var(--control-height)",
-        "padding: var(--space-2) calc(var(--panel-padding) + 1px)",
+        "padding: var(--space-2) var(--panel-padding);\n  border: 1px solid var(--line);",
         ".bounded-select-menu",
         ".bounded-select-button",
     ]:

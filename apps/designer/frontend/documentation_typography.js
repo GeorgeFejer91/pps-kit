@@ -10,6 +10,7 @@ export function initializeDocumentationTypography() {
   // The shared owner uses ResizeObserver and preserves the computed text size.
   typography = initializeBoundedText(document.body, pretext, [
     "[data-pretext-fit]", "[data-pretext]",
+    ".segment-heading > :is(h2, .segment-info-button, .segment-reopen-button)",
     ".stimulus-editor-grid :is(button, .field-row label, legend, .audio-source-file-status, .source-mode-row > span, .source-mode-widget-copy > *, .fixed-clip-trajectory-note, .decision-note)",
     "#schedule-segment button", "#schedule-segment .status-label", "#schedule-segment td",
     "#run-segment button", "#run-segment .status-label", "#run-segment td",
