@@ -45,11 +45,11 @@ const studyBase = new URL("../assets/phone-studies/", location.href);
 const studyPlayback = new PhoneStudyPlayback(outputEngine, {
   instruction: (label) => updateStudyStep(label),
   gate: (gate) => updateStudyStep(gate.label, gate),
-  trial: (record, startMs, anchorMs) => {
+  trial: (record, startMs, anchorMs, update) => {
     trialStartMs = startMs;
-    responseWindow.open(anchorMs, record.number);
-    phoneSnapshot = recordBrowserTrial(phoneSnapshot, { ...record }, clock);
-    appendEvent({ action: "study.trial", ...record }, "browser-output");
+    if (anchorMs !== null) responseWindow.open(anchorMs, record.number);
+    phoneSnapshot = recordBrowserTrial(phoneSnapshot, record, clock);
+    appendEvent({ action: update ? "study.anchor" : "study.trial", ...record }, "browser-output");
     publishPhoneSnapshot();
   },
   complete: () => applyPhone("run.complete_demo", {}, { source: "browser-output" }),
@@ -134,21 +134,25 @@ function renderControllerSnapshot(snapshot) {
   updateControllerActions();
 }
 
+function trialMarkers(trial) {
+  const response = trial.response_required ? trial.rt_ms + " ms RT" : trial.rt_ms + " ms · catch tap";
+  return [
+    ["Audio scheduled", trial.audio_ms, "audio"],
+    ["Vibration requested", trial.tactile_ms, "tactile"],
+    ["Response · " + response, trial.response_ms, "response"],
+  ].filter(([, offset]) => offset !== null).sort((a, b) => a[1] - b[1]);
+}
+
 function renderControllerTimeline(trial, recent) {
   const panel = elements["controller-timeline"];
   panel.hidden = !trial;
   if (!trial) return;
   text("controller-trial-number", "Trial " + trial.number + (trial.response_required ? "" : " · Withhold"));
-  const cues = [
-    ["Audio scheduled", trial.audio_ms, "audio"],
-    ["Vibration requested", trial.tactile_ms, "tactile"],
-    [trial.rt_ms === null ? "Response" : "Response · " + trial.rt_ms + " ms RT", trial.response_ms, "response"],
-  ].filter(([, offset]) => offset !== null).sort((a, b) => a[1] - b[1]);
   const track = elements["controller-timeline-track"];
   const list = elements["controller-timeline-list"];
   track.replaceChildren();
   list.replaceChildren();
-  for (const [label, offset, kind] of cues) {
+  for (const [label, offset, kind] of trialMarkers(trial)) {
     const mark = document.createElement("span");
     mark.dataset.cue = kind;
     mark.style.left = (100 * offset / trial.duration_ms) + "%";
@@ -162,9 +166,8 @@ function renderControllerTimeline(trial, recent) {
   history.replaceChildren();
   for (const entry of recent) {
     const item = document.createElement("li");
-    const response = entry.rt_ms === null ? "No tap recorded" :
-      entry.response_required ? entry.rt_ms + " ms RT" : entry.rt_ms + " ms · catch tap";
-    item.textContent = "Trial " + entry.number + " · " + response;
+    const markers = trialMarkers(entry).map(([label, offset]) => "+" + offset + " ms " + label);
+    item.textContent = ["Trial " + entry.number, ...markers].join(" · ");
     history.append(item);
   }
 }

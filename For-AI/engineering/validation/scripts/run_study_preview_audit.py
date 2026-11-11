@@ -146,13 +146,20 @@ def stage_completion_fixture(context):
     plan["clips"] = {block["trials"][0]["clip"]: clip}
     plan["profile_id"] = "phone_timing_fixture"
     plan["title"] = "Phone timing validation fixture"
+    first_trial = block["trials"][0]
+    next_trial = {**first_trial, "number": 2}
+    for field, sample in first_trial.items():
+        if field.endswith("_sample") and sample is not None:
+            next_trial[field] = sample + block["length_samples"]
+    second_block = {**block, "label": "Second block", "length_samples": next_trial["end_sample"],
+                    "trials": [first_trial, next_trial]}
     plan["parts"] = [{
         "number": 1,
         "instructions": [{
             "slot": "after_each_block", "label": "Continue to next stage", "continue_mode": "click",
             "delay_s": 0, "button_label": "Continue", "clip": None,
         }],
-        "blocks": [block, {**block, "label": "Second block"}],
+        "blocks": [block, second_block],
     }]
     context.route("**/phone-studies/index.json", lambda route: route.fulfill(json=[
         {"id": plan["profile_id"], "title": plan["title"]},
@@ -229,6 +236,9 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
         expect(surface).to_be_visible(timeout=12000)
         assert surface.evaluate("(node) => node.scrollWidth <= node.clientWidth && node.scrollHeight <= node.clientHeight")
         target.screenshot(path=ARTIFACTS / "participant-during-run.png")
+        if complete_fixture:
+            expect(controller.locator("#controller-timeline-list")).to_contain_text("Audio scheduled")
+            assert target.evaluate("ppsCueMs === null"), "The controller did not show the audio until vibration"
         if full_study:
             expect(controller.locator("#controller-timeline-list")).to_contain_text("Vibration requested", timeout=10000)
         else:
@@ -254,10 +264,40 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
             assert (1850 if complete_fixture else 1300) < reaction_time <= 2000, reaction_time
         if study:
             if complete_fixture:
-                for _ in range(2):
-                    expect(controller.locator("#controller-run-state")).to_have_text("Instruction Gate", timeout=15000)
-                    controller.get_by_role("button", name="Continue", exact=True).click()
-                    expect(controller.locator("#controller-run-state")).not_to_have_text("Instruction Gate")
+                expect(controller.locator("#controller-run-state")).to_have_text("Instruction Gate", timeout=15000)
+                previous_cue = target.evaluate("ppsCueMs")
+                controller.get_by_role("button", name="Continue", exact=True).click()
+                trial_number = controller.locator("#controller-trial-number")
+                expect(trial_number).to_have_text("Trial 3", timeout=10000)
+                target.wait_for_function(
+                    "(previousCue) => ppsCueMs > previousCue && performance.now() - ppsCueMs >= 1450",
+                    arg=previous_cue, timeout=7000,
+                )
+                surface.tap()
+                summary = controller.get_by_text("Recent trials", exact=True)
+                summary.press("Enter")
+                expect(summary).to_be_focused()
+                history = controller.locator("#controller-recent-trial-list")
+                earlier = history.get_by_role("listitem").filter(has_text="Trial 2")
+                expect(earlier).to_contain_text("Audio scheduled")
+                expect(earlier).to_contain_text("Vibration requested")
+                expect(earlier).to_contain_text("ms RT")
+                earlier_rt = int(re.search(r"(\d+) ms RT", earlier.inner_text())[1])
+                assert 1300 < earlier_rt <= 2000
+                expect(trial_number).to_have_text("Trial 3")
+
+                controller.set_viewport_size({"width": 320, "height": 800})
+                controller_context.route("**/timeline-audit-spacing.css", lambda route: route.fulfill(
+                    content_type="text/css",
+                    body=".browser-timeline * { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; }",
+                ))
+                controller.add_style_tag(url=f"{origin}/timeline-audit-spacing.css")
+                history.scroll_into_view_if_needed()
+                assert history.evaluate("(node) => node.scrollWidth <= node.clientWidth")
+                assert controller.evaluate("document.documentElement.scrollWidth <= innerWidth")
+                controller.locator("#controller-timeline").screenshot(path=ARTIFACTS / "controller-timeline-320.png")
+                expect(controller.locator("#controller-run-state")).to_have_text("Instruction Gate", timeout=15000)
+                controller.get_by_role("button", name="Continue", exact=True).click()
                 expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
             elif full_study:
                 expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=90000)
@@ -276,8 +316,9 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
             else:
                 assert exported["trials"][0]["rt_ms"] == reaction_time
             if complete_fixture:
-                assert len(exported["trials"]) == 2 and exported["trials"][1]["rt_ms"] is None
+                assert [trial["rt_ms"] for trial in exported["trials"]] == [reaction_time, earlier_rt, None]
                 print(f"Controller and export recorded a {reaction_time} ms tap released after the deadline.")
+                print(f"Trial 2 retained its {earlier_rt} ms tap while Trial 3 stayed on the current timeline.")
         else:
             expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
         target.get_by_role("button", name="Disconnect controller").click()

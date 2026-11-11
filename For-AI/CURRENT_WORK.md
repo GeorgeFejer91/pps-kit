@@ -20,9 +20,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   profile. Chromium exercised 71 blocks and 4,592 trials across all 23
   with real audio decoding, a simulated clock, and instrumented vibration
   requests. A real-time paired run completed all 90 Biggio common-racket
-  trials. The paired two-block fixture recorded a tap begun near 1,900 ms
-  and released after 2,000 ms, then exercised both instruction gates and
-  completion. The controller marker matched the exported RT.
+  trials. The paired two-block fixture showed the audio marker before
+  vibration, matched a 1,909 ms tap released after 2,000 ms to the export,
+  and kept Trial 3 in view while Trial 2's 1,489 ms tap appeared in its
+  history. Both instruction gates and terminal completion passed. The
+  controller history passed keyboard and 320 CSS px text-spacing checks.
 - **Phone catalogue gap:** Both Tajadura posture profiles now export as
   separate hardware schedules via `export_phone_study.py --lateralization-schedule`.
   An audit matched all 600 trials to the prepared WAV and CSV, including

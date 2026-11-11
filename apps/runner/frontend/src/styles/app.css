@@ -456,7 +456,8 @@ input[type="checkbox"] {
 }
 
 .browser-timeline ol {
-  padding-inline-start: 1.25rem;
+  padding-inline-start: 0;
+  list-style: none;
   font-variant-numeric: tabular-nums;
 }
 

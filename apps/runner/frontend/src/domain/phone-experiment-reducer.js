@@ -401,8 +401,9 @@ export function browserStudyStep(current, eventLabel, clock, gate = null) {
 export function recordBrowserTrial(current, browserTrial, clock, { advanceRevision = true } = {}) {
   const snapshot = { ...current, browser_trial: browserTrial };
   if (current.browser_study) {
-    const number = Math.max(browserTrial.number, current.browser_trials?.at(-1)?.number ?? 0);
-    snapshot.run = { ...snapshot.run, progress_label: "Trial " + number + " of " + current.browser_study.trial_count };
+    if (current.browser_trial?.number > browserTrial.number) snapshot.browser_trial = current.browser_trial;
+    snapshot.run = { ...snapshot.run,
+      progress_label: "Trial " + snapshot.browser_trial.number + " of " + current.browser_study.trial_count };
     snapshot.browser_trials = [...(current.browser_trials ?? []).filter(({ number }) => number !== browserTrial.number), browserTrial]
       .sort((a, b) => a.number - b.number).slice(-12);
   }

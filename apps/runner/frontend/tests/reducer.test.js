@@ -5,6 +5,8 @@ import {
   applyPhoneAction,
   createPhoneExperimentSnapshot,
   expirePhoneLease,
+  prepareBrowserStudy,
+  recordBrowserTrial,
 } from "../src/domain/phone-experiment-reducer.js";
 
 let tick;
@@ -117,4 +119,30 @@ test("snapshot action refreshes clocks without changing semantic revision", () =
   assert.equal(outcome.status, "accepted");
   assert.equal(outcome.snapshot.revision, snapshot.revision);
   assert.notEqual(outcome.snapshot.server_monotonic_ns, snapshot.server_monotonic_ns);
+});
+
+
+test("a late tap updates its trial without replacing the current timeline", () => {
+  resetClock();
+  const initial = createPhoneExperimentSnapshot({ targetId: "phone_target_test", clock });
+  let snapshot = prepareBrowserStudy(initial, {
+    totalTrials: 2,
+    plan: { profile_id: "study_fixture", title: "Study fixture" },
+  }, clock);
+  const first = {
+    number: 1, response_required: true, duration_ms: 4200,
+    audio_ms: 0, tactile_ms: 2200, response_ms: null, rt_ms: null,
+  };
+  const second = {
+    number: 2, response_required: true, duration_ms: 5000,
+    audio_ms: 0, tactile_ms: null, response_ms: null, rt_ms: null,
+  };
+  snapshot = recordBrowserTrial(snapshot, first, clock);
+  snapshot = recordBrowserTrial(snapshot, second, clock);
+  const lateTap = { ...first, response_ms: 4100, rt_ms: 1900 };
+  snapshot = recordBrowserTrial(snapshot, lateTap, clock);
+
+  assert.deepEqual(snapshot.browser_trial, second);
+  assert.deepEqual(snapshot.browser_trials, [lateTap, second]);
+  assert.equal(snapshot.run.progress_label, "Trial 2 of 2");
 });

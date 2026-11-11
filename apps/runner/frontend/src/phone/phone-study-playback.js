@@ -229,31 +229,41 @@ export class PhoneStudyPlayback {
       if (trial.clip !== null) this.play(buffers.get(trial.clip), audioZero + trial.start_sample / block.sample_rate);
     }
     let blockEndMs = blockZeroMs + toMs(block.length_samples);
-    const responseOrder = block.trials
-      .map((trial) => ({ trial, number: nextNumber() }))
-      .sort((a, b) => a.trial.response_anchor_sample - b.trial.response_anchor_sample);
-    for (const { trial, number } of responseOrder) {
-      const targetMs = blockZeroMs + toMs(trial.response_anchor_sample);
+    const events = [];
+    for (const trial of block.trials) {
+      const number = nextNumber();
+      if (trial.audio_onset_sample !== null && trial.audio_onset_sample < trial.response_anchor_sample) {
+        events.push({ trial, number, sample: trial.audio_onset_sample, opensResponse: false });
+      }
+      events.push({ trial, number, sample: trial.response_anchor_sample, opensResponse: true });
+    }
+    events.sort((a, b) => a.sample - b.sample);
+
+    for (const { trial, number, sample, opensResponse } of events) {
+      const targetMs = blockZeroMs + toMs(sample);
       await wait(targetMs - performance.now(), signal);
       if (context.state !== "running") throw new Error("Phone audio was interrupted.");
-      let anchorMs = targetMs;
-      if (trial.tactile_onset_sample !== null) {
+      let anchorMs = opensResponse ? targetMs : null;
+      let tactileMs = null;
+      const startMs = blockZeroMs + toMs(trial.start_sample);
+      if (opensResponse && trial.tactile_onset_sample !== null) {
         anchorMs = performance.now();
         requirePlan(this.output.navigatorObject.vibrate(trial.tactile_duration_ms),
           "The phone refused a scheduled vibration.");
+        tactileMs = Math.round(anchorMs - startMs);
       }
-      const startMs = blockZeroMs + toMs(trial.start_sample);
-      const tactileMs = trial.tactile_onset_sample === null ? null : Math.round(anchorMs - startMs);
+      const responseOffsetMs = anchorMs === null ? toMs(trial.response_anchor_sample - trial.start_sample) : anchorMs - startMs;
       const record = {
         number, response_required: trial.response_required,
-        duration_ms: Math.ceil(Math.max(toMs(trial.end_sample - trial.start_sample), anchorMs - startMs + RESPONSE_MAX_MS)),
+        duration_ms: Math.ceil(Math.max(toMs(trial.end_sample - trial.start_sample), responseOffsetMs + RESPONSE_MAX_MS)),
         audio_ms: trial.audio_onset_sample === null ? null : Math.round(toMs(trial.audio_onset_sample - trial.start_sample)),
         tactile_ms: tactileMs,
         response_ms: null, rt_ms: null,
       };
+      const existingTrial = this.results[number - 1];
       this.results[number - 1] = { ...record, trial_start_ms: startMs, response_anchor_ms: anchorMs };
-      this.callbacks.trial(record, startMs, anchorMs);
-      blockEndMs = Math.max(blockEndMs, anchorMs + RESPONSE_SETTLE_MS);
+      this.callbacks.trial(record, startMs, anchorMs, Boolean(existingTrial));
+      if (anchorMs !== null) blockEndMs = Math.max(blockEndMs, anchorMs + RESPONSE_SETTLE_MS);
     }
     await wait(blockEndMs - performance.now(), signal);
   }
