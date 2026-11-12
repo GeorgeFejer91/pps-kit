@@ -21,13 +21,18 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Physical vibration, device timing and native acquisition are separate
   qualification gates. The Windows release remains a draft with no installer
   assets; Downloads lists the three editions without inventing asset URLs.
-- **Designer header: VERIFIED LIVE.** The bordered segment heading docks below
-  the page tabs in the wide public Designer. Pages [run 43194790723](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43194790723)
-  deployed `7e64f72` to [ppskit.com](https://ppskit.com/). Chromium checked all
-  seven headings, keyboard About interaction, and Downloads at 320 CSS px.
-  All 468 staged files matched the site and the four public routes returned
-  HTTP 200. Future completed Pages UI tasks follow the
-  [standing deployment workflow](WORKFLOW.md#ui-exploration-and-promotion).
+- **Designer header: VERIFIED LIVE.** The phone Planner groups theme, View/Edit
+  and section navigation into one 54 CSS px row. The four site tabs use one row
+  with short visible labels and full accessible names. At 390 CSS px, the
+  sticky header dropped from 313 to 151 CSS px and the controls from 192 to
+  54 CSS px. The header scrolls with the page when wrapping makes it taller
+  than a third of the viewport. Chromium verified 320–760 CSS px, light and
+  dark themes, touch and keyboard navigation, and 200% text with spacing.
+  The wide segment heading still docks below the tabs. Pages
+  [run 43196127192](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43196127192)
+  deployed source commit 6e1e208 to [ppskit.com](https://ppskit.com/). All 472
+  public files matched local staging and the four main routes returned HTTP 200.
+  The Windows package and physical-device checks remain separate.
 - **Current stage:** verified Designer source. The public Designer opens
   directly as a browser preview with bundled study assets. The connection
   panel and localhost probe were removed in `d45c0c8`. Live Chromium checked
