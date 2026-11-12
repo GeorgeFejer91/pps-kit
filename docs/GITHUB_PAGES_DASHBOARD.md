@@ -8,9 +8,12 @@ verification and Pages.
 
 - The site navigation opens **Experiment Planner**, **Experiment Runner**,
   **Documentation**, and **Downloads** in that order.
-- The Planner is an installable PWA. Its service worker caches the app and the
-  verified Study 5 preview assets. The Runner stays on its own top-level route,
-  with separate **Run on this device** and **Control another device** modes.
+- The Planner is an installable PWA. Online navigation fetches the current
+  page. Offline navigation uses a complete cached build and the verified Study 5
+  preview assets. After a new build finishes caching, the worker activates and
+  retains one preceding snapshot for already-open tabs' compiled assets.
+- The Runner stays on its own top-level route, with separate **Run on this device**
+  and **Control another device** modes.
   See [browser pairing](CROSS_PLATFORM_RUNNER_AND_REMOTE.md#browser-companion).
 - Downloads groups the PWA separately from the three Windows installer
   editions. [Installation notes](PPS_DOWNLOADS.md) describe the packages.

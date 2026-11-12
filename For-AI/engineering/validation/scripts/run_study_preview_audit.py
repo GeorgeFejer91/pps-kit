@@ -17,6 +17,10 @@ ARTIFACTS = ROOT / "artifacts" / "browser-runner-launch"
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("X-PPS-Audit-Revision", self.server.audit_revision)
+        super().end_headers()
+
     def log_message(self, *args):
         pass
 
@@ -43,7 +47,7 @@ def play(page, app, origin, *, offline=False):
     expect(button).not_to_have_class(re.compile(r"\bplaying\b"))
 
 
-def audit(browser, origin):
+def audit(browser, origin, server):
     with browser.new_context(viewport={"width": 1440, "height": 900}) as context:
         context.add_init_script(
             "localStorage.setItem('ppsDashboard.apiBase', 'http://127.0.0.1:18766')"
@@ -63,6 +67,19 @@ def audit(browser, origin):
         cdp = context.new_cdp_session(page)
         page.wait_for_function("navigator.serviceWorker.controller !== null")
         assert not cdp.send("Page.getInstallabilityErrors")["installabilityErrors"]
+        server.audit_revision = "online-revisit"
+        with page.expect_response(
+            lambda response: response.request.is_navigation_request()
+            and urlsplit(response.url).path == "/app/index.html"
+        ) as refreshed:
+            shell = page.reload(wait_until="domcontentloaded")
+        assert shell and shell.headers.get("x-pps-audit-revision") == "online-revisit", (
+            "An online return visit reused the cached site shell."
+        )
+        assert refreshed.value.headers.get("x-pps-audit-revision") == "online-revisit", (
+            "An online return visit reused the cached Planner document."
+        )
+        expect(study).to_have_text("study5_box_breathing_pps")
         context.set_offline(True)
         page.set_viewport_size({"width": 320, "height": 800})
         page.reload(wait_until="domcontentloaded")
@@ -76,9 +93,11 @@ def audit_routes(browser, origin):
         page.goto(f"{origin}/download/")
         app = page.frame_locator("iframe")
         nav = app.get_by_role("navigation", name="PPS Kit", exact=True)
-        assert nav.get_by_role("link").all_text_contents() == [
-            "Experiment Planner", "Experiment Runner", "Documentation", "Downloads",
-        ]
+        names = ("Experiment Planner", "Experiment Runner", "Documentation", "Downloads")
+        links = nav.get_by_role("link")
+        expect(links).to_have_count(len(names))
+        for index, name in enumerate(names):
+            expect(links.nth(index)).to_have_accessible_name(name)
         expect(nav.get_by_role("link", name="Downloads")).to_have_attribute("aria-current", "page")
         expect(app.locator(".windows-installers h3")).to_have_count(3)
         expect(app.get_by_role("link", name="View releases")).to_have_count(1)
@@ -100,7 +119,9 @@ def audit_routes(browser, origin):
         )
         page.screenshot(path=ARTIFACTS / "downloads-320-text-spacing.png")
         runner = nav.get_by_role("link", name="Experiment Runner")
-        expect(runner).to_have_attribute("data-pretext-result", re.compile("fit|reflow|dom-fallback"))
+        expect(runner.locator("[data-pretext]:visible")).to_have_attribute(
+            "data-pretext-result", re.compile("fit|reflow|dom-fallback")
+        )
         runner.press("Enter")
         page.wait_for_url(f"{origin}/experiment-runner/")
         assert len(page.frames) == 1
@@ -181,6 +202,7 @@ def main():
         raise SystemExit("Assemble the Pages site with build_pages.mjs before running this audit.")
     handler = partial(QuietHandler, directory=PAGES)
     with ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
+        server.audit_revision = "initial"
         thread = Thread(target=server.serve_forever, daemon=True)
         thread.start()
         try:
@@ -189,7 +211,7 @@ def main():
                 try:
                     origin = f"http://127.0.0.1:{server.server_port}"
                     if not args.runner_only:
-                        audit(browser, origin)
+                        audit(browser, origin, server)
                     audit_routes(browser, origin)
                     print("Downloads, top-level Runner navigation, and the local browser demo passed.")
                     if args.live_beacon:
@@ -201,7 +223,7 @@ def main():
             server.shutdown()
             thread.join()
     if not args.runner_only:
-        print("Keyboard playback, Chromium installability and offline Study 5 passed.")
+        print("Online refresh, keyboard playback, Chromium installability and offline Study 5 passed.")
 
 
 if __name__ == "__main__":
