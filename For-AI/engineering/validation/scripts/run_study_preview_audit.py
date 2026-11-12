@@ -100,6 +100,21 @@ def audit_routes(browser, origin):
             expect(links.nth(index)).to_have_accessible_name(name)
         expect(nav.get_by_role("link", name="Downloads")).to_have_attribute("aria-current", "page")
         expect(app.locator(".windows-installers h3")).to_have_count(3)
+        for position, (title, icon) in enumerate([
+            ("Experiment Planner", "pps_toolkit_icon"),
+            ("Experiment Runner", "pps_runner_icon"),
+            ("Experiment Planner + Runner Suite", "pps_suite_icon"),
+        ]):
+            heading = app.locator(".installer-card-heading").nth(position)
+            expect(heading.get_by_role("heading")).to_have_text(title)
+            image = heading.locator("img")
+            expect(image).to_have_attribute("src", re.compile(fr"{icon}-[\w-]+\.svg$"))
+            expect(image).to_have_attribute("alt", "")
+            expect(image).to_be_visible()
+            expect(image).to_have_js_property("naturalWidth", 512)
+            expect(heading.locator("h3")).to_have_attribute(
+                "data-pretext-result", re.compile("fit|reflow|dom-fallback")
+            )
         expect(app.get_by_role("link", name="View releases")).to_have_count(1)
         expect(app.get_by_role("heading", name="Browser app (PWA)")).to_be_visible()
         expect(app.get_by_role("link", name="Open web app")).to_have_attribute("target", "_top")
@@ -117,7 +132,7 @@ def audit_routes(browser, origin):
         assert app.locator("#downloads-page").evaluate(
             "(node) => [...node.querySelectorAll('article, a')].every(el => el.scrollWidth <= el.clientWidth)"
         )
-        page.screenshot(path=ARTIFACTS / "downloads-320-text-spacing.png")
+        app.locator(".windows-installers").screenshot(path=ARTIFACTS / "installer-icons-320-text-spacing.png")
         runner = nav.get_by_role("link", name="Experiment Runner")
         expect(runner.locator("[data-pretext]:visible")).to_have_attribute(
             "data-pretext-result", re.compile("fit|reflow|dom-fallback")

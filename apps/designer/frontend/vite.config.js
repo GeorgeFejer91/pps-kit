@@ -4,6 +4,11 @@ import { resolve } from "node:path";
 
 export default defineConfig({
   base: "./",
+  server: {
+    fs: {
+      allow: [import.meta.dirname, resolve(import.meta.dirname, "../../../packages/pps-resources/assets/app")],
+    },
+  },
   plugins: [{
     name: "pps-compiled-paths",
     transformIndexHtml: {

@@ -11,6 +11,9 @@ export default defineConfig({
     host: "127.0.0.1",
     port: 1420,
     strictPort: true,
+    fs: {
+      allow: [import.meta.dirname, resolve(import.meta.dirname, "../../packages/pps-resources/assets/app")],
+    },
   },
   build: {
     outDir: resolve(import.meta.dirname, "compiled"),

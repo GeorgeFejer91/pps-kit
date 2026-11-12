@@ -14494,7 +14494,7 @@ def run_focus_window(
         companion_port=companion_port,
         companion_advertise_ip=companion_advertise_ip,
     )
-    apply_qt_app_icon(q, app=app, window=window.dialog)
+    apply_qt_app_icon(q, app=app, window=window.dialog, icon_stem="pps_runner_icon")
     validation_clicks: list[dict[str, Any]] = []
     if _env_flag("PPS_FOCUS_VALIDATION_PARTICIPANT_EMULATOR"):
         validation_clicks = _install_validation_participant_emulator(q, window)
@@ -14589,7 +14589,7 @@ def run_launcher_window(
     dialog.resize(880, 520)
     dialog.setMinimumSize(760, 480)
     dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
-    apply_qt_app_icon(q, app=app, window=dialog)
+    apply_qt_app_icon(q, app=app, window=dialog, icon_stem="pps_runner_icon")
     _prepare_validation_window_placement(q, dialog)
 
     selected_action: dict[str, Any] = {"open_environment": False}
@@ -15235,7 +15235,7 @@ def _run_phone_transfer_window(
     dialog.resize(920, 720)
     dialog.setMinimumSize(760, 620)
     dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
-    apply_qt_app_icon(q, app=app, window=dialog)
+    apply_qt_app_icon(q, app=app, window=dialog, icon_stem="pps_runner_icon")
     _prepare_validation_window_placement(q, dialog)
 
     runner_settings = load_profile_runner_settings(state_root=DEFAULT_DASHBOARD_STATE_ROOT, default_output_folder=DEFAULT_SESSION_ROOT)
@@ -15731,7 +15731,7 @@ def _run_environment_operations_window(
     dialog.resize(900, 620)
     dialog.setMinimumSize(760, 520)
     dialog.setStyleSheet(_focus_style_sheet(q, DEFAULT_FOCUS_LAYOUT_PROFILE))
-    apply_qt_app_icon(q, app=app, window=dialog)
+    apply_qt_app_icon(q, app=app, window=dialog, icon_stem="pps_runner_icon")
     _prepare_validation_window_placement(q, dialog)
 
     selected_manifest: dict[str, Path | None] = {"path": None}

@@ -15,7 +15,7 @@ const designerFrontend = join(root, "apps", "designer", "frontend");
 const designerCompiled = join(designerFrontend, "compiled");
 const runnerCompiled = join(root, "apps", "runner", "compiled");
 const resources = join(root, "packages", "pps-resources");
-const companionAssets = ["companion.js", "text-layout.js", "style.css"];
+const companionAssets = ["companion.js", "text-layout.js", "style.css", "pps_runner_icon.svg"];
 const companionVendorFiles = [
   "LICENSE-MPL-2.0.txt",
   "NOTICE.md",

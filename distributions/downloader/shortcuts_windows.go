@@ -44,13 +44,16 @@ func makeShortcut(linkPath string, target string, workingDir string, icon string
 		psQuote(linkPath),
 		psQuote(target),
 		psQuote(workingDir),
-		psQuote(icon),
+		psQuote(icon+",0"),
 	)
 	cmd := exec.Command("powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script)
 	return cmd.Run()
 }
 
 func shortcutIcon(installDir string, target string) string {
+	if strings.EqualFold(filepath.Ext(target), ".exe") && pathExists(target) {
+		return target
+	}
 	candidates := []string{
 		filepath.Join(installDir, "src", "peripersonal_space_toolkit", "assets", "pps_toolkit_icon.ico"),
 		filepath.Join(installDir, "dist", "PPSExperimentRunner", "PPSExperimentRunner.exe"),

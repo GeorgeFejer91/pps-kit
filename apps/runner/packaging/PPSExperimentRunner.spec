@@ -10,7 +10,7 @@ from PyInstaller.utils.hooks import collect_submodules
 root = Path.cwd().resolve()
 src_root = root / "packages" / "pps-runtime" / "src"
 resource_root = root / "packages" / "pps-resources"
-icon_path = resource_root / "assets" / "app" / "pps_toolkit_icon.ico"
+icon_path = resource_root / "assets" / "app" / "pps_runner_icon.ico"
 disable_icon = os.environ.get("PPS_EXPERIMENT_RUNNER_DISABLE_ICON", "").strip().lower() in {
     "1",
     "true",

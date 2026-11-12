@@ -15,14 +15,20 @@ def package_asset(name: str) -> Path:
     return app_asset_path(name)
 
 
-def apply_qt_app_icon(qt: dict[str, Any], *, app: Any | None = None, window: Any | None = None) -> Any | None:
+def apply_qt_app_icon(
+    qt: dict[str, Any],
+    *,
+    app: Any | None = None,
+    window: Any | None = None,
+    icon_stem: str = "pps_toolkit_icon",
+) -> Any | None:
     """Apply the packaged PPS icon to a Qt app/window when QIcon is available."""
     q_icon = qt.get("QIcon")
     if q_icon is None:
         return None
     icon = None
-    for filename in ("pps_toolkit_icon.ico", "pps_toolkit_icon.png"):
-        candidate = q_icon(str(package_asset(filename)))
+    for suffix in (".svg", ".ico", ".png"):
+        candidate = q_icon(str(package_asset(icon_stem + suffix)))
         if not candidate.isNull():
             icon = candidate
             break

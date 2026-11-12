@@ -43,6 +43,7 @@ var (
 	procGetMessage      = user32.NewProc("GetMessageW")
 	procGetModuleHandle = kernel32.NewProc("GetModuleHandleW")
 	procLoadCursor      = user32.NewProc("LoadCursorW")
+	procLoadIcon        = user32.NewProc("LoadIconW")
 	procPostMessage     = user32.NewProc("PostMessageW")
 	procRegisterClassEx = user32.NewProc("RegisterClassExW")
 	procSendMessage     = user32.NewProc("SendMessageW")
@@ -163,10 +164,13 @@ func registerWindowClass() error {
 	className := utf16Ptr("PPSDownloaderWindow")
 	instance, _, _ := procGetModuleHandle.Call(0)
 	cursor, _, _ := procLoadCursor.Call(0, 32512)
+	// The resource compiler assigns ID 1 to the first and only icon group.
+	icon, _, _ := procLoadIcon.Call(instance, 1)
 	wc := wndClassEx{
 		Size:       uint32(unsafe.Sizeof(wndClassEx{})),
 		WndProc:    syscall.NewCallback(windowProc),
 		Instance:   syscall.Handle(instance),
+		Icon:       syscall.Handle(icon),
 		Cursor:     syscall.Handle(cursor),
 		Background: 6,
 		ClassName:  className,
@@ -217,10 +221,10 @@ func windowProc(hwnd syscall.Handle, message uint32, wParam uintptr, lParam uint
 }
 
 func (u *uiState) createControls(hwnd syscall.Handle) {
-	u.status = createChild("STATIC", "Preparing " + productName + " download...", wsChild|wsVisible|ssLeft, 24, 28, 500, 24, hwnd, 0)
+	u.status = createChild("STATIC", "Preparing "+productName+" download...", wsChild|wsVisible|ssLeft, 24, 28, 500, 24, hwnd, 0)
 	u.progress = createChild("msctls_progress32", "", wsChild|wsVisible, 24, 68, 500, 24, hwnd, 0)
 	u.percent = createChild("STATIC", "0%", wsChild|wsVisible|ssLeft, 24, 102, 500, 24, hwnd, 0)
-	u.launchButton = createChild("BUTTON", "Launch " + productName, wsChild|wsVisible|bsPushButton, 248, 166, 146, 34, hwnd, idLaunchButton)
+	u.launchButton = createChild("BUTTON", "Launch "+productName, wsChild|wsVisible|bsPushButton, 248, 166, 146, 34, hwnd, idLaunchButton)
 	u.closeButton = createChild("BUTTON", "Close", wsChild|wsVisible|bsPushButton, 408, 166, 116, 34, hwnd, idCloseButton)
 	procEnableWindow.Call(uintptr(u.launchButton), 0)
 	procSendMessage.Call(uintptr(u.progress), pbmSetRange32, 0, 100)
@@ -265,7 +269,7 @@ func (u *uiState) refreshDone() {
 		procEnableWindow.Call(uintptr(u.launchButton), 0)
 		return
 	}
-	setWindowText(u.status, productName + " is ready.")
+	setWindowText(u.status, productName+" is ready.")
 	setWindowText(u.percent, result.InstallDir+externalDependencySuffix(result.ExternalDependencyStatus))
 	procSendMessage.Call(uintptr(u.progress), pbmSetPos, 100, 0)
 	procEnableWindow.Call(uintptr(u.launchButton), 1)
