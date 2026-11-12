@@ -65,75 +65,46 @@
           </button>
         </div>
         <div class="mode-switch" role="group" aria-label="Runner mode">
-          <button type="button" class="is-active" data-mode="target" aria-pressed="true" aria-controls="target-mode">Run on this device</button>
-          <button type="button" data-mode="controller" aria-pressed="false" aria-controls="controller-mode">Control another device</button>
+          <button type="button" class="is-active" data-mode="target" aria-pressed="true" aria-controls="target-mode" data-icon="play">Run on this device</button>
+          <button type="button" data-mode="controller" aria-pressed="false" aria-controls="controller-mode" data-icon="remote">Control another device</button>
         </div>
       </aside>
 
       <main id="main-content" class="workspace runner-workspace" tabindex="-1">
-        <h1 data-pretext>Experiment Runner</h1>
+        <div class="runner-titlebar">
+          <h1 data-pretext>Experiment Runner</h1>
+          <div class="runner-tools">
+            <button class="button button-quiet" type="button" data-dialog="remote-center" data-icon="remote" aria-haspopup="dialog" aria-controls="remote-center" id="remote-center-open">Remote control</button>
+            <span id="remote-attention" class="badge" role="status" hidden></span>
+          </div>
+        </div>
         <div id="embedding-warning" class="exploratory-banner embedding-warning" role="alert" hidden>
           <strong>Open this page directly</strong>
           <span>For pairing safety, the browser Runner is disabled inside embedded frames.</span>
         </div>
 
         <section id="controller-mode" class="mode-panel" data-mode-panel="controller" hidden>
-          <section class="panel beacon-panel" aria-labelledby="scan-beacon-title">
-            <h2 id="scan-beacon-title">Find a runner</h2>
-            <div class="stack compact-stack">
-              <span id="beacon-status" class="badge" role="status">Beacon off</span>
-              <p class="subtle">On the device that will run the experiment, press Send beacon. Then scan here, select that device, and request access.</p>
-              <div class="inline-actions">
-                <button id="beacon-browse" class="button" type="button">Scan beacon</button>
-                <button id="beacon-stop" class="button" type="button" disabled>Stop scanning</button>
-              </div>
-              <div id="beacon-targets" class="beacon-target-list" aria-live="polite"><p class="subtle">Browsing is off.</p></div>
-              <p id="beacon-selection" class="subtle" role="status">Match the beacon code shown on the target before requesting access.</p>
-              <button id="beacon-request" class="button" type="button" disabled>Request private session</button>
-              <details><summary>Discovery and privacy</summary><p class="safety-copy">Listings and requests carry no participant state or runner commands. After target-local approval, fresh credentials go only to that exact requester over its encrypted peer data channel. VDO signaling and peer selection remain part of the trust boundary. Internet access is required.</p></details>
-            </div>
-          </section>
-
-          <section class="panel stack compact-stack">
-            <div class="section-heading"><h2>Private connection</h2><span id="invite-badge" class="badge">No invite</span></div>
-            <p id="invite-summary" class="subtle">Scan for a beacon above or open a private invitation link from the target.</p>
-            <label>Access requested<select id="controller-role"><option value="controller">Run controls</option><option value="observer">Observe only</option></select></label>
-            <div class="inline-actions">
-              <button id="controller-connect" class="button button-primary" type="button" disabled>Connect</button>
-              <button id="controller-stop" class="button" type="button" disabled>Disconnect</button>
-            </div>
-            <p id="controller-next-step" class="timeline-event" aria-live="polite">Pair with a runner to begin.</p>
-            <p id="controller-outcome" class="safety-copy" role="status" hidden></p>
-            <details>
-              <summary>Connection details</summary>
-              <dl class="summary-list">
-                <div><dt>Target</dt><dd id="controller-target">—</dd></div>
-                <div><dt>Transport</dt><dd id="controller-transport">—</dd></div>
-                <div><dt>Granted access</dt><dd id="controller-scopes">None</dd></div>
-                <div><dt>Pending</dt><dd id="controller-pending">0</dd></div>
-              </dl>
-            </details>
-          </section>
-
+          <p id="controller-next-step" class="timeline-event" aria-live="polite">Open Remote control to scan for a runner.</p>
+          <p id="controller-outcome" class="safety-copy" role="status" hidden></p>
           <section id="controller-session-panel" class="panel stack compact-stack" hidden>
-            <div class="section-heading"><h2 id="controller-run-state">Ready</h2><span id="controller-revision" class="badge">rev 0</span></div>
+            <h2 id="controller-run-state">Ready</h2>
             <p id="controller-study" class="subtle" hidden></p>
             <p id="controller-progress" class="subtle">No target snapshot received.</p>
             <div class="phone-progress"><span id="controller-progress-bar"></span></div>
             <p id="controller-event" class="timeline-event">Connect to receive target state.</p>
             <div class="phone-action-grid">
-              <button class="button button-primary remote-action" type="button" data-remote-action="package.prepare_demo">Prepare demo</button>
-              <button class="button button-primary remote-action" type="button" data-remote-action="part.start">Start part</button>
-              <button class="button remote-action" type="button" data-remote-action="instruction.continue">Continue</button>
-              <button class="button remote-action" type="button" data-remote-action="run.pause">Pause</button>
-              <button class="button remote-action" type="button" data-remote-action="run.resume">Resume</button>
-              <button class="button remote-action" type="button" data-remote-action="run.stop">Stop</button>
-              <button class="button button-danger remote-action" type="button" data-remote-action="run.abort">Abort</button>
+              <button class="button button-primary remote-action" type="button" data-remote-action="package.prepare_demo" data-icon="study">Prepare demo</button>
+              <button class="button button-primary remote-action" type="button" data-remote-action="part.start" data-icon="play">Start part</button>
+              <button class="button remote-action" type="button" data-remote-action="instruction.continue" data-icon="next">Continue</button>
+              <button class="button remote-action" type="button" data-remote-action="run.pause" data-icon="pause">Pause</button>
+              <button class="button remote-action" type="button" data-remote-action="run.resume" data-icon="play">Resume</button>
+              <button class="button remote-action" type="button" data-remote-action="run.stop" data-icon="stop">Stop</button>
+              <button class="button button-danger remote-action" type="button" data-remote-action="run.abort" data-icon="abort">Abort</button>
             </div>
             <section id="controller-timeline" class="browser-timeline" aria-labelledby="controller-timeline-title" hidden>
               <h3 id="controller-timeline-title">Trial timeline</h3>
               <p id="controller-trial-number" class="subtle"></p>
-              <div id="controller-timeline-track" aria-hidden="true"></div>
+              <div id="controller-timeline-track" class="trial-timeline-track" aria-hidden="true"></div>
               <ol id="controller-timeline-list" role="list"></ol>
               <details id="controller-recent-trials" hidden>
                 <summary>Recent trials</summary>
@@ -141,13 +112,7 @@
               </details>
             </section>
             <p class="subtle">Complete participant setup and arm outputs on the device running the experiment.</p>
-            <details>
-              <summary>Add a session note</summary>
-              <div class="stack compact-stack">
-                <label>Session note<textarea id="remote-note" maxlength="500" rows="3"></textarea></label>
-                <button id="remote-note-button" class="button remote-action" type="button" data-remote-action="session.note">Send note</button>
-              </div>
-            </details>
+            <button class="button button-quiet" type="button" data-dialog="phone-note-settings" data-icon="note" aria-haspopup="dialog" aria-controls="phone-note-settings">Session note</button>
           </section>
 
 
@@ -156,40 +121,95 @@
         <section id="target-mode" class="mode-panel is-active" data-mode-panel="target">
           <div class="exploratory-banner" role="note">
             <strong>Exploratory browser timing</strong>
-            <span>Run a prepared PPS study with audio and phone vibration in Android Chrome. Browser timing is exploratory.</span>
+            <span>Browser timing is exploratory. Use Android Chrome for studies that require vibration.</span>
           </div>
-          <section class="panel stack compact-stack">
-            <h2>Study setup</h2>
-            <label for="phone-study">Study</label><select id="phone-study"><option value="">Practice demo</option></select>
-            <p id="phone-catalogue-status" class="subtle" role="status" hidden></p>
-            <label>Participant code<input id="phone-participant-code" maxlength="64" autocomplete="off" value="PHONE_DEMO"></label>
-            <div class="phone-action-grid">
-              <button id="phone-setup" class="button" type="button" disabled>Submit setup</button>
-              <button id="phone-prepare" class="button" type="button" disabled>Prepare demo</button>
-            </div>
-          </section>
-
-          <section class="panel stack compact-stack">
-            <div class="section-heading"><h2>Device outputs</h2><span id="output-capability" class="badge">Checking</span></div>
-            <label class="check-row"><input id="phone-audio-enabled" type="checkbox" checked> Enable audio</label>
-            <label class="check-row"><input id="phone-vibration-enabled" type="checkbox" checked> Enable phone vibration</label>
-            <button id="arm-phone" class="button button-primary" type="button" disabled>Arm outputs locally</button>
-            <button id="disarm-phone" class="button" type="button" disabled>Disarm outputs</button>
-            <p class="safety-copy">For vibration studies, use Chrome on an Android phone. Arming sends a test pulse. If you cannot feel it, check the phone’s vibration settings before starting. Keep Chrome in the foreground.</p>
-          </section>
-
           <section class="panel stack compact-stack" aria-labelledby="phone-run-state">
-            <div class="section-heading"><h2 id="phone-run-state" tabindex="-1">Idle</h2><span id="phone-revision" class="badge">rev 0</span></div>
+            <h2 id="phone-run-state" tabindex="-1">Idle</h2>
+            <p id="phone-study-summary" class="subtle">Practice demo</p>
+            <p id="phone-readiness" class="subtle">Open Study setup and prepare the experiment.</p>
             <div class="phone-action-grid">
-              <button id="phone-start" class="button button-primary" type="button" disabled>Start locally</button>
-              <button id="phone-pause" class="button" type="button" disabled>Pause</button>
-              <button id="phone-resume" class="button" type="button" disabled>Resume</button>
-              <button id="phone-stop" class="button" type="button" disabled>Stop</button>
+              <button id="phone-start" class="button button-primary" type="button" disabled data-icon="play">Start locally</button>
+              <button id="phone-pause" class="button" type="button" disabled data-icon="pause">Pause</button>
+              <button id="phone-resume" class="button" type="button" disabled data-icon="play">Resume</button>
+              <button id="phone-stop" class="button" type="button" disabled data-icon="stop">Stop</button>
             </div>
             <p id="phone-event" class="timeline-event">Submit setup and prepare the demo to begin.</p>
-            <button id="download-phone-log" class="button button-quiet" type="button" disabled>Download event log</button>
+            <section id="phone-timeline" class="browser-timeline" aria-labelledby="phone-timeline-title" hidden>
+              <h3 id="phone-timeline-title">Trial timeline</h3>
+              <p id="phone-trial-number" class="subtle"></p>
+              <div id="phone-timeline-track" class="trial-timeline-track" aria-hidden="true"></div>
+              <ol id="phone-timeline-list" role="list"></ol>
+              <details id="phone-recent-trials" hidden>
+                <summary>Recent trials</summary>
+                <ol id="phone-recent-trial-list" role="list"></ol>
+              </details>
+            </section>
+            <button id="download-phone-log" class="button button-quiet" type="button" disabled data-icon="download">Download event log</button>
           </section>
+          <div class="runner-tools" role="group" aria-label="Device setup">
+            <button class="button button-quiet" type="button" data-dialog="phone-study-settings" data-icon="study" aria-haspopup="dialog" aria-controls="phone-study-settings">Study setup</button>
+            <button class="button button-quiet" type="button" data-dialog="phone-output-settings" data-icon="audio" aria-haspopup="dialog" aria-controls="phone-output-settings">Outputs</button>
+          </div>
+        </section>
+      </main>
+    </div>
 
+    <dialog id="phone-study-settings" class="runner-dialog" aria-labelledby="phone-study-settings-title">
+      <div class="dialog-heading">
+        <h2 id="phone-study-settings-title" tabindex="-1" autofocus>Study setup</h2>
+        <button class="button button-quiet" type="button" data-close-dialog data-icon="close">Close</button>
+      </div>
+      <div class="dialog-body stack">
+        <section class="panel stack compact-stack">
+          <label for="phone-study">Study</label><select id="phone-study"><option value="">Practice demo</option></select>
+          <p id="phone-catalogue-status" class="subtle" role="status" hidden></p>
+          <label>Participant code<input id="phone-participant-code" maxlength="64" autocomplete="off" value="PHONE_DEMO"></label>
+          <div class="phone-action-grid">
+            <button id="phone-setup" class="button" type="button" disabled data-icon="check">Submit setup</button>
+            <button id="phone-prepare" class="button" type="button" disabled data-icon="study">Prepare demo</button>
+          </div>
+        </section>
+      </div>
+    </dialog>
+    <dialog id="phone-output-settings" class="runner-dialog" aria-labelledby="phone-output-settings-title">
+      <div class="dialog-heading">
+        <h2 id="phone-output-settings-title" tabindex="-1" autofocus>Outputs</h2>
+        <button class="button button-quiet" type="button" data-close-dialog data-icon="close">Close</button>
+      </div>
+      <div class="dialog-body stack">
+        <section class="panel stack compact-stack">
+          <div class="section-heading"><h2>Device outputs</h2><span id="output-capability" class="badge">Checking</span></div>
+          <label class="check-row"><input id="phone-audio-enabled" type="checkbox" checked> Enable audio</label>
+          <label class="check-row"><input id="phone-vibration-enabled" type="checkbox" checked> Enable phone vibration</label>
+          <button id="arm-phone" class="button button-primary" type="button" disabled data-icon="arm">Arm outputs locally</button>
+          <button id="disarm-phone" class="button" type="button" disabled data-icon="disarm">Disarm outputs</button>
+          <p class="safety-copy">For vibration studies, use Chrome on an Android phone. Arming sends a test pulse. If you cannot feel it, check the phone’s vibration settings before starting. Keep Chrome in the foreground.</p>
+        </section>
+      </div>
+    </dialog>
+    <dialog id="phone-note-settings" class="runner-dialog" aria-labelledby="phone-note-settings-title">
+      <div class="dialog-heading">
+        <h2 id="phone-note-settings-title" tabindex="-1" autofocus>Session note</h2>
+        <button class="button button-quiet" type="button" data-close-dialog data-icon="close">Close</button>
+      </div>
+      <div class="dialog-body stack">
+        <div class="stack compact-stack">
+          <label>Session note<textarea id="remote-note" maxlength="500" rows="3"></textarea></label>
+          <button id="remote-note-button" class="button remote-action" type="button" data-remote-action="session.note">Send note</button>
+        </div>
+      </div>
+    </dialog>
+    <dialog id="remote-center" class="runner-dialog" aria-labelledby="remote-center-title">
+      <div class="dialog-heading">
+        <h2 id="remote-center-title" tabindex="-1" autofocus>Remote control center</h2>
+        <button class="button button-quiet" type="button" data-close-dialog data-icon="close">Close</button>
+      </div>
+      <div class="dialog-body stack">
+        <div class="beacon-choices" role="group" aria-label="Connection direction">
+          <button class="button button-quiet" type="button" data-mode="target" aria-pressed="true" aria-controls="send-beacon-options" data-icon="send">Send a beacon</button>
+          <button class="button button-quiet" type="button" data-mode="controller" aria-pressed="false" aria-controls="scan-beacon-options" data-icon="scan">Scan for a beacon</button>
+        </div>
+        <div id="send-beacon-options" class="stack compact-stack" data-beacon-role="target">
           <section class="panel beacon-panel" aria-labelledby="send-beacon-title">
             <h2 id="send-beacon-title">Allow remote control</h2>
             <div class="stack compact-stack">
@@ -199,18 +219,18 @@
               <span id="target-beacon-code" class="badge" role="status" hidden></span>
             </div>
             <div class="inline-actions">
-              <button id="target-beacon-start" class="button button-primary" type="button">Send beacon</button>
-              <button id="target-beacon-stop" class="button" type="button" disabled>Stop beacon</button>
+              <button id="target-beacon-start" class="button button-primary" type="button" data-icon="send">Send beacon</button>
+              <button id="target-beacon-stop" class="button" type="button" disabled data-icon="stop">Stop beacon</button>
             </div>
             <div id="target-pairing-request" class="beacon-request-card" hidden>
               <p><strong id="target-request-label">Browser controller</strong> requests <span id="target-request-scopes">no scopes</span>.</p>
               <p class="subtle">The public label is unverified. Approve creates new pairing material and sends it only to this requester’s peer channel; it does not arm phone audio or vibration.</p>
               <div class="inline-actions">
-                <button id="target-request-approve" class="button button-primary" type="button">Allow to pair</button>
-                <button id="target-request-deny" class="button" type="button">Deny</button>
+                <button id="target-request-approve" class="button button-primary" type="button" data-icon="check">Allow to pair</button>
+                <button id="target-request-deny" class="button" type="button" data-icon="close">Deny</button>
               </div>
             </div>
-            <button id="target-disconnect" class="button" type="button" disabled hidden>Disconnect controller</button>
+            <button id="target-disconnect" class="button" type="button" disabled hidden data-icon="disconnect">Disconnect controller</button>
             <details><summary>Discovery and privacy</summary><p class="safety-copy">Advertising publishes only a random beacon ID and the label “PPS browser runner.” Requests remain untrusted until you approve one here. Approval sends fresh private credentials only to that requester’s encrypted peer data channel; VDO signaling, peer selection, and ordinary WebRTC connection metadata remain part of the trust boundary.</p></details>
             </div>
           </section>
@@ -221,24 +241,60 @@
             <label>Private room<input id="target-room" maxlength="64" readonly aria-readonly="true" placeholder="Created with fresh pairing material"></label>
             <label class="check-row"><input id="target-allow-notes" type="checkbox" checked> Allow remote session notes</label>
             <label class="check-row"><input id="target-allow-abort" type="checkbox"> Allow remote stop / abort</label>
-            <button id="create-phone-target" class="button button-primary" type="button">Create private target + QR</button>
+            <button id="create-phone-target" class="button button-primary" type="button" data-icon="scan">Create private target + QR</button>
             <div id="target-pairing" class="target-pairing" hidden>
               <canvas id="target-qr" width="212" height="212" aria-label="Controller invitation QR code"></canvas>
-              <button id="copy-target-invite" class="button" type="button">Copy controller invitation</button>
-              <button id="target-connect" class="button button-primary" type="button">Start private data target</button>
+              <button id="copy-target-invite" class="button" type="button" data-icon="copy">Copy controller invitation</button>
+              <button id="target-connect" class="button button-primary" type="button" data-icon="remote">Start private data target</button>
             </div>
           </details>
-        </section>
-      </main>
-    </div>
+        </div>
+        <div id="scan-beacon-options" class="stack compact-stack" data-beacon-role="controller" hidden>
+          <section class="panel beacon-panel" aria-labelledby="scan-beacon-title">
+            <h2 id="scan-beacon-title">Find a runner</h2>
+            <div class="stack compact-stack">
+              <span id="beacon-status" class="badge" role="status">Beacon off</span>
+              <p class="subtle">On the device that will run the experiment, press Send beacon. Then scan here, select that device, and request access.</p>
+              <div class="inline-actions">
+                <button id="beacon-browse" class="button" type="button" data-icon="scan">Scan beacon</button>
+                <button id="beacon-stop" class="button" type="button" disabled data-icon="stop">Stop scanning</button>
+              </div>
+              <div id="beacon-targets" class="beacon-target-list" aria-live="polite"><p class="subtle">Browsing is off.</p></div>
+              <p id="beacon-selection" class="subtle" role="status">Match the beacon code shown on the target before requesting access.</p>
+              <button id="beacon-request" class="button" type="button" disabled data-icon="remote">Request private session</button>
+              <details><summary>Discovery and privacy</summary><p class="safety-copy">Listings and requests carry no participant state or runner commands. After target-local approval, fresh credentials go only to that exact requester over its encrypted peer data channel. VDO signaling and peer selection remain part of the trust boundary. Internet access is required.</p></details>
+            </div>
+          </section>
+
+          <section class="panel stack compact-stack">
+            <div class="section-heading"><h2>Private connection</h2><span id="invite-badge" class="badge">No invite</span></div>
+            <p id="invite-summary" class="subtle">Scan for a beacon above or open a private invitation link from the target.</p>
+            <label>Access requested<select id="controller-role"><option value="controller">Run controls</option><option value="observer">Observe only</option></select></label>
+            <div class="inline-actions">
+              <button id="controller-connect" class="button button-primary" type="button" disabled data-icon="remote">Connect</button>
+              <button id="controller-stop" class="button" type="button" disabled data-icon="disconnect">Disconnect</button>
+            </div>
+            <details>
+              <summary>Connection details</summary>
+              <dl class="summary-list">
+                <div><dt>Target</dt><dd id="controller-target">—</dd></div>
+                <div><dt>Transport</dt><dd id="controller-transport">—</dd></div>
+                <div><dt>Granted access</dt><dd id="controller-scopes">None</dd></div>
+                <div><dt>Pending</dt><dd id="controller-pending">0</dd></div>
+              </dl>
+            </details>
+          </section>
+        </div>
+      </div>
+    </dialog>
 
     <section id="phone-participant-view" aria-label="Experiment in progress" hidden>
       <div id="phone-response" role="region" aria-labelledby="phone-response-instruction">
         <p id="phone-response-instruction" data-pretext>Tap when you feel the vibration.</p>
       </div>
       <div class="participant-actions">
-        <button id="participant-continue" class="button button-primary" type="button" hidden>Continue</button>
-        <button id="participant-stop" class="button" type="button">Stop experiment</button>
+        <button id="participant-continue" class="button button-primary" type="button" hidden data-icon="next">Continue</button>
+        <button id="participant-stop" class="button" type="button" data-icon="stop">Stop experiment</button>
       </div>
     </section>
 

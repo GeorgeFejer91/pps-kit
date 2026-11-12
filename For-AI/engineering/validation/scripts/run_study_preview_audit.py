@@ -141,6 +141,18 @@ def audit_shared_shell(browser, origin):
                     nav.get_by_role("link", name=routes[index + 1][1], exact=True).press("Enter")
 
 
+def open_runner_dialog(page, dialog_id):
+    launcher = page.locator(f'[data-dialog="{dialog_id}"]')
+    launcher.click()
+    expect(page.locator(f"#{dialog_id}")).to_be_visible()
+    return launcher
+
+
+def close_runner_dialog(page, dialog_id):
+    page.locator(f"#{dialog_id} [data-close-dialog]").click()
+    expect(page.locator(f"#{dialog_id}")).to_be_hidden()
+
+
 def audit_routes(browser, origin):
     with browser.new_context(viewport={"width": 1440, "height": 900}) as context:
         page = context.new_page()
@@ -205,19 +217,31 @@ def audit_routes(browser, origin):
         page.wait_for_url(f"{origin}/experiment-runner/")
         assert len(page.frames) == 1
         expect(page.get_by_role("link", name="Experiment Runner")).to_have_attribute("aria-current", "page")
-        expect(page.get_by_role("button", name="Send beacon")).to_be_enabled()
-        expect(page.get_by_role("button", name="Scan beacon")).to_be_hidden()
-        page.screenshot(path=ARTIFACTS / "runner-320.png")
-        page.get_by_role("button", name="Control another device").press("Enter")
-        expect(page.get_by_role("button", name="Scan beacon")).to_be_enabled()
-        expect(page.get_by_role("button", name="Send beacon")).to_be_hidden()
+        launcher = open_runner_dialog(page, "remote-center")
+        expect(page.locator("#remote-center-title")).to_be_focused()
+        expect(page.locator("#target-beacon-start")).to_be_enabled()
+        expect(page.locator("#beacon-browse")).to_be_hidden()
+        expect(page.locator('#remote-center [data-mode="target"] .icon-label')).to_have_attribute(
+            "data-pretext-result", re.compile("fit|reflow|dom-fallback")
+        )
+        page.screenshot(path=ARTIFACTS / "runner-remote-320.png")
+        page.get_by_role("button", name="Scan for a beacon").press("Enter")
+        expect(page.locator("#beacon-browse")).to_be_enabled()
+        expect(page.locator("#target-beacon-start")).to_be_hidden()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+        page.keyboard.press("Escape")
+        expect(launcher).to_be_focused()
         page.get_by_role("button", name="Run on this device").click()
+        page.screenshot(path=ARTIFACTS / "runner-320.png")
 
+        open_runner_dialog(page, "phone-study-settings")
         page.get_by_role("button", name="Submit setup").click()
         page.get_by_role("button", name="Prepare demo").click()
+        close_runner_dialog(page, "phone-study-settings")
         expect(page.get_by_role("button", name="Start locally")).to_be_disabled()
+        open_runner_dialog(page, "phone-output-settings")
         page.get_by_role("button", name="Arm outputs locally").click()
+        close_runner_dialog(page, "phone-output-settings")
         page.get_by_role("button", name="Start locally").click()
         expect(page.locator("#phone-response")).to_be_visible()
         expect(page.get_by_role("button", name="Stop experiment")).to_be_focused()
@@ -284,14 +308,18 @@ def audit_local_phone_study(browser, origin):
         errors = []
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(f"{origin}/experiment-runner/")
+        open_runner_dialog(page, "phone-study-settings")
         page.locator("#phone-study").select_option(study)
         page.get_by_role("button", name="Prepare study", exact=True).click()
         page.get_by_role("button", name="Submit setup").click()
+        close_runner_dialog(page, "phone-study-settings")
+        open_runner_dialog(page, "phone-output-settings")
         page.get_by_role("button", name="Arm outputs locally").click()
         expect(page.locator("#companion-toast")).to_contain_text("refused a vibration request")
         expect(page.get_by_role("button", name="Start locally")).to_be_disabled()
         page.evaluate("ppsRejectVibration = false")
         page.get_by_role("button", name="Arm outputs locally").tap()
+        close_runner_dialog(page, "phone-output-settings")
         page.get_by_role("button", name="Start locally").tap()
         gate = page.get_by_role("button", name="Continue", exact=True)
         context.route("**/participant-audit-spacing.css", lambda route: route.fulfill(
@@ -317,6 +345,7 @@ def audit_local_phone_study(browser, origin):
             )
             gate.press("Enter")
         expect(page.locator("#phone-run-state")).to_have_text("Completed")
+        expect(page.locator("#phone-timeline-list")).to_contain_text("Vibration requested")
         with page.expect_download() as download:
             page.get_by_role("button", name="Download event log").click()
         exported = json.loads(download.value.path().read_text(encoding="utf-8"))
@@ -334,6 +363,7 @@ def audit_phone_catalogue(browser, origin):
         context.add_init_script("Object.defineProperty(navigator, 'vibrate', { value: () => true });")
         page = context.new_page()
         page.goto(f"{origin}/experiment-runner/")
+        open_runner_dialog(page, "phone-study-settings")
         selection = page.locator("#phone-study")
         expect(selection.locator("option")).to_have_count(len(expected) + 1)
         for study in expected:
@@ -362,10 +392,12 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
         controller = controller_context.new_page()
         target.goto(f"{origin}/experiment-runner/")
         controller.goto(f"{origin}/experiment-runner/")
-        target.get_by_role("button", name="Send beacon").click()
+        open_runner_dialog(target, "remote-center")
+        target.locator("#target-beacon-start").click()
         expect(target.locator("#target-beacon-status")).to_have_text("Advertising", timeout=25000)
-        controller.get_by_role("button", name="Control another device").click()
-        controller.get_by_role("button", name="Scan beacon").click()
+        open_runner_dialog(controller, "remote-center")
+        controller.get_by_role("button", name="Scan for a beacon").click()
+        controller.locator("#beacon-browse").click()
         expect(controller.locator("#beacon-status")).to_have_text("Browsing", timeout=25000)
         candidate = controller.locator("#beacon-targets button")
         expect(target.locator("#target-beacon-code")).to_be_visible()
@@ -378,7 +410,10 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
         controller.get_by_role("button", name="Connect", exact=True).click(timeout=25000)
         expect(controller.locator("#companion-status")).to_have_text("Controls ready", timeout=25000)
         expect(target.locator("#target-qr")).to_be_hidden()
+        close_runner_dialog(controller, "remote-center")
+        close_runner_dialog(target, "remote-center")
         expect(controller.get_by_role("button", name="Start part")).to_be_disabled()
+        open_runner_dialog(target, "phone-study-settings")
         target.get_by_role("button", name="Submit setup").click()
         if study:
             target.locator("#phone-study").select_option(study)
@@ -387,7 +422,10 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
         else:
             controller.get_by_role("button", name="Prepare demo").click()
         expect(controller.get_by_role("button", name="Start part")).to_be_disabled()
+        close_runner_dialog(target, "phone-study-settings")
+        open_runner_dialog(target, "phone-output-settings")
         target.get_by_role("button", name="Arm outputs locally").click()
+        close_runner_dialog(target, "phone-output-settings")
         expect(controller.get_by_role("button", name="Start part")).to_be_enabled(timeout=12000)
         target.evaluate("ppsCueMs = null")
         controller.get_by_role("button", name="Start part").click()
@@ -433,7 +471,7 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
                     arg=previous_cue, timeout=7000,
                 )
                 surface.tap()
-                summary = controller.get_by_text("Recent trials", exact=True)
+                summary = controller.locator("#controller-recent-trials summary")
                 summary.press("Enter")
                 expect(summary).to_be_focused()
                 history = controller.locator("#controller-recent-trial-list")
@@ -480,6 +518,7 @@ def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_
                 print(f"Trial 2 retained its {earlier_rt} ms tap while Trial 3 stayed on the current timeline.")
         else:
             expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
+        open_runner_dialog(target, "remote-center")
         target.get_by_role("button", name="Disconnect controller").click()
         expect(controller.get_by_role("button", name="Start part")).to_be_hidden(timeout=15000)
 

@@ -10,12 +10,11 @@ const [html, source, styles] = await Promise.all([
 ]);
 
 test("desktop page exposes explicit inbound target and outbound controller roles", () => {
-  assert.match(html, /Public rendezvous · private control/u);
-  assert.match(html, /id="desktop-beacon-start"[^>]*>Advertise this runner</u);
+  const remote = html.slice(html.indexOf('<dialog id="remote-center"'));
+  assert.match(remote, /id="desktop-beacon-start"[^>]*data-icon="send"[^>]*>Send beacon</u);
   assert.match(html, /id="desktop-pairing-request"[^>]*hidden/u);
   assert.match(html, /id="desktop-request-approve"[^>]*disabled/u);
-  assert.match(html, /Control a Browser Experiment/u);
-  assert.match(html, /id="desktop-controller-browse"[^>]*>Browse public targets</u);
+  assert.match(remote, /id="desktop-controller-browse"[^>]*data-icon="scan"[^>]*>Scan beacon</u);
   assert.match(html, /id="desktop-controller-connect"[^>]*disabled/u);
   for (const action of ["package.prepare_demo", "part.start", "run.pause", "run.resume", "run.stop"]) {
     assert.match(html, new RegExp(`data-controller-action="${action.replace(".", "\\.")}"`));

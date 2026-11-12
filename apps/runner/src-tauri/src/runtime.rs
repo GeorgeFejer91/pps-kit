@@ -440,6 +440,16 @@ impl AppRuntime {
             .map_err(owner_runtime_error)
     }
 
+    pub(crate) async fn operator_snapshot(
+        &self,
+    ) -> Result<crate::operator_timeline::OperatorSnapshot, String> {
+        self.0
+            .authority
+            .operator_snapshot()
+            .await
+            .map_err(owner_runtime_error)
+    }
+
     pub(crate) fn start_latency_trace(&self, route: LatencyRoute) -> LatencyTraceGuard {
         self.0.latency_diagnostics.start_trace(route)
     }

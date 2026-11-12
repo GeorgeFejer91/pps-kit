@@ -35,7 +35,10 @@ test("hosted companion declares a restrictive browser-only document policy", () 
   assert.match(companionHtml, /After target-local approval, fresh credentials go only to that exact requester/u);
   const controllerHtml = companionHtml.slice(companionHtml.indexOf('id="controller-mode"'), companionHtml.indexOf('id="target-mode"'));
   assert.doesNotMatch(controllerHtml, /remote-participant|setup\.submit|Exploratory browser timing/u);
-  assert.match(controllerHtml, /value="observer">Observe only/u);
+  const remote = companionHtml.slice(companionHtml.indexOf('<dialog id="remote-center"'));
+  assert.match(remote, /data-beacon-role="controller"[\s\S]+value="observer">Observe only/u);
+  assert.match(remote, /id="target-beacon-start"[^>]*data-icon="send"/u);
+  assert.match(remote, /id="beacon-browse"[^>]*data-icon="scan"/u);
   assert.match(companionHtml, /\.\.\/vendor\/vdoninja\/1\.5\.5\/vdoninja-sdk\.min\.js/u);
   assert(
     companionHtml.indexOf("vdoninja-sdk.min.js") < companionHtml.indexOf('type="module"'),

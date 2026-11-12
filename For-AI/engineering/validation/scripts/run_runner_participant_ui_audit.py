@@ -21,6 +21,8 @@ BRIDGE = """() => {
       setup: {participant_code: 'P001', part_labels: {'1':'A','2':'B'}},
       safety: {local_armed: true, capture_started: true},
       active_block: {active: true, block_label: 'Synthetic fixture', duration_s: 2},
+      operator_timeline: {block_label:'Synthetic fixture',duration_s:2,elapsed_s:0.5,
+        audio_s:[0.1],tactile_s:[0.45],response_s:[],response_count:0},
       allowed_actions: ['system.snapshot','run.pause','run.stop']
     },
     emit(snapshot) { callbacks.get(listenerId)?.({event:'runner-snapshot',id:1,payload:structuredClone(snapshot)}); }
@@ -36,6 +38,8 @@ BRIDGE = """() => {
       if (command === 'runner_record_response') {
         state.requests.push(structuredClone(args.request));
         if (state.failNext) {state.failNext=false; throw {code:'native_response_unavailable',message:'Synthetic input rejection'};}
+        state.snapshot.operator_timeline.response_s.push(0.5);
+        state.snapshot.operator_timeline.response_count++;
         return state.requests.length;
       }
       throw new Error(`Unexpected native fixture command: ${command}`);
@@ -68,7 +72,7 @@ def main() -> int:
                 page.evaluate("""() => {
                   document.documentElement.style.fontSize = '32px';
                   const target = document.querySelector('#participant-response');
-                  target.textContent = 'Teilnehmerantwort im laufenden Experiment erfassen';
+                  target.querySelector('.icon-label').textContent = 'Teilnehmerantwort im laufenden Experiment erfassen';
                   for (const node of document.querySelectorAll('*')) {
                     node.style.letterSpacing='0.12em'; node.style.wordSpacing='0.16em';
                   }
@@ -77,7 +81,7 @@ def main() -> int:
             page.wait_for_timeout(120)
             geometry = target.evaluate("""node => ({
               width:node.clientWidth,scroll:node.scrollWidth,height:node.clientHeight,scrollHeight:node.scrollHeight,
-              measured:node.dataset.pretextResult,pageWidth:document.documentElement.clientWidth,
+              measured:node.querySelector('.icon-label').dataset.pretextResult,pageWidth:document.documentElement.clientWidth,
               pageScroll:document.documentElement.scrollWidth
             })""")
             assert geometry["measured"] not in {None,"unavailable"}, geometry
@@ -92,11 +96,16 @@ def main() -> int:
             assert geometry["pageScroll"] <= geometry["pageWidth"] + 1, geometry
             page.screenshot(path=str(output / f"response-{width}-{'enlarged' if enlarged else height}.png"))
             cases.append({"viewport": [width,height], "enlarged": enlarged, **geometry})
+        page.wait_for_function("document.querySelector('#audio-markers').getAttribute('d').length > 0")
+        assert page.locator("#tactile-markers").get_attribute("d")
+        assert not page.locator("#response-markers").get_attribute("d")
         box = target.bounding_box()
         target.click(position={"x": box["width"] * .25, "y": box["height"] * .75})
         target.focus()
         target.press("Space")
         page.wait_for_function("window.participantAudit.requests.length === 2")
+        page.wait_for_function("document.querySelector('#timeline-responses').textContent === '2 recorded responses'")
+        assert page.locator("#response-markers").get_attribute("d")
         requests = page.evaluate("window.participantAudit.requests")
         assert abs(requests[0]["x"] - .25) < .02 and abs(requests[0]["y"] - .75) < .02, requests
         assert requests[1] == {"choice":"", "x":None, "y":None}, requests

@@ -9,6 +9,8 @@ use pps_runner_execution::BlockEventSchedule;
 use pps_session_package::{VerifiedPreparedSession, VerifiedPreparedWav};
 use serde::Serialize;
 
+use crate::operator_timeline::OperatorTimeline;
+
 pub(crate) const PREPARED_AUDIO_CACHE_CAPACITY_BLOCKS: u8 = 1;
 pub(crate) const MAXIMUM_CACHED_DECODED_BYTES: u64 = DEFAULT_MAXIMUM_DECODED_BYTES;
 
@@ -97,6 +99,7 @@ impl PreparedAudioSource {
 pub(crate) struct PreparedAudioCandidate {
     receipt: Arc<PreparedAudioSourceReceipt>,
     playback_plan: Arc<PreparedPlaybackPlan>,
+    pub(crate) timeline: OperatorTimeline,
 }
 
 impl PreparedAudioCandidate {
@@ -343,6 +346,8 @@ fn prepare_verified_audio_with_limits(
         PpsChannelLayout::LegacyStudy5TactileAudio => OutputRouteRequest::legacy_stereo(),
         PpsChannelLayout::BinauralLeftRightTactile => OutputRouteRequest::canonical_three(),
     };
+    let timeline =
+        OperatorTimeline::from_schedule(receipt.schedule(), media.frames(), media.sample_rate_hz());
     let playback_plan = PreparedPlaybackPlan::new(
         media,
         receipt.run_generation(),
@@ -354,6 +359,7 @@ fn prepare_verified_audio_with_limits(
     Ok(PreparedAudioCandidate {
         receipt,
         playback_plan: Arc::new(playback_plan),
+        timeline,
     })
 }
 

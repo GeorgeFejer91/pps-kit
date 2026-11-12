@@ -14,11 +14,13 @@ import {
   remoteActionsForTarget,
 } from "./remote/websocket-session.js";
 import { renderQrCode } from "./ui/qr-code.js";
+import { bindRunnerControls, updateRemoteAttention } from "./ui/runner-controls.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
 import { bindParticipantResponse } from "./ui/participant-response.js";
 import { bindNativeOutputSetup } from "./ui/native-output-setup.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 
+bindRunnerControls();
 initializeTextLayout();
 
 const api = selectRunnerAdapter();
@@ -41,6 +43,8 @@ const outboundActionButtons = [...document.querySelectorAll("[data-controller-ac
 const MAX_PENDING_NATIVE_COMMANDS = 32;
 
 let snapshot = null;
+let setupSignature = "";
+let operatorTimeline = null;
 let preparedPlan = null;
 let preparedExecution = null;
 let preparedAudio = null;
@@ -61,8 +65,9 @@ let outboundPrivateOffer = null;
 let outboundController = null;
 
 function text(id, value, fallback = "—") {
-  const element = elements[id];
-  if (element) element.textContent = value === undefined || value === null || value === "" ? fallback : String(value);
+  const element = elements[id]?.querySelector(":scope > .icon-label") ?? elements[id];
+  const label = value === undefined || value === null || value === "" ? fallback : String(value);
+  if (element && element.textContent !== label) element.textContent = label;
 }
 
 function titleCase(value) {
@@ -76,8 +81,7 @@ function formatDuration(seconds) {
 
 function showToast(message, { error = false } = {}) {
   clearTimeout(toastTimer);
-  const owner = document.activeElement?.closest(".panel")
-    ?? document.querySelector(".tab-panel.is-active .panel");
+  const owner = document.querySelector(".runner-dialog[open] .dialog-body") ?? elements["run-feedback"];
   owner?.append(elements.toast);
   elements.toast.textContent = message;
   elements.toast.classList.toggle("is-error", error);
@@ -258,10 +262,46 @@ function updateInboundPolicyUi() {
   }
 }
 
+// The display uses block-relative software positions supplied by the native owner.
+function renderStimulusTimeline(next) {
+  const timeline = operatorTimeline;
+  const block = next.active_block;
+  const duration = timeline?.duration_s ?? block?.duration_s ?? 0;
+  const elapsed = timeline?.elapsed_s ?? block?.elapsed_s ?? 0;
+  text("block-label", timeline?.block_label || block?.block_label, "No active block");
+  text("block-time", `${formatDuration(elapsed)} / ${formatDuration(duration)}`);
+  elements["timeline-axis"].hidden = duration <= 0;
+  text("axis-midpoint", formatDuration(duration / 2));
+  text("axis-end", formatDuration(duration));
+  text("timeline-status", timeline
+    ? "Scheduled cues and recorded inputs at software positions. Nearby markers can overlap."
+    : next.package_verified ? "Prepare native output to preview the first block."
+      : "Open Study setup to prepare a session.");
+  const responseCount = timeline?.response_count ?? 0;
+  elements["timeline-responses"].hidden = !timeline;
+  text("timeline-responses", `${responseCount} recorded ${responseCount === 1 ? "response" : "responses"}`);
+
+  // Keep the end markers inside the plotting surface.
+  const plotX = (offset) => duration > 0 ? 2 + 996 * Math.min(1, Math.max(0, offset / duration)) : 2;
+  const markers = (values, y) => (values ?? []).filter(Number.isFinite)
+    .map((time) => `M${plotX(time).toFixed(2)} ${y - 12}v24`).join("");
+  elements["audio-markers"].setAttribute("d", markers(timeline?.audio_s, 25));
+  elements["tactile-markers"].setAttribute("d", markers(timeline?.tactile_s, 75));
+  elements["response-markers"].setAttribute("d", markers(timeline?.response_s, 125));
+  elements["block-progress"].setAttribute("d", duration > 0 ? `M${plotX(elapsed)} 0v150` : "");
+}
+
 function renderSnapshot(next) {
   if (!next || typeof next !== "object") return;
   if (snapshot && (next.epoch < snapshot.epoch
     || (next.epoch === snapshot.epoch && next.revision < snapshot.revision))) return;
+  if (snapshot?.identity?.session_id !== next.identity?.session_id
+    || snapshot?.package_label !== next.package_label) operatorTimeline = null;
+  if (Object.hasOwn(next, "operator_timeline")) {
+    const { operator_timeline, ...runnerState } = next;
+    operatorTimeline = operator_timeline;
+    next = runnerState;
+  }
   snapshot = next;
   participantResponse.refresh(next);
   const phase = next.run?.phase ?? "unknown";
@@ -272,19 +312,21 @@ function renderSnapshot(next) {
   text("run-heading", next.run?.state_label || titleCase(phase));
   text("run-progress", next.run?.progress_label, "Waiting for target state.");
   text("event-label", next.run?.event_label, "No current event");
-  text("block-label", next.active_block?.active ? next.active_block.block_label : "No active block");
-  const elapsed = Number(next.active_block?.elapsed_s) || 0;
-  const duration = Number(next.active_block?.duration_s) || 0;
-  text("block-time", `${formatDuration(elapsed)} / ${formatDuration(duration)}`);
-  elements["block-progress"].style.width = `${duration > 0 ? Math.min(100, elapsed / duration * 100) : 0}%`;
+  renderStimulusTimeline(next);
 
   text("setup-badge", next.setup?.ready ? "Ready" : "Not submitted");
   elements["setup-badge"].dataset.tone = next.setup?.ready ? "ready" : "";
-  if (document.activeElement !== elements["participant-code"]) elements["participant-code"].value = next.setup?.participant_code || "";
-  if (document.activeElement !== elements["participant-age"]) elements["participant-age"].value = next.setup?.age ?? "";
-  if (document.activeElement !== elements["participant-handedness"]) elements["participant-handedness"].value = next.setup?.handedness === "unspecified" ? "" : (next.setup?.handedness || "");
-  if (document.activeElement !== elements["participant-gender"]) elements["participant-gender"].value = next.setup?.gender === "unspecified" ? "" : (next.setup?.gender || "");
-  elements["name-sharing"].checked = Boolean(next.setup?.name_sharing_opt_in);
+  const nextSetup = next.setup ?? {};
+  const signature = JSON.stringify([next.epoch, nextSetup.participant_code, nextSetup.age,
+    nextSetup.handedness, nextSetup.gender, nextSetup.name_sharing_opt_in]);
+  if (signature !== setupSignature) {
+    setupSignature = signature;
+    elements["participant-code"].value = nextSetup.participant_code || "";
+    elements["participant-age"].value = nextSetup.age ?? "";
+    elements["participant-handedness"].value = nextSetup.handedness === "unspecified" ? "" : (nextSetup.handedness || "");
+    elements["participant-gender"].value = nextSetup.gender === "unspecified" ? "" : (nextSetup.gender || "");
+    elements["name-sharing"].checked = Boolean(nextSetup.name_sharing_opt_in);
+  }
 
   text("package-badge", next.package_verified ? "Verified" : "Unverified");
   elements["package-badge"].dataset.tone = next.package_verified ? "ready" : "";
@@ -346,6 +388,8 @@ function readRemoteUrl(status) {
 async function renderRemote(next) {
   if (!next || typeof next !== "object") return;
   remoteStatus = next;
+  updateRemoteAttention(elements["remote-attention"], pendingInboundRequest,
+    remoteControllerConnected() || inboundPrivateTarget?.nativeClaimReceipt);
   const enabled = remoteEnabled(next);
   const serverAvailable = Boolean(next.server_available ?? next.serverAvailable);
   const serverError = next.server_error ?? next.serverError ?? "";
@@ -647,6 +691,8 @@ async function stopInboundPrivateTarget(reason = "local_stop") {
 function renderPendingInboundRequest() {
   const requests = inboundBeacon?.pendingPairingRequests() ?? [];
   pendingInboundRequest = requests[0] ?? null;
+  updateRemoteAttention(elements["remote-attention"], pendingInboundRequest,
+    remoteControllerConnected() || inboundPrivateTarget?.nativeClaimReceipt);
   elements["desktop-pairing-request"].hidden = !pendingInboundRequest;
   if (pendingInboundRequest) {
     text("desktop-request-label", pendingInboundRequest.label, "Browser controller");
@@ -770,6 +816,7 @@ function updateOutboundControls() {
     const action = button.dataset.controllerAction;
     button.disabled = !ready || busy || !allowed.has(action) || !granted.has(requiredScope(action));
   }
+  elements["outbound-run-controls"].hidden = !ready;
   elements["desktop-controller-disconnect"].disabled = !outboundController;
 }
 
@@ -954,19 +1001,6 @@ async function stopAllRemoteNetworking() {
     stopOutboundBeacon(),
     stopOutboundControllerSession(),
   ]);
-}
-
-function bindTabs() {
-  document.querySelectorAll(".tab-button").forEach((button) => {
-    button.addEventListener("click", () => {
-      document.querySelectorAll(".tab-button").forEach((candidate) => {
-        const active = candidate === button;
-        candidate.classList.toggle("is-active", active);
-        candidate.setAttribute("aria-selected", String(active));
-      });
-      document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === button.dataset.tab));
-    });
-  });
 }
 
 function bindLocalActions() {
@@ -1165,7 +1199,6 @@ function bindOutboundControllerControls() {
 }
 
 async function start() {
-  bindTabs();
   bindLocalActions();
   bindNativeRemoteControls();
   bindOutboundControllerControls();

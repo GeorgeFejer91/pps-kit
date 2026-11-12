@@ -30,6 +30,7 @@ import { PpsPublicBeacon } from "./remote/vdo-beacon.js";
 import { BrspControllerSession, BrspTargetSession } from "./remote/websocket-session.js";
 import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 import { renderQrCode } from "./ui/qr-code.js";
+import { bindRunnerControls, updateRemoteAttention } from "./ui/runner-controls.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
 
 import { initializeSiteHeader } from "../../../../packages/pps-resources/assets/ui/site-header.mjs";
@@ -90,7 +91,9 @@ function clock() {
 }
 
 function text(id, value, fallback = "—") {
-  if (elements[id]) elements[id].textContent = value === undefined || value === null || value === "" ? fallback : String(value);
+  const element = elements[id]?.querySelector(":scope > .icon-label") ?? elements[id];
+  const label = value === undefined || value === null || value === "" ? fallback : String(value);
+  if (element && element.textContent !== label) element.textContent = label;
 }
 
 function titleCase(value) {
@@ -99,6 +102,8 @@ function titleCase(value) {
 
 function showToast(message, { error = false } = {}) {
   clearTimeout(toastTimer);
+  const owner = document.querySelector(".runner-dialog[open] .dialog-body") ?? document.body;
+  owner.append(elements["companion-toast"]);
   elements["companion-toast"].textContent = message;
   elements["companion-toast"].classList.toggle("is-error", error);
   elements["companion-toast"].classList.add("is-visible");
@@ -116,6 +121,9 @@ function activateMode(mode) {
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", String(active));
   });
+  document.querySelectorAll("[data-beacon-role]").forEach((panel) => {
+    panel.hidden = panel.dataset.beaconRole !== mode;
+  });
   document.querySelectorAll("[data-mode-panel]").forEach((panel) => {
     panel.hidden = panel.dataset.modePanel !== mode;
     panel.classList.toggle("is-active", !panel.hidden);
@@ -132,13 +140,12 @@ function renderControllerSnapshot(snapshot) {
   text("controller-run-state", snapshot.run?.state_label || titleCase(phase));
   elements["controller-study"].hidden = !snapshot.browser_study;
   if (snapshot.browser_study) text("controller-study", snapshot.browser_study.title);
-  text("controller-revision", `rev ${snapshot.revision ?? 0}`);
   text("controller-progress", snapshot.run?.progress_label, "No progress reported.");
   text("controller-event", snapshot.run?.event_label, "No current event.");
   const elapsed = Number(snapshot.active_block?.elapsed_s) || 0;
   const duration = Number(snapshot.active_block?.duration_s) || 0;
   elements["controller-progress-bar"].style.width = `${duration > 0 ? Math.min(100, elapsed / duration * 100) : 0}%`;
-  renderControllerTimeline(snapshot.browser_trial, snapshot.browser_trials ?? []);
+  renderTrialTimeline("controller", snapshot.browser_trial, snapshot.browser_trials ?? []);
   updateControllerActions();
 }
 
@@ -151,13 +158,13 @@ function trialMarkers(trial) {
   ].filter(([, offset]) => offset !== null).sort((a, b) => a[1] - b[1]);
 }
 
-function renderControllerTimeline(trial, recent) {
-  const panel = elements["controller-timeline"];
+function renderTrialTimeline(role, trial, recent) {
+  const panel = elements[`${role}-timeline`];
   panel.hidden = !trial;
   if (!trial) return;
-  text("controller-trial-number", "Trial " + trial.number + (trial.response_required ? "" : " · Withhold"));
-  const track = elements["controller-timeline-track"];
-  const list = elements["controller-timeline-list"];
+  text(`${role}-trial-number`, "Trial " + trial.number + (trial.response_required ? "" : " · Withhold"));
+  const track = elements[`${role}-timeline-track`];
+  const list = elements[`${role}-timeline-list`];
   track.replaceChildren();
   list.replaceChildren();
   for (const [label, offset, kind] of trialMarkers(trial)) {
@@ -169,8 +176,8 @@ function renderControllerTimeline(trial, recent) {
     item.textContent = "+" + offset + " ms · " + label;
     list.append(item);
   }
-  elements["controller-recent-trials"].hidden = recent.length === 0;
-  const history = elements["controller-recent-trial-list"];
+  elements[`${role}-recent-trials`].hidden = recent.length === 0;
+  const history = elements[`${role}-recent-trial-list`];
   history.replaceChildren();
   for (const entry of recent) {
     const item = document.createElement("li");
@@ -195,7 +202,7 @@ function updateControllerActions() {
   text("controller-pending", status?.pendingCommands ?? 0);
   elements["controller-session-panel"].hidden = !ready;
   elements["controller-role"].disabled = Boolean(status && !["idle", "closed", "error", "disconnected"].includes(status.phase));
-  let next = controllerInvitation ? "Invitation ready. Press Connect." : "Scan for a beacon or open an invitation to begin.";
+  let next = controllerInvitation ? "Invitation ready. Open Remote control and press Connect." : "Open Remote control to scan for a runner, or open an invitation.";
   if (!browserActive) next = "Control suspended while this page is hidden or offline.";
   else if (status?.phase === "ready" && !ready) next = "Authenticated. Waiting for fresh target state…";
   else if (ready) {
@@ -206,7 +213,7 @@ function updateControllerActions() {
           : !current.safety?.local_armed ? "Arm outputs on the device running the experiment."
             : current.run?.phase === "running" ? "Running. Pause or stop when needed."
               : current.run?.phase === "paused" ? "Paused. Review the target, then resume when ready."
-                : "Ready. Choose the next permitted action below.";
+                : "Ready. Choose an available run action.";
   } else if (["connecting", "authenticating"].includes(status?.phase)) next = "Connecting to the target…";
   else if (["closed", "error", "disconnected"].includes(status?.phase)) next = "Connection lost. Press Connect to fetch fresh target state.";
   text("controller-next-step", next);
@@ -384,6 +391,7 @@ function bindControllerBeacon(beacon) {
 function renderPendingTargetRequest() {
   const requests = targetBeacon?.pendingPairingRequests() ?? [];
   pendingTargetRequest = requests[0] ?? null;
+  updateRemoteAttention(elements["remote-attention"], pendingTargetRequest, phoneTarget?.session?.phase === "ready");
   elements["target-pairing-request"].hidden = !pendingTargetRequest;
   if (!pendingTargetRequest) return;
   text("target-request-label", pendingTargetRequest.label, "Browser controller");
@@ -396,8 +404,7 @@ async function stopTargetBeacon() {
   clearTimeout(targetBeaconExpiry);
   targetBeaconExpiry = null;
   elements["target-beacon-code"].hidden = true;
-  pendingTargetRequest = null;
-  elements["target-pairing-request"].hidden = true;
+  renderPendingTargetRequest();
   elements["target-beacon-stop"].disabled = true;
   elements["target-beacon-start"].disabled = false;
   if (beacon) await beacon.stop();
@@ -595,8 +602,13 @@ function renderPhoneSnapshot() {
   if (!phoneSnapshot) return;
   const phase = phoneSnapshot.run.phase;
   text("phone-run-state", phoneSnapshot.run.state_label || titleCase(phase));
-  text("phone-revision", `rev ${phoneSnapshot.revision}`);
   text("phone-event", phoneSnapshot.run.event_label);
+  text("phone-study-summary", phoneSnapshot.browser_study?.title, "Practice demo");
+  text("phone-readiness", !phoneSnapshot.setup.ready ? "Complete participant setup."
+    : !phoneSnapshot.package_verified ? "Prepare the selected study."
+      : !phoneSnapshot.safety.local_armed ? "Open Outputs and arm this device."
+        : "Device outputs armed.");
+  renderTrialTimeline("phone", phoneSnapshot.browser_trial, phoneSnapshot.browser_trials ?? []);
   const allowed = new Set(phoneSnapshot.allowed_actions);
   elements["phone-setup"].disabled = !allowed.has("setup.submit");
   elements["phone-study"].disabled = phoneSnapshot.run.thread_alive || studyLoading;
@@ -620,6 +632,7 @@ function renderPhoneSnapshot() {
     if (gate) text("participant-continue", phoneSnapshot.instruction_gate.button_label || "Continue");
   }
   if (participant.hidden === showing) {
+    if (showing) document.querySelector(".runner-dialog[open]")?.close();
     participant.hidden = !showing;
     document.querySelector(".app-shell").inert = showing;
     document.querySelector(".skip-link").inert = showing;
@@ -639,6 +652,7 @@ function renderPhoneSnapshot() {
   elements["disarm-phone"].disabled = !allowed.has("target.disarm");
   text("target-state-badge", phoneTarget?.session?.phase === "ready" ? "Remote ready" : titleCase(phoneSnapshot.connection_state));
   elements["target-state-badge"].dataset.tone = phoneTarget?.session?.phase === "ready" ? "ready" : "";
+  updateRemoteAttention(elements["remote-attention"], pendingTargetRequest, phoneTarget?.session?.phase === "ready");
 }
 
 function applyPhone(action, args = {}, { source = "local", expectedRevision = null, publish = true } = {}) {
@@ -1088,6 +1102,7 @@ function start() {
     blockEmbeddedContext();
     return;
   }
+  bindRunnerControls();
   bindModeSwitch();
   initializeInvitation();
   bindControllerControls();

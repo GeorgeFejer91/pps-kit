@@ -14,7 +14,7 @@
         <div class="brand-block">
           <span class="brand-mark" aria-hidden="true">PPS</span>
           <div>
-            <p class="eyebrow">Peripersonal Space Toolkit</p>
+
             <h1>Experiment Runner</h1>
           </div>
         </div>
@@ -25,249 +25,294 @@
         </div>
       </header>
 
-      <nav class="tabbar" aria-label="Runner sections">
-        <button class="tab-button is-active" type="button" data-tab="control" aria-selected="true">Experiment Control</button>
-        <button class="tab-button" type="button" data-tab="logging" aria-selected="false">Data Logging</button>
-        <button class="tab-button" type="button" data-tab="remote" aria-selected="false">Phone Remote</button>
-      </nav>
 
-      <main>
-        <section class="tab-panel is-active" data-panel="control">
-          <div class="workspace-grid">
-            <div class="workspace-main stack">
-              <section class="hero-panel panel">
-                <div>
-                  <h2 id="run-heading">Waiting for a prepared package</h2>
-                  <p id="run-progress" class="subtle">The native target remains the timing and state authority.</p>
-                </div>
-                <button id="participant-response" class="response-target" type="button" disabled
-                  aria-describedby="participant-response-help" data-pretext>Respond</button>
-              </section>
-              <p id="participant-response-help" class="subtle">Click or tap the response area. Space or Enter records a response without a position. Responses are enabled during native playback.</p>
-
-              <section class="panel">
-                <div class="section-heading">
-                  <div>
-                    <p class="eyebrow">Session transport</p>
-                    <h2>Experiment Control</h2>
-                  </div>
-                  <button class="button button-quiet" type="button" data-action="system.snapshot">Refresh snapshot</button>
-                </div>
-                <div class="control-grid">
-                  <button class="button button-primary action-button" type="button" data-action="part.start">Start selected part</button>
-                  <button class="button action-button" type="button" data-action="instruction.continue">Continue instruction</button>
-                  <button class="button action-button" type="button" data-action="run.pause">Pause</button>
-                  <button class="button action-button" type="button" data-action="run.resume">Resume</button>
-                  <button class="button action-button" type="button" data-action="run.stop">Stop run</button>
-                  <button class="button button-danger action-button" type="button" data-action="run.abort">Abort run</button>
-                </div>
-                <div class="timeline" aria-label="Active block progress">
-                  <div class="timeline-labels"><span id="block-label">No active block</span><span id="block-time">0:00 / 0:00</span></div>
-                  <div class="progress-track"><span id="block-progress"></span></div>
-                  <p id="event-label" class="timeline-event">Waiting for target snapshot</p>
-                </div>
-              </section>
-
-              <section class="panel two-column-panel">
-                <form id="setup-form" class="stack compact-stack">
-                  <div class="section-heading">
-                    <div><p class="eyebrow">Participant</p><h2>Participant Setup</h2></div>
-                    <span id="setup-badge" class="badge">Not submitted</span>
-                  </div>
-                  <div class="form-grid">
-                    <label>Participant code<input id="participant-code" name="participant_code" maxlength="64" autocomplete="off" required></label>
-                    <label>Age<input id="participant-age" name="age" type="number" min="1" max="120" inputmode="numeric" required></label>
-                    <label>Handedness<select id="participant-handedness" name="handedness" required><option value="">Choose…</option><option value="right">Right</option><option value="left">Left</option><option value="ambidextrous">Ambidextrous</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
-                    <label>Gender<select id="participant-gender" name="gender" required><option value="">Choose…</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
-                    <label class="form-span">Participant name <span class="hint">kept local unless sharing is opted in</span><input id="participant-name" name="participant_name" maxlength="80" autocomplete="off"></label>
-                    <label class="check-row form-span"><input id="name-sharing" name="name_sharing_opt_in" type="checkbox"> Allow the participant name to enter remote state</label>
-                  </div>
-                  <button class="button button-primary" type="submit">Submit participant setup</button>
-                </form>
-
-                <div class="stack compact-stack split-border">
-                  <div class="section-heading"><div><p class="eyebrow">Package</p><h2>Session Package</h2></div><span id="package-badge" class="badge">Unverified</span></div>
-                  <p id="package-label" class="subtle">No package loaded.</p>
-                  <button id="select-session-manifest" class="button button-primary" type="button">Choose prepared session manifest</button>
-                  <button id="inspect-prepared-execution" class="button" type="button" disabled>Compile and inspect Rust schedule</button>
-                  <button id="prepare-first-audio-block" class="button" type="button" disabled>Prepare first audio block</button>
-                  <button id="prepare-demo-button" class="button" type="button" data-action="package.prepare_demo">Prepare deterministic validation demo</button>
-                  <p id="package-detail" class="safety-copy">The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.</p>
-                  <p id="execution-inspection-detail" class="safety-copy">Schedule inspection is unavailable until a real prepared session is selected.</p>
-                  <p id="prepared-audio-detail" class="safety-copy">Native PCM preparation is unavailable until the first schedule is inspected.</p>
-                  <ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol>
-                  <div class="inline-actions">
-                    <button class="button" type="button" data-action="target.arm">Arm local target</button>
-                    <button class="button button-quiet" type="button" data-action="target.disarm">Disarm</button>
-                  </div>
-                  <p class="safety-copy">Audio-device selection, tactile calibration, filesystem access, and acquisition controls remain local-only.</p>
-                </div>
-              </section>
+      <main class="operator-workspace">
+        <section class="panel operator-panel" aria-labelledby="stimulus-timeline-title">
+          <div class="section-heading">
+            <div>
+              <h2 id="stimulus-timeline-title">Stimulus timeline</h2>
+              <p id="block-label" class="subtle">No active block</p>
             </div>
-
-            <aside class="workspace-side stack">
-              <section class="panel stack compact-stack" aria-labelledby="native-output-heading">
-                <h2 id="native-output-heading">Prepare audio output</h2>
-                <p id="native-output-detail" class="safety-copy" role="status">Prepare the first audio block before choosing an output device.</p>
-                <button id="native-output-list" class="button" type="button" disabled>List output devices</button>
-                <label>Output device<select id="native-output-route" aria-describedby="native-output-selection" disabled>
-                  <option value="">Choose output device…</option>
-                </select></label>
-                <p id="native-output-selection" class="subtle">Choose a device configuration matching the prepared block.</p>
-                <button id="native-output-prepare" class="button" type="button" disabled>Prepare silent output</button>
-                <div class="inline-actions">
-                  <button id="native-output-release" class="button" type="button" disabled>Release output</button>
-                  <button id="native-output-disable" class="button button-quiet" type="button" disabled>Disable output</button>
-                </div>
-              </section>
-              <section class="panel">
-                <p class="eyebrow">Output levels</p>
-                <h2>Output Summary</h2>
-                <dl class="summary-list">
-                  <div><dt>Audio route</dt><dd id="audio-route">Not ready</dd></div>
-                  <div><dt>Local armed</dt><dd id="local-armed">No</dd></div>
-                  <div><dt>LSL</dt><dd id="lsl-ready">Not ready</dd></div>
-                  <div><dt>Capture</dt><dd id="capture-ready">Not started</dd></div>
-                </dl>
-              </section>
-
-              <section class="panel">
-                <p class="eyebrow">Run plan</p>
-                <h2>Session Overview</h2>
-                <dl class="summary-list">
-                  <div><dt>Session</dt><dd id="session-id">—</dd></div>
-                  <div><dt>Package part</dt><dd id="package-part">—</dd></div>
-                  <div><dt>Prepared blocks</dt><dd id="package-block-count">—</dd></div>
-                  <div><dt>Execution mode</dt><dd id="package-mode">—</dd></div>
-                  <div><dt>Rust schedule</dt><dd id="execution-inspection-status">Not compiled</dd></div>
-                  <div><dt>Scheduled events</dt><dd id="execution-event-count">—</dd></div>
-                  <div><dt>Native PCM</dt><dd id="prepared-audio-status">Not prepared</dd></div>
-                  <div><dt>Revision</dt><dd id="revision">0</dd></div>
-                  <div><dt>Audit events</dt><dd id="audit-events">0</dd></div>
-                </dl>
-                <div id="allowed-actions" class="token-list" aria-label="Currently allowed actions"></div>
-              </section>
-            </aside>
+            <span id="block-time" data-pretext>0:00 / 0:00</span>
+          </div>
+          <div class="stimulus-timeline" role="img" aria-label="Audio, tactile, and response lanes" aria-describedby="block-time timeline-status timeline-responses">
+            <div class="timeline-lanes" aria-hidden="true">
+              <span class="lane-audio" data-pretext>Audio</span>
+              <span class="lane-tactile" data-pretext>Tactile</span>
+              <span class="lane-response" data-pretext>Responses</span>
+            </div>
+            <svg id="stimulus-timeline" viewBox="0 0 1000 150" preserveAspectRatio="none" aria-hidden="true">
+              <path class="timeline-grid" d="M0 25h1000M0 75h1000M0 125h1000M250 0v150M500 0v150M750 0v150"/>
+              <path id="audio-markers" class="lane-audio"/>
+              <path id="tactile-markers" class="lane-tactile"/>
+              <path id="response-markers" class="lane-response"/>
+              <path id="block-progress" class="timeline-playhead" d="M0 0v150"/>
+            </svg>
+            <div id="timeline-axis" class="timeline-axis" aria-hidden="true" hidden>
+              <span data-pretext>0:00</span>
+              <span id="axis-midpoint" data-pretext></span>
+              <span id="axis-end" data-pretext></span>
+            </div>
+          </div>
+          <div class="timeline-caption">
+            <span id="timeline-status" class="subtle">Open Study setup to prepare a session.</span>
+            <span id="timeline-responses" class="subtle" hidden></span>
+          </div>
+          <div class="run-controls" role="group" aria-label="Run controls">
+            <button class="button button-primary action-button" type="button" data-action="part.start" data-icon="play">Start part</button>
+            <button class="button action-button" type="button" data-action="instruction.continue" data-icon="next">Continue</button>
+            <button class="button action-button" type="button" data-action="run.pause" data-icon="pause">Pause</button>
+            <button class="button action-button" type="button" data-action="run.resume" data-icon="play">Resume</button>
+            <button class="button action-button" type="button" data-action="run.stop" data-icon="stop">Stop run</button>
+            <button class="button button-danger action-button" type="button" data-action="run.abort" data-icon="abort">Abort run</button>
           </div>
         </section>
 
-        <section class="tab-panel" data-panel="logging">
-          <div class="workspace-grid balanced-grid">
-            <section class="panel stack">
-              <div class="section-heading"><div><p class="eyebrow">Acquisition</p><h2>Data Logging</h2></div><span class="badge">Target-owned</span></div>
-              <div class="check-list read-only-list">
-                <label><input type="checkbox" checked disabled> Bounded in-memory semantic audit preview</label>
-                <label><input type="checkbox" disabled> Durable scientific event log</label>
-                <label><input type="checkbox" disabled> Lab Streaming Layer mirror</label>
-                <label><input type="checkbox" disabled> Multichannel audio evidence</label>
-                <label><input type="checkbox" disabled> Physical capture evidence</label>
-              </div>
-              <p class="safety-copy">This rebuild exposes state, but it does not silently enable hardware acquisition. Native readiness gates remain authoritative.</p>
-            </section>
-            <section class="panel stack">
-              <p class="eyebrow">Session annotation</p>
-              <h2>Add a Note</h2>
-              <label>Researcher note<textarea id="session-note" maxlength="500" rows="6" placeholder="Record a bounded session annotation…"></textarea></label>
-              <button id="note-button" class="button button-primary" type="button">Save note</button>
-              <div class="note-preview"><span>Latest note</span><p id="last-note">None</p></div>
-            </section>
+        <aside id="run-feedback" class="panel operator-status" aria-label="Run feedback">
+          <div>
+            <h2 id="run-heading">Waiting for a prepared package</h2>
+            <p id="run-progress" class="subtle">Choose a prepared session or load the validation demo.</p>
+            <p id="event-label" class="timeline-event" data-pretext>Waiting for target snapshot</p>
           </div>
-        </section>
+          <dl class="run-readiness" aria-label="Run readiness">
+            <div><dt>Audio</dt><dd id="audio-route">Not ready</dd></div>
+            <div><dt>Target armed</dt><dd id="local-armed">No</dd></div>
+            <div><dt>Capture</dt><dd id="capture-ready">Not started</dd></div>
+            <div><dt>LSL</dt><dd id="lsl-ready">Not ready</dd></div>
+          </dl>
+          <div class="inline-actions">
+            <button class="button" type="button" data-action="target.arm" data-icon="arm">Arm target</button>
+            <button class="button button-quiet" type="button" data-action="target.disarm" data-icon="disarm">Disarm</button>
+</div>
+          <div class="response-input">
+            <button id="participant-response" class="response-target" type="button" disabled
+              aria-describedby="participant-response-help" data-icon="response">Respond</button>
+            <p id="participant-response-help" class="subtle">Click, tap, or use Space or Enter while focused to record a response during native playback.</p>
+          </div>
+        </aside>
 
-        <section class="tab-panel" data-panel="remote">
-          <div class="workspace-grid balanced-grid">
-            <section class="panel stack">
-              <div class="section-heading">
-                <div><p class="eyebrow">Explicit activation</p><h2>Phone Remote</h2></div>
-                <span id="remote-state-badge" class="badge">Disabled</span>
-              </div>
-              <label class="switch-row"><span><strong>Enable remote authority</strong><small>Allows a locally approved browser controller. Public discovery is a separate explicit action below.</small></span><input id="remote-enabled" type="checkbox" role="switch"></label>
-              <label class="switch-row"><span><strong>Allow remote abort</strong><small>Grants the separate high-impact <code>session.abort</code> scope.</small></span><input id="remote-allow-abort" type="checkbox" role="switch"></label>
-              <div class="inline-actions">
-                <button id="remote-apply" class="button button-primary" type="button">Apply remote settings</button>
-                <button id="rotate-pairing" class="button" type="button">Rotate pairing</button>
-              </div>
-              <p id="remote-detail" class="safety-copy">Remote networking is inert until enabled.</p>
-              <dl class="summary-list">
-                <div><dt>Controller</dt><dd id="remote-controller">None</dd></div>
-                <div><dt>Granted scopes</dt><dd id="remote-scopes">None</dd></div>
-                <div><dt>Native authority</dt><dd id="remote-route">Local-only</dd></div>
-              </dl>
-            </section>
-            <section class="panel pairing-panel stack">
-              <p class="eyebrow">Fresh invitation</p>
-              <h2>Scan to Control</h2>
-              <canvas id="pairing-qr" width="212" height="212" hidden aria-label="Phone companion pairing QR code"></canvas>
-              <div id="pairing-placeholder" class="qr-placeholder">Enable remote control to create a short-lived pairing invitation.</div>
-              <p id="pairing-summary" class="subtle">The secret is held in the URL fragment and is not sent in an HTTP request.</p>
-              <button id="copy-invite" class="button" type="button" disabled>Copy invitation link</button>
-            </section>
-            <section class="panel stack remote-controller-panel" aria-labelledby="desktop-controller-heading">
-              <div class="section-heading">
-                <div><p class="eyebrow">Controller role · browser or phone target</p><h2 id="desktop-controller-heading">Control a Browser Experiment</h2></div>
-                <span id="desktop-controller-status" class="badge">Controller off</span>
-              </div>
-              <p class="safety-copy">Browsing reveals unverified public labels only. Select one target, request access, wait for its local approval, then press Connect to perform mutual BRSP proof in the fresh private room.</p>
-              <div class="inline-actions">
-                <button id="desktop-controller-browse" class="button button-primary" type="button">Browse public targets</button>
-                <button id="desktop-controller-stop" class="button" type="button" disabled>Stop browsing</button>
-                <button id="desktop-controller-request" class="button" type="button" disabled>Request private session</button>
-                <button id="desktop-controller-connect" class="button button-primary" type="button" disabled>Connect privately</button>
-                <button id="desktop-controller-disconnect" class="button" type="button" disabled>Disconnect controller</button>
-              </div>
-              <div id="desktop-controller-targets" class="beacon-target-list" aria-live="polite">
-                <p class="subtle">Press Browse to list public PPS targets.</p>
-              </div>
-              <p id="desktop-controller-selection" class="subtle">No public target selected.</p>
-              <div class="remote-controller-grid">
-                <dl class="summary-list">
-                  <div><dt>Target</dt><dd id="desktop-controller-target">None</dd></div>
-                  <div><dt>Private route</dt><dd id="desktop-controller-route">Not connected</dd></div>
-                  <div><dt>Confirmed revision</dt><dd id="desktop-controller-revision">—</dd></div>
-                </dl>
-                <div class="control-grid compact-controller-actions" aria-label="Browser experiment controls">
-                  <button class="button" type="button" data-controller-action="package.prepare_demo" disabled>Prepare demo</button>
-                  <button class="button button-primary" type="button" data-controller-action="part.start" disabled>Start part</button>
-                  <button class="button" type="button" data-controller-action="run.pause" disabled>Pause</button>
-                  <button class="button" type="button" data-controller-action="run.resume" disabled>Resume</button>
-                  <button class="button button-danger" type="button" data-controller-action="run.stop" disabled>Stop</button>
-                </div>
-              </div>
-            </section>
-            <section class="panel stack remote-beacon-panel" aria-labelledby="desktop-beacon-heading">
-              <div class="section-heading">
-                <div><p class="eyebrow">Public rendezvous · private control</p><h2 id="desktop-beacon-heading">Website Connection Beacon</h2></div>
-                <span id="desktop-beacon-status" class="badge">Beacon off</span>
-              </div>
-              <p class="safety-copy">Public listings expose only an unverified target label and bounded access requests. After local approval, fresh credentials go only to that exact requester over its encrypted peer data channel; VDO signaling and peer selection remain trusted. Control then moves to a fresh private room with mutual BRSP proof and Rust-owned scopes, revisions, and lease expiry.</p>
-              <div class="inline-actions">
-                <button id="desktop-beacon-start" class="button button-primary" type="button" disabled>Advertise this runner</button>
-                <button id="desktop-beacon-stop" class="button" type="button" disabled>Stop beacon and private session</button>
-              </div>
-              <dl class="summary-list">
-                <div><dt>Discovery</dt><dd id="desktop-beacon-detail">Advertising can enable VDO-only authority without opening a LAN listener.</dd></div>
-                <div><dt>Private transport</dt><dd id="desktop-private-route">Not connected</dd></div>
-                <div><dt>Controller lease</dt><dd id="desktop-private-lease">None</dd></div>
-              </dl>
-              <div id="desktop-pairing-request" class="beacon-request-card" hidden>
-                <div>
-                  <span>Unverified controller request</span>
-                  <strong id="desktop-request-label">Browser controller</strong>
-                </div>
-                <p>Requested scopes: <span id="desktop-request-scopes">None</span></p>
-                <p id="desktop-request-policy" class="subtle">Remote authority must be enabled and the target locally armed before approval.</p>
-                <div class="inline-actions">
-                  <button id="desktop-request-approve" class="button button-primary" type="button" disabled>Approve private control</button>
-                  <button id="desktop-request-deny" class="button" type="button">Deny request</button>
-                </div>
-              </div>
-            </section>
-          </div>
-        </section>
+        <div class="runner-tools" role="group" aria-label="Runner tools">
+          <button class="button button-quiet" type="button" data-dialog="study-settings" data-icon="study" aria-haspopup="dialog" aria-controls="study-settings">Study setup</button>
+          <button class="button button-quiet" type="button" data-dialog="output-settings" data-icon="audio" aria-haspopup="dialog" aria-controls="output-settings">Outputs</button>
+          <button class="button button-quiet" type="button" data-dialog="logging-settings" data-icon="note" aria-haspopup="dialog" aria-controls="logging-settings">Data logging</button>
+          <button class="button button-quiet" type="button" data-dialog="remote-center" data-icon="remote" aria-haspopup="dialog" aria-controls="remote-center" id="remote-center-open">Remote control</button>
+          <button class="button button-quiet" type="button" data-action="system.snapshot" data-icon="refresh">Refresh</button>
+          <span id="remote-attention" class="badge" role="status" hidden></span>
+        </div>
+        <div id="toast" class="toast" role="status" aria-live="polite" data-pretext></div>
       </main>
     </div>
 
-    <div id="toast" class="toast" role="status" aria-live="polite" data-pretext></div>
+    <dialog id="study-settings" class="runner-dialog runner-dialog-wide" aria-labelledby="study-settings-title">
+      <div class="dialog-heading">
+        <h2 id="study-settings-title" tabindex="-1" autofocus>Study setup</h2>
+        <button class="button button-quiet" type="button" data-close-dialog data-icon="close">Close</button>
+      </div>
+      <div class="dialog-body stack">
+        <section class="panel two-column-panel">
+          <form id="setup-form" class="stack compact-stack">
+            <div class="section-heading">
+              <div><h2>Participant Setup</h2></div>
+              <span id="setup-badge" class="badge">Not submitted</span>
+            </div>
+            <div class="form-grid">
+              <label>Participant code<input id="participant-code" name="participant_code" maxlength="64" autocomplete="off" required></label>
+              <label>Age<input id="participant-age" name="age" type="number" min="1" max="120" inputmode="numeric" required></label>
+              <label>Handedness<select id="participant-handedness" name="handedness" required><option value="">Choose…</option><option value="right">Right</option><option value="left">Left</option><option value="ambidextrous">Ambidextrous</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
+              <label>Gender<select id="participant-gender" name="gender" required><option value="">Choose…</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
+              <label class="form-span">Participant name <span class="hint">kept local unless sharing is opted in</span><input id="participant-name" name="participant_name" maxlength="80" autocomplete="off"></label>
+              <label class="check-row form-span"><input id="name-sharing" name="name_sharing_opt_in" type="checkbox"> Allow the participant name to enter remote state</label>
+            </div>
+            <button class="button button-primary" type="submit" data-icon="check">Submit participant setup</button>
+          </form>
+
+          <div class="stack compact-stack split-border">
+            <div class="section-heading"><div><h2>Session Package</h2></div><span id="package-badge" class="badge">Unverified</span></div>
+            <p id="package-label" class="subtle">No package loaded.</p>
+            <button id="select-session-manifest" class="button button-primary" type="button" data-icon="folder">Choose prepared session manifest</button>
+            <button id="inspect-prepared-execution" class="button" type="button" disabled data-icon="timeline">Compile and inspect Rust schedule</button>
+            <button id="prepare-first-audio-block" class="button" type="button" disabled data-icon="audio">Prepare first audio block</button>
+            <button id="prepare-demo-button" class="button" type="button" data-action="package.prepare_demo">Prepare deterministic validation demo</button>
+            <p id="package-detail" class="safety-copy">The native verifier checks the V1 manifest, ordered block files, source hashes, and trial counts before adoption.</p>
+            <p id="execution-inspection-detail" class="safety-copy">Schedule inspection is unavailable until a real prepared session is selected.</p>
+            <p id="prepared-audio-detail" class="safety-copy">Native PCM preparation is unavailable until the first schedule is inspected.</p>
+            <ol id="package-block-list" class="package-block-list" aria-label="Verified package blocks"></ol>
+            <p class="safety-copy">Audio-device selection, tactile calibration, filesystem access, and acquisition controls remain local-only.</p>
+          </div>
+        </section>
+        <details class="runner-disclosure"><summary>Session diagnostics</summary>
+        <section class="panel">
+
+          <h2>Session Overview</h2>
+          <dl class="summary-list">
+            <div><dt>Session</dt><dd id="session-id">—</dd></div>
+            <div><dt>Package part</dt><dd id="package-part">—</dd></div>
+            <div><dt>Prepared blocks</dt><dd id="package-block-count">—</dd></div>
+            <div><dt>Execution mode</dt><dd id="package-mode">—</dd></div>
+            <div><dt>Rust schedule</dt><dd id="execution-inspection-status">Not compiled</dd></div>
+            <div><dt>Scheduled events</dt><dd id="execution-event-count">—</dd></div>
+            <div><dt>Native PCM</dt><dd id="prepared-audio-status">Not prepared</dd></div>
+            <div><dt>Revision</dt><dd id="revision">0</dd></div>
+            <div><dt>Audit events</dt><dd id="audit-events">0</dd></div>
+          </dl>
+          <div id="allowed-actions" class="token-list" aria-label="Currently allowed actions"></div>
+        </section>
+        </details>
+      </div>
+    </dialog>
+
+    <dialog id="output-settings" class="runner-dialog" aria-labelledby="output-settings-title">
+      <div class="dialog-heading">
+        <h2 id="output-settings-title" tabindex="-1" autofocus>Outputs</h2>
+        <button class="button button-quiet" type="button" data-close-dialog data-icon="close">Close</button>
+      </div>
+      <div class="dialog-body stack">
+        <section class="panel stack compact-stack" aria-labelledby="native-output-heading">
+          <h2 id="native-output-heading">Prepare audio output</h2>
+          <p id="native-output-detail" class="safety-copy" role="status">Prepare the first audio block before choosing an output device.</p>
+          <button id="native-output-list" class="button" type="button" disabled data-icon="scan">List output devices</button>
+          <label>Output device<select id="native-output-route" aria-describedby="native-output-selection" disabled>
+            <option value="">Choose output device…</option>
+          </select></label>
+          <p id="native-output-selection" class="subtle">Choose a device configuration matching the prepared block.</p>
+          <button id="native-output-prepare" class="button" type="button" disabled data-icon="arm">Prepare silent output</button>
+          <div class="inline-actions">
+            <button id="native-output-release" class="button" type="button" disabled data-icon="disconnect">Release output</button>
+            <button id="native-output-disable" class="button button-quiet" type="button" disabled data-icon="stop">Disable output</button>
+          </div>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog id="logging-settings" class="runner-dialog runner-dialog-wide" aria-labelledby="logging-settings-title">
+      <div class="dialog-heading">
+        <h2 id="logging-settings-title" tabindex="-1" autofocus>Data logging</h2>
+        <button class="button button-quiet" type="button" data-close-dialog data-icon="close">Close</button>
+      </div>
+      <div class="dialog-body stack">
+        <div class="dialog-grid">
+          <section class="panel stack">
+            <div class="section-heading"><div><h2>Data Logging</h2></div><span class="badge">Target-owned</span></div>
+            <div class="check-list read-only-list">
+              <label><input type="checkbox" checked disabled> Bounded in-memory semantic audit preview</label>
+              <label><input type="checkbox" disabled> Durable scientific event log</label>
+              <label><input type="checkbox" disabled> Lab Streaming Layer mirror</label>
+              <label><input type="checkbox" disabled> Multichannel audio evidence</label>
+              <label><input type="checkbox" disabled> Physical capture evidence</label>
+            </div>
+            <p class="safety-copy">Acquisition readiness is controlled by the native Runner.</p>
+          </section>
+          <section class="panel stack">
+            <h2>Session note</h2>
+            <label>Researcher note<textarea id="session-note" maxlength="500" rows="6"></textarea></label>
+            <button id="note-button" class="button button-primary" type="button" data-icon="note">Save note</button>
+            <div class="note-preview"><span>Latest note</span><p id="last-note">None</p></div>
+          </section>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="remote-center" class="runner-dialog runner-dialog-wide" aria-labelledby="remote-center-title">
+      <div class="dialog-heading">
+        <h2 id="remote-center-title" tabindex="-1" autofocus>Remote control center</h2>
+        <button class="button button-quiet" type="button" data-close-dialog data-icon="close">Close</button>
+      </div>
+      <div class="dialog-body stack">
+        <div class="beacon-choices">
+          <section class="panel stack" aria-labelledby="desktop-beacon-heading">
+            <div class="section-heading">
+              <div><h2 id="desktop-beacon-heading">Let a phone control this runner</h2></div>
+              <span id="desktop-beacon-status" class="badge">Beacon off</span>
+            </div>
+            <p class="subtle">Send a beacon so your phone can find this Runner. Review the access request here.</p>
+            <div class="inline-actions">
+              <button id="desktop-beacon-start" class="button button-primary" type="button" disabled data-icon="send">Send beacon</button>
+              <button id="desktop-beacon-stop" class="button" type="button" disabled data-icon="stop">Stop beacon and private session</button>
+            </div>
+            <dl class="summary-list">
+              <div><dt>Discovery</dt><dd id="desktop-beacon-detail">Advertising can enable VDO-only authority without opening a LAN listener.</dd></div>
+              <div><dt>Private transport</dt><dd id="desktop-private-route">Not connected</dd></div>
+              <div><dt>Controller lease</dt><dd id="desktop-private-lease">None</dd></div>
+            </dl>
+            <div id="desktop-pairing-request" class="beacon-request-card" hidden>
+              <div>
+                <span>Unverified controller request</span>
+                <strong id="desktop-request-label">Browser controller</strong>
+              </div>
+              <p>Requested scopes: <span id="desktop-request-scopes">None</span></p>
+              <p id="desktop-request-policy" class="subtle">Remote authority must be enabled and the target locally armed before approval.</p>
+              <div class="inline-actions">
+                <button id="desktop-request-approve" class="button button-primary" type="button" disabled data-icon="check">Approve private control</button>
+                <button id="desktop-request-deny" class="button" type="button" data-icon="close">Deny request</button>
+              </div>
+            </div>
+          </section>
+          <section class="panel stack" aria-labelledby="desktop-controller-heading">
+            <div class="section-heading">
+              <div><h2 id="desktop-controller-heading">Control another device</h2></div>
+              <span id="desktop-controller-status" class="badge">Controller off</span>
+            </div>
+            <p class="subtle">Scan for Runner beacons, select the expected device, and request access.</p>
+            <div class="inline-actions">
+              <button id="desktop-controller-browse" class="button button-primary" type="button" data-icon="scan">Scan beacon</button>
+              <button id="desktop-controller-stop" class="button" type="button" disabled data-icon="stop">Stop browsing</button>
+              <button id="desktop-controller-request" class="button" type="button" disabled data-icon="remote">Request private session</button>
+              <button id="desktop-controller-connect" class="button button-primary" type="button" disabled data-icon="remote">Connect privately</button>
+              <button id="desktop-controller-disconnect" class="button" type="button" disabled data-icon="disconnect">Disconnect controller</button>
+            </div>
+            <div id="desktop-controller-targets" class="beacon-target-list" aria-live="polite">
+              <p class="subtle">Scan to list public PPS targets.</p>
+            </div>
+            <p id="desktop-controller-selection" class="subtle">No public target selected.</p>
+            <details class="runner-disclosure">
+              <summary>Connection details</summary>
+              <dl class="summary-list">
+                <div><dt>Target</dt><dd id="desktop-controller-target">None</dd></div>
+                <div><dt>Private route</dt><dd id="desktop-controller-route">Not connected</dd></div>
+                <div><dt>Confirmed revision</dt><dd id="desktop-controller-revision">—</dd></div>
+              </dl>
+            </details>
+            <div id="outbound-run-controls" class="run-controls" role="group" aria-label="Browser experiment controls" hidden>
+              <button class="button" type="button" data-controller-action="package.prepare_demo" disabled data-icon="study">Prepare demo</button>
+              <button class="button button-primary" type="button" data-controller-action="part.start" disabled data-icon="play">Start part</button>
+              <button class="button" type="button" data-controller-action="run.pause" disabled data-icon="pause">Pause</button>
+              <button class="button" type="button" data-controller-action="run.resume" disabled data-icon="play">Resume</button>
+              <button class="button button-danger" type="button" data-controller-action="run.stop" disabled data-icon="stop">Stop</button>
+            </div>
+          </section>
+        </div>
+        <details class="runner-disclosure"><summary>Private invitation and permissions</summary>
+        <div class="dialog-grid">
+          <section class="panel stack">
+            <div class="section-heading">
+              <div><h2>Phone Remote</h2></div>
+              <span id="remote-state-badge" class="badge">Disabled</span>
+            </div>
+            <label class="switch-row"><span><strong>Enable remote authority</strong><small>Allows a locally approved browser controller. Public discovery is a separate explicit action below.</small></span><input id="remote-enabled" type="checkbox" role="switch"></label>
+            <label class="switch-row"><span><strong>Allow remote abort</strong><small>Grants the separate high-impact <code>session.abort</code> scope.</small></span><input id="remote-allow-abort" type="checkbox" role="switch"></label>
+            <div class="inline-actions">
+              <button id="remote-apply" class="button button-primary" type="button" data-icon="check">Apply remote settings</button>
+              <button id="rotate-pairing" class="button" type="button" data-icon="refresh">Rotate pairing</button>
+            </div>
+            <p id="remote-detail" class="safety-copy">Remote networking is inert until enabled.</p>
+            <dl class="summary-list">
+              <div><dt>Controller</dt><dd id="remote-controller">None</dd></div>
+              <div><dt>Granted scopes</dt><dd id="remote-scopes">None</dd></div>
+              <div><dt>Native authority</dt><dd id="remote-route">Local-only</dd></div>
+            </dl>
+          </section>
+          <section class="pairing-panel stack">
+
+            <h2>Scan to Control</h2>
+            <canvas id="pairing-qr" width="212" height="212" hidden aria-label="Phone companion pairing QR code"></canvas>
+            <div id="pairing-placeholder" class="qr-placeholder">Enable remote control to create a short-lived pairing invitation.</div>
+            <p id="pairing-summary" class="subtle">The secret is held in the URL fragment and is not sent in an HTTP request.</p>
+            <button id="copy-invite" class="button" type="button" disabled data-icon="copy">Copy invitation link</button>
+          </section>
+        </div>
+        </details>
+      </div>
+    </dialog>
     <!-- @vite-ignore: reviewed classic SDK bytes are copied unchanged from public/. -->
     <script src="./vendor/vdoninja/1.5.5/vdoninja-sdk.min.js"></script>
     <script type="module" src="./src/desktop-app.js"></script>

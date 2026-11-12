@@ -93,10 +93,20 @@ def main() -> int:
         route = page.locator("#native-output-route")
         prepare = page.locator("#native-output-prepare")
         detail = page.locator("#native-output-detail")
+        def prepare_audio():
+            if page.locator("#output-settings").is_visible():
+                page.locator("#output-settings [data-close-dialog]").click()
+            page.locator('[data-dialog="study-settings"]').click()
+            page.locator("#prepare-first-audio-block").click()
+            page.locator("#study-settings [data-close-dialog]").click()
+            page.locator('[data-dialog="output-settings"]').click()
+
         assert listing.is_disabled()
+        page.locator('[data-dialog="study-settings"]').click()
         page.locator("#select-session-manifest").click()
         page.locator("#inspect-prepared-execution").click()
-        page.locator("#prepare-first-audio-block").click()
+        page.locator("#study-settings [data-close-dialog]").click()
+        prepare_audio()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         listing.click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 2")
@@ -109,7 +119,7 @@ def main() -> int:
             if enlarged:
                 page.evaluate("""() => {
                   document.documentElement.style.fontSize='32px';
-                  document.querySelector('#native-output-prepare').textContent='Audioausgabe für das vorbereitete Experiment stumm vorbereiten';
+                  document.querySelector('#native-output-prepare .icon-label').textContent='Audioausgabe für das vorbereitete Experiment stumm vorbereiten';
                   for (const node of document.querySelectorAll('*')) {
                     node.style.letterSpacing='0.12em'; node.style.wordSpacing='0.16em';
                   }
@@ -117,7 +127,7 @@ def main() -> int:
             prepare.scroll_into_view_if_needed()
             page.wait_for_timeout(150)
             geometry = prepare.evaluate("""node => ({width:node.clientWidth,scroll:node.scrollWidth,
-              height:node.clientHeight,scrollHeight:node.scrollHeight,measured:node.dataset.pretextResult,
+              height:node.clientHeight,scrollHeight:node.scrollHeight,measured:node.querySelector('.icon-label').dataset.pretextResult,
               pageWidth:document.documentElement.clientWidth,pageScroll:document.documentElement.scrollWidth})""")
             assert geometry["measured"] not in {None,"unavailable"}, geometry
             assert geometry["scroll"] <= geometry["width"] + 1, geometry
@@ -138,7 +148,7 @@ def main() -> int:
         page.locator("#native-output-release").click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 1")
         assert listing.is_disabled(), "Release must retire the cached media summary"
-        page.locator("#prepare-first-audio-block").click()
+        prepare_audio()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         listing.click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 2")
@@ -154,7 +164,7 @@ def main() -> int:
         assert not detail.inner_text().startswith("Prepared and silent"), "Late reservation must not restore disabled output"
         assert prepare.is_disabled() and page.locator("#native-output-release").is_disabled()
         assert listing.is_disabled(), "Disable must require fresh media preparation"
-        page.locator("#prepare-first-audio-block").click()
+        prepare_audio()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         page.evaluate("window.outputAudit.noMatch = true")
         listing.click()
@@ -172,7 +182,7 @@ def main() -> int:
         assert sum(request["command"] == "native_output_reserve_silence" for request in requests) == 3
         assert page.locator("#participant-response").is_disabled()
         page.locator("#native-output-release").click()
-        page.locator("#prepare-first-audio-block").click()
+        prepare_audio()
         page.wait_for_function("!document.querySelector('#native-output-list').disabled")
         listing.click()
         page.wait_for_function("document.querySelector('#native-output-route').options.length === 2")

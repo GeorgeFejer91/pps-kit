@@ -37,6 +37,7 @@ use crate::{
         NativeControlIntent, NativeOutputPreparation, NativePlaybackCompletion,
         NativePlaybackSource, NativePreparedPlayback,
     },
+    operator_timeline::{OperatorSnapshot, OperatorTimeline},
     prepared_audio::{
         PreparedAudioCandidate, PreparedAudioLookup, PreparedAudioSource,
         PreparedAudioSourceReceipt, PreparedAudioSummary, MAXIMUM_CACHED_DECODED_BYTES,
@@ -356,6 +357,7 @@ struct OwnerState {
     run_generation: u64,
     native_output: NativeOutputAuthority,
     native_playback: Option<NativePreparedPlayback>,
+    operator_timeline: Option<OperatorTimeline>,
     native_control: Option<NativeControlIntent>,
     owner_generation: u64,
     ledger: EventLedger,
@@ -481,6 +483,9 @@ impl OwnerState {
             self.fail_stop_unavailable("native.response.lost", "evidence_unavailable");
             "native_response_unavailable"
         })?;
+        if let Some(timeline) = self.operator_timeline.as_mut() {
+            timeline.record_response(status.submitted_frames);
+        }
         Ok(response_id)
     }
 
@@ -956,7 +961,11 @@ impl OwnerState {
 
     fn invalidate_prepared_audio(&mut self) {
         // Dropping the sole native port irreversibly silences this callback.
-        self.native_playback = None;
+        if let (Some(timeline), Some(playback)) =
+            (self.operator_timeline.as_mut(), self.native_playback.take())
+        {
+            timeline.update_cursor(playback.port.status().submitted_frames);
+        }
         self.native_control = None;
         self.prepared_audio = None;
         self.prepared_audio_reservation = None;
@@ -1096,6 +1105,9 @@ impl OwnerState {
             }
         } else if action == Action::TargetArm && self.native_playback.is_none() {
             self.native_output.invalidate_for_runner_change();
+        }
+        if action == Action::PackagePrepareDemo {
+            self.operator_timeline = None;
         }
         Ok(())
     }
@@ -1530,6 +1542,7 @@ impl OwnerState {
         // Exactly one immutable block is retained. Replacing this Option drops
         // the prior Arc-backed PCM before the authority processes more work.
         self.prepared_audio_reservation = None;
+        self.operator_timeline = Some(candidate.timeline.clone());
         self.prepared_audio = Some(CachedPreparedAudio {
             candidate,
             summary: summary.clone(),
@@ -1589,6 +1602,7 @@ impl OwnerState {
         });
         self.compiled_execution = None;
         self.invalidate_prepared_audio();
+        self.operator_timeline = None;
         self.native_output.invalidate_for_runner_change();
         Ok(snapshot)
     }
@@ -2483,6 +2497,7 @@ impl ExecutionOwner {
                     run_generation: 0,
                     native_output,
                     native_playback: None,
+                    operator_timeline: None,
                     native_control: None,
                     owner_generation: 0,
                     ledger,
@@ -2623,6 +2638,22 @@ impl ExecutionOwner {
     pub(crate) async fn view(&self) -> Result<AuthorityView, OwnerSubmitError> {
         self.asynchronous(AdmissionClass::Normal, "view", |state| state.view())
             .await
+    }
+
+    pub(crate) async fn operator_snapshot(&self) -> Result<OperatorSnapshot, OwnerSubmitError> {
+        self.asynchronous(AdmissionClass::Normal, "operator_snapshot", |state| {
+            let mut operator_timeline = state.operator_timeline.clone();
+            if let (Some(timeline), Some(playback)) =
+                (operator_timeline.as_mut(), state.native_playback.as_ref())
+            {
+                timeline.update_cursor(playback.port.status().submitted_frames);
+            }
+            OperatorSnapshot {
+                snapshot: state.core.snapshot(),
+                operator_timeline,
+            }
+        })
+        .await
     }
 
     pub(crate) async fn native_output_status(

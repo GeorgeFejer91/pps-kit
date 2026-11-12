@@ -3,6 +3,7 @@ mod execution_owner;
 mod latency_diagnostics;
 mod native_output;
 mod native_playback;
+mod operator_timeline;
 mod prepared_audio;
 mod prepared_execution;
 mod remote;
@@ -65,8 +66,10 @@ struct PreparedSessionSelection {
 }
 
 #[tauri::command]
-async fn runner_snapshot(state: tauri::State<'_, AppRuntime>) -> Result<RunnerSnapshot, String> {
-    state.snapshot_async().await
+async fn runner_snapshot(
+    state: tauri::State<'_, AppRuntime>,
+) -> Result<operator_timeline::OperatorSnapshot, String> {
+    state.operator_snapshot().await
 }
 
 #[tauri::command]

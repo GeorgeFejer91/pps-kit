@@ -9,6 +9,15 @@ This file is the active checklist and handoff owner; replace state, do not appen
   The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
+- **Timeline-first Runner UI:** keep experiment feedback and transport in the
+  main view. The Study 5 Focus Mode inspires the native landscape timeline's
+  audio, tactile, and recorded-response lanes. Native positions come from the
+  prepared schedule and submitted audio frames. Display bins bound the chart
+  while the total counts every accepted input. The phone has separate
+  controller and device views. Study setup, outputs, logging, and beacon
+  pairing open in dialogs with SVG controls. Keep the participant response
+  surface focused during playback. Local native and hosted checks own UI
+  verification. Installed and physical acquisition remain separate gates.
 - **Chrome phone Runner: VERIFIED LIVE IN SOFTWARE.** The prepared-study runner
   starts on the phone or from a paired browser. The phone owns playback,
   timed touch responses, instruction gates and JSON export. Arming requests a
