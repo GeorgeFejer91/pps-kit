@@ -6,8 +6,8 @@ Documentation/tooling-only work goes straight to its relevant source checks.
 
 | Stage | Work and evidence | Exit condition |
 |---|---|---|
-| Local preview | One scoped screen/behavior; canonical frontend build; local real-control and inspected visual checks. | Concrete working preview. Unsettled design remains here for user review. |
-| Verified source | Accepted behavior; owning tests; unchanged scientific contracts or intentional documented changes; compiled local/Pages parity for UI. | Scoped source checkpoint committed/pushed; hosted route checked after promotion to `main`. |
+| Local preview | One scoped screen/behavior, canonical frontend build, and local real-control and inspected visual checks. | Working preview. Continue to deployment for completed Pages UI changes unless the user requested a preview-only or local-only task. |
+| Verified source | Requested behavior verified, owning tests passed, scientific contracts preserved or intentionally documented, and compiled local/Pages parity confirmed for UI. | Scoped source checkpoint pushed. For Pages UI, the deployment and changed behavior are verified on ppskit.com before handoff. |
 | Packaged candidate | Build exact verified revision; component inventory, runtime dependencies, installed executable/UI checks. | Evidence from the installed path, with scientific qualification gaps stated. |
 | Qualified release | Clean-install/download checks, platform/hardware/scientific gates matching release claims, final URLs/hashes/metadata. | Authorized release publication with retained evidence. |
 
@@ -49,26 +49,34 @@ Designer visual audit:
 python For-AI/engineering/validation/scripts/run_designer_visual_layout_audit.py
 ```
 
-Inspect its rendered evidence; correct defects before a usability claim.
-Backend/unit tests supplement that proof. If the user requested exploration or
-the appearance remains unsettled, present the working local preview for review.
-If the requested outcome is already authorized and verified, do not ask for
-another routine confirmation.
+Inspect the rendered evidence and correct defects. Backend and unit tests
+supplement real interaction checks.
 
-Keep unsettled but verified checkpoints on a review branch. The Pages workflow
-deploys matching product changes pushed to `main`; a push there is publication,
-not merely local backup. At promotion, rebuild canonical compiled assets and
-assemble/check Pages with:
+The owner grants standing authorization to deploy every completed UI task that
+changes the GitHub Pages site. After local verification, promote the scoped change
+to `main` without a separate approval step. An explicit preview-only, review-only,
+or local-only request sets the endpoint for that task.
+
+Rebuild the canonical compiled assets and assemble and check Pages:
 
 ```powershell
 node --test For-AI/engineering/automation/build_pages.test.mjs
 node For-AI/engineering/automation/build_pages.mjs
 ```
 
-Pages consumes the same Designer and allowlisted Runner companion bytes.
-Never create a second editable dashboard under `website/`. Verify live routes
-after a production UI push. Git checkpoint rules are in
-[agent_update_protocol.md](agent_update_protocol.md).
+Pages consumes the canonical Designer and allowlisted Runner bytes. Use the
+same source and compiled assets for local and hosted checks. Keep editable UI
+source in the frontend and Pages wrappers in `website/`.
+
+Commit the scoped source and canonical artifacts, then push to `main` to start
+[Publish GitHub Pages](../.github/workflows/pages.yml). Follow the run for the
+pushed revision through deployment, address recoverable failures, and verify the
+changed UI and affected routes on [ppskit.com](https://ppskit.com/). Compare the
+live site with the assembled files using
+[the public Pages byte audit](engineering/validation/scripts/run_public_pages_byte_audit.py).
+Record the deployed commit, run, and live evidence in [CURRENT_WORK.md](CURRENT_WORK.md)
+before handoff. [Git checkpoints](agent_update_protocol.md) cover safe pushes
+and blocked publication.
 
 ## Packaging is a separate gate
 

@@ -18,8 +18,9 @@ installers, and release claims. Read [WORKFLOW.md](../WORKFLOW.md) for stages an
 - Payload/installers: [inventory](../download_package_inventory.md),
   `distributions/manifests/`, and the matching release protocol.
 - Pages: `For-AI/engineering/automation/build_pages.mjs` and
-  `.github/workflows/pages.yml`. Matching product pushes to `main` deploy the
-  public site; unsettled local previews use a review branch.
+  `.github/workflows/pages.yml`. Follow the
+  [standing deployment workflow](../WORKFLOW.md#ui-exploration-and-promotion)
+  for completed public UI tasks.
 - Checks: [validation tiers](../engineering/validation/docs/VALIDATION.md).
 
 Use **Ponytail** for tooling and **skill-creator** for skill maintenance.

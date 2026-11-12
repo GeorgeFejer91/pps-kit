@@ -146,9 +146,10 @@ source directories. Inspect status, branch, upstream, and worktrees first.
 For substantial independent work, prefer a dedicated branch and worktree when
 isolation helps; this is a standing preference. Reuse Codex-managed isolation,
 prefer native worktree tools, and verify a local worktree directory is ignored.
-Small instruction edits can remain in place. Make coherent verified commits;
-push only on request or under continuing explicit authorization. Never
-force-push, reset destructively, discard work, or remove worktrees without
+Small instruction edits can remain in place. Make coherent verified commits.
+Push on request or under continuing explicit authorization, including the
+[standing Pages deployment workflow](WORKFLOW.md#ui-exploration-and-promotion).
+Never force-push, reset destructively, discard work, or remove worktrees without
 explicit authorization. Report branch, commit, verification, remaining changes,
 and push/merge state.
 

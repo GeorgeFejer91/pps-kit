@@ -47,8 +47,9 @@ Use only the relevant sections for the requested stage in
 - Run targeted API/schema tests.
 - Run relevant render/session tests when backend behavior changes.
 - Browser-smoke the local dashboard.
-- At verified-source promotion, check compiled local/Pages byte parity and
-  inspect the live hosted routes after a production push.
-- Keep unsettled previews on a review branch; defer installer work to packaging.
+- For completed Pages UI changes, check local/Pages byte parity, promote to
+  `main`, and verify the live deployment under the
+  [standing deployment workflow](../../../WORKFLOW.md#ui-exploration-and-promotion).
+- Honor preview-only requests and run installer checks during packaging.
 - Run the Designer visual-layout audit for visual changes, inspect every generated viewport/segment image and the contact sheet, fix defects, then rerun until the report and inspection pass.
 - State any test that could not be run.

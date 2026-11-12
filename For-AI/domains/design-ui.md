@@ -45,9 +45,10 @@ portrait comes from the site's [profile image](https://www.georgefejer.com/Acade
 Both credits reflow on narrow
 screens while staying within the hosted header.
 
-For exploration, present the working local preview and remain at
-**local-preview** until accepted. Preview completion does not start packaging.
-At source promotion, check Pages uses identical allowlisted compiled bytes.
+For completed changes to the public UI, follow the
+[standing Pages deployment workflow](../WORKFLOW.md#ui-exploration-and-promotion)
+through live verification. An explicit preview-only request ends at the working
+preview. Packaging is a separate deliverable.
 
 The final planner action exports the verified local experiment JSON; the portable
 audio bundle remains a separate action. Keep review evidence, instruction audio,

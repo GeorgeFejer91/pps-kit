@@ -38,9 +38,10 @@ before handing back the task:
 2. Inspect the diff and run the smallest relevant checks plus whitespace checks.
 3. Stage exact intended paths, inspect the staged diff, and commit a concise
    problem/outcome message. Never bundle unrelated edits or use blanket staging.
-4. Push the task branch and verify the remote branch points to the local commit.
-   Use a review branch for verified but unsettled UI previews; promote to `main`
-   only after the stage's acceptance and parity gates pass.
+4. Push the task branch and verify the remote commit. For completed Pages UI
+   work, follow the [standing deployment workflow](WORKFLOW.md#ui-exploration-and-promotion):
+   promote the scoped verified change to `main`, follow the Pages run, and check
+   the live behavior before handoff.
 
 These are agent execution rules, not a filesystem watcher, timer, commit hook,
 or background auto-push daemon. Do not commit each keystroke, knowingly broken

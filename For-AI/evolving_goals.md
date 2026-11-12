@@ -42,9 +42,10 @@ platforms and routes; release remains a separate stage.
   Reuse existing modules and gates; centralize repeated decisions in their
   current owner. Delete duplicate paths and unused helpers before adding layers.
   Preserve calibration, input validation, accessibility, and evidence boundaries.
-- Stage UI work as local preview, verified source promotion, packaging, and
-  release. A preview can be complete without an installer. Unsettled designs
-  remain on a review branch until the concrete preview is accepted.
+- Verify UI changes locally. For completed Pages UI tasks, use the
+  [standing deployment workflow](WORKFLOW.md#ui-exploration-and-promotion) to
+  promote the verified change and check ppskit.com before handoff. Packaging
+  and release remain separate stages.
 - Commit/push each verified logical checkpoint and before final handoff. Keep
   incomplete preview checkpoints off `main`; respect local-only requests.
   No timer or background service commits arbitrary work.

@@ -47,13 +47,12 @@ Pretext contract, then inspect actual rendered geometry.
 Follow [WORKFLOW.md](../../WORKFLOW.md). Build/test the canonical frontend and
 exercise actual controls locally. Layout changes require inspected screenshots
 and supported viewport/zoom/content checks in addition to backend tests.
-Unsettled exploration stays at local-preview on a review branch.
 
-At verified-source promotion, compile once, assemble Pages from the identical
-canonical bytes, check local/hosted-facing parity, commit/push the scoped change,
-and inspect live routes after production publication. `website/` is not a
-second editable dashboard. Packaging is a separate later task; a source-only
-change cannot claim the installed binary was updated.
+For completed changes to the Pages UI, use the
+[standing deployment workflow](../../WORKFLOW.md#ui-exploration-and-promotion).
+Compile the canonical frontend, assemble Pages from those bytes, promote the
+scoped change to `main`, and check the deployed UI before handoff. Use
+`website/` for the Pages wrappers. Packaging is a separate deliverable.
 
 Use [the checklist](references/orchestrator-checklist.md) for the affected
 contract/interaction/visual gate. Update only owning guidance/current work.

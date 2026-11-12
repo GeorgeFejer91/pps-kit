@@ -11,11 +11,12 @@ scientific validation, calibration, accessibility, privacy, and safety boundarie
 Use its [skill nesting rules](For-AI/SKILLS.md#skill-nesting-and-ownership)
 and the [delegation protocol](For-AI/WORKFLOW.md#delegation-and-handoffs).
 
-Follow [For-AI/WORKFLOW.md](For-AI/WORKFLOW.md): local UI preview first, verified
-source promotion second, packaging and release as separate deliverables.
-Unsettled previews stay local or on a review branch. At UI source promotion,
-rebuild the canonical frontend and verify identical local/hosted-facing bytes.
-Do not claim the installed application changed until its package is rebuilt and tested.
+Follow [For-AI/WORKFLOW.md](For-AI/WORKFLOW.md#ui-exploration-and-promotion).
+The owner grants standing authorization to deploy completed GitHub Pages UI
+changes after local verification. Rebuild the canonical frontend,
+push the scoped change to `main`, and verify the deployed UI on ppskit.com before
+handoff. Honor explicit requests for preview-only or local-only work. Packaging
+and installer validation are separate deliverables.
 
 Commit and push each completed, verified logical checkpoint and before final
 handoff, unless the user requests local-only work. Stage exact intended files;
