@@ -21,6 +21,7 @@ def _load_audit_module():
 
 def test_designer_layout_uses_shared_grid_and_control_tokens() -> None:
     css = (ROOT / "apps" / "designer" / "frontend" / "styles.css").read_text(encoding="utf-8")
+    css += (ROOT / "packages/pps-resources/assets/ui/site-shell.css").read_text(encoding="utf-8")
     memory = (ROOT / "For-AI" / "interface_design_principles.md").read_text(encoding="utf-8")
     audit_source = SCRIPT.read_text(encoding="utf-8")
 

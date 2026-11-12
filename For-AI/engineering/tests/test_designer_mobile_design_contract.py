@@ -190,14 +190,15 @@ def test_mobile_section_navigation_is_compact() -> None:
 def test_phone_css_is_content_first_and_uses_touch_sized_static_controls() -> None:
     _html, styles, app_js, _designer_main = _read_sources()
     _compiled_html, compiled_css, compiled_js = _read_compiled()
-    mobile_css = "\n".join(_at_rule_blocks(styles, "@media (max-width: 760px)"))
+    shell_css = (ROOT / "packages/pps-resources/assets/ui/site-shell.css").read_text(encoding="utf-8")
+    mobile_css = "\n".join(_at_rule_blocks(styles + "\n" + shell_css, "@media (max-width: 760px)"))
     compact_compiled_css = _compact_css(compiled_css)
 
     assert "--control-height: 44px" in mobile_css
     assert _rule_has(mobile_css, r"button,[^{]+", r"min-height:\s*44px")
     assert _rule_has(mobile_css, r"\.icon-action", r"(?:width|min-width):\s*44px")
-    assert _rule_has(mobile_css, r"\.topbar", r"display:\s*contents")
-    assert _rule_has(mobile_css, r"\.topbar \.site-tab-list", r"position:\s*sticky")
+    assert _rule_has(mobile_css, r"\.site-tabs", r"display:\s*contents")
+    assert _rule_has(mobile_css, r"\.site-tabs \.site-tab-list", r"position:\s*sticky")
     assert _rule_has(mobile_css, r"#designer-capability-badge", r"display:\s*none")
     assert _rule_has(mobile_css, r"\.rail", r"position:\s*static")
     assert _rule_has(mobile_css, r"\.workspace", r"margin-left:\s*0")

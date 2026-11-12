@@ -90,6 +90,56 @@ def audit(browser, origin, server):
         play(page, app, origin, offline=True)
 
 
+def audit_shared_shell(browser, origin):
+    routes = (
+        ("", "Experiment Planner"),
+        ("experiment-runner/", "Experiment Runner"),
+        ("documentation/", "Documentation"),
+        ("download/", "Downloads"),
+        ("", "Experiment Planner"),
+    )
+    for width in (320, 1440, 1920):
+        with browser.new_context(viewport={"width": width, "height": 900}, color_scheme="dark") as context:
+            page = context.new_page()
+            page.goto(f"{origin}/")
+            reference = None
+            for index, (path, name) in enumerate(routes):
+                page.wait_for_url(f"{origin}/{path}")
+                app = page if path == "experiment-runner/" else page.frame_locator("iframe.dashboard-frame")
+                nav = app.get_by_role("navigation", name="PPS Kit", exact=True)
+                current = nav.get_by_role("link", name=name, exact=True)
+                expect(current).to_have_attribute("aria-current", "page")
+                expect(current.locator("[data-pretext]:visible")).to_have_attribute(
+                    "data-pretext-result", re.compile("fit|reflow|dom-fallback")
+                )
+                theme_parent = nav if width <= 760 else app.locator(".rail")
+                expect(theme_parent.get_by_role("button", name="Dark theme")).to_have_attribute(
+                    "aria-pressed", "true"
+                )
+
+                tabs = nav.get_by_role("link").all()
+                chrome = [*tabs, nav, app.locator(".header-credits"), app.locator(".rail")]
+                if width > 760:
+                    chrome.append(app.locator(".site-tabs"))
+                bounds = [element.bounding_box() for element in chrome]
+                assert all(bounds), (width, path, bounds)
+                if reference is None:
+                    reference = bounds
+                else:
+                    for expected, actual in zip(reference, bounds):
+                        assert all(abs(expected[key] - actual[key]) <= 1 for key in expected), (
+                            width, path, expected, actual
+                        )
+                if path == "experiment-runner/":
+                    assert len(page.frames) == 1
+                    expect(app.locator(".rail").get_by_role("group", name="Runner mode")).to_be_visible()
+                    for image in app.locator(".header-credits img").all():
+                        assert image.evaluate("node => node.complete && node.naturalWidth > 0")
+                    page.screenshot(path=ARTIFACTS / f"runner-shell-{width}-dark.png")
+                if index + 1 < len(routes):
+                    nav.get_by_role("link", name=routes[index + 1][1], exact=True).press("Enter")
+
+
 def audit_routes(browser, origin):
     with browser.new_context(viewport={"width": 1440, "height": 900}) as context:
         page = context.new_page()
@@ -240,8 +290,9 @@ def main():
                     origin = f"http://127.0.0.1:{server.server_port}"
                     if not args.runner_only:
                         audit(browser, origin, server)
+                    audit_shared_shell(browser, origin)
                     audit_routes(browser, origin)
-                    print("Downloads, top-level Runner navigation, and the local browser demo passed.")
+                    print("Shared page shell, Downloads, top-level Runner navigation, and the local browser demo passed.")
                     if args.live_beacon:
                         audit_live_beacon(browser, origin)
                         print("Live two-browser beacon pairing and remote start passed.")

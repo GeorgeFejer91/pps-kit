@@ -37,13 +37,18 @@ screenshots under ignored `artifacts/`; check clipping, overlap, focus,
 disabled/read-only behavior, and relevant errors. Use silent isolated browser
 sessions unless a visible test is requested.
 
-The hosted Designer header carries a linked funding credit with the English
+Planner, Runner, Documentation and Downloads share the hosted header and
+sidebar layout in `pps-resources/assets/ui/site-shell.css`. The Runner's
+sidebar selects between running on this device and controlling another
+device. The Runner opens at the top-level `/experiment-runner/` route for
+pairing and local output controls.
+
+The hosted header carries a linked funding credit with the English
 wordmark from the [BIAL Foundation site](https://www.fundacaobial.com/en-GB).
 The developer profile sits next to it in the header and links to
 [George Fejer's academic site](https://www.georgefejer.com/). Its bundled
 portrait comes from the site's [profile image](https://www.georgefejer.com/Academic/assets/images/crop_selfie.png).
-Both credits reflow on narrow
-screens while staying within the hosted header.
+Both credits reflow within the hosted header on narrow screens.
 
 For completed changes to the public UI, follow the
 [standing Pages deployment workflow](../WORKFLOW.md#ui-exploration-and-promotion)

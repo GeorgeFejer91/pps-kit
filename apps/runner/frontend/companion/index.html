@@ -13,43 +13,68 @@
     <link rel="stylesheet" href="../src/styles/app.css">
   </head>
   <body class="companion-page">
-    <header class="runner-site-header">
-      <nav class="site-tab-list hosted-page-nav" aria-label="PPS Kit">
-        <a class="button-link site-tab" href="../" aria-label="Experiment Planner"><span class="tab-label-full" data-pretext>Experiment Planner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Planner</span></a>
-        <a class="button-link site-tab" href="./" aria-current="page" aria-label="Experiment Runner"><span class="tab-label-full" data-pretext>Experiment Runner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Runner</span></a>
-        <a class="button-link site-tab" href="../documentation/" aria-label="Documentation"><span class="tab-label-full" data-pretext>Documentation</span><span class="tab-label-short" aria-hidden="true" data-pretext>Docs</span></a>
-        <a class="button-link site-tab" href="../download/" data-pretext>Downloads</a>
-        <button id="runner-theme-toggle" class="rail-theme-toggle" type="button" aria-pressed="false" aria-label="Dark theme" title="Use dark theme">
-          <span class="theme-toggle-track" aria-hidden="true">
-            <span class="theme-toggle-indicator"></span>
-            <svg class="theme-toggle-icon theme-toggle-sun" viewBox="0 0 24 24" focusable="false">
-              <circle cx="12" cy="12" r="3.5"></circle>
-              <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"></path>
-            </svg>
-            <svg class="theme-toggle-icon theme-toggle-moon" viewBox="0 0 24 24" focusable="false">
-              <path d="M19 15.2A7.6 7.6 0 0 1 8.8 5a7.7 7.7 0 1 0 10.2 10.2Z"></path>
-            </svg>
-          </span>
-        </button>
-      </nav>
-    </header>
-    <div class="phone-shell">
-      <header class="phone-header">
-        <h1 data-pretext>Experiment Runner</h1>
-        <span id="companion-status" class="connection-pill" data-pretext data-phase="idle">Not connected</span>
+    <a class="skip-link" href="#main-content">Skip to page content</a>
+    <div class="app-shell">
+      <header class="topbar site-tabs" aria-label="Primary dashboard pages">
+        <nav class="site-tab-list hosted-page-nav" aria-label="PPS Kit">
+          <a class="button-link site-tab" href="../" aria-label="Experiment Planner"><span class="tab-label-full" data-pretext>Experiment Planner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Planner</span></a>
+          <a class="button-link site-tab" href="./" aria-current="page" aria-label="Experiment Runner"><span class="tab-label-full" data-pretext>Experiment Runner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Runner</span></a>
+          <a class="button-link site-tab" href="../documentation/" aria-label="Documentation"><span class="tab-label-full" data-pretext>Documentation</span><span class="tab-label-short" aria-hidden="true" data-pretext>Docs</span></a>
+          <a class="button-link site-tab" href="../download/"><span data-pretext>Downloads</span></a>
+        </nav>
+        <div class="site-status">
+          <span id="companion-status" class="connection-pill" data-pretext data-phase="idle" role="status">Not connected</span>
+        </div>
+        <div class="header-credits">
+          <a class="developer-credit" href="https://www.georgefejer.com/" target="_blank" rel="noopener">
+            <img src="../../../designer/frontend/george-fejer.webp?inline" alt="" width="36" height="36">
+            <span class="header-credit-copy">
+              <span data-pretext>Developed by</span>
+              <strong data-pretext>George Fejer</strong>
+            </span>
+          </a>
+          <a class="funding-credit" href="https://www.fundacaobial.com/en-GB" target="_blank" rel="noopener">
+            <span class="header-credit-copy">
+              <span data-pretext>Funded by</span>
+              <strong data-pretext>BIAL Foundation</strong>
+            </span>
+            <img src="../../../designer/frontend/bial-foundation.svg?inline" alt="" width="54" height="36">
+          </a>
+        </div>
       </header>
 
-      <div id="embedding-warning" class="exploratory-banner embedding-warning" role="alert" hidden>
-        <strong>Open this page directly</strong>
-        <span>For pairing safety, the browser Runner is disabled inside embedded frames.</span>
-      </div>
+      <aside class="rail" aria-label="Runner workspace">
+        <div class="brand">
+          <div class="brand-copy">
+            <div class="brand-name" data-pretext>Peripersonal Space Design Toolkit</div>
+            <div class="brand-subtitle" data-pretext>Experiment Runner</div>
+          </div>
+          <button id="runner-theme-toggle" class="rail-theme-toggle" type="button" aria-pressed="false" aria-label="Dark theme" title="Use dark theme">
+            <span class="theme-toggle-track" aria-hidden="true">
+              <span class="theme-toggle-indicator"></span>
+              <svg class="theme-toggle-icon theme-toggle-sun" viewBox="0 0 24 24" focusable="false">
+                <circle cx="12" cy="12" r="3.5"></circle>
+                <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"></path>
+              </svg>
+              <svg class="theme-toggle-icon theme-toggle-moon" viewBox="0 0 24 24" focusable="false">
+                <path d="M19 15.2A7.6 7.6 0 0 1 8.8 5a7.7 7.7 0 1 0 10.2 10.2Z"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+        <div class="mode-switch" role="group" aria-label="Runner mode">
+          <button type="button" class="is-active" data-mode="target" aria-pressed="true" aria-controls="target-mode">Run on this device</button>
+          <button type="button" data-mode="controller" aria-pressed="false" aria-controls="controller-mode">Control another device</button>
+        </div>
+      </aside>
 
-      <div class="mode-switch" role="group" aria-label="Runner mode">
-        <button type="button" class="is-active" data-mode="target" aria-pressed="true" aria-controls="target-mode">Run on this device</button>
-        <button type="button" data-mode="controller" aria-pressed="false" aria-controls="controller-mode">Control another device</button>
-      </div>
+      <main id="main-content" class="workspace runner-workspace" tabindex="-1">
+        <h1 data-pretext>Experiment Runner</h1>
+        <div id="embedding-warning" class="exploratory-banner embedding-warning" role="alert" hidden>
+          <strong>Open this page directly</strong>
+          <span>For pairing safety, the browser Runner is disabled inside embedded frames.</span>
+        </div>
 
-      <main>
         <section id="controller-mode" class="mode-panel" data-mode-panel="controller" hidden>
           <section class="panel beacon-panel" aria-labelledby="scan-beacon-title">
             <h2 id="scan-beacon-title">Find a runner</h2>

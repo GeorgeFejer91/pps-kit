@@ -15,43 +15,68 @@
     <link rel="stylesheet" crossorigin href="../assets/style.css">
   </head>
   <body class="companion-page">
-    <header class="runner-site-header">
-      <nav class="site-tab-list hosted-page-nav" aria-label="PPS Kit">
-        <a class="button-link site-tab" href="../" aria-label="Experiment Planner"><span class="tab-label-full" data-pretext>Experiment Planner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Planner</span></a>
-        <a class="button-link site-tab" href="./" aria-current="page" aria-label="Experiment Runner"><span class="tab-label-full" data-pretext>Experiment Runner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Runner</span></a>
-        <a class="button-link site-tab" href="../documentation/" aria-label="Documentation"><span class="tab-label-full" data-pretext>Documentation</span><span class="tab-label-short" aria-hidden="true" data-pretext>Docs</span></a>
-        <a class="button-link site-tab" href="../download/" data-pretext>Downloads</a>
-        <button id="runner-theme-toggle" class="rail-theme-toggle" type="button" aria-pressed="false" aria-label="Dark theme" title="Use dark theme">
-          <span class="theme-toggle-track" aria-hidden="true">
-            <span class="theme-toggle-indicator"></span>
-            <svg class="theme-toggle-icon theme-toggle-sun" viewBox="0 0 24 24" focusable="false">
-              <circle cx="12" cy="12" r="3.5"></circle>
-              <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"></path>
-            </svg>
-            <svg class="theme-toggle-icon theme-toggle-moon" viewBox="0 0 24 24" focusable="false">
-              <path d="M19 15.2A7.6 7.6 0 0 1 8.8 5a7.7 7.7 0 1 0 10.2 10.2Z"></path>
-            </svg>
-          </span>
-        </button>
-      </nav>
-    </header>
-    <div class="phone-shell">
-      <header class="phone-header">
-        <h1 data-pretext>Experiment Runner</h1>
-        <span id="companion-status" class="connection-pill" data-pretext data-phase="idle">Not connected</span>
+    <a class="skip-link" href="#main-content">Skip to page content</a>
+    <div class="app-shell">
+      <header class="topbar site-tabs" aria-label="Primary dashboard pages">
+        <nav class="site-tab-list hosted-page-nav" aria-label="PPS Kit">
+          <a class="button-link site-tab" href="../" aria-label="Experiment Planner"><span class="tab-label-full" data-pretext>Experiment Planner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Planner</span></a>
+          <a class="button-link site-tab" href="./" aria-current="page" aria-label="Experiment Runner"><span class="tab-label-full" data-pretext>Experiment Runner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Runner</span></a>
+          <a class="button-link site-tab" href="../documentation/" aria-label="Documentation"><span class="tab-label-full" data-pretext>Documentation</span><span class="tab-label-short" aria-hidden="true" data-pretext>Docs</span></a>
+          <a class="button-link site-tab" href="../download/"><span data-pretext>Downloads</span></a>
+        </nav>
+        <div class="site-status">
+          <span id="companion-status" class="connection-pill" data-pretext data-phase="idle" role="status">Not connected</span>
+        </div>
+        <div class="header-credits">
+          <a class="developer-credit" href="https://www.georgefejer.com/" target="_blank" rel="noopener">
+            <img src="data:image/webp;base64,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" alt="" width="36" height="36">
+            <span class="header-credit-copy">
+              <span data-pretext>Developed by</span>
+              <strong data-pretext>George Fejer</strong>
+            </span>
+          </a>
+          <a class="funding-credit" href="https://www.fundacaobial.com/en-GB" target="_blank" rel="noopener">
+            <span class="header-credit-copy">
+              <span data-pretext>Funded by</span>
+              <strong data-pretext>BIAL Foundation</strong>
+            </span>
+            <img src="data:image/svg+xml,%3c?xml%20version='1.0'%20encoding='UTF-8'?%3e%3csvg%20id='Layer_1'%20data-name='Layer%201'%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20120%2080'%3e%3cdefs%3e%3cstyle%3e%20.cls-1%20{%20fill:%20%23568cd7;%20}%20.cls-2%20{%20fill:%20%231f3880;%20}%20%3c/style%3e%3c/defs%3e%3cg%20id='ID'%3e%3cpath%20class='cls-2'%20d='M55.56,49.75h-10.74V16.87h10.74v32.87h0ZM56.76,7.81c0-3.63-2.94-6.58-6.58-6.58s-6.58,2.94-6.58,6.58,2.94,6.58,6.58,6.58,6.58-2.94,6.58-6.58ZM89.14,46.04c.24-.22.68-.63,1.26-1.23.27,1.61.4,3.26.4,4.93h10.74c0-6.5-1.51-12-3.48-16.42,1.97-4.43,3.48-9.95,3.48-16.45h-10.74c0,1.71-.14,3.39-.42,5.03-.57-.59-1.01-.99-1.26-1.21-3.33-3.27-7.64-5.06-12.16-5.06s-8.94,1.84-12.3,5.2c-6.92,6.92-6.92,18.17,0,25.09,3.35,3.35,7.72,5.2,12.3,5.2s8.83-1.8,12.17-5.07h0ZM81.67,28.42c.12.12.2.19.33.3.17.15,1.95,1.76,3.85,4.62-1.92,2.91-3.72,4.55-3.88,4.7-.12.1-.19.16-.3.28-2.72,2.72-6.68,2.72-9.4,0-2.73-2.73-2.73-7.17,0-9.9,1.36-1.36,3.03-2.04,4.7-2.04s3.34.68,4.7,2.04h0ZM117.14,1.45h-10.74v48.3h10.74V1.45ZM40.55,34.62c0,8.34-6.78,15.13-15.13,15.13H2.86V1.45h21.67c7.94,0,14.39,6.46,14.39,14.39,0,3.07-.97,5.93-2.62,8.27,2.63,2.72,4.26,6.43,4.26,10.51h0ZM24.52,12.19h-10.93v7.3h10.93c2.01,0,3.65-1.64,3.65-3.65s-1.64-3.65-3.65-3.65ZM29.81,34.62c0-2.42-1.97-4.39-4.39-4.39h-11.83v8.77h11.83c2.42,0,4.39-1.97,4.39-4.39h0Z'/%3e%3cpath%20class='cls-2'%20d='M2.86,67.34h7.72v.99H3.85v4.04h5.89v.99H3.85v5.04h-.99s0-11.07,0-11.07Z'/%3e%3cpath%20class='cls-2'%20d='M18.94,67.02c3.24,0,5.82,2.74,5.82,5.87s-2.58,5.87-5.82,5.87-5.84-2.73-5.84-5.87,2.6-5.87,5.84-5.87ZM18.94,68.02c-2.66,0-4.85,2.2-4.85,4.88s2.18,4.88,4.85,4.88,4.83-2.2,4.83-4.88-2.18-4.88-4.83-4.88Z'/%3e%3cpath%20class='cls-2'%20d='M36.75,74.73c0,2.25-1.93,4-4.22,4s-4.24-1.75-4.24-4v-7.38h.99v7.38c0,1.65,1.43,3.03,3.23,3.03s3.24-1.38,3.24-3.03v-7.38h.99s0,7.38,0,7.38Z'/%3e%3cpath%20class='cls-2'%20d='M40.79,67.34h.99l6.81,9.34v-9.34h.99v11.07h-.98l-6.82-9.34v9.34h-.99s0-11.07,0-11.07Z'/%3e%3cpath%20class='cls-2'%20d='M53.72,67.33h3.88c3.16,0,5.71,2.39,5.71,5.55s-2.55,5.54-5.71,5.54h-3.88v-11.09h0ZM57.61,77.44c2.6,0,4.72-1.96,4.72-4.56s-2.12-4.56-4.72-4.56h-2.89v9.11h2.89Z'/%3e%3cpath%20class='cls-2'%20d='M73.78,75.29h-5.78l-1.35,3.13h-1.08l4.9-11.06h.83l4.9,11.06h-1.09l-1.33-3.13h0ZM73.37,74.34l-2.47-5.46-2.49,5.46h4.96,0Z'/%3e%3cpath%20class='cls-2'%20d='M80.8,68.31h-3.92v-.96h8.81v.96h-3.9v10.11h-.99v-10.11Z'/%3e%3cpath%20class='cls-2'%20d='M88.68,67.34h.99v11.07h-.99v-11.07Z'/%3e%3cpath%20class='cls-2'%20d='M98.91,67.02c3.24,0,5.82,2.74,5.82,5.87s-2.58,5.87-5.82,5.87-5.84-2.73-5.84-5.87,2.6-5.87,5.84-5.87ZM98.91,68.02c-2.66,0-4.85,2.2-4.85,4.88s2.18,4.88,4.85,4.88,4.83-2.2,4.83-4.88-2.18-4.88-4.83-4.88Z'/%3e%3cpath%20class='cls-2'%20d='M108.35,67.34h.99l6.81,9.34v-9.34h.99v11.07h-.98l-6.82-9.34v9.34h-.99v-11.07h0Z'/%3e%3crect%20class='cls-1'%20x='.27'%20y='56.95'%20width='119.46'%20height='2.93'/%3e%3c/g%3e%3c/svg%3e" alt="" width="54" height="36">
+          </a>
+        </div>
       </header>
 
-      <div id="embedding-warning" class="exploratory-banner embedding-warning" role="alert" hidden>
-        <strong>Open this page directly</strong>
-        <span>For pairing safety, the browser Runner is disabled inside embedded frames.</span>
-      </div>
+      <aside class="rail" aria-label="Runner workspace">
+        <div class="brand">
+          <div class="brand-copy">
+            <div class="brand-name" data-pretext>Peripersonal Space Design Toolkit</div>
+            <div class="brand-subtitle" data-pretext>Experiment Runner</div>
+          </div>
+          <button id="runner-theme-toggle" class="rail-theme-toggle" type="button" aria-pressed="false" aria-label="Dark theme" title="Use dark theme">
+            <span class="theme-toggle-track" aria-hidden="true">
+              <span class="theme-toggle-indicator"></span>
+              <svg class="theme-toggle-icon theme-toggle-sun" viewBox="0 0 24 24" focusable="false">
+                <circle cx="12" cy="12" r="3.5"></circle>
+                <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"></path>
+              </svg>
+              <svg class="theme-toggle-icon theme-toggle-moon" viewBox="0 0 24 24" focusable="false">
+                <path d="M19 15.2A7.6 7.6 0 0 1 8.8 5a7.7 7.7 0 1 0 10.2 10.2Z"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+        <div class="mode-switch" role="group" aria-label="Runner mode">
+          <button type="button" class="is-active" data-mode="target" aria-pressed="true" aria-controls="target-mode">Run on this device</button>
+          <button type="button" data-mode="controller" aria-pressed="false" aria-controls="controller-mode">Control another device</button>
+        </div>
+      </aside>
 
-      <div class="mode-switch" role="group" aria-label="Runner mode">
-        <button type="button" class="is-active" data-mode="target" aria-pressed="true" aria-controls="target-mode">Run on this device</button>
-        <button type="button" data-mode="controller" aria-pressed="false" aria-controls="controller-mode">Control another device</button>
-      </div>
+      <main id="main-content" class="workspace runner-workspace" tabindex="-1">
+        <h1 data-pretext>Experiment Runner</h1>
+        <div id="embedding-warning" class="exploratory-banner embedding-warning" role="alert" hidden>
+          <strong>Open this page directly</strong>
+          <span>For pairing safety, the browser Runner is disabled inside embedded frames.</span>
+        </div>
 
-      <main>
         <section id="controller-mode" class="mode-panel" data-mode-panel="controller" hidden>
           <section class="panel beacon-panel" aria-labelledby="scan-beacon-title">
             <h2 id="scan-beacon-title">Find a runner</h2>

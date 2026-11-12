@@ -27,9 +27,12 @@ import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 import { renderQrCode } from "./ui/qr-code.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
 
+import { initializeSiteHeader } from "../../../../packages/pps-resources/assets/ui/site-header.mjs";
 import { initializeTheme } from "../../../../packages/pps-resources/assets/ui/theme.mjs";
 
-initializeTheme(document.getElementById("runner-theme-toggle"));
+const themeToggle = document.getElementById("runner-theme-toggle");
+initializeTheme(themeToggle);
+initializeSiteHeader(document.querySelector(".site-tabs"), themeToggle);
 initializeTextLayout();
 
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));

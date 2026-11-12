@@ -1,12 +1,12 @@
 nav.site-tab-list.hosted-page-nav {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(8rem, 1.12fr) minmax(0, 0.9fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.12fr) minmax(0, 0.9fr);
   gap: 12px;
   max-width: var(--hosted-nav-max-width, 740px);
 }
 
 nav.site-tab-list.hosted-page-nav:has(> .rail-theme-toggle) {
-  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(8rem, 1.12fr) minmax(0, 0.9fr) auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.12fr) minmax(0, 0.9fr) auto;
 }
 
 nav.site-tab-list.hosted-page-nav[hidden] { display: none; }
@@ -43,6 +43,7 @@ nav.site-tab-list.hosted-page-nav[hidden] { display: none; }
 :root[data-theme="dark"] { --primary-ink: #10241d; }
 
 .hosted-page-nav .site-tab > span {
+  min-inline-size: 0;
   inline-size: 100%;
   min-block-size: var(--pretext-min-height, 0px);
 }

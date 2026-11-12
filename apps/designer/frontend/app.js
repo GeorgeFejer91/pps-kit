@@ -1,3 +1,4 @@
+import { initializeSiteHeader } from "../../../packages/pps-resources/assets/ui/site-header.mjs";
 import {
   initializeDocumentationTypography,
   refreshDocumentationTypography,
@@ -3100,33 +3101,8 @@ function renderPageTabs() {
 }
 
 function initializePageTabs() {
-  const topbar = document.querySelector(".topbar");
-  const phone = window.matchMedia("(max-width: 760px)");
-  if (HOSTED_SITE && new URLSearchParams(window.location.search).get("desktop") !== "1") {
-    const theme = $("designer-theme-toggle");
-    const sidebar = theme.parentElement;
-    const placeTheme = () => {
-      const parent = phone.matches ? $("hosted-page-nav") : sidebar;
-      if (theme.parentElement === parent) return;
-      const focused = document.activeElement === theme;
-      parent.append(theme);
-      if (focused) theme.focus({ preventScroll: true });
-    };
-    placeTheme();
-    phone.addEventListener("change", placeTheme);
-  }
-  const syncTopbarHeight = () => {
-    const nav = topbar.querySelector(".site-tab-list:not([hidden])");
-    const height = (phone.matches ? nav : topbar)?.getBoundingClientRect().height ?? 0;
-    const scrollWithPage = phone.matches && height > window.innerHeight / 3;
-    topbar.toggleAttribute("data-scroll-with-page", scrollWithPage);
-    document.documentElement.style.setProperty("--topbar-height", `${scrollWithPage ? 0 : height}px`);
-  };
-  syncTopbarHeight();
-  const resize = new ResizeObserver(syncTopbarHeight);
-  resize.observe(topbar, { box: "border-box" });
-  for (const nav of topbar.querySelectorAll(".site-tab-list")) resize.observe(nav, { box: "border-box" });
-  window.addEventListener("resize", syncTopbarHeight);
+  const hosted = HOSTED_SITE && new URLSearchParams(window.location.search).get("desktop") !== "1";
+  initializeSiteHeader(document.querySelector(".topbar"), hosted ? $("designer-theme-toggle") : null);
   setActivePage(pageFromLocation() || "toolkit");
   scrollToHashTarget();
 }
