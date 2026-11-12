@@ -79,8 +79,9 @@ body {
 }
 
 html {
+  --page-scroll-padding-top: 18px;
   scroll-behavior: smooth;
-  scroll-padding-top: 18px;
+  scroll-padding-top: var(--page-scroll-padding-top);
 }
 
 .visually-hidden {
@@ -7358,12 +7359,18 @@ body.modal-open {
 
 .segment-heading {
   position: sticky;
-  top: 88px;
+  top: var(--space-2);
   z-index: 9;
   align-items: center;
-  padding: var(--space-2) calc(var(--panel-padding) + 1px);
-  background: color-mix(in srgb, var(--background) 94%, transparent);
-  backdrop-filter: blur(8px);
+  padding: var(--space-2) var(--panel-padding);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.segment-heading h2 {
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .decision-segment.workflow-current > .segment-heading {
@@ -7457,10 +7464,6 @@ body.modal-open {
   display: none !important;
 }
 
-.decision-segment.collapsed .segment-heading {
-  border-bottom: 1px solid var(--line);
-}
-
 .step-footer {
   position: sticky;
   bottom: 8px;
@@ -7470,12 +7473,6 @@ body.modal-open {
   border-radius: 7px;
   background: var(--surface);
   backdrop-filter: none;
-}
-
-@media (max-width: 760px) {
-  .segment-heading {
-    top: var(--space-2);
-  }
 }
 
 body:not(.desktop-applet) .legacy-session-action {
@@ -7771,9 +7768,9 @@ body.desktop-applet .segment-heading {
     gap: 3px 8px;
     min-height: 64px;
     padding: 8px calc(var(--panel-padding) + 1px);
-    border-bottom: 1px solid var(--line);
+    border-width: 0 0 1px;
+    border-radius: 0;
     background: transparent;
-    backdrop-filter: none;
   }
 
   .segment-heading .segment-kicker {
@@ -8175,9 +8172,33 @@ body.desktop-applet .segment-heading {
   .topbar {
     position: static;
   }
+}
 
-  .segment-heading {
-    top: var(--space-2);
+@media (width > 1400px) {
+  body:not(.desktop-applet) {
+    --segment-sticky-top: calc(var(--layout-gutter) + var(--topbar-height, 56px));
+  }
+
+  body:not(.desktop-applet)[data-active-page="toolkit"] .topbar {
+    border-radius: 8px 8px 0 0;
+  }
+
+  body:not(.desktop-applet) .decision-segment {
+    margin-top: 0;
+    scroll-margin-top: calc(var(--segment-sticky-top) - var(--page-scroll-padding-top));
+  }
+
+  body:not(.desktop-applet) .decision-segment:not(:last-child) {
+    padding-bottom: var(--space-4);
+  }
+
+  body:not(.desktop-applet) .decision-segment:last-child {
+    min-block-size: calc(100dvh - var(--segment-sticky-top) - var(--layout-gutter));
+  }
+
+  body:not(.desktop-applet) .segment-heading {
+    top: var(--segment-sticky-top);
+    border-radius: 0 0 8px 8px;
   }
 }
 

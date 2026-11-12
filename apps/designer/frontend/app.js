@@ -3099,6 +3099,12 @@ function renderPageTabs() {
 }
 
 function initializePageTabs() {
+  const topbar = document.querySelector(".topbar");
+  const syncTopbarHeight = () => {
+    document.documentElement.style.setProperty("--topbar-height", `${topbar.getBoundingClientRect().height}px`);
+  };
+  syncTopbarHeight();
+  new ResizeObserver(syncTopbarHeight).observe(topbar, { box: "border-box" });
   setActivePage(pageFromLocation() || "toolkit");
   scrollToHashTarget();
 }
@@ -8252,7 +8258,7 @@ function updateActiveNav() {
     link.classList.remove("active");
   }
   let active = "study";
-  const viewportTop = 96;
+  const viewportTop = Math.max(96, document.querySelector(".topbar").getBoundingClientRect().bottom + 1);
   for (const stepId of WORKFLOW_STEPS) {
     const target = $(STEP_TARGETS[stepId]);
     if (!target) continue;
