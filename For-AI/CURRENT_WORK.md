@@ -9,15 +9,23 @@ This file is the active checklist and handoff owner; replace state, do not appen
   The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
-- **Timeline-first Runner UI:** keep experiment feedback and transport in the
-  main view. The Study 5 Focus Mode inspires the native landscape timeline's
-  audio, tactile, and recorded-response lanes. Native positions come from the
-  prepared schedule and submitted audio frames. Display bins bound the chart
-  while the total counts every accepted input. The phone has separate
-  controller and device views. Study setup, outputs, logging, and beacon
-  pairing open in dialogs with SVG controls. Keep the participant response
-  surface focused during playback. Local native and hosted checks own UI
-  verification. Installed and physical acquisition remain separate gates.
+- **Timeline-first Runner UI: VERIFIED SOURCE AND HOSTED.** Study 5 Focus
+  Mode inspires the native landscape timeline's audio, tactile, and response
+  lanes. It shows scheduled cues and software playback positions, with one
+  display marker per time bin and a count of every accepted input. The phone
+  has separate controller and participant views. Study setup, outputs,
+  logging, and the SVG Send/Scan beacon controls open in dialogs. All 141
+  native Runner tests and 71 frontend tests passed. Chromium checked the
+  compiled native view with a mock bridge, including response markers,
+  dialog focus, and 320 CSS px reflow with enlarged text. Pages
+  [run 43285114458](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43285114458)
+  deployed `a5e487c` to [ppskit.com](https://ppskit.com/experiment-runner/).
+  Live Chromium prepared all 22 phone studies and exercised private beacon
+  pairing, remote Start, instruction gates, and matching response markers
+  and JSON export with instrumented vibration. All 617 staged files matched
+  the site and the four public routes returned HTTP 200. The primary checkout
+  had staged deletions, so the verified change went to `main` from an isolated
+  checkout. Installed WebView and physical-device checks remain open.
 - **Chrome phone Runner: VERIFIED LIVE IN SOFTWARE.** The prepared-study runner
   starts on the phone or from a paired browser. The phone owns playback,
   timed touch responses, instruction gates and JSON export. Arming requests a
