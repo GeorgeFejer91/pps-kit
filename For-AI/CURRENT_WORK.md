@@ -9,7 +9,7 @@ This file is the active checklist and handoff owner; replace state, do not appen
   The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
-- **Chrome phone Runner: VERIFIED LOCALLY.** The prepared-study runner
+- **Chrome phone Runner: VERIFIED LIVE IN SOFTWARE.** The prepared-study runner
   starts on the phone or from a paired browser. The phone owns playback,
   timed touch responses, instruction gates and JSON export. Arming requests a
   test pulse. The scheduler uses Web Audio output timestamps to target
@@ -19,17 +19,26 @@ This file is the active checklist and handoff owner; replace state, do not appen
   A real-time Chrome fixture exercised local and paired control, two gates,
   late-release tap capture and JSON export. A paired real-time Biggio
   common-racket run completed all 90 trials. Both canonical builds, 71 Runner
-  tests and two Pages assembly tests passed.
+  tests and two Pages assembly tests passed. Pages
+  [run 43264672807](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43264672807)
+  deployed `71b78b5` to [ppskit.com](https://ppskit.com/experiment-runner/).
+  Live Chrome passed the shared layout, all 22 study selections, the local
+  fixture, 320 CSS px text enlargement, touch and keyboard focus, and the
+  two-browser VDO.Ninja pairing. The paired fixture matched a 1,908 ms tap
+  to the export after release past the 2,000 ms deadline. All 617 public
+  files matched canonical staging and the four main routes returned HTTP 200.
 - **Phone catalogue boundary:** Each of the 22 public packs uses one prepared
   trial order. The two Tajadura profiles require separate tactile actuators.
   The candidate Canzoneri 2012 pack adds pre- and post-sound silence to the
   main-branch design and awaits reconciliation. The remaining unfinished
   profiles stay outside the browser catalogue.
-- **Phone Runner next check:** Verify deployment from the current
-  `codex/pps-chrome-phone-finish` worktree. Confirm audible sound and felt
-  vibration on a named Android phone in Chrome. No Android phone was
-  connected to this workstation. Physical acoustic and motor timing require
-  separate measurement before any acquisition timing claim.
+- **Phone Runner next check:** Confirm audible sound and felt vibration in the
+  hosted Practice demo on a named Android phone in Chrome. No Android phone
+  was connected to this workstation. Physical acoustic and motor timing
+  require separate measurement before any acquisition timing claim. The
+  verified source reached `main` from the isolated
+  `codex/pps-chrome-phone-finish` worktree because the primary checkout had a
+  missing Git index.
 - **Browser launch: VERIFIED.** Pages [run 43051771734](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43051771734)
   deployed source checkpoint 48b42e1 to [ppskit.com](https://ppskit.com/).
   All 474 staged files matched the public site and the four public routes
@@ -245,8 +254,10 @@ recheck that cache variant if the old redirect is reported again. See
 - [x] PWA — Verify installability and a cached revisit for the supported Study 5 preview.
 - [x] Browser Runner — Publish the Runner tab and verify the built-in demo and
   consent-based beacon pairing over the public HTTPS route.
-- [ ] Phone Runner — Complete the Android Chrome hardware check after Pages
-  promotion and record the phone model and browser version.
+- [x] Phone Runner — Publish and verify standalone and paired prepared-study
+  playback in Chrome with instrumented vibration.
+- [ ] Phone Runner — Confirm audible sound and felt vibration on Android Chrome.
+  Record the phone model and browser version when available.
 - [ ] M1 — Authoring/participant fixes and validation/build baseline: B1–B3, C1,
   G1–G2, H1–H2. Validation has verified checkpoints but remains non-green.
 - [ ] M2 — Execute one real single-block package through native authority (A1).
