@@ -98,6 +98,7 @@ def main() -> int:
         page.set_viewport_size({"width": 320, "height": 900})
         page.goto(f"{base}/apps/runner/compiled/companion/index.html", wait_until="networkidle")
         page.locator('[data-mode="target"]').click()
+        page.get_by_text("Remote permissions and QR invitation", exact=True).click()
         page.locator("#create-phone-target").click()
         page.locator("#phone-prepare").click()
         page.locator("#phone-setup").click()
@@ -105,14 +106,14 @@ def main() -> int:
         page.locator("#phone-vibration-enabled").uncheck()
         page.locator("#arm-phone").click()
         page.locator("#phone-start").click()
-        page.wait_for_function("document.querySelector('#phone-run-state').textContent === 'Running'")
+        page.wait_for_function("() => document.querySelector('#phone-run-state').textContent === 'Running'")
         page.evaluate('''() => {
           Object.defineProperty(document, 'visibilityState', {configurable:true, get:()=>'hidden'});
           document.dispatchEvent(new Event('visibilitychange'));
           document.dispatchEvent(new Event('freeze'));
           window.dispatchEvent(new Event('pagehide'));
         }''')
-        page.wait_for_function("document.querySelector('#phone-start').disabled && document.querySelector('#disarm-phone').disabled")
+        page.wait_for_function("() => document.querySelector('#phone-start').disabled && document.querySelector('#disarm-phone').disabled")
         page.evaluate('''() => {
           Object.defineProperty(document, 'visibilityState', {configurable:true, get:()=>'visible'});
           window.dispatchEvent(new Event('pageshow'));
