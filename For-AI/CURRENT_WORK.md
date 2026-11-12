@@ -25,7 +25,9 @@ This file is the active checklist and handoff owner; replace state, do not appen
   for Planner, Runner and Suite. Planner retains its radar artwork. Runner's
   play icon is used by its browser tab, Qt windows and native build settings.
   The three local Windows downloaders matched all seven embedded sizes, and
-  Windows loaded each icon. Chromium verified the public cards at 1440 CSS px
+  Windows loaded each icon. The rebuilt legacy Runner executable also matched
+  all seven embedded sizes and passed its Qt runtime and startup checks.
+  Chromium verified the public cards at 1440 CSS px
   in light mode and 390 CSS px in dark mode. The local 320 CSS px check
   included 200% text and spacing. All 477 staged files matched the public
   site and the four main routes returned HTTP 200. Pages
