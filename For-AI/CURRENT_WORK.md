@@ -21,6 +21,17 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Physical vibration, device timing and native acquisition are separate
   qualification gates. The Windows release remains a draft with no installer
   assets; Downloads lists the three editions without inventing asset URLs.
+- **Installer and app icons: VERIFIED LIVE.** Downloads shows a distinct SVG
+  for Planner, Runner and Suite. Planner retains its radar artwork. Runner's
+  play icon is used by its browser tab, Qt windows and native build settings.
+  The three local Windows downloaders matched all seven embedded sizes, and
+  Windows loaded each icon. Chromium verified the public cards at 1440 CSS px
+  in light mode and 390 CSS px in dark mode. The local 320 CSS px check
+  included 200% text and spacing. All 477 staged files matched the public
+  site and the four main routes returned HTTP 200. Pages
+  [run 43211295270](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43211295270)
+  deployed `6e74400`. Both local Vite previews also served the SVGs.
+  The public Windows release remains a draft.
 - **Designer header: VERIFIED LIVE.** The pinned phone page links occupy one
   53 CSS px row at the default text size. Status, Help and credits scroll with
   the page. The section disclosure opens a four-column grid on narrow phones
