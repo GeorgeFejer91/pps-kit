@@ -226,7 +226,7 @@ def test_visual_layout_audit_rejects_phone_navigation_target_and_breakpoint_regr
     assert any("missing its section toggle" in failure for failure in failures)
     assert any("expanded before" in failure for failure in failures)
     assert any("obsolete companion controls" in failure for failure in failures)
-    assert any("taller than 300" in failure for failure in failures)
+    assert any("taller than 60" in failure for failure in failures)
     assert any("below 44x44" in failure for failure in failures)
     assert any("resize handles remain" in failure for failure in failures)
 

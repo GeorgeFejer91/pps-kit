@@ -203,17 +203,8 @@ def test_phone_css_is_content_first_and_uses_touch_sized_static_controls() -> No
     assert _rule_has(mobile_css, r"\.step-footer,[^{]+", r"position:\s*static")
     assert _rule_has(mobile_css, r"\.rail \.rail-nav-group", r"display:\s*none")
 
-    landscape_css = "\n".join(
-        _at_rule_blocks(
-            styles,
-            "@media (min-width: 480px) and (max-width: 760px) and (max-height: 500px) and (orientation: landscape)",
-        )
-    )
-    assert _rule_has(
-        landscape_css,
-        r"\.rail",
-        r"grid-template-columns:\s*64px\s+minmax\(92px,\s*0\.75fr\)\s+minmax\(0,\s*1fr\)",
-    )
+    assert _rule_has(mobile_css, r"\.rail", r"flex-flow:\s*row\s+wrap")
+    assert _rule_has(mobile_css, r"\.rail\.mobile-sections-open \.rail-nav-group\.active", r"flex:\s*0\s+0\s+100%")
 
     narrow_css = "\n".join(_at_rule_blocks(styles, "@media (max-width: 760px)"))
     assert _rule_has(narrow_css, r"\.panel-resize-handle", r"display:\s*none\s*!important")

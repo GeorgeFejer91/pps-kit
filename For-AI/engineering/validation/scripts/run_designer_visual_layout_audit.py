@@ -172,8 +172,8 @@ def assess_geometry(case: ViewportCase, geometry: dict[str, Any]) -> list[str]:
         failures.append("mobile section navigation is expanded before the user requests it")
     if metrics.get("legacy_companion_controls", 0) > 0:
         failures.append("obsolete companion controls are present")
-    if case.phone and metrics.get("mobile_rail_height_px", 0) > 300:
-        failures.append("collapsed mobile sidebar is taller than 300 CSS px")
+    if case.phone and metrics.get("mobile_rail_height_px", 0) > 60:
+        failures.append("collapsed mobile sidebar is taller than 60 CSS px")
     if case.width == 761 and metrics.get("mobile_section_toggle_visible", 0) > 0:
         failures.append("mobile section toggle remains visible above the 760px breakpoint")
     if metrics.get("site_tab_labels_fit", 0) < 1:

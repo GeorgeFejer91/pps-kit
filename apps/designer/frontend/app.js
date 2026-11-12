@@ -3101,10 +3101,14 @@ function renderPageTabs() {
 function initializePageTabs() {
   const topbar = document.querySelector(".topbar");
   const syncTopbarHeight = () => {
-    document.documentElement.style.setProperty("--topbar-height", `${topbar.getBoundingClientRect().height}px`);
+    const height = topbar.getBoundingClientRect().height;
+    document.documentElement.style.setProperty("--topbar-height", `${height}px`);
+    // On phones, a wrapping header must leave room for the focused content.
+    topbar.toggleAttribute("data-scroll-with-page", height > window.innerHeight / 3);
   };
   syncTopbarHeight();
   new ResizeObserver(syncTopbarHeight).observe(topbar, { box: "border-box" });
+  window.addEventListener("resize", syncTopbarHeight);
   setActivePage(pageFromLocation() || "toolkit");
   scrollToHashTarget();
 }
