@@ -87,6 +87,18 @@ This file is the active checklist and handoff owner; replace state, do not appen
   confirmed the same interaction and layout; all 470 public files matched
   staging and the four main routes returned HTTP 200. The offline suite and
   installed validation remain open.
+- **Trajectory preview: VERIFIED LIVE.** The square, square-cornered frame
+  contains the full canvas at fractional and high device pixel ratios. Its
+  opening 2D view centers and fits the circle, including when a study changes
+  the radius. Local and live Chromium checked 320–1920 CSS px, reloads, a
+  cached offline revisit, a study switch, 2D/3D, Fit Radius and Reset Camera.
+  The 12-case Designer audit and both Pages assembly tests passed.
+  At 320 CSS px with 200% text and spacing, the preview fits and the existing
+  stimulus status row below it still overflows by 14 CSS px. Pages
+  [run 43246515501](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43246515501)
+  deployed `1c36f6b`. All 477 staged files matched the public site and the
+  four main routes returned HTTP 200. The source checkpoint was pushed from
+  a clean worktree because the primary checkout reported a Git mmap error.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.
