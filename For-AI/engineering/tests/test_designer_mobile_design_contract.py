@@ -198,6 +198,7 @@ def test_phone_css_is_content_first_and_uses_touch_sized_static_controls() -> No
     assert _rule_has(mobile_css, r"\.icon-action", r"(?:width|min-width):\s*44px")
     assert _rule_has(mobile_css, r"\.topbar", r"display:\s*contents")
     assert _rule_has(mobile_css, r"\.topbar \.site-tab-list", r"position:\s*sticky")
+    assert _rule_has(mobile_css, r"#designer-capability-badge", r"display:\s*none")
     assert _rule_has(mobile_css, r"\.rail", r"position:\s*static")
     assert _rule_has(mobile_css, r"\.workspace", r"margin-left:\s*0")
     assert _rule_has(mobile_css, r"\.segment-heading", r"position:\s*static")
@@ -347,7 +348,6 @@ def test_modals_contain_focus_and_scroll_within_the_phone_viewport() -> None:
     mobile_css = "\n".join(_at_rule_blocks(styles, "@media (max-width: 760px)"))
     assert _rule_has(mobile_css, r"\.modal-card", r"max-height:\s*calc\(100dvh - 16px\)")
     assert _rule_has(mobile_css, r"\.modal-heading", r"position:\s*sticky")
-    assert "@media (min-width: 480px) and (max-width: 760px) and (max-height: 500px) and (orientation: landscape)" in styles
 
     for contract in (
         "function activeModalBackdrop()",

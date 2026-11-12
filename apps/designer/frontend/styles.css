@@ -349,10 +349,11 @@ code {
 }
 
 .rail-theme-toggle {
+  --theme-toggle-width: 64px;
   grid-column: 2;
   grid-row: 2;
-  width: 64px;
-  min-width: 64px;
+  width: var(--theme-toggle-width);
+  min-width: var(--theme-toggle-width);
   min-height: 30px;
   border: 0;
   border-radius: 999px;
@@ -362,7 +363,7 @@ code {
 
 .theme-toggle-track {
   position: relative;
-  width: 64px;
+  width: 100%;
   height: 30px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -377,7 +378,7 @@ code {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 29px;
+  width: calc(var(--theme-toggle-width) / 2 - 3px);
   height: 24px;
   border-radius: 999px;
   background: var(--text);
@@ -404,7 +405,7 @@ code {
 }
 
 .rail-theme-toggle[aria-pressed="true"] .theme-toggle-indicator {
-  transform: translateX(30px);
+  transform: translateX(calc(var(--theme-toggle-width) / 2 - 2px));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -7636,6 +7637,7 @@ body.desktop-applet .segment-heading {
   .site-tab-list.hosted-page-nav:not([hidden]) {
     display: flex;
     flex-wrap: wrap;
+    gap: var(--space-1);
   }
 
   .hosted-page-nav .site-tab {
@@ -7645,6 +7647,11 @@ body.desktop-applet .segment-heading {
     max-width: 100%;
     font-size: 0.8125rem;
     line-height: 1.25;
+  }
+
+  .hosted-page-nav .rail-theme-toggle {
+    --theme-toggle-width: 56px;
+    flex: none;
   }
 
   .hosted-page-nav .tab-label-full {
@@ -7672,6 +7679,10 @@ body.desktop-applet .segment-heading {
     overflow-wrap: anywhere;
   }
 
+  #designer-capability-badge {
+    display: none;
+  }
+
   .designer-status-chrome #designer-help {
     min-height: 44px;
     padding: 4px 10px;
@@ -7691,9 +7702,7 @@ body.desktop-applet .segment-heading {
   }
 
   .rail .brand {
-    display: flex;
-    padding: 0;
-    border: 0;
+    display: contents;
   }
 
   .rail .brand-copy,
@@ -8143,12 +8152,6 @@ body.desktop-applet .segment-heading {
 
   #toolkit-workflow-nav a:last-child {
     grid-column: auto;
-  }
-}
-
-@media (min-width: 480px) and (max-width: 760px) and (max-height: 500px) and (orientation: landscape) {
-  #designer-capability-badge {
-    display: none;
   }
 }
 

@@ -78,7 +78,8 @@ const DEFAULT_LOUDNESS_POLICY = {
     windows_volume_policy: "not_part_of_asio_calibration"
   }
 };
-const HOSTED_SITE = /\/app\/(?:index\.html)?$/.test(window.location.pathname);
+// The encoded index URL also opens the hosted Planner when bypassing an older offline cache.
+const HOSTED_SITE = /\/app\/(?:(?:i|%69)ndex\.html)?$/.test(window.location.pathname);
 const STATIC_REPO_ROOT = HOSTED_SITE ? new URL("../", window.location.href).href : new URL(import.meta.url.includes("/compiled/assets/") ? "../../../../../" : "../../../", import.meta.url).href;
 const STATIC_PRELOAD_INVENTORY_PATH = "/assets/preloads/preload_inventory.json";
 const STATIC_TEMPLATE_DIR = "/study_templates/";
@@ -3101,6 +3102,19 @@ function renderPageTabs() {
 function initializePageTabs() {
   const topbar = document.querySelector(".topbar");
   const phone = window.matchMedia("(max-width: 760px)");
+  if (HOSTED_SITE && new URLSearchParams(window.location.search).get("desktop") !== "1") {
+    const theme = $("designer-theme-toggle");
+    const sidebar = theme.parentElement;
+    const placeTheme = () => {
+      const parent = phone.matches ? $("hosted-page-nav") : sidebar;
+      if (theme.parentElement === parent) return;
+      const focused = document.activeElement === theme;
+      parent.append(theme);
+      if (focused) theme.focus({ preventScroll: true });
+    };
+    placeTheme();
+    phone.addEventListener("change", placeTheme);
+  }
   const syncTopbarHeight = () => {
     const nav = topbar.querySelector(".site-tab-list:not([hidden])");
     const height = (phone.matches ? nav : topbar)?.getBoundingClientRect().height ?? 0;
