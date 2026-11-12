@@ -27,6 +27,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   two-browser VDO.Ninja pairing. The paired fixture matched a 1,908 ms tap
   to the export after release past the 2,000 ms deadline. All 617 public
   files matched canonical staging and the four main routes returned HTTP 200.
+  A standalone run of the published Biggio common-racket study in Chrome
+  157 with Pixel 7 touch emulation completed all 90 trials, requested all
+  60 planned vibrations and exported a 239 ms tap. The recorded vibration
+  request delay had a 6.5 ms median and a 15 ms maximum. The run used real
+  Web Audio and an instrumented vibration API.
 - **Phone catalogue boundary:** Each of the 22 public packs uses one prepared
   trial order. The two Tajadura profiles require separate tactile actuators.
   The candidate Canzoneri 2012 pack adds pre- and post-sound silence to the
