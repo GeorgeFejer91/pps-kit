@@ -1,6 +1,6 @@
 # Current work
 
-Reviewed: 2026-11-11. Overall completion goal: **OPEN**.
+Reviewed: 2026-11-12. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
 - **Goal:** deliver the [standalone study preview PWA and offline Planner +
@@ -21,6 +21,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Physical vibration, device timing and native acquisition are separate
   qualification gates. The Windows release remains a draft with no installer
   assets; Downloads lists the three editions without inventing asset URLs.
+- **Designer header: VERIFIED LIVE.** The bordered segment heading docks below
+  the page tabs in the wide public Designer. Pages [run 43194790723](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43194790723)
+  deployed `7e64f72` to [ppskit.com](https://ppskit.com/). Chromium checked all
+  seven headings, keyboard About interaction, and Downloads at 320 CSS px.
+  All 468 staged files matched the site and the four public routes returned
+  HTTP 200. Future completed Pages UI tasks follow the
+  [standing deployment workflow](WORKFLOW.md#ui-exploration-and-promotion).
 - **Current stage:** verified Designer source. The public Designer opens
   directly as a browser preview with bundled study assets. The connection
   panel and localhost probe were removed in `d45c0c8`. Live Chromium checked
