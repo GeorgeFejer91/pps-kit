@@ -29,8 +29,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   docks below the page tabs. The 12-case local audit and live Chromium checks
   covered 320–760 CSS px, resizing, light and dark themes, touch, keyboard focus,
   and 200% text with spacing. Pages [run 43206039793](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43206039793)
-  deployed `9e4b36a` to [ppskit.com](https://ppskit.com/). All 472 staged files
-  matched the live site and all four public routes returned HTTP 200.
+  deployed `9e4b36a` to [ppskit.com](https://ppskit.com/). A legacy offline cache
+  reproduced the old phone header. Online navigation now fetches current HTML,
+  while the offline preview retains a complete snapshot. The older browser
+  picked up the fix on reload and kept its existing tab and previous assets.
+  Live Chromium verified the current header and cached Study 5 playback.
+  Pages [run 43208031434](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43208031434)
+  deployed `6c3c324`. All 474 staged files and four public routes passed.
 - **Current stage:** verified Designer source. The public Designer opens
   directly as a browser preview with bundled study assets. The connection
   panel and localhost probe were removed in `d45c0c8`. Live Chromium checked
