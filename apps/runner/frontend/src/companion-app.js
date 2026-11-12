@@ -27,6 +27,9 @@ import { installBrowserLifecycle } from "./remote/browser-lifecycle.js";
 import { renderQrCode } from "./ui/qr-code.js";
 import { initializeTextLayout } from "./ui/text-layout.js";
 
+import { initializeTheme } from "../../../../packages/pps-resources/assets/ui/theme.mjs";
+
+initializeTheme(document.getElementById("runner-theme-toggle"));
 initializeTextLayout();
 
 const elements = Object.fromEntries([...document.querySelectorAll("[id]")].map((element) => [element.id, element]));

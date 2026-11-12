@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#f4f5f1">
-    <meta name="color-scheme" content="light">
+    <meta name="color-scheme" content="light dark">
     <meta name="description" content="Control a PPS experiment target or run the exploratory phone audio and vibration interface directly in a smartphone browser.">
     <meta name="referrer" content="no-referrer">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' wss://wss.vdo.ninja https://turnservers.vdo.ninja; object-src 'none'; base-uri 'none'; form-action 'self'">
@@ -13,19 +13,30 @@
     <link rel="stylesheet" href="../src/styles/app.css">
   </head>
   <body class="companion-page">
-    <nav class="runner-site-nav" aria-label="PPS Kit">
-      <a class="button" href="../" data-pretext>Experiment Planner</a>
-      <a class="button button-primary" href="./" aria-current="page" data-pretext>Experiment Runner</a>
-      <a class="button" href="../documentation/" data-pretext>Documentation</a>
-      <a class="button" href="../download/" data-pretext>Downloads</a>
-    </nav>
+    <header class="runner-site-header">
+      <nav class="site-tab-list hosted-page-nav" aria-label="PPS Kit">
+        <a class="button-link site-tab" href="../" aria-label="Experiment Planner"><span class="tab-label-full" data-pretext>Experiment Planner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Planner</span></a>
+        <a class="button-link site-tab" href="./" aria-current="page" aria-label="Experiment Runner"><span class="tab-label-full" data-pretext>Experiment Runner</span><span class="tab-label-short" aria-hidden="true" data-pretext>Runner</span></a>
+        <a class="button-link site-tab" href="../documentation/" aria-label="Documentation"><span class="tab-label-full" data-pretext>Documentation</span><span class="tab-label-short" aria-hidden="true" data-pretext>Docs</span></a>
+        <a class="button-link site-tab" href="../download/" data-pretext>Downloads</a>
+        <button id="runner-theme-toggle" class="rail-theme-toggle" type="button" aria-pressed="false" aria-label="Dark theme" title="Use dark theme">
+          <span class="theme-toggle-track" aria-hidden="true">
+            <span class="theme-toggle-indicator"></span>
+            <svg class="theme-toggle-icon theme-toggle-sun" viewBox="0 0 24 24" focusable="false">
+              <circle cx="12" cy="12" r="3.5"></circle>
+              <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"></path>
+            </svg>
+            <svg class="theme-toggle-icon theme-toggle-moon" viewBox="0 0 24 24" focusable="false">
+              <path d="M19 15.2A7.6 7.6 0 0 1 8.8 5a7.7 7.7 0 1 0 10.2 10.2Z"></path>
+            </svg>
+          </span>
+        </button>
+      </nav>
+    </header>
     <div class="phone-shell">
       <header class="phone-header">
-        <div class="brand-block">
-          <span class="brand-mark" aria-hidden="true">PPS</span>
-          <h1>Experiment Runner</h1>
-        </div>
-        <span id="companion-status" class="connection-pill" data-phase="idle">Not connected</span>
+        <h1 data-pretext>Experiment Runner</h1>
+        <span id="companion-status" class="connection-pill" data-pretext data-phase="idle">Not connected</span>
       </header>
 
       <div id="embedding-warning" class="exploratory-banner embedding-warning" role="alert" hidden>

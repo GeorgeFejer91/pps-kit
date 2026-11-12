@@ -9,6 +9,7 @@ on:
       - "apps/designer/frontend/**"
       - "apps/runner/**"
       - "packages/pps-resources/assets/preloads/**"
+      - "packages/pps-resources/assets/ui/**"
       - "packages/pps-resources/study_templates/**"
       - "website/**"
       - "For-AI/engineering/automation/build_pages*.mjs"

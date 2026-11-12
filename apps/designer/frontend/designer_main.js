@@ -1,3 +1,5 @@
+import { initializeTheme } from "../../../packages/pps-resources/assets/ui/theme.mjs";
+
 const DATABASE_NAME = "pps-designer";
 const DATABASE_VERSION = 1;
 const DRAFT_STORE = "drafts";
@@ -171,24 +173,11 @@ async function saveProfileDownload(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(link.href), 2000);
 }
 
-function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  localStorage.setItem("ppsDesigner.theme", theme);
-  const toggle = document.getElementById("designer-theme-toggle");
-  if (toggle) {
-    toggle.setAttribute("aria-pressed", String(theme === "dark"));
-    const nextThemeLabel = theme === "dark" ? "Use light theme" : "Use dark theme";
-    toggle.setAttribute("aria-label", nextThemeLabel);
-    toggle.title = nextThemeLabel;
-  }
-}
-
 function initializeChrome() {
   const desktop = new URLSearchParams(location.search).get("desktop") === "1";
   document.body.classList.toggle("desktop-applet", desktop);
   document.getElementById("designer-capability-badge").textContent = desktop ? "desktop full" : "browser preview";
-  applyTheme(localStorage.getItem("ppsDesigner.theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
-  document.getElementById("designer-theme-toggle")?.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+  initializeTheme(document.getElementById("designer-theme-toggle"));
   document.getElementById("designer-help")?.addEventListener("click", () => document.querySelector('[data-segment-info="study"]')?.click());
   const saveState = document.getElementById("designer-save-state");
   document.addEventListener("pps-designer-dirty", () => {
