@@ -537,7 +537,7 @@ def run_audit(
                 context = browser.new_context(
                     viewport={"width": case.width, "height": case.height},
                     color_scheme=case.theme,
-                    device_scale_factor=1,
+                    device_scale_factor=0.8 if case.name == "laptop_1280_light" else 1,
                     has_touch=case.phone,
                 )
                 context.add_init_script(
@@ -925,6 +925,35 @@ def run_audit(
                     }
                     workflow_geometry[str(segment_index)] = segment_geometry
                     failures.extend(assess_mobile_segment(case, segment_index, segment_geometry))
+                    if segment_index == 1:
+                        frame = segment.locator("#trajectory-frame")
+                        frame.scroll_into_view_if_needed()
+                        if not frame.evaluate(
+                            """el => {
+                              const box = el.getBoundingClientRect();
+                              const panel = el.parentElement.getBoundingClientRect();
+                              return Math.abs(box.width - box.height) <= 1
+                                && Math.abs(box.left + box.right - panel.left - panel.right) <= 2
+                                && getComputedStyle(el).borderRadius === '0px';
+                            }"""
+                        ):
+                            failures.append("trajectory preview frame is not square and centered")
+                        viewer = frame.content_frame.locator("#viewer[data-viewer-ready=true]")
+                        if not viewer.evaluate(
+                            """el => {
+                              const canvas = el.querySelector('canvas').getBoundingClientRect();
+                              const {radiusScreenCenterXFraction: x, radiusScreenCenterYFraction: y,
+                                     radiusScreenWidthPx: width, radiusScreenHeightPx: height} = el.dataset;
+                              return el.dataset.viewMode === '2d'
+                                && Math.abs(canvas.width - el.clientWidth) <= 1
+                                && Math.abs(canvas.height - el.clientHeight) <= 1
+                                && canvas.x === 0 && canvas.y === 0
+                                && Math.abs(x - 0.5) <= 0.001 && Math.abs(y - 0.5) <= 0.001
+                                && Math.abs(width - height) <= 1
+                                && Number(width) > 0 && Number(width) < canvas.width;
+                            }"""
+                        ):
+                            failures.append("trajectory preview canvas or default radius fit is incorrect")
                     # Normalize only the evidence framing. Hash navigation can
                     # stop at the document boundary or beneath a prior sticky
                     # heading, which obscures the stage in a viewport capture.

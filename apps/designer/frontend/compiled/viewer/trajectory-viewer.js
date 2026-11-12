@@ -172,12 +172,13 @@ function set2DVerticalSpan(verticalSpan) {
 }
 
 function fit2DCameraToRadius({ resetCenter = true, resetZoom = true } = {}) {
+  const wasFitted = lastTwoDVerticalSpan === lastTwoDFitVerticalSpan;
   const verticalSpan = fitted2DVerticalSpan();
   controls.enabled = false;
   if (resetCenter) {
     controls.target.set(0, 0, 0);
   }
-  set2DVerticalSpan(resetZoom || lastTwoDVerticalSpan <= 0 ? verticalSpan : lastTwoDVerticalSpan);
+  set2DVerticalSpan(resetZoom || wasFitted ? verticalSpan : lastTwoDVerticalSpan);
 }
 
 function twoDViewSpans() {
@@ -1059,6 +1060,7 @@ function animate() {
   window.requestAnimationFrame(animate);
 }
 
+resize();
 addAvatar();
 drawScene({
   preview_mode: "2d",
@@ -1068,7 +1070,6 @@ drawScene({
   start: { x_m: 0, y_m: 1.1, z_m: 0 },
   end: { x_m: 0, y_m: 0.1, z_m: 0 }
 });
-resize();
 animate();
 
 renderer.domElement.addEventListener("pointerdown", handlePointerDown);

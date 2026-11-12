@@ -5878,7 +5878,7 @@ a:focus-visible,
   height: auto;
   aspect-ratio: 1;
   border: 1px solid #272d29;
-  border-radius: 6px;
+  border-radius: 0;
   display: block;
   place-self: center;
   min-width: 0;

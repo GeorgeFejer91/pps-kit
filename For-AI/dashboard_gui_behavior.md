@@ -76,8 +76,10 @@ The `2 · Configure ingredient` row places **Sound Ingredient Settings** beside
 the trajectory preview where both panes fit. Drag the vertical divider or use
 its Left/Right arrow keys (Home/End go to the width limits). This works in View
 and Edit modes. The panes stack in reading order when space is limited. The
-preview starts with a square 2D canvas, with the radius circle centered and
-inset from all four edges.
+preview starts with a square-cornered frame and a 2D canvas that fills it
+at any device pixel ratio. The radius circle starts centered and inset from
+all four edges. The default camera refits when the loaded radius changes.
+Manual zoom remains in effect until the view is reset or refitted.
 
 The Segment 1 trajectory preview is an embedded Three.js viewer that is lazy-loaded as it approaches the viewport. The right-side preview controls (`2D`, `3D`, view presets, zoom, fit radius, reset) are view-only camera controls and must stay usable in read-only, locked, and hosted/static modes. Source-owned trajectories remain visible together: the selected trajectory is thicker and opaque, inactive trajectories are muted, arbitrary imported-audio colours use a contrast outline, and coincident paths receive small deterministic offsets. Both 2D and 3D paths are clickable and select their matching inventory card. A fixed-clip selection reports `Preserved audio clip — no trajectory` while leaving the spatialized paths visible but muted.
 
