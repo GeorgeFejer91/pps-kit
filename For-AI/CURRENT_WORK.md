@@ -55,19 +55,21 @@ This file is the active checklist and handoff owner; replace state, do not appen
   touch and keyboard interaction, the direct Planner link, and the on-device
   Runner demo with an instrumented vibration call. All 477 staged files matched
   the site and all four public routes returned HTTP 200.
-- **Browser Runner layout: VERIFIED LIVE.** The Runner shares the site tabs,
-  sun/moon control and theme preference with Planner, Documentation and
-  Downloads. Its phone header fits one 53 CSS px row at 320 CSS px and
-  reflows for enlarged text. Pages [run 43220968834](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43220968834)
-  deployed `ed1811e` to [ppskit.com](https://ppskit.com/). Local and live
-  Chromium verified both themes at 320–1440 CSS px, including landscape,
-  200% text with spacing, keyboard and touch, navigation, preference
-  persistence and the local demo with instrumented vibration. Both
-  canonical builds, 65 Runner tests, the 12-case Designer audit, the
-  15-case bounded-text audit and both Pages assembly checks passed. All
-  477 public files matched staging and the four main routes returned
-  HTTP 200. The checkpoint was pushed from a clean GitHub checkout after
-  the primary checkout reported staged deletions and cloud read errors.
+- **Browser Runner layout: VERIFIED LIVE.** Planner, Runner, Documentation
+  and Downloads share the header, sidebar geometry and theme placement. The
+  Runner's modes sit in the sidebar. Its public route opens directly for
+  pairing and local output controls. Pages
+  [run 43248773920](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43248773920)
+  deployed `52c5dd2` to [ppskit.com](https://ppskit.com/). Live Chromium
+  verified that the tabs and sidebar keep their positions through navigation
+  at 320, 1440 and 1920 CSS px. The browser demo also passed. Local Chromium
+  checked both themes at 320–2560 CSS px, including landscape, keyboard,
+  touch, resizing and 200% text with spacing. Both canonical builds, 65
+  Runner tests, 18 layout contract tests, the 12-case Designer audit, offline
+  Study 5 and both Pages assembly checks passed. All 477 public files matched
+  staging and all four routes returned HTTP 200. The checkpoint was pushed
+  from a clean checkout because the primary checkout reported staged deletions
+  and a Git mmap error.
 - **Current stage:** verified Designer source. The public Designer opens
   directly as a browser preview with bundled study assets. The connection
   panel and localhost probe were removed in `d45c0c8`. Live Chromium checked
