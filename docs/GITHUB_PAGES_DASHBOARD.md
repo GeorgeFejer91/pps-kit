@@ -30,10 +30,11 @@ verification and Pages.
   an optional runner checkbox.
 - Imported stimulus audio stays in browser storage when composing online or in
   local files when using the installed Designer.
-- Designer browser JavaScript does not own experiment timing. Timing-sensitive
-  participant runs stay native-backed. The separate Runner companion can own an
-  explicitly exploratory, locally armed phone demo using Web Audio and browser
-  vibration, but it is not publication-grade timing evidence.
+- The browser Runner plays prepared studies and a practice demo with Web Audio
+  and phone vibration in Android Chrome. Runs can start on the phone or from a
+  paired browser after local arming. The phone records browser event timestamps
+  in a downloadable JSON log. Timing-sensitive acquisition requires a qualified
+  native route.
 - The Documentation page includes a read-only, lazy-loaded PPS publication and
   citation network. It is a static GitHub Pages asset and never calls the local
   companion or moves literature metadata, PDFs, or participant data between the

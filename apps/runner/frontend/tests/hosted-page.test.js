@@ -29,7 +29,8 @@ test("hosted companion declares a restrictive browser-only document policy", () 
   assert.match(companionHtml, /Browser timing is exploratory/u);
   assert.match(companionHtml, /id="beacon-browse"/u);
   assert.match(companionHtml, /id="target-beacon-start"/u);
-  assert.match(companionHtml, /id="phone-response"[^>]*disabled>Tap response/u);
+  assert.match(companionHtml, /id="phone-participant-view"[^>]*hidden/u);
+  assert.match(companionHtml, /id="phone-response" role="region"/u);
   assert.match(companionHtml, /id="embedding-warning"[^>]*role="alert"[^>]*hidden/u);
   assert.match(companionHtml, /After target-local approval, fresh credentials go only to that exact requester/u);
   const controllerHtml = companionHtml.slice(companionHtml.indexOf('id="controller-mode"'), companionHtml.indexOf('id="target-mode"'));

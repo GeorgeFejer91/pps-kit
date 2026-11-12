@@ -115,6 +115,7 @@
 
           <section id="controller-session-panel" class="panel stack compact-stack" hidden>
             <div class="section-heading"><h2 id="controller-run-state">Ready</h2><span id="controller-revision" class="badge">rev 0</span></div>
+            <p id="controller-study" class="subtle" hidden></p>
             <p id="controller-progress" class="subtle">No target snapshot received.</p>
             <div class="phone-progress"><span id="controller-progress-bar"></span></div>
             <p id="controller-event" class="timeline-event">Connect to receive target state.</p>
@@ -127,6 +128,16 @@
               <button class="button remote-action" type="button" data-remote-action="run.stop">Stop</button>
               <button class="button button-danger remote-action" type="button" data-remote-action="run.abort">Abort</button>
             </div>
+            <section id="controller-timeline" class="browser-timeline" aria-labelledby="controller-timeline-title" hidden>
+              <h3 id="controller-timeline-title">Trial timeline</h3>
+              <p id="controller-trial-number" class="subtle"></p>
+              <div id="controller-timeline-track" aria-hidden="true"></div>
+              <ol id="controller-timeline-list" role="list"></ol>
+              <details id="controller-recent-trials" hidden>
+                <summary>Recent trials</summary>
+                <ol id="controller-recent-trial-list" role="list"></ol>
+              </details>
+            </section>
             <p class="subtle">Complete participant setup and arm outputs on the device running the experiment.</p>
             <details>
               <summary>Add a session note</summary>
@@ -143,12 +154,44 @@
         <section id="target-mode" class="mode-panel is-active" data-mode-panel="target">
           <div class="exploratory-banner" role="note">
             <strong>Exploratory browser timing</strong>
-            <span>Run the built-in PPS demo with generated audio and vibration on supported devices. Browser timing is exploratory. Use the desktop Runner for research acquisition.</span>
+            <span>Run a prepared PPS study with audio and phone vibration in Android Chrome. Browser timing is exploratory.</span>
           </div>
+          <section class="panel stack compact-stack">
+            <h2>Study setup</h2>
+            <label for="phone-study">Study</label><select id="phone-study"><option value="">Practice demo</option></select>
+            <p id="phone-catalogue-status" class="subtle" role="status" hidden></p>
+            <label>Participant code<input id="phone-participant-code" maxlength="64" autocomplete="off" value="PHONE_DEMO"></label>
+            <div class="phone-action-grid">
+              <button id="phone-setup" class="button" type="button" disabled>Submit setup</button>
+              <button id="phone-prepare" class="button" type="button" disabled>Prepare demo</button>
+            </div>
+          </section>
+
+          <section class="panel stack compact-stack">
+            <div class="section-heading"><h2>Device outputs</h2><span id="output-capability" class="badge">Checking</span></div>
+            <label class="check-row"><input id="phone-audio-enabled" type="checkbox" checked> Enable audio</label>
+            <label class="check-row"><input id="phone-vibration-enabled" type="checkbox" checked> Enable phone vibration</label>
+            <button id="arm-phone" class="button button-primary" type="button" disabled>Arm outputs locally</button>
+            <button id="disarm-phone" class="button" type="button" disabled>Disarm outputs</button>
+            <p class="safety-copy">For vibration studies, use Chrome on an Android phone. Arming sends a test pulse. If you cannot feel it, check the phone’s vibration settings before starting. Keep Chrome in the foreground.</p>
+          </section>
+
+          <section class="panel stack compact-stack" aria-labelledby="phone-run-state">
+            <div class="section-heading"><h2 id="phone-run-state" tabindex="-1">Idle</h2><span id="phone-revision" class="badge">rev 0</span></div>
+            <div class="phone-action-grid">
+              <button id="phone-start" class="button button-primary" type="button" disabled>Start locally</button>
+              <button id="phone-pause" class="button" type="button" disabled>Pause</button>
+              <button id="phone-resume" class="button" type="button" disabled>Resume</button>
+              <button id="phone-stop" class="button" type="button" disabled>Stop</button>
+            </div>
+            <p id="phone-event" class="timeline-event">Submit setup and prepare the demo to begin.</p>
+            <button id="download-phone-log" class="button button-quiet" type="button" disabled>Download event log</button>
+          </section>
+
           <section class="panel beacon-panel" aria-labelledby="send-beacon-title">
             <h2 id="send-beacon-title">Allow remote control</h2>
             <div class="stack compact-stack">
-            <p class="subtle">Send a beacon before preparing the demo if another device will control this run. Only approve a request you expect.</p>
+            <p class="subtle">Send a beacon if you want to control this run from another browser. Only approve a request you expect.</p>
             <div class="inline-actions">
               <span id="target-beacon-status" class="badge" role="status">Beacon off</span>
               <span id="target-beacon-code" class="badge" role="status" hidden></span>
@@ -183,35 +226,19 @@
               <button id="target-connect" class="button button-primary" type="button">Start private data target</button>
             </div>
           </details>
-
-          <section class="panel stack compact-stack">
-            <div class="section-heading"><div><p class="eyebrow">Local safety gate</p><h2>Device outputs</h2></div><span id="output-capability" class="badge">Checking</span></div>
-            <label class="check-row"><input id="phone-audio-enabled" type="checkbox" checked> Enable generated looming audio</label>
-            <label class="check-row"><input id="phone-vibration-enabled" type="checkbox" checked> Enable vibration when supported by this device</label>
-            <button id="arm-phone" class="button button-primary" type="button" disabled>Arm outputs locally</button>
-            <button id="disarm-phone" class="button" type="button" disabled>Disarm outputs</button>
-            <p class="safety-copy">Remote peers cannot arm phone audio or vibration. A person at this device must press Arm outputs locally.</p>
-          </section>
-
-          <section class="panel stack compact-stack">
-            <div class="section-heading"><div><p class="eyebrow">Demo authority</p><h2 id="phone-run-state">Idle</h2></div><span id="phone-revision" class="badge">rev 0</span></div>
-            <label>Participant code<input id="phone-participant-code" maxlength="64" autocomplete="off" value="PHONE_DEMO"></label>
-            <div class="phone-action-grid">
-              <button id="phone-setup" class="button" type="button" disabled>Submit setup</button>
-              <button id="phone-prepare" class="button" type="button" disabled>Prepare demo</button>
-              <button id="phone-start" class="button button-primary" type="button" disabled>Start locally</button>
-              <button id="phone-pause" class="button" type="button" disabled>Pause</button>
-              <button id="phone-resume" class="button" type="button" disabled>Resume</button>
-              <button id="phone-stop" class="button" type="button" disabled>Stop</button>
-            </div>
-            <div class="looming-orbit" id="looming-orbit" aria-hidden="true"><span></span></div>
-            <button id="phone-response" class="button button-primary" type="button" disabled>Tap response</button>
-            <p id="phone-event" class="timeline-event">Submit setup and prepare the demo to begin.</p>
-            <button id="download-phone-log" class="button button-quiet" type="button" disabled>Download event log</button>
-          </section>
         </section>
       </main>
     </div>
+
+    <section id="phone-participant-view" aria-label="Experiment in progress" hidden>
+      <div id="phone-response" role="region" aria-labelledby="phone-response-instruction">
+        <p id="phone-response-instruction" data-pretext>Tap when you feel the vibration.</p>
+      </div>
+      <div class="participant-actions">
+        <button id="participant-continue" class="button button-primary" type="button" hidden>Continue</button>
+        <button id="participant-stop" class="button" type="button">Stop experiment</button>
+      </div>
+    </section>
 
     <div id="companion-toast" class="toast" role="status" aria-live="polite"></div>
     <!-- Reviewed classic SDK bytes are copied unchanged from public/. -->

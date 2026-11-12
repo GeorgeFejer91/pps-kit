@@ -2,6 +2,7 @@
 
 import argparse
 from functools import partial
+import json
 import re
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -218,8 +219,9 @@ def audit_routes(browser, origin):
         expect(page.get_by_role("button", name="Start locally")).to_be_disabled()
         page.get_by_role("button", name="Arm outputs locally").click()
         page.get_by_role("button", name="Start locally").click()
-        expect(page.get_by_role("button", name="Tap response")).to_be_enabled()
-        page.get_by_role("button", name="Tap response").click()
+        expect(page.locator("#phone-response")).to_be_visible()
+        expect(page.get_by_role("button", name="Stop experiment")).to_be_focused()
+        assert page.locator(".app-shell").evaluate("(shell) => shell.inert")
         expect(page.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
         expect(page.get_by_role("button", name="Download event log")).to_be_enabled()
 
@@ -230,13 +232,132 @@ def audit_routes(browser, origin):
         )
 
 
-def audit_live_beacon(browser, origin):
+def stage_completion_fixture(context):
+    """Serve a two-block test plan without modifying the assembled site."""
+    root = PAGES / "assets" / "phone-studies"
+    # Its first trial ends before the final response window closes.
+    reference = root / "serino_2015_peri_trunk_exp1"
+    plan = json.loads((reference / "study.json").read_text(encoding="utf-8"))
+    block = plan["parts"][0]["blocks"][0]
+    block["trials"] = block["trials"][:1]
+    block["length_samples"] = block["trials"][0]["end_sample"]
+    clip = plan["clips"][block["trials"][0]["clip"]]
+    plan["clips"] = {block["trials"][0]["clip"]: clip}
+    plan["profile_id"] = "phone_timing_fixture"
+    plan["title"] = "Phone timing validation fixture"
+    first_trial = block["trials"][0]
+    next_trial = {**first_trial, "number": 2}
+    for field, sample in first_trial.items():
+        if field.endswith("_sample") and sample is not None:
+            next_trial[field] = sample + block["length_samples"]
+    second_block = {**block, "label": "Second block", "length_samples": next_trial["end_sample"],
+                    "trials": [first_trial, next_trial]}
+    plan["parts"] = [{
+        "number": 1,
+        "instructions": [{
+            "slot": "after_each_block", "label": "Continue to next stage", "continue_mode": "click",
+            "delay_s": 0, "button_label": "Continue", "clip": None,
+        }],
+        "blocks": [block, second_block],
+    }]
+    context.route("**/phone-studies/index.json", lambda route: route.fulfill(json=[
+        {"id": plan["profile_id"], "title": plan["title"]},
+    ]))
+    context.route("**/phone-studies/phone_timing_fixture/study.json", lambda route: route.fulfill(json=plan))
+    context.route("**/phone-studies/phone_timing_fixture/" + clip["file"],
+                  lambda route: route.fulfill(path=reference / clip["file"]))
+    return plan["profile_id"]
+
+
+def audit_local_phone_study(browser, origin):
+    with browser.new_context(viewport={"width": 320, "height": 700}, has_touch=True, is_mobile=True) as context:
+        context.add_init_script("""
+          window.ppsVibrationCalls = [];
+          window.ppsRejectVibration = true;
+          Object.defineProperty(navigator, 'vibrate', { value: (value) => {
+            ppsVibrationCalls.push(value);
+            return !ppsRejectVibration;
+          }});
+        """)
+        study = stage_completion_fixture(context)
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(f"{origin}/experiment-runner/")
+        page.locator("#phone-study").select_option(study)
+        page.get_by_role("button", name="Prepare study", exact=True).click()
+        page.get_by_role("button", name="Submit setup").click()
+        page.get_by_role("button", name="Arm outputs locally").click()
+        expect(page.locator("#companion-toast")).to_contain_text("refused a vibration request")
+        expect(page.get_by_role("button", name="Start locally")).to_be_disabled()
+        page.evaluate("ppsRejectVibration = false")
+        page.get_by_role("button", name="Arm outputs locally").tap()
+        page.get_by_role("button", name="Start locally").tap()
+        gate = page.get_by_role("button", name="Continue", exact=True)
+        context.route("**/participant-audit-spacing.css", lambda route: route.fulfill(
+            content_type="text/css",
+            body="#phone-response-instruction, #participant-continue, #participant-stop { "
+                 "font-size: 200% !important; line-height: 1.5 !important; "
+                 "letter-spacing: .12em !important; word-spacing: .16em !important; }",
+        ))
+        for index in range(2):
+            expect(gate).to_be_focused(timeout=15_000)
+            expect(page.locator("#phone-response-instruction")).to_have_text("Continue to next stage")
+            if index == 1:
+                page.add_style_tag(url=f"{origin}/participant-audit-spacing.css")
+                page.screenshot(path=ARTIFACTS / "participant-gate-320-text-spacing.png")
+            assert page.locator("#phone-participant-view").evaluate(
+                """(node) => {
+                    const prompt = node.querySelector('#phone-response-instruction').getBoundingClientRect();
+                    const actions = node.querySelector('.participant-actions').getBoundingClientRect();
+                    return node.scrollWidth <= node.clientWidth && node.scrollHeight <= node.clientHeight &&
+                        node.contains(document.elementFromPoint(innerWidth / 2, 12)) &&
+                        prompt.top >= 0 && prompt.bottom <= actions.top;
+                }"""
+            )
+            gate.press("Enter")
+        expect(page.locator("#phone-run-state")).to_have_text("Completed")
+        with page.expect_download() as download:
+            page.get_by_role("button", name="Download event log").click()
+        exported = json.loads(download.value.path().read_text(encoding="utf-8"))
+        assert [trial["number"] for trial in exported["trials"]] == [1, 2, 3]
+        assert all(trial["vibration_lateness_ms"] is not None for trial in exported["trials"])
+        # The two arming attempts and the three scheduled cues request 100 ms each.
+        assert page.evaluate("ppsVibrationCalls.filter(value => value > 0)") == [100] * 5
+        assert not errors, errors
+        print("Local phone study, refused-vibration handling, two instruction gates and JSON export passed.")
+
+
+def audit_phone_catalogue(browser, origin):
+    expected = json.loads((PAGES / "assets" / "phone-studies" / "index.json").read_text(encoding="utf-8"))
+    with browser.new_context(viewport={"width": 320, "height": 780}, has_touch=True) as context:
+        context.add_init_script("Object.defineProperty(navigator, 'vibrate', { value: () => true });")
+        page = context.new_page()
+        page.goto(f"{origin}/experiment-runner/")
+        selection = page.locator("#phone-study")
+        expect(selection.locator("option")).to_have_count(len(expected) + 1)
+        for study in expected:
+            selection.select_option(study["id"])
+            page.get_by_role("button", name="Prepare study", exact=True).click()
+            expect(page.locator("#phone-run-state")).to_have_text("Prepared")
+            assert not page.locator("#phone-participant-view").is_visible()
+        print(f"Prepared all {len(expected)} phone catalogue profiles in Chromium.")
+
+
+def audit_live_beacon(browser, origin, study=None, complete_fixture=False, full_study=False):
     # Two independent browser contexts. Only the physical vibration API is instrumented.
-    with browser.new_context(viewport={"width": 390, "height": 844}) as target_context, browser.new_context() as controller_context:
+    with browser.new_context(viewport={"width": 390, "height": 844}, has_touch=True) as target_context, browser.new_context() as controller_context:
         target_context.add_init_script("""
           window.ppsVibrationCalls = [];
-          Object.defineProperty(navigator, 'vibrate', { value: (value) => (ppsVibrationCalls.push(value), true) });
+          window.ppsCueMs = null;
+          Object.defineProperty(navigator, 'vibrate', { value: (value) => {
+            ppsVibrationCalls.push(value);
+            if (Array.isArray(value) || value > 30) ppsCueMs = performance.now();
+            return true;
+          }});
         """)
+        if complete_fixture:
+            study = stage_completion_fixture(target_context)
         target = target_context.new_page()
         controller = controller_context.new_page()
         target.goto(f"{origin}/experiment-runner/")
@@ -259,21 +380,118 @@ def audit_live_beacon(browser, origin):
         expect(target.locator("#target-qr")).to_be_hidden()
         expect(controller.get_by_role("button", name="Start part")).to_be_disabled()
         target.get_by_role("button", name="Submit setup").click()
-        controller.get_by_role("button", name="Prepare demo").click()
+        if study:
+            target.locator("#phone-study").select_option(study)
+            target.get_by_role("button", name="Prepare study", exact=True).click()
+            expect(controller.locator("#controller-study")).to_be_visible()
+        else:
+            controller.get_by_role("button", name="Prepare demo").click()
         expect(controller.get_by_role("button", name="Start part")).to_be_disabled()
         target.get_by_role("button", name="Arm outputs locally").click()
         expect(controller.get_by_role("button", name="Start part")).to_be_enabled(timeout=12000)
+        target.evaluate("ppsCueMs = null")
         controller.get_by_role("button", name="Start part").click()
-        expect(target.locator("#phone-run-state")).to_have_text("Running", timeout=12000)
-        expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
-        assert target.evaluate("ppsVibrationCalls.some(Array.isArray)"), "No scheduled tactile output call"
+        surface = target.locator("#phone-response")
+        expect(surface).to_be_visible(timeout=12000)
+        assert surface.evaluate("(node) => node.scrollWidth <= node.clientWidth && node.scrollHeight <= node.clientHeight")
+        target.screenshot(path=ARTIFACTS / "participant-during-run.png")
+        if complete_fixture:
+            expect(controller.locator("#controller-timeline-list")).to_contain_text("Audio scheduled")
+            assert target.evaluate("ppsCueMs === null"), "The controller did not show the audio until vibration"
+        if full_study:
+            expect(controller.locator("#controller-timeline-list")).to_contain_text("Vibration requested", timeout=10000)
+        else:
+            surface.tap()
+            if complete_fixture:
+                bounds = surface.bounding_box()
+                center = {"x": bounds["x"] + bounds["width"] / 2, "y": bounds["y"] + bounds["height"] / 2}
+                touch = target_context.new_cdp_session(target)
+                target.wait_for_function("() => ppsCueMs !== null && performance.now() - ppsCueMs >= 1900", timeout=7000)
+                touch.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [center]})
+                target.wait_for_function("() => performance.now() - ppsCueMs >= 2130")
+                touch.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
+            else:
+                target.wait_for_function("() => ppsCueMs !== null && performance.now() - ppsCueMs >= 1450", timeout=7000)
+                surface.tap()
+                surface.tap()
+            timeline = controller.locator("#controller-timeline-list")
+            expect(timeline).to_contain_text("Audio scheduled")
+            expect(timeline).to_contain_text("Vibration requested")
+            responses = timeline.get_by_role("listitem").filter(has_text=" ms RT")
+            expect(responses).to_have_count(1)
+            reaction_time = int(re.search(r"(\d+) ms RT", responses.inner_text())[1])
+            assert (1850 if complete_fixture else 1300) < reaction_time <= 2000, reaction_time
+        if study:
+            if complete_fixture:
+                expect(controller.locator("#controller-run-state")).to_have_text("Instruction Gate", timeout=15000)
+                previous_cue = target.evaluate("ppsCueMs")
+                controller.get_by_role("button", name="Continue", exact=True).click()
+                trial_number = controller.locator("#controller-trial-number")
+                expect(trial_number).to_have_text("Trial 3", timeout=10000)
+                target.wait_for_function(
+                    "(previousCue) => ppsCueMs > previousCue && performance.now() - ppsCueMs >= 1450",
+                    arg=previous_cue, timeout=7000,
+                )
+                surface.tap()
+                summary = controller.get_by_text("Recent trials", exact=True)
+                summary.press("Enter")
+                expect(summary).to_be_focused()
+                history = controller.locator("#controller-recent-trial-list")
+                earlier = history.get_by_role("listitem").filter(has_text="Trial 2")
+                expect(earlier).to_contain_text("Audio scheduled")
+                expect(earlier).to_contain_text("Vibration requested")
+                expect(earlier).to_contain_text("ms RT")
+                earlier_rt = int(re.search(r"(\d+) ms RT", earlier.inner_text())[1])
+                assert 1300 < earlier_rt <= 2000
+                expect(trial_number).to_have_text("Trial 3")
+
+                controller.set_viewport_size({"width": 320, "height": 800})
+                controller_context.route("**/timeline-audit-spacing.css", lambda route: route.fulfill(
+                    content_type="text/css",
+                    body=".browser-timeline * { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; }",
+                ))
+                controller.add_style_tag(url=f"{origin}/timeline-audit-spacing.css")
+                history.scroll_into_view_if_needed()
+                assert history.evaluate("(node) => node.scrollWidth <= node.clientWidth")
+                assert controller.evaluate("document.documentElement.scrollWidth <= innerWidth")
+                controller.locator("#controller-timeline").screenshot(path=ARTIFACTS / "controller-timeline-320.png")
+                expect(controller.locator("#controller-run-state")).to_have_text("Instruction Gate", timeout=15000)
+                controller.get_by_role("button", name="Continue", exact=True).click()
+                expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
+            elif full_study:
+                expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=90000)
+            else:
+                target.get_by_role("button", name="Stop experiment").click()
+                expect(target.locator("#phone-run-state")).to_have_text("Interrupted", timeout=6000)
+            with target.expect_download() as download:
+                target.get_by_role("button", name="Download event log").click()
+            exported = json.loads(download.value.path().read_text(encoding="utf-8"))
+            assert exported["final_snapshot"]["browser_study"]["id"] == study
+            if full_study:
+                expected = exported["final_snapshot"]["browser_study"]["trial_count"]
+                assert len(exported["trials"]) == expected
+                assert [trial["number"] for trial in exported["trials"]] == list(range(1, expected + 1))
+                print(f"Completed {expected} trials for {study}.")
+            else:
+                assert exported["trials"][0]["rt_ms"] == reaction_time
+            if complete_fixture:
+                assert [trial["rt_ms"] for trial in exported["trials"]] == [reaction_time, earlier_rt, None]
+                print(f"Controller and export recorded a {reaction_time} ms tap released after the deadline.")
+                print(f"Trial 2 retained its {earlier_rt} ms tap while Trial 3 stayed on the current timeline.")
+        else:
+            expect(target.locator("#phone-run-state")).to_have_text("Completed", timeout=6000)
         target.get_by_role("button", name="Disconnect controller").click()
         expect(controller.get_by_role("button", name="Start part")).to_be_hidden(timeout=15000)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--chrome", action="store_true", help="use installed Google Chrome")
+    parser.add_argument("--origin", help="check the assembled content at a deployed origin")
     parser.add_argument("--live-beacon", action="store_true", help="also use the live VDO.Ninja service")
     parser.add_argument("--runner-only", action="store_true", help="skip the install and cached study audit")
+    parser.add_argument("--study", help="prepared browser study ID staged under assets/phone-studies")
+    parser.add_argument("--complete-fixture", action="store_true", help="complete the two-block instruction fixture")
+    parser.add_argument("--full-study", action="store_true", help="wait for completion of a short prepared study")
     args = parser.parse_args()
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     if not (PAGES / "index.html").is_file():
@@ -285,23 +503,25 @@ def main():
         thread.start()
         try:
             with sync_playwright() as playwright:
-                browser = playwright.chromium.launch()
+                browser = playwright.chromium.launch(channel="chrome" if args.chrome else None)
                 try:
-                    origin = f"http://127.0.0.1:{server.server_port}"
-                    if not args.runner_only:
+                    origin = args.origin or f"http://127.0.0.1:{server.server_port}"
+                    if not args.runner_only and not args.origin:
                         audit(browser, origin, server)
                     audit_shared_shell(browser, origin)
                     audit_routes(browser, origin)
                     print("Shared page shell, Downloads, top-level Runner navigation, and the local browser demo passed.")
+                    audit_phone_catalogue(browser, origin)
+                    audit_local_phone_study(browser, origin)
                     if args.live_beacon:
-                        audit_live_beacon(browser, origin)
+                        audit_live_beacon(browser, origin, args.study, args.complete_fixture, args.full_study)
                         print("Live two-browser beacon pairing and remote start passed.")
                 finally:
                     browser.close()
         finally:
             server.shutdown()
             thread.join()
-    if not args.runner_only:
+    if not args.runner_only and not args.origin:
         print("Online refresh, keyboard playback, Chromium installability and offline Study 5 passed.")
 
 

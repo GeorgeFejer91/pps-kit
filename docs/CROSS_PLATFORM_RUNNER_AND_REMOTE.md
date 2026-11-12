@@ -440,9 +440,13 @@ the Tauri desktop entry or native capabilities.
 
 The browser has two modes:
 
-1. **Run on this device** runs the built-in exploratory PPS demo. Submit local
-   setup, prepare the demo, and arm outputs before starting. Local response
-   taps go into a downloadable JSON event log.
+1. **Run on this device** runs a prepared PPS study or the practice demo in
+   Chrome on an Android phone. Choose and prepare the study, submit the local
+   setup, and tap **Arm outputs locally**. Check that you feel the test pulse.
+   Keep Chrome in the foreground. Select **Start locally**, use **Continue**
+   when prompted, and tap the response surface when you feel the vibration.
+   **Stop experiment** ends the run. Download the local JSON log for trial
+   and response timestamps.
 2. **Control another device** pairs with another browser Runner or a compatible
    desktop, phone, or Quest target. It can request only granted actions.
 
@@ -450,15 +454,30 @@ To pair two browsers, keep both Runner pages open and in the foreground. On the
 device that will play the stimuli, press **Send beacon**. On the controller,
 press **Scan beacon**, select the matching code, and request a private session.
 On the target, choose **Allow to pair**, then press **Connect** on the controller.
-The beacon closes after approval or after two minutes. Complete setup and arm
-outputs on the target; either device can prepare the demo after pairing. To
+The beacon closes after approval or after two minutes. Choose and prepare the
+study on the target, then complete local setup and arm outputs. Use **Start
+part** on the controller to run the prepared study and **Continue** at an
+instruction gate. The timeline shows scheduled audio, vibration requests,
+and response markers. Recent trials retain those markers when a tap arrives
+after the next trial starts. One isolated tap per trial can begin 100 to
+2,000 ms after its local response anchor. The tap must end within 500 ms of contact
+onset. If windows overlap, the most recent eligible cue owns the tap. To
 grant remote stop and abort, enable that permission on the target before
 approving. The target can disconnect the controller at any time. Pairing needs
 Internet access.
 
-Browser audio and vibration depend on user activation, foreground operation,
-browser support, and device hardware. Treat the browser demo as exploratory;
-its event log is not physical onset or research acquisition evidence.
+Each phone pack carries one prepared block order, verified stereo clips and
+sample-based cue timing. The browser converts each tactile cue to a phone
+vibration request using its configured duration. Preparing a pack requires a
+complete native session for a repository study. The maintainer exporter lives
+in For-AI and its verified output is staged under the phone study catalogue.
+
+The phone schedules the clips on Web Audio's clock and requests vibration
+against Chrome's estimated audio output time. Each tactile trial in the local
+log records the browser request timestamp relative to the trial and the request
+delay relative to its scheduled cue. Motor and acoustic onset require physical
+measurement. Browser runs are exploratory. Studies that require independent
+tactile actuators or a different response apparatus need their own setup.
 
 External HTML apps can interoperate by implementing PPS Kit's
 [beacon framing](../apps/runner/frontend/src/remote/beacon-contract.js),

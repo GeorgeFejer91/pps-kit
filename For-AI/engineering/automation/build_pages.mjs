@@ -120,6 +120,38 @@ async function stageStudyPreviewCache(output) {
     `self.PPS_STUDY_PREVIEW_CACHE = ${JSON.stringify({ revision, files })};\n`);
 }
 
+async function stagePhoneStudies(output) {
+  const source = join(resources, "assets", "phone-studies");
+  const destination = join(output, "assets", "phone-studies");
+  const index = JSON.parse(await readFile(join(source, "index.json"), "utf8"));
+  if (!Array.isArray(index) || index.length === 0 || index.length > 100) {
+    throw new Error("Invalid phone study catalogue.");
+  }
+  for (const { id, title } of index) {
+    if (!/^[a-z0-9_]{1,100}$/u.test(id)) throw new Error("Invalid phone study ID.");
+    const folder = join(source, id);
+    const published = join(destination, id);
+    const planPath = join(folder, "study.json");
+    const plan = JSON.parse(await readFile(planPath, "utf8"));
+    if (plan.schema !== "pps-phone-study.v1" || plan.profile_id !== id || plan.title !== title) {
+      throw new Error("Phone study manifest does not match the catalogue: " + id);
+    }
+    for (const [key, { file, sha256, bytes }] of Object.entries(plan.clips)) {
+      if (!/^[a-f0-9]{64}$/u.test(key) || file !== "audio/" + key + ".flac") {
+        throw new Error("Invalid phone study audio path: " + id);
+      }
+      const path = join(folder, file);
+      const data = await readFile(path);
+      if (data.length !== bytes || createHash("sha256").update(data).digest("hex") !== sha256) {
+        throw new Error("Phone study audio integrity check failed: " + id);
+      }
+      await copyVerified(path, join(published, file), "Phone study audio");
+    }
+    await copyVerified(planPath, join(published, "study.json"), "Phone study manifest");
+  }
+  await copyVerified(join(source, "index.json"), join(destination, "index.json"), "Phone study catalogue");
+}
+
 export async function assemblePages(output = canonicalOutput) {
   const resolvedOutput = resolve(output);
   const companionIndex = join(runnerCompiled, "companion", "index.html");
@@ -152,6 +184,7 @@ export async function assemblePages(output = canonicalOutput) {
   await cp(join(resources, "assets", "preloads"), join(resolvedOutput, "assets", "preloads"), { recursive: true });
   await cp(join(resources, "study_templates"), join(resolvedOutput, "study_templates"), { recursive: true });
   await stageStudyPreviewCache(resolvedOutput);
+  await stagePhoneStudies(resolvedOutput);
 
   await copyVerified(
     companionIndex,
