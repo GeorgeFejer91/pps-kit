@@ -36,7 +36,8 @@ assign as a sibling. No nested orchestrator or separate progress ledger.
 
 ## UI exploration and promotion
 
-Use existing source/build paths. Run previews locally with real controls and
+Use the existing build paths and lockfile-installed dependencies in the frontend
+checkout so the canonical source maps match CI. Run previews with real controls and
 representative states, widths, long labels, accessibility, and error cases.
 Designer uses `npm --prefix apps/designer/frontend run build`; Runner frontend
 uses `npm --prefix apps/runner run check`. Serve/test the compiled artifact
