@@ -32,9 +32,10 @@ This file is the active checklist and handoff owner; replace state, do not appen
   [run 43211295270](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43211295270)
   deployed `6e74400`. Both local Vite previews also served the SVGs.
   The public Windows release remains a draft.
-- **Designer header: VERIFIED LIVE.** The pinned phone page links occupy one
-  53 CSS px row at the default text size. Status, Help and credits scroll with
-  the page. The section disclosure opens a four-column grid on narrow phones
+- **Designer header: VERIFIED LIVE.** Runner and the light/dark switch share
+  the 53 CSS px pinned phone row. The phone Planner omits the browser preview
+  badge. Save status, Help and credits scroll with the page. The section
+  disclosure opens a four-column grid on narrow phones
   and a single seven-column row from 600 to 760 CSS px. Pretext selects readable
   label sizes and preserves enlarged text with wrapping. The wide heading still
   docks below the page tabs. The 12-case local audit and live Chromium checks
@@ -47,6 +48,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
   Live Chromium verified the current header and cached Study 5 playback.
   Pages [run 43208031434](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43208031434)
   deployed `6c3c324`. All 474 staged files and four public routes passed.
+  Pages [run 43211778280](https://github.com/GeorgeFejer91/pps-kit/actions/runs/43211778280)
+  deployed `40fb1ef`. Live Chromium verified the 320 CSS px Planner row, theme
+  touch and keyboard interaction, the direct Planner link, and the on-device
+  Runner demo with an instrumented vibration call. All 477 staged files matched
+  the site and all four public routes returned HTTP 200.
 - **Current stage:** verified Designer source. The public Designer opens
   directly as a browser preview with bundled study assets. The connection
   panel and localhost probe were removed in `d45c0c8`. Live Chromium checked
