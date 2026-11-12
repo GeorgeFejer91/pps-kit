@@ -3100,14 +3100,18 @@ function renderPageTabs() {
 
 function initializePageTabs() {
   const topbar = document.querySelector(".topbar");
+  const phone = window.matchMedia("(max-width: 760px)");
   const syncTopbarHeight = () => {
-    const height = topbar.getBoundingClientRect().height;
-    document.documentElement.style.setProperty("--topbar-height", `${height}px`);
-    // On phones, a wrapping header must leave room for the focused content.
-    topbar.toggleAttribute("data-scroll-with-page", height > window.innerHeight / 3);
+    const nav = topbar.querySelector(".site-tab-list:not([hidden])");
+    const height = (phone.matches ? nav : topbar)?.getBoundingClientRect().height ?? 0;
+    const scrollWithPage = phone.matches && height > window.innerHeight / 3;
+    topbar.toggleAttribute("data-scroll-with-page", scrollWithPage);
+    document.documentElement.style.setProperty("--topbar-height", `${scrollWithPage ? 0 : height}px`);
   };
   syncTopbarHeight();
-  new ResizeObserver(syncTopbarHeight).observe(topbar, { box: "border-box" });
+  const resize = new ResizeObserver(syncTopbarHeight);
+  resize.observe(topbar, { box: "border-box" });
+  for (const nav of topbar.querySelectorAll(".site-tab-list")) resize.observe(nav, { box: "border-box" });
   window.addEventListener("resize", syncTopbarHeight);
   setActivePage(pageFromLocation() || "toolkit");
   scrollToHashTarget();

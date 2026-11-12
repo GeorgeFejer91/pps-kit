@@ -7589,27 +7589,21 @@ body.desktop-applet .segment-heading {
   }
 
   .topbar {
+    display: contents;
+  }
+
+  .topbar .site-tab-list {
     position: sticky;
     top: 0;
     z-index: 40;
-    display: grid;
-    gap: var(--space-1);
-    width: 100%;
-    margin: 0;
+    max-width: none;
     padding: var(--space-1) var(--space-2);
-    border-width: 0 0 1px;
-    border-radius: 0;
-    background: color-mix(in srgb, var(--surface) 97%, transparent);
-    backdrop-filter: blur(10px);
-    align-items: center;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
   }
 
-  .topbar[data-scroll-with-page] {
+  .topbar[data-scroll-with-page] .site-tab-list {
     position: static;
-  }
-
-  html:has(.topbar[data-scroll-with-page]) {
-    scroll-padding-top: var(--layout-gutter);
   }
 
   .site-tab-list {
@@ -7646,8 +7640,13 @@ body.desktop-applet .segment-heading {
     display: block;
   }
 
+  .designer-status-chrome,
+  .header-credits {
+    width: auto;
+    margin: var(--space-1) var(--space-2) 0;
+  }
+
   .designer-status-chrome {
-    display: flex;
     justify-content: flex-start;
     gap: 6px;
   }
@@ -7762,6 +7761,43 @@ body.desktop-applet .segment-heading {
   .rail-nav-group a {
     min-height: 44px;
     padding: 8px;
+  }
+
+  .rail.mobile-sections-open #toolkit-workflow-nav.active {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  #toolkit-workflow-nav a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    justify-items: center;
+    gap: 2px;
+    border: 1px solid var(--line);
+    padding: 3px 2px;
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  #toolkit-workflow-nav a:last-child {
+    grid-column: span 2;
+  }
+
+  #toolkit-workflow-nav a > span {
+    display: block;
+    justify-self: stretch;
+    min-width: 0;
+    font-size: var(--workflow-label-size, 1em);
+    line-height: 1.25;
+    overflow-wrap: break-word;
+  }
+
+  #toolkit-workflow-nav .decision-state {
+    width: 16px;
+    min-width: 0;
+    height: 16px;
+    border-radius: 4px;
+    font-size: 11px;
   }
 
   .rail-nav-kicker {
@@ -8082,6 +8118,16 @@ body.desktop-applet .segment-heading {
     max-width: none;
     background: #142019;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 760px) {
+  .rail.mobile-sections-open #toolkit-workflow-nav.active {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  #toolkit-workflow-nav a:last-child {
+    grid-column: auto;
   }
 }
 

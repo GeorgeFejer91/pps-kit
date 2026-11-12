@@ -196,7 +196,8 @@ def test_phone_css_is_content_first_and_uses_touch_sized_static_controls() -> No
     assert "--control-height: 44px" in mobile_css
     assert _rule_has(mobile_css, r"button,[^{]+", r"min-height:\s*44px")
     assert _rule_has(mobile_css, r"\.icon-action", r"(?:width|min-width):\s*44px")
-    assert _rule_has(mobile_css, r"\.topbar", r"position:\s*sticky")
+    assert _rule_has(mobile_css, r"\.topbar", r"display:\s*contents")
+    assert _rule_has(mobile_css, r"\.topbar \.site-tab-list", r"position:\s*sticky")
     assert _rule_has(mobile_css, r"\.rail", r"position:\s*static")
     assert _rule_has(mobile_css, r"\.workspace", r"margin-left:\s*0")
     assert _rule_has(mobile_css, r"\.segment-heading", r"position:\s*static")

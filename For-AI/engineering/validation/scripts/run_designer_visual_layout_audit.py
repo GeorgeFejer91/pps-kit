@@ -326,7 +326,10 @@ def _geometry_script() -> str:
       const panelElement = document.querySelector('#study');
       const panelStyle = getComputedStyle(panelElement);
       const panel = rect('#study');
-      const topbar = rect('.topbar');
+      const topbarSelector = matchMedia('(max-width: 760px)').matches
+        ? '.topbar .site-tab-list:not([hidden])'
+        : '.topbar';
+      const topbar = rect(topbarSelector);
       const rail = rect('.rail');
       const picker = rect('.segment-zero-picker');
       const card = rect('.profile-inspection-card');
@@ -397,7 +400,7 @@ def _geometry_script() -> str:
           select_button_height_delta_px: Math.abs(select.height - button.height),
           select_button_center_delta_px: Math.abs((select.y + select.height / 2) - (button.y + button.height / 2)),
           select_button_overlap_px: horizontalOverlap,
-          topbar_visible: visible(document.querySelector('.topbar')),
+          topbar_visible: visible(document.querySelector(topbarSelector)),
           mobile_topbar_above_rail: topbar.bottom <= rail.y + 1,
           site_tab_labels_fit: siteTabs.every((element) => element.clientWidth + 1 >= element.scrollWidth),
           site_tab_overlap_px: siteTabOverlapPx,
@@ -662,6 +665,19 @@ def run_audit(
                         section_toggle.get_attribute("aria-expanded") == "true"
                         and page.locator(".rail-nav-group.active").is_visible()
                     )
+                    page.wait_for_function(
+                        """[...document.querySelectorAll('#toolkit-workflow-nav a > span')]
+                            .every(label => ['fit', 'reflow'].includes(label.dataset.pretextResult))"""
+                    )
+                    section_grid = page.locator("#toolkit-workflow-nav").evaluate(
+                        """grid => ({
+                          columns: getComputedStyle(grid).gridTemplateColumns.split(' ').length,
+                          labels_fit: [...grid.querySelectorAll('a > span')].every(
+                            label => label.scrollWidth <= label.clientWidth + 1),
+                        })"""
+                    )
+                    if section_grid["columns"] != (7 if case.width >= 600 else 4) or not section_grid["labels_fit"]:
+                        failures.append("phone workflow links do not fit the segment grid")
                     section_path = output_dir / f"{case.name}_mobile_sections_open.png"
                     page.locator(".rail").screenshot(path=str(section_path), animations="disabled")
                     screenshots.append(section_path)
@@ -705,7 +721,7 @@ def run_audit(
                             labels = ", ".join(item["selector"] for item in page_targets[:6])
                             failures.append(f"mobile {page_name} page targets are below 44x44 CSS px: {labels}")
                         tab_path = output_dir / f"{case.name}_tab_{page_name}.png"
-                        page.locator(".topbar").screenshot(
+                        page.locator(".topbar .site-tab-list:not([hidden])").screenshot(
                             path=str(tab_path), animations="disabled"
                         )
                         screenshots.append(tab_path)
@@ -887,7 +903,10 @@ def run_audit(
                     sticky_overlap = segment.locator(":scope > .segment-heading").evaluate(
                         """
                         headingElement => {
-                          const topbar = document.querySelector('.topbar').getBoundingClientRect();
+                          const topbarSelector = matchMedia('(max-width: 760px)').matches
+                            ? '.topbar .site-tab-list:not([hidden])'
+                            : '.topbar';
+                          const topbar = document.querySelector(topbarSelector).getBoundingClientRect();
                           const heading = headingElement.getBoundingClientRect();
                           const width = Math.max(0, Math.min(topbar.right, heading.right) - Math.max(topbar.left, heading.left));
                           const height = Math.max(0, Math.min(topbar.bottom, heading.bottom) - Math.max(topbar.top, heading.top));
@@ -912,7 +931,10 @@ def run_audit(
                     segment.evaluate(
                         """
                         element => {
-                          const topbar = document.querySelector('.topbar');
+                          const topbarSelector = matchMedia('(max-width: 760px)').matches
+                            ? '.topbar .site-tab-list:not([hidden])'
+                            : '.topbar';
+                          const topbar = document.querySelector(topbarSelector);
                           const stickyTopbarHeight = topbar && getComputedStyle(topbar).position === 'sticky'
                             ? topbar.getBoundingClientRect().height
                             : 0;
