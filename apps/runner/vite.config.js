@@ -1,7 +1,9 @@
 import { resolve } from "node:path";
-import { defineConfig } from "vite";
+import { defineConfig, normalizePath } from "vite";
 
 const frontendRoot = resolve(import.meta.dirname, "frontend");
+const iconDirectory = resolve(import.meta.dirname, "../../packages/pps-resources/assets/app");
+const devIcons = "/@fs/" + normalizePath(iconDirectory).replace(/^\/+/, "") + "/";
 
 export default defineConfig({
   root: frontendRoot,
@@ -12,9 +14,16 @@ export default defineConfig({
     port: 1420,
     strictPort: true,
     fs: {
-      allow: [import.meta.dirname, resolve(import.meta.dirname, "../../packages/pps-resources/assets/app")],
+      allow: [import.meta.dirname, iconDirectory],
     },
   },
+  plugins: [{
+    name: "pps-runner-dev-icons",
+    apply: "serve",
+    transformIndexHtml(html) {
+      return html.replace(/(?:\.\.\/)+packages\/pps-resources\/assets\/app\//gu, devIcons);
+    },
+  }],
   build: {
     outDir: resolve(import.meta.dirname, "compiled"),
     emptyOutDir: true,

@@ -1,19 +1,23 @@
-import { defineConfig } from "vite";
+import { defineConfig, normalizePath } from "vite";
 import { cpSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
+
+const iconDirectory = resolve(import.meta.dirname, "../../../packages/pps-resources/assets/app");
+const devIcons = "/@fs/" + normalizePath(iconDirectory).replace(/^\/+/, "") + "/";
 
 export default defineConfig({
   base: "./",
   server: {
     fs: {
-      allow: [import.meta.dirname, resolve(import.meta.dirname, "../../../packages/pps-resources/assets/app")],
+      allow: [import.meta.dirname, iconDirectory],
     },
   },
   plugins: [{
     name: "pps-compiled-paths",
     transformIndexHtml: {
       order: "post",
-      handler(html) {
+      handler(html, { server }) {
+        if (server) html = html.replaceAll("../../../packages/pps-resources/assets/app/", devIcons);
         return html
           .replaceAll('href="../../../', 'href="../../../../');
       },
