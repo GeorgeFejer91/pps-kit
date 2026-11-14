@@ -37,9 +37,9 @@
   ],
   "profile_parameters_manifest": "assets/preloads/ferri_2015_ecological_looming_valence/01_profile/profile_parameters_manifest.json",
   "recreation_status": {
-    "primary_category": "missing_publication_parameters",
-    "category_label": "Missing publication parameters",
-    "runner_readiness": "blocked_missing_parameters",
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
     "profile_checks_passed": false,
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
@@ -47,8 +47,8 @@
     "finished_profile": false,
     "segment_6_launchable": false,
     "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 2,
-    "unsupported_structure_count": 0
+    "missing_parameter_count": 5,
+    "unsupported_structure_count": 1
   },
   "render_contract": {
     "stage": "auditory_looming_prebake",
@@ -56,167 +56,7 @@
     "include_tactile": false,
     "tactile_policy": "deferred_until_session_preparation"
   },
-  "assets": [
-    {
-      "label": "Negative ecological looming",
-      "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
-      "sha256": "764ab5a98c2936d0b7b8b1df2bee88d8bd516e8dca6dc047d1bc197d3b4303f4",
-      "duration_s": 3.0,
-      "sample_rate": 44100,
-      "channels": 2,
-      "source_kind": "generated_noise",
-      "noise_type": "brown",
-      "tone_type": "brown",
-      "motion_mode": "looming",
-      "direction_label": "looming",
-      "render_mode": "preserve",
-      "include_tactile": false,
-      "trajectory_snapshot": {
-        "schema": "pps-stimulus-trajectory.v1",
-        "label": "Negative ecological looming",
-        "source_kind": "generated_noise",
-        "noise_type": "brown",
-        "start_distance_cm": 110.0,
-        "end_distance_cm": 10.0,
-        "start_rotation_deg": 0.0,
-        "end_rotation_deg": 0.0,
-        "movement_duration_s": 3.0,
-        "start_hold_s": 0.0,
-        "end_hold_s": 0.0,
-        "path_length_m": 1.0,
-        "coordinate_mode": "cartesian",
-        "path_direction": "approach",
-        "start": {
-          "x_m": 0.0,
-          "y_m": 1.1,
-          "z_m": 0.0
-        },
-        "end": {
-          "x_m": 0.0,
-          "y_m": 0.1,
-          "z_m": 0.0
-        }
-      },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
-    },
-    {
-      "label": "Neutral ecological looming",
-      "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
-      "sha256": "514078a8548f4bc5bedb7938fa9853cea621c18956c5af29eff7efc953c4f5fa",
-      "duration_s": 3.0,
-      "sample_rate": 44100,
-      "channels": 2,
-      "source_kind": "generated_noise",
-      "noise_type": "white",
-      "tone_type": "white",
-      "motion_mode": "looming",
-      "direction_label": "looming",
-      "render_mode": "preserve",
-      "include_tactile": false,
-      "trajectory_snapshot": {
-        "schema": "pps-stimulus-trajectory.v1",
-        "label": "Neutral ecological looming",
-        "source_kind": "generated_noise",
-        "noise_type": "white",
-        "start_distance_cm": 110.0,
-        "end_distance_cm": 10.0,
-        "start_rotation_deg": 0.0,
-        "end_rotation_deg": 0.0,
-        "movement_duration_s": 3.0,
-        "start_hold_s": 0.0,
-        "end_hold_s": 0.0,
-        "path_length_m": 1.0,
-        "coordinate_mode": "cartesian",
-        "path_direction": "approach",
-        "start": {
-          "x_m": 0.0,
-          "y_m": 1.1,
-          "z_m": 0.0
-        },
-        "end": {
-          "x_m": 0.0,
-          "y_m": 0.1,
-          "z_m": 0.0
-        }
-      },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
-    },
-    {
-      "label": "Positive ecological looming",
-      "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
-      "sha256": "9701ef704652f39dcdfea2fe037a3060e116121057be2cf17e88089ac461bfeb",
-      "duration_s": 3.0,
-      "sample_rate": 44100,
-      "channels": 2,
-      "source_kind": "generated_noise",
-      "noise_type": "pink",
-      "tone_type": "pink",
-      "motion_mode": "looming",
-      "direction_label": "looming",
-      "render_mode": "preserve",
-      "include_tactile": false,
-      "trajectory_snapshot": {
-        "schema": "pps-stimulus-trajectory.v1",
-        "label": "Positive ecological looming",
-        "source_kind": "generated_noise",
-        "noise_type": "pink",
-        "start_distance_cm": 110.0,
-        "end_distance_cm": 10.0,
-        "start_rotation_deg": 0.0,
-        "end_rotation_deg": 0.0,
-        "movement_duration_s": 3.0,
-        "start_hold_s": 0.0,
-        "end_hold_s": 0.0,
-        "path_length_m": 1.0,
-        "coordinate_mode": "cartesian",
-        "path_direction": "approach",
-        "start": {
-          "x_m": 0.0,
-          "y_m": 1.1,
-          "z_m": 0.0
-        },
-        "end": {
-          "x_m": 0.0,
-          "y_m": 0.1,
-          "z_m": 0.0
-        }
-      },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
-    }
-  ],
+  "assets": [],
   "notes": [
     "Prebaked WAVs are local auditory-only profile assets.",
     "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",

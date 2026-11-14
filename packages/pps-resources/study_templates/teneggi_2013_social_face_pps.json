@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1016/j.cub.2013.01.043",
   "doi": "10.1016/j.cub.2013.01.043",
   "verification_status": "partial",
-  "notes": "Experiment 1 schedule for one social condition. Run it separately for the mannequin and unfamiliar-person conditions and counterbalance their order between participants. The preview uses generated audio and toolkit response and tactile proxies. The publication's equipment and calibrations are recorded as reference values.",
+  "notes": "Experiment 1 schedule for both social conditions. Each participant receives two consecutive blocks per condition in counterbalanced order. The operator changes the mannequin or unfamiliar-person setting between condition groups. The preview uses generated audio and toolkit response and tactile proxies. The publication's equipment and calibrations are recorded as reference values.",
   "reference_parameters": {
     "profile_type": "face_audio_tactile_social_context",
     "implemented_controls": [
@@ -108,7 +108,7 @@
       "use_inverse_square": false
     },
     "protocol": {
-      "repetitions_per_condition": 8,
+      "repetitions_per_condition": 16,
       "soa_values_ms": [300, 800, 1500, 2200, 2700],
       "spatial_values_cm": [],
       "pair_spatial_values_with_soas": false,
@@ -121,14 +121,29 @@
       ],
       "include_catch_trials": true,
       "catch_trial_percentage": 23.076923076923077,
-      "catch_trials_exact": 24,
+      "catch_trials_exact": 48,
       "include_baseline_trials": false,
       "baseline_strategy": "none",
       "baseline_soa_values_ms": [],
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 2,
+      "blocks": 4,
+      "block_specs": [
+        {"label": "Mannequin 1", "stimulus_types": ["Audio-Tactile", "Catch"]},
+        {"label": "Mannequin 2", "stimulus_types": ["Audio-Tactile", "Catch"]},
+        {"label": "Unfamiliar person 1", "stimulus_types": ["Audio-Tactile", "Catch"]},
+        {"label": "Unfamiliar person 2", "stimulus_types": ["Audio-Tactile", "Catch"]}
+      ],
+      "participant_order_policy": {
+        "schema": "pps-participant-order-policy.v1",
+        "algorithm": "seeded_factoradic_cycle.v1",
+        "seed": 20130304,
+        "block_groups": [
+          ["Mannequin 1", "Mannequin 2"],
+          ["Unfamiliar person 1", "Unfamiliar person 2"]
+        ]
+      },
       "distribute_trial_pool_across_blocks": true,
       "trial_randomization_strategy": "balanced_shuffle",
       "block_order_randomization": "fixed",
@@ -187,7 +202,7 @@
     },
     {
       "field": "Toolkit preview defaults",
-      "source": "The toolkit uses a generated continuous pink-noise source and a virtual path with nominal endpoints about 105 and 5 cm to define a three-second preview. These are renderer settings only. The toolkit seed and block allocation are reproducibility defaults."
+      "source": "The toolkit uses a generated continuous pink-noise source and a virtual path with nominal endpoints about 105 and 5 cm to define a three-second preview. These are renderer settings only. The deterministic seed and evenly balanced cell allocation within blocks are toolkit defaults. The two social-condition blocks are kept together and condition order is counterbalanced."
     }
   ]
 }

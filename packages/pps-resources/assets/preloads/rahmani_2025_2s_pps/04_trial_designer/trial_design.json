@@ -1,0 +1,70 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "rahmani_2025_2s_pps",
+  "repetitions_per_condition": 16,
+  "soa_values_ms": [
+    250,
+    500,
+    750,
+    1000,
+    1250,
+    1500,
+    1750
+  ],
+  "spatial_values_cm": [
+    87.5,
+    75.0,
+    62.5,
+    50.0,
+    37.5,
+    25.0,
+    12.5
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "rahmani-2025-2s-pps",
+      "label": "2 s hand PPS assessment",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_input_modality": "mouse_click",
+        "target_role": "right_palm_tactile_detection",
+        "body_anchor": "right palm",
+        "body_part": "palm",
+        "body_side": "right",
+        "response_capture_device": "mouse"
+      },
+      "elements": [
+        {
+          "element_id": "rahmani-2025-2s-fixation-preroll",
+          "kind": "jitter",
+          "label": "Fixation interval (silent preview)",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "rahmani-2025-2s-loom",
+          "kind": "looming_stimulus",
+          "label": "2 s right-lateral pink noise",
+          "source_label": "2 s right-lateral pink noise",
+          "source_labels": [
+            "2 s right-lateral pink noise"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 245
+}

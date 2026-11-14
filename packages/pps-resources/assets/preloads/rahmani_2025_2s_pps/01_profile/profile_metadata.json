@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "rahmani_2025_2s_pps",
+  "title": "Rahmani 2025 2-second looming PPS",
+  "citation": "Rahmani, M. M. H., Roel Lesur, M., & Tajadura-Jim\u00e9nez, A. (2025). The impact of looming sound duration on peripersonal space measurement. Proceedings of Forum Acusticum / EuroNoise 2025, 3549\u20133556.",
+  "doi": "10.61782/fa.2025.0866",
+  "source_url": "https://doi.org/10.61782/fa.2025.0866",
+  "verification_status": "partial",
+  "notes": "The 2-second audio-tactile assessment preserves the seven nominal touch delays and matched tactile-only baselines. The preview uses a horizontal binaural path, a silent fixation interval and the toolkit tactile cue. Exact physical replication requires the original display and haptic setup.",
+  "reference_parameters": {
+    "profile_type": "right_lateral_looming_duration_pps",
+    "publication_study_row_id": "doi:10.61782/fa.2025.0866::duration_2s",
+    "source_scope": "2-second duration condition of the within-participant experiment. Participants also completed the other duration in a semi-counterbalanced order (seven 2 s first, six 3 s first).",
+    "sound_duration_ms": 2000,
+    "trial_fixation_preroll_ms": 1000,
+    "soa_reference": "Nominal trial onset, 1000 ms after fixation cross appearance. Sound starts at this onset in paired and catch trials. Tactile-only trials use the same nominal reference in silence.",
+    "scheduled_tactile_onsets_ms": [
+      250,
+      500,
+      750,
+      1000,
+      1250,
+      1500,
+      1750
+    ],
+    "analysis_midpoint_onsets_ms": [
+      375.0,
+      625.0,
+      875.0,
+      1125.0,
+      1375.0,
+      1625.0
+    ],
+    "reported_trial_formula": "245 trials per duration: 112 paired (seven delays \u00d7 16), 112 tactile-only (the same seven delays \u00d7 16) and 21 sound-only catches.",
+    "published_breaks_per_duration": 2,
+    "original_break_positions": null,
+    "original_intertrial_interval_ms": null,
+    "published_trajectory": {
+      "direction": "Approach from the right toward the listener\u2019s head",
+      "nominal_start_cm": 100,
+      "nominal_end_cm": 0,
+      "nominal_speed_cm_per_s": 50,
+      "nominal_simulated_distances_cm_at_pulse": [
+        87.5,
+        75.0,
+        62.5,
+        50.0,
+        37.5,
+        25.0,
+        12.5
+      ],
+      "raw_start_height_cm": null,
+      "raw_end_height_cm": null,
+      "preview_start_height_cm": 0,
+      "preview_end_height_cm": 0,
+      "preview_height_reference": "Listener head-center plane. This is a horizontal preview convention.",
+      "preview_end_cm": 1,
+      "preview_speed_cm_per_s": 49.5,
+      "preview_minimum_radius_scope": "The toolkit trajectory editor requires a positive endpoint. Its Python rendering reference additionally floors distance gain at 5 cm. Scheduled distance labels retain the paper-based nominal model."
+    },
+    "published_tactile_target": {
+      "site": "Right palm",
+      "waveform": "80 Hz sawtooth, generated in Audacity",
+      "duration_ms": 200,
+      "delivery": "Audio-driven haptic actuator on a molded silicone pad, from a separate synchronized channel",
+      "preview_cue_duration_ms": 100
+    },
+    "published_response": "Speeded left-side Cherry MX Blue button press after tactile onset; withhold on auditory-only catch. RT is measured from scheduled tactile onset.",
+    "preview_timing": "A 1000 ms silent lead-in encodes the nominal fixation-to-trial interval. Fixation display and head-still instruction require the original study procedure.",
+    "analysis_exclusions": "Exclude responses ahead of touch and trials with multiple presses. Apply the reported 2.5 SD filter per delay and condition. The study combines adjacent scheduled delays into six overlapping analytic midpoints and applies a sigmoid fit threshold.",
+    "implementation_gaps": [
+      "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics.",
+      "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence.",
+      "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response.",
+      "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Acquisition delay grid and trial counts",
+      "source": "Forum Acusticum / EuroNoise 2025, pp. 3550\u20133551, \u00a72.3. The seven touch delays yield 112 trials per target-bearing family, with 21 additional catches."
+    },
+    {
+      "field": "Analytic midpoint axis",
+      "source": "Forum Acusticum / EuroNoise 2025, pp. 3551\u20133553, \u00a72.5 and Figs. 1\u20132. The analysis pools adjacent scheduled levels."
+    },
+    {
+      "field": "Sound path, fixation and tactile drive",
+      "source": "Forum Acusticum / EuroNoise 2025, pp. 3550\u20133551, \u00a7\u00a72.3\u20132.4. Exact hardware and geometry caveats are listed in the profile."
+    }
+  ]
+}

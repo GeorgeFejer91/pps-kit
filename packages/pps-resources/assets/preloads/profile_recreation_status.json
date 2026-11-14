@@ -1,6 +1,6 @@
 {
   "schema": "pps-profile-recreation-status.v1",
-  "profile_count": 34,
+  "profile_count": 38,
   "categories": {
     "gui_recreatable": [
       "study5_box_breathing_pps",
@@ -36,13 +36,19 @@
       "ardizzi_ferri_2018_looming_flat",
       "ferri_2015_artificial_looming_valence",
       "ferri_2015_ecological_looming_valence",
+      "hobeika_2020_logarithmic",
+      "hobeika_2020_pseudo_linear",
+      "rahmani_2025_2s_pps",
+      "rahmani_2025_3s_pps",
       "serino_2007_blind_cane_users",
       "taffou_2014_cynophobic_rear_looming",
       "teneggi_2013_social_face_pps"
     ],
     "toolkit_structural_gap": [
       "amemiya_2019_foot_sole_exp1",
-      "amemiya_2019_foot_sole_exp2"
+      "amemiya_2019_foot_sole_exp2",
+      "ferri_2015_artificial_looming_valence",
+      "ferri_2015_ecological_looming_valence"
     ]
   },
   "category_labels": {
@@ -1709,9 +1715,9 @@
       "profile_type": "audio_tactile_looming_valence",
       "visible_variant_label": "A",
       "variant_display": "Ferri 2015 artificial emotional looming sounds - Variant A",
-      "primary_category": "missing_publication_parameters",
-      "category_label": "Missing publication parameters",
-      "runner_readiness": "blocked_missing_parameters",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
       "gui_recreatable": false,
       "segment_0_to_4_profile_checks_passed": false,
@@ -1719,8 +1725,8 @@
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 2,
-      "unsupported_structure_count": 0,
+      "missing_parameter_count": 3,
+      "unsupported_structure_count": 1,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
         "passed": false,
@@ -1728,42 +1734,53 @@
           {
             "segment": "0",
             "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
             "passed": false,
             "field_count": 5,
             "blocking_reasons": [
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
-                "reason": "exact auditory files"
-              }
-            ]
-          },
-          {
-            "segment": "1",
-            "segment_label": "Segment 1 source/stimulus assets",
-            "passed": false,
-            "field_count": 4,
-            "blocking_reasons": [
+                "reason": "Exact original white and brown WAV files, the 2700\u20133150 Hz power-matching implementation and Sound Forge intensity envelopes."
+              },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
-                "reason": "paper-specific gain envelope"
+                "reason": "Original trial order, per-sound catch quotas and per-block balancing constraints."
               }
             ]
           },
           {
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
-            "passed": true,
-            "field_count": 3,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "A clinically governed, calibrated external electrical target scheduler for the Digitimer DS7A. The original MATLAB/Cogent task and button acquisition hardware are required to verify delivery and response timing."
+              }
+            ]
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": true,
-            "field_count": 5,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Absolute acoustic output calibration for the study headphones, original hardware and corresponding ear-level measurement."
+              }
+            ]
           },
           {
             "segment": "4",
@@ -1776,17 +1793,28 @@
       },
       "missing_publication_parameters": [
         {
-          "segment": "0",
+          "segment": "1",
           "parameter": "profile_gap",
-          "reason": "exact auditory files"
+          "reason": "Exact original white and brown WAV files, the 2700\u20133150 Hz power-matching implementation and Sound Forge intensity envelopes."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Absolute acoustic output calibration for the study headphones, original hardware and corresponding ear-level measurement."
         },
         {
           "segment": "1",
           "parameter": "profile_gap",
-          "reason": "paper-specific gain envelope"
+          "reason": "Original trial order, per-sound catch quotas and per-block balancing constraints."
         }
       ],
-      "unsupported_toolkit_structures": [],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "A clinically governed, calibrated external electrical target scheduler for the Digitimer DS7A. The original MATLAB/Cogent task and button acquisition hardware are required to verify delivery and response timing."
+        }
+      ],
       "profile_parameters_manifest": "assets/preloads/ferri_2015_artificial_looming_valence/01_profile/profile_parameters_manifest.json"
     },
     {
@@ -1799,9 +1827,9 @@
       "profile_type": "audio_tactile_ecological_valence",
       "visible_variant_label": "B",
       "variant_display": "Ferri 2015 ecological emotional looming sounds - Variant B",
-      "primary_category": "missing_publication_parameters",
-      "category_label": "Missing publication parameters",
-      "runner_readiness": "blocked_missing_parameters",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
       "gui_recreatable": false,
       "segment_0_to_4_profile_checks_passed": false,
@@ -1809,8 +1837,8 @@
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 2,
-      "unsupported_structure_count": 0,
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
         "passed": false,
@@ -1826,33 +1854,55 @@
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
             "passed": false,
-            "field_count": 6,
+            "field_count": 5,
             "blocking_reasons": [
               {
-                "parameter": "profile_gap",
+                "parameter": "source_stimulus_inventory",
                 "status": "missing_publication_parameter",
-                "reason": "licensed ecological sounds"
+                "reason": "No source assets are available for Segment 1."
+              },
+              {
+                "parameter": "trajectory_snapshots",
+                "status": "missing_publication_parameter",
+                "reason": "No source-level trajectory snapshots are available."
               },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
-                "reason": "exact amplitude envelopes"
+                "reason": "Exact licensed IADS source WAVs 276, 110 and 720, their Ferri three-second edits/envelopes and the exact white-noise comparison file."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Original trial order, per-sound catch quotas and per-block balancing constraints."
               }
             ]
           },
           {
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
-            "passed": true,
-            "field_count": 3,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "A clinically governed, calibrated external electrical target scheduler for the Digitimer DS7A. The original MATLAB/Cogent task and button acquisition hardware are required to verify delivery and response timing."
+              }
+            ]
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": true,
-            "field_count": 5,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Absolute acoustic output calibration for the study headphones, original hardware and corresponding ear-level measurement."
+              }
+            ]
           },
           {
             "segment": "4",
@@ -1866,16 +1916,47 @@
       "missing_publication_parameters": [
         {
           "segment": "1",
-          "parameter": "profile_gap",
-          "reason": "licensed ecological sounds"
+          "parameter": "source_stimulus_inventory",
+          "reason": "No source assets are available for Segment 1."
+        },
+        {
+          "segment": "1",
+          "parameter": "trajectory_snapshots",
+          "reason": "No source-level trajectory snapshots are available."
         },
         {
           "segment": "1",
           "parameter": "profile_gap",
-          "reason": "exact amplitude envelopes"
+          "reason": "Exact licensed IADS source WAVs 276, 110 and 720, their Ferri three-second edits/envelopes and the exact white-noise comparison file."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Absolute acoustic output calibration for the study headphones, original hardware and corresponding ear-level measurement."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Original trial order, per-sound catch quotas and per-block balancing constraints."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one procedural noise definition or custom looming audio source is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "Experiment 2 trial references unknown stimulus source(s): Negative IADS 276 woman screaming, Positive IADS 110 baby laughing, Neutral IADS 720 brushing teeth, White noise comparator"
         }
       ],
-      "unsupported_toolkit_structures": [],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "A clinically governed, calibrated external electrical target scheduler for the Digitimer DS7A. The original MATLAB/Cogent task and button acquisition hardware are required to verify delivery and response timing."
+        }
+      ],
       "profile_parameters_manifest": "assets/preloads/ferri_2015_ecological_looming_valence/01_profile/profile_parameters_manifest.json"
     },
     {
@@ -1944,6 +2025,228 @@
       "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/galli_2015_wheelchair_full_body/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "hobeika_2020_logarithmic",
+      "title": "Hobeika 2020 logarithmic distance PPS assessment",
+      "citation": "Hobeika, L., Taffou, M., Carpentier, T., Warusfel, O., & Viaud-Delmon, I. (2020). Capturing the dynamics of peripersonal space by integrating expectancy effects and sound propagation properties. Journal of Neuroscience Methods, 332, 108534.",
+      "doi": "10.1016/j.jneumeth.2019.108534",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "right_front_looming_fixed_expectancy_audio_tactile_pps",
+      "visible_variant_label": "A",
+      "variant_display": "Hobeika 2020 logarithmic distance PPS assessment - Variant A",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact auditory source delivery, LISTEN HRTF ID, Spat patch and calibrated headphone output are unavailable."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The 20 ms target is encoded in the trial-row design. The current Segment 3 bake writes the legacy 100 ms tactile cue and uses that duration in the manifest. Calibrated 20 ms tactile delivery and response capture require a verified hardware path."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact within-range jitter sampling and cross-day assignment details are unreported."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Response-contingent auditory control and discomfort ratings in the separate aBATs require a separate profile."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact auditory source delivery, LISTEN HRTF ID, Spat patch and calibrated headphone output are unavailable."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The 20 ms target is encoded in the trial-row design. The current Segment 3 bake writes the legacy 100 ms tactile cue and uses that duration in the manifest. Calibrated 20 ms tactile delivery and response capture require a verified hardware path."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Exact within-range jitter sampling and cross-day assignment details are unreported."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Response-contingent auditory control and discomfort ratings in the separate aBATs require a separate profile."
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/hobeika_2020_logarithmic/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "hobeika_2020_pseudo_linear",
+      "title": "Hobeika 2020 pseudo-linear distance PPS assessment",
+      "citation": "Hobeika, L., Taffou, M., Carpentier, T., Warusfel, O., & Viaud-Delmon, I. (2020). Capturing the dynamics of peripersonal space by integrating expectancy effects and sound propagation properties. Journal of Neuroscience Methods, 332, 108534.",
+      "doi": "10.1016/j.jneumeth.2019.108534",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "right_front_looming_fixed_expectancy_audio_tactile_pps",
+      "visible_variant_label": "B",
+      "variant_display": "Hobeika 2020 pseudo-linear distance PPS assessment - Variant B",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact auditory source delivery, LISTEN HRTF ID, Spat patch and calibrated headphone output are unavailable."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The 20 ms target is encoded in the trial-row design. The current Segment 3 bake writes the legacy 100 ms tactile cue and uses that duration in the manifest. Calibrated 20 ms tactile delivery and response capture require a verified hardware path."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact within-range jitter sampling and cross-day assignment details are unreported."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Response-contingent auditory control and discomfort ratings in the separate aBATs require a separate profile."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact auditory source delivery, LISTEN HRTF ID, Spat patch and calibrated headphone output are unavailable."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The 20 ms target is encoded in the trial-row design. The current Segment 3 bake writes the legacy 100 ms tactile cue and uses that duration in the manifest. Calibrated 20 ms tactile delivery and response capture require a verified hardware path."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Exact within-range jitter sampling and cross-day assignment details are unreported."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Response-contingent auditory control and discomfort ratings in the separate aBATs require a separate profile."
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/hobeika_2020_pseudo_linear/01_profile/profile_parameters_manifest.json"
     },
     {
       "template_id": "lerner_2021_3d_audio_tactile_boundary",
@@ -2078,6 +2381,228 @@
       "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/maister_2015_shared_sensory_pps/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "rahmani_2025_2s_pps",
+      "title": "Rahmani 2025 2-second looming PPS",
+      "citation": "Rahmani, M. M. H., Roel Lesur, M., & Tajadura-Jim\u00e9nez, A. (2025). The impact of looming sound duration on peripersonal space measurement. Proceedings of Forum Acusticum / EuroNoise 2025, 3549\u20133556.",
+      "doi": "10.61782/fa.2025.0866",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "right_lateral_looming_duration_pps",
+      "visible_variant_label": "A",
+      "variant_display": "Rahmani 2025 2-second looming PPS - Variant A",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/rahmani_2025_2s_pps/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "rahmani_2025_3s_pps",
+      "title": "Rahmani 2025 3-second looming PPS",
+      "citation": "Rahmani, M. M. H., Roel Lesur, M., & Tajadura-Jim\u00e9nez, A. (2025). The impact of looming sound duration on peripersonal space measurement. Proceedings of Forum Acusticum / EuroNoise 2025, 3549\u20133556.",
+      "doi": "10.61782/fa.2025.0866",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "right_lateral_looming_duration_pps",
+      "visible_variant_label": "B",
+      "variant_display": "Rahmani 2025 3-second looming PPS - Variant B",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/rahmani_2025_3s_pps/01_profile/profile_parameters_manifest.json"
     },
     {
       "template_id": "serino_2007_blind_cane_users",

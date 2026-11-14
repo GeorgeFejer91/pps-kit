@@ -1,0 +1,43 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "rahmani_2025_2s_pps",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "2 s right-lateral pink noise",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 100.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 2.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.99,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 1.0,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.01,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "2 s right-lateral pink noise"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/rahmani_2025_2s_pps/02_looming_stimuli/looming_2_s_right-lateral_pink_noise.wav"
+      ]
+    }
+  ]
+}

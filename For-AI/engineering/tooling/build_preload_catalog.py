@@ -75,6 +75,10 @@ def main() -> int:
         default=[],
         help="Regenerate WAVs only for the named template id while still rebuilding the full catalog metadata.",
     )
+    parser.add_argument(
+        "--template", action="append", default=[],
+        help="Rebuild only the named profiles and their entries in the shared catalogue.",
+    )
     args = parser.parse_args()
     force_template_ids = set(args.force_template or [])
     PRELOAD_ROOT.mkdir(parents=True, exist_ok=True)
@@ -82,14 +86,34 @@ def main() -> int:
 
     templates = load_templates(TEMPLATE_DIR)
     variant_labels = profile_variant_labels(templates)
+    selected_ids = set(args.template)
+    unknown_ids = (selected_ids | force_template_ids) - {template.template_id for template in templates}
+    if unknown_ids:
+        parser.error(f"Unknown template ids: {', '.join(sorted(unknown_ids))}")
+    inventory_path = PRELOAD_ROOT / "preload_inventory.json"
+    previous_profiles = {}
+    if selected_ids:
+        previous = json.loads(inventory_path.read_text(encoding="utf-8"))
+        previous_profiles = {profile["template_id"]: profile for profile in previous["profiles"]}
+
     profiles = []
     profile_parameter_manifests = []
     for template in templates:
-        profile, profile_parameters = build_profile_catalog(
-            template,
-            force=args.force or template.template_id in force_template_ids,
-            variant_label=variant_labels.get(template.template_id, ""),
-        )
+        template_id = template.template_id
+        if selected_ids and template_id not in selected_ids:
+            if template_id not in previous_profiles:
+                parser.error(f"Include new template {template_id} when rebuilding the catalogue.")
+            profile = previous_profiles[template_id]
+            parameters_path = RESOURCE_ROOT / profile["profile_parameters_manifest"]
+            profile_parameters = json.loads(parameters_path.read_text(encoding="utf-8"))
+            if profile.get("visible_variant_label", "") != variant_labels.get(template_id, ""):
+                parser.error(f"Include {template_id} because its shared variant label changed.")
+        else:
+            profile, profile_parameters = build_profile_catalog(
+                template,
+                force=args.force or template_id in force_template_ids,
+                variant_label=variant_labels.get(template_id, ""),
+            )
         profiles.append(profile)
         profile_parameter_manifests.append(profile_parameters)
 
@@ -117,7 +141,7 @@ def main() -> int:
         "segments": [{"folder": folder, "label": label} for folder, label in SEGMENTS],
         "profiles": profiles,
     }
-    write_json(PRELOAD_ROOT / "preload_inventory.json", inventory)
+    write_json(inventory_path, inventory)
     print(f"Built {len(profiles)} preload catalogs under {PRELOAD_ROOT}")
     return 0
 
@@ -673,6 +697,8 @@ def write_segment_metadata(template: StudyTemplate, design: Any, profile_dir: Pa
     }
     if protocol.block_specs:
         run_setup_defaults["block_specs"] = [asdict(block) for block in protocol.block_specs]
+    if "block_groups" in protocol.participant_order_policy:
+        run_setup_defaults["participant_order_policy"] = protocol.participant_order_policy
     dashboard_run_setup = template.reference_parameters.get("dashboard_run_setup")
     if isinstance(dashboard_run_setup, dict):
         if "experiment_structure" in dashboard_run_setup:

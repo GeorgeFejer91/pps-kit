@@ -157,10 +157,10 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 45,
+            "not_yet_templated_missing_publication_parameters": 43,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
             "template_present_blocked_missing_publication_parameters": 6,
-            "template_present_blocked_toolkit_structure": 1,
+            "template_present_blocked_toolkit_structure": 3,
             "ready_profile_parameter_run_available_expected_contrast_unvalidated": 2,
         },
     }

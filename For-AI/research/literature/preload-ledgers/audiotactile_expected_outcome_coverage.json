@@ -21,11 +21,11 @@
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 45,
+      "not_yet_templated_missing_publication_parameters": 43,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
       "ready_profile_parameter_run_available_expected_contrast_unvalidated": 2,
       "template_present_blocked_missing_publication_parameters": 6,
-      "template_present_blocked_toolkit_structure": 1
+      "template_present_blocked_toolkit_structure": 3
     }
   },
   "expected_outcome_extraction_sources": {
@@ -673,7 +673,7 @@
       "record_id": "ferri_2015_artificial_valence",
       "citation_short": "Ferri et al. (2015A)",
       "doi": "10.1016/j.neuropsychologia.2015.03.001",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_blocked_toolkit_structure",
       "current_template_ids": [
         "ferri_2015_artificial_looming_valence"
       ],
@@ -700,7 +700,7 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
@@ -708,7 +708,7 @@
       "record_id": "ferri_2015_ecological_valence",
       "citation_short": "Ferri et al. (2015B)",
       "doi": "10.1016/j.neuropsychologia.2015.03.001",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_blocked_toolkit_structure",
       "current_template_ids": [
         "ferri_2015_ecological_looming_valence"
       ],
@@ -735,7 +735,7 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
       "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
@@ -1707,9 +1707,12 @@
       "record_id": "hobeika_2020_methods",
       "citation_short": "Hobeika et al. (2020)",
       "doi": "10.1016/j.jneumeth.2019.108534",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "hobeika_2020_pseudo_linear",
+        "hobeika_2020_logarithmic"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "expectancy_corrected_log_distance_pps_method",
@@ -1732,9 +1735,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "ferroni_2020_tool_observation",
@@ -2242,9 +2245,12 @@
       "record_id": "looming_duration_2025",
       "citation_short": "Impact of looming sound duration on PPS measurement (2025)",
       "doi": "10.61782/fa.2025.0866",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "rahmani_2025_2s_pps",
+        "rahmani_2025_3s_pps"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "duration_comparison_lateral_looming_audio_tactile_pps",
@@ -2268,9 +2274,9 @@
         "paper_audit_visualization_candidate_count": "8"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "depersonalisation_2024",

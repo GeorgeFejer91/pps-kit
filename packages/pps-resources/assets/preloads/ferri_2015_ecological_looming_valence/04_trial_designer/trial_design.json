@@ -1,49 +1,71 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "ferri_2015_ecological_looming_valence",
-  "repetitions_per_condition": 8,
+  "repetitions_per_condition": 12,
   "soa_values_ms": [
     300,
-    800,
+    600,
+    900,
+    1200,
     1500,
-    2200,
-    2700
+    1800,
+    2100,
+    2400,
+    2700,
+    3000
   ],
-  "spatial_values_cm": [
-    100,
-    83.3,
-    60,
-    36.7,
-    20
-  ],
+  "spatial_values_cm": [],
   "custom_clip_assets": [],
   "trial_strips": [
     {
       "strip_id": "ferri-ecological-looming-valence-row",
-      "label": "Ecological looming valence trial",
-      "audio_tactile_percentage": 100.0,
-      "catch_percentage": 0.0,
-      "baseline_percentage": 0.0,
+      "label": "Experiment 2 trial",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
       "soa_values_ms": [],
       "spatial_values_cm": [],
       "metadata": {},
       "elements": [
         {
+          "element_id": "ferri-ecological-silence-before",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
           "element_id": "ferri-ecological-looming-source",
           "kind": "looming_stimulus",
-          "label": "Ecological looming source",
-          "source_label": "Negative ecological looming",
+          "label": "Study sound",
+          "source_label": "Negative IADS 276 woman screaming",
           "source_labels": [
-            "Negative ecological looming",
-            "Neutral ecological looming",
-            "Positive ecological looming"
+            "Negative IADS 276 woman screaming",
+            "Positive IADS 110 baby laughing",
+            "Neutral IADS 720 brushing teeth",
+            "White noise comparator"
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "ferri-ecological-silence-after",
+          "kind": "jitter",
+          "label": "Post-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
         }
       ]
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 120
+  "preview_trial_count": 0
 }

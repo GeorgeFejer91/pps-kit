@@ -1,0 +1,200 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "hobeika_2020_pseudo_linear",
+  "title": "Hobeika 2020 pseudo-linear distance PPS assessment",
+  "citation": "Hobeika, L., Taffou, M., Carpentier, T., Warusfel, O., & Viaud-Delmon, I. (2020). Capturing the dynamics of peripersonal space by integrating expectancy effects and sound propagation properties. Journal of Neuroscience Methods, 332, 108534.",
+  "doi": "10.1016/j.jneumeth.2019.108534",
+  "source_url": "https://doi.org/10.1016/j.jneumeth.2019.108534",
+  "verification_status": "partial",
+  "notes": "One pseudo-linear-distance session of the two-day study. Both source types and both silent-at-touch controls are encoded. Pair with the other distance profile and counterbalance session order across participants. The review gate remains blocked pending acoustic, tactile, and response validation.",
+  "reference_parameters": {
+    "profile_type": "right_front_looming_fixed_expectancy_audio_tactile_pps",
+    "publication_study_row_id": "doi:10.1016/j.jneumeth.2019.108534::pseudo-linear",
+    "source_scope": "The audiotactile reaction-time assessment. The three auditory discomfort tests and handedness screening are separate.",
+    "session_order": "The same participants complete both distance grids, on separate days at most three days apart. Distance-grid order is counterbalanced. The three auditory discomfort tests follow the second day's detection task.",
+    "participants_recruited": 19,
+    "participants_analyzed": 18,
+    "trial_timing": {
+      "soa_reference": "Sound onset, Table 2.",
+      "pre_sound_silence_ms": 300,
+      "sound_window_ms": 3250,
+      "reported_post_sound_silence_range_ms": [
+        700,
+        1100
+      ],
+      "concurrent_target_delays_from_sound_onset_ms": [
+        105,
+        675,
+        1245,
+        1910,
+        2480,
+        3050
+      ],
+      "concurrent_target_delays_from_trial_start_ms": [
+        405,
+        975,
+        1545,
+        2210,
+        2780,
+        3350
+      ],
+      "silent_at_touch_delays_from_sound_onset_ms": [
+        -250,
+        3500
+      ],
+      "silent_at_touch_delays_from_trial_start_ms": [
+        50,
+        3800
+      ],
+      "silent_at_touch_playback": "Both endpoint trials still contain their fixed or looming sound. The tactile pulse occurs 250 ms before onset or 250 ms after sound offset.",
+      "distance_scope": "Only concurrent tactile targets have a sound distance at touch. Ignore any row-distance metadata carried by catch and endpoint records.",
+      "looming_distance_at_concurrent_targets_cm": [
+        640,
+        520,
+        400,
+        260,
+        140,
+        20
+      ],
+      "fixed_distance_at_concurrent_targets_cm": [
+        640,
+        640,
+        640,
+        640,
+        640,
+        640
+      ],
+      "preview_post_sound_silence_choices_ms": [
+        700,
+        833,
+        967,
+        1100
+      ],
+      "preview_jitter_policy": "Four balanced discrete intervals span the reported range. Six repeats per sound \u00d7 delay \u00d7 interval produce the reported 24 targets per sound \u00d7 delay. The original sampling law, random seed and realized within-block allocations were unreported."
+    },
+    "session_allocation": {
+      "blocks": 8,
+      "trials_per_block": 72,
+      "responses_requested_per_block": 48,
+      "withhold_catches_per_block": 24,
+      "block_duration_approx_minutes": 5,
+      "targets_during_sound": 288,
+      "targets_during_silence_with_same_trial_sound": 96,
+      "auditory_only_catches": 192,
+      "trials_total": 576,
+      "catch_allocation_preview": "The generated pool balances across sound type and the four preview intervals. The study only reports the overall and per-block catch totals."
+    },
+    "original_apparatus": {
+      "audio": "Beyerdynamic DT770 headphones, Max/MSP 6.1.10 with IRCAM Spat and nonindividual LISTEN HRTFs. The reported ear-specific ranges were 42\u201369 dBA contralateral and 45\u201373 dBA ipsilateral.",
+      "room": "Direct sound, early reflections over a 40\u00b0 cone centered on the direct sound, and a diffuse 200 ms reverberation tail.",
+      "moving_sound": "Right-front approach at reported \u221260\u00b0 azimuth, 640 to 20 cm at 210 cm/s. The fixed source stays at 640 cm.",
+      "tactile": "A 28 mm speaker on the left index-finger pad, driven by a 250 Hz, 20 ms sine. The published tactile signal is perceptible and its sound inaudible. The preview amplitude is a digital default.",
+      "task": "Hands palms down aligned to the midline and hidden from view. Look at a fixation cross 150 cm straight ahead at eye height. Respond promptly with the right finger to touch, and withhold on sound-only catches.",
+      "response_scoring": "The source applied a 100\u20131000 ms offline RT validity interval. This publication rule does not establish an acquisition deadline. Presentation controlled delivery and acquisition, with response device model, active key and hardware latency unreported."
+    },
+    "preview_audio": {
+      "description": "Two newly generated right-front headphone previews. One shared dry carrier preserves the movement contrast under a common gain. Original room acoustics and acoustic calibration require separate verification.",
+      "assets": {
+        "looming": {
+          "path": "packages/pps-resources/assets/study_profile_sources/hobeika_2020/looming_white_burst_train_preview.wav",
+          "sha256": "fa4685cd881ecb45c10f908634f28820ffc8f9e0a4cee47f764f38ae0d59133e",
+          "bytes": 573344
+        },
+        "fixed": {
+          "path": "packages/pps-resources/assets/study_profile_sources/hobeika_2020/fixed_white_burst_train_preview.wav",
+          "sha256": "c99e6a8872c1e4adae9fdb1ffcc53b440b8235139449177be9ad073ad757bd5d",
+          "bytes": 573344
+        }
+      },
+      "synthesis": {
+        "seed": 2019108534,
+        "random_generator": "NumPy PCG64",
+        "sample_rate_hz": 44100,
+        "container": "stereo PCM16 WAV",
+        "duration_ms": 3250,
+        "burst_count": 33,
+        "burst_duration_ms": 30,
+        "burst_interval_ms": 65,
+        "raised_cosine_rise_fall_ms": 10,
+        "normalization": "Equal RMS per dry burst. One shared gain after binaural convolution sets the pair's largest absolute peak to \u22126 dBFS.",
+        "right_front_direction": "Published \u221260\u00b0 in the study convention. Toolkit +60\u00b0 selects the nearest FABIAN azimuth/elevation, 300\u00b0/0\u00b0 in SOFA coordinates.",
+        "render": "Convolve both generated tracks with the same direction's left and right measured HRIRs and crop to 3250 ms. Resample HRIRs to 44.1 kHz using scipy.signal.resample_poly when needed.",
+        "level_law": "Fixed audio uses \u221230.7 dB, relative to the nearest moving distance. Interpolate direct-sound dB linearly between Table 1 distance points and convert to amplitude; move for 6.2 m at 2.1 m/s after a toolkit preview hold of 95 ms. The preview omits early reflections and the reported 200 ms room response."
+      },
+      "hrir_attribution": {
+        "authors": "Fabian Brinkmann, Alexander Lindau, Stefan Weinzierl, Gunnar Geissler, Steven van de Par, Markus M\u00fcller-Trapet, Rob Opdam, and Michael Vorl\u00e4nder",
+        "title": "The FABIAN head-related transfer function data base",
+        "source": "https://doi.org/10.14279/depositonce-5718.5",
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "modifications": "One measured neutral-head HRIR direction selected and convolved with the generated noise; resampled where needed.",
+        "bundled_hrir_sha256": "83ebbcd9a09d17679b95d201c9775438c0bb1199d565c3fc7a25448a905cdc3c"
+      }
+    },
+    "supplementary_audio_examples": {
+      "fixed_url": "https://ars.els-cdn.com/content/image/1-s2.0-S0165027019303917-mmc1.zip",
+      "looming_url": "https://ars.els-cdn.com/content/image/1-s2.0-S0165027019303917-mmc2.zip",
+      "boundary": "The publisher's MP3 examples each have a 3850 ms gapless decoded duration. The study reports a 3250 ms sound window. Published examples are referenced here; their redistribution and relationship to the delivered runtime files are unverified."
+    },
+    "other_procedures": {
+      "auditory_behavioral_assessment_tests": {
+        "session_2_only": true,
+        "preceded_by": "That day's audiotactile assessment",
+        "conditions": {
+          "logarithmic_cm": [
+            640,
+            320,
+            160,
+            80,
+            40,
+            20
+          ],
+          "pseudo_linear_cm": [
+            640,
+            520,
+            400,
+            260,
+            140,
+            20
+          ],
+          "fixed_cm": [
+            640,
+            640,
+            640,
+            640,
+            640,
+            640
+          ]
+        },
+        "order": "Counterbalance the two moving tests. The fixed test is last.",
+        "procedure": "Continuous sound for six positions with a 2 s transition, 500 ms before a rating cue, and a hold at the current position until a 0\u201310 discomfort rating. The display/input mapping and cue waveform are unreported.",
+        "boundary": "Response-contingent sound and ratings require a separate executable procedure."
+      },
+      "handedness_screening": "FLANDERS. The paper reports the retained participants' scores. Screening is separate from the reaction-time task."
+    },
+    "implementation_gaps": [
+      "Exact auditory source delivery, LISTEN HRTF ID, Spat patch and calibrated headphone output are unavailable.",
+      "The 20 ms target is encoded in the trial-row design. The current Segment 3 bake writes the legacy 100 ms tactile cue and uses that duration in the manifest. Calibrated 20 ms tactile delivery and response capture require a verified hardware path.",
+      "Exact within-range jitter sampling and cross-day assignment details are unreported.",
+      "Response-contingent auditory control and discomfort ratings in the separate aBATs require a separate profile."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Assessment conditions and scheduled trial counts",
+      "source": "Journal of Neuroscience Methods 332:108534, publisher pp. 3\u20134, \u00a7\u00a72.2\u20132.3.1, Tables 1\u20132 and Fig. 1. One profile covers each six-distance table plus the two endpoints."
+    },
+    {
+      "field": "Trial timing and nominal tactile stimulus",
+      "source": "Publisher pp. 3\u20135, \u00a7\u00a72.2\u20132.3.1, Table 2 and Fig. 2. A 300 ms leading silence sets the shift from sound-onset to trial-start clock."
+    },
+    {
+      "field": "Auditory discomfort assessments and RT criterion",
+      "source": "Publisher p. 4, \u00a7\u00a72.3.2 and 3.1. These three ratings procedures are separate from the reaction-time profile."
+    },
+    {
+      "field": "Generated preview and source demonstrations",
+      "source": "Publisher pp. 3\u20134, \u00a72.2, Table 1 and Appendix A p. 11. New synthetic Gaussian-noise carrier and an attributed measured FABIAN filter approximate the right-front level contrast. The ZIPs deliver demonstrations rather than a verified experiment playback project."
+    }
+  ]
+}

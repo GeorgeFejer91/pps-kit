@@ -59,13 +59,13 @@ def test_full_pipeline_validation_summary_is_conservative():
         "full_emulated_source_to_runner_pipeline_validated": 17,
         "pipeline_incomplete": 2,
         "profile_present_but_source_parameters_missing": 6,
-        "source_parameters_missing_before_profile_creation": 45,
-        "toolkit_structure_or_response_contract_missing": 1,
+        "source_parameters_missing_before_profile_creation": 43,
+        "toolkit_structure_or_response_contract_missing": 3,
     }
     assert summary["primary_gap_counts"] == {
         "profile_present_but_source_parameters_missing": 6,
-        "source_parameters_missing_before_profile_creation": 45,
-        "toolkit_structure_or_response_contract_missing": 1,
+        "source_parameters_missing_before_profile_creation": 43,
+        "toolkit_structure_or_response_contract_missing": 3,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
         "minimum_source_parameters_captured": 19,
@@ -78,8 +78,8 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 51,
-        "blocked_by_toolkit_structure_or_response_contract": 1,
+        "blocked_by_missing_profile_parameters": 49,
+        "blocked_by_toolkit_structure_or_response_contract": 3,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 19,
     }
@@ -243,7 +243,7 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
     assert "trajectory-family metadata is now runner-supported" in amiel["next_required_action"]
 
     looming_duration = records["looming_duration_2025"]
-    assert looming_duration["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert looming_duration["pipeline_status"] == "profile_present_but_source_parameters_missing"
     assert looming_duration["gates"]["toolkit_gui_implementation"]["status"] == (
         "blocked_by_missing_profile_parameters"
     )

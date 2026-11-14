@@ -269,18 +269,18 @@
     "literature_record_category_counts": {
       "covered_runnable_profile": 19,
       "covered_blocked_missing_publication_parameters": 6,
-      "covered_blocked_toolkit_structure": 1,
+      "covered_blocked_toolkit_structure": 3,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 45,
+      "not_yet_templated_missing_publication_parameters": 43,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
-    "current_template_count": 34,
+    "current_template_count": 38,
     "current_profile_check_pass_count": 26,
     "published_profile_check_pass_count": 24,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 8,
-    "current_templates_with_toolkit_structural_gaps": 2,
+    "current_templates_with_missing_publication_parameters": 12,
+    "current_templates_with_toolkit_structural_gaps": 4,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -732,18 +732,20 @@
     {
       "template_id": "ferri_2015_artificial_looming_valence",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
+      "current_recreation_category": "toolkit_structural_gap",
       "primary_constraint_ids": [
-        "exact_audio_envelope_or_gain_files"
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration"
       ]
     },
     {
       "template_id": "ferri_2015_ecological_looming_valence",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
+      "current_recreation_category": "toolkit_structural_gap",
       "primary_constraint_ids": [
         "ecological_or_licensed_audio_assets",
-        "exact_audio_envelope_or_gain_files"
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration"
       ]
     },
     {
@@ -893,6 +895,40 @@
       "published": true,
       "current_recreation_category": "gui_recreatable",
       "primary_constraint_ids": []
+    },
+    {
+      "template_id": "hobeika_2020_logarithmic",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "exact_audio_envelope_or_gain_files",
+        "hrtf_database_or_binaural_engine_mismatch"
+      ]
+    },
+    {
+      "template_id": "hobeika_2020_pseudo_linear",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "exact_audio_envelope_or_gain_files",
+        "hrtf_database_or_binaural_engine_mismatch"
+      ]
+    },
+    {
+      "template_id": "rahmani_2025_2s_pps",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "hrtf_database_or_binaural_engine_mismatch"
+      ]
+    },
+    {
+      "template_id": "rahmani_2025_3s_pps",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "hrtf_database_or_binaural_engine_mismatch"
+      ]
     }
   ],
   "literature_records": [
@@ -1237,15 +1273,15 @@
       "current_template_ids": [
         "ferri_2015_artificial_looming_valence"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "dynamic emotional artificial looming sounds with tactile detection",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "exact_audio_envelope_or_gain_files"
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration"
       ],
       "missing_publication_parameters": [
-        "exact auditory files",
-        "paper-specific gain envelope"
+        "Original white and brown noise and their level/envelope files remain unavailable, alongside the calibrated electrical delivery and response-box route."
       ]
     },
     {
@@ -1259,16 +1295,16 @@
       "current_template_ids": [
         "ferri_2015_ecological_looming_valence"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "dynamic ecological emotional sounds with tactile detection",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
         "ecological_or_licensed_audio_assets",
-        "exact_audio_envelope_or_gain_files"
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration"
       ],
       "missing_publication_parameters": [
-        "licensed ecological sounds",
-        "exact amplitude envelopes"
+        "The four required source files, including the exact IADS excerpts, remain unavailable. The calibrated electrical delivery and response-box route require qualification."
       ]
     },
     {
@@ -1744,15 +1780,19 @@
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "hobeika_2020_pseudo_linear",
+        "hobeika_2020_logarithmic"
+      ],
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "expectancy-controlled dynamic PPS task with sound-propagation corrections",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files",
+        "hrtf_database_or_binaural_engine_mismatch"
       ],
       "missing_publication_parameters": [
-        "extract logarithmic distances, fixed-distance baselines, and sound-propagation settings"
+        "Two nominal 576-trial PPS assessments now encode the printed onset tables and trial composition. Original session playback, calibrated tactile and response device timing, and separate adaptive auditory tasks remain unresolved."
       ]
     },
     {
@@ -2039,15 +2079,18 @@
         "openalex_audiotactile_pps_2026_06_13",
         "web_search_sanity_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "rahmani_2025_2s_pps",
+        "rahmani_2025_3s_pps"
+      ],
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "looming-cue tactile-response PPS task varying auditory duration",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
         "hrtf_database_or_binaural_engine_mismatch"
       ],
       "missing_publication_parameters": [
-        "live PDF check reports 2 s/3 s right-lateral looming pink-noise tasks, seven SOAs per duration, 16 repetitions per delay/condition, 21 auditory-only catch trials, 80 Hz 200 ms sawtooth tactile stimulation, response button, starting distances, and speed; row-level tactile waveform synthesis and renderer/HRTF provenance metadata are now runner-supported, but exact original MATLAB HRTF/right-lateral rendering implementation, HRTF/source assets, and source-equivalence validation remain unresolved"
+        "Each duration now generates 245 trials with seven delays and matched tactile-only trials. Original HRTF, synchronized visual fixation and the exact haptic waveform and response route remain open. Row-level renderer/HRTF provenance metadata are now runner-supported."
       ]
     },
     {

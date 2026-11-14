@@ -1,0 +1,49 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "rahmani_2025_2s_pps",
+  "assets": [
+    {
+      "label": "2 s right-lateral pink noise",
+      "path": "assets/preloads/rahmani_2025_2s_pps/02_looming_stimuli/looming_2_s_right-lateral_pink_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/rahmani_2025_2s_pps/02_looming_stimuli/looming_2_s_right-lateral_pink_noise.wav",
+      "sha256": "284523bc507bf87507e81c87b0ae6e296186296f4a684ac929efb34aafa42533",
+      "duration_s": 2.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "2 s right-lateral pink noise",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 100.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 90.0,
+        "end_rotation_deg": 90.0,
+        "movement_duration_s": 2.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.99,
+        "coordinate_mode": "cartesian",
+        "path_direction": "custom",
+        "start": {
+          "x_m": 1.0,
+          "y_m": 0.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.01,
+          "y_m": 0.0,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

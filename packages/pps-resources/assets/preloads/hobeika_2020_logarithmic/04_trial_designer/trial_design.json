@@ -1,0 +1,161 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "hobeika_2020_logarithmic",
+  "repetitions_per_condition": 6,
+  "soa_values_ms": [
+    105,
+    1625,
+    2385,
+    2765,
+    2955,
+    3050
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "hobeika-logarithmic-looming",
+      "label": "Approaching source",
+      "audio_tactile_percentage": 50.0,
+      "catch_percentage": 33.33333333333333,
+      "baseline_percentage": 16.666666666666664,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        640.0,
+        320.0,
+        160.0,
+        80.0,
+        40.0,
+        20.0
+      ],
+      "metadata": {
+        "auditory_trajectory_direction": "looming",
+        "auditory_trajectory_family": "right_front_constant_speed_approach",
+        "body_anchor": "head center",
+        "spatial_hemifield": "right front",
+        "trajectory_start_distance_cm": 640,
+        "trajectory_end_distance_cm": 20,
+        "source_asset_equivalence": "generated direct-path binaural proxy",
+        "renderer_equivalence_boundary": "FABIAN direct-path preview, with Spat room acoustics and LISTEN filters in the publication",
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_capture_device": "mouse click preview",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_waveform_shape": "sine",
+        "tactile_frequency_hz": 250,
+        "tactile_duration_ms": 20,
+        "tactile_amplitude": 0.2
+      },
+      "elements": [
+        {
+          "element_id": "hobeika-logarithmic-looming-pre",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            300
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "hobeika-logarithmic-looming-sound",
+          "kind": "looming_stimulus",
+          "label": "Hobeika moving white-noise burst preview",
+          "source_label": "Hobeika moving white-noise burst preview",
+          "source_labels": [
+            "Hobeika moving white-noise burst preview"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "hobeika-logarithmic-looming-post",
+          "kind": "jitter",
+          "label": "Post-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            700,
+            833,
+            967,
+            1100
+          ],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "hobeika-logarithmic-fixed",
+      "label": "Fixed source at 640 cm",
+      "audio_tactile_percentage": 50.0,
+      "catch_percentage": 33.33333333333333,
+      "baseline_percentage": 16.666666666666664,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        640.0,
+        640.0,
+        640.0,
+        640.0,
+        640.0,
+        640.0
+      ],
+      "metadata": {
+        "auditory_trajectory_direction": "fixed",
+        "auditory_trajectory_family": "fixed_distance_control",
+        "body_anchor": "head center",
+        "spatial_hemifield": "right front",
+        "trajectory_start_distance_cm": 640,
+        "trajectory_end_distance_cm": 640,
+        "source_asset_equivalence": "generated direct-path binaural proxy",
+        "renderer_equivalence_boundary": "FABIAN direct-path preview, with Spat room acoustics and LISTEN filters in the publication",
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_capture_device": "mouse click preview",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_waveform_shape": "sine",
+        "tactile_frequency_hz": 250,
+        "tactile_duration_ms": 20,
+        "tactile_amplitude": 0.2
+      },
+      "elements": [
+        {
+          "element_id": "hobeika-logarithmic-fixed-pre",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            300
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "hobeika-logarithmic-fixed-sound",
+          "kind": "looming_stimulus",
+          "label": "Hobeika fixed white-noise burst preview",
+          "source_label": "Hobeika fixed white-noise burst preview",
+          "source_labels": [
+            "Hobeika fixed white-noise burst preview"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "hobeika-logarithmic-fixed-post",
+          "kind": "jitter",
+          "label": "Post-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            700,
+            833,
+            967,
+            1100
+          ],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 576
+}

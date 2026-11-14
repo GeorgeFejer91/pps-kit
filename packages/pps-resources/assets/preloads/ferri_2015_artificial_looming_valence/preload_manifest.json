@@ -37,9 +37,9 @@
   ],
   "profile_parameters_manifest": "assets/preloads/ferri_2015_artificial_looming_valence/01_profile/profile_parameters_manifest.json",
   "recreation_status": {
-    "primary_category": "missing_publication_parameters",
-    "category_label": "Missing publication parameters",
-    "runner_readiness": "blocked_missing_parameters",
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
     "profile_checks_passed": false,
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
@@ -47,8 +47,8 @@
     "finished_profile": false,
     "segment_6_launchable": false,
     "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 2,
-    "unsupported_structure_count": 0
+    "missing_parameter_count": 3,
+    "unsupported_structure_count": 1
   },
   "render_contract": {
     "stage": "auditory_looming_prebake",
@@ -58,35 +58,78 @@
   },
   "assets": [
     {
-      "label": "Negative artificial 1/f2 looming",
-      "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
-      "sha256": "1f9194513bf4ce53c7075e0a6c966fcdf97eb731474df5c3d1248a859e66364b",
+      "label": "Neutral artificial white noise",
+      "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_white_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_white_noise.wav",
+      "sha256": "57be5bc524de6eeff9a14c1c207b37ce38af7b280455b4a2e86091b072d281d0",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Neutral artificial white noise",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Negative artificial brown noise",
+      "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_brown_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_brown_noise.wav",
+      "sha256": "2453ab4d560496fe23632bf9776c56920e5819cc96a7ea16ddf91c0401f87e93",
       "duration_s": 3.0,
       "sample_rate": 44100,
       "channels": 2,
       "source_kind": "generated_noise",
       "noise_type": "brown",
       "tone_type": "brown",
-      "motion_mode": "looming",
+      "motion_mode": "stationary",
       "direction_label": "looming",
       "render_mode": "preserve",
       "include_tactile": false,
       "trajectory_snapshot": {
         "schema": "pps-stimulus-trajectory.v1",
-        "label": "Negative artificial 1/f2 looming",
+        "label": "Negative artificial brown noise",
         "source_kind": "generated_noise",
         "noise_type": "brown",
         "start_distance_cm": 110.0,
-        "end_distance_cm": 10.0,
+        "end_distance_cm": 110.0,
         "start_rotation_deg": 0.0,
         "end_rotation_deg": 0.0,
-        "movement_duration_s": 3.0,
+        "movement_duration_s": 0.0,
         "start_hold_s": 0.0,
         "end_hold_s": 0.0,
-        "path_length_m": 1.0,
-        "coordinate_mode": "cartesian",
-        "path_direction": "approach",
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
         "start": {
           "x_m": 0.0,
           "y_m": 1.1,
@@ -94,74 +137,11 @@
         },
         "end": {
           "x_m": 0.0,
-          "y_m": 0.1,
-          "z_m": 0.0
-        }
-      },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
-    },
-    {
-      "label": "Neutral artificial 1/f looming",
-      "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
-      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
-      "sha256": "8d9ae4c39e33c80a34b4f5fe50ab6949cb68a160554d2e0856f9e09f28bdc29f",
-      "duration_s": 3.0,
-      "sample_rate": 44100,
-      "channels": 2,
-      "source_kind": "generated_noise",
-      "noise_type": "pink",
-      "tone_type": "pink",
-      "motion_mode": "looming",
-      "direction_label": "looming",
-      "render_mode": "preserve",
-      "include_tactile": false,
-      "trajectory_snapshot": {
-        "schema": "pps-stimulus-trajectory.v1",
-        "label": "Neutral artificial 1/f looming",
-        "source_kind": "generated_noise",
-        "noise_type": "pink",
-        "start_distance_cm": 110.0,
-        "end_distance_cm": 10.0,
-        "start_rotation_deg": 0.0,
-        "end_rotation_deg": 0.0,
-        "movement_duration_s": 3.0,
-        "start_hold_s": 0.0,
-        "end_hold_s": 0.0,
-        "path_length_m": 1.0,
-        "coordinate_mode": "cartesian",
-        "path_direction": "approach",
-        "start": {
-          "x_m": 0.0,
           "y_m": 1.1,
           "z_m": 0.0
-        },
-        "end": {
-          "x_m": 0.0,
-          "y_m": 0.1,
-          "z_m": 0.0
         }
       },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
+      "source_profile": "continuous_noise"
     }
   ],
   "notes": [

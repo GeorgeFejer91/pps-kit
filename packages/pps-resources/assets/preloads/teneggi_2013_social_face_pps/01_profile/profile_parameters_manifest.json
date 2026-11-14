@@ -213,7 +213,7 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "catch_mode",
       "status": "reported",
-      "value": 24,
+      "value": 48,
       "note": "Catch settings are encoded."
     },
     {
@@ -221,7 +221,7 @@
       "segment_label": "Segment 4 repetition pool settings",
       "parameter": "trial_pool_repetitions",
       "status": "inferred",
-      "value": 8,
+      "value": 16,
       "note": "Segment 4 can infer repetitions from repetitions_per_condition."
     },
     {
@@ -229,7 +229,7 @@
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "block_count",
       "status": "reported",
-      "value": 2,
+      "value": 4,
       "note": "Block count is encoded."
     },
     {
@@ -334,7 +334,7 @@
     },
     "05_run_setup": {
       "run_defaults": "assets/preloads/teneggi_2013_social_face_pps/05_run_setup/run_defaults.json",
-      "block_count": 2,
+      "block_count": 4,
       "participant_count": 18
     },
     "local_segment_0_to_4_profile_gate": {
@@ -362,7 +362,7 @@
     },
     {
       "field": "Toolkit preview defaults",
-      "source": "The toolkit uses a generated continuous pink-noise source and a virtual path with nominal endpoints about 105 and 5 cm to define a three-second preview. These are renderer settings only. The toolkit seed and block allocation are reproducibility defaults."
+      "source": "The toolkit uses a generated continuous pink-noise source and a virtual path with nominal endpoints about 105 and 5 cm to define a three-second preview. These are renderer settings only. The deterministic seed and evenly balanced cell allocation within blocks are toolkit defaults. The two social-condition blocks are kept together and condition order is counterbalanced."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

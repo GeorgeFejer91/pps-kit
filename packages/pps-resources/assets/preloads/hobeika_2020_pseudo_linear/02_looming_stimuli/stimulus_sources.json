@@ -1,0 +1,90 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "hobeika_2020_pseudo_linear",
+  "assets": [
+    {
+      "label": "Hobeika moving white-noise burst preview",
+      "path": "assets/preloads/hobeika_2020_pseudo_linear/02_looming_stimuli/looming_Hobeika_moving_white-noise_burst_preview.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/hobeika_2020_pseudo_linear/02_looming_stimuli/looming_Hobeika_moving_white-noise_burst_preview.wav",
+      "sha256": "fa4685cd881ecb45c10f908634f28820ffc8f9e0a4cee47f764f38ae0d59133e",
+      "duration_s": 3.25,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "imported_audio",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "looming",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Hobeika moving white-noise burst preview",
+        "source_kind": "imported_audio",
+        "noise_type": "white",
+        "start_distance_cm": 640.0,
+        "end_distance_cm": 20.0,
+        "start_rotation_deg": 60.0,
+        "end_rotation_deg": 60.0,
+        "movement_duration_s": 2.9524,
+        "start_hold_s": 0.095,
+        "end_hold_s": 0.2026,
+        "path_length_m": 6.2,
+        "coordinate_mode": "polar",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 5.542563,
+          "y_m": 3.2,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.173205,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Hobeika fixed white-noise burst preview",
+      "path": "assets/preloads/hobeika_2020_pseudo_linear/02_looming_stimuli/looming_Hobeika_fixed_white-noise_burst_preview.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/hobeika_2020_pseudo_linear/02_looming_stimuli/looming_Hobeika_fixed_white-noise_burst_preview.wav",
+      "sha256": "c99e6a8872c1e4adae9fdb1ffcc53b440b8235139449177be9ad073ad757bd5d",
+      "duration_s": 3.25,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "imported_audio",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Hobeika fixed white-noise burst preview",
+        "source_kind": "imported_audio",
+        "noise_type": "white",
+        "start_distance_cm": 640.0,
+        "end_distance_cm": 640.0,
+        "start_rotation_deg": 60.0,
+        "end_rotation_deg": 60.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.095,
+        "end_hold_s": 0.2026,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 5.542563,
+          "y_m": 3.2,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 5.542563,
+          "y_m": 3.2,
+          "z_m": 0.0
+        }
+      }
+    }
+  ]
+}

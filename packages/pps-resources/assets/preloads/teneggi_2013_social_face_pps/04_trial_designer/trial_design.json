@@ -1,7 +1,7 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "teneggi_2013_social_face_pps",
-  "repetitions_per_condition": 8,
+  "repetitions_per_condition": 16,
   "soa_values_ms": [
     300,
     800,
@@ -67,5 +67,5 @@
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 104
+  "preview_trial_count": 208
 }

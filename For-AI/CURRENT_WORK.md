@@ -164,9 +164,14 @@ This file is the active checklist and handoff owner; replace state, do not appen
   capture, and verified baseline/catch allocation. Ardizzi–Ferri and Teneggi
   remain blocked for the reported apparatus. Profiles and readiness gates
   are listed in the [profile catalogue](../docs/PUBLISHED_STUDY_RECREATION_STATUS.md).
-  Next implement stable trial-row selection by block and grouped participant
-  ordering, then verify it against Teneggi’s two blocks per social condition.
-  Keep the remaining experimental implementations and physical qualification open.
+  Native Teneggi scheduling now verifies four 52-trial blocks and assigns
+  both condition orders to nine participants each. The operator changes the
+  social setting between condition groups. The second pass also verifies the
+  416-trial Ferri artificial assessment, 688-trial ecological schedule with
+  test fixtures, two 576-trial Hobeika variants and two 245-trial Rahmani
+  variants. Exact delivery remains gated. Next implement stable trial-row
+  selection by block for experiments whose conditions use different media
+  or stimulus settings. Physical qualification and the remaining profiles are open.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.

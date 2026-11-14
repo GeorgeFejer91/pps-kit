@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import pytest
 
@@ -40,3 +41,36 @@ def test_legacy_order_algorithms_remain_available() -> None:
     assert fixed.block_order == ("A", "B")
     policy = default_order_policy(seed=42)
     assert policy["algorithm"] == SEEDED_FACTORADIC_CYCLE
+
+def test_teneggi_keeps_each_social_condition_together_in_runner_order() -> None:
+    from peripersonal_space_toolkit.dashboard_app import _run_setup_preview_rows
+    from peripersonal_space_toolkit.design import block_trial_rows, participant_block_orders
+    from peripersonal_space_toolkit.templates import load_template
+
+    root = Path(__file__).resolve().parents[3]
+    design = load_template(
+        root / "packages/pps-resources/study_templates/teneggi_2013_social_face_pps.json"
+    ).design
+    labels = [spec.label for spec in design.protocol.block_specs]
+    pool = block_trial_rows(design)
+    blocks = [
+        {"block_label": label, "trial_count": sum(row["block_label"] == label for row in pool)}
+        for label in labels
+    ]
+    assert [block["trial_count"] for block in blocks] == [52] * 4
+    _, schedule = _run_setup_preview_rows(
+        blocks,
+        participant_count=18,
+        structure="single",
+        seed=design.protocol.random_seed,
+        order_policy=design.protocol.participant_order_policy,
+    )
+    planned = participant_block_orders(design)
+    for participant, order in planned.items():
+        assert order == [row["block_label"] for row in schedule if row["participant_id"] == participant]
+    orders = list(planned.values())
+    assert orders.count(labels) == orders.count(labels[2:] + labels[:2]) == 9
+
+    broken_policy = {**design.protocol.participant_order_policy, "block_groups": [labels[:2]]}
+    with pytest.raises(ValueError, match="each block exactly once"):
+        participant_order(labels, participant_index=1, policy=broken_policy)

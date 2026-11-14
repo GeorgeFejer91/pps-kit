@@ -3387,9 +3387,9 @@
       "profile_manifest": "assets/preloads/ferri_2015_artificial_looming_valence/preload_manifest.json",
       "profile_parameters_manifest": "assets/preloads/ferri_2015_artificial_looming_valence/01_profile/profile_parameters_manifest.json",
       "recreation_status": {
-        "primary_category": "missing_publication_parameters",
-        "category_label": "Missing publication parameters",
-        "runner_readiness": "blocked_missing_parameters",
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
         "profile_checks_passed": false,
         "gui_recreatable": false,
         "segment_0_to_4_profile_checks_passed": false,
@@ -3397,18 +3397,18 @@
         "finished_profile": false,
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 2,
-        "unsupported_structure_count": 0
+        "missing_parameter_count": 3,
+        "unsupported_structure_count": 1
       },
-      "runner_readiness": "blocked_missing_parameters",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
       "segment_0_to_4_profile_checks_passed": false,
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "primary_recreation_category": "missing_publication_parameters",
-      "missing_parameter_count": 2,
-      "unsupported_structure_count": 0,
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 3,
+      "unsupported_structure_count": 1,
       "local_only": true,
       "source_recipe_count": 2,
       "catalog_segments": [
@@ -3441,35 +3441,78 @@
       "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
       "assets": [
         {
-          "label": "Negative artificial 1/f2 looming",
-          "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_1_f2_looming.wav",
-          "sha256": "1f9194513bf4ce53c7075e0a6c966fcdf97eb731474df5c3d1248a859e66364b",
+          "label": "Neutral artificial white noise",
+          "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_white_noise.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_white_noise.wav",
+          "sha256": "57be5bc524de6eeff9a14c1c207b37ce38af7b280455b4a2e86091b072d281d0",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Neutral artificial white noise",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 110.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "polar",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        },
+        {
+          "label": "Negative artificial brown noise",
+          "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_brown_noise.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_brown_noise.wav",
+          "sha256": "2453ab4d560496fe23632bf9776c56920e5819cc96a7ea16ddf91c0401f87e93",
           "duration_s": 3.0,
           "sample_rate": 44100,
           "channels": 2,
           "source_kind": "generated_noise",
           "noise_type": "brown",
           "tone_type": "brown",
-          "motion_mode": "looming",
+          "motion_mode": "stationary",
           "direction_label": "looming",
           "render_mode": "preserve",
           "include_tactile": false,
           "trajectory_snapshot": {
             "schema": "pps-stimulus-trajectory.v1",
-            "label": "Negative artificial 1/f2 looming",
+            "label": "Negative artificial brown noise",
             "source_kind": "generated_noise",
             "noise_type": "brown",
             "start_distance_cm": 110.0,
-            "end_distance_cm": 10.0,
+            "end_distance_cm": 110.0,
             "start_rotation_deg": 0.0,
             "end_rotation_deg": 0.0,
-            "movement_duration_s": 3.0,
+            "movement_duration_s": 0.0,
             "start_hold_s": 0.0,
             "end_hold_s": 0.0,
-            "path_length_m": 1.0,
-            "coordinate_mode": "cartesian",
-            "path_direction": "approach",
+            "path_length_m": 0.0,
+            "coordinate_mode": "polar",
+            "path_direction": "stationary",
             "start": {
               "x_m": 0.0,
               "y_m": 1.1,
@@ -3477,74 +3520,11 @@
             },
             "end": {
               "x_m": 0.0,
-              "y_m": 0.1,
-              "z_m": 0.0
-            }
-          },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
-        },
-        {
-          "label": "Neutral artificial 1/f looming",
-          "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_1_f_looming.wav",
-          "sha256": "8d9ae4c39e33c80a34b4f5fe50ab6949cb68a160554d2e0856f9e09f28bdc29f",
-          "duration_s": 3.0,
-          "sample_rate": 44100,
-          "channels": 2,
-          "source_kind": "generated_noise",
-          "noise_type": "pink",
-          "tone_type": "pink",
-          "motion_mode": "looming",
-          "direction_label": "looming",
-          "render_mode": "preserve",
-          "include_tactile": false,
-          "trajectory_snapshot": {
-            "schema": "pps-stimulus-trajectory.v1",
-            "label": "Neutral artificial 1/f looming",
-            "source_kind": "generated_noise",
-            "noise_type": "pink",
-            "start_distance_cm": 110.0,
-            "end_distance_cm": 10.0,
-            "start_rotation_deg": 0.0,
-            "end_rotation_deg": 0.0,
-            "movement_duration_s": 3.0,
-            "start_hold_s": 0.0,
-            "end_hold_s": 0.0,
-            "path_length_m": 1.0,
-            "coordinate_mode": "cartesian",
-            "path_direction": "approach",
-            "start": {
-              "x_m": 0.0,
               "y_m": 1.1,
               "z_m": 0.0
-            },
-            "end": {
-              "x_m": 0.0,
-              "y_m": 0.1,
-              "z_m": 0.0
             }
           },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
+          "source_profile": "continuous_noise"
         }
       ]
     },
@@ -3560,9 +3540,9 @@
       "profile_manifest": "assets/preloads/ferri_2015_ecological_looming_valence/preload_manifest.json",
       "profile_parameters_manifest": "assets/preloads/ferri_2015_ecological_looming_valence/01_profile/profile_parameters_manifest.json",
       "recreation_status": {
-        "primary_category": "missing_publication_parameters",
-        "category_label": "Missing publication parameters",
-        "runner_readiness": "blocked_missing_parameters",
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
         "profile_checks_passed": false,
         "gui_recreatable": false,
         "segment_0_to_4_profile_checks_passed": false,
@@ -3570,20 +3550,20 @@
         "finished_profile": false,
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 2,
-        "unsupported_structure_count": 0
+        "missing_parameter_count": 5,
+        "unsupported_structure_count": 1
       },
-      "runner_readiness": "blocked_missing_parameters",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
       "segment_0_to_4_profile_checks_passed": false,
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "primary_recreation_category": "missing_publication_parameters",
-      "missing_parameter_count": 2,
-      "unsupported_structure_count": 0,
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
       "local_only": true,
-      "source_recipe_count": 3,
+      "source_recipe_count": 0,
       "catalog_segments": [
         {
           "folder": "01_profile",
@@ -3612,167 +3592,7 @@
         }
       ],
       "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
-      "assets": [
-        {
-          "label": "Negative ecological looming",
-          "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Negative_ecological_looming.wav",
-          "sha256": "764ab5a98c2936d0b7b8b1df2bee88d8bd516e8dca6dc047d1bc197d3b4303f4",
-          "duration_s": 3.0,
-          "sample_rate": 44100,
-          "channels": 2,
-          "source_kind": "generated_noise",
-          "noise_type": "brown",
-          "tone_type": "brown",
-          "motion_mode": "looming",
-          "direction_label": "looming",
-          "render_mode": "preserve",
-          "include_tactile": false,
-          "trajectory_snapshot": {
-            "schema": "pps-stimulus-trajectory.v1",
-            "label": "Negative ecological looming",
-            "source_kind": "generated_noise",
-            "noise_type": "brown",
-            "start_distance_cm": 110.0,
-            "end_distance_cm": 10.0,
-            "start_rotation_deg": 0.0,
-            "end_rotation_deg": 0.0,
-            "movement_duration_s": 3.0,
-            "start_hold_s": 0.0,
-            "end_hold_s": 0.0,
-            "path_length_m": 1.0,
-            "coordinate_mode": "cartesian",
-            "path_direction": "approach",
-            "start": {
-              "x_m": 0.0,
-              "y_m": 1.1,
-              "z_m": 0.0
-            },
-            "end": {
-              "x_m": 0.0,
-              "y_m": 0.1,
-              "z_m": 0.0
-            }
-          },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
-        },
-        {
-          "label": "Neutral ecological looming",
-          "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Neutral_ecological_looming.wav",
-          "sha256": "514078a8548f4bc5bedb7938fa9853cea621c18956c5af29eff7efc953c4f5fa",
-          "duration_s": 3.0,
-          "sample_rate": 44100,
-          "channels": 2,
-          "source_kind": "generated_noise",
-          "noise_type": "white",
-          "tone_type": "white",
-          "motion_mode": "looming",
-          "direction_label": "looming",
-          "render_mode": "preserve",
-          "include_tactile": false,
-          "trajectory_snapshot": {
-            "schema": "pps-stimulus-trajectory.v1",
-            "label": "Neutral ecological looming",
-            "source_kind": "generated_noise",
-            "noise_type": "white",
-            "start_distance_cm": 110.0,
-            "end_distance_cm": 10.0,
-            "start_rotation_deg": 0.0,
-            "end_rotation_deg": 0.0,
-            "movement_duration_s": 3.0,
-            "start_hold_s": 0.0,
-            "end_hold_s": 0.0,
-            "path_length_m": 1.0,
-            "coordinate_mode": "cartesian",
-            "path_direction": "approach",
-            "start": {
-              "x_m": 0.0,
-              "y_m": 1.1,
-              "z_m": 0.0
-            },
-            "end": {
-              "x_m": 0.0,
-              "y_m": 0.1,
-              "z_m": 0.0
-            }
-          },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
-        },
-        {
-          "label": "Positive ecological looming",
-          "path": "assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_ecological_looming_valence/02_looming_stimuli/looming_Positive_ecological_looming.wav",
-          "sha256": "9701ef704652f39dcdfea2fe037a3060e116121057be2cf17e88089ac461bfeb",
-          "duration_s": 3.0,
-          "sample_rate": 44100,
-          "channels": 2,
-          "source_kind": "generated_noise",
-          "noise_type": "pink",
-          "tone_type": "pink",
-          "motion_mode": "looming",
-          "direction_label": "looming",
-          "render_mode": "preserve",
-          "include_tactile": false,
-          "trajectory_snapshot": {
-            "schema": "pps-stimulus-trajectory.v1",
-            "label": "Positive ecological looming",
-            "source_kind": "generated_noise",
-            "noise_type": "pink",
-            "start_distance_cm": 110.0,
-            "end_distance_cm": 10.0,
-            "start_rotation_deg": 0.0,
-            "end_rotation_deg": 0.0,
-            "movement_duration_s": 3.0,
-            "start_hold_s": 0.0,
-            "end_hold_s": 0.0,
-            "path_length_m": 1.0,
-            "coordinate_mode": "cartesian",
-            "path_direction": "approach",
-            "start": {
-              "x_m": 0.0,
-              "y_m": 1.1,
-              "z_m": 0.0
-            },
-            "end": {
-              "x_m": 0.0,
-              "y_m": 0.1,
-              "z_m": 0.0
-            }
-          },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
-        }
-      ]
+      "assets": []
     },
     {
       "template_id": "galli_2015_wheelchair_full_body",
@@ -3943,6 +3763,308 @@
             "active_window_source": "trajectory_movement_duration",
             "spacing_policy": "symmetric_fit",
             "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "hobeika_2020_logarithmic",
+      "title": "Hobeika 2020 logarithmic distance PPS assessment",
+      "visible_variant_label": "A",
+      "variant_display": "Hobeika 2020 logarithmic distance PPS assessment - Variant A",
+      "publication_status": "published",
+      "profile_type": "right_front_looming_fixed_expectancy_audio_tactile_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/hobeika_2020_logarithmic/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/hobeika_2020_logarithmic/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 4,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/hobeika_2020_logarithmic/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/hobeika_2020_logarithmic/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/hobeika_2020_logarithmic/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/hobeika_2020_logarithmic/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/hobeika_2020_logarithmic/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Hobeika moving white-noise burst preview",
+          "path": "assets/preloads/hobeika_2020_logarithmic/02_looming_stimuli/looming_Hobeika_moving_white-noise_burst_preview.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/hobeika_2020_logarithmic/02_looming_stimuli/looming_Hobeika_moving_white-noise_burst_preview.wav",
+          "sha256": "fa4685cd881ecb45c10f908634f28820ffc8f9e0a4cee47f764f38ae0d59133e",
+          "duration_s": 3.25,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "imported_audio",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Hobeika moving white-noise burst preview",
+            "source_kind": "imported_audio",
+            "noise_type": "white",
+            "start_distance_cm": 640.0,
+            "end_distance_cm": 20.0,
+            "start_rotation_deg": 60.0,
+            "end_rotation_deg": 60.0,
+            "movement_duration_s": 2.9524,
+            "start_hold_s": 0.095,
+            "end_hold_s": 0.2026,
+            "path_length_m": 6.2,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 5.542563,
+              "y_m": 3.2,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.173205,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Hobeika fixed white-noise burst preview",
+          "path": "assets/preloads/hobeika_2020_logarithmic/02_looming_stimuli/looming_Hobeika_fixed_white-noise_burst_preview.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/hobeika_2020_logarithmic/02_looming_stimuli/looming_Hobeika_fixed_white-noise_burst_preview.wav",
+          "sha256": "c99e6a8872c1e4adae9fdb1ffcc53b440b8235139449177be9ad073ad757bd5d",
+          "duration_s": 3.25,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "imported_audio",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Hobeika fixed white-noise burst preview",
+            "source_kind": "imported_audio",
+            "noise_type": "white",
+            "start_distance_cm": 640.0,
+            "end_distance_cm": 640.0,
+            "start_rotation_deg": 60.0,
+            "end_rotation_deg": 60.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.095,
+            "end_hold_s": 0.2026,
+            "path_length_m": 0.0,
+            "coordinate_mode": "polar",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 5.542563,
+              "y_m": 3.2,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 5.542563,
+              "y_m": 3.2,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "template_id": "hobeika_2020_pseudo_linear",
+      "title": "Hobeika 2020 pseudo-linear distance PPS assessment",
+      "visible_variant_label": "B",
+      "variant_display": "Hobeika 2020 pseudo-linear distance PPS assessment - Variant B",
+      "publication_status": "published",
+      "profile_type": "right_front_looming_fixed_expectancy_audio_tactile_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/hobeika_2020_pseudo_linear/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/hobeika_2020_pseudo_linear/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 4,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/hobeika_2020_pseudo_linear/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/hobeika_2020_pseudo_linear/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/hobeika_2020_pseudo_linear/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/hobeika_2020_pseudo_linear/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/hobeika_2020_pseudo_linear/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Hobeika moving white-noise burst preview",
+          "path": "assets/preloads/hobeika_2020_pseudo_linear/02_looming_stimuli/looming_Hobeika_moving_white-noise_burst_preview.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/hobeika_2020_pseudo_linear/02_looming_stimuli/looming_Hobeika_moving_white-noise_burst_preview.wav",
+          "sha256": "fa4685cd881ecb45c10f908634f28820ffc8f9e0a4cee47f764f38ae0d59133e",
+          "duration_s": 3.25,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "imported_audio",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Hobeika moving white-noise burst preview",
+            "source_kind": "imported_audio",
+            "noise_type": "white",
+            "start_distance_cm": 640.0,
+            "end_distance_cm": 20.0,
+            "start_rotation_deg": 60.0,
+            "end_rotation_deg": 60.0,
+            "movement_duration_s": 2.9524,
+            "start_hold_s": 0.095,
+            "end_hold_s": 0.2026,
+            "path_length_m": 6.2,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 5.542563,
+              "y_m": 3.2,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.173205,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Hobeika fixed white-noise burst preview",
+          "path": "assets/preloads/hobeika_2020_pseudo_linear/02_looming_stimuli/looming_Hobeika_fixed_white-noise_burst_preview.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/hobeika_2020_pseudo_linear/02_looming_stimuli/looming_Hobeika_fixed_white-noise_burst_preview.wav",
+          "sha256": "c99e6a8872c1e4adae9fdb1ffcc53b440b8235139449177be9ad073ad757bd5d",
+          "duration_s": 3.25,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "imported_audio",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Hobeika fixed white-noise burst preview",
+            "source_kind": "imported_audio",
+            "noise_type": "white",
+            "start_distance_cm": 640.0,
+            "end_distance_cm": 640.0,
+            "start_rotation_deg": 60.0,
+            "end_rotation_deg": 60.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.095,
+            "end_hold_s": 0.2026,
+            "path_length_m": 0.0,
+            "coordinate_mode": "polar",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 5.542563,
+              "y_m": 3.2,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 5.542563,
+              "y_m": 3.2,
+              "z_m": 0.0
+            }
           }
         }
       ]
@@ -5149,6 +5271,226 @@
             "end": {
               "x_m": 0.0,
               "y_m": 0.1,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
+      "template_id": "rahmani_2025_2s_pps",
+      "title": "Rahmani 2025 2-second looming PPS",
+      "visible_variant_label": "A",
+      "variant_display": "Rahmani 2025 2-second looming PPS - Variant A",
+      "publication_status": "published",
+      "profile_type": "right_lateral_looming_duration_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/rahmani_2025_2s_pps/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/rahmani_2025_2s_pps/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 4,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 1,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/rahmani_2025_2s_pps/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/rahmani_2025_2s_pps/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/rahmani_2025_2s_pps/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/rahmani_2025_2s_pps/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/rahmani_2025_2s_pps/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "2 s right-lateral pink noise",
+          "path": "assets/preloads/rahmani_2025_2s_pps/02_looming_stimuli/looming_2_s_right-lateral_pink_noise.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/rahmani_2025_2s_pps/02_looming_stimuli/looming_2_s_right-lateral_pink_noise.wav",
+          "sha256": "284523bc507bf87507e81c87b0ae6e296186296f4a684ac929efb34aafa42533",
+          "duration_s": 2.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "2 s right-lateral pink noise",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 100.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 2.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.99,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 1.0,
+              "y_m": 0.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.01,
+              "y_m": 0.0,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
+      "template_id": "rahmani_2025_3s_pps",
+      "title": "Rahmani 2025 3-second looming PPS",
+      "visible_variant_label": "B",
+      "variant_display": "Rahmani 2025 3-second looming PPS - Variant B",
+      "publication_status": "published",
+      "profile_type": "right_lateral_looming_duration_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/rahmani_2025_3s_pps/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/rahmani_2025_3s_pps/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 4,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 1,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/rahmani_2025_3s_pps/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/rahmani_2025_3s_pps/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/rahmani_2025_3s_pps/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/rahmani_2025_3s_pps/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/rahmani_2025_3s_pps/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "3 s right-lateral pink noise",
+          "path": "assets/preloads/rahmani_2025_3s_pps/02_looming_stimuli/looming_3_s_right-lateral_pink_noise.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/rahmani_2025_3s_pps/02_looming_stimuli/looming_3_s_right-lateral_pink_noise.wav",
+          "sha256": "17197fe09cacf1f705fb058b6f1c3245578942017ab5676a6502d57a138c7597",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "3 s right-lateral pink noise",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 150.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 90.0,
+            "end_rotation_deg": 90.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.49,
+            "coordinate_mode": "cartesian",
+            "path_direction": "custom",
+            "start": {
+              "x_m": 1.5,
+              "y_m": 0.0,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.01,
+              "y_m": 0.0,
               "z_m": 0.0
             }
           },

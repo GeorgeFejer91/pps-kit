@@ -36,19 +36,19 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
         "covered_runnable_profile": 19,
         "covered_blocked_missing_publication_parameters": 6,
-        "covered_blocked_toolkit_structure": 1,
+        "covered_blocked_toolkit_structure": 3,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 45,
+        "not_yet_templated_missing_publication_parameters": 43,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 34
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 38
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
     ) == 26
     assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 24
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
-    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 2
+    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 4
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
     assert coverage["coverage_summary"]["openalex_broad_linked_candidate_like_hits"] == 47
@@ -765,7 +765,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels",
     ]
     assert records["looming_duration_2025"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
+        "covered_blocked_missing_publication_parameters"
     )
     assert records["looming_duration_2025"]["blocking_constraint_ids"] == [
         "hrtf_database_or_binaural_engine_mismatch"
@@ -773,9 +773,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert "renderer/HRTF provenance metadata are now runner-supported" in records["looming_duration_2025"][
         "missing_publication_parameters"
     ][0]
-    assert records["hobeika_2020_methods"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["hobeika_2020_methods"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
     assert records["hobeika_2020_methods"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files",
+        "hrtf_database_or_binaural_engine_mismatch",
     ]
     assert records["spadone_2021_connectivity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["spadone_2021_connectivity"]["blocking_constraint_ids"] == []
@@ -918,7 +919,13 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         record["record_id"]
         for record in records.values()
         if "electrical_tactile_calibration" in record["blocking_constraint_ids"]
-    } == {"serino_2007_blind_cane_users", "teneggi_2013_social_face", "ardizzi_ferri_2018_interoceptive"}
+    } == {
+        "serino_2007_blind_cane_users",
+        "teneggi_2013_social_face",
+        "ardizzi_ferri_2018_interoceptive",
+        "ferri_2015_artificial_valence",
+        "ferri_2015_ecological_valence",
+    }
     assert {
         record["record_id"]
         for record in records.values()

@@ -40,7 +40,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "packages" / "pps-resources" / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 34
+    assert len(templates) == 38
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -49,10 +49,12 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert categorized == template_ids
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
-    assert len(status["categories"]["missing_publication_parameters"]) == 8
+    assert len(status["categories"]["missing_publication_parameters"]) == 12
     assert set(status["categories"]["toolkit_structural_gap"]) == {
         "amemiya_2019_foot_sole_exp1",
         "amemiya_2019_foot_sole_exp2",
+        "ferri_2015_artificial_looming_valence",
+        "ferri_2015_ecological_looming_valence",
     }
 
     allowed_statuses = {
@@ -103,10 +105,16 @@ def test_new_assessment_preloads_preserve_trial_counts_and_launch_gates():
     status = json.loads((root / "profile_recreation_status.json").read_text(encoding="utf-8"))
     expected = {
         "maister_2015_shared_sensory_pps": (50, True),
-        "teneggi_2013_social_face_pps": (104, False),
+        "teneggi_2013_social_face_pps": (208, False),
         "ardizzi_ferri_2018_looming_flat": (300, False),
         "amemiya_2019_foot_sole_exp1": (180, False),
         "amemiya_2019_foot_sole_exp2": (120, False),
+        "ferri_2015_artificial_looming_valence": (416, False),
+        "ferri_2015_ecological_looming_valence": (0, False),
+        "hobeika_2020_logarithmic": (576, False),
+        "hobeika_2020_pseudo_linear": (576, False),
+        "rahmani_2025_2s_pps": (245, False),
+        "rahmani_2025_3s_pps": (245, False),
     }
     for profile in status["profiles"]:
         template_id = profile["template_id"]

@@ -5,134 +5,291 @@
   "source_url": "https://pubmed.ncbi.nlm.nih.gov/25744869/",
   "doi": "10.1016/j.neuropsychologia.2015.03.001",
   "verification_status": "partial",
-  "notes": "Ecological-sound variant. Current GUI can represent valence-labeled sound conditions but cannot bundle the original ecological audio assets.",
+  "notes": "Experiment 2 specification. The three IADS sounds and a white-noise comparator are listed in the filmstrip. The sample-accurate sound files must be supplied before the trial pool can be generated.",
   "reference_parameters": {
     "profile_type": "audio_tactile_ecological_valence",
     "implemented_controls": [
-      "negative/positive/neutral condition labels",
-      "frontal looming path",
-      "right-hand tactile target"
+      "Tactile timing at 300–3000 ms in 300-ms steps, with D0 at −500 ms on trials that still present the sound.",
+      "One second of silence, three seconds of audio and one second of silence.",
+      "12 repetitions per sound and tactile time across 4 blocks, with 160 sound-present catch trials.",
+      "Four named source slots pending import of the exact study versions."
     ],
     "implementation_gaps": [
-      "licensed ecological sounds",
-      "sound-specific emotional validation",
-      "exact amplitude envelopes"
-    ]
+      "Exact licensed IADS source WAVs 276, 110 and 720, their Ferri three-second edits/envelopes and the exact white-noise comparison file.",
+      "A clinically governed, calibrated external electrical target scheduler for the Digitimer DS7A. The original MATLAB/Cogent task and button acquisition hardware are required to verify delivery and response timing.",
+      "Absolute acoustic output calibration for the study headphones, original hardware and corresponding ear-level measurement.",
+      "Original trial order, per-sound catch quotas and per-block balancing constraints."
+    ],
+    "experiment": 2,
+    "profile_check_complete": false,
+    "reported_auditory": {
+      "sources": [
+        {
+          "label": "Negative IADS 276 woman screaming",
+          "iads_id": 276,
+          "valence": "negative"
+        },
+        {
+          "label": "Positive IADS 110 baby laughing",
+          "iads_id": 110,
+          "valence": "positive"
+        },
+        {
+          "label": "Neutral IADS 720 brushing teeth",
+          "iads_id": 720,
+          "valence": "neutral"
+        },
+        {
+          "label": "White noise comparator",
+          "noise_type": "white",
+          "role": "comparative stimulus"
+        }
+      ],
+      "sample_rate_hz": 44100,
+      "sound_duration_ms": 3000,
+      "playback": "Headphones",
+      "looming_cue": "Rising acoustic intensity",
+      "nominal_intensity_db": [
+        55,
+        70
+      ],
+      "reported_envelope_shape": "Exponential increase in acoustic intensity",
+      "editing_software": "Sound Forge 4.5",
+      "locator": "p. 471, sections 2.2.1–2.2.2; p. 472, section 3.2.1"
+    },
+    "reported_trial_schedule": {
+      "fixed_silence_before_ms": 1000,
+      "sound_duration_ms": 3000,
+      "fixed_silence_after_ms": 1000,
+      "tactile_d0_from_trial_start_ms": 500,
+      "tactile_d0_from_sound_onset_ms": -500,
+      "tactile_d1_through_d10_from_sound_onset_ms": [
+        300,
+        600,
+        900,
+        1200,
+        1500,
+        1800,
+        2100,
+        2400,
+        2700,
+        3000
+      ],
+      "delayed_tactile_trials": 480,
+      "d0_tactile_trials": 48,
+      "tactile_trials_total": 528,
+      "sound_present_catch_trials": 160,
+      "total_trials_per_participant": 688,
+      "blocks": 4,
+      "trials_per_block": 172,
+      "tactile_repetitions_per_sound_time_cell": 12,
+      "locator": "pp. 470–471, sections 2.1.3 and 2.2.1"
+    },
+    "reported_tactile_target": {
+      "stimulator": "Digitimer DS7A",
+      "site": "Intermediate phalanx of the right middle finger",
+      "electrodes": "Pair of Ag/AgCl electrodes",
+      "pulse_shape": "Single square pulse",
+      "pulse_duration_us": 100,
+      "calibration": "Start at minimum and increase to clear perception. Intermix 10 tactile and 5 empty trials. If performance is below 100%, increase the intensity by 5 mA and repeat.",
+      "locator": "p. 470, sections 2.1.2–2.1.3; p. 471, section 2.2.1",
+      "output_mode_note": "The article calls the DS7A constant-current and describes a constant-voltage pulse. Absolute amplitude and delivered electrical waveform require confirmation."
+    },
+    "reported_response": {
+      "target_trials": "Press the response button with the left index finger as quickly as possible when touch is felt.",
+      "catch_trials": "Withhold response.",
+      "setup": "Blindfolded participant with the right hand palm down.",
+      "locator": "p. 470, section 2.1.3; p. 471, section 2.2.1",
+      "task_software": "Custom MATLAB task by Gaspare Galati using Cogent 2000 and Cogent Graphics."
+    },
+    "reported_pps_analysis": {
+      "paired_delay_bins": [
+        [
+          "D1",
+          "D2"
+        ],
+        [
+          "D3",
+          "D4"
+        ],
+        [
+          "D5",
+          "D6"
+        ],
+        [
+          "D7",
+          "D8"
+        ],
+        [
+          "D9",
+          "D10"
+        ]
+      ],
+      "paired_delay_bin_centers_ms": [
+        450,
+        1050,
+        1650,
+        2250,
+        2850
+      ],
+      "locator": "pp. 470–473, sections 2.1.5, 2.2.1–2.2.2, 3.2.1–3.2.2 and Fig. 5",
+      "white_noise_comparator": "Presented in the full PPS task schedule and excluded from the published valence analysis following SAM validation.",
+      "d0_analysis_scope": "D0 supplies a unimodal tactile reference and sits outside the five fitted delay pairs. Its role in baseline subtraction is unspecified.",
+      "paired_delay_bin_centers_derivation": "Arithmetic means of adjacent reported D1–D10 timings; fits use the five observed delay bins.",
+      "fit_exclusion": "Excluded participants whose RMSE exceeded the group mean by more than two standard deviations for both sigmoid and linear fits."
+    },
+    "toolkit_choices": {
+      "schedule": "Seeded balanced shuffle for replay. The original paper specifies randomized trial order. It gives aggregate catch and block counts.",
+      "geometry": "Delay is the independent stimulus coordinate. The renderer's trajectory fields only provide a three-second scaffold; study distances are unspecified.",
+      "acoustic_preview": "Supply the authorized three-second, 44.1 kHz Ferri study versions with their intensity envelopes already applied. Import them with the exact listed source labels and preserve mode. No ecological preview audio is provided."
+    }
   },
   "design": {
     "name": "Ferri 2015 ecological emotional looming PPS",
     "sofa_file": "",
-    "noises": [
-      {
-        "label": "Negative ecological looming",
-        "noise_type": "brown",
-        "azimuth_deg": 0.0,
-        "elevation_deg": 0.0,
-        "gain": 1.0
-      },
-      {
-        "label": "Neutral ecological looming",
-        "noise_type": "white",
-        "azimuth_deg": 0.0,
-        "elevation_deg": 0.0,
-        "gain": 1.0
-      },
-      {
-        "label": "Positive ecological looming",
-        "noise_type": "pink",
-        "azimuth_deg": 0.0,
-        "elevation_deg": 0.0,
-        "gain": 1.0
-      }
-    ],
+    "noises": [],
     "custom_looming_files": [],
     "prestimulus_files": [],
     "trajectory": {
-      "start_radius_m": 1.1,
-      "end_radius_m": 0.1,
-      "path_direction": "approach",
-      "coordinate_mode": "cartesian",
-      "start_x_m": 0.0,
-      "start_y_m": 1.1,
-      "start_z_m": 0.0,
-      "end_x_m": 0.0,
-      "end_y_m": 0.1,
-      "end_z_m": 0.0,
       "path_length_m": 1.0,
-      "propagation_speed_mps": 0.333333333,
-      "azimuth_start_deg": 0.0,
-      "azimuth_end_deg": 0.0,
-      "elevation_deg": 0.0,
+      "propagation_speed_mps": 0.3333333333333333,
       "padding_pre_s": 0.0,
       "padding_post_s": 0.0,
       "sample_rate": 44100,
-      "use_inverse_square": true
+      "use_inverse_square": false
     },
     "protocol": {
-      "repetitions_per_condition": 8,
+      "repetitions_per_condition": 12,
       "soa_values_ms": [
         300,
-        800,
+        600,
+        900,
+        1200,
         1500,
-        2200,
-        2700
+        1800,
+        2100,
+        2400,
+        2700,
+        3000
       ],
-      "spatial_values_cm": [
-        100,
-        83.3,
-        60,
-        36.7,
-        20
-      ],
-      "pair_spatial_values_with_soas": true,
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
       "auditory_motion_directions": [
         "looming"
       ],
       "tactile_sites": [
-        "right hand"
+        "right middle finger intermediate phalanx"
       ],
-      "catch_trial_percentage": 10.0,
-      "catch_trials_exact": null,
+      "catch_trials_exact": 160,
       "include_baseline_trials": true,
-      "baseline_soa_values_ms": [],
+      "baseline_soa_values_ms": [
+        -500
+      ],
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 1,
-      "trial_randomization_strategy": "no_immediate_repeats",
+      "blocks": 4,
+      "trial_randomization_strategy": "balanced_shuffle",
       "block_order_randomization": "fixed",
-      "max_consecutive_same_trial_type": 2,
       "trial_strips": [
         {
           "strip_id": "ferri-ecological-looming-valence-row",
-          "label": "Ecological looming valence trial",
-          "audio_tactile_percentage": 100.0,
-          "catch_percentage": 0.0,
-          "baseline_percentage": 0.0,
+          "label": "Experiment 2 trial",
           "elements": [
+            {
+              "element_id": "ferri-ecological-silence-before",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
             {
               "element_id": "ferri-ecological-looming-source",
               "kind": "looming_stimulus",
-              "label": "Ecological looming source",
-              "source_label": "Negative ecological looming",
-              "source_labels": ["Negative ecological looming", "Neutral ecological looming", "Positive ecological looming"],
+              "label": "Study sound",
+              "source_label": "Negative IADS 276 woman screaming",
+              "source_labels": [
+                "Negative IADS 276 woman screaming",
+                "Positive IADS 110 baby laughing",
+                "Neutral IADS 720 brushing teeth",
+                "White noise comparator"
+              ],
               "randomized": true
+            },
+            {
+              "element_id": "ferri-ecological-silence-after",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
             }
           ]
         }
       ],
       "participants": 1,
-      "random_seed": 20150302
+      "random_seed": 20150302,
+      "include_catch_trials": true,
+      "catch_crosses_sequence_variants": true,
+      "baseline_strategy": "custom",
+      "baseline_custom_trial_mode": "audio_tactile",
+      "baseline_trials_exact": 48,
+      "baseline_crosses_sequence_variants": true,
+      "block_specs": [
+        {
+          "label": "Block 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 3",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 4",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "distribute_trial_pool_across_blocks": true,
+      "repeat_trial_pool_per_block": false
     }
   },
   "provenance": [
     {
-      "field": "ecological valence conditions",
-      "source": "UCL Discovery abstract reports negative, positive, and neutral ecological sounds in Experiment 2."
+      "field": "Stimulus identity, intensity and editing",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2015.03.001, p. 471, sections 2.2.1–2.2.2; p. 472, section 3.2.1."
     },
     {
-      "field": "implementation gap",
-      "source": "The original ecological recordings are not redistributed; labels are placeholders for user-supplied audio."
+      "field": "Trial timing, counts and allocation",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2015.03.001, pp. 470–471, sections 2.1.3 and 2.2.1."
+    },
+    {
+      "field": "Tactile delivery, thresholding and response",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2015.03.001, p. 470, sections 2.1.2–2.1.3; p. 471, section 2.2.1."
+    },
+    {
+      "field": "Analysis bins and comparison scope",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2015.03.001, pp. 470–473, sections 2.1.5, 2.2.1–2.2.2, 3.2.1–3.2.2 and Fig. 5."
     }
   ]
 }

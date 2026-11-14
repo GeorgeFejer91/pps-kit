@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import math
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Iterable
 
 
@@ -101,6 +101,23 @@ def participant_order(
     policy = dict(policy or {})
     algorithm = str(policy.get("algorithm") or legacy_algorithm)
     seed = int(policy.get("seed") if policy.get("seed") is not None else legacy_seed)
+    if "block_groups" in policy:
+        if algorithm != SEEDED_FACTORADIC_CYCLE:
+            raise ValueError("Grouped blocks require the seeded factoradic order policy.")
+        groups = policy["block_groups"]
+        if not isinstance(groups, list) or not all(
+            isinstance(group, list) and group and all(isinstance(label, str) for label in group)
+            for group in groups
+        ):
+            raise ValueError("Participant order requires a list of nonempty block groups.")
+        group_blocks = [label for group in groups for label in group]
+        if len(group_blocks) != len(blocks) or set(group_blocks) != set(blocks):
+            raise ValueError("Participant order block groups must contain each block exactly once.")
+        by_first_block = {group[0]: group for group in groups}
+        order = seeded_factoradic_order(by_first_block, participant_index=participant_index, seed=seed)
+        return replace(order, block_order=tuple(
+            block for first in order.block_order for block in by_first_block[first]
+        ))
     if algorithm == SEEDED_FACTORADIC_CYCLE:
         return seeded_factoradic_order(blocks, participant_index=participant_index, seed=seed)
     if participant_index < 1:

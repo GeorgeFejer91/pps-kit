@@ -5,128 +5,281 @@
   "source_url": "https://discovery.ucl.ac.uk/id/eprint/1464805/",
   "doi": "10.1016/j.neuropsychologia.2015.03.001",
   "verification_status": "partial",
-  "notes": "Captures the Canzoneri-style frontal audio-tactile scaffold and artificial 1/f versus 1/f2 looming sound labels. Exact emotional stimulus construction and ratings require the paper materials.",
+  "notes": "Experiment 1 specification and trial-pool preview. White and brown preview audio represent the two reported noise colors. The original amplitude envelopes, frequency-band power matching and clinical stimulation require separate verification.",
   "reference_parameters": {
     "profile_type": "audio_tactile_looming_valence",
     "implemented_controls": [
-      "approaching sound",
-      "right-hand tactile target",
-      "five SOA/distance samples",
-      "negative/neutral artificial sound labels"
+      "Tactile timing at 300–3000 ms in 300-ms steps, with D0 at −500 ms on trials that still present the sound.",
+      "One second of silence, three seconds of audio and one second of silence.",
+      "16 repetitions per sound and tactile time across 2 blocks, with 64 sound-present catch trials.",
+      "Neutral white and negative brown noise-color preview."
     ],
     "implementation_gaps": [
-      "exact auditory files",
-      "emotional ratings",
-      "paper-specific gain envelope"
-    ]
+      "Exact original white and brown WAV files, the 2700–3150 Hz power-matching implementation and Sound Forge intensity envelopes.",
+      "A clinically governed, calibrated external electrical target scheduler for the Digitimer DS7A. The original MATLAB/Cogent task and button acquisition hardware are required to verify delivery and response timing.",
+      "Absolute acoustic output calibration for the study headphones, original hardware and corresponding ear-level measurement.",
+      "Original trial order, per-sound catch quotas and per-block balancing constraints."
+    ],
+    "experiment": 1,
+    "profile_check_complete": false,
+    "reported_auditory": {
+      "sources": [
+        {
+          "label": "Neutral artificial white noise",
+          "noise_type": "white",
+          "valence": "neutral",
+          "power_spectrum": "flat"
+        },
+        {
+          "label": "Negative artificial brown noise",
+          "noise_type": "brown",
+          "valence": "negative",
+          "power_spectrum": "1/f²"
+        }
+      ],
+      "sample_rate_hz": 44100,
+      "sound_duration_ms": 3000,
+      "playback": "Headphones",
+      "looming_cue": "Rising acoustic intensity",
+      "nominal_intensity_db": [
+        55,
+        70
+      ],
+      "reported_envelope_shape": "Exponential increase in acoustic intensity",
+      "editing_software": "Sound Forge 4.5",
+      "locator": "p. 470, section 2.1.2",
+      "noise_power_matching_band_hz": [
+        2700,
+        3150
+      ]
+    },
+    "reported_trial_schedule": {
+      "fixed_silence_before_ms": 1000,
+      "sound_duration_ms": 3000,
+      "fixed_silence_after_ms": 1000,
+      "tactile_d0_from_trial_start_ms": 500,
+      "tactile_d0_from_sound_onset_ms": -500,
+      "tactile_d1_through_d10_from_sound_onset_ms": [
+        300,
+        600,
+        900,
+        1200,
+        1500,
+        1800,
+        2100,
+        2400,
+        2700,
+        3000
+      ],
+      "delayed_tactile_trials": 320,
+      "d0_tactile_trials": 32,
+      "tactile_trials_total": 352,
+      "sound_present_catch_trials": 64,
+      "total_trials_per_participant": 416,
+      "blocks": 2,
+      "trials_per_block": 208,
+      "tactile_repetitions_per_sound_time_cell": 16,
+      "locator": "p. 470, section 2.1.3"
+    },
+    "reported_tactile_target": {
+      "stimulator": "Digitimer DS7A",
+      "site": "Intermediate phalanx of the right middle finger",
+      "electrodes": "Pair of Ag/AgCl electrodes",
+      "pulse_shape": "Single square pulse",
+      "pulse_duration_us": 100,
+      "calibration": "Start at minimum and increase to clear perception. Intermix 10 tactile and 5 empty trials. If performance is below 100%, increase the intensity by 5 mA and repeat.",
+      "locator": "p. 470, sections 2.1.2–2.1.3; p. 471, section 2.2.1",
+      "output_mode_note": "The article calls the DS7A constant-current and describes a constant-voltage pulse. Absolute amplitude and delivered electrical waveform require confirmation."
+    },
+    "reported_response": {
+      "target_trials": "Press the response button with the left index finger as quickly as possible when touch is felt.",
+      "catch_trials": "Withhold response.",
+      "setup": "Blindfolded participant with the right hand palm down.",
+      "locator": "p. 470, section 2.1.3; p. 471, section 2.2.1",
+      "task_software": "Custom MATLAB task by Gaspare Galati using Cogent 2000 and Cogent Graphics."
+    },
+    "reported_pps_analysis": {
+      "paired_delay_bins": [
+        [
+          "D1",
+          "D2"
+        ],
+        [
+          "D3",
+          "D4"
+        ],
+        [
+          "D5",
+          "D6"
+        ],
+        [
+          "D7",
+          "D8"
+        ],
+        [
+          "D9",
+          "D10"
+        ]
+      ],
+      "paired_delay_bin_centers_ms": [
+        450,
+        1050,
+        1650,
+        2250,
+        2850
+      ],
+      "locator": "pp. 470–472, section 2.1.5, section 3.1.2 and Fig. 3",
+      "d0_analysis_scope": "D0 supplies a unimodal tactile reference and sits outside the five fitted delay pairs. Its role in baseline subtraction is unspecified.",
+      "paired_delay_bin_centers_derivation": "Arithmetic means of adjacent reported D1–D10 timings; fits use the five observed delay bins.",
+      "fit_exclusion": "Excluded participants whose RMSE exceeded the group mean by more than two standard deviations for both sigmoid and linear fits."
+    },
+    "toolkit_choices": {
+      "schedule": "Seeded balanced shuffle for replay. The original paper specifies randomized trial order. It gives aggregate catch and block counts.",
+      "geometry": "Delay is the independent stimulus coordinate. The renderer's trajectory fields only provide a three-second scaffold; study distances are unspecified.",
+      "acoustic_preview": "The built-in continuous noise preview uses the stated noise colors at fixed gain. The study's experimental stimulus files, frequency-band power matching and acoustic intensity envelope are required for replication."
+    }
   },
   "design": {
     "name": "Ferri 2015 artificial emotional looming PPS",
     "sofa_file": "",
     "noises": [
       {
-        "label": "Negative artificial 1/f2 looming",
-        "noise_type": "brown",
-        "azimuth_deg": 0.0,
-        "elevation_deg": 0.0,
-        "gain": 1.0
+        "label": "Neutral artificial white noise",
+        "noise_type": "white",
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise"
       },
       {
-        "label": "Neutral artificial 1/f looming",
-        "noise_type": "pink",
-        "azimuth_deg": 0.0,
-        "elevation_deg": 0.0,
-        "gain": 1.0
+        "label": "Negative artificial brown noise",
+        "noise_type": "brown",
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise"
       }
     ],
     "custom_looming_files": [],
     "prestimulus_files": [],
     "trajectory": {
-      "start_radius_m": 1.1,
-      "end_radius_m": 0.1,
-      "path_direction": "approach",
-      "coordinate_mode": "cartesian",
-      "start_x_m": 0.0,
-      "start_y_m": 1.1,
-      "start_z_m": 0.0,
-      "end_x_m": 0.0,
-      "end_y_m": 0.1,
-      "end_z_m": 0.0,
       "path_length_m": 1.0,
-      "propagation_speed_mps": 0.333333333,
-      "azimuth_start_deg": 0.0,
-      "azimuth_end_deg": 0.0,
-      "elevation_deg": 0.0,
+      "propagation_speed_mps": 0.3333333333333333,
       "padding_pre_s": 0.0,
       "padding_post_s": 0.0,
       "sample_rate": 44100,
-      "use_inverse_square": true
+      "use_inverse_square": false
     },
     "protocol": {
-      "repetitions_per_condition": 12,
+      "repetitions_per_condition": 16,
       "soa_values_ms": [
         300,
-        800,
+        600,
+        900,
+        1200,
         1500,
-        2200,
-        2700
+        1800,
+        2100,
+        2400,
+        2700,
+        3000
       ],
-      "spatial_values_cm": [
-        100,
-        83.3,
-        60,
-        36.7,
-        20
-      ],
-      "pair_spatial_values_with_soas": true,
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
       "auditory_motion_directions": [
         "looming"
       ],
       "tactile_sites": [
-        "right hand"
+        "right middle finger intermediate phalanx"
       ],
-      "catch_trial_percentage": 10.0,
-      "catch_trials_exact": null,
+      "catch_trials_exact": 64,
       "include_baseline_trials": true,
-      "baseline_soa_values_ms": [],
+      "baseline_soa_values_ms": [
+        -500
+      ],
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 1,
-      "trial_randomization_strategy": "no_immediate_repeats",
+      "blocks": 2,
+      "trial_randomization_strategy": "balanced_shuffle",
       "block_order_randomization": "fixed",
-      "max_consecutive_same_trial_type": 2,
       "trial_strips": [
         {
           "strip_id": "ferri-artificial-looming-valence-row",
-          "label": "Artificial looming valence trial",
-          "audio_tactile_percentage": 100.0,
-          "catch_percentage": 0.0,
-          "baseline_percentage": 0.0,
+          "label": "Experiment 1 trial",
           "elements": [
+            {
+              "element_id": "ferri-artificial-silence-before",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
             {
               "element_id": "ferri-artificial-looming-source",
               "kind": "looming_stimulus",
-              "label": "Artificial looming source",
-              "source_label": "Negative artificial 1/f2 looming",
-              "source_labels": ["Negative artificial 1/f2 looming", "Neutral artificial 1/f looming"],
+              "label": "Study sound",
+              "source_label": "Neutral artificial white noise",
+              "source_labels": [
+                "Neutral artificial white noise",
+                "Negative artificial brown noise"
+              ],
               "randomized": true
+            },
+            {
+              "element_id": "ferri-artificial-silence-after",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
             }
           ]
         }
       ],
       "participants": 1,
-      "random_seed": 20150301
+      "random_seed": 20150301,
+      "include_catch_trials": true,
+      "catch_crosses_sequence_variants": true,
+      "baseline_strategy": "custom",
+      "baseline_custom_trial_mode": "audio_tactile",
+      "baseline_trials_exact": 32,
+      "baseline_crosses_sequence_variants": true,
+      "block_specs": [
+        {
+          "label": "Block 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "distribute_trial_pool_across_blocks": true,
+      "repeat_trial_pool_per_block": false
     }
   },
   "provenance": [
     {
-      "field": "auditory stimuli",
-      "source": "UCL Discovery abstract reports intensity-changing artificial sound sources with neutral or negative valence."
+      "field": "Stimulus identity, intensity and editing",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2015.03.001, p. 470, section 2.1.2."
     },
     {
-      "field": "template scope",
-      "source": "The profile reuses the Canzoneri-style five-point looming PPS scaffold because the exact sound files/envelopes are not bundled."
+      "field": "Trial timing, counts and allocation",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2015.03.001, p. 470, section 2.1.3."
+    },
+    {
+      "field": "Tactile delivery, thresholding and response",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2015.03.001, p. 470, sections 2.1.2–2.1.3; p. 471, section 2.2.1."
+    },
+    {
+      "field": "Analysis bins and comparison scope",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2015.03.001, pp. 470–472, section 2.1.5, section 3.1.2 and Fig. 3."
     }
   ]
 }
