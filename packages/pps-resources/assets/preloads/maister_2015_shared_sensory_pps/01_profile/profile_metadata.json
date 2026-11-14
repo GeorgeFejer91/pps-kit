@@ -1,0 +1,61 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "maister_2015_shared_sensory_pps",
+  "title": "Maister 2015 interpersonal stimulation PPS assessment",
+  "citation": "Maister, L., Cardini, F., Zamariola, G., Serino, A., & Tsakiris, M. (2015). Your place or mine: Shared sensory experiences elicit a remapping of peripersonal space. Neuropsychologia, 70, 455\u2013461.",
+  "doi": "10.1016/j.neuropsychologia.2014.10.027",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
+  "verification_status": "partial",
+  "notes": "This profile runs one scored 50-trial PPS assessment. Use it before and after each of the two live interpersonal-stimulation conditions. Perform the 2-minute intervention and the post-block questionnaire outside Runner. The original order counterbalances synchronous and asynchronous stimulation and uses a different confederate in each block. The supplied audio is synthesized for headphone preview.",
+  "reference_parameters": {
+    "profile_type": "interpersonal_stimulation_pps_assessment",
+    "profile_scope": "One of four scored PPS assessments, with no in-run intervention or questionnaire.",
+    "source_study_row": "doi:10.1016/j.neuropsychologia.2014.10.027",
+    "reported_trials_per_assessment": 50,
+    "reported_repetitions_per_soa": 10,
+    "reported_control_sequence": [
+      "Pre-IMS PPS (50 trials)",
+      "Two-minute live synchronous or asynchronous IMS",
+      "Post-IMS PPS (50 trials)",
+      "Post-block questionnaire"
+    ],
+    "tactile_modality": "electrical",
+    "reported_stimulator": "Digitimer DS7A",
+    "reported_tactile_pulse_duration_us": 200,
+    "reported_tactile_calibration": "Participant-specific detection threshold, with the working current set to 1.4 times threshold.",
+    "reported_response": "Press a key with the left hand as quickly as possible upon right-hand touch.",
+    "analysis_distance_reference": "Use the five audio-onset delays as ordinal conditions. No metric probe distances were reported.",
+    "remaining_caveats": [
+      "The two concealed physical speakers, original Audacity source and exact channel envelopes require independent setup. The generated stereo file represents the reported rise in level. Its visual trajectory coordinates are display defaults.",
+      "Use a calibrated external electrical stimulator and verify its physical timing. Toolkit playback supplies a cue for setup and software validation.",
+      "The paper does not specify a numeric online response deadline, key mapping, exact trial order or intertrial interval."
+    ],
+    "loudness_policy": {
+      "mode": "digital_dbfs",
+      "calibration_mode": "digital_only",
+      "calibration_status": "digital_only",
+      "start_spl_db": 55,
+      "end_spl_db": 70,
+      "instruction_offset_db": 0
+    },
+    "profile_check_complete": true
+  },
+  "provenance": [
+    {
+      "field": "assessed procedure and trial counts",
+      "source": "Neuropsychologia 70, pp. 457\u2013458, \u00a7\u00a72.3.1\u20132.3.2, Fig. 1. Fifty target trials per assessment include ten repeats at each of five delays. Repeat the assessment at four pre/post measurement points."
+    },
+    {
+      "field": "audio and SOAs",
+      "source": "p. 457, \u00a72.3.1 and Fig. 1. Continuous 3 s pink noise at 44.1 kHz grows from 55 to 70 dB. Touch follows sound onset by 300, 800, 1500, 2200 or 2700 ms."
+    },
+    {
+      "field": "tactile and response",
+      "source": "p. 457, \u00a72.3.1. A 200 \u00b5s electrical pulse to the right hand dorsum is detected with the left hand."
+    },
+    {
+      "field": "implementation defaults",
+      "source": "Toolkit headphone renderer and deterministic trial-order seed. The geometry in the preview is illustrative. Physical SPL and site calibration are operator tasks."
+    }
+  ]
+}

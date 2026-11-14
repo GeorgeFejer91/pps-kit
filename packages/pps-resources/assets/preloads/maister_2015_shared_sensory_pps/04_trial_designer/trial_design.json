@@ -1,0 +1,59 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "maister_2015_shared_sensory_pps",
+  "repetitions_per_condition": 10,
+  "soa_values_ms": [
+    300,
+    800,
+    1500,
+    2200,
+    2700
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "maister-2015-pps-assessment",
+      "label": "Looming sound with right-hand target",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "respond",
+        "target_role": "tactile_target",
+        "response_rule": "Press a key with the left hand upon detecting the tactile target",
+        "response_capture_device": "keyboard",
+        "body_anchor": "right hand",
+        "body_part": "right hand dorsum",
+        "body_side": "right",
+        "tactile_stimulation_modality": "electrical",
+        "tactile_body_anchor": "right hand dorsum",
+        "tactile_pulse_duration_ms": "0.2",
+        "electrical_stimulator_model": "Digitimer DS7A",
+        "electrical_electrode_site": "right hand dorsum",
+        "tactile_calibration_method": "individual perceptual threshold",
+        "tactile_threshold_reference": "1.4 \u00d7 estimated detection threshold",
+        "source_asset_equivalence": "procedurally generated continuous pink noise with 15 dB endpoint change",
+        "renderer_equivalence_boundary": "headphone preview of a physical two-speaker crossfade, without measured SPL",
+        "iti_policy": "toolkit_default_unreported_in_source"
+      },
+      "elements": [
+        {
+          "element_id": "maister-2015-pink-approach",
+          "kind": "looming_stimulus",
+          "label": "Approaching continuous pink noise",
+          "source_label": "Approaching continuous pink noise",
+          "source_labels": [
+            "Approaching continuous pink noise"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 50
+}

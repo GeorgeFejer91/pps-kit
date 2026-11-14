@@ -1,13 +1,13 @@
 {
   "schema": "pps-preload-run-setup-segment.v1",
   "template_id": "teneggi_2013_social_face_pps",
-  "blocks": 1,
-  "participants": 1,
+  "blocks": 2,
+  "participants": 18,
   "random_seed": 20130304,
-  "trial_randomization_strategy": "no_immediate_repeats",
+  "trial_randomization_strategy": "balanced_shuffle",
   "block_order_randomization": "fixed",
   "repeat_trial_pool_per_block": false,
-  "distribute_trial_pool_across_blocks": false,
+  "distribute_trial_pool_across_blocks": true,
   "baseline_crosses_sequence_variants": true,
   "catch_crosses_sequence_variants": true
 }

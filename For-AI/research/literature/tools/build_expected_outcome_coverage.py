@@ -1294,9 +1294,13 @@ def build_record(
     runnable_status = _runnable_status(record, coverage_category, template_ids, adjacent)
     observed_status = _observed_status(expected_status, runnable_status)
     observed_gap = _observed_comparison_gap(expected_status, runnable_status, coverage_category)
-    if record_id == "canzoneri_2013_tool_use_reshaping" and runnable_status == "runnable_profile_parameters_ready":
-        # The recovered validator checks assessment parameters and response counts;
-        # it does not compare pre/post tool-use effects or synthetic RT contrasts.
+    # These assessment profiles have run evidence. The corresponding study-level
+    # intervention contrast has no retained outcome comparison.
+    has_assessment_run_only = (
+        record_id in {"canzoneri_2013_tool_use_reshaping", "maister_2015_shared_sensory"}
+        and runnable_status == "runnable_profile_parameters_ready"
+    )
+    if has_assessment_run_only:
         observed_status = "parameter_run_evidence_only_behavioral_effect_unobserved"
         observed_gap = "ready_profile_parameter_run_available_expected_contrast_unvalidated"
     extraction_blocker = _expected_outcome_extraction_blocker(expected_status, paper_audit, manual_review)
@@ -1328,9 +1332,9 @@ def build_record(
     observed_mouse_click_evidence = _observed_mouse_click_evidence(observed_status, record)
     if observed_mouse_click_evidence:
         result["observed_mouse_click_participant_like_evidence"] = observed_mouse_click_evidence
-    if record_id == "canzoneri_2013_tool_use_reshaping" and runnable_status == "runnable_profile_parameters_ready":
+    if has_assessment_run_only:
         result["required_next_evidence"] = (
-            "Validate the pre/post tool-use versus pointing-control contrast before claiming an "
+            "Validate the study-specific pre/post intervention contrast before claiming an "
             "expected-effect comparison; the available rehearsal checks assessment parameters and "
             "response counts only. Human effects and physical timing remain unobserved."
         )

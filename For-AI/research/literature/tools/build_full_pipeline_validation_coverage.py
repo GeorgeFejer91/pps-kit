@@ -271,7 +271,7 @@ def _toolkit_gui_gate(
     if passed:
         status = "segment_0_to_6_gui_toolkit_path_ready"
         evidence = "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness."
-    elif literature.get("coverage_category") == "not_yet_templated_requires_toolkit_structure":
+    elif literature.get("coverage_category") in {"not_yet_templated_requires_toolkit_structure", "covered_blocked_toolkit_structure"}:
         status = "blocked_by_toolkit_structure_or_response_contract"
         evidence = "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record."
     else:
@@ -353,7 +353,7 @@ def _pipeline_status(
         return "profile_present_but_source_parameters_missing"
     if category == "not_yet_templated_missing_publication_parameters":
         return "source_parameters_missing_before_profile_creation"
-    if category == "not_yet_templated_requires_toolkit_structure":
+    if category in {"not_yet_templated_requires_toolkit_structure", "covered_blocked_toolkit_structure"}:
         return "toolkit_structure_or_response_contract_missing"
     if expected.get("runnable_status") == "template_present_but_blocked":
         return "profile_present_but_blocked"
@@ -374,7 +374,7 @@ def _next_required_action(
             "Emulated source-to-runner pipeline is available; collect participant and physical timing/loopback "
             "evidence before making a scientific replication claim."
         )
-    if literature.get("coverage_category") == "not_yet_templated_requires_toolkit_structure":
+    if literature.get("coverage_category") in {"not_yet_templated_requires_toolkit_structure", "covered_blocked_toolkit_structure"}:
         action = "Implement or validate toolkit support for: " + ", ".join(literature["blocking_constraint_ids"])
         missing = literature.get("missing_publication_parameters") or []
         if missing:

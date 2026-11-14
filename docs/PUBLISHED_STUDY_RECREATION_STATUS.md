@@ -44,6 +44,7 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 | tonelli_2019_echolocation | - | ready | All required current-GUI fields are present and materializable. |
 | galli_2015_wheelchair_full_body | - | ready | All required current-GUI fields are present and materializable. |
 | lerner_2021_3d_audio_tactile_boundary | - | ready | All required current-GUI fields are present and materializable. |
+| maister_2015_shared_sensory_pps | - | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_front_back_trunk_exp2 | A | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_hand_exp3 | B | ready | All required current-GUI fields are present and materializable. |
 | serino_2015_peri_trunk_exp1 | C | ready | All required current-GUI fields are present and materializable. |
@@ -53,15 +54,21 @@ Clinical populations, interventions, and non-audiotactile experimental context a
 
 | Profile | Variant | Status | Main reasons |
 |---|---|---|---|
+| amemiya_2019_foot_sole_exp1 | A | blocked_unsupported_toolkit_structure | The exact binaural looming source and original left and right conditioning waveforms are unavailable. Absolute output levels, hardware calibration and timing from recorded sound onset are unreported.; Exact baseline trial allocation and catch counts by condition and block are unreported.; The exact accepted numeric key and online response deadline are unreported. |
+| amemiya_2019_foot_sole_exp2 | B | blocked_unsupported_toolkit_structure | The exact binaural looming source and original left and right conditioning waveforms are unavailable. Absolute output levels, hardware calibration and timing from recorded sound onset are unreported.; Exact baseline trial allocation and catch counts by condition and block are unreported.; The exact accepted numeric key and online response deadline are unreported. |
+| ardizzi_ferri_2018_looming_flat | - | blocked_missing_parameters | Exact author sound files, loudspeaker routing, and measured SPL calibration are unavailable.; Original physical electrical tactile threshold and Cedrus button timing require laboratory calibration. The toolkit 100 ms tactile-channel cue and mouse response are software proxies.; The separate heartbeat counting, time estimation and self-consciousness assessments require their own procedures. |
 | ferri_2015_artificial_looming_valence | A | blocked_missing_parameters | exact auditory files; paper-specific gain envelope |
 | ferri_2015_ecological_looming_valence | B | blocked_missing_parameters | licensed ecological sounds; exact amplitude envelopes |
 | serino_2007_blind_cane_users | - | blocked_missing_parameters | exact white-noise source asset, seed, and spectral recipe; exact electrical tactile pulse duration, waveform, current, and electrode impedance calibration; exact ITI or jitter distribution and numeric response window |
 | taffou_2014_cynophobic_rear_looming | - | blocked_missing_parameters | exact dog/sheep source audio and Audacity amplitude/dynamic matching settings; LISTEN HRTF subject/filter identifier and renderer settings |
-| teneggi_2013_social_face_pps | - | blocked_missing_parameters | exact distance/timing table from supplement |
+| teneggi_2013_social_face_pps | - | blocked_missing_parameters | Exact original pink-noise source and two loudspeaker gain functions are unavailable.; Exact physical response capture requires the original voice-key threshold, recording latency calibration and response cutoff.; Exact apparatus-specific tactile delivery requires a calibrated physical stimulator and timing verification. |
 
 ## Toolkit structural gap
 
-No profiles currently fall in this category.
+| Profile | Variant | Status | Main reasons |
+|---|---|---|---|
+| amemiya_2019_foot_sole_exp1 | A | blocked_unsupported_toolkit_structure | The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target.; The trial scheduler needs a condition-specific block order with a reversed second half and a dedicated constant-level white-noise baseline with its own chest-target and catch trials.; The response scheduler needs numeric-keypad capture timestamped relative to the chest target. |
+| amemiya_2019_foot_sole_exp2 | B | blocked_unsupported_toolkit_structure | The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target.; The trial scheduler needs a condition-specific block order with a reversed second half and a dedicated constant-level white-noise baseline with its own chest-target and catch trials.; The response scheduler needs numeric-keypad capture timestamped relative to the chest target. |
 
 ## Machine-Readable Source
 

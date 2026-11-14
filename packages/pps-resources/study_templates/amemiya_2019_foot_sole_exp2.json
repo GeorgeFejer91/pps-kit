@@ -1,0 +1,360 @@
+{
+  "template_id": "amemiya_2019_foot_sole_exp2",
+  "title": "Amemiya 2019 foot-sole PPS, Experiment 2",
+  "citation": "Amemiya, T., Ikei, Y., & Kitazaki, M. (2019). Remapping peripersonal space by using foot-sole vibrations without any body movement. Psychological Science, 30(10), 1522–1532.",
+  "source_url": "https://doi.org/10.1177/0956797619869337",
+  "doi": "10.1177/0956797619869337",
+  "verification_status": "partial",
+  "notes": "Published design scaffold. Original stimuli and independent conditioning outputs are required for launch. Preview timing is derived from Figure 1b. Baseline allocation, exact counterbalancing and hardware timing remain unresolved.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1177/0956797619869337::exp2",
+    "publication_status": "published",
+    "profile_type": "seated_looming_audio_chest_detection_with_bilateral_conditioning",
+    "profile_check_complete": false,
+    "participants": 15,
+    "condition_factor": "Body site receiving the same walking waveform",
+    "conditioning_conditions": [
+      {
+        "id": "walking_heels",
+        "label": "Walking-sound vibration at the heels",
+        "site": "Left and right heels"
+      },
+      {
+        "id": "walking_forearms",
+        "label": "Walking-sound vibration at the forearms",
+        "site": "Left and right proximal forearms near the elbows"
+      }
+    ],
+    "condition_stimuli": {
+      "actuator": "Acouve Vp416 voice coils",
+      "walking_footstep_recording_low_pass_hz": 120,
+      "walking_steps_per_minute": 100,
+      "nominal_alternating_step_interval_ms": 600,
+      "exact_conditioning_playback_onset_relative_to_headphone_audio_ms": null,
+      "waveform_files_publicly_available": false,
+      "site_waveform_rule": "Use the same walking-sound waveform at the two sites.",
+      "forearm_as_percent_of_sole_mean": 52.2,
+      "forearm_as_percent_of_sole_sd": 24.3,
+      "individual_forearm_intensity": "Set by subjective staircase and confirm during practice."
+    },
+    "auditory_stimulus": {
+      "signal": "White noise emitted from a loudspeaker moved toward a binaural dummy head on a handcart",
+      "velocity_m_per_s": 0.7,
+      "loudspeaker": "Bose SoundLink Mini II",
+      "binaural_microphone": "Neumann KU 100",
+      "playback": "Bose QuietComfort 15 noise-canceling headphones",
+      "tested_distance_cm": [
+        160,
+        120,
+        80,
+        40
+      ],
+      "figure_1b_time_relative_to_closest_point_ms": [
+        -2290,
+        -1710,
+        -1140,
+        -570
+      ],
+      "exact_delay_from_original_playback_onset_ms": null,
+      "exact_playback_duration_ms": null
+    },
+    "figure_derived_preview_timing": {
+      "approximate_delay_from_drawn_waveform_start_ms": [
+        2710,
+        3290,
+        3860,
+        4430
+      ],
+      "drawn_waveform_axis_duration_ms": 6000,
+      "closest_point_estimate_from_drawn_waveform_start_ms": 4994,
+      "derivation": "Compare the four signed timing marks in Figure 1b with the shared 0–6 s waveform axis. The reference is graphical. The executable preview rounds each mark to the nearest 10 ms."
+    },
+    "tactile_target": {
+      "site": "Manubrium of the sternum",
+      "actuator": "Acouve Vp216 voice coil on a neck strap",
+      "frequency_hz": 200,
+      "duration_ms": 100,
+      "intensity": "Suprathreshold"
+    },
+    "response": {
+      "kind": "Speeded tactile detection",
+      "device": "Numeric keyboard",
+      "effector": "Right index finger",
+      "exact_key": null,
+      "online_deadline_ms": null,
+      "rt_reference": "Chest vibration onset",
+      "offline_rt_exclusion_below_ms": 100,
+      "offline_rt_exclusion_above_ms": 1000,
+      "additional_offline_exclusion": "Outside two standard deviations from individual mean for each sound location"
+    },
+    "baseline": {
+      "audio": "Constant-level white noise",
+      "conditioning": false,
+      "target": "Chest vibration at the same four delays on target-present trials",
+      "catch_cell_present_in_false_alarm_analysis": true,
+      "trials_per_delay": null,
+      "total_trials": null,
+      "block_count_and_order": null,
+      "analysis": "Subtract the baseline mean RT at the matching delay"
+    },
+    "catch": {
+      "reported_percent": 20,
+      "target_chest": false,
+      "active_condition_audio_and_bilateral_pattern_continue": true,
+      "expected_response": "withhold",
+      "exact_count_by_condition_and_block": null
+    },
+    "blocks_and_repetitions": {
+      "reported_condition_sequence": "ABBA",
+      "reported_condition_order": "Modified Latin square across participants followed by the reverse order",
+      "conditioning_block_count_derived": 4,
+      "repetitions_per_stimulus_combination_reported": 12,
+      "condition_distance_target_total_if_repetitions_cover_both_halves": 96,
+      "exact_full_session_trials": null,
+      "minimum_break_between_blocks_minutes": 5,
+      "delay_order": "Randomized",
+      "exact_intertrial_timing": null
+    },
+    "auxiliary_procedures": [
+      {
+        "name": "Pre-task forearm-to-heel vibration intensity matching",
+        "method": "Adjust each participant’s forearm vibration to match perceived heel vibration by staircase. Confirm in practice.",
+        "exact_steps_reversal_criteria_and_trial_counts": null
+      },
+      {
+        "name": "Post-task sound localization",
+        "source_url": "https://doi.org/10.25384/sage.9896807.v1",
+        "target_frequency_hz": 150,
+        "target_duration_ms": 200,
+        "repetitions_per_distance": 16,
+        "target_distances_cm": [
+          160,
+          120,
+          80,
+          40
+        ],
+        "planned_trials_derived": 64,
+        "conditioning": false,
+        "response": "Enter perceived sound distance on a 1–100 scale using keys.",
+        "feedback": false
+      },
+      {
+        "name": "Post-task walking sensation",
+        "scale": [
+          -3,
+          3
+        ],
+        "neutral": 0,
+        "response": "Rate the sensation of walking during conditioning using the numeric keyboard.",
+        "looming_sound": false,
+        "order": "Pseudorandom conditions, with task order counterbalanced against localization.",
+        "repetitions": null
+      }
+    ],
+    "preview_scope": {
+      "runtime_mode": "Active audio and chest-target design scaffold for inspection",
+      "auditory_rendering": "Procedural continuous white noise along a virtual approach at the reported velocity. The figure-derived preview uses a 5 s approach with a 1 cm near endpoint and 1 s tail. Those endpoints and the inverse-square setting describe a preview reconstruction.",
+      "catch_pool": "The scaffold uses 20% no-chest rows within each active condition. The original catch allocation by condition and block is unknown.",
+      "baseline": "Reference settings retain all four delays and the stationary white-noise mode. Baseline target and catch allocation is unresolved and is omitted from the generated preview pool.",
+      "conditioning_and_blocks": "Condition labels identify the paper’s intended outputs. The active-only illustration occupies one inspection block. The condition waveforms and mirrored participant schedules are unimplemented."
+    },
+    "implementation_gaps": [
+      "The exact binaural looming source and original left and right conditioning waveforms are unavailable. Absolute output levels, hardware calibration and timing from recorded sound onset are unreported.",
+      "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target.",
+      "The trial scheduler needs a condition-specific block order with a reversed second half and a dedicated constant-level white-noise baseline with its own chest-target and catch trials.",
+      "Exact baseline trial allocation and catch counts by condition and block are unreported.",
+      "The response scheduler needs numeric-keypad capture timestamped relative to the chest target.",
+      "The exact accepted numeric key and online response deadline are unreported.",
+      "The exact individualized forearm-to-heel calibration staircase and practice settings are unreported."
+    ]
+  },
+  "design": {
+    "name": "Amemiya 2019 foot-sole PPS, Experiment 2",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Procedural looming white noise for preview",
+        "noise_type": "white",
+        "source_profile": "continuous_noise",
+        "motion_mode": "looming",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "approach",
+          "start": {
+            "x_m": 0.0,
+            "y_m": 3.51,
+            "z_m": 0.0
+          },
+          "end": {
+            "x_m": 0.0,
+            "y_m": 0.01,
+            "z_m": 0.0
+          },
+          "path_length_m": 3.5,
+          "movement_duration_s": 5.0,
+          "start_hold_s": 0.0,
+          "end_hold_s": 1.0
+        }
+      }
+    ],
+    "trajectory": {
+      "coordinate_mode": "cartesian",
+      "path_direction": "approach",
+      "start_radius_m": 3.51,
+      "end_radius_m": 0.01,
+      "start_x_m": 0.0,
+      "start_y_m": 3.51,
+      "start_z_m": 0.0,
+      "end_x_m": 0.0,
+      "end_y_m": 0.01,
+      "end_z_m": 0.0,
+      "path_length_m": 3.5,
+      "propagation_speed_mps": 0.7,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 1.0,
+      "use_inverse_square": true
+    },
+    "protocol": {
+      "repetitions_per_condition": 12,
+      "soa_values_ms": [
+        2710,
+        3290,
+        3860,
+        4430
+      ],
+      "spatial_values_cm": [
+        160,
+        120,
+        80,
+        40
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "chest"
+      ],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 20,
+      "catch_trials_exact": null,
+      "include_baseline_trials": true,
+      "baseline_strategy": "stationary_burst",
+      "baseline_soa_values_ms": [
+        2710,
+        3290,
+        3860,
+        4430
+      ],
+      "baseline_trials_exact": null,
+      "participants": 15,
+      "blocks": 1,
+      "block_order_randomization": "fixed",
+      "trial_randomization_strategy": "balanced_shuffle",
+      "trial_strips": [
+        {
+          "strip_id": "amemiya-exp2-walking_heels",
+          "label": "Walking-sound vibration at the heels",
+          "audio_tactile_percentage": 80,
+          "catch_percentage": 20,
+          "baseline_percentage": 0,
+          "metadata": {
+            "conditioning_pattern": "Walking-sound vibration at the heels",
+            "conditioning_body_sites": "Left and right heels",
+            "expected_response": "respond",
+            "response_rule": "respond_only_to_chest_vibration",
+            "target_role": "chest_vibrotactile_target",
+            "response_mode": "numeric_keypad_press",
+            "response_capture_device": "Numeric keyboard",
+            "response_input_modality": "right_index_keypress",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_frequency_hz": 200,
+            "tactile_duration_ms": 100,
+            "source_asset_equivalence": "Procedural preview. Original binaural recording and bilateral conditioning are unavailable."
+          },
+          "elements": [
+            {
+              "element_id": "amemiya-exp2-walking_heels-looming",
+              "kind": "looming_stimulus",
+              "label": "Procedural looming white noise for preview",
+              "source_label": "Procedural looming white noise for preview",
+              "source_labels": [
+                "Procedural looming white noise for preview"
+              ],
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "amemiya-exp2-walking_forearms",
+          "label": "Walking-sound vibration at the forearms",
+          "audio_tactile_percentage": 80,
+          "catch_percentage": 20,
+          "baseline_percentage": 0,
+          "metadata": {
+            "conditioning_pattern": "Walking-sound vibration at the forearms",
+            "conditioning_body_sites": "Left and right proximal forearms near the elbows",
+            "expected_response": "respond",
+            "response_rule": "respond_only_to_chest_vibration",
+            "target_role": "chest_vibrotactile_target",
+            "response_mode": "numeric_keypad_press",
+            "response_capture_device": "Numeric keyboard",
+            "response_input_modality": "right_index_keypress",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_frequency_hz": 200,
+            "tactile_duration_ms": 100,
+            "source_asset_equivalence": "Procedural preview. Original binaural recording and bilateral conditioning are unavailable."
+          },
+          "elements": [
+            {
+              "element_id": "amemiya-exp2-walking_forearms-looming",
+              "kind": "looming_stimulus",
+              "label": "Procedural looming white noise for preview",
+              "source_label": "Procedural looming white noise for preview",
+              "source_labels": [
+                "Procedural looming white noise for preview"
+              ],
+              "randomized": false
+            }
+          ]
+        }
+      ],
+      "respiratory_phases": [
+        "PPS assessment"
+      ],
+      "block_specs": [
+        {
+          "label": "Design inspection only",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        }
+      ],
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 12
+      }
+    }
+  },
+  "provenance": [
+    {
+      "field": "Stimuli, timing and apparatus",
+      "source": "https://doi.org/10.1177/0956797619869337, pp. 1523–1526, Figure 1 and Methods."
+    },
+    {
+      "field": "Blocks, responses and baseline",
+      "source": "https://doi.org/10.1177/0956797619869337, pp. 1525–1526, Procedure, Analysis, Catch trials and Baseline trials."
+    },
+    {
+      "field": "Auxiliary sound localization",
+      "source": "https://doi.org/10.25384/sage.9896807.v1, Supplementary Methods, PDF p. 2, numbered lines 19–36."
+    },
+    {
+      "field": "Auxiliary walking ratings and material availability",
+      "source": "https://doi.org/10.1177/0956797619869337, pp. 1525, 1527–1530, Procedure, Figure 3 and Open Practices."
+    }
+  ]
+}

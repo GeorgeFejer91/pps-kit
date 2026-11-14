@@ -11,20 +11,21 @@
     "structured_expected_outcome_record_count": 71,
     "pending_expected_outcome_record_count": 0,
     "adjacent_or_out_of_scope_record_count": 4,
-    "runnable_profile_parameter_record_count": 18,
+    "runnable_profile_parameter_record_count": 19,
     "observed_behavioral_comparison_record_count": 0,
     "mouse_click_simulated_participant_like_comparison_record_count": 17,
     "synthetic_profile_contrast_comparison_record_count": 17,
-    "parameter_run_evidence_only_record_count": 1,
-    "not_runnable_no_observed_comparison_record_count": 53,
+    "parameter_run_evidence_only_record_count": 2,
+    "not_runnable_no_observed_comparison_record_count": 52,
     "adjacent_not_applicable_record_count": 4,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 48,
+      "not_yet_templated_missing_publication_parameters": 45,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
-      "ready_profile_parameter_run_available_expected_contrast_unvalidated": 1,
-      "template_present_blocked_missing_publication_parameters": 5
+      "ready_profile_parameter_run_available_expected_contrast_unvalidated": 2,
+      "template_present_blocked_missing_publication_parameters": 6,
+      "template_present_blocked_toolkit_structure": 1
     }
   },
   "expected_outcome_extraction_sources": {
@@ -482,7 +483,7 @@
       "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "observed_comparison_gap": "ready_profile_parameter_run_available_expected_contrast_unvalidated",
       "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant data or mouse-click-simulated participant-like runner data have been compared with the paper's expected PPS effect.",
-      "required_next_evidence": "Validate the pre/post tool-use versus pointing-control contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved."
+      "required_next_evidence": "Validate the study-specific pre/post intervention contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved."
     },
     {
       "record_id": "canzoneri_2013_amputation_prosthesis",
@@ -820,9 +821,11 @@
       "record_id": "maister_2015_shared_sensory",
       "citation_short": "Maister et al. (2015)",
       "doi": "10.1016/j.neuropsychologia.2014.10.027",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_runnable_profile",
+      "current_template_ids": [
+        "maister_2015_shared_sensory_pps"
+      ],
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "shared_sensory_experience_remaps_other_pps",
@@ -844,10 +847,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_parameter_run_available_expected_contrast_unvalidated",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant data or mouse-click-simulated participant-like runner data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Validate the study-specific pre/post intervention contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved."
     },
     {
       "record_id": "noel_2015_bodily_self",
@@ -1178,9 +1181,11 @@
       "record_id": "ardizzi_ferri_2018_interoceptive",
       "citation_short": "Ardizzi & Ferri (2018)",
       "doi": "10.1016/j.cognition.2018.04.001",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "ardizzi_ferri_2018_looming_flat"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "interoceptive_accuracy_predicts_pps_boundary_size",
@@ -1203,9 +1208,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "hobeika_2018_anisotropy",
@@ -1666,9 +1671,12 @@
       "record_id": "footsole_vibration_2019",
       "citation_short": "Foot-sole vibration PPS remapping (2019)",
       "doi": "10.1177/0956797619869337",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "amemiya_2019_foot_sole_exp1",
+        "amemiya_2019_foot_sole_exp2"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "pseudo_walking_footsole_vibration_pps_extension",
@@ -1691,9 +1699,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "hobeika_2020_methods",

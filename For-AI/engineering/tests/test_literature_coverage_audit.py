@@ -34,21 +34,21 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 18,
-        "covered_blocked_missing_publication_parameters": 5,
-        "covered_blocked_toolkit_structure": 0,
+        "covered_runnable_profile": 19,
+        "covered_blocked_missing_publication_parameters": 6,
+        "covered_blocked_toolkit_structure": 1,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 48,
+        "not_yet_templated_missing_publication_parameters": 45,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 30
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 34
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 25
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 23
+    ) == 26
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 24
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
-    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 0
+    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 2
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
     assert coverage["coverage_summary"]["openalex_broad_linked_candidate_like_hits"] == 47
@@ -418,7 +418,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 23
+    assert len(published_ready) == 24
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -913,12 +913,12 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         record["record_id"]
         for record in records.values()
         if "voice_key_response_capture" in record["blocking_constraint_ids"]
-    } == {"serino_2007_blind_cane_users"}
+    } == {"serino_2007_blind_cane_users", "teneggi_2013_social_face"}
     assert {
         record["record_id"]
         for record in records.values()
         if "electrical_tactile_calibration" in record["blocking_constraint_ids"]
-    } == {"serino_2007_blind_cane_users"}
+    } == {"serino_2007_blind_cane_users", "teneggi_2013_social_face", "ardizzi_ferri_2018_interoceptive"}
     assert {
         record["record_id"]
         for record in records.values()

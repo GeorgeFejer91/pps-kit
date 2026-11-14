@@ -1,6 +1,6 @@
 {
   "schema": "pps-profile-recreation-status.v1",
-  "profile_count": 30,
+  "profile_count": 34,
   "categories": {
     "gui_recreatable": [
       "study5_box_breathing_pps",
@@ -24,19 +24,26 @@
       "tonelli_2019_echolocation",
       "galli_2015_wheelchair_full_body",
       "lerner_2021_3d_audio_tactile_boundary",
+      "maister_2015_shared_sensory_pps",
       "serino_2015_front_back_trunk_exp2",
       "serino_2015_peri_hand_exp3",
       "serino_2015_peri_trunk_exp1",
       "serino_2015_toolless_sync_training"
     ],
     "missing_publication_parameters": [
+      "amemiya_2019_foot_sole_exp1",
+      "amemiya_2019_foot_sole_exp2",
+      "ardizzi_ferri_2018_looming_flat",
       "ferri_2015_artificial_looming_valence",
       "ferri_2015_ecological_looming_valence",
       "serino_2007_blind_cane_users",
       "taffou_2014_cynophobic_rear_looming",
       "teneggi_2013_social_face_pps"
     ],
-    "toolkit_structural_gap": []
+    "toolkit_structural_gap": [
+      "amemiya_2019_foot_sole_exp1",
+      "amemiya_2019_foot_sole_exp2"
+    ]
   },
   "category_labels": {
     "gui_recreatable": "GUI-recreatable",
@@ -713,6 +720,381 @@
       "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/study5_dynaspace_lateral_45_pps/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "amemiya_2019_foot_sole_exp1",
+      "title": "Amemiya 2019 foot-sole PPS, Experiment 1",
+      "citation": "Amemiya, T., Ikei, Y., & Kitazaki, M. (2019). Remapping peripersonal space by using foot-sole vibrations without any body movement. Psychological Science, 30(10), 1522\u20131532.",
+      "doi": "10.1177/0956797619869337",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "seated_looming_audio_chest_detection_with_bilateral_conditioning",
+      "visible_variant_label": "A",
+      "variant_display": "Amemiya 2019 foot-sole PPS, Experiment 1 - Variant A",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 3,
+      "unsupported_structure_count": 3,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The exact binaural looming source and original left and right conditioning waveforms are unavailable. Absolute output levels, hardware calibration and timing from recorded sound onset are unreported."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The trial scheduler needs a condition-specific block order with a reversed second half and a dedicated constant-level white-noise baseline with its own chest-target and catch trials."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact baseline trial allocation and catch counts by condition and block are unreported."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The response scheduler needs numeric-keypad capture timestamped relative to the chest target."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The exact accepted numeric key and online response deadline are unreported."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "The exact binaural looming source and original left and right conditioning waveforms are unavailable. Absolute output levels, hardware calibration and timing from recorded sound onset are unreported."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Exact baseline trial allocation and catch counts by condition and block are unreported."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The exact accepted numeric key and online response deadline are unreported."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The trial scheduler needs a condition-specific block order with a reversed second half and a dedicated constant-level white-noise baseline with its own chest-target and catch trials."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The response scheduler needs numeric-keypad capture timestamped relative to the chest target."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/amemiya_2019_foot_sole_exp1/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "amemiya_2019_foot_sole_exp2",
+      "title": "Amemiya 2019 foot-sole PPS, Experiment 2",
+      "citation": "Amemiya, T., Ikei, Y., & Kitazaki, M. (2019). Remapping peripersonal space by using foot-sole vibrations without any body movement. Psychological Science, 30(10), 1522\u20131532.",
+      "doi": "10.1177/0956797619869337",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "seated_looming_audio_chest_detection_with_bilateral_conditioning",
+      "visible_variant_label": "B",
+      "variant_display": "Amemiya 2019 foot-sole PPS, Experiment 2 - Variant B",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 3,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The exact binaural looming source and original left and right conditioning waveforms are unavailable. Absolute output levels, hardware calibration and timing from recorded sound onset are unreported."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The trial scheduler needs a condition-specific block order with a reversed second half and a dedicated constant-level white-noise baseline with its own chest-target and catch trials."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact baseline trial allocation and catch counts by condition and block are unreported."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The response scheduler needs numeric-keypad capture timestamped relative to the chest target."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The exact accepted numeric key and online response deadline are unreported."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The exact individualized forearm-to-heel calibration staircase and practice settings are unreported."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "The exact binaural looming source and original left and right conditioning waveforms are unavailable. Absolute output levels, hardware calibration and timing from recorded sound onset are unreported."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Exact baseline trial allocation and catch counts by condition and block are unreported."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The exact accepted numeric key and online response deadline are unreported."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The exact individualized forearm-to-heel calibration staircase and practice settings are unreported."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The trial scheduler needs a condition-specific block order with a reversed second half and a dedicated constant-level white-noise baseline with its own chest-target and catch trials."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The response scheduler needs numeric-keypad capture timestamped relative to the chest target."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/amemiya_2019_foot_sole_exp2/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "ardizzi_ferri_2018_looming_flat",
+      "title": "Ardizzi and Ferri 2018 looming versus flat hand PPS",
+      "citation": "Ardizzi, M., & Ferri, F. (2018). Interoceptive influences on peripersonal space boundary. Cognition, 177, 79\u201386.",
+      "doi": "10.1016/j.cognition.2018.04.001",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "looming_flat_audio_tactile_pps",
+      "visible_variant_label": "",
+      "variant_display": "Ardizzi and Ferri 2018 looming versus flat hand PPS",
+      "primary_category": "missing_publication_parameters",
+      "category_label": "Missing publication parameters",
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 3,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The separate heartbeat counting, time estimation and self-consciousness assessments require their own procedures."
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact author sound files, loudspeaker routing, and measured SPL calibration are unavailable."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Original physical electrical tactile threshold and Cedrus button timing require laboratory calibration. The toolkit 100 ms tactile-channel cue and mouse response are software proxies."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact author sound files, loudspeaker routing, and measured SPL calibration are unavailable."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Original physical electrical tactile threshold and Cedrus button timing require laboratory calibration. The toolkit 100 ms tactile-channel cue and mouse response are software proxies."
+        },
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "The separate heartbeat counting, time estimation and self-consciousness assessments require their own procedures."
+        }
+      ],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/ardizzi_ferri_2018_looming_flat/01_profile/profile_parameters_manifest.json"
     },
     {
       "template_id": "biggio_2017_common_racket",
@@ -1631,6 +2013,73 @@
       "profile_parameters_manifest": "assets/preloads/lerner_2021_3d_audio_tactile_boundary/01_profile/profile_parameters_manifest.json"
     },
     {
+      "template_id": "maister_2015_shared_sensory_pps",
+      "title": "Maister 2015 interpersonal stimulation PPS assessment",
+      "citation": "Maister, L., Cardini, F., Zamariola, G., Serino, A., & Tsakiris, M. (2015). Your place or mine: Shared sensory experiences elicit a remapping of peripersonal space. Neuropsychologia, 70, 455\u2013461.",
+      "doi": "10.1016/j.neuropsychologia.2014.10.027",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "interpersonal_stimulation_pps_assessment",
+      "visible_variant_label": "",
+      "variant_display": "Maister 2015 interpersonal stimulation PPS assessment",
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": true,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": true,
+            "field_count": 5,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [],
+      "unsupported_toolkit_structures": [],
+      "profile_parameters_manifest": "assets/preloads/maister_2015_shared_sensory_pps/01_profile/profile_parameters_manifest.json"
+    },
+    {
       "template_id": "serino_2007_blind_cane_users",
       "title": "Serino 2007 blind cane-user static near/far PPS",
       "citation": "Serino, A., Bassolino, M., Farne, A., & Ladavas, E. (2007). Extended multisensory space in blind cane users. Psychological Science, 18(7), 642-648.",
@@ -2118,7 +2567,7 @@
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 1,
+      "missing_parameter_count": 3,
       "unsupported_structure_count": 0,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
@@ -2127,22 +2576,22 @@
           {
             "segment": "0",
             "segment_label": "Segment 0 profile manifest and provenance",
-            "passed": false,
-            "field_count": 6,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "exact distance/timing table from supplement"
-              }
-            ]
+            "passed": true,
+            "field_count": 5,
+            "blocking_reasons": []
           },
           {
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
-            "passed": true,
-            "field_count": 3,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact original pink-noise source and two loudspeaker gain functions are unavailable."
+              }
+            ]
           },
           {
             "segment": "2",
@@ -2154,9 +2603,20 @@
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": true,
-            "field_count": 5,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact physical response capture requires the original voice-key threshold, recording latency calibration and response cutoff."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact apparatus-specific tactile delivery requires a calibrated physical stimulator and timing verification."
+              }
+            ]
           },
           {
             "segment": "4",
@@ -2169,9 +2629,19 @@
       },
       "missing_publication_parameters": [
         {
-          "segment": "0",
+          "segment": "1",
           "parameter": "profile_gap",
-          "reason": "exact distance/timing table from supplement"
+          "reason": "Exact original pink-noise source and two loudspeaker gain functions are unavailable."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Exact physical response capture requires the original voice-key threshold, recording latency calibration and response cutoff."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Exact apparatus-specific tactile delivery requires a calibrated physical stimulator and timing verification."
         }
       ],
       "unsupported_toolkit_structures": [],

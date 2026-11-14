@@ -40,7 +40,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "packages" / "pps-resources" / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 30
+    assert len(templates) == 34
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -49,8 +49,11 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert categorized == template_ids
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
-    assert len(status["categories"]["missing_publication_parameters"]) == 5
-    assert len(status["categories"]["toolkit_structural_gap"]) == 0
+    assert len(status["categories"]["missing_publication_parameters"]) == 8
+    assert set(status["categories"]["toolkit_structural_gap"]) == {
+        "amemiya_2019_foot_sole_exp1",
+        "amemiya_2019_foot_sole_exp2",
+    }
 
     allowed_statuses = {
         STATUS_REPORTED,
@@ -95,6 +98,27 @@ def test_profile_recreation_manifests_cover_all_current_templates():
         assert STATUS_MISSING in _classify_gap("exact trial count and ITI table")
 
 
+def test_new_assessment_preloads_preserve_trial_counts_and_launch_gates():
+    root = ROOT / "packages" / "pps-resources" / "assets" / "preloads"
+    status = json.loads((root / "profile_recreation_status.json").read_text(encoding="utf-8"))
+    expected = {
+        "maister_2015_shared_sensory_pps": (50, True),
+        "teneggi_2013_social_face_pps": (104, False),
+        "ardizzi_ferri_2018_looming_flat": (300, False),
+        "amemiya_2019_foot_sole_exp1": (180, False),
+        "amemiya_2019_foot_sole_exp2": (120, False),
+    }
+    for profile in status["profiles"]:
+        template_id = profile["template_id"]
+        if template_id not in expected:
+            continue
+        trial_count, launchable = expected.pop(template_id)
+        trial_design = root / template_id / "04_trial_designer" / "trial_design.json"
+        assert json.loads(trial_design.read_text(encoding="utf-8"))["preview_trial_count"] == trial_count
+        assert profile["segment_6_launchable"] is launchable
+    assert not expected
+
+
 def test_profile_recreation_status_distinguishes_ready_missing_and_structural_profiles():
     root = ROOT
     status = json.loads((root / "packages" / "pps-resources" / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
@@ -108,7 +132,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 25
+    assert len(status["categories"]["gui_recreatable"]) == 26
     assert profiles["canzoneri_2013_tool_use_reshaping"]["profile_checks_passed"] is True
 
     study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
@@ -317,14 +341,15 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 23
+    assert len(ready_published) == 24
+    assert "maister_2015_shared_sensory_pps" in ready_published
     assert "canzoneri_2013_tool_use_reshaping" in ready_published
     assert set(ready_published) < set(ready_all)
-    assert len(blocked_samples) == 1
+    assert len(blocked_samples) == 2
 
     profiles = {profile["template_id"]: profile for profile in status["profiles"]}
     assert any(profiles[item]["missing_parameter_count"] > 0 for item in blocked_samples)
-    assert all(profiles[item]["unsupported_structure_count"] == 0 for item in blocked_samples)
+    assert any(profiles[item]["unsupported_structure_count"] > 0 for item in blocked_samples)
 
 
 def test_protocol12_matrix_metadata_only_report_accepts_ready_and_blocked(tmp_path: Path):

@@ -1,0 +1,94 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "amemiya_2019_foot_sole_exp2",
+  "repetitions_per_condition": 12,
+  "soa_values_ms": [
+    2710,
+    3290,
+    3860,
+    4430
+  ],
+  "spatial_values_cm": [
+    160,
+    120,
+    80,
+    40
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "amemiya-exp2-walking_heels",
+      "label": "Walking-sound vibration at the heels",
+      "audio_tactile_percentage": 80.0,
+      "catch_percentage": 20.0,
+      "baseline_percentage": 0.0,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "conditioning_pattern": "Walking-sound vibration at the heels",
+        "conditioning_body_sites": "Left and right heels",
+        "expected_response": "respond",
+        "response_rule": "respond_only_to_chest_vibration",
+        "target_role": "chest_vibrotactile_target",
+        "response_mode": "numeric_keypad_press",
+        "response_capture_device": "Numeric keyboard",
+        "response_input_modality": "right_index_keypress",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_frequency_hz": 200,
+        "tactile_duration_ms": 100,
+        "source_asset_equivalence": "Procedural preview. Original binaural recording and bilateral conditioning are unavailable."
+      },
+      "elements": [
+        {
+          "element_id": "amemiya-exp2-walking_heels-looming",
+          "kind": "looming_stimulus",
+          "label": "Procedural looming white noise for preview",
+          "source_label": "Procedural looming white noise for preview",
+          "source_labels": [
+            "Procedural looming white noise for preview"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "amemiya-exp2-walking_forearms",
+      "label": "Walking-sound vibration at the forearms",
+      "audio_tactile_percentage": 80.0,
+      "catch_percentage": 20.0,
+      "baseline_percentage": 0.0,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "conditioning_pattern": "Walking-sound vibration at the forearms",
+        "conditioning_body_sites": "Left and right proximal forearms near the elbows",
+        "expected_response": "respond",
+        "response_rule": "respond_only_to_chest_vibration",
+        "target_role": "chest_vibrotactile_target",
+        "response_mode": "numeric_keypad_press",
+        "response_capture_device": "Numeric keyboard",
+        "response_input_modality": "right_index_keypress",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_frequency_hz": 200,
+        "tactile_duration_ms": 100,
+        "source_asset_equivalence": "Procedural preview. Original binaural recording and bilateral conditioning are unavailable."
+      },
+      "elements": [
+        {
+          "element_id": "amemiya-exp2-walking_forearms-looming",
+          "kind": "looming_stimulus",
+          "label": "Procedural looming white noise for preview",
+          "source_label": "Procedural looming white noise for preview",
+          "source_labels": [
+            "Procedural looming white noise for preview"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 120
+}

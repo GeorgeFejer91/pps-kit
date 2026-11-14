@@ -1,0 +1,172 @@
+{
+  "template_id": "maister_2015_shared_sensory_pps",
+  "title": "Maister 2015 interpersonal stimulation PPS assessment",
+  "citation": "Maister, L., Cardini, F., Zamariola, G., Serino, A., & Tsakiris, M. (2015). Your place or mine: Shared sensory experiences elicit a remapping of peripersonal space. Neuropsychologia, 70, 455–461.",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2014.10.027",
+  "doi": "10.1016/j.neuropsychologia.2014.10.027",
+  "verification_status": "partial",
+  "notes": "This profile runs one scored 50-trial PPS assessment. Use it before and after each of the two live interpersonal-stimulation conditions. Perform the 2-minute intervention and the post-block questionnaire outside Runner. The original order counterbalances synchronous and asynchronous stimulation and uses a different confederate in each block. The supplied audio is synthesized for headphone preview.",
+  "reference_parameters": {
+    "profile_type": "interpersonal_stimulation_pps_assessment",
+    "profile_scope": "One of four scored PPS assessments, with no in-run intervention or questionnaire.",
+    "source_study_row": "doi:10.1016/j.neuropsychologia.2014.10.027",
+    "reported_trials_per_assessment": 50,
+    "reported_repetitions_per_soa": 10,
+    "reported_control_sequence": [
+      "Pre-IMS PPS (50 trials)",
+      "Two-minute live synchronous or asynchronous IMS",
+      "Post-IMS PPS (50 trials)",
+      "Post-block questionnaire"
+    ],
+    "tactile_modality": "electrical",
+    "reported_stimulator": "Digitimer DS7A",
+    "reported_tactile_pulse_duration_us": 200,
+    "reported_tactile_calibration": "Participant-specific detection threshold, with the working current set to 1.4 times threshold.",
+    "reported_response": "Press a key with the left hand as quickly as possible upon right-hand touch.",
+    "analysis_distance_reference": "Use the five audio-onset delays as ordinal conditions. No metric probe distances were reported.",
+    "remaining_caveats": [
+      "The two concealed physical speakers, original Audacity source and exact channel envelopes require independent setup. The generated stereo file represents the reported rise in level. Its visual trajectory coordinates are display defaults.",
+      "Use a calibrated external electrical stimulator and verify its physical timing. Toolkit playback supplies a cue for setup and software validation.",
+      "The paper does not specify a numeric online response deadline, key mapping, exact trial order or intertrial interval."
+    ],
+    "loudness_policy": {
+      "mode": "digital_dbfs",
+      "calibration_mode": "digital_only",
+      "calibration_status": "digital_only",
+      "start_spl_db": 55,
+      "end_spl_db": 70,
+      "instruction_offset_db": 0
+    },
+    "profile_check_complete": true
+  },
+  "design": {
+    "name": "Maister 2015 50-trial PPS assessment",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Approaching continuous pink noise",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "azimuth_deg": 0,
+        "elevation_deg": 0,
+        "gain": 1
+      }
+    ],
+    "trajectory": {
+      "start_radius_m": 1.1,
+      "end_radius_m": 0.1,
+      "path_direction": "approach",
+      "path_length_m": 1,
+      "propagation_speed_mps": 0.3333333333333333,
+      "azimuth_start_deg": 0,
+      "azimuth_end_deg": 0,
+      "elevation_deg": 0,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 10,
+      "trial_pool_repetition_defaults": {
+        "default": 10,
+        "audio_tactile": 10
+      },
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "right hand dorsum"
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "catch_trials_exact": 0,
+      "include_auditory_only_trials": false,
+      "auditory_only_trials_exact": 0,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "baseline_trials_exact": 0,
+      "baseline_soa_values_ms": [],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "block_specs": [
+        {
+          "label": "PPS assessment (pre- or post-IMS)",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        }
+      ],
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "trial_strips": [
+        {
+          "strip_id": "maister-2015-pps-assessment",
+          "label": "Looming sound with right-hand target",
+          "metadata": {
+            "expected_response": "respond",
+            "target_role": "tactile_target",
+            "response_rule": "Press a key with the left hand upon detecting the tactile target",
+            "response_capture_device": "keyboard",
+            "body_anchor": "right hand",
+            "body_part": "right hand dorsum",
+            "body_side": "right",
+            "tactile_stimulation_modality": "electrical",
+            "tactile_body_anchor": "right hand dorsum",
+            "tactile_pulse_duration_ms": "0.2",
+            "electrical_stimulator_model": "Digitimer DS7A",
+            "electrical_electrode_site": "right hand dorsum",
+            "tactile_calibration_method": "individual perceptual threshold",
+            "tactile_threshold_reference": "1.4 × estimated detection threshold",
+            "source_asset_equivalence": "procedurally generated continuous pink noise with 15 dB endpoint change",
+            "renderer_equivalence_boundary": "headphone preview of a physical two-speaker crossfade, without measured SPL",
+            "iti_policy": "toolkit_default_unreported_in_source"
+          },
+          "elements": [
+            {
+              "element_id": "maister-2015-pink-approach",
+              "kind": "looming_stimulus",
+              "label": "Approaching continuous pink noise",
+              "source_label": "Approaching continuous pink noise",
+              "source_labels": [
+                "Approaching continuous pink noise"
+              ],
+              "randomized": false
+            }
+          ]
+        }
+      ],
+      "participants": 16,
+      "random_seed": 201410027
+    }
+  },
+  "provenance": [
+    {
+      "field": "assessed procedure and trial counts",
+      "source": "Neuropsychologia 70, pp. 457–458, §§2.3.1–2.3.2, Fig. 1. Fifty target trials per assessment include ten repeats at each of five delays. Repeat the assessment at four pre/post measurement points."
+    },
+    {
+      "field": "audio and SOAs",
+      "source": "p. 457, §2.3.1 and Fig. 1. Continuous 3 s pink noise at 44.1 kHz grows from 55 to 70 dB. Touch follows sound onset by 300, 800, 1500, 2200 or 2700 ms."
+    },
+    {
+      "field": "tactile and response",
+      "source": "p. 457, §2.3.1. A 200 µs electrical pulse to the right hand dorsum is detected with the left hand."
+    },
+    {
+      "field": "implementation defaults",
+      "source": "Toolkit headphone renderer and deterministic trial-order seed. The geometry in the preview is illustrative. Physical SPL and site calibration are operator tasks."
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ardizzi_ferri_2018_looming_flat",
+  "title": "Ardizzi and Ferri 2018 looming versus flat hand PPS",
+  "citation": "Ardizzi, M., & Ferri, F. (2018). Interoceptive influences on peripersonal space boundary. Cognition, 177, 79\u201386.",
+  "doi": "10.1016/j.cognition.2018.04.001",
+  "source_url": "https://doi.org/10.1016/j.cognition.2018.04.001",
+  "verification_status": "partial",
+  "notes": "Session 1 audio-tactile assessment with matched looming and flat pink-noise schedules. The two preview clips reproduce the relative intensity contrast in digital audio. Physical loudspeaker calibration, electrical stimulation, response-box timing and the separate interoception assessments require the original lab procedures.",
+  "reference_parameters": {
+    "profile_type": "looming_flat_audio_tactile_pps",
+    "publication_study_row_id": "doi:10.1016/j.cognition.2018.04.001",
+    "source_scope": "Session 1, tactile reaction time with either looming or flat sound. The heartbeat and time-estimation tasks are separately administered in Session 2.",
+    "sound_duration_ms": 3000,
+    "inter_trial_interval_ms": 1000,
+    "soa_reference": "Sound onset",
+    "reported_trial_formula": "180 paired trials (two sound conditions \u00d7 five SOAs \u00d7 18 repetitions), 120 sound-only catches derived from 40% of trials, three equal blocks of 100, and no tactile-only baseline.",
+    "reported_loudspeaker_separation_cm": 100,
+    "sound_source_distance_at_each_soa_cm": null,
+    "trajectory_preview_scope": "The general Designer geometry is only a preview default. The stereo clips are played unchanged, and the trial pool does not encode a spatial distance for any SOA.",
+    "published_tactile_target": {
+      "site": "Back of the right index finger",
+      "stimulator": "Digitimer DS7A",
+      "pulse_duration_us": 100,
+      "waveform": "Single rectangular monophasic electrical pulse",
+      "toolkit_preview_cue_duration_ms": 100,
+      "intensity_calibration": "Individual weakest clearly detectable nonpainful level above sensory threshold"
+    },
+    "published_response": "Speeded Cedrus RB-834 button press with the left index finger for touch; withhold on auditory-only catches.",
+    "catch_allocation_default": "Equal overall counts for looming and flat catches. The paper reports a combined catch proportion without the split; realized within-block condition counts and original random order are unspecified.",
+    "preview_audio": {
+      "synthesis": "PPS Kit continuous pink-noise generator with PCG64 seed, strip DC, normalize the shared 3-second waveform to \u221226 dBFS RMS before envelope, and apply 5 ms sine-squared fades at both ends.",
+      "seed": 201804001,
+      "sample_rate_hz": 44100,
+      "channels": "Identical stereo channels.",
+      "looming_gain_db_relative_to_flat": [
+        -7.5,
+        7.5
+      ],
+      "looming_envelope": "Linear ramp in dB over the stimulus, equivalent to exponential amplitude gain.",
+      "flat_gain_db_relative_to_flat": 0,
+      "sha256": {
+        "Looming pink noise": "da0095bfb40b3e9870a03783309148d0a7ccb6b9a29d0e515eb51615b3307b37",
+        "Flat pink noise": "9a0f83a0e3f2a8e83be7c00f00f40f385dd3f1f093060e328008e1bf4cce9d95"
+      }
+    },
+    "implementation_gaps": [
+      "Exact author sound files, loudspeaker routing, and measured SPL calibration are unavailable.",
+      "Original physical electrical tactile threshold and Cedrus button timing require laboratory calibration. The toolkit 100 ms tactile-channel cue and mouse response are software proxies.",
+      "The separate heartbeat counting, time estimation and self-consciousness assessments require their own procedures."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Paired SOAs, acoustic conditions, and trial counts",
+      "source": "Cognition 177, pp. 80\u201381, \u00a72.2 and Fig. 1. The exact target repetitions and 60:40 target-to-catch ratio give the full session counts."
+    },
+    {
+      "field": "Auditory contrast and hardware",
+      "source": "Cognition 177, p. 80, \u00a72.2. Original pink noise was synthesized at 44.1 kHz, with 55\u201370 dB looming or 62.5 dB flat intensity. The locally generated clips approximate the relative profiles with a common digital level reference."
+    },
+    {
+      "field": "Tactile target, response and interval",
+      "source": "Cognition 177, pp. 80\u201381, \u00a72.2. Tactile onset is relative to the acoustic source. Each trial is followed by a 1000 ms interval. The recorded response used the left index finger on a Cedrus RB-834."
+    }
+  ]
+}

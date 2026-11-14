@@ -153,6 +153,20 @@ This file is the active checklist and handoff owner; replace state, do not appen
   deployed `1c36f6b`. All 477 staged files matched the public site and the
   four main routes returned HTTP 200. The source checkpoint was pushed from
   a clean worktree because the primary checkout reported a Git mmap error.
+- **Published PPS profiles:** The 94-paper private source audit is the input
+  for expanding the Toolkit catalogue. The first implementation pass added
+  Maister’s single 50-trial assessment, both Amemiya experiment definitions,
+  and the Ardizzi–Ferri assessment, and corrected Teneggi Experiment 1 from
+  the publisher supplement. Maister completed the software Runner smoke with
+  50 analysis rows and a response marker. Ardizzi–Ferri produced the planned
+  300 rows and Teneggi produced two 52-trial blocks per social condition.
+  Amemiya still needs independently routed conditioning outputs, keypad
+  capture, and verified baseline/catch allocation. Ardizzi–Ferri and Teneggi
+  remain blocked for the reported apparatus. Profiles and readiness gates
+  are listed in the [profile catalogue](../docs/PUBLISHED_STUDY_RECREATION_STATUS.md).
+  Next implement stable trial-row selection by block and grouped participant
+  ordering, then verify it against Teneggi’s two blocks per social condition.
+  Keep the remaining experimental implementations and physical qualification open.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.

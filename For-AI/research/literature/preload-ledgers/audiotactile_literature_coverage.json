@@ -267,20 +267,20 @@
   "coverage_summary": {
     "literature_record_count": 75,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 18,
-      "covered_blocked_missing_publication_parameters": 5,
-      "covered_blocked_toolkit_structure": 0,
+      "covered_runnable_profile": 19,
+      "covered_blocked_missing_publication_parameters": 6,
+      "covered_blocked_toolkit_structure": 1,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 48,
+      "not_yet_templated_missing_publication_parameters": 45,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
-    "current_template_count": 30,
-    "current_profile_check_pass_count": 25,
-    "published_profile_check_pass_count": 23,
+    "current_template_count": 34,
+    "current_profile_check_pass_count": 26,
+    "published_profile_check_pass_count": 24,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 5,
-    "current_templates_with_toolkit_structural_gaps": 0,
+    "current_templates_with_missing_publication_parameters": 8,
+    "current_templates_with_toolkit_structural_gaps": 2,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -637,6 +637,15 @@
         "spadone_2021_connectivity"
       ],
       "validation_report": "artifacts/validation_runs/current_goal_external_trigger_contract_20260715/external_trigger_contract_capability_smoke_report.json"
+    },
+    {
+      "id": "amemiya_independent_conditioning_delivery",
+      "dimension": "trial_family_and_baseline_logic",
+      "description": "Amemiya requires two independently routed conditioning signals in addition to headphone audio and the chest target, and an explicit baseline/catch schedule and reversal of condition-specific blocks.",
+      "toolkit_status": "requires_native_implementation",
+      "example_records": [
+        "footsole_vibration_2019"
+      ]
     }
   ],
   "current_template_coverage": [
@@ -800,7 +809,9 @@
       "published": true,
       "current_recreation_category": "missing_publication_parameters",
       "primary_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration",
+        "voice_key_response_capture"
       ]
     },
     {
@@ -849,6 +860,39 @@
       "current_recreation_category": "gui_recreatable",
       "primary_constraint_ids": [],
       "known_parameter_validation_report": "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/biggio_2017_known_parameter_validation_report.json"
+    },
+    {
+      "template_id": "amemiya_2019_foot_sole_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "amemiya_independent_conditioning_delivery",
+        "missing_core_soa_iti_baseline_repetition_parameters"
+      ]
+    },
+    {
+      "template_id": "amemiya_2019_foot_sole_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "amemiya_independent_conditioning_delivery",
+        "missing_core_soa_iti_baseline_repetition_parameters"
+      ]
+    },
+    {
+      "template_id": "ardizzi_ferri_2018_looming_flat",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration"
+      ]
+    },
+    {
+      "template_id": "maister_2015_shared_sensory_pps",
+      "published": true,
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": []
     }
   ],
   "literature_records": [
@@ -1151,10 +1195,12 @@
       "audiotactile_task_family": "face tactile detection with approaching/receding sound labels",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration",
+        "voice_key_response_capture"
       ],
       "missing_publication_parameters": [
-        "exact distance/timing table from supplement"
+        "Experiment 1 source delays and per-condition trial counts are encoded. The original audio and speaker gains, electrically calibrated cheek stimulation and voice-relay parameters remain unresolved."
       ]
     },
     {
@@ -1269,16 +1315,14 @@
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "PPS measurement after shared sensory/social context",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+      "current_template_ids": [
+        "maister_2015_shared_sensory_pps"
       ],
-      "missing_publication_parameters": [
-        "extract exact audiotactile PPS timing, distances, trial counts, tactile settings, and response settings; shared sensory/social context is non-blocking"
-      ]
+      "coverage_category": "covered_runnable_profile",
+      "audiotactile_task_family": "PPS measurement after shared sensory/social context",
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": []
     },
     {
       "record_id": "noel_2015_bodily_self",
@@ -1420,15 +1464,18 @@
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "ardizzi_ferri_2018_looming_flat"
+      ],
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "dynamic audio-tactile PPS boundary task with interoception context",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files",
+        "electrical_tactile_calibration"
       ],
       "missing_publication_parameters": [
-        "extract exact audio-tactile PPS task scaffold, timing, distances, tactile settings, response settings, and analysis parameters; interoception context is non-blocking"
+        "The nominal 300-trial scored assessment is encoded. Original speaker routing and calibration, electrical pulse delivery and calibrated Cedrus response capture remain unresolved."
       ]
     },
     {
@@ -1675,15 +1722,19 @@
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "amemiya_2019_foot_sole_exp1",
+        "amemiya_2019_foot_sole_exp2"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "looming-sound PPS tactile-processing task with foot-sole vibration context",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
+        "amemiya_independent_conditioning_delivery",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "missing_publication_parameters": [
-        "extract the core audio-tactile PPS timing, distances, trial counts, and response settings separately from the foot-sole vibration manipulation"
+        "Original audio and conditioning tracks, exact baseline/catch allocations, device-onset calibration and keypad response settings remain unresolved."
       ]
     },
     {

@@ -1601,6 +1601,377 @@
       ]
     },
     {
+      "template_id": "amemiya_2019_foot_sole_exp1",
+      "title": "Amemiya 2019 foot-sole PPS, Experiment 1",
+      "visible_variant_label": "A",
+      "variant_display": "Amemiya 2019 foot-sole PPS, Experiment 1 - Variant A",
+      "publication_status": "published",
+      "profile_type": "seated_looming_audio_chest_detection_with_bilateral_conditioning",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/amemiya_2019_foot_sole_exp1/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/amemiya_2019_foot_sole_exp1/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 3,
+        "unsupported_structure_count": 3
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 3,
+      "unsupported_structure_count": 3,
+      "local_only": true,
+      "source_recipe_count": 1,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp1/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp1/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp1/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp1/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp1/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Procedural looming white noise for preview",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp1/02_looming_stimuli/looming_Procedural_looming_white_noise_for_preview.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/amemiya_2019_foot_sole_exp1/02_looming_stimuli/looming_Procedural_looming_white_noise_for_preview.wav",
+          "sha256": "54c9bc6dc1caffae8b4d6c954ba342de53a764032ad95433c1c8cc6bcbbfa1c2",
+          "duration_s": 6.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Procedural looming white noise for preview",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 351.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 5.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 1.0,
+            "path_length_m": 3.5,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 3.51,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.01,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
+      "template_id": "amemiya_2019_foot_sole_exp2",
+      "title": "Amemiya 2019 foot-sole PPS, Experiment 2",
+      "visible_variant_label": "B",
+      "variant_display": "Amemiya 2019 foot-sole PPS, Experiment 2 - Variant B",
+      "publication_status": "published",
+      "profile_type": "seated_looming_audio_chest_detection_with_bilateral_conditioning",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/amemiya_2019_foot_sole_exp2/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/amemiya_2019_foot_sole_exp2/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 4,
+        "unsupported_structure_count": 3
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 3,
+      "local_only": true,
+      "source_recipe_count": 1,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp2/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp2/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp2/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp2/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp2/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Procedural looming white noise for preview",
+          "path": "assets/preloads/amemiya_2019_foot_sole_exp2/02_looming_stimuli/looming_Procedural_looming_white_noise_for_preview.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/amemiya_2019_foot_sole_exp2/02_looming_stimuli/looming_Procedural_looming_white_noise_for_preview.wav",
+          "sha256": "54c9bc6dc1caffae8b4d6c954ba342de53a764032ad95433c1c8cc6bcbbfa1c2",
+          "duration_s": 6.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Procedural looming white noise for preview",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 351.0,
+            "end_distance_cm": 1.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 5.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 1.0,
+            "path_length_m": 3.5,
+            "coordinate_mode": "cartesian",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 3.51,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.01,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
+      "template_id": "ardizzi_ferri_2018_looming_flat",
+      "title": "Ardizzi and Ferri 2018 looming versus flat hand PPS",
+      "visible_variant_label": "",
+      "variant_display": "Ardizzi and Ferri 2018 looming versus flat hand PPS",
+      "publication_status": "published",
+      "profile_type": "looming_flat_audio_tactile_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/ardizzi_ferri_2018_looming_flat/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/ardizzi_ferri_2018_looming_flat/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "missing_publication_parameters",
+        "category_label": "Missing publication parameters",
+        "runner_readiness": "blocked_missing_parameters",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 3,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "blocked_missing_parameters",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "missing_publication_parameters",
+      "missing_parameter_count": 3,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/ardizzi_ferri_2018_looming_flat/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/ardizzi_ferri_2018_looming_flat/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/ardizzi_ferri_2018_looming_flat/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/ardizzi_ferri_2018_looming_flat/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/ardizzi_ferri_2018_looming_flat/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Looming pink noise",
+          "path": "assets/preloads/ardizzi_ferri_2018_looming_flat/02_looming_stimuli/looming_Looming_pink_noise.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ardizzi_ferri_2018_looming_flat/02_looming_stimuli/looming_Looming_pink_noise.wav",
+          "sha256": "da0095bfb40b3e9870a03783309148d0a7ccb6b9a29d0e515eb51615b3307b37",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "imported_audio",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Looming pink noise",
+            "source_kind": "imported_audio",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          }
+        },
+        {
+          "label": "Flat pink noise",
+          "path": "assets/preloads/ardizzi_ferri_2018_looming_flat/02_looming_stimuli/looming_Flat_pink_noise.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ardizzi_ferri_2018_looming_flat/02_looming_stimuli/looming_Flat_pink_noise.wav",
+          "sha256": "9a0f83a0e3f2a8e83be7c00f00f40f385dd3f1f093060e328008e1bf4cce9d95",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "imported_audio",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Flat pink noise",
+            "source_kind": "imported_audio",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 110.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "polar",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
       "template_id": "biggio_2017_common_racket",
       "title": "Biggio 2017 racket tool-use PPS - common racket session",
       "visible_variant_label": "A",
@@ -4676,6 +5047,116 @@
       ]
     },
     {
+      "template_id": "maister_2015_shared_sensory_pps",
+      "title": "Maister 2015 interpersonal stimulation PPS assessment",
+      "visible_variant_label": "",
+      "variant_display": "Maister 2015 interpersonal stimulation PPS assessment",
+      "publication_status": "published",
+      "profile_type": "interpersonal_stimulation_pps_assessment",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/maister_2015_shared_sensory_pps/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/maister_2015_shared_sensory_pps/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
+        "unsupported_structure_count": 0
+      },
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
+      "unsupported_structure_count": 0,
+      "local_only": true,
+      "source_recipe_count": 1,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/maister_2015_shared_sensory_pps/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/maister_2015_shared_sensory_pps/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/maister_2015_shared_sensory_pps/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/maister_2015_shared_sensory_pps/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/maister_2015_shared_sensory_pps/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Approaching continuous pink noise",
+          "path": "assets/preloads/maister_2015_shared_sensory_pps/02_looming_stimuli/looming_Approaching_continuous_pink_noise.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/maister_2015_shared_sensory_pps/02_looming_stimuli/looming_Approaching_continuous_pink_noise.wav",
+          "sha256": "7736f6b4379a03ca4cab2e28f3d067acfa08e2d9414e69a84e22312b1e213d8d",
+          "duration_s": 3.0,
+          "sample_rate": 44100,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "pink",
+          "tone_type": "pink",
+          "motion_mode": "looming",
+          "direction_label": "looming",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Approaching continuous pink noise",
+            "source_kind": "generated_noise",
+            "noise_type": "pink",
+            "start_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 3.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 1.0,
+            "coordinate_mode": "polar",
+            "path_direction": "approach",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.1,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.1,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
       "template_id": "serino_2007_blind_cane_users",
       "title": "Serino 2007 blind cane-user static near/far PPS",
       "visible_variant_label": "",
@@ -5781,7 +6262,7 @@
         "finished_profile": false,
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 1,
+        "missing_parameter_count": 3,
         "unsupported_structure_count": 0
       },
       "runner_readiness": "blocked_missing_parameters",
@@ -5791,7 +6272,7 @@
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
       "primary_recreation_category": "missing_publication_parameters",
-      "missing_parameter_count": 1,
+      "missing_parameter_count": 3,
       "unsupported_structure_count": 0,
       "local_only": true,
       "source_recipe_count": 2,
@@ -5828,8 +6309,8 @@
           "label": "Face-centered moving sound",
           "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
           "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
-          "sha256": "7090eade6cb7126d1633563fd387c91450cb4ca3c9d5014e264f7f6acbfd5f95",
-          "duration_s": 4.0,
+          "sha256": "a5acacaa3ef458dd45b36be6c3d7fbd7bd002b8dd883f8da9486af1932324c56",
+          "duration_s": 3.0,
           "sample_rate": 44100,
           "channels": 2,
           "source_kind": "generated_noise",
@@ -5844,19 +6325,19 @@
             "label": "Face-centered moving sound",
             "source_kind": "generated_noise",
             "noise_type": "pink",
-            "start_distance_cm": 93.0,
+            "start_distance_cm": 105.0,
             "end_distance_cm": 5.0,
             "start_rotation_deg": 0.0,
             "end_rotation_deg": 0.0,
-            "movement_duration_s": 4.0,
+            "movement_duration_s": 3.0,
             "start_hold_s": 0.0,
             "end_hold_s": 0.0,
-            "path_length_m": 0.88,
+            "path_length_m": 1.0,
             "coordinate_mode": "cartesian",
             "path_direction": "approach",
             "start": {
               "x_m": 0.0,
-              "y_m": 0.93,
+              "y_m": 1.05,
               "z_m": 0.0
             },
             "end": {
@@ -5865,24 +6346,14 @@
               "z_m": 0.0
             }
           },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
+          "source_profile": "continuous_noise"
         },
         {
           "label": "Face-centered moving sound - receding",
           "path": "assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
           "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_social_face_pps/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
-          "sha256": "9a0bc2aadad2a5a6526ee932a455e7df82e23fe3734194bee40aa8348be77cce",
-          "duration_s": 4.0,
+          "sha256": "8c00d2c2f5b61e586ebef187c145982f5d0394c2b82da719ad4dcc7673e1f1cf",
+          "duration_s": 3.0,
           "sample_rate": 44100,
           "channels": 2,
           "source_kind": "generated_noise",
@@ -5898,13 +6369,13 @@
             "source_kind": "generated_noise",
             "noise_type": "pink",
             "start_distance_cm": 5.0,
-            "end_distance_cm": 93.0,
+            "end_distance_cm": 105.0,
             "start_rotation_deg": 0.0,
             "end_rotation_deg": 0.0,
-            "movement_duration_s": 4.0,
+            "movement_duration_s": 3.0,
             "start_hold_s": 0.0,
             "end_hold_s": 0.0,
-            "path_length_m": 0.88,
+            "path_length_m": 1.0,
             "coordinate_mode": "cartesian",
             "path_direction": "recede",
             "start": {
@@ -5914,21 +6385,11 @@
             },
             "end": {
               "x_m": 0.0,
-              "y_m": 0.93,
+              "y_m": 1.05,
               "z_m": 0.0
             }
           },
-          "source_profile": "dynaspace_gaussian_burst_train",
-          "source_profile_parameters": {
-            "burst_count_mode": "duration_derived",
-            "burst_duration_s": 0.03,
-            "rise_fall_s": 0.01,
-            "target_period_s": 0.095,
-            "onset_s": 0.3,
-            "active_window_source": "trajectory_movement_duration",
-            "spacing_policy": "symmetric_fit",
-            "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-          }
+          "source_profile": "continuous_noise"
         }
       ]
     }

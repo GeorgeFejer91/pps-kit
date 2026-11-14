@@ -2,21 +2,73 @@
   "template_id": "teneggi_2013_social_face_pps",
   "title": "Teneggi 2013 social modulation face PPS",
   "citation": "Teneggi, C., Canzoneri, E., di Pellegrino, G., & Serino, A. (2013). Social modulation of peripersonal space boundaries. Current Biology, 23(5), 406-411.",
-  "source_url": "https://pubmed.ncbi.nlm.nih.gov/23394831/",
+  "source_url": "https://doi.org/10.1016/j.cub.2013.01.043",
   "doi": "10.1016/j.cub.2013.01.043",
   "verification_status": "partial",
-  "notes": "Face-centered social PPS task. The preload captures the audio-tactile face schedule, but social partner/mannequin/cooperation manipulations are not GUI fields yet.",
+  "notes": "Experiment 1 schedule for one social condition. Run it separately for the mannequin and unfamiliar-person conditions and counterbalance their order between participants. The preview uses generated audio and toolkit response and tactile proxies. The publication's equipment and calibrations are recorded as reference values.",
   "reference_parameters": {
     "profile_type": "face_audio_tactile_social_context",
     "implemented_controls": [
-      "face tactile site",
-      "approaching/receding sound labels",
-      "five distance samples"
+      "right-cheek target label",
+      "IN and OUT sound variants",
+      "five sound-onset-relative tactile delays",
+      "two blocks per social condition",
+      "auditory-only catch trials with response withholding"
     ],
+    "supplement_url": "https://ars.els-cdn.com/content/image/1-s2.0-S096098221300078X-mmc1.pdf",
+    "experiment_1": {
+      "participants": 18,
+      "social_conditions": ["mannequin", "unfamiliar live person"],
+      "partner_distance_cm": 100,
+      "instructions": "Maintain gaze on the face of the mannequin or unfamiliar person during the assessment.",
+      "condition_order": "Counterbalanced between participants. Complete both blocks of one condition before changing the setting.",
+      "audio_tactile_trials_per_condition": 80,
+      "auditory_only_catches_per_condition": 24,
+      "trials_per_block": 52,
+      "trials_per_participant": 208,
+      "block_duration_approx_minutes": 5,
+      "randomization": "Targets and catches were randomly intermingled. The original randomization algorithm, seed, catch split by direction and per-block trial-type composition are unreported."
+    },
+    "trial_timing": {
+      "pre_sound_silence_ms": 1000,
+      "sound_duration_ms": 3000,
+      "post_sound_silence_ms": 1000,
+      "tactile_from_sound_onset_ms": [300, 800, 1500, 2200, 2700],
+      "tactile_from_trial_start_ms": [1300, 1800, 2500, 3200, 3700],
+      "ordinal_perceived_distance_by_delay": {
+        "IN": ["D1", "D2", "D3", "D4", "D5"],
+        "OUT": ["D5", "D4", "D3", "D2", "D1"]
+      },
+      "distance_definition": "D1 is farthest and D5 is closest. These are ordered perceptual bins. The study does not give metric coordinates for the five bins."
+    },
+    "published_apparatus": {
+      "sound": "Two hidden same-height loudspeakers beside the seated participant, with the near speaker about 5 cm from the right cheek and the other about 100 cm from the near speaker. Both played the same 44.1 kHz pink-noise sample simultaneously with opposing channel gains.",
+      "ear_position_spl_db": {
+        "IN": [55, 70],
+        "OUT": [70, 55]
+      },
+      "sound_envelope": "Exponential rise for IN and exponential fall for OUT. Near and far gain directions were reversed for OUT.",
+      "tactile": "Digitimer DS7A constant-current stimulator and Ambu Neuroline electrode pair on the right cheek. One rectangular monophasic pulse with a reported duration of 100 microseconds.",
+      "tactile_calibration": "Individual suprathreshold setting. Verify all 10 stimuli among 5 catches and repeat with a 5 mA increase if any response is missed or given on a catch. The original study reports observed settings of 60–90 mA.",
+      "response": "Say TAH as quickly as possible after touch. The original used a voice-activated relay. RT was computed as the vocal timestamp minus the scheduled tactile-onset timestamp, both measured from trial start."
+    },
+    "other_experiments": {
+      "experiment_2": {
+        "schedule": "The same audio-tactile timing and count per assessment as Experiment 1. Assess the participant with the same confederate before and after a one-shot bargaining game.",
+        "assignment": "Cooperative versus non-cooperative confederate behavior was assigned between participants, 16 in each group. The two confederates were counterbalanced across roles.",
+        "profile_scope": "The bargaining game and between-participant assignment require a separate procedure."
+      },
+      "experiment_3": {
+        "schedule": "IN only, 2000 mm loudspeaker separation, 4000 ms sound, 500 ms silence before and after. Tactile onsets were 250, 750, 1300, 1800, 2500, 3200, and 3700 ms after sound onset.",
+        "profile_scope": "Requires its own trial profile. Per-assessment target repetitions and catch allocation are unreported for this variant."
+      }
+    },
     "implementation_gaps": [
-      "other-person/mannequin context",
-      "economic-game manipulation",
-      "exact distance/timing table from supplement"
+      "Exact original pink-noise source and two loudspeaker gain functions are unavailable.",
+      "Exact physical response capture requires the original voice-key threshold, recording latency calibration and response cutoff.",
+      "Exact apparatus-specific tactile delivery requires a calibrated physical stimulator and timing verification.",
+      "Other-person/mannequin context must be arranged and counterbalanced by the operator.",
+      "Economic-game manipulation is a separate procedure in Experiment 2."
     ]
   },
   "design": {
@@ -28,101 +80,114 @@
         "noise_type": "pink",
         "azimuth_deg": 0.0,
         "elevation_deg": 0.0,
-        "gain": 1.0
+        "gain": 1.0,
+        "source_profile": "continuous_noise"
       }
     ],
     "custom_looming_files": [],
     "prestimulus_files": [],
     "trajectory": {
-      "start_radius_m": 0.93,
+      "start_radius_m": 1.05,
       "end_radius_m": 0.05,
       "path_direction": "approach",
       "coordinate_mode": "cartesian",
       "start_x_m": 0.0,
-      "start_y_m": 0.93,
+      "start_y_m": 1.05,
       "start_z_m": 0.0,
       "end_x_m": 0.0,
       "end_y_m": 0.05,
       "end_z_m": 0.0,
-      "path_length_m": 0.88,
-      "propagation_speed_mps": 0.22,
+      "path_length_m": 1.0,
+      "propagation_speed_mps": 0.3333333333333333,
       "azimuth_start_deg": 0.0,
       "azimuth_end_deg": 0.0,
       "elevation_deg": 0.0,
       "padding_pre_s": 0.0,
       "padding_post_s": 0.0,
       "sample_rate": 44100,
-      "use_inverse_square": true
+      "use_inverse_square": false
     },
     "protocol": {
-      "repetitions_per_condition": 12,
-      "soa_values_ms": [
-        0,
-        1000,
-        1955,
-        3000,
-        4000
-      ],
-      "spatial_values_cm": [
-        93,
-        71,
-        50,
-        27,
-        5
-      ],
-      "pair_spatial_values_with_soas": true,
+      "repetitions_per_condition": 8,
+      "soa_values_ms": [300, 800, 1500, 2200, 2700],
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
       "auditory_motion_directions": [
         "looming",
         "receding"
       ],
       "tactile_sites": [
-        "face"
+        "right cheek"
       ],
-      "catch_trial_percentage": 10.0,
-      "catch_trials_exact": null,
-      "include_baseline_trials": true,
-      "baseline_soa_values_ms": [
-        0,
-        4000
-      ],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 23.076923076923077,
+      "catch_trials_exact": 24,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "baseline_soa_values_ms": [],
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 1,
-      "trial_randomization_strategy": "no_immediate_repeats",
+      "blocks": 2,
+      "distribute_trial_pool_across_blocks": true,
+      "trial_randomization_strategy": "balanced_shuffle",
       "block_order_randomization": "fixed",
       "max_consecutive_same_trial_type": 2,
       "trial_strips": [
         {
           "strip_id": "teneggi-social-face-row",
           "label": "Social face PPS moving-sound trial",
-          "audio_tactile_percentage": 100.0,
-          "catch_percentage": 0.0,
-          "baseline_percentage": 0.0,
+          "metadata": {
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "mouse_click_proxy",
+            "tactile_stimulation_modality": "electrical_in_publication",
+            "electrical_electrode_site": "right cheek",
+            "source_asset_equivalence": "generated pink-noise proxy",
+            "renderer_equivalence_boundary": "virtual moving source proxy for opposing physical loudspeaker gains"
+          },
           "elements": [
+            {
+              "element_id": "teneggi-pre-sound-silence",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [1000]
+            },
             {
               "element_id": "teneggi-face-moving-sound",
               "kind": "looming_stimulus",
               "label": "Face-centered moving sound",
-              "source_label": "",
-              "source_labels": [],
+              "source_label": "Face-centered moving sound",
               "randomized": true
+            },
+            {
+              "element_id": "teneggi-post-sound-silence",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [1000]
             }
           ]
         }
       ],
-      "participants": 1,
+      "participants": 18,
       "random_seed": 20130304
     }
   },
   "provenance": [
     {
-      "field": "core task",
-      "source": "PubMed abstract reports tactile detection on the face with task-irrelevant approaching/receding sounds."
+      "field": "Experiment 1 contexts and participant positioning",
+      "source": "Current Biology version of record pp. 406–407, Experiment 1 and Figure 1. Supplemental Experimental Procedures pp. 7 and 9–10, Participants and Social Interactions."
     },
     {
-      "field": "social manipulation gap",
-      "source": "The GUI currently has no social-context or economic-game factor fields, so this is an audio-tactile scaffold only."
+      "field": "Stimulus, timing, trial allocation and response",
+      "source": "Supplemental Experimental Procedures pp. 7–9, Apparatus and Stimuli, Design and Procedure, and Data Analysis and Sigmoid Fitting."
+    },
+    {
+      "field": "Other numbered experiments",
+      "source": "Current Biology version of record pp. 407–409 and Supplemental Experimental Procedures pp. 7 and 9–11. The shared Experiment 2 assessment and alternate Experiment 3 timings are documented separately."
+    },
+    {
+      "field": "Toolkit preview defaults",
+      "source": "The toolkit uses a generated continuous pink-noise source and a virtual path with nominal endpoints about 105 and 5 cm to define a three-second preview. These are renderer settings only. The toolkit seed and block allocation are reproducibility defaults."
     }
   ]
 }

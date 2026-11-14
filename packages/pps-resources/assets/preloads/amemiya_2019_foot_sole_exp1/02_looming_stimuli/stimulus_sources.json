@@ -1,0 +1,49 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "amemiya_2019_foot_sole_exp1",
+  "assets": [
+    {
+      "label": "Procedural looming white noise for preview",
+      "path": "assets/preloads/amemiya_2019_foot_sole_exp1/02_looming_stimuli/looming_Procedural_looming_white_noise_for_preview.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/amemiya_2019_foot_sole_exp1/02_looming_stimuli/looming_Procedural_looming_white_noise_for_preview.wav",
+      "sha256": "54c9bc6dc1caffae8b4d6c954ba342de53a764032ad95433c1c8cc6bcbbfa1c2",
+      "duration_s": 6.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Procedural looming white noise for preview",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 351.0,
+        "end_distance_cm": 1.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 5.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 1.0,
+        "path_length_m": 3.5,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 3.51,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.01,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}
