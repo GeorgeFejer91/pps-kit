@@ -6,12 +6,12 @@
   "doi": "10.1523/jneurosci.1696-15.2015",
   "source_url": "https://doi.org/10.1523/jneurosci.1696-15.2015",
   "verification_status": "partial",
-  "notes": "The trial design includes two 3100 ms pink-noise conditions, five tactile delays, 300 trials across three blocks, and fixed intertrial silence. Import calibrated original audio and qualify electrical delivery before participant use.",
+  "notes": "Run the 300-trial behavioral timing preview with two synthesized 3.1-second pink-noise cues. The clinical electrical stimulator, Cedrus response box and calibrated two-speaker playback require laboratory qualification.",
   "reference_parameters": {
     "study_row_id": "doi:10.1523/jneurosci.1696-15.2015::behavior",
     "publication_status": "published",
     "profile_type": "looming_flat_audio_tactile_pps",
-    "profile_check_complete": false,
+    "profile_check_complete": true,
     "published_method": {
       "participants": {
         "enrolled": 38,
@@ -48,14 +48,11 @@
       "response": "Press with left index finger for single electrical pulse at the hairy right index finger. Withhold on sound-only trials.",
       "analysis": "Take the mean of log reaction times by sound and delay, then compare linear and sigmoid fits for looming; the midpoint is expressed in milliseconds after sound onset.",
       "software_schedule": {
-        "scope": "Use the existing scheduler with two unchanged imported clips, source-conditioned Audio-Tactile trials and audio-only Catch trials. Use the same 1000 ms silent gap for both. No tactile fixture or manual proxy constitutes research delivery.",
+        "scope": "The existing scheduler preserves both 3.1-second clips, the five source-relative target offsets and the 1,000 ms intertrial silence. Target timing is verified through the software cue channel.",
         "catch_split": "60 per sound is a balanced software allocation, because the article gives the overall catch count but not the split.",
         "onsets": "The five delays are tied to source onset; the model-derived distances are descriptive and do not create independent runtime conditions.",
-        "required_imports": [
-          "Looming pink noise",
-          "Flat pink noise"
-        ],
-        "expected_block_size": 100
+        "expected_block_size": 100,
+        "sources": "Synthesized digital cues, named and hashed below. Original or calibrated replacement loudspeaker files are required for a research run."
       }
     },
     "publication_parameters": {
@@ -303,11 +300,32 @@
         }
       }
     },
-    "implementation_gaps": [
+    "profile_scope": "Software assessment timing for the behavioral task. The fMRI paradigm and its individual trial selection have a separate profile.",
+    "remaining_caveats": [
       "The original flat and exponential rising pink-noise waveforms, full amplitude envelopes, loudspeaker gains and absolute acoustic calibration are unavailable.",
       "Requires a calibrated Digitimer DS7A trigger and measured electrical tactile delivery. The software touch marker does not recreate the physical electrical target.",
       "Original per-sound catch allocations and within-block random sequence are unreported. A balanced split of the reported 120 catches and deterministic shuffling are software scheduling choices."
-    ]
+    ],
+    "preview_audio": {
+      "recipe": "Filter one seeded noise realization to 1/f power with the PPS Kit generator, remove DC, set the dry signal to \u221226 dBFS broadband RMS, apply the digital envelope and 5 ms raised-cosine edge fades, and write dual-mono PCM16.",
+      "seed": 20151639,
+      "sample_rate_hz": 44100,
+      "duration_ms": 3100,
+      "duration_basis": "Reported behavioral sound duration in Journal of Neuroscience pp. 16330\u201316331, Stimuli.",
+      "digital_gain_change_db": 15.0,
+      "flat_relative_digital_gain_db": 0,
+      "looming_gain_shape": "Linear in dB and exponential in amplitude.",
+      "sha256": {
+        "Looming pink noise preview": "b20f4d46f68b97275abacbc534cf2e486899ab670933cfba755919e03bbe6801",
+        "Flat pink noise preview": "264cbda37f4dac27938848b76fe07f5b5624b025e4fa98960fec81991971a8ec"
+      }
+    },
+    "loudness_policy": {
+      "mode": "digital_dbfs",
+      "calibration_mode": "digital_only",
+      "calibration_status": "digital_only",
+      "instruction_offset_db": 0
+    }
   },
   "provenance": [
     {

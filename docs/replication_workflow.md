@@ -14,8 +14,11 @@ The catalogue covers 91 of 94 DOI records with 201 source-linked profiles.
 It represents 193 reviewed primary assessment rows and one conference abstract
 series. Repeated sessions with the same assessment may share a profile. Where
 a publication reports a separate companion task or computational model, its
-profile records the relevant conditions and output. Twenty-eight profiles
-across 20 DOI records pass the software launch checks.
+profile records the relevant conditions and output. Forty-three profiles
+across 30 DOI records pass the software launch checks. The timing profiles
+use documented audio, tactile or response substitutes where the original
+assets or devices are unavailable. Use the remaining caveats to qualify
+the physical setup before collecting participant data.
 
 - Rahmani’s 2 s and 3 s profiles each run 112 paired trials, 112 tactile-only
   trials and 21 auditory catches with the published onset grid. Both generate an
@@ -35,17 +38,29 @@ across 20 DOI records pass the software launch checks.
   main trial pools. Eight companion profiles record calibration and controls.
   Calibrated stimulus delivery, response classification and the driving apparatus
   are required for research launch.
-- Ferri’s behavioral preview schedules 180 paired trials and 120 audio-only
-  catches. The setup requires its two calibrated sound sources and electrical
-  delivery.
-- Serino’s hand-posture preview schedules 288 paired trials, 96 touch-only
-  baselines, and 48 sound-only catches. Its virtual trajectory and block
-  partition are software choices. The published physical placement and
-  delivered timing need verification.
-- Teneggi’s bargaining-game preview schedules 104 trials before the game and
-  104 after. The software uses a virtual moving sound and placeholder response
-  and touch channels. The lab setup requires the game, cheek stimulation,
-  physical sound, and vocal response capture.
+- Hobeika’s left- and right-handed assessments each run 240 trials. The
+  logarithmic and pseudo-linear assessments each run 576. Both preserve the
+  sound during baseline trials with touch in the silent window. The two
+  passive-audience profiles each run 480 trials with operator-managed seating.
+  Collaboration and competition require synchronized participant stations.
+- Ferri’s premotor and artificial-looming profiles run 300 and 416 trials.
+  Di Cosmo’s 360-trial assessment uses illustrative audio because the original
+  playback duration and calibration are unresolved. All three use digital
+  tactile markers. The original calibrated playback and electrical delivery
+  require laboratory qualification.
+- Serino’s hand–trunk and hand-posture assessments run 480 and 432 trials.
+  The software uses virtual trajectories, digital tactile cues and shorter
+  blocks. Research sessions require the published placements and hardware.
+- Teneggi’s social-face and bargaining-game assessments each run 208 trials.
+  The operator changes the social context or administers the game at the
+  indicated boundary. Research requires the physical sound, cheek stimulation
+  and vocal response capture.
+- Ardizzi and Ferri’s Session 1 assessment runs 300 trials with digital
+  substitutes. Bassolino’s chronic-stroke profile runs one 110-trial pool.
+  The source leaves allocation of that pool across hands unresolved.
+- Both Teraoka timing previews include the generated 1 kHz start tone and
+  54 of 56 trials. Cue-only catches and the calibrated speaker array remain
+  prerequisites for the original procedure.
 - Paredes’ two-point prediction can be rerun with the
   [pinned author notebooks](https://github.com/renatoparedes/SCZ_PPS_Model/tree/e881e2d74717d24fa24a5b30ed2f794b5d96b1db).
   The profile records the reproduced computational output and links the inputs.

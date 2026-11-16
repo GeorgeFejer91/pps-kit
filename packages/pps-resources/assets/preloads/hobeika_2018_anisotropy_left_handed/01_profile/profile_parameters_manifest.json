@@ -12,22 +12,22 @@
   "visible_variant_label": "A",
   "variant_display": "Hobeika 2018 lateral PPS \u2014 left-handed cohort - Variant A",
   "recreation_status": {
-    "primary_category": "missing_publication_parameters",
-    "category_label": "Missing publication parameters",
-    "runner_readiness": "blocked_missing_parameters",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 3,
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
-    "passed": false,
+    "passed": true,
     "segments": [
       {
         "segment": "0",
@@ -39,20 +39,9 @@
       {
         "segment": "1",
         "segment_label": "Segment 1 source/stimulus assets",
-        "passed": false,
-        "field_count": 5,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable."
-          },
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported."
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "2",
@@ -64,15 +53,9 @@
       {
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-        "passed": false,
-        "field_count": 6,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration."
-          }
-        ]
+        "passed": true,
+        "field_count": 5,
+        "blocking_reasons": []
       },
       {
         "segment": "4",
@@ -112,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 24,
+      "value": 26,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -267,49 +250,9 @@
       "status": "defaulted",
       "value": "1 part",
       "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
-    },
-    {
-      "segment": "1",
-      "segment_label": "Segment 1 source/stimulus assets",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable.",
-      "note": "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable."
-    },
-    {
-      "segment": "3",
-      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration.",
-      "note": "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration."
-    },
-    {
-      "segment": "1",
-      "segment_label": "Segment 1 source/stimulus assets",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported.",
-      "note": "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported."
     }
   ],
-  "missing_publication_parameters": [
-    {
-      "segment": "1",
-      "parameter": "profile_gap",
-      "reason": "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable."
-    },
-    {
-      "segment": "3",
-      "parameter": "profile_gap",
-      "reason": "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration."
-    },
-    {
-      "segment": "1",
-      "parameter": "profile_gap",
-      "reason": "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported."
-    }
-  ],
+  "missing_publication_parameters": [],
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {

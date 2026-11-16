@@ -78,7 +78,7 @@
   "prestimulus_files": [
     {
       "label": "Trial-start 1 kHz tone",
-      "path": "teraoka_2024_trial_start_1000hz_500ms.wav",
+      "path": "assets/study_profile_sources/teraoka_2024/teraoka_2024_trial_start_1000hz_500ms.wav",
       "target_duration_s": 0.5,
       "render_mode": "preserve",
       "tone_type": "sine",

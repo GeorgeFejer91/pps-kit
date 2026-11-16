@@ -5,12 +5,12 @@
   "source_url": "https://doi.org/10.1250/ast.41.345",
   "doi": "10.1250/ast.41.345",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "The software assessment runs one response stream over 480 trials. The operator seats a passive partner during the audience blocks and leaves the chair empty during the isolated blocks. The trial budget and silent-window timing use the matched procedure in the author's thesis.",
   "reference_parameters": {
     "study_row_id": "doi:10.1250/ast.41.345::audience",
     "publication_status": "published",
-    "profile_type": "published_method_inspection",
-    "profile_check_complete": false,
+    "profile_type": "lateral_looming_audio_tactile_social_pps",
+    "profile_check_complete": true,
     "published_method": {
       "parallel_publication_doi": "10.1098/rsos.181878",
       "relationship": "The parallel Royal Society Open Science report has the same three assessments, analyzed counts and multiple statistics. Participant-level overlap is unverified.",
@@ -398,20 +398,67 @@
         }
       }
     },
-    "implementation_gaps": [
-      "Requires shared-clock coordination for two participants, routed and calibrated physical tactile and response paths, and the original audio rendering assets.",
-      "The exact per-block trial manifest, ITI draw distribution and response cutoff are unavailable. Silent-window tactile probes retain the sound sequence."
+    "remaining_caveats": [
+      "The toolkit uses generated pink noise and its binaural engine. Original bubbling-water audio, LISTEN filters, room response and calibrated headphone output are still needed for source-equivalent delivery.",
+      "The preview generates the reported 250 Hz, 20 ms waveform at a digital default and uses a mouse response. Calibrate the physical miniature loudspeaker and validate the button timing. Follow the paper's fixation and seating procedure.",
+      "The author's thesis supplies the trial allocation. The toolkit uses two balanced silence durations at the reported 2,700 and 3,300 ms endpoints. Original jitter draws, catch split and realized order are unreported."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "preview_scope": "Two counterbalanced sets of five blocks. The active participant responds to touch while the passive partner remains still. All baseline trials keep their sound and place touch outside that sound window."
   },
   "design": {
     "name": "Hobeika 2020 · Audience",
-    "sofa_file": "",
-    "noises": [],
-    "custom_looming_files": [],
-    "prestimulus_files": [],
+    "trajectory": {
+      "coordinate_mode": "polar",
+      "path_direction": "approach",
+      "start_radius_m": 1.35,
+      "end_radius_m": 0.2,
+      "azimuth_start_deg": -60.0,
+      "azimuth_end_deg": -60.0,
+      "elevation_deg": 0.0,
+      "path_length_m": 1.15,
+      "propagation_speed_mps": 0.3833333333333333,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "noises": [
+      {
+        "label": "Left-front approach preview",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "motion_mode": "looming",
+        "trajectory_snapshot": {
+          "start_distance_cm": 135,
+          "end_distance_cm": 20,
+          "start_rotation_deg": 300.0,
+          "end_rotation_deg": 300.0,
+          "movement_duration_s": 3,
+          "path_direction": "approach"
+        }
+      },
+      {
+        "label": "Right-front approach preview",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "motion_mode": "looming",
+        "trajectory_snapshot": {
+          "start_distance_cm": 135,
+          "end_distance_cm": 20,
+          "start_rotation_deg": 60.0,
+          "end_rotation_deg": 60.0,
+          "movement_duration_s": 3,
+          "path_direction": "approach"
+        }
+      }
+    ],
     "protocol": {
-      "spatial_values_cm": [],
+      "repetitions_per_condition": 1,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 1,
+        "baseline": 1,
+        "catch": 1
+      },
       "soa_values_ms": [
         0,
         375,
@@ -423,28 +470,275 @@
         2625,
         3000
       ],
-      "include_catch_trials": false,
-      "catch_trial_percentage": 0,
-      "include_baseline_trials": false,
-      "baseline_trial_percentage": 0,
-      "baseline_strategy": "none",
-      "trial_strips": [],
+      "spatial_values_cm": [
+        135.0,
+        120.625,
+        106.25,
+        91.875,
+        77.5,
+        63.125,
+        48.75,
+        34.375,
+        20.0
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "source_trajectory"
+      ],
       "tactile_sites": [
         "palmar left index finger"
       ],
-      "pair_spatial_values_with_soas": false,
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 1,
-      "participants": 1,
-      "block_order_randomization": "fixed"
+      "include_catch_trials": true,
+      "catch_trial_percentage": 8.333333333333334,
+      "catch_trials_exact": 4,
+      "catch_crosses_sequence_variants": true,
+      "include_baseline_trials": true,
+      "baseline_strategy": "custom",
+      "baseline_custom_trial_mode": "audio_tactile",
+      "baseline_soa_values_ms": [
+        -650,
+        3650
+      ],
+      "baseline_trial_percentage": 16.666666666666668,
+      "baseline_trials_exact": 8,
+      "baseline_crosses_sequence_variants": true,
+      "blocks": 10,
+      "block_specs": [
+        {
+          "label": "Isolated 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Isolated 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Isolated 3",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Isolated 4",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Isolated 5",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Audience dyad 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Audience dyad 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Audience dyad 3",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Audience dyad 4",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Audience dyad 5",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "distribute_trial_pool_across_blocks": false,
+      "repeat_trial_pool_per_block": true,
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "trial_strips": [
+        {
+          "strip_id": "left-approach",
+          "label": "Left-front approach preview",
+          "audio_tactile_percentage": 75.0,
+          "baseline_percentage": 16.666666666666668,
+          "catch_percentage": 8.333333333333334,
+          "spatial_values_cm": [
+            135.0,
+            120.625,
+            106.25,
+            91.875,
+            77.5,
+            63.125,
+            48.75,
+            34.375,
+            20.0
+          ],
+          "metadata": {
+            "auditory_trajectory_direction": "looming",
+            "spatial_hemifield": "left front",
+            "source_asset_equivalence": "generated pink-noise acoustic proxy",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_waveform_shape": "sine",
+            "tactile_duration_ms": 20,
+            "tactile_frequency_hz": 250,
+            "tactile_amplitude": 0.2,
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_capture_device": "mouse click preview"
+          },
+          "elements": [
+            {
+              "element_id": "left-lead",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
+            {
+              "element_id": "left-sound",
+              "kind": "looming_stimulus",
+              "label": "Left-front approach preview",
+              "source_label": "Left-front approach preview"
+            },
+            {
+              "element_id": "left-trail",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [
+                2700,
+                3300
+              ],
+              "randomized": true
+            }
+          ]
+        },
+        {
+          "strip_id": "right-approach",
+          "label": "Right-front approach preview",
+          "audio_tactile_percentage": 75.0,
+          "baseline_percentage": 16.666666666666668,
+          "catch_percentage": 8.333333333333334,
+          "spatial_values_cm": [
+            135.0,
+            120.625,
+            106.25,
+            91.875,
+            77.5,
+            63.125,
+            48.75,
+            34.375,
+            20.0
+          ],
+          "metadata": {
+            "auditory_trajectory_direction": "looming",
+            "spatial_hemifield": "right front",
+            "source_asset_equivalence": "generated pink-noise acoustic proxy",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_waveform_shape": "sine",
+            "tactile_duration_ms": 20,
+            "tactile_frequency_hz": 250,
+            "tactile_amplitude": 0.2,
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_capture_device": "mouse click preview"
+          },
+          "elements": [
+            {
+              "element_id": "right-lead",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
+            {
+              "element_id": "right-sound",
+              "kind": "looming_stimulus",
+              "label": "Right-front approach preview",
+              "source_label": "Right-front approach preview"
+            },
+            {
+              "element_id": "right-trail",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [
+                2700,
+                3300
+              ],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 26,
+      "random_seed": 2020410345,
+      "participant_order_policy": {
+        "schema": "pps-participant-order-policy.v1",
+        "algorithm": "seeded_factoradic_cycle.v1",
+        "seed": 2020410345,
+        "block_groups": [
+          [
+            "Isolated 1",
+            "Isolated 2",
+            "Isolated 3",
+            "Isolated 4",
+            "Isolated 5"
+          ],
+          [
+            "Audience dyad 1",
+            "Audience dyad 2",
+            "Audience dyad 3",
+            "Audience dyad 4",
+            "Audience dyad 5"
+          ]
+        ]
+      }
     }
   },
   "provenance": [
     {
       "field": "Study design and execution parameters",
       "source": "https://doi.org/10.1250/ast.41.345. Acoustical Science and Technology p. 345, Material and methods; Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods; Acoustical Science and Technology pp. 346–348, Results, Fig. 2 and Discussion; Hobeika thesis Ch. 7, printed pp. 76–78 (PDF pp. 97–99); Hobeika thesis Ch. 7, printed pp. 88–91 (PDF pp. 109–112)"
+    },
+    {
+      "field": "Toolkit schedule",
+      "source": "Acoustical Science and Technology pp. 345–346 and Hobeika thesis Chapter 7. Deterministic software allocation with equal auditory-only catch counts across side and silence duration."
     }
   ]
 }

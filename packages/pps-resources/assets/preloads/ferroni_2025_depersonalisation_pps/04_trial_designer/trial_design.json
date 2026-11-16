@@ -11,7 +11,66 @@
   ],
   "spatial_values_cm": [],
   "custom_clip_assets": [],
-  "trial_strips": [],
+  "trial_strips": [
+    {
+      "strip_id": "ferroni-2025-depersonalisation-pps-trial-example",
+      "label": "Looming or flat PPS trial",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "respond",
+        "target_role": "tactile_target",
+        "response_rule": "tactile_detection_proxy",
+        "response_capture_device": "mouse (software proxy)",
+        "tactile_stimulation_modality": "electrical in the paper",
+        "body_anchor": "dorsal right index finger",
+        "electrical_stimulator_model": "Digitimer DS3",
+        "auditory_trajectory_family": "near_far_speaker_intensity_crossfade_or_flat",
+        "source_asset_equivalence": "Ardizzi\u2013Ferri 2018 digital pink-noise preview",
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_input_modality": "mouse_click"
+      },
+      "elements": [
+        {
+          "element_id": "pre-sound-reference",
+          "kind": "jitter",
+          "label": "Inspection foreperiod",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "looming-flat-proxies",
+          "kind": "looming_stimulus",
+          "label": "Looming or flat pink-noise proxy",
+          "source_label": "Looming pink-noise proxy",
+          "source_labels": [
+            "Looming pink-noise proxy",
+            "Flat pink-noise proxy"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        },
+        {
+          "element_id": "post-trial-iti",
+          "kind": "jitter",
+          "label": "Post-trial interval",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        }
+      ]
+    }
+  ],
   "prestimulus_files": [],
-  "preview_trial_count": 0
+  "preview_trial_count": 26
 }

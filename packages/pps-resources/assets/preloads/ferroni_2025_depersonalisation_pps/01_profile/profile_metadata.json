@@ -6,7 +6,7 @@
   "doi": "10.1177/17470218241261645",
   "source_url": "https://doi.org/10.1177/17470218241261645",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Preview the published paired delay, silent D0 and catch examples. The conflicting trial totals prevent a full assessment reconstruction.",
   "reference_parameters": {
     "study_row_id": "doi:10.1177/17470218241261645",
     "publication_status": "published",
@@ -246,7 +246,17 @@
       "Recover or validate the two-channel sound cross-fade envelope, physical speaker calibration and synchronized electrocutaneous delivery.",
       "Verify the scoring pipeline and the reported SD/SE labeling with the original analysis."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "software_preview_allocation": {
+      "paired_rows_per_block": 10,
+      "catch_rows_per_block": 2,
+      "silent_tactile_rows_per_block": 1,
+      "example_blocks": 2,
+      "actual_allocation": null,
+      "pre_audio_reference_delay_ms": 1000,
+      "foreperiod_scope": "Toolkit offset for the silent D0 example; original trial start to nominal audio is unreported."
+    },
+    "preview_source": "Reuse Ardizzi\u2013Ferri synthetic 3 s looming and flat files as two digital examples. Original gain and calibration are unavailable.",
+    "preview_scope": "Timing exemplars only. Per example block: ten paired sound-by-delay rows, two sound-only catches and one silent D0 row. The toolkit sets these demonstration counts."
   },
   "provenance": [
     {

@@ -57,20 +57,20 @@ def test_full_pipeline_validation_summary_is_conservative():
     assert summary["pipeline_status_counts"] == {
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 17,
-        "pipeline_incomplete": 5,
-        "profile_present_but_source_parameters_missing": 8,
+        "pipeline_incomplete": 11,
+        "profile_present_but_source_parameters_missing": 4,
         "source_parameters_missing_before_profile_creation": 3,
-        "toolkit_structure_or_response_contract_missing": 43,
+        "toolkit_structure_or_response_contract_missing": 41,
     }
     assert summary["primary_gap_counts"] == {
-        "profile_present_but_source_parameters_missing": 8,
+        "profile_present_but_source_parameters_missing": 4,
         "source_parameters_missing_before_profile_creation": 3,
-        "toolkit_structure_or_response_contract_missing": 43,
+        "toolkit_structure_or_response_contract_missing": 41,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
-        "minimum_source_parameters_captured": 22,
+        "minimum_source_parameters_captured": 28,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 54,
+        "source_parameters_missing_or_unresolved": 48,
     }
     assert summary["gate_status_counts"]["observed_emulated_expected_match"] == {
         "emulated_observed_direction_matches_expected": 17,
@@ -78,10 +78,10 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 11,
-        "blocked_by_toolkit_structure_or_response_contract": 43,
+        "blocked_by_missing_profile_parameters": 7,
+        "blocked_by_toolkit_structure_or_response_contract": 41,
         "not_applicable_adjacent_record": 4,
-        "segment_0_to_6_gui_toolkit_path_ready": 22,
+        "segment_0_to_6_gui_toolkit_path_ready": 28,
     }
     assert "not collected participant evidence" in pipeline["scope"]["evidence_boundary"]
 

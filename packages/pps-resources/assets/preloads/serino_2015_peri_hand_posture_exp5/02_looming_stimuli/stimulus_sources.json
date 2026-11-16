@@ -6,8 +6,8 @@
       "label": "Hand-posture reference approach",
       "path": "assets/preloads/serino_2015_peri_hand_posture_exp5/02_looming_stimuli/looming_Hand-posture_reference_approach.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_posture_exp5/02_looming_stimuli/looming_Hand-posture_reference_approach.wav",
-      "sha256": "aaaf239c7374a2a3334fdcb06cd3ee0275dc6d3d0604db0f4b12be1f0b47a37b",
-      "duration_s": 4.318005,
+      "sha256": "a08eda6522ee5620ab5d2f9351691341592cd41f380f306690c02079b1e17005",
+      "duration_s": 4.418005,
       "sample_rate": 44100,
       "channels": 2,
       "source_kind": "generated_noise",
@@ -28,7 +28,7 @@
         "end_rotation_deg": 0.0,
         "movement_duration_s": 4.318,
         "start_hold_s": 0.0,
-        "end_hold_s": 0.0,
+        "end_hold_s": 0.1,
         "path_length_m": 0.95,
         "coordinate_mode": "cartesian",
         "path_direction": "approach",
@@ -43,17 +43,7 @@
           "z_m": 0.0
         }
       },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
+      "source_profile": "continuous_noise"
     }
   ]
 }

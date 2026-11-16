@@ -6,12 +6,12 @@
   "doi": "10.1093/braincomms/fcac179",
   "source_url": "https://doi.org/10.1093/braincomms/fcac179",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Run one described 110-trial PPS pool. Software uses a generated broadband cue, tactile-channel markers and mouse clicks. The source leaves the allocation of the pool across hands open.",
   "reference_parameters": {
     "study_row_id": "doi:10.1093/braincomms/fcac179",
     "publication_status": "published",
     "profile_type": "published_method_inspection",
-    "profile_check_complete": false,
+    "profile_check_complete": true,
     "published_method": {
       "participants": {
         "patients_analyzed": 39,
@@ -265,11 +265,13 @@
         }
       }
     },
-    "implementation_gaps": [
-      "Original broadband waveform and opposing loudspeaker gains are unavailable. The tactile load, route timing and patient/foot-pedal hardware require calibration.",
-      "Per-side delivery counts, block structure and exact baseline pooling are unresolved."
-    ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "profile_scope": "One reported count set of 60 paired targets, 30 silent tactile controls and 20 sound-only catches. The software run uses one operator-selected hand.",
+    "remaining_caveats": [
+      "The supplement does not resolve whether one count set applied to a single hand or the complete two-hand assessment. The software uses one block for the described pool without asserting a published block schedule.",
+      "The original 3-second two-speaker stimulus has no published digital asset or gain law. The software uses white noise as a broadband demonstration and illustrative headphone geometry.",
+      "The paper gives a 2-second response window and randomized intervals of 500, 750 and 1000 ms. The generator uses toolkit response timing and the reported midpoint interval of 750 ms after the software cue. Exact randomization, original interval anchor and physical response timing are unverified.",
+      "The physical motor, foot-pedal response and side assignment require lab verification. Clinical results and limb groupings require the original screening and analysis."
+    ]
   },
   "provenance": [
     {

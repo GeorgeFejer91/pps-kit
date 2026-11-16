@@ -11,21 +11,21 @@
     "structured_expected_outcome_record_count": 76,
     "pending_expected_outcome_record_count": 0,
     "adjacent_or_out_of_scope_record_count": 4,
-    "runnable_profile_parameter_record_count": 22,
+    "runnable_profile_parameter_record_count": 28,
     "observed_behavioral_comparison_record_count": 0,
     "mouse_click_simulated_participant_like_comparison_record_count": 17,
     "synthetic_profile_contrast_comparison_record_count": 17,
-    "parameter_run_evidence_only_record_count": 5,
-    "not_runnable_no_observed_comparison_record_count": 54,
+    "parameter_run_evidence_only_record_count": 11,
+    "not_runnable_no_observed_comparison_record_count": 48,
     "adjacent_not_applicable_record_count": 4,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
       "not_yet_templated_missing_publication_parameters": 3,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
-      "ready_profile_parameter_run_available_expected_contrast_unvalidated": 5,
-      "template_present_blocked_missing_publication_parameters": 8,
-      "template_present_blocked_toolkit_structure": 43
+      "ready_profile_parameter_run_available_expected_contrast_unvalidated": 11,
+      "template_present_blocked_missing_publication_parameters": 4,
+      "template_present_blocked_toolkit_structure": 41
     }
   },
   "expected_outcome_extraction_sources": {
@@ -628,11 +628,11 @@
       "record_id": "teneggi_2013_social_face",
       "citation_short": "Teneggi et al. (2013)",
       "doi": "10.1016/j.cub.2013.01.043",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "teneggi_2013_social_face_pps"
       ],
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "social_context_modulation_of_face_pps_boundaries",
@@ -654,10 +654,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_parameter_run_available_expected_contrast_unvalidated",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant data or mouse-click-simulated participant-like runner data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved."
     },
     {
       "record_id": "taffou_2014_cynophobic_rear_looming",
@@ -698,11 +698,11 @@
       "record_id": "ferri_2015_artificial_valence",
       "citation_short": "Ferri et al. (2015A)",
       "doi": "10.1016/j.neuropsychologia.2015.03.001",
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "ferri_2015_artificial_looming_valence"
       ],
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "negative_valence_expansion_of_artificial_sound_pps",
@@ -724,10 +724,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_parameter_run_available_expected_contrast_unvalidated",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant data or mouse-click-simulated participant-like runner data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved."
     },
     {
       "record_id": "ferri_2015_ecological_valence",
@@ -1213,11 +1213,11 @@
       "record_id": "ardizzi_ferri_2018_interoceptive",
       "citation_short": "Ardizzi & Ferri (2018)",
       "doi": "10.1016/j.cognition.2018.04.001",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "ardizzi_ferri_2018_looming_flat"
       ],
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "interoceptive_accuracy_predicts_pps_boundary_size",
@@ -1239,21 +1239,21 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_parameter_run_available_expected_contrast_unvalidated",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant data or mouse-click-simulated participant-like runner data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved."
     },
     {
       "record_id": "hobeika_2018_anisotropy",
       "citation_short": "Hobeika et al. (2018)",
       "doi": "10.1007/s00221-017-5158-2",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "hobeika_2018_anisotropy_left_handed",
         "hobeika_2018_anisotropy_right_handed"
       ],
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "handedness_linked_lateral_pps_anisotropy",
@@ -1275,10 +1275,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_parameter_run_available_expected_contrast_unvalidated",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant data or mouse-click-simulated participant-like runner data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved."
     },
     {
       "record_id": "noel_2018_neural_adaptation",
@@ -1767,12 +1767,12 @@
       "record_id": "hobeika_2020_methods",
       "citation_short": "Hobeika et al. (2020)",
       "doi": "10.1016/j.jneumeth.2019.108534",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "hobeika_2020_pseudo_linear",
         "hobeika_2020_logarithmic"
       ],
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "expectancy_corrected_log_distance_pps_method",
@@ -1794,10 +1794,10 @@
         "paper_audit_visualization_status": "no_extracted_source",
         "paper_audit_visualization_candidate_count": "0"
       },
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_parameter_run_available_expected_contrast_unvalidated",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant data or mouse-click-simulated participant-like runner data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved."
     },
     {
       "record_id": "ferroni_2020_tool_observation",
@@ -2939,11 +2939,11 @@
       "record_id": "di_cosmo_2021_phase_coupling",
       "citation_short": "Di Cosmo, G., Costantini, M., Spadone, S., Pizzella, V., Della Penna, S., Marzetti, L., & Ferri, F. (2021). Phase-coupling of neural oscillations contributes to individual differences in peripersonal space. Neuropsychologia, 156, 107823.",
       "doi": "10.1016/j.neuropsychologia.2021.107823",
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "di_cosmo_2021_phase_coupling"
       ],
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "resting_connectivity_and_pps",
@@ -2957,10 +2957,10 @@
       },
       "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
       "expected_outcome_source_audit": {},
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
-      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
+      "observed_comparison_gap": "ready_profile_parameter_run_available_expected_contrast_unvalidated",
+      "observed_evidence_boundary": "Current evidence can show that the profile can load/materialize/run as software, but no profile-specific participant data or mouse-click-simulated participant-like runner data have been compared with the paper's expected PPS effect.",
+      "required_next_evidence": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved."
     },
     {
       "record_id": "ferroni_2020_schizotypy",

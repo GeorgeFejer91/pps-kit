@@ -6,7 +6,7 @@
   "doi": "10.1016/j.neuropsychologia.2026.109490",
   "source_url": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Inspect the audio-tactile group timing as two 20-trial software examples. The full repetition count, visual group and physical tool training remain outside this preview.",
   "reference_parameters": {
     "study_row_id": "doi:10.1016/j.neuropsychologia.2026.109490::a",
     "publication_status": "published",
@@ -268,7 +268,17 @@
       "Validate both assessments and the intervening physical training with the corresponding cohort and original geometry. Original realized trial sequences and participant analysis inputs are unavailable.",
       "Run an independently calibrated dual-speaker electrocutaneous task and a synchronized Vive visual and haptic task. Original channel gain curves and measured stimulus latency are unavailable."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "software_preview_allocation": {
+      "per_example": {
+        "paired_looming_or_flat": 10,
+        "auditory_only_catch": 8,
+        "silent_tactile_D0": 2
+      },
+      "reason": "The 20-trial demonstrator is the smallest integer 50:40:10 allocation covering one occurrence of each of the two waveforms at each of the five target SOAs. Published allocation per waveform, target SOA and phase is unreported.",
+      "provisional_choices": "Equal catch distribution across the sound options. The helper\u2019s 1000 ms audio-reference offset and trailing placeholder silence are toolkit timing choices."
+    },
+    "preview_source": "Ardizzi\u2013Ferri synthesized 3 s pink-noise files show digital looming and flat examples. The published physical cross-fade and individual calibration require lab verification.",
+    "preview_scope": "A qualifying audio-tactile timing unit for the audio-tactile group, shown once in pre- and once in post-training order. The original number of trials and exact allocations remain unresolved."
   },
   "provenance": [
     {

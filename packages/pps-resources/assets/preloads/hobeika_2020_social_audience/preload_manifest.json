@@ -4,7 +4,7 @@
   "title": "Hobeika 2020 \u00b7 Audience",
   "visible_variant_label": "A",
   "publication_status": "published",
-  "profile_type": "published_method_inspection",
+  "profile_type": "lateral_looming_audio_tactile_social_pps",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -37,18 +37,18 @@
   ],
   "profile_parameters_manifest": "assets/preloads/hobeika_2020_social_audience/01_profile/profile_parameters_manifest.json",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 4,
-    "unsupported_structure_count": 1
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
+    "unsupported_structure_count": 0
   },
   "render_contract": {
     "stage": "auditory_looming_prebake",
@@ -56,7 +56,94 @@
     "include_tactile": false,
     "tactile_policy": "deferred_until_session_preparation"
   },
-  "assets": [],
+  "assets": [
+    {
+      "label": "Left-front approach preview",
+      "path": "assets/preloads/hobeika_2020_social_audience/02_looming_stimuli/looming_Left-front_approach_preview.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/hobeika_2020_social_audience/02_looming_stimuli/looming_Left-front_approach_preview.wav",
+      "sha256": "4b023308026325156fbac52c3820a08236cb09f0205f2b8493c4e033fe0c54a9",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Left-front approach preview",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 135.0,
+        "end_distance_cm": 20.0,
+        "start_rotation_deg": 300.0,
+        "end_rotation_deg": 300.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.15,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": -1.169134,
+          "y_m": 0.675,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.173205,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Right-front approach preview",
+      "path": "assets/preloads/hobeika_2020_social_audience/02_looming_stimuli/looming_Right-front_approach_preview.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/hobeika_2020_social_audience/02_looming_stimuli/looming_Right-front_approach_preview.wav",
+      "sha256": "566821a2fac4cbc8c2f93d01c225893aeec6f6484ebd95346d25c6847c881bcb",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Right-front approach preview",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 135.0,
+        "end_distance_cm": 20.0,
+        "start_rotation_deg": 60.0,
+        "end_rotation_deg": 60.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.15,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 1.169134,
+          "y_m": 0.675,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.173205,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ],
   "notes": [
     "Prebaked WAVs are local auditory-only profile assets.",
     "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",

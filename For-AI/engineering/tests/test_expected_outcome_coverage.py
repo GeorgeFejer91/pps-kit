@@ -152,21 +152,21 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "structured_expected_outcome_record_count": 76,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
-        "runnable_profile_parameter_record_count": 22,
+        "runnable_profile_parameter_record_count": 28,
         "observed_behavioral_comparison_record_count": 0,
         "mouse_click_simulated_participant_like_comparison_record_count": 17,
         "synthetic_profile_contrast_comparison_record_count": 17,
-        "parameter_run_evidence_only_record_count": 5,
-        "not_runnable_no_observed_comparison_record_count": 54,
+        "parameter_run_evidence_only_record_count": 11,
+        "not_runnable_no_observed_comparison_record_count": 48,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
             "not_yet_templated_missing_publication_parameters": 3,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
-            "template_present_blocked_missing_publication_parameters": 8,
-            "template_present_blocked_toolkit_structure": 43,
-            "ready_profile_parameter_run_available_expected_contrast_unvalidated": 5,
+            "template_present_blocked_missing_publication_parameters": 4,
+            "template_present_blocked_toolkit_structure": 41,
+            "ready_profile_parameter_run_available_expected_contrast_unvalidated": 11,
         },
     }
 
@@ -268,7 +268,17 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert "observed_profile_contrast_evidence" not in maister
     assert "observed_mouse_click_participant_like_evidence" not in maister
 
-    new_assessments = {"looming_duration_2025", "pregnancy_2018_preprint", "pregnancy_2019"}
+    new_assessments = {
+        "ardizzi_ferri_2018_interoceptive",
+        "di_cosmo_2021_phase_coupling",
+        "ferri_2015_artificial_valence",
+        "hobeika_2018_anisotropy",
+        "hobeika_2020_methods",
+        "looming_duration_2025",
+        "pregnancy_2018_preprint",
+        "pregnancy_2019",
+        "teneggi_2013_social_face",
+    }
     for record_id in new_assessments:
         record = records[record_id]
         assert record["runnable_status"] == "runnable_profile_parameters_ready"
@@ -388,7 +398,7 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
 
     for record_id in [
         "taffou_2014_cynophobic_rear_looming",
-        "hobeika_2020_methods",
+        "social_coding_2019",
         "amemiya_2017_pseudowalking_footsole",
     ]:
         record = records[record_id]

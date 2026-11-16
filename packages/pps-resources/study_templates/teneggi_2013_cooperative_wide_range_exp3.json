@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1016/j.cub.2013.01.043",
   "doi": "10.1016/j.cub.2013.01.043",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Inspect seven wide-range approach delays and the sound-only catch family before and after the game. The demonstrator runs each target delay once per phase. The published repetition and block totals are unresolved.",
   "reference_parameters": {
     "study_row_id": "doi:10.1016/j.cub.2013.01.043::c",
     "publication_status": "published",
@@ -267,16 +267,43 @@
       "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration.",
       "The wider-range experiment's actual target and catch trial counts, block allocation and order are unreported."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "software_preview_allocation": {
+      "targets_per_phase": 7,
+      "demonstration_sound_only_per_phase": 1,
+      "reported_repetitions_per_delay": null,
+      "reported_catches_per_phase": null
+    },
+    "loudness_policy": {
+      "mode": "digital_dbfs",
+      "calibration_mode": "digital_only",
+      "calibration_status": "digital_only",
+      "start_spl_db": 55,
+      "end_spl_db": 70,
+      "instruction_offset_db": 0
+    },
+    "preview_scope": "A software exemplar for each of the seven documented target schedules and one sound-only catch per assessment. The exemplar count is a toolkit choice."
   },
   "design": {
     "name": "Teneggi 2013 · Experiment 3, wide-range cooperative decision",
     "sofa_file": "",
-    "noises": [],
+    "noises": [
+      {
+        "label": "4 s wide-range pink-noise approach proxy",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "azimuth_deg": 0,
+        "elevation_deg": 0,
+        "gain": 1.0
+      }
+    ],
     "custom_looming_files": [],
     "prestimulus_files": [],
     "protocol": {
-      "spatial_values_cm": [],
+      "repetitions_per_condition": 1,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 1,
+        "catch": 1
+      },
       "soa_values_ms": [
         250,
         750,
@@ -286,22 +313,117 @@
         3200,
         3700
       ],
-      "include_catch_trials": false,
-      "catch_trial_percentage": 0,
-      "include_baseline_trials": false,
-      "baseline_trial_percentage": 0,
-      "baseline_strategy": "none",
-      "trial_strips": [],
-      "tactile_sites": [
-        "Right cheek"
-      ],
+      "spatial_values_cm": [],
       "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "right cheek"
+      ],
+      "include_catch_trials": true,
+      "catch_trials_exact": 1,
+      "catch_crosses_sequence_variants": false,
+      "include_auditory_only_trials": false,
+      "include_baseline_trials": false,
+      "baseline_trials_exact": 0,
+      "baseline_strategy": "none",
+      "baseline_soa_values_ms": [],
+      "baseline_crosses_sequence_variants": false,
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 1,
-      "participants": 1,
-      "block_order_randomization": "fixed"
+      "blocks": 2,
+      "block_order_randomization": "fixed",
+      "block_specs": [
+        {
+          "label": "Before game · timing preview",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "After game · timing preview",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        }
+      ],
+      "repeat_trial_pool_per_block": true,
+      "trial_randomization_strategy": "balanced_shuffle",
+      "trial_strips": [
+        {
+          "strip_id": "teneggi-2013-wide-range-preview",
+          "label": "Wide-range PPS example",
+          "metadata": {
+            "body_anchor": "right cheek",
+            "target_role": "tactile_detection",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_input_modality": "mouse_click",
+            "response_capture_device": "mouse",
+            "source_asset_equivalence": "generated headphone cue and illustrative endpoints"
+          },
+          "elements": [
+            {
+              "element_id": "teneggi-wide-pre-silence",
+              "kind": "jitter",
+              "label": "Pre-audio silence",
+              "jitter_values_ms": [
+                500
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "teneggi-wide-audio",
+              "kind": "looming_stimulus",
+              "label": "4 s approach proxy",
+              "source_labels": [
+                "4 s wide-range pink-noise approach proxy"
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "teneggi-wide-post-silence",
+              "kind": "jitter",
+              "label": "Post-audio silence",
+              "jitter_values_ms": [
+                500
+              ],
+              "randomized": false
+            }
+          ]
+        }
+      ],
+      "participants": 20,
+      "random_seed": 20130307,
+      "participant_order_policy": {
+        "schema": "pps-participant-order-policy.v1",
+        "algorithm": "fixed",
+        "seed": 20130307
+      }
+    },
+    "trajectory": {
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_radius_m": 2.05,
+      "end_radius_m": 0.05,
+      "start_x_m": 0,
+      "start_y_m": 2.05,
+      "start_z_m": 0,
+      "end_x_m": 0,
+      "end_y_m": 0.05,
+      "end_z_m": 0,
+      "path_length_m": 1.9999999999999998,
+      "propagation_speed_mps": 0.49999999999999994,
+      "azimuth_start_deg": 0,
+      "azimuth_end_deg": 0,
+      "elevation_deg": 0,
+      "sample_rate": 44100,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "use_inverse_square": false
     }
   },
   "provenance": [

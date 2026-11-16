@@ -29,10 +29,15 @@
         "response_mode": "button_press_mouse_click_proxy",
         "response_input_modality": "mouse_click",
         "response_capture_device": "mouse",
-        "target_role": "right_middle_finger_tactile_detection",
-        "body_anchor": "right middle finger intermediate phalanx",
+        "target_role": "tactile_detection_timing_marker",
+        "body_anchor": "Right middle finger intermediate phalanx",
         "body_part": "middle finger",
-        "body_side": "right"
+        "body_side": "right",
+        "tactile_stimulation_modality": "electrical",
+        "expected_response": "respond",
+        "response_rule": "respond_only_to_the_timing_marker",
+        "primary_analysis_included": false,
+        "source_asset_equivalence": "Software timing marker and mouse response. The electrical target and hardware response require separate qualification."
       },
       "elements": [
         {

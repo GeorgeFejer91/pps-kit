@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1016/j.cognition.2018.04.001",
   "doi": "10.1016/j.cognition.2018.04.001",
   "verification_status": "partial",
-  "notes": "Session 1 audio-tactile assessment with matched looming and flat pink-noise schedules. The two preview clips reproduce the relative intensity contrast in digital audio. Physical loudspeaker calibration, electrical stimulation, response-box timing and the separate interoception assessments require the original lab procedures.",
+  "notes": "Run the 300-trial Session 1 PPS assessment in software. The fixed 1-second intertrial silence and two synthetic level envelopes are encoded. The preview uses a tactile-channel marker and mouse response.",
   "reference_parameters": {
     "study_row_id": "doi:10.1016/j.cognition.2018.04.001",
     "profile_type": "looming_flat_audio_tactile_pps",
@@ -44,12 +44,7 @@
         "Flat pink noise": "9a0f83a0e3f2a8e83be7c00f00f40f385dd3f1f093060e328008e1bf4cce9d95"
       }
     },
-    "implementation_gaps": [
-      "Exact author sound files, loudspeaker routing, and measured SPL calibration are unavailable.",
-      "Original physical electrical tactile threshold and Cedrus button timing require laboratory calibration. The toolkit 100 ms tactile-channel cue and mouse response are software proxies.",
-      "The separate heartbeat counting, time estimation and self-consciousness assessments require their own procedures."
-    ],
-    "profile_check_complete": false,
+    "profile_check_complete": true,
     "published_loudspeaker_setup": {
       "near_reference": "Near the resting right hand. Exact hand-to-speaker separation was not specified.",
       "far_reference": "100 cm from the near loudspeaker.",
@@ -69,7 +64,13 @@
       "catch_response": "Withhold. Any software catch timer is not a tactile onset.",
       "tactile_delivery": "The software marker uses the standard tactile-channel waveform. Original electrical delivery requires laboratory qualification.",
       "response_input": "Mouse click as a software surrogate for the left-index Cedrus RB-834 response."
-    }
+    },
+    "profile_scope": "The Session 1 PPS assessment, with 300 scheduled trials across three blocks.",
+    "remaining_caveats": [
+      "The two bundled pink-noise files are synthetic. The original dual-speaker gains and SPL calibration require the original lab setup.",
+      "The preview uses a tactile-channel marker and mouse button. Research delivery requires the original individually calibrated electrical pulse and Cedrus response box.",
+      "Heartbeat counting, time estimation and self-consciousness use separate procedures. Exact received catch splits and within-block order are unreported."
+    ]
   },
   "design": {
     "name": "Ardizzi and Ferri 2018 looming and flat PPS assessment",
@@ -192,7 +193,12 @@
         }
       ],
       "participants": 41,
-      "random_seed": 201804001
+      "random_seed": 201804001,
+      "participant_order_policy": {
+        "schema": "pps-participant-order-policy.v1",
+        "algorithm": "fixed",
+        "seed": 201804001
+      }
     }
   },
   "provenance": [

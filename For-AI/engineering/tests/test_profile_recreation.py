@@ -7,7 +7,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from peripersonal_space_toolkit.design import block_trial_rows
+from peripersonal_space_toolkit.design import block_trial_rows, participant_block_orders
 from peripersonal_space_toolkit.profile_recreation import (
     PROFILE_PARAMETERS_SCHEMA,
     PROFILE_RECREATION_STATUS_SCHEMA,
@@ -60,8 +60,6 @@ def test_profile_recreation_manifests_cover_all_current_templates():
         "amemiya_2019_foot_sole_exp1",
         "amemiya_2019_foot_sole_exp2",
         "bernasconi_2018_trunk_ieeg",
-        "di_cosmo_2021_phase_coupling",
-        "ferri_2015_artificial_looming_valence",
         "ferri_2015_ecological_looming_valence",
         "ferroni_2020_schizotypy_active",
         "ferroni_2020_schizotypy_observation",
@@ -150,9 +148,9 @@ def test_new_assessment_preloads_preserve_trial_counts_and_launch_gates():
         "amemiya_2017_ieee_foot_sole_vibration": (192, False),
         "amemiya_2017_ieee_sound_localization": (64, False),
         "bernasconi_2018_trunk_ieeg": (85, False),
-        "hobeika_2018_anisotropy_left_handed": (240, False),
-        "hobeika_2018_anisotropy_right_handed": (240, False),
-        "hobeika_2019_social_audience": (480, False),
+        "hobeika_2018_anisotropy_left_handed": (240, True),
+        "hobeika_2018_anisotropy_right_handed": (240, True),
+        "hobeika_2019_social_audience": (480, True),
         "hobeika_2019_social_collaboration": (480, False),
         "hobeika_2019_social_competition": (480, False),
         "holmes_2019_osf_exp1": (160, False),
@@ -168,20 +166,28 @@ def test_new_assessment_preloads_preserve_trial_counts_and_launch_gates():
         "taffou_2021_auditory_roughness": (0, False),
         "teraoka_2024_front_pps": (54, False),
         "teraoka_2024_rear_pps": (54, False),
-        "teneggi_2013_social_face_pps": (208, False),
-        "ardizzi_ferri_2018_looming_flat": (300, False),
+        "teneggi_2013_social_face_pps": (208, True),
+        "ardizzi_ferri_2018_looming_flat": (300, True),
         "amemiya_2019_foot_sole_exp1": (180, False),
         "amemiya_2019_foot_sole_exp2": (120, False),
-        "ferri_2015_artificial_looming_valence": (416, False),
+        "ferri_2015_artificial_looming_valence": (416, True),
         "ferri_2015_ecological_looming_valence": (0, False),
-        "hobeika_2020_logarithmic": (576, False),
-        "hobeika_2020_pseudo_linear": (576, False),
+        "hobeika_2020_logarithmic": (576, True),
+        "hobeika_2020_pseudo_linear": (576, True),
+        "hobeika_2020_social_audience": (480, True),
+        "bassolino_2022_chronic_stroke_pps": (110, True),
+        "serino_2015_peri_hand_trunk_exp4": (480, True),
+        "depersonalisation_2023_psyarxiv_pps": (26, False),
+        "ferroni_2025_depersonalisation_pps": (26, False),
+        "ferroni_2026_pps_plasticity_determinants_exp1": (40, False),
+        "ferroni_2026_pps_plasticity_determinants_exp2": (40, False),
+        "teneggi_2013_cooperative_wide_range_exp3": (16, False),
         "rahmani_2025_2s_pps": (245, True),
         "rahmani_2025_3s_pps": (245, True),
         "cardini_2018_pregnancy_trunk_pps": (65, True),
         "cardini_2019_pregnancy_trunk_pps": (65, True),
         "chiarella_2024_mindfulness_cheek_pps": (100, False),
-        "di_cosmo_2021_phase_coupling": (0, False),
+        "di_cosmo_2021_phase_coupling": (360, True),
         "ferroni_2020_schizotypy_active": (52, False),
         "ferroni_2020_schizotypy_observation": (52, False),
         "galigani_2020_tool_observation": (360, False),
@@ -227,7 +233,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 30
+    assert len(status["categories"]["gui_recreatable"]) == 45
     assert profiles["canzoneri_2013_tool_use_reshaping"]["profile_checks_passed"] is True
 
     study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
@@ -427,13 +433,24 @@ def test_source_backed_previews_preserve_trial_families_and_phase_order():
         trial_design = json.loads((preload / "04_trial_designer/trial_design.json").read_text(encoding="utf-8"))
         assert trial_design["preview_trial_count"] == len(rows)
         manifest = json.loads((preload / "01_profile/profile_parameters_manifest.json").read_text(encoding="utf-8"))
-        assert not manifest["recreation_status"]["segment_6_launchable"]
+        assert manifest["recreation_status"]["segment_6_launchable"]
     cooperative = block_trial_rows(templates["teneggi_2013_cooperative_game_exp2"].design)
     assert list(dict.fromkeys(row["block_label"] for row in cooperative)) == [
         "Before game 1", "Before game 2", "After game 1", "After game 2",
     ]
     assert Counter(row["block_label"] for row in cooperative) == {
         "Before game 1": 52, "Before game 2": 52, "After game 1": 52, "After game 2": 52,
+    }
+    cooperative_orders = participant_block_orders(templates["teneggi_2013_cooperative_game_exp2"].design)
+    assert Counter(map(tuple, cooperative_orders.values())) == {
+        ("Before game 1", "Before game 2", "After game 1", "After game 2"): 32,
+    }
+    social_orders = participant_block_orders(templates["teneggi_2013_social_face_pps"].design)
+    mannequin = ("Mannequin 1", "Mannequin 2")
+    unfamiliar = ("Unfamiliar person 1", "Unfamiliar person 2")
+    assert Counter(map(tuple, social_orders.values())) == {
+        mannequin + unfamiliar: 9,
+        unfamiliar + mannequin: 9,
     }
 
 
@@ -496,7 +513,7 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 28
+    assert len(ready_published) == 43
     assert "maister_2015_shared_sensory_pps" in ready_published
     assert "canzoneri_2013_tool_use_reshaping" in ready_published
     assert set(ready_published) < set(ready_all)

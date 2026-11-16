@@ -5,12 +5,12 @@
   "source_url": "https://doi.org/10.1093/braincomms/fcac179",
   "doi": "10.1093/braincomms/fcac179",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Run one described 110-trial PPS pool. Software uses a generated broadband cue, tactile-channel markers and mouse clicks. The source leaves the allocation of the pool across hands open.",
   "reference_parameters": {
     "study_row_id": "doi:10.1093/braincomms/fcac179",
     "publication_status": "published",
     "profile_type": "published_method_inspection",
-    "profile_check_complete": false,
+    "profile_check_complete": true,
     "published_method": {
       "participants": {
         "patients_analyzed": 39,
@@ -264,44 +264,137 @@
         }
       }
     },
-    "implementation_gaps": [
-      "Original broadband waveform and opposing loudspeaker gains are unavailable. The tactile load, route timing and patient/foot-pedal hardware require calibration.",
-      "Per-side delivery counts, block structure and exact baseline pooling are unresolved."
-    ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "profile_scope": "One reported count set of 60 paired targets, 30 silent tactile controls and 20 sound-only catches. The software run uses one operator-selected hand.",
+    "remaining_caveats": [
+      "The supplement does not resolve whether one count set applied to a single hand or the complete two-hand assessment. The software uses one block for the described pool without asserting a published block schedule.",
+      "The original 3-second two-speaker stimulus has no published digital asset or gain law. The software uses white noise as a broadband demonstration and illustrative headphone geometry.",
+      "The paper gives a 2-second response window and randomized intervals of 500, 750 and 1000 ms. The generator uses toolkit response timing and the reported midpoint interval of 750 ms after the software cue. Exact randomization, original interval anchor and physical response timing are unverified.",
+      "The physical motor, foot-pedal response and side assignment require lab verification. Clinical results and limb groupings require the original screening and analysis."
+    ]
   },
   "design": {
     "name": "Bassolino 2022 · Chronic stroke hand PPS",
     "sofa_file": "",
-    "noises": [],
+    "noises": [
+      {
+        "label": "3 s broadband approach proxy",
+        "noise_type": "white",
+        "source_profile": "continuous_noise",
+        "azimuth_deg": 0,
+        "elevation_deg": 0,
+        "gain": 1.0
+      }
+    ],
     "custom_looming_files": [],
     "prestimulus_files": [],
     "protocol": {
-      "spatial_values_cm": [],
+      "repetitions_per_condition": 20,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 20,
+        "catch": 20,
+        "baseline": 10
+      },
       "soa_values_ms": [
         300,
         1500,
         2700
       ],
-      "include_catch_trials": false,
-      "catch_trial_percentage": 0,
-      "include_baseline_trials": false,
-      "baseline_trial_percentage": 0,
-      "baseline_strategy": "none",
-      "trial_strips": [],
-      "tactile_sites": [],
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "dorsum of tested hand"
+      ],
+      "include_catch_trials": true,
+      "catch_trials_exact": 20,
+      "catch_crosses_sequence_variants": false,
+      "include_auditory_only_trials": false,
+      "include_baseline_trials": true,
+      "baseline_trials_exact": 30,
+      "baseline_strategy": "tactile_only",
       "baseline_soa_values_ms": [
         300,
         1500,
         2700
       ],
-      "pair_spatial_values_with_soas": false,
+      "baseline_crosses_sequence_variants": false,
       "respiratory_phases": [
         "Any"
       ],
       "blocks": 1,
+      "block_order_randomization": "fixed",
+      "block_specs": [
+        {
+          "label": "One reported hand PPS count set",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "repeat_trial_pool_per_block": false,
+      "trial_randomization_strategy": "balanced_shuffle",
+      "trial_strips": [
+        {
+          "strip_id": "bassolino-2022-chronic-stroke-hand-pps",
+          "label": "Hand PPS pool",
+          "metadata": {
+            "body_anchor": "dorsum of tested hand",
+            "target_role": "tactile_detection",
+            "response_mode": "foot_pedal_mouse_click_proxy",
+            "response_input_modality": "mouse_click",
+            "response_capture_device": "mouse",
+            "tactile_stimulation_modality": "mechanical",
+            "source_asset_equivalence": "generated white-noise headphone proxy"
+          },
+          "elements": [
+            {
+              "element_id": "bassolino-2022-audio",
+              "kind": "looming_stimulus",
+              "label": "3 s approach proxy",
+              "source_labels": [
+                "3 s broadband approach proxy"
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "bassolino-2022-isi",
+              "kind": "jitter",
+              "label": "Software interval (published middle value)",
+              "jitter_values_ms": [
+                750
+              ],
+              "randomized": false
+            }
+          ]
+        }
+      ],
       "participants": 1,
-      "block_order_randomization": "fixed"
+      "random_seed": 2022179
+    },
+    "trajectory": {
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_radius_m": 1.05,
+      "end_radius_m": 0.05,
+      "start_x_m": 0,
+      "start_y_m": 1.05,
+      "start_z_m": 0,
+      "end_x_m": 0,
+      "end_y_m": 0.05,
+      "end_z_m": 0,
+      "path_length_m": 1.0,
+      "propagation_speed_mps": 0.3333333333333333,
+      "azimuth_start_deg": 0,
+      "azimuth_end_deg": 0,
+      "elevation_deg": 0,
+      "sample_rate": 44100,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "use_inverse_square": false
     }
   },
   "provenance": [

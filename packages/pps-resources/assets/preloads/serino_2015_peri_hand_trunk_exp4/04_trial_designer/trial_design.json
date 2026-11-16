@@ -1,11 +1,122 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "serino_2015_peri_hand_trunk_exp4",
-  "repetitions_per_condition": 1,
-  "soa_values_ms": [],
-  "spatial_values_cm": [],
+  "repetitions_per_condition": 4,
+  "soa_values_ms": [
+    0,
+    864,
+    1727,
+    2591,
+    3455,
+    4318
+  ],
+  "spatial_values_cm": [
+    100,
+    81,
+    62,
+    43,
+    24,
+    5
+  ],
   "custom_clip_assets": [],
-  "trial_strips": [],
+  "trial_strips": [
+    {
+      "strip_id": "serino-hand-trunk-looming",
+      "label": "Looming virtual sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        100.0,
+        81.0,
+        62.0,
+        43.0,
+        24.0,
+        5.0
+      ],
+      "metadata": {
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_input_modality": "mouse_click",
+        "response_capture_device": "mouse",
+        "auditory_trajectory_direction": "looming",
+        "audio_output_mode": "headphone_binaural_preview"
+      },
+      "elements": [
+        {
+          "element_id": "serino-hand-trunk-looming-sound",
+          "kind": "looming_stimulus",
+          "label": "Hand and trunk looming pink noise",
+          "source_label": "Hand and trunk looming pink noise",
+          "source_labels": [
+            "Hand and trunk looming pink noise"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "serino-hand-trunk-looming-gap",
+          "kind": "jitter",
+          "label": "Intertrial silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            500,
+            700
+          ],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "serino-hand-trunk-receding",
+      "label": "Receding virtual sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        5.0,
+        24.0,
+        43.0,
+        62.0,
+        81.0,
+        100.0
+      ],
+      "metadata": {
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_input_modality": "mouse_click",
+        "response_capture_device": "mouse",
+        "auditory_trajectory_direction": "receding",
+        "audio_output_mode": "headphone_binaural_preview"
+      },
+      "elements": [
+        {
+          "element_id": "serino-hand-trunk-receding-sound",
+          "kind": "looming_stimulus",
+          "label": "Hand and trunk receding pink noise",
+          "source_label": "Hand and trunk receding pink noise",
+          "source_labels": [
+            "Hand and trunk receding pink noise"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "serino-hand-trunk-receding-gap",
+          "kind": "jitter",
+          "label": "Intertrial silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            500,
+            700
+          ],
+          "randomized": true
+        }
+      ]
+    }
+  ],
   "prestimulus_files": [],
-  "preview_trial_count": 0
+  "preview_trial_count": 480
 }

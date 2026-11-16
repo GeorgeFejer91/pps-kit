@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1007/s00221-024-06782-2",
   "doi": "10.1007/s00221-024-06782-2",
   "verification_status": "partial",
-  "notes": "Published rear block with an inspection schedule that uses three procedural pink-noise probes and requires an imported start tone. The second direction is a companion variant from the same study. Research launch is blocked.",
+  "notes": "The rear timing preview includes the generated 500 ms start tone and 54 of the 56 published main trials. Both tone-only catches and the calibrated speaker-array procedure are required for a research launch.",
   "reference_parameters": {
     "study_row_id": "doi:10.1007/s00221-024-06782-2",
     "publication_status": "published",
@@ -21,7 +21,18 @@
     },
     "apparatus": {
       "original_audio_output": "Ten upward-facing Aura Sound NSW1-205-A loudspeakers along the head-centered sagittal axis at approximately chest height, driven with GNU Octave 6.2.0 and Playrec.",
-      "speaker_head_distance_cm": [48, 64, 80, 96, 112, 128, 144, 160, 176, 192],
+      "speaker_head_distance_cm": [
+        48,
+        64,
+        80,
+        96,
+        112,
+        128,
+        144,
+        160,
+        176,
+        192
+      ],
       "speaker_height_from_floor_cm": 110,
       "calibration": {
         "reported_db_spl": 70,
@@ -34,17 +45,32 @@
     "paths": [
       {
         "distance_label": "near",
-        "speaker_head_distances_cm": [96, 80, 64, 48],
+        "speaker_head_distances_cm": [
+          96,
+          80,
+          64,
+          48
+        ],
         "head_relative_midpoint_cm": 72
       },
       {
         "distance_label": "middle",
-        "speaker_head_distances_cm": [144, 128, 112, 96],
+        "speaker_head_distances_cm": [
+          144,
+          128,
+          112,
+          96
+        ],
         "head_relative_midpoint_cm": 120
       },
       {
         "distance_label": "far",
-        "speaker_head_distances_cm": [192, 176, 160, 144],
+        "speaker_head_distances_cm": [
+          192,
+          176,
+          160,
+          144
+        ],
         "head_relative_midpoint_cm": 168
       }
     ],
@@ -81,9 +107,21 @@
         {
           "id": "probe_touch",
           "start_tone": true,
-          "paths": ["near", "middle", "far"],
-          "touch_after_probe_onset_ms": [250, 500, 750],
-          "touch_after_tone_onset_ms_derived": [1750, 2000, 2250],
+          "paths": [
+            "near",
+            "middle",
+            "far"
+          ],
+          "touch_after_probe_onset_ms": [
+            250,
+            500,
+            750
+          ],
+          "touch_after_tone_onset_ms_derived": [
+            1750,
+            2000,
+            2250
+          ],
           "repetitions_per_path_and_timing": 4,
           "count": 36
         },
@@ -91,15 +129,27 @@
           "id": "tone_touch_baseline",
           "start_tone": true,
           "paths": [],
-          "touch_after_tone_presentation_ms": [1250, 1500, 1750],
-          "touch_after_tone_onset_ms_derived": [1750, 2000, 2250],
+          "touch_after_tone_presentation_ms": [
+            1250,
+            1500,
+            1750
+          ],
+          "touch_after_tone_onset_ms_derived": [
+            1750,
+            2000,
+            2250
+          ],
           "repetitions_per_timing": 4,
           "count": 12
         },
         {
           "id": "probe_catch",
           "start_tone": true,
-          "paths": ["near", "middle", "far"],
+          "paths": [
+            "near",
+            "middle",
+            "far"
+          ],
           "tactile": false,
           "repetitions_per_path": 2,
           "count": 6
@@ -143,31 +193,27 @@
     ],
     "analysis": "Trim log-transformed RTs once at ±3 SD per participant and condition. Collapse tactile timings. Compare probe RTs by direction and distance against the corresponding direction’s no-probe baseline.",
     "inspection_scope": {
-      "trial_rows_with_imported_cue": 54,
       "trial_rows_omitted": 2,
       "matched_baseline": "The inspection builder retains the fixed 500 ms start tone and silences the pink probe. Baseline SOA values are stored relative to the nominal 1500 ms probe onset, including when the probe is silent.",
-      "cue_import_requirement": {
-        "expected_filename": "teraoka_2024_trial_start_1000hz_500ms.wav",
-        "frequency_hz": 1000,
-        "duration_ms": 500,
-        "format": "WAV; preserve duration",
-        "role": "Unbundled fixed audio ingredient; import or point to a calibrated recording. For digital timing inspection only, a 1 kHz centered sine-wave file may be used."
-      },
       "inspection_only_cue_waveform": {
         "sample_rate_hz": 44100,
         "frames": 22050,
         "channels": 2,
         "peak_full_scale": 0.1,
-        "construction": "For samples n=0…22049, both channels are 0.1 × sin(2π × 1000 × n / 44100). The digital level is selected for inspection and is not a measured study SPL."
+        "construction": "For samples n=0…22049, both channels are 0.1 × sin(2π × 1000 × n / 44100). The digital level is selected for inspection and is not a measured study SPL.",
+        "path": "assets/study_profile_sources/teraoka_2024/teraoka_2024_trial_start_1000hz_500ms.wav",
+        "sha256": "9da18216aa9534318fe6e439b12be4407d317b9f31fc77b14c417f9fa6e12b56",
+        "bytes": 88244
       },
       "inspection_only_tactile_waveform": "A 300 Hz, 100 ms digital sine marker uses a peak of 0.2 full scale. The original actuator drive shape and delivered mechanical amplitude are unreported.",
       "renderer": "Each head-relative path is represented with a straight binaural pink-noise approach. Digital spatialization and level settings are inspection substitutes for the physical crossfading speaker array.",
-      "timing_exclusions": "The schedule omits the two tone-only catches, original randomized intertrial intervals, main-task familiarization and auxiliary tasks. It is not intended for study data collection."
+      "timing_exclusions": "The schedule omits the two tone-only catches, original randomized intertrial intervals, main-task familiarization and auxiliary tasks. It is not intended for study data collection.",
+      "trial_rows_with_bundled_cue": 54
     },
     "implementation_gaps": [
       "The speaker array scheduler must present the start tone simultaneously on all ten calibrated channels and crossfade four speakers per approach. The stereo inspection sources do not implement that physical output.",
       "The trial scheduler needs two distinct no-touch families: six probe catches and two tone-only catches per direction. The inspection scheduler only produces the six probe catches.",
-      "The start tone is an unbundled input. Exact cue gain and probe files, channel gains, calibration and original Octave/Playrec routines are unavailable.",
+      "The bundled digital 1 kHz start tone is a synthesized timing cue. Original cue and probe files, speaker gains, calibrated sound levels and the Octave/Playrec routines are unavailable.",
       "The study requires calibrated 300 Hz anterior chest vibration, synchronized keypad timing and the original event clock. The digital inspection does not verify physical vibration or response latency.",
       "Exact intertrial interval sampling, between-direction order, keypad key and online response deadline are unreported. The original auditory estimation and familiarization schedules are outside the inspection."
     ]
@@ -261,7 +307,7 @@
     "prestimulus_files": [
       {
         "label": "Trial-start 1 kHz tone",
-        "path": "teraoka_2024_trial_start_1000hz_500ms.wav",
+        "path": "assets/study_profile_sources/teraoka_2024/teraoka_2024_trial_start_1000hz_500ms.wav",
         "target_duration_s": 0.5,
         "render_mode": "preserve",
         "tone_type": "sine",
@@ -287,18 +333,30 @@
     },
     "protocol": {
       "repetitions_per_condition": 4,
-      "soa_values_ms": [250, 500, 750],
+      "soa_values_ms": [
+        250,
+        500,
+        750
+      ],
       "spatial_values_cm": [],
       "pair_spatial_values_with_soas": false,
-      "auditory_motion_directions": ["looming"],
-      "tactile_sites": ["anterior chest"],
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "anterior chest"
+      ],
       "include_catch_trials": true,
       "catch_trial_percentage": 0,
       "catch_trials_exact": 6,
       "catch_crosses_sequence_variants": true,
       "include_baseline_trials": true,
       "baseline_strategy": "tactile_only",
-      "baseline_soa_values_ms": [250, 500, 750],
+      "baseline_soa_values_ms": [
+        250,
+        500,
+        750
+      ],
       "baseline_trials_exact": 12,
       "baseline_crosses_sequence_variants": false,
       "blocks": 1,
@@ -333,14 +391,18 @@
               "kind": "fixed_audio",
               "label": "Trial-start 1 kHz tone",
               "source_label": "Trial-start 1 kHz tone",
-              "source_labels": ["Trial-start 1 kHz tone"],
+              "source_labels": [
+                "Trial-start 1 kHz tone"
+              ],
               "randomized": false
             },
             {
               "element_id": "teraoka-rear-lead",
               "kind": "jitter",
               "label": "Fixed gap after the cue",
-              "jitter_values_ms": [1000],
+              "jitter_values_ms": [
+                1000
+              ],
               "randomized": false
             },
             {
@@ -360,7 +422,11 @@
       "block_specs": [
         {
           "label": "Rear inspection",
-          "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
         }
       ],
       "trial_pool_repetition_defaults": {
@@ -382,6 +448,10 @@
     {
       "field": "Auxiliary procedures and baseline-subtraction analysis",
       "source": "https://doi.org/10.1007/s00221-024-06782-2, pp. 800–801, Auditory distance perception task, Speed estimation task and Data analysis. Publisher Supplementary Information, Fig. S2, baseline and raw response times."
+    },
+    {
+      "field": "Bundled trial-start cue",
+      "source": "Teraoka et al. 2024, p. 800, Procedure. PPS Kit generated a 1 kHz stereo sine for 500 ms at a digital peak of 0.1 full scale for timing inspection."
     }
   ]
 }

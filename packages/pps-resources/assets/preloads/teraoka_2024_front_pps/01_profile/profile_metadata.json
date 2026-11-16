@@ -6,7 +6,7 @@
   "doi": "10.1007/s00221-024-06782-2",
   "source_url": "https://doi.org/10.1007/s00221-024-06782-2",
   "verification_status": "partial",
-  "notes": "Published front block with an inspection schedule that uses three procedural pink-noise probes and requires an imported start tone. The second direction is a companion variant from the same study. Research launch is blocked.",
+  "notes": "The front timing preview includes the generated 500 ms start tone and 54 of the 56 published main trials. Both tone-only catches and the calibrated speaker-array procedure are required for a research launch.",
   "reference_parameters": {
     "study_row_id": "doi:10.1007/s00221-024-06782-2",
     "publication_status": "published",
@@ -194,31 +194,27 @@
     ],
     "analysis": "Trim log-transformed RTs once at \u00b13 SD per participant and condition. Collapse tactile timings. Compare probe RTs by direction and distance against the corresponding direction\u2019s no-probe baseline.",
     "inspection_scope": {
-      "trial_rows_with_imported_cue": 54,
       "trial_rows_omitted": 2,
       "matched_baseline": "The inspection builder retains the fixed 500 ms start tone and silences the pink probe. Baseline SOA values are stored relative to the nominal 1500 ms probe onset, including when the probe is silent.",
-      "cue_import_requirement": {
-        "expected_filename": "teraoka_2024_trial_start_1000hz_500ms.wav",
-        "frequency_hz": 1000,
-        "duration_ms": 500,
-        "format": "WAV; preserve duration",
-        "role": "Unbundled fixed audio ingredient; import or point to a calibrated recording. For digital timing inspection only, a 1 kHz centered sine-wave file may be used."
-      },
       "inspection_only_cue_waveform": {
         "sample_rate_hz": 44100,
         "frames": 22050,
         "channels": 2,
         "peak_full_scale": 0.1,
-        "construction": "For samples n=0\u202622049, both channels are 0.1 \u00d7 sin(2\u03c0 \u00d7 1000 \u00d7 n / 44100). The digital level is selected for inspection and is not a measured study SPL."
+        "construction": "For samples n=0\u202622049, both channels are 0.1 \u00d7 sin(2\u03c0 \u00d7 1000 \u00d7 n / 44100). The digital level is selected for inspection and is not a measured study SPL.",
+        "path": "assets/study_profile_sources/teraoka_2024/teraoka_2024_trial_start_1000hz_500ms.wav",
+        "sha256": "9da18216aa9534318fe6e439b12be4407d317b9f31fc77b14c417f9fa6e12b56",
+        "bytes": 88244
       },
       "inspection_only_tactile_waveform": "A 300 Hz, 100 ms digital sine marker uses a peak of 0.2 full scale. The original actuator drive shape and delivered mechanical amplitude are unreported.",
       "renderer": "Each head-relative path is represented with a straight binaural pink-noise approach. Digital spatialization and level settings are inspection substitutes for the physical crossfading speaker array.",
-      "timing_exclusions": "The schedule omits the two tone-only catches, original randomized intertrial intervals, main-task familiarization and auxiliary tasks. It is not intended for study data collection."
+      "timing_exclusions": "The schedule omits the two tone-only catches, original randomized intertrial intervals, main-task familiarization and auxiliary tasks. It is not intended for study data collection.",
+      "trial_rows_with_bundled_cue": 54
     },
     "implementation_gaps": [
       "The speaker array scheduler must present the start tone simultaneously on all ten calibrated channels and crossfade four speakers per approach. The stereo inspection sources do not implement that physical output.",
       "The trial scheduler needs two distinct no-touch families: six probe catches and two tone-only catches per direction. The inspection scheduler only produces the six probe catches.",
-      "The start tone is an unbundled input. Exact cue gain and probe files, channel gains, calibration and original Octave/Playrec routines are unavailable.",
+      "The bundled digital 1 kHz start tone is a synthesized timing cue. Original cue and probe files, speaker gains, calibrated sound levels and the Octave/Playrec routines are unavailable.",
       "The study requires calibrated 300 Hz anterior chest vibration, synchronized keypad timing and the original event clock. The digital inspection does not verify physical vibration or response latency.",
       "Exact intertrial interval sampling, between-direction order, keypad key and online response deadline are unreported. The original auditory estimation and familiarization schedules are outside the inspection."
     ]
@@ -235,6 +231,10 @@
     {
       "field": "Auxiliary procedures and baseline-subtraction analysis",
       "source": "https://doi.org/10.1007/s00221-024-06782-2, pp. 800\u2013801, Auditory distance perception task, Speed estimation task and Data analysis. Publisher Supplementary Information, Fig. S2, baseline and raw response times."
+    },
+    {
+      "field": "Bundled trial-start cue",
+      "source": "Teraoka et al. 2024, p. 800, Procedure. PPS Kit generated a 1 kHz stereo sine for 500 ms at a digital peak of 0.1 full scale for timing inspection."
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "serino_2015_peri_hand_posture_exp5",
-  "repetitions_per_condition": 24,
+  "repetitions_per_condition": 6,
   "soa_values_ms": [
     0,
     864,
@@ -28,7 +28,14 @@
       "baseline_percentage": null,
       "soa_values_ms": [],
       "spatial_values_cm": [],
-      "metadata": {},
+      "metadata": {
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_input_modality": "mouse_click",
+        "response_capture_device": "mouse",
+        "body_anchor": "Right hand dorsum",
+        "body_part": "hand",
+        "body_side": "right"
+      },
       "elements": [
         {
           "element_id": "serino-hand-posture-approach",
@@ -39,6 +46,18 @@
             "Hand-posture reference approach"
           ],
           "jitter_values_ms": [],
+          "randomized": true
+        },
+        {
+          "element_id": "serino-hand-posture-gap",
+          "kind": "jitter",
+          "label": "Intertrial silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            500,
+            700
+          ],
           "randomized": true
         }
       ]

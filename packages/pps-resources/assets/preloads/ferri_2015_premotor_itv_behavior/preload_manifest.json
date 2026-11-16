@@ -37,17 +37,17 @@
   ],
   "profile_parameters_manifest": "assets/preloads/ferri_2015_premotor_itv_behavior/01_profile/profile_parameters_manifest.json",
   "recreation_status": {
-    "primary_category": "missing_publication_parameters",
-    "category_label": "Missing publication parameters",
-    "runner_readiness": "blocked_missing_parameters",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 5,
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },
   "render_contract": {
@@ -56,7 +56,92 @@
     "include_tactile": false,
     "tactile_policy": "deferred_until_session_preparation"
   },
-  "assets": [],
+  "assets": [
+    {
+      "label": "Looming pink noise preview",
+      "path": "assets/preloads/ferri_2015_premotor_itv_behavior/02_looming_stimuli/looming_Looming_pink_noise_preview.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_premotor_itv_behavior/02_looming_stimuli/looming_Looming_pink_noise_preview.wav",
+      "sha256": "b20f4d46f68b97275abacbc534cf2e486899ab670933cfba755919e03bbe6801",
+      "duration_s": 3.1,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "imported_audio",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Looming pink noise preview",
+        "source_kind": "imported_audio",
+        "noise_type": "pink",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.1,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "polar",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    },
+    {
+      "label": "Flat pink noise preview",
+      "path": "assets/preloads/ferri_2015_premotor_itv_behavior/02_looming_stimuli/looming_Flat_pink_noise_preview.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_premotor_itv_behavior/02_looming_stimuli/looming_Flat_pink_noise_preview.wav",
+      "sha256": "264cbda37f4dac27938848b76fe07f5b5624b025e4fa98960fec81991971a8ec",
+      "duration_s": 3.1,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "imported_audio",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Flat pink noise preview",
+        "source_kind": "imported_audio",
+        "noise_type": "pink",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      }
+    }
+  ],
   "notes": [
     "Prebaked WAVs are local auditory-only profile assets.",
     "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",

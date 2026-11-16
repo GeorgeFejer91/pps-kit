@@ -14,7 +14,7 @@
   "trial_strips": [
     {
       "strip_id": "di-cosmo-2021-inspection",
-      "label": "Source required for trial inspection",
+      "label": "Behavioral timing preview",
       "audio_tactile_percentage": null,
       "catch_percentage": null,
       "baseline_percentage": null,
@@ -22,26 +22,54 @@
       "spatial_values_cm": [],
       "metadata": {
         "expected_response": "respond",
-        "response_mode": "left_index_cedrus",
-        "response_rule": "respond_to_tactile_target_only",
-        "primary_analysis_included": false
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_rule": "respond_only_to_the_timing_marker",
+        "primary_analysis_included": false,
+        "body_anchor": "Right index finger",
+        "tactile_stimulation_modality": "electrical",
+        "response_input_modality": "mouse_click",
+        "response_capture_device": "mouse",
+        "target_role": "tactile_detection_timing_marker",
+        "source_asset_equivalence": "Software timing marker and mouse response. The electrical target and hardware response require separate qualification."
       },
       "elements": [
         {
+          "element_id": "di-cosmo-2021-presound",
+          "kind": "jitter",
+          "label": "Software lead-in silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
           "element_id": "di-cosmo-2021-sound",
           "kind": "looming_stimulus",
-          "label": "Published sound",
-          "source_label": "Di Cosmo looming sound",
+          "label": "Looming or flat software cue",
+          "source_label": "Di Cosmo looming timing preview",
           "source_labels": [
-            "Di Cosmo looming sound",
-            "Di Cosmo flat sound"
+            "Di Cosmo looming timing preview",
+            "Di Cosmo flat timing preview"
           ],
           "jitter_values_ms": [],
           "randomized": true
+        },
+        {
+          "element_id": "di-cosmo-2021-iti",
+          "kind": "jitter",
+          "label": "Post-trial silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
         }
       ]
     }
   ],
   "prestimulus_files": [],
-  "preview_trial_count": 0
+  "preview_trial_count": 360
 }

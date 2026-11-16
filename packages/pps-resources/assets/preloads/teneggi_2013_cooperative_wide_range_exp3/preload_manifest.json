@@ -47,8 +47,8 @@
     "finished_profile": false,
     "segment_6_launchable": false,
     "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 5,
-    "unsupported_structure_count": 2
+    "missing_parameter_count": 3,
+    "unsupported_structure_count": 1
   },
   "render_contract": {
     "stage": "auditory_looming_prebake",
@@ -56,7 +56,51 @@
     "include_tactile": false,
     "tactile_policy": "deferred_until_session_preparation"
   },
-  "assets": [],
+  "assets": [
+    {
+      "label": "4 s wide-range pink-noise approach proxy",
+      "path": "assets/preloads/teneggi_2013_cooperative_wide_range_exp3/02_looming_stimuli/looming_4_s_wide-range_pink-noise_approach_proxy.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_cooperative_wide_range_exp3/02_looming_stimuli/looming_4_s_wide-range_pink-noise_approach_proxy.wav",
+      "sha256": "8fd31078af888acca6c663ad7bbdf035fc85bc9087966b53b9b53388304413e1",
+      "duration_s": 4.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "4 s wide-range pink-noise approach proxy",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 205.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 2.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 2.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ],
   "notes": [
     "Prebaked WAVs are local auditory-only profile assets.",
     "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",

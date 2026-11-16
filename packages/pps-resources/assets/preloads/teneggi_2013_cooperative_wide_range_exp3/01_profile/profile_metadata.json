@@ -6,7 +6,7 @@
   "doi": "10.1016/j.cub.2013.01.043",
   "source_url": "https://doi.org/10.1016/j.cub.2013.01.043",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Inspect seven wide-range approach delays and the sound-only catch family before and after the game. The demonstrator runs each target delay once per phase. The published repetition and block totals are unresolved.",
   "reference_parameters": {
     "study_row_id": "doi:10.1016/j.cub.2013.01.043::c",
     "publication_status": "published",
@@ -268,7 +268,21 @@
       "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration.",
       "The wider-range experiment's actual target and catch trial counts, block allocation and order are unreported."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "software_preview_allocation": {
+      "targets_per_phase": 7,
+      "demonstration_sound_only_per_phase": 1,
+      "reported_repetitions_per_delay": null,
+      "reported_catches_per_phase": null
+    },
+    "loudness_policy": {
+      "mode": "digital_dbfs",
+      "calibration_mode": "digital_only",
+      "calibration_status": "digital_only",
+      "start_spl_db": 55,
+      "end_spl_db": 70,
+      "instruction_offset_db": 0
+    },
+    "preview_scope": "A software exemplar for each of the seven documented target schedules and one sound-only catch per assessment. The exemplar count is a toolkit choice."
   },
   "provenance": [
     {

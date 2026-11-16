@@ -1,13 +1,31 @@
 {
   "schema": "pps-preload-run-setup-segment.v1",
   "template_id": "ferroni_2026_pps_plasticity_determinants_exp1",
-  "blocks": 1,
+  "blocks": 2,
   "participants": 1,
-  "random_seed": 20250604,
-  "trial_randomization_strategy": "no_immediate_repeats",
+  "random_seed": 202609491,
+  "trial_randomization_strategy": "balanced_shuffle",
   "block_order_randomization": "fixed",
-  "repeat_trial_pool_per_block": false,
+  "repeat_trial_pool_per_block": true,
   "distribute_trial_pool_across_blocks": false,
-  "baseline_crosses_sequence_variants": true,
-  "catch_crosses_sequence_variants": true
+  "baseline_crosses_sequence_variants": false,
+  "catch_crosses_sequence_variants": true,
+  "block_specs": [
+    {
+      "label": "Pre-training \u00b7 audio-tactile group timing example",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Post-training \u00b7 audio-tactile group timing example",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    }
+  ]
 }

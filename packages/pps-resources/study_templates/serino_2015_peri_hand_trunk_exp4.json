@@ -1,16 +1,16 @@
 {
   "template_id": "serino_2015_peri_hand_trunk_exp4",
-  "title": "Serino 2015 · Experiment 4, hand by trunk",
+  "title": "Serino 2015 · Hand and trunk software assessment",
   "citation": "Serino et al. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
   "source_url": "https://doi.org/10.1038/srep18603",
   "doi": "10.1038/srep18603",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Software assessment of Experiment 4. Runs the 480-trial pool with separately labelled hand and sternum blocks, virtual looming and receding pink noise, a single software tactile channel and mouse-click responses. The physical hand posture, two-speaker output, stimulation sites and button timing require the original apparatus and calibration.",
   "reference_parameters": {
     "study_row_id": "doi:10.1038/srep18603::d",
     "publication_status": "published",
-    "profile_type": "published_method_inspection",
-    "profile_check_complete": false,
+    "profile_type": "audio_tactile_hand_trunk",
+    "profile_check_complete": true,
     "published_method": {
       "tactile_sites": [
         "Right hand dorsum",
@@ -38,7 +38,15 @@
         "sound_only": 32,
         "total": 480
       },
-      "response": "Speeded gamepad response to tactile onset. Compare distance-dependent facilitation by stimulated site."
+      "response": "Speeded gamepad response to tactile onset. Compare distance-dependent facilitation by stimulated site.",
+      "software_assessment": {
+        "timing_reference": "Offsets are derived from nominal 22 cm/s motion between 100 and 5 cm, starting at the far endpoint for approach and at the near endpoint for recession. The physical trigger offsets are unavailable.",
+        "sound": "Two continuous synthetic pink-noise clips use the same virtual frontal path with reversed direction. Each clip holds its final virtual position for 100 ms so the last tactile cue can complete.",
+        "tactile_and_response": "The same 100 ms software tactile cue and mouse response are used in both site conditions. The block label records which site is intended. The software does not switch an actuator or verify body placement.",
+        "block_allocation": "Four 120-trial software blocks, two for each tactile site. Each block includes 96 paired, 16 tactile-only and 8 sound-only trials.",
+        "intervals": "The software balances 500 and 700 ms gaps within the published range, using a deterministic seed.",
+        "source": "Article pp. 5–6, Experiment 4 and Fig. 4A, and pp. 11–13, Stimuli and Apparatus and Design and Analysis."
+      }
     },
     "publication_parameters": {
       "stimulus": {
@@ -130,15 +138,15 @@
           "gap": "Exact block count and counterbalance unreported."
         },
         "iti_jitter_policy": {
-          "status": "reported",
+          "status": "reported_with_caveat",
           "value": {
-            "iti_ms": [
+            "shuffled_range_ms": [
               500,
               700
-            ],
-            "policy": "randomly shuffled; distribution unspecified"
+            ]
           },
-          "source": "Article pp. 12–13, Design and Analysis"
+          "source": "Article p. 13, Design and Analysis",
+          "gap": "The original values, draw distribution and realized order are unreported."
         },
         "response_window": {
           "status": "not_reported_after_review",
@@ -240,36 +248,260 @@
         }
       }
     },
-    "implementation_gaps": [
+    "remaining_caveats": [
       "The source gives the spatial probe grid and nominal velocity. Original trigger offsets, propagation delays and position-specific sound envelopes are unavailable.",
       "The delivered vibrotactile waveform, actuator acceleration and synchronized gamepad latency require calibration. The 100 ms pulse is the motor command duration.",
-      "The trial scheduler must switch the active tactile site by block and time the probe at the paper's measured sound position."
-    ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+      "Match the physical hand posture, the two fixed acoustic speakers and the motor location in each body-site block. The software target channel and mouse response require measured hardware translation before research use.",
+      "The original within-site block splits, site order, interval draws and response deadline are unreported. The software run uses four blocks, with two per site, and combines both sound directions at each site."
+    ]
   },
   "design": {
     "name": "Serino 2015 · Experiment 4, hand by trunk",
     "sofa_file": "",
-    "noises": [],
+    "noises": [
+      {
+        "label": "Hand and trunk looming pink noise",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "approach",
+          "start": {
+            "x_m": 0,
+            "y_m": 1.0,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": 0,
+            "y_m": 0.05,
+            "z_m": 0
+          },
+          "path_length_m": 0.95,
+          "movement_duration_s": 4.318,
+          "start_hold_s": 0,
+          "end_hold_s": 0.1
+        }
+      },
+      {
+        "label": "Hand and trunk receding pink noise",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "recede",
+          "start": {
+            "x_m": 0,
+            "y_m": 0.05,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": 0,
+            "y_m": 1.0,
+            "z_m": 0
+          },
+          "path_length_m": 0.95,
+          "movement_duration_s": 4.318,
+          "start_hold_s": 0,
+          "end_hold_s": 0.1
+        }
+      }
+    ],
     "custom_looming_files": [],
     "prestimulus_files": [],
     "protocol": {
-      "spatial_values_cm": [],
-      "soa_values_ms": [],
-      "include_catch_trials": false,
-      "catch_trial_percentage": 0,
-      "include_baseline_trials": false,
+      "spatial_values_cm": [
+        100,
+        81,
+        62,
+        43,
+        24,
+        5
+      ],
+      "soa_values_ms": [
+        0,
+        864,
+        1727,
+        2591,
+        3455,
+        4318
+      ],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 10.0,
+      "include_baseline_trials": true,
       "baseline_trial_percentage": 0,
-      "baseline_strategy": "none",
-      "trial_strips": [],
-      "tactile_sites": [],
-      "pair_spatial_values_with_soas": false,
+      "baseline_strategy": "tactile_only",
+      "trial_strips": [
+        {
+          "strip_id": "serino-hand-trunk-looming",
+          "label": "Looming virtual sound",
+          "spatial_values_cm": [
+            100,
+            81,
+            62,
+            43,
+            24,
+            5
+          ],
+          "metadata": {
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_input_modality": "mouse_click",
+            "response_capture_device": "mouse",
+            "auditory_trajectory_direction": "looming",
+            "audio_output_mode": "headphone_binaural_preview"
+          },
+          "elements": [
+            {
+              "element_id": "serino-hand-trunk-looming-sound",
+              "kind": "looming_stimulus",
+              "label": "Hand and trunk looming pink noise",
+              "source_labels": [
+                "Hand and trunk looming pink noise"
+              ]
+            },
+            {
+              "element_id": "serino-hand-trunk-looming-gap",
+              "kind": "jitter",
+              "label": "Intertrial silence",
+              "jitter_values_ms": [
+                500,
+                700
+              ],
+              "randomized": true
+            }
+          ]
+        },
+        {
+          "strip_id": "serino-hand-trunk-receding",
+          "label": "Receding virtual sound",
+          "spatial_values_cm": [
+            5,
+            24,
+            43,
+            62,
+            81,
+            100
+          ],
+          "metadata": {
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_input_modality": "mouse_click",
+            "response_capture_device": "mouse",
+            "auditory_trajectory_direction": "receding",
+            "audio_output_mode": "headphone_binaural_preview"
+          },
+          "elements": [
+            {
+              "element_id": "serino-hand-trunk-receding-sound",
+              "kind": "looming_stimulus",
+              "label": "Hand and trunk receding pink noise",
+              "source_labels": [
+                "Hand and trunk receding pink noise"
+              ]
+            },
+            {
+              "element_id": "serino-hand-trunk-receding-gap",
+              "kind": "jitter",
+              "label": "Intertrial silence",
+              "jitter_values_ms": [
+                500,
+                700
+              ],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "tactile_sites": [
+        "Intended stimulus site is identified by block label"
+      ],
+      "repetitions_per_condition": 4,
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "source_trajectory"
+      ],
+      "catch_trials_exact": 8,
+      "baseline_soa_values_ms": [
+        0,
+        4318
+      ],
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 1,
-      "participants": 1,
-      "block_order_randomization": "fixed"
+      "blocks": 4,
+      "trial_randomization_strategy": "no_immediate_repeats",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "participants": 18,
+      "random_seed": 20151224,
+      "baseline_trials_exact": 16,
+      "repeat_trial_pool_per_block": true,
+      "block_specs": [
+        {
+          "label": "Right hand dorsum 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Right hand dorsum 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Sternum 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Sternum 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "baseline_crosses_sequence_variants": true,
+      "catch_crosses_sequence_variants": true,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 4,
+        "baseline": 2,
+        "catch": 2
+      }
+    },
+    "trajectory": {
+      "start_radius_m": 1.0,
+      "end_radius_m": 0.05,
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0.0,
+      "start_y_m": 1.0,
+      "start_z_m": 0.0,
+      "end_x_m": 0.0,
+      "end_y_m": 0.05,
+      "end_z_m": 0.0,
+      "path_length_m": 0.95,
+      "propagation_speed_mps": 0.220009264,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 0.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.1,
+      "sample_rate": 44100,
+      "use_inverse_square": true
     }
   },
   "provenance": [

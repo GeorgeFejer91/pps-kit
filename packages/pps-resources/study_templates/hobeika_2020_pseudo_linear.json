@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1016/j.jneumeth.2019.108534",
   "doi": "10.1016/j.jneumeth.2019.108534",
   "verification_status": "partial",
-  "notes": "One pseudo-linear-distance session of the two-day study. Both source types and both silent-at-touch controls are encoded. Pair with the other distance profile and counterbalance session order across participants. The review gate remains blocked pending acoustic, tactile, and response validation.",
+  "notes": "The 576-trial pseudo-linear-distance software assessment preserves the six sound-relative target delays and both silent-window controls. It uses generated burst trains, a digital tactile waveform and a mouse response. Counterbalance this profile with the other distance grid on a separate day. The published acoustic calibration and subsequent discomfort tests require their own procedures.",
   "reference_parameters": {
     "study_row_id": "doi:10.1016/j.jneumeth.2019.108534::pseudo-linear",
     "profile_type": "right_front_looming_fixed_expectancy_audio_tactile_pps",
@@ -114,12 +114,13 @@
         "duration_ms": 3250,
         "burst_count": 33,
         "burst_duration_ms": 30,
-        "burst_interval_ms": 65,
         "raised_cosine_rise_fall_ms": 10,
         "normalization": "Equal RMS per dry burst. One shared gain after binaural convolution sets the pair's largest absolute peak to −6 dBFS.",
         "right_front_direction": "Published −60° in the study convention. Toolkit +60° selects the nearest FABIAN azimuth/elevation, 300°/0° in SOFA coordinates.",
         "render": "Convolve both generated tracks with the same direction's left and right measured HRIRs and crop to 3250 ms. Resample HRIRs to 44.1 kHz using scipy.signal.resample_poly when needed.",
-        "level_law": "Fixed audio uses −30.7 dB, relative to the nearest moving distance. Interpolate direct-sound dB linearly between Table 1 distance points and convert to amplitude; move for 6.2 m at 2.1 m/s after a toolkit preview hold of 95 ms. The preview omits early reflections and the reported 200 ms room response."
+        "level_law": "Fixed audio uses −30.7 dB, relative to the nearest moving distance. Interpolate direct-sound dB linearly between Table 1 distance points and convert to amplitude; move for 6.2 m at 2.1 m/s after a toolkit preview hold of 95 ms. The preview omits early reflections and the reported 200 ms room response.",
+        "inter_burst_silence_ms": 65,
+        "burst_onset_spacing_ms": 95
       },
       "hrir_attribution": {
         "authors": "Fabian Brinkmann, Alexander Lindau, Stefan Weinzierl, Gunnar Geissler, Steven van de Par, Markus Müller-Trapet, Rob Opdam, and Michael Vorländer",
@@ -172,7 +173,9 @@
       },
       "handedness_screening": "FLANDERS. The paper reports the retained participants' scores. Screening is separate from the reaction-time task."
     },
-    "implementation_gaps": [
+    "protocol_locator": "Journal of Neuroscience Methods 332:108534, §§2.2 and 2.3.1, Tables 1–2 and Fig. 2",
+    "profile_check_complete": true,
+    "remaining_caveats": [
       "Exact auditory source delivery, LISTEN HRTF ID, Spat patch and calibrated headphone output are unavailable.",
       "The Segment 3 preview synthesizes the stated 20 ms, 250 Hz vibrotactile command. Calibrated tactile delivery and response capture require a verified physical path.",
       "Exact within-range jitter sampling and cross-day assignment details are unreported.",

@@ -5,12 +5,12 @@
   "source_url": "https://doi.org/10.1016/j.cub.2013.01.043",
   "doi": "10.1016/j.cub.2013.01.043",
   "verification_status": "partial",
-  "notes": "The preview schedules the original pre- and post-game assessment trial totals. It uses pink-noise and response/tactile proxies. Arrange the bargaining game, physical sound system, and calibrated cheek stimulation and voice capture separately.",
+  "notes": "Run the PPS assessments before and after the operator-administered game as four 52-trial blocks. The software uses generated auditory cues, tactile-channel markers and mouse clicks.",
   "reference_parameters": {
     "study_row_id": "doi:10.1016/j.cub.2013.01.043::b",
     "publication_status": "published",
     "profile_type": "published_method_inspection",
-    "profile_check_complete": false,
+    "profile_check_complete": true,
     "published_method": {
       "group_assignment": {
         "cooperative": 16,
@@ -294,10 +294,12 @@
         }
       }
     },
-    "implementation_gaps": [
-      "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable.",
-      "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration.",
-      "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
+    "profile_scope": "The two 104-trial PPS assessments, before and after the operator-administered game.",
+    "remaining_caveats": [
+      "Generated pink noise substitutes for the original opposing loudspeaker gains. Absolute ear-level SPL and exact waveform remain unverified.",
+      "The software uses scheduled right-cheek markers and mouse clicks. The original cheek stimulation and vocal response require synchronized and calibrated external equipment.",
+      "Use the published live bargaining procedure and between-participant assignment outside Runner. The fixed block labels distinguish pre-game from post-game.",
+      "The specific achieved trial ordering and physical voice-key response cutoff are unreported."
     ]
   },
   "design": {
@@ -440,7 +442,12 @@
       "max_consecutive_same_trial_type": 2,
       "participants": 32,
       "random_seed": 20130305,
-      "repeat_trial_pool_per_block": true
+      "repeat_trial_pool_per_block": true,
+      "participant_order_policy": {
+        "schema": "pps-participant-order-policy.v1",
+        "algorithm": "fixed",
+        "seed": 20130305
+      }
     }
   },
   "provenance": [

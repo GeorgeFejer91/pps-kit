@@ -13,9 +13,154 @@
     2625,
     3000
   ],
-  "spatial_values_cm": [],
+  "spatial_values_cm": [
+    135.0,
+    120.625,
+    106.25,
+    91.875,
+    77.5,
+    63.125,
+    48.75,
+    34.375,
+    20.0
+  ],
   "custom_clip_assets": [],
-  "trial_strips": [],
+  "trial_strips": [
+    {
+      "strip_id": "left-approach",
+      "label": "Left-front approach preview",
+      "audio_tactile_percentage": 75.0,
+      "catch_percentage": 8.333333333333334,
+      "baseline_percentage": 16.666666666666668,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        135.0,
+        120.625,
+        106.25,
+        91.875,
+        77.5,
+        63.125,
+        48.75,
+        34.375,
+        20.0
+      ],
+      "metadata": {
+        "auditory_trajectory_direction": "looming",
+        "spatial_hemifield": "left front",
+        "source_asset_equivalence": "generated pink-noise acoustic proxy",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_waveform_shape": "sine",
+        "tactile_duration_ms": 20,
+        "tactile_frequency_hz": 250,
+        "tactile_amplitude": 0.2,
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_capture_device": "mouse click preview"
+      },
+      "elements": [
+        {
+          "element_id": "left-lead",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "left-sound",
+          "kind": "looming_stimulus",
+          "label": "Left-front approach preview",
+          "source_label": "Left-front approach preview",
+          "source_labels": [
+            "Left-front approach preview"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "left-trail",
+          "kind": "jitter",
+          "label": "Post-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            2700,
+            3300
+          ],
+          "randomized": true
+        }
+      ]
+    },
+    {
+      "strip_id": "right-approach",
+      "label": "Right-front approach preview",
+      "audio_tactile_percentage": 75.0,
+      "catch_percentage": 8.333333333333334,
+      "baseline_percentage": 16.666666666666668,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        135.0,
+        120.625,
+        106.25,
+        91.875,
+        77.5,
+        63.125,
+        48.75,
+        34.375,
+        20.0
+      ],
+      "metadata": {
+        "auditory_trajectory_direction": "looming",
+        "spatial_hemifield": "right front",
+        "source_asset_equivalence": "generated pink-noise acoustic proxy",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_waveform_shape": "sine",
+        "tactile_duration_ms": 20,
+        "tactile_frequency_hz": 250,
+        "tactile_amplitude": 0.2,
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_capture_device": "mouse click preview"
+      },
+      "elements": [
+        {
+          "element_id": "right-lead",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "right-sound",
+          "kind": "looming_stimulus",
+          "label": "Right-front approach preview",
+          "source_label": "Right-front approach preview",
+          "source_labels": [
+            "Right-front approach preview"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "right-trail",
+          "kind": "jitter",
+          "label": "Post-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            2700,
+            3300
+          ],
+          "randomized": true
+        }
+      ]
+    }
+  ],
   "prestimulus_files": [],
-  "preview_trial_count": 0
+  "preview_trial_count": 480
 }

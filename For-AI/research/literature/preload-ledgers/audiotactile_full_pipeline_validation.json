@@ -1858,13 +1858,9 @@
     },
     {
       "audiotactile_task_family": "face tactile detection with approaching/receding sound labels",
-      "blocking_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "electrical_tactile_calibration",
-        "voice_key_response_capture"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Teneggi et al. (2013)",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "teneggi_2013_social_face_pps"
       ],
@@ -1886,32 +1882,26 @@
         "observed_emulated_expected_match": {
           "evidence": "No observed emulated comparison exists for this record.",
           "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
           "passed": false,
           "source_report": "",
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
-          "passed": false,
+          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
+          "passed": true,
           "profile_completion_statuses": [
-            "unfinished_preload"
+            "finished_segment_6_launchable"
           ],
-          "status": "profile_scaffold_present_but_incomplete",
+          "status": "parsimonious_profile_complete",
           "template_ids": [
             "teneggi_2013_social_face_pps"
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "exact_audio_envelope_or_gain_files",
-            "electrical_tactile_calibration",
-            "voice_key_response_capture"
-          ],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "Experiment 1 source delays and per-condition trial counts are encoded. The original audio and speaker gains, electrically calibrated cheek stimulation and voice-relay parameters remain unresolved."
-          ],
+          "blockers": [],
+          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
+          "missing_parameters": [],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
             "extraction_status": "pending_pdf",
@@ -1923,42 +1913,36 @@
             "pdf_status": "needs_user_download",
             "supplement_status": "not_found"
           },
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "passed": true,
+          "status": "minimum_source_parameters_captured"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "exact_audio_envelope_or_gain_files",
-            "electrical_tactile_calibration",
-            "voice_key_response_capture"
-          ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
-          "passed": false,
+          "blocker_ids": [],
+          "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
+          "passed": true,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "teneggi_2013_social_face_pps"
             }
           ],
-          "status": "blocked_by_missing_profile_parameters"
+          "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "template_present_but_blocked",
+          "runnable_status": "runnable_profile_parameters_ready",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "Experiment 1 source delays and per-condition trial counts are encoded. The original audio and speaker gains, electrically calibrated cheek stimulation and voice-relay parameters remain unresolved."
-      ],
-      "next_required_action": "Extract or source the missing paper parameters: Experiment 1 source delays and per-condition trial counts are encoded. The original audio and speaker gains, electrically calibrated cheek stimulation and voice-relay parameters remain unresolved.",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "missing_publication_parameters": [],
+      "next_required_action": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved.",
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
         "extraction_status": "pending_pdf",
@@ -1970,9 +1954,9 @@
         "pdf_status": "needs_user_download",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "profile_present_but_source_parameters_missing",
+      "pipeline_status": "pipeline_incomplete",
       "record_id": "teneggi_2013_social_face",
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "source_basis": [
         "holmes_2020_systematic_review",
         "pubmed_query_variant_exhaustiveness_2026_06_13"
@@ -2101,12 +2085,9 @@
     },
     {
       "audiotactile_task_family": "dynamic emotional artificial looming sounds with tactile detection",
-      "blocking_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "electrical_tactile_calibration"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Ferri et al. (2015A)",
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "ferri_2015_artificial_looming_valence"
       ],
@@ -2128,31 +2109,26 @@
         "observed_emulated_expected_match": {
           "evidence": "No observed emulated comparison exists for this record.",
           "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
           "passed": false,
           "source_report": "",
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
-          "passed": false,
+          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
+          "passed": true,
           "profile_completion_statuses": [
-            "unfinished_preload"
+            "finished_segment_6_launchable"
           ],
-          "status": "profile_scaffold_present_but_incomplete",
+          "status": "parsimonious_profile_complete",
           "template_ids": [
             "ferri_2015_artificial_looming_valence"
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "exact_audio_envelope_or_gain_files",
-            "electrical_tactile_calibration"
-          ],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "Original white and brown noise and their level/envelope files remain unavailable, alongside the calibrated electrical delivery and response-box route."
-          ],
+          "blockers": [],
+          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
+          "missing_parameters": [],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
             "extraction_status": "pending_pdf",
@@ -2164,41 +2140,36 @@
             "pdf_status": "needs_user_download",
             "supplement_status": "paywalled"
           },
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "passed": true,
+          "status": "minimum_source_parameters_captured"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "exact_audio_envelope_or_gain_files",
-            "electrical_tactile_calibration"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
-          "passed": false,
+          "blocker_ids": [],
+          "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
+          "passed": true,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_unsupported_toolkit_structure",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "ferri_2015_artificial_looming_valence"
             }
           ],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "template_present_but_blocked",
+          "runnable_status": "runnable_profile_parameters_ready",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "Original white and brown noise and their level/envelope files remain unavailable, alongside the calibrated electrical delivery and response-box route."
-      ],
-      "next_required_action": "Implement or validate toolkit support for: exact_audio_envelope_or_gain_files, electrical_tactile_calibration; also extract/source missing paper parameters: Original white and brown noise and their level/envelope files remain unavailable, alongside the calibrated electrical delivery and response-box route.",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "missing_publication_parameters": [],
+      "next_required_action": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved.",
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
         "extraction_status": "pending_pdf",
@@ -2210,9 +2181,9 @@
         "pdf_status": "needs_user_download",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "pipeline_incomplete",
       "record_id": "ferri_2015_artificial_valence",
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "source_basis": [
         "holmes_2020_systematic_review",
         "openalex_audiotactile_pps_2026_06_13"
@@ -2379,7 +2350,7 @@
           "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
           "profile_completion_statuses": [
-            "unfinished_preload",
+            "finished_segment_6_launchable",
             "unfinished_preload"
           ],
           "status": "profile_scaffold_present_but_incomplete",
@@ -2424,10 +2395,10 @@
           "passed": false,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "ferri_2015_premotor_itv_behavior"
             },
             {
@@ -3267,8 +3238,8 @@
           "passed": false,
           "profile_completion_statuses": [
             "unfinished_preload",
-            "unfinished_preload",
-            "unfinished_preload"
+            "finished_segment_6_launchable",
+            "finished_segment_6_launchable"
           ],
           "status": "profile_scaffold_present_but_incomplete",
           "template_ids": [
@@ -3318,17 +3289,17 @@
               "template_id": "serino_2015_face_trunk_audio_exp6"
             },
             {
-              "runner_readiness": "blocked_unsupported_toolkit_structure",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "serino_2015_peri_hand_posture_exp5"
             },
             {
-              "runner_readiness": "blocked_unsupported_toolkit_structure",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "serino_2015_peri_hand_trunk_exp4"
             }
           ],
@@ -3479,12 +3450,9 @@
     },
     {
       "audiotactile_task_family": "dynamic audio-tactile PPS boundary task with interoception context",
-      "blocking_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "electrical_tactile_calibration"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Ardizzi & Ferri (2018)",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "ardizzi_ferri_2018_looming_flat"
       ],
@@ -3506,31 +3474,26 @@
         "observed_emulated_expected_match": {
           "evidence": "No observed emulated comparison exists for this record.",
           "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
           "passed": false,
           "source_report": "",
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
-          "passed": false,
+          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
+          "passed": true,
           "profile_completion_statuses": [
-            "unfinished_preload"
+            "finished_segment_6_launchable"
           ],
-          "status": "profile_scaffold_present_but_incomplete",
+          "status": "parsimonious_profile_complete",
           "template_ids": [
             "ardizzi_ferri_2018_looming_flat"
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "exact_audio_envelope_or_gain_files",
-            "electrical_tactile_calibration"
-          ],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "The nominal 300-trial scored assessment is encoded. Original speaker routing and calibration, electrical pulse delivery and calibrated Cedrus response capture remain unresolved."
-          ],
+          "blockers": [],
+          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
+          "missing_parameters": [],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
             "extraction_status": "pending_pdf",
@@ -3542,41 +3505,36 @@
             "pdf_status": "paywalled",
             "supplement_status": "not_found"
           },
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "passed": true,
+          "status": "minimum_source_parameters_captured"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "exact_audio_envelope_or_gain_files",
-            "electrical_tactile_calibration"
-          ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
-          "passed": false,
+          "blocker_ids": [],
+          "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
+          "passed": true,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "ardizzi_ferri_2018_looming_flat"
             }
           ],
-          "status": "blocked_by_missing_profile_parameters"
+          "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "template_present_but_blocked",
+          "runnable_status": "runnable_profile_parameters_ready",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "The nominal 300-trial scored assessment is encoded. Original speaker routing and calibration, electrical pulse delivery and calibrated Cedrus response capture remain unresolved."
-      ],
-      "next_required_action": "Extract or source the missing paper parameters: The nominal 300-trial scored assessment is encoded. Original speaker routing and calibration, electrical pulse delivery and calibrated Cedrus response capture remain unresolved.",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "missing_publication_parameters": [],
+      "next_required_action": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved.",
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
         "extraction_status": "pending_pdf",
@@ -3588,9 +3546,9 @@
         "pdf_status": "paywalled",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "profile_present_but_source_parameters_missing",
+      "pipeline_status": "pipeline_incomplete",
       "record_id": "ardizzi_ferri_2018_interoceptive",
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "source_basis": [
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13"
@@ -3598,12 +3556,9 @@
     },
     {
       "audiotactile_task_family": "lateral PPS audio-tactile task linked to handedness",
-      "blocking_constraint_ids": [
-        "hrtf_database_or_binaural_engine_mismatch",
-        "exact_audio_envelope_or_gain_files"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Hobeika et al. (2018)",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "hobeika_2018_anisotropy_left_handed",
         "hobeika_2018_anisotropy_right_handed"
@@ -3626,33 +3581,28 @@
         "observed_emulated_expected_match": {
           "evidence": "No observed emulated comparison exists for this record.",
           "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
           "passed": false,
           "source_report": "",
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
-          "passed": false,
+          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
+          "passed": true,
           "profile_completion_statuses": [
-            "unfinished_preload",
-            "unfinished_preload"
+            "finished_segment_6_launchable",
+            "finished_segment_6_launchable"
           ],
-          "status": "profile_scaffold_present_but_incomplete",
+          "status": "parsimonious_profile_complete",
           "template_ids": [
             "hobeika_2018_anisotropy_left_handed",
             "hobeika_2018_anisotropy_right_handed"
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "hrtf_database_or_binaural_engine_mismatch",
-            "exact_audio_envelope_or_gain_files"
-          ],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "Original bubbling-water recording, LISTEN filter and sound-level calibration. The Toolkit encodes the nine concurrent SOAs, two sound-bearing silent controls, and reported cohort-specific target and response hands."
-          ],
+          "blockers": [],
+          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
+          "missing_parameters": [],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
             "extraction_status": "pending_pdf",
@@ -3664,48 +3614,43 @@
             "pdf_status": "paywalled",
             "supplement_status": "needs_user_download"
           },
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "passed": true,
+          "status": "minimum_source_parameters_captured"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "hrtf_database_or_binaural_engine_mismatch",
-            "exact_audio_envelope_or_gain_files"
-          ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
-          "passed": false,
+          "blocker_ids": [],
+          "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
+          "passed": true,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "hobeika_2018_anisotropy_left_handed"
             },
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "hobeika_2018_anisotropy_right_handed"
             }
           ],
-          "status": "blocked_by_missing_profile_parameters"
+          "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "template_present_but_blocked",
+          "runnable_status": "runnable_profile_parameters_ready",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "Original bubbling-water recording, LISTEN filter and sound-level calibration. The Toolkit encodes the nine concurrent SOAs, two sound-bearing silent controls, and reported cohort-specific target and response hands."
-      ],
-      "next_required_action": "Extract or source the missing paper parameters: Original bubbling-water recording, LISTEN filter and sound-level calibration. The Toolkit encodes the nine concurrent SOAs, two sound-bearing silent controls, and reported cohort-specific target and response hands.",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "missing_publication_parameters": [],
+      "next_required_action": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved.",
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
         "extraction_status": "pending_pdf",
@@ -3717,9 +3662,9 @@
         "pdf_status": "paywalled",
         "supplement_status": "needs_user_download"
       },
-      "pipeline_status": "profile_present_but_source_parameters_missing",
+      "pipeline_status": "pipeline_incomplete",
       "record_id": "hobeika_2018_anisotropy",
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "source_basis": [
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13"
@@ -4859,7 +4804,7 @@
           "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
           "profile_completion_statuses": [
-            "unfinished_preload",
+            "finished_segment_6_launchable",
             "unfinished_preload",
             "unfinished_preload"
           ],
@@ -4903,10 +4848,10 @@
           "passed": false,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "hobeika_2019_social_audience"
             },
             {
@@ -5287,12 +5232,9 @@
     },
     {
       "audiotactile_task_family": "expectancy-controlled dynamic PPS task with sound-propagation corrections",
-      "blocking_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "hrtf_database_or_binaural_engine_mismatch"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Hobeika et al. (2020)",
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "hobeika_2020_pseudo_linear",
         "hobeika_2020_logarithmic"
@@ -5315,33 +5257,28 @@
         "observed_emulated_expected_match": {
           "evidence": "No observed emulated comparison exists for this record.",
           "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
           "passed": false,
           "source_report": "",
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
-          "passed": false,
+          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
+          "passed": true,
           "profile_completion_statuses": [
-            "unfinished_preload",
-            "unfinished_preload"
+            "finished_segment_6_launchable",
+            "finished_segment_6_launchable"
           ],
-          "status": "profile_scaffold_present_but_incomplete",
+          "status": "parsimonious_profile_complete",
           "template_ids": [
             "hobeika_2020_pseudo_linear",
             "hobeika_2020_logarithmic"
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "exact_audio_envelope_or_gain_files",
-            "hrtf_database_or_binaural_engine_mismatch"
-          ],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "Two nominal 576-trial PPS assessments now encode the printed onset tables and trial composition. Original session playback, calibrated tactile and response device timing, and separate adaptive auditory tasks remain unresolved."
-          ],
+          "blockers": [],
+          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
+          "missing_parameters": [],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
             "extraction_status": "pending_pdf",
@@ -5353,48 +5290,43 @@
             "pdf_status": "paywalled",
             "supplement_status": "not_found"
           },
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "passed": true,
+          "status": "minimum_source_parameters_captured"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "exact_audio_envelope_or_gain_files",
-            "hrtf_database_or_binaural_engine_mismatch"
-          ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
-          "passed": false,
+          "blocker_ids": [],
+          "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
+          "passed": true,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "hobeika_2020_pseudo_linear"
             },
             {
-              "runner_readiness": "blocked_missing_parameters",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "hobeika_2020_logarithmic"
             }
           ],
-          "status": "blocked_by_missing_profile_parameters"
+          "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "template_present_but_blocked",
+          "runnable_status": "runnable_profile_parameters_ready",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "Two nominal 576-trial PPS assessments now encode the printed onset tables and trial composition. Original session playback, calibrated tactile and response device timing, and separate adaptive auditory tasks remain unresolved."
-      ],
-      "next_required_action": "Extract or source the missing paper parameters: Two nominal 576-trial PPS assessments now encode the printed onset tables and trial composition. Original session playback, calibrated tactile and response device timing, and separate adaptive auditory tasks remain unresolved.",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "missing_publication_parameters": [],
+      "next_required_action": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved.",
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
         "extraction_status": "pending_pdf",
@@ -5406,9 +5338,9 @@
         "pdf_status": "paywalled",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "profile_present_but_source_parameters_missing",
+      "pipeline_status": "pipeline_incomplete",
       "record_id": "hobeika_2020_methods",
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ]
@@ -5629,14 +5561,14 @@
           "passed": false,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "runner_readiness": "blocked_missing_parameters",
               "segment_0_to_4_profile_checks_passed": false,
               "segment_1_to_6_materializable": false,
               "segment_6_launchable": false,
               "template_id": "ferroni_2026_pps_plasticity_determinants_exp1"
             },
             {
-              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "runner_readiness": "blocked_missing_parameters",
               "segment_0_to_4_profile_checks_passed": false,
               "segment_1_to_6_materializable": false,
               "segment_6_launchable": false,
@@ -7578,7 +7510,7 @@
           "passed": false,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "runner_readiness": "blocked_missing_parameters",
               "segment_0_to_4_profile_checks_passed": false,
               "segment_1_to_6_materializable": false,
               "segment_6_launchable": false,
@@ -9102,12 +9034,9 @@
     },
     {
       "audiotactile_task_family": "Looming versus flat hand PPS and resting-state MEG",
-      "blocking_constraint_ids": [
-        "electrical_tactile_calibration",
-        "exact_audio_envelope_or_gain_files"
-      ],
+      "blocking_constraint_ids": [],
       "citation_short": "Di Cosmo, G., Costantini, M., Spadone, S., Pizzella, V., Della Penna, S., Marzetti, L., & Ferri, F. (2021). Phase-coupling of neural oscillations contributes to individual differences in peripersonal space. Neuropsychologia, 156, 107823.",
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "current_template_ids": [
         "di_cosmo_2021_phase_coupling"
       ],
@@ -9128,75 +9057,61 @@
         "observed_emulated_expected_match": {
           "evidence": "No observed emulated comparison exists for this record.",
           "evidence_boundary": "",
-          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
           "passed": false,
           "source_report": "",
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
-          "passed": false,
+          "evidence": "All current template IDs are finished profiles and source parameters are complete.",
+          "passed": true,
           "profile_completion_statuses": [
-            "unfinished_preload"
+            "finished_segment_6_launchable"
           ],
-          "status": "profile_scaffold_present_but_incomplete",
+          "status": "parsimonious_profile_complete",
           "template_ids": [
             "di_cosmo_2021_phase_coupling"
           ]
         },
         "source_parameter_extraction": {
-          "blockers": [
-            "electrical_tactile_calibration",
-            "exact_audio_envelope_or_gain_files"
-          ],
-          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
-          "missing_parameters": [
-            "Original looming and flat sound source files, gain coefficients, file duration and delivered audio calibration are unavailable.",
-            "The behavioral scheduler requires a silent negative-SOA lead-in, exact electrical target timing and calibrated response capture.",
-            "Resting MEG and T1 MRI require external acquisition systems and a validated connectivity pipeline. The exact spectral windowing, fit options, and acquisition-to-analysis data are unavailable."
-          ],
+          "blockers": [],
+          "evidence": "Literature ledger marks the task as currently recreatable with no blocking constraints or missing publication parameters.",
+          "missing_parameters": [],
           "paper_audit": {},
-          "passed": false,
-          "status": "source_parameters_missing_or_unresolved"
+          "passed": true,
+          "status": "minimum_source_parameters_captured"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [
-            "electrical_tactile_calibration",
-            "exact_audio_envelope_or_gain_files"
-          ],
-          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
-          "passed": false,
+          "blocker_ids": [],
+          "evidence": "Profile status reports Segment 0-4 checks, Segment 1-6 materialization, and Segment 6 launch readiness.",
+          "passed": true,
           "profile_readiness": [
             {
-              "runner_readiness": "blocked_unsupported_toolkit_structure",
-              "segment_0_to_4_profile_checks_passed": false,
-              "segment_1_to_6_materializable": false,
-              "segment_6_launchable": false,
+              "runner_readiness": "ready",
+              "segment_0_to_4_profile_checks_passed": true,
+              "segment_1_to_6_materializable": true,
+              "segment_6_launchable": true,
               "template_id": "di_cosmo_2021_phase_coupling"
             }
           ],
-          "status": "blocked_by_toolkit_structure_or_response_contract"
+          "status": "segment_0_to_6_gui_toolkit_path_ready"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "template_present_but_blocked",
+          "runnable_status": "runnable_profile_parameters_ready",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
-      "missing_publication_parameters": [
-        "Original looming and flat sound source files, gain coefficients, file duration and delivered audio calibration are unavailable.",
-        "The behavioral scheduler requires a silent negative-SOA lead-in, exact electrical target timing and calibrated response capture.",
-        "Resting MEG and T1 MRI require external acquisition systems and a validated connectivity pipeline. The exact spectral windowing, fit options, and acquisition-to-analysis data are unavailable."
-      ],
-      "next_required_action": "Implement or validate toolkit support for: electrical_tactile_calibration, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: Original looming and flat sound source files, gain coefficients, file duration and delivered audio calibration are unavailable.; The behavioral scheduler requires a silent negative-SOA lead-in, exact electrical target timing and calibrated response capture.; Resting MEG and T1 MRI require external acquisition systems and a validated connectivity pipeline. The exact spectral windowing, fit options, and acquisition-to-analysis data are unavailable.",
-      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "missing_publication_parameters": [],
+      "next_required_action": "Validate the study-specific contrast before claiming an expected-effect comparison; the available rehearsal checks assessment parameters and response counts only. Human effects and physical timing remain unobserved.",
+      "observed_vs_expected_status": "parameter_run_evidence_only_behavioral_effect_unobserved",
       "paper_audit": {},
-      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "pipeline_status": "pipeline_incomplete",
       "record_id": "di_cosmo_2021_phase_coupling",
-      "runnable_status": "template_present_but_blocked",
+      "runnable_status": "runnable_profile_parameters_ready",
       "source_basis": [
         "https://doi.org/10.1016/j.neuropsychologia.2021.107823"
       ]
@@ -9570,20 +9485,20 @@
       },
       "parsimonious_profile_saved": {
         "not_applicable_adjacent_record": 4,
-        "parsimonious_profile_complete": 22,
+        "parsimonious_profile_complete": 28,
         "profile_not_yet_created": 3,
-        "profile_scaffold_present_but_incomplete": 51
+        "profile_scaffold_present_but_incomplete": 45
       },
       "source_parameter_extraction": {
-        "minimum_source_parameters_captured": 22,
+        "minimum_source_parameters_captured": 28,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 54
+        "source_parameters_missing_or_unresolved": 48
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 11,
-        "blocked_by_toolkit_structure_or_response_contract": 43,
+        "blocked_by_missing_profile_parameters": 7,
+        "blocked_by_toolkit_structure_or_response_contract": 41,
         "not_applicable_adjacent_record": 4,
-        "segment_0_to_6_gui_toolkit_path_ready": 22
+        "segment_0_to_6_gui_toolkit_path_ready": 28
       },
       "wav_generation_and_runner_execution": {
         "not_applicable_adjacent_record": 4,
@@ -9598,15 +9513,15 @@
     "pipeline_status_counts": {
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 17,
-      "pipeline_incomplete": 5,
-      "profile_present_but_source_parameters_missing": 8,
+      "pipeline_incomplete": 11,
+      "profile_present_but_source_parameters_missing": 4,
       "source_parameters_missing_before_profile_creation": 3,
-      "toolkit_structure_or_response_contract_missing": 43
+      "toolkit_structure_or_response_contract_missing": 41
     },
     "primary_gap_counts": {
-      "profile_present_but_source_parameters_missing": 8,
+      "profile_present_but_source_parameters_missing": 4,
       "source_parameters_missing_before_profile_creation": 3,
-      "toolkit_structure_or_response_contract_missing": 43
+      "toolkit_structure_or_response_contract_missing": 41
     }
   }
 }

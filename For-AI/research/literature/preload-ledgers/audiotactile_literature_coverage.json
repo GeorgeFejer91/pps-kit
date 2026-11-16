@@ -267,20 +267,20 @@
   "coverage_summary": {
     "literature_record_count": 80,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 22,
-      "covered_blocked_missing_publication_parameters": 8,
-      "covered_blocked_toolkit_structure": 43,
+      "covered_runnable_profile": 28,
+      "covered_blocked_missing_publication_parameters": 4,
+      "covered_blocked_toolkit_structure": 41,
       "not_yet_templated_requires_toolkit_structure": 0,
       "not_yet_templated_missing_publication_parameters": 3,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
     "current_template_count": 203,
-    "current_profile_check_pass_count": 30,
-    "published_profile_check_pass_count": 28,
+    "current_profile_check_pass_count": 45,
+    "published_profile_check_pass_count": 43,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 173,
-    "current_templates_with_toolkit_structural_gaps": 159,
+    "current_templates_with_missing_publication_parameters": 158,
+    "current_templates_with_toolkit_structural_gaps": 148,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -743,11 +743,9 @@
     {
       "template_id": "ferri_2015_artificial_looming_valence",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "electrical_tactile_calibration"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "Run a 416-trial timing preview with generated white and brown noise, then use the original two-block procedure, calibrated headphones and qualified electrical delivery for participant research."
     },
     {
       "template_id": "ferri_2015_ecological_looming_valence",
@@ -820,12 +818,9 @@
     {
       "template_id": "teneggi_2013_social_face_pps",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "electrical_tactile_calibration",
-        "voice_key_response_capture"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "Run the PPS assessments mannequin and unfamiliar-person contexts as four 52-trial blocks. The software uses generated auditory cues, tactile-channel markers and mouse clicks."
     },
     {
       "template_id": "serino_2007_blind_cane_users",
@@ -895,11 +890,9 @@
     {
       "template_id": "ardizzi_ferri_2018_looming_flat",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "electrical_tactile_calibration"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "Run the 300-trial Session 1 PPS assessment in software. The fixed 1-second intertrial silence and two synthetic level envelopes are encoded. The preview uses a tactile-channel marker and mouse response."
     },
     {
       "template_id": "maister_2015_shared_sensory_pps",
@@ -910,20 +903,16 @@
     {
       "template_id": "hobeika_2020_logarithmic",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "hrtf_database_or_binaural_engine_mismatch"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The 576-trial logarithmic-distance software assessment preserves the six sound-relative target delays and both silent-window controls. It uses generated burst trains, a digital tactile waveform and a mouse response. Counterbalance this profile with the other distance grid on a separate day. The published acoustic calibration and subsequent discomfort tests require their own procedures."
     },
     {
       "template_id": "hobeika_2020_pseudo_linear",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "hrtf_database_or_binaural_engine_mismatch"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The 576-trial pseudo-linear-distance software assessment preserves the six sound-relative target delays and both silent-window controls. It uses generated burst trains, a digital tactile waveform and a mouse response. Counterbalance this profile with the other distance grid on a separate day. The published acoustic calibration and subsequent discomfort tests require their own procedures."
     },
     {
       "template_id": "rahmani_2025_2s_pps",
@@ -942,20 +931,16 @@
     {
       "template_id": "hobeika_2018_anisotropy_left_handed",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "hrtf_database_or_binaural_engine_mismatch",
-        "exact_audio_envelope_or_gain_files"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The 240-trial software assessment preserves the published left and right sound paths and target timings at the right index finger. It uses generated pink noise, a digital tactile waveform and a mouse response. Calibrate delivery and run the study's practice and perceived-distance check before a participant session."
     },
     {
       "template_id": "hobeika_2018_anisotropy_right_handed",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "hrtf_database_or_binaural_engine_mismatch",
-        "exact_audio_envelope_or_gain_files"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The 240-trial software assessment preserves the published left and right sound paths and target timings at the left index finger. It uses generated pink noise, a digital tactile waveform and a mouse response. Calibrate delivery and run the study's practice and perceived-distance check before a participant session."
     },
     {
       "template_id": "bernasconi_2018_trunk_ieeg",
@@ -968,11 +953,9 @@
     {
       "template_id": "hobeika_2019_social_audience",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "hrtf_database_or_binaural_engine_mismatch",
-        "exact_audio_envelope_or_gain_files"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The 480-trial software assessment runs one response stream through the isolated and passive-audience conditions. The operator seats a passive partner during the audience blocks and removes the partner during the isolated blocks. The rendered audio, touch cue and mouse response require laboratory validation."
     },
     {
       "template_id": "hobeika_2019_social_collaboration",
@@ -1057,7 +1040,8 @@
       "current_recreation_category": "toolkit_structural_gap",
       "primary_constraint_ids": [
         "exact_audio_envelope_or_gain_files"
-      ]
+      ],
+      "source_notes": "The front timing preview includes the generated 500 ms start tone and 54 of the 56 published main trials. Both tone-only catches and the calibrated speaker-array procedure are required for a research launch."
     },
     {
       "template_id": "teraoka_2024_rear_pps",
@@ -1065,7 +1049,8 @@
       "current_recreation_category": "toolkit_structural_gap",
       "primary_constraint_ids": [
         "exact_audio_envelope_or_gain_files"
-      ]
+      ],
+      "source_notes": "The rear timing preview includes the generated 500 ms start tone and 54 of the 56 published main trials. Both tone-only catches and the calibrated speaker-array procedure are required for a research launch."
     },
     {
       "template_id": "amemiya_2017_ieee_foot_sole_vibration",
@@ -1138,11 +1123,9 @@
     {
       "template_id": "di_cosmo_2021_phase_coupling",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "electrical_tactile_calibration",
-        "exact_audio_envelope_or_gain_files"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "Run the 360-trial behavioral timing preview with illustrative looming and flat clips. The original playback duration, electrical target and response hardware require independent validation. MEG and MRI acquisition remain separate."
     },
     {
       "template_id": "ferroni_2020_schizotypy_active",
@@ -1399,10 +1382,9 @@
     {
       "template_id": "bassolino_2022_chronic_stroke_pps",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "study_specific_physical_apparatus"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "Run one described 110-trial PPS pool. Software uses a generated broadband cue, tactile-channel markers and mouse clicks. The source leaves the allocation of the pool across hands open."
     },
     {
       "template_id": "bernasconi_2018_preprint_trunk_ieeg",
@@ -1629,10 +1611,9 @@
     {
       "template_id": "ferri_2015_premotor_itv_behavior",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "Run the 300-trial behavioral timing preview with two synthesized 3.1-second pink-noise cues. The clinical electrical stimulator, Cedrus response box and calibrated two-speaker playback require laboratory qualification."
     },
     {
       "template_id": "ferri_2015_premotor_itv_fmri",
@@ -1645,10 +1626,11 @@
     {
       "template_id": "depersonalisation_2023_psyarxiv_pps",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
+      "current_recreation_category": "missing_publication_parameters",
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
-      ]
+      ],
+      "source_notes": "Preview the timing illustrated in the preprint appendix. The appendix’s cohort attribution and actual allocation remain unresolved."
     },
     {
       "template_id": "ferroni_2023_depersonalisation_mental_time_travel",
@@ -1661,10 +1643,11 @@
     {
       "template_id": "ferroni_2025_depersonalisation_pps",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
+      "current_recreation_category": "missing_publication_parameters",
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
-      ]
+      ],
+      "source_notes": "Preview the published paired delay, silent D0 and catch examples. The conflicting trial totals prevent a full assessment reconstruction."
     },
     {
       "template_id": "ferroni_2025_depersonalisation_mental_time_travel",
@@ -1677,18 +1660,20 @@
     {
       "template_id": "ferroni_2026_pps_plasticity_determinants_exp1",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
+      "current_recreation_category": "missing_publication_parameters",
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
-      ]
+      ],
+      "source_notes": "Inspect the audio-tactile group timing as two 20-trial software examples. The full repetition count, visual group and physical tool training remain outside this preview."
     },
     {
       "template_id": "ferroni_2026_pps_plasticity_determinants_exp2",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
+      "current_recreation_category": "missing_publication_parameters",
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
-      ]
+      ],
+      "source_notes": "Inspect the hand-effector group timing as two 20-trial software examples. The full repetition count, foot-effector group and physical tool training remain outside this preview."
     },
     {
       "template_id": "ferroni_2026_pps_plasticity_determinants_exp3",
@@ -1749,10 +1734,9 @@
     {
       "template_id": "hobeika_2020_social_audience",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "study_specific_physical_apparatus"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The software assessment runs one response stream over 480 trials. The operator seats a passive partner during the audience blocks and leaves the chair empty during the isolated blocks. The trial budget and silent-window timing use the matched procedure in the author's thesis."
     },
     {
       "template_id": "hobeika_2020_social_collaboration",
@@ -2081,18 +2065,16 @@
     {
       "template_id": "serino_2015_peri_hand_trunk_exp4",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "study_specific_physical_apparatus"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "Software assessment of Experiment 4. Runs the 480-trial pool with separately labelled hand and sternum blocks, virtual looming and receding pink noise, a single software tactile channel and mouse-click responses. The physical hand posture, two-speaker output, stimulation sites and button timing require the original apparatus and calibration."
     },
     {
       "template_id": "serino_2015_peri_hand_posture_exp5",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "study_specific_physical_apparatus"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "Software assessment of Experiment 5. Runs both hand-posture conditions with 432 scheduled trials, continuous synthetic pink noise, a software tactile cue and mouse-click responses. Replication requires the original hand placements and two-speaker stimulus, calibrated hand vibration, and measured gamepad timing."
     },
     {
       "template_id": "serino_2015_face_trunk_audio_exp6",
@@ -2191,10 +2173,9 @@
     {
       "template_id": "teneggi_2013_cooperative_game_exp2",
       "published": true,
-      "current_recreation_category": "toolkit_structural_gap",
-      "primary_constraint_ids": [
-        "study_specific_physical_apparatus"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "Run the PPS assessments before and after the operator-administered game as four 52-trial blocks. The software uses generated auditory cues, tactile-channel markers and mouse clicks."
     },
     {
       "template_id": "teneggi_2013_cooperative_wide_range_exp3",
@@ -2202,7 +2183,8 @@
       "current_recreation_category": "toolkit_structural_gap",
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
-      ]
+      ],
+      "source_notes": "Inspect seven wide-range approach delays and the sound-only catch family before and after the game. The demonstrator runs each target delay once per phase. The published repetition and block totals are unresolved."
     },
     {
       "template_id": "zampini_2007_front_rear",
@@ -2661,17 +2643,15 @@
       "current_template_ids": [
         "teneggi_2013_social_face_pps"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "face tactile detection with approaching/receding sound labels",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "electrical_tactile_calibration",
-        "voice_key_response_capture"
-      ],
-      "missing_publication_parameters": [
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
         "Experiment 1 source delays and per-condition trial counts are encoded. The original audio and speaker gains, electrically calibrated cheek stimulation and voice-relay parameters remain unresolved."
-      ]
+      ],
+      "source_notes": "The 208-trial software assessment preserves the two social contexts and their trial cells with a synthetic trajectory, digital tactile markers and mouse response. The experimenter stages the original contexts."
     },
     {
       "record_id": "taffou_2014_cynophobic_rear_looming",
@@ -2707,16 +2687,15 @@
       "current_template_ids": [
         "ferri_2015_artificial_looming_valence"
       ],
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "dynamic emotional artificial looming sounds with tactile detection",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "electrical_tactile_calibration"
-      ],
-      "missing_publication_parameters": [
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
         "Original white and brown noise and their level/envelope files remain unavailable, alongside the calibrated electrical delivery and response-box route."
-      ]
+      ],
+      "source_notes": "The 416-trial software assessment uses generated white and brown noise and divides the original two blocks into four. Measured headphone output and electrical calibration require laboratory verification."
     },
     {
       "record_id": "ferri_2015_ecological_valence",
@@ -2765,7 +2744,8 @@
         "Original per-sound catch allocations and within-block random sequence are unreported. A balanced split of the reported 120 catches and deterministic shuffling are software scheduling choices.",
         "The protocol requires trial selection from each participant’s behavioral data, MRI-compatible playback and tactile targets, scanner trigger and BOLD acquisition, and an independent auditory localizer.",
         "The scanner catch-trial count and post-catch interval are ambiguous in the report; obtain the original schedule before a research run."
-      ]
+      ],
+      "source_notes": "The 300-trial behavioral assessment can launch in software. The fMRI procedure and original calibrated stimulus delivery remain separate requirements."
     },
     {
       "record_id": "galli_2015_wheelchair",
@@ -2918,7 +2898,8 @@
         "The trial scheduler must switch the active tactile site by block and time the probe at the paper's measured sound position.",
         "Exact target-hand coordinates relative to the physical loudspeaker array are unreported.",
         "The scheduler requires the selected face- or sternum-height trajectory aligned to participant position."
-      ]
+      ],
+      "source_notes": "Experiments 4 and 5 can launch as 480- and 432-trial software assessments. Experiment 6 still requires the face/trunk apparatus and validated routing."
     },
     {
       "record_id": "serino_2015_toolless_sync_training",
@@ -2955,16 +2936,15 @@
       "current_template_ids": [
         "ardizzi_ferri_2018_looming_flat"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "dynamic audio-tactile PPS boundary task with interoception context",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "electrical_tactile_calibration"
-      ],
-      "missing_publication_parameters": [
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
         "The nominal 300-trial scored assessment is encoded. Original speaker routing and calibration, electrical pulse delivery and calibrated Cedrus response capture remain unresolved."
-      ]
+      ],
+      "source_notes": "The 300-trial software assessment uses generated level envelopes, a tactile marker and mouse response. Physiological and questionnaire procedures require the published setup."
     },
     {
       "record_id": "hobeika_2018_anisotropy",
@@ -2978,16 +2958,15 @@
         "hobeika_2018_anisotropy_left_handed",
         "hobeika_2018_anisotropy_right_handed"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "lateral PPS audio-tactile task linked to handedness",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "hrtf_database_or_binaural_engine_mismatch",
-        "exact_audio_envelope_or_gain_files"
-      ],
-      "missing_publication_parameters": [
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
         "Original bubbling-water recording, LISTEN filter and sound-level calibration. The Toolkit encodes the nine concurrent SOAs, two sound-bearing silent controls, and reported cohort-specific target and response hands."
-      ]
+      ],
+      "source_notes": "Each cohort has a 240-trial software assessment. Generated pink noise preserves the two nominal paths. Tactile and acoustic output and the response setup require physical verification."
     },
     {
       "record_id": "noel_2018_neural_adaptation",
@@ -3215,7 +3194,8 @@
       "missing_publication_parameters": [
         "Original bubbling-water recording and calibrated LISTEN rendering and target/response devices.",
         "Collaboration and competition need synchronized partner stations. Profile blocks use a fixed preview silence and a balanced allocation because the original jitter and block composition are unreported."
-      ]
+      ],
+      "source_notes": "The 480-trial passive-audience assessment runs one response stream. Collaboration and competition require two synchronized participant stations."
     },
     {
       "record_id": "social_perception_2017",
@@ -3290,16 +3270,15 @@
         "hobeika_2020_pseudo_linear",
         "hobeika_2020_logarithmic"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "expectancy-controlled dynamic PPS task with sound-propagation corrections",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "exact_audio_envelope_or_gain_files",
-        "hrtf_database_or_binaural_engine_mismatch"
-      ],
-      "missing_publication_parameters": [
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
         "Two nominal 576-trial PPS assessments now encode the printed onset tables and trial composition. Original session playback, calibrated tactile and response device timing, and separate adaptive auditory tasks remain unresolved."
-      ]
+      ],
+      "source_notes": "The two 576-trial software assessments preserve six target delays and two silent-window controls per sound. The generated burst trains omit the original acoustics. The separate adaptive auditory tasks require their own procedure."
     },
     {
       "record_id": "ferroni_2020_tool_observation",
@@ -3553,7 +3532,8 @@
       "missing_publication_parameters": [
         "The original four-speaker cosine-window playback, all-speaker tone cue, calibrated chest vibration and keypad response.",
         "The reported tone-only catch quotas are recorded. The standard inspection path needs the named tone import and omits the pure cue catch family."
-      ]
+      ],
+      "source_notes": "The timing previews bundle a generated 500 ms start tone and 54 trials per direction. The two tone-only catches per direction and calibrated speaker-array delivery remain pending."
     },
     {
       "record_id": "body_image_social_cognition_2024",
@@ -4008,18 +3988,17 @@
       "current_template_ids": [
         "di_cosmo_2021_phase_coupling"
       ],
-      "coverage_category": "covered_blocked_toolkit_structure",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "Looming versus flat hand PPS and resting-state MEG",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "electrical_tactile_calibration",
-        "exact_audio_envelope_or_gain_files"
-      ],
-      "missing_publication_parameters": [
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "recreation_caveats": [
         "Original looming and flat sound source files, gain coefficients, file duration and delivered audio calibration are unavailable.",
         "The behavioral scheduler requires a silent negative-SOA lead-in, exact electrical target timing and calibrated response capture.",
         "Resting MEG and T1 MRI require external acquisition systems and a validated connectivity pipeline. The exact spectral windowing, fit options, and acquisition-to-analysis data are unavailable."
-      ]
+      ],
+      "source_notes": "The 360-trial behavioral timing preview uses illustrative audio because the original duration and calibration are unresolved. MEG and MRI acquisition require the published apparatus."
     },
     {
       "record_id": "ferroni_2020_schizotypy",

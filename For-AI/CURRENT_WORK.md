@@ -13,14 +13,16 @@ This file is the active checklist and handoff owner; replace state, do not appen
   includes 201 source-linked profiles and two local lab profiles. The catalogue
   covers 193 original assessments and one conference-abstract series across 91
   of the 94 DOI records. A commentary, a conceptual chapter and an ASMR survey
-  have no original PPS task. Twenty-eight profiles across 20 DOI records can
-  launch in software. Both Rahmani durations and both Cardini versions passed
-  Runner software playback with the published trial totals. Holmes, Amemiya,
-  Ferri and Ardizzi–Ferri gained timing, stimulus or apparatus records. For the
-  remaining research launches, the [profile status](../docs/PUBLISHED_STUDY_RECREATION_STATUS.md)
-  and [workflow](../docs/replication_workflow.md#published-study-profiles)
-  identify the missing inputs, timing or apparatus. Source PDFs and extraction
-  protocols reside in the private archive.
+  have no original PPS task. Forty-three profiles across 30 DOI records pass
+  software launch checks. The latest 15 cover Hobeika, Ferri, Di Cosmo, Serino,
+  Ardizzi and Ferri, Bassolino and Teneggi. Seven additional timing previews
+  remain gated for participant launch. The
+  [profile status](../docs/PUBLISHED_STUDY_RECREATION_STATUS.md) and
+  [workflow](../docs/replication_workflow.md#published-study-profiles) record
+  substitutions and physical setup requirements. Continue with mixed cue-only
+  catch scheduling, synchronized participant stations and source assets that
+  block the remaining profiles. Source PDFs and extraction protocols reside
+  in the private archive.
 - **Timeline-first Runner UI: VERIFIED SOURCE AND HOSTED.** Study 5 Focus
   Mode inspires the native landscape timeline's audio, tactile, and response
   lanes. It shows scheduled cues and software playback positions, with one

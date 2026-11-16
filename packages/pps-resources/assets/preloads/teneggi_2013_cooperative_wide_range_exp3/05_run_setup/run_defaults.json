@@ -1,13 +1,29 @@
 {
   "schema": "pps-preload-run-setup-segment.v1",
   "template_id": "teneggi_2013_cooperative_wide_range_exp3",
-  "blocks": 1,
-  "participants": 1,
-  "random_seed": 20250604,
-  "trial_randomization_strategy": "no_immediate_repeats",
+  "blocks": 2,
+  "participants": 20,
+  "random_seed": 20130307,
+  "trial_randomization_strategy": "balanced_shuffle",
   "block_order_randomization": "fixed",
-  "repeat_trial_pool_per_block": false,
+  "repeat_trial_pool_per_block": true,
   "distribute_trial_pool_across_blocks": false,
-  "baseline_crosses_sequence_variants": true,
-  "catch_crosses_sequence_variants": true
+  "baseline_crosses_sequence_variants": false,
+  "catch_crosses_sequence_variants": false,
+  "block_specs": [
+    {
+      "label": "Before game \u00b7 timing preview",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Catch"
+      ]
+    },
+    {
+      "label": "After game \u00b7 timing preview",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Catch"
+      ]
+    }
+  ]
 }

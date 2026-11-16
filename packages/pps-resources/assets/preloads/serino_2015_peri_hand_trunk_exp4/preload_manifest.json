@@ -1,10 +1,10 @@
 {
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "serino_2015_peri_hand_trunk_exp4",
-  "title": "Serino 2015 \u00b7 Experiment 4, hand by trunk",
+  "title": "Serino 2015 \u00b7 Hand and trunk software assessment",
   "visible_variant_label": "F",
   "publication_status": "published",
-  "profile_type": "published_method_inspection",
+  "profile_type": "audio_tactile_hand_trunk",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -37,18 +37,18 @@
   ],
   "profile_parameters_manifest": "assets/preloads/serino_2015_peri_hand_trunk_exp4/01_profile/profile_parameters_manifest.json",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 5,
-    "unsupported_structure_count": 2
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
+    "unsupported_structure_count": 0
   },
   "render_contract": {
     "stage": "auditory_looming_prebake",
@@ -56,7 +56,94 @@
     "include_tactile": false,
     "tactile_policy": "deferred_until_session_preparation"
   },
-  "assets": [],
+  "assets": [
+    {
+      "label": "Hand and trunk looming pink noise",
+      "path": "assets/preloads/serino_2015_peri_hand_trunk_exp4/02_looming_stimuli/looming_Hand_and_trunk_looming_pink_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_trunk_exp4/02_looming_stimuli/looming_Hand_and_trunk_looming_pink_noise.wav",
+      "sha256": "43111fbfdb159a2e052d0c5dffe8c2ee293a0a45342a8ac2f1331d74ae9d76e0",
+      "duration_s": 4.418005,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Hand and trunk looming pink noise",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 100.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.318,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.1,
+        "path_length_m": 0.95,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Hand and trunk receding pink noise",
+      "path": "assets/preloads/serino_2015_peri_hand_trunk_exp4/02_looming_stimuli/looming_Hand_and_trunk_receding_pink_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_trunk_exp4/02_looming_stimuli/looming_Hand_and_trunk_receding_pink_noise.wav",
+      "sha256": "3f39a175be7fe0be08acf2a466ae648e14e9251ea9a7a79f470091a9390a5a41",
+      "duration_s": 4.418005,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Hand and trunk receding pink noise",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 5.0,
+        "end_distance_cm": 100.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 4.318,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.1,
+        "path_length_m": 0.95,
+        "coordinate_mode": "cartesian",
+        "path_direction": "recede",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ],
   "notes": [
     "Prebaked WAVs are local auditory-only profile assets.",
     "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",

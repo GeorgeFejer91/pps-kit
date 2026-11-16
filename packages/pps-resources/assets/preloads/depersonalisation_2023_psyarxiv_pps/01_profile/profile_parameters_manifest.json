@@ -12,9 +12,9 @@
   "visible_variant_label": "A",
   "variant_display": "Ferroni 2023 \u00b7 Depersonalisation PPS preprint - Variant A",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "primary_category": "missing_publication_parameters",
+    "category_label": "Missing publication parameters",
+    "runner_readiness": "blocked_missing_parameters",
     "profile_checks_passed": false,
     "gui_recreatable": false,
     "segment_0_to_4_profile_checks_passed": false,
@@ -22,8 +22,8 @@
     "finished_profile": false,
     "segment_6_launchable": false,
     "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 5,
-    "unsupported_structure_count": 1
+    "missing_parameter_count": 2,
+    "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
@@ -43,16 +43,6 @@
         "field_count": 5,
         "blocking_reasons": [
           {
-            "parameter": "source_stimulus_inventory",
-            "status": "missing_publication_parameter",
-            "reason": "No source assets are available for Segment 1."
-          },
-          {
-            "parameter": "trajectory_snapshots",
-            "status": "missing_publication_parameter",
-            "reason": "No source-level trajectory snapshots are available."
-          },
-          {
             "parameter": "profile_gap",
             "status": "missing_publication_parameter",
             "reason": "Determine which appendix timing and count values were used for the depersonalisation cohort. Verify the block and baseline/catch allocation against original source logs."
@@ -67,28 +57,16 @@
       {
         "segment": "2",
         "segment_label": "Segment 2 trial rows and sequences",
-        "passed": false,
+        "passed": true,
         "field_count": 3,
-        "blocking_reasons": [
-          {
-            "parameter": "trial_sequence_rows",
-            "status": "unsupported_toolkit_structure",
-            "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
-          }
-        ]
+        "blocking_reasons": []
       },
       {
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-        "passed": false,
+        "passed": true,
         "field_count": 5,
-        "blocking_reasons": [
-          {
-            "parameter": "soa_values_ms",
-            "status": "missing_publication_parameter",
-            "reason": "No SOA values are encoded."
-          }
-        ]
+        "blocking_reasons": []
       },
       {
         "segment": "4",
@@ -128,64 +106,75 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 9,
+      "value": 11,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
       "segment": "1",
       "segment_label": "Segment 1 source/stimulus assets",
       "parameter": "source_stimulus_inventory",
-      "status": "missing_publication_parameter",
-      "value": 0,
-      "note": "No source assets are available for Segment 1."
+      "status": "reported",
+      "value": 2,
+      "note": "Prebaked/profile source assets available."
     },
     {
       "segment": "1",
       "segment_label": "Segment 1 source/stimulus assets",
       "parameter": "trajectory_snapshots",
-      "status": "missing_publication_parameter",
-      "value": 0,
-      "note": "No source-level trajectory snapshots are available."
+      "status": "reported",
+      "value": 2,
+      "note": "Source-level trajectory snapshots are available."
     },
     {
       "segment": "1",
       "segment_label": "Segment 1 source/stimulus assets",
       "parameter": "stimulus_duration",
-      "status": "inferred",
-      "value": 4.0,
-      "note": "Duration inferred from trajectory defaults."
+      "status": "reported",
+      "value": [
+        3.0
+      ],
+      "note": "Duration comes from generated WAV metadata."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "trial_sequence_rows",
-      "status": "unsupported_toolkit_structure",
-      "value": 0,
-      "note": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+      "status": "reported",
+      "value": 1,
+      "note": "Current Segment 2 row/box representation is encoded."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "jitter_values_ms",
-      "status": "defaulted",
-      "value": [],
-      "note": "No explicit jitter box is encoded."
+      "status": "reported",
+      "value": [
+        1000,
+        1000
+      ],
+      "note": "Explicit jitter values encoded."
     },
     {
       "segment": "2",
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "iti_jitter_policy",
-      "status": "defaulted",
-      "value": "no explicit Segment 2 ITI/jitter box",
-      "note": "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."
+      "status": "reported",
+      "value": "jitter/iti box",
+      "note": "Segment 2 encodes explicit ITI/jitter timing values."
     },
     {
       "segment": "3",
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "soa_values_ms",
-      "status": "missing_publication_parameter",
-      "value": [],
-      "note": "No SOA values are encoded."
+      "status": "reported",
+      "value": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "note": "SOA values are encoded."
     },
     {
       "segment": "3",
@@ -193,7 +182,7 @@
       "parameter": "tactile_sites",
       "status": "reported",
       "value": [
-        "hairy dorsal right index finger"
+        "dorsal right index finger"
       ],
       "note": "Tactile site labels are encoded."
     },
@@ -202,48 +191,50 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_mode",
       "status": "reported",
-      "value": "none",
+      "value": "tactile_only",
       "note": "Baseline strategy is encoded."
     },
     {
       "segment": "3",
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_count",
-      "status": "defaulted",
-      "value": 0,
-      "note": "No baseline trials are configured."
+      "status": "reported",
+      "value": 1,
+      "note": "Baseline count/percentage settings are encoded."
     },
     {
       "segment": "3",
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "catch_mode",
-      "status": "defaulted",
-      "value": 0,
-      "note": "No catch trials are configured."
+      "status": "reported",
+      "value": 2,
+      "note": "Catch settings are encoded."
     },
     {
       "segment": "4",
       "segment_label": "Segment 4 repetition pool settings",
       "parameter": "trial_pool_repetitions",
-      "status": "inferred",
-      "value": 1,
-      "note": "Segment 4 can infer repetitions from repetitions_per_condition."
+      "status": "reported",
+      "value": {
+        "default": 1
+      },
+      "note": "Segment 4 repetition defaults are encoded."
     },
     {
       "segment": "5",
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "block_count",
       "status": "reported",
-      "value": 1,
+      "value": 2,
       "note": "Block count is encoded."
     },
     {
       "segment": "5",
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "row_order_constraints",
-      "status": "unsupported_toolkit_structure",
-      "value": 0,
-      "note": "Segment 5 row-order preservation requires Segment 2 row folders."
+      "status": "reported",
+      "value": 1,
+      "note": "Row order can be preserved through Segment 5."
     },
     {
       "segment": "6",
@@ -276,48 +267,9 @@
       "status": "missing_publication_parameter",
       "value": "Recover the source audio, dual-speaker calibration and tactile trigger/response timing. A single procedural looming cue would alter the task.",
       "note": "Recover the source audio, dual-speaker calibration and tactile trigger/response timing. A single procedural looming cue would alter the task."
-    },
-    {
-      "segment": "6",
-      "segment_label": "Segment 6 run setup settings",
-      "parameter": "current_design_validation",
-      "status": "missing_publication_parameter",
-      "value": "",
-      "note": "At least one procedural noise definition or custom looming audio source is required."
-    },
-    {
-      "segment": "6",
-      "segment_label": "Segment 6 run setup settings",
-      "parameter": "current_design_validation",
-      "status": "missing_publication_parameter",
-      "value": "",
-      "note": "At least one SOA value is required."
-    },
-    {
-      "segment": "6",
-      "segment_label": "Segment 6 run setup settings",
-      "parameter": "current_design_validation",
-      "status": "missing_publication_parameter",
-      "value": "",
-      "note": "At least one spatial value is required."
     }
   ],
   "missing_publication_parameters": [
-    {
-      "segment": "1",
-      "parameter": "source_stimulus_inventory",
-      "reason": "No source assets are available for Segment 1."
-    },
-    {
-      "segment": "1",
-      "parameter": "trajectory_snapshots",
-      "reason": "No source-level trajectory snapshots are available."
-    },
-    {
-      "segment": "3",
-      "parameter": "soa_values_ms",
-      "reason": "No SOA values are encoded."
-    },
     {
       "segment": "1",
       "parameter": "profile_gap",
@@ -327,35 +279,9 @@
       "segment": "1",
       "parameter": "profile_gap",
       "reason": "Recover the source audio, dual-speaker calibration and tactile trigger/response timing. A single procedural looming cue would alter the task."
-    },
-    {
-      "segment": "6",
-      "parameter": "current_design_validation",
-      "reason": "At least one procedural noise definition or custom looming audio source is required."
-    },
-    {
-      "segment": "6",
-      "parameter": "current_design_validation",
-      "reason": "At least one SOA value is required."
-    },
-    {
-      "segment": "6",
-      "parameter": "current_design_validation",
-      "reason": "At least one spatial value is required."
     }
   ],
-  "unsupported_toolkit_structures": [
-    {
-      "segment": "2",
-      "parameter": "trial_sequence_rows",
-      "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
-    },
-    {
-      "segment": "5",
-      "parameter": "row_order_constraints",
-      "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
-    }
-  ],
+  "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
       "profile_metadata": "assets/preloads/depersonalisation_2023_psyarxiv_pps/01_profile/profile_metadata.json",
@@ -364,18 +290,18 @@
     "02_looming_stimuli": {
       "stimulus_sources": "assets/preloads/depersonalisation_2023_psyarxiv_pps/02_looming_stimuli/stimulus_sources.json",
       "trajectory_inventory": "assets/preloads/depersonalisation_2023_psyarxiv_pps/02_looming_stimuli/trajectory_inventory.json",
-      "asset_count": 0
+      "asset_count": 2
     },
     "03_baseline_strategy": {
       "baseline_strategy": "assets/preloads/depersonalisation_2023_psyarxiv_pps/03_baseline_strategy/baseline_strategy.json"
     },
     "04_trial_designer": {
       "trial_design": "assets/preloads/depersonalisation_2023_psyarxiv_pps/04_trial_designer/trial_design.json",
-      "trial_row_count": 0
+      "trial_row_count": 1
     },
     "05_run_setup": {
       "run_defaults": "assets/preloads/depersonalisation_2023_psyarxiv_pps/05_run_setup/run_defaults.json",
-      "block_count": 1,
+      "block_count": 2,
       "participant_count": 1
     },
     "local_segment_0_to_4_profile_gate": {

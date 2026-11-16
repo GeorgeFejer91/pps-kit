@@ -1,7 +1,7 @@
 {
   "schema": "pps-preload-run-setup-segment.v1",
   "template_id": "serino_2015_peri_hand_posture_exp5",
-  "blocks": 2,
+  "blocks": 4,
   "participants": 19,
   "random_seed": 20151225,
   "trial_randomization_strategy": "no_immediate_repeats",
@@ -12,7 +12,7 @@
   "catch_crosses_sequence_variants": true,
   "block_specs": [
     {
-      "label": "Hand near trunk",
+      "label": "Hand near trunk 1",
       "stimulus_types": [
         "Audio-Tactile",
         "Baseline",
@@ -20,7 +20,23 @@
       ]
     },
     {
-      "label": "Hand far trunk",
+      "label": "Hand near trunk 2",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Hand far trunk 1",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "Hand far trunk 2",
       "stimulus_types": [
         "Audio-Tactile",
         "Baseline",

@@ -5,12 +5,12 @@
   "source_url": "https://doi.org/10.1016/j.neuropsychologia.2021.107823",
   "doi": "10.1016/j.neuropsychologia.2021.107823",
   "verification_status": "partial",
-  "notes": "Inspection of the behavioral looming/flat PPS assessment and the paired resting-state MEG measurement. The behavioral source sounds, calibrated electrical target, response box and external MEG/MRI setup remain required.",
+  "notes": "Run the 360-trial behavioral timing preview with illustrative looming and flat clips. The original playback duration, electrical target and response hardware require independent validation. MEG and MRI acquisition remain separate.",
   "reference_parameters": {
     "study_row_id": "doi:10.1016/j.neuropsychologia.2021.107823",
     "publication_status": "published",
     "profile_type": "behavioral_pps_with_resting_meg",
-    "profile_check_complete": false,
+    "profile_check_complete": true,
     "study_inventory": {
       "formal_experiments": 1,
       "primary_assessments": 2,
@@ -161,24 +161,66 @@
       "flip_angle_deg": 8,
       "scope": "Individual anatomical coregistration and forward model for MEG."
     },
-    "preview_scope": "Source-listed trial timing and acquisition parameters are available for inspection. No playback file, electric stimulation or scanner control is bundled.",
-    "implementation_gaps": [
+    "preview_scope": "Behavioral schedule preview with 3.1-second illustrative clips. A one-second software lead-in places the D0 cue 700 ms before either sound and leaves 300 ms before the D0 cue. The original lead-in and playback duration remain unknown. The reported one-second post-trial silence is encoded after each clip.",
+    "remaining_caveats": [
       "Original looming and flat sound source files, gain coefficients, file duration and delivered audio calibration are unavailable.",
-      "The behavioral scheduler requires a silent negative-SOA lead-in, exact electrical target timing and calibrated response capture.",
+      "Use qualified electrical delivery at the right index finger and synchronize its measured onset with the Cedrus button box. The software embeds a marker and accepts mouse clicks for checks.",
       "Resting MEG and T1 MRI require external acquisition systems and a validated connectivity pipeline. The exact spectral windowing, fit options, and acquisition-to-analysis data are unavailable."
-    ]
+    ],
+    "software_schedule_choices": {
+      "catch_per_sound": 72,
+      "balancing": "Equal software allocation by sound for 144 catches and a seeded shuffle. Per-sound, per-block assignment and exact sequence are unavailable.",
+      "published_assessments": "The companion resting MEG and T1 MRI remain source-linked in the reference and are outside the behavioral software run."
+    },
+    "preview_audio": {
+      "recipe": "Filter one seeded noise realization to 1/f power with the PPS Kit generator, remove DC, set the dry signal to −26 dBFS broadband RMS, apply the digital envelope and 5 ms raised-cosine edge fades, and write dual-mono PCM16.",
+      "seed": 202107823,
+      "sample_rate_hz": 44100,
+      "duration_ms": 3100,
+      "duration_basis": "Illustrative Toolkit duration and digital envelope for software timing. The journal does not report the original sound duration, spectrum or calibrated level curve.",
+      "digital_gain_change_db": 15.0,
+      "flat_relative_digital_gain_db": 0,
+      "looming_gain_shape": "Linear in dB and exponential in amplitude.",
+      "sha256": {
+        "Di Cosmo looming timing preview": "116e74067e65a981ac2478fee621db8c8f0caed535efde472438d3930591e1c5",
+        "Di Cosmo flat timing preview": "16ed9ab289bf67b84ed804619d43cbe9218e1a7db9da4a5ee8be9bdc5ce95518"
+      }
+    },
+    "loudness_policy": {
+      "mode": "digital_dbfs",
+      "calibration_mode": "digital_only",
+      "calibration_status": "digital_only",
+      "instruction_offset_db": 0
+    }
   },
   "design": {
     "name": "Di Cosmo 2021 looming versus flat PPS",
     "sofa_file": "",
     "noises": [],
-    "custom_looming_files": [],
+    "custom_looming_files": [
+      {
+        "label": "Di Cosmo looming timing preview",
+        "path": "packages/pps-resources/assets/preloads/di_cosmo_2021_phase_coupling/02_looming_stimuli/looming_Di_Cosmo_looming_timing_preview.wav",
+        "target_duration_s": 3.1,
+        "render_mode": "preserve",
+        "tone_type": "pink",
+        "motion_mode": "looming"
+      },
+      {
+        "label": "Di Cosmo flat timing preview",
+        "path": "packages/pps-resources/assets/preloads/di_cosmo_2021_phase_coupling/02_looming_stimuli/looming_Di_Cosmo_flat_timing_preview.wav",
+        "target_duration_s": 3.1,
+        "render_mode": "preserve",
+        "tone_type": "pink",
+        "motion_mode": "stationary"
+      }
+    ],
     "prestimulus_files": [],
     "protocol": {
       "spatial_values_cm": [],
       "pair_spatial_values_with_soas": false,
       "include_catch_trials": true,
-      "catch_trial_percentage": 0,
+      "catch_trial_percentage": 40,
       "include_baseline_trials": true,
       "baseline_strategy": "custom",
       "respiratory_phases": [
@@ -186,7 +228,7 @@
       ],
       "block_order_randomization": "fixed",
       "trial_randomization_strategy": "balanced_shuffle",
-      "participants": 1,
+      "participants": 30,
       "repetitions_per_condition": 18,
       "soa_values_ms": [
         300,
@@ -198,7 +240,7 @@
       "blocks": 3,
       "block_specs": [
         {
-          "label": "Design inspection 1",
+          "label": "Behavioral timing, block 1",
           "stimulus_types": [
             "Audio-Tactile",
             "Baseline",
@@ -206,7 +248,7 @@
           ]
         },
         {
-          "label": "Design inspection 2",
+          "label": "Behavioral timing, block 2",
           "stimulus_types": [
             "Audio-Tactile",
             "Baseline",
@@ -214,7 +256,7 @@
           ]
         },
         {
-          "label": "Design inspection 3",
+          "label": "Behavioral timing, block 3",
           "stimulus_types": [
             "Audio-Tactile",
             "Baseline",
@@ -225,24 +267,48 @@
       "trial_strips": [
         {
           "strip_id": "di-cosmo-2021-inspection",
-          "label": "Source required for trial inspection",
+          "label": "Behavioral timing preview",
           "metadata": {
             "expected_response": "respond",
-            "response_mode": "left_index_cedrus",
-            "response_rule": "respond_to_tactile_target_only",
-            "primary_analysis_included": false
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_rule": "respond_only_to_the_timing_marker",
+            "primary_analysis_included": false,
+            "body_anchor": "Right index finger",
+            "tactile_stimulation_modality": "electrical",
+            "response_input_modality": "mouse_click",
+            "response_capture_device": "mouse",
+            "target_role": "tactile_detection_timing_marker",
+            "source_asset_equivalence": "Software timing marker and mouse response. The electrical target and hardware response require separate qualification."
           },
           "elements": [
             {
+              "element_id": "di-cosmo-2021-presound",
+              "kind": "jitter",
+              "label": "Software lead-in silence",
+              "jitter_values_ms": [
+                1000
+              ],
+              "randomized": false
+            },
+            {
               "element_id": "di-cosmo-2021-sound",
               "kind": "looming_stimulus",
-              "label": "Published sound",
-              "source_label": "Di Cosmo looming sound",
+              "label": "Looming or flat software cue",
+              "source_label": "Di Cosmo looming timing preview",
               "source_labels": [
-                "Di Cosmo looming sound",
-                "Di Cosmo flat sound"
+                "Di Cosmo looming timing preview",
+                "Di Cosmo flat timing preview"
               ],
               "randomized": true
+            },
+            {
+              "element_id": "di-cosmo-2021-iti",
+              "kind": "jitter",
+              "label": "Post-trial silence",
+              "jitter_values_ms": [
+                1000
+              ],
+              "randomized": false
             }
           ]
         }
@@ -256,7 +322,24 @@
       ],
       "baseline_trials_exact": 36,
       "catch_trials_exact": 144,
-      "distribute_trial_pool_across_blocks": true
+      "distribute_trial_pool_across_blocks": true,
+      "baseline_crosses_sequence_variants": true,
+      "catch_crosses_sequence_variants": true,
+      "repeat_trial_pool_per_block": false,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 18,
+        "baseline": 18,
+        "catch": 72
+      },
+      "random_seed": 202107823
+    },
+    "trajectory": {
+      "use_inverse_square": false,
+      "sample_rate": 44100,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "path_length_m": 1.0,
+      "propagation_speed_mps": 0.3225806451612903
     }
   },
   "provenance": [

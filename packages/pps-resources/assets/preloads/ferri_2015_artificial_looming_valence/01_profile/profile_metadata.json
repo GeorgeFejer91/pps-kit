@@ -6,7 +6,7 @@
   "doi": "10.1016/j.neuropsychologia.2015.03.001",
   "source_url": "https://discovery.ucl.ac.uk/id/eprint/1464805/",
   "verification_status": "partial",
-  "notes": "Experiment 1 specification and schedule preview. The bundled artificial sounds implement the reported noise colors and 15 dB relative intensity increase in digital audio. Original band-power matching, headphone calibration and electrical touch delivery remain laboratory requirements.",
+  "notes": "Run a 416-trial timing preview with generated white and brown noise, then use the original two-block procedure, calibrated headphones and qualified electrical delivery for participant research.",
   "reference_parameters": {
     "study_row_id": "doi:10.1016/j.neuropsychologia.2015.03.001::a",
     "profile_type": "audio_tactile_looming_valence",
@@ -16,14 +16,8 @@
       "16 repetitions per sound and tactile time across 2 blocks, with 64 sound-present catch trials.",
       "Neutral white and negative brown auditory previews with a shared 15 dB relative rising envelope."
     ],
-    "implementation_gaps": [
-      "Exact original white and brown WAV files, the 2700\u20133150 Hz power-matching implementation and Sound Forge intensity envelopes.",
-      "A clinically governed, calibrated external electrical target scheduler for the Digitimer DS7A. The original MATLAB/Cogent task and button acquisition hardware are required to verify delivery and response timing.",
-      "Absolute acoustic output calibration for the study headphones, original hardware and corresponding ear-level measurement.",
-      "Original trial order, per-sound catch quotas and per-block balancing constraints."
-    ],
     "experiment": 1,
-    "profile_check_complete": false,
+    "profile_check_complete": true,
     "reported_auditory": {
       "sources": [
         {
@@ -139,7 +133,9 @@
       "schedule": "Seeded balanced shuffle for replay. The original paper specifies randomized trial order. It gives aggregate catch and block counts.",
       "geometry": "Delay is the independent stimulus coordinate. The renderer's trajectory fields only provide a three-second scaffold; study distances are unspecified.",
       "acoustic_preview": "The bundled 3-second sources use the reported noise colors and a shared amplitude envelope that rises by 15 dB. Their broadband digital RMS reference and edge fades are preview choices. This preview does not implement the original 2700\u20133150 Hz power matching, absolute acoustic level calibration or valence validation.",
-      "tactile_and_response_preview": "The toolkit places a cue on the third channel, withholds it on sound-only catches, and uses mouse clicks as the software response. The lab procedure requires calibrated electrical stimulation and left-index button capture."
+      "tactile_and_response_preview": "The toolkit places a cue on the third channel, withholds it on sound-only catches, and uses mouse clicks as the software response. The lab procedure requires calibrated electrical stimulation and left-index button capture.",
+      "software_block_partition": "Four 104-trial blocks keep the software block WAVs within the existing working-memory limit. The publication's two-block procedure remains required for research.",
+      "software_catch_allocation": "32 catches per sound is a balanced software choice. The study provides only the 64-trial total."
     },
     "preview_audio": {
       "synthesis": "Use the PPS Kit seeded white and cumulative-sum brown noise generator, remove the mean, normalize each dry waveform to \u221226 dBFS broadband RMS, apply the relative gain curve and 5 ms sine-squared edge fades, and encode as dual-mono PCM16.",
@@ -157,6 +153,19 @@
         "Neutral artificial white noise": "92fb1aa1eeed2e95804ccaa89a7bcad7f5ee933553fd5a08b3fbdb27a4777151",
         "Negative artificial brown noise": "07463ecc748133d8d50415e72c767d790796569f6f7fe7897184e075e7fe8933"
       }
+    },
+    "remaining_caveats": [
+      "Exact original white and brown WAV files, the 2700\u20133150 Hz power-matching implementation and Sound Forge intensity envelopes.",
+      "A clinically governed, calibrated external electrical target scheduler for the Digitimer DS7A. The original MATLAB/Cogent task and button acquisition hardware are required to verify delivery and response timing.",
+      "Absolute acoustic output calibration for the study headphones, original hardware and corresponding ear-level measurement.",
+      "Original trial order, per-sound catch quotas and per-block balancing constraints."
+    ],
+    "profile_scope": "Software assessment timing and digital-envelope playback. Four 104-trial software blocks fit the current audio assembly memory limit. The study used two 208-trial blocks.",
+    "loudness_policy": {
+      "mode": "digital_dbfs",
+      "calibration_mode": "digital_only",
+      "calibration_status": "digital_only",
+      "instruction_offset_db": 0
     }
   },
   "provenance": [

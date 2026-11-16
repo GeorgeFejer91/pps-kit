@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1007/s00221-017-5158-2",
   "doi": "10.1007/s00221-017-5158-2",
   "verification_status": "partial",
-  "notes": "Source-backed sample schedule. Generated audio, calibrated tactile delivery and original response acquisition affect replication fidelity.",
+  "notes": "The 240-trial software assessment preserves the published left and right sound paths and target timings at the right index finger. It uses generated pink noise, a digital tactile waveform and a mouse response. Calibrate delivery and run the study's practice and perceived-distance check before a participant session.",
   "reference_parameters": {
     "study_row_id": "doi:10.1007/s00221-017-5158-2",
     "profile_type": "lateral_looming_audio_tactile_pps",
@@ -90,16 +90,18 @@
       "timing": "Two balanced post-sound interval endpoints and five repeats per delay, path and endpoint realize ten per delay and path. The actual jitter distribution and block composition are unreported.",
       "response": "Mouse press proxy. Calibrated physical tactile delivery and response capture require separate verification."
     },
-    "implementation_gaps": [
-      "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable.",
-      "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration.",
-      "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported."
-    ],
     "reported_cohort": {
       "analyzed": 28,
       "total_recruited_across_groups": 56
     },
-    "handedness_screening": "FLANDERS. The non-dominant index contacts the trunk midline; respond with the dominant index."
+    "handedness_screening": "FLANDERS. The non-dominant index contacts the trunk midline; respond with the dominant index.",
+    "protocol_locator": "Experimental Brain Research 236:609–618, pp. 611–612, Design and procedure and Fig. 1",
+    "profile_check_complete": true,
+    "remaining_caveats": [
+      "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable.",
+      "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration.",
+      "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported."
+    ]
   },
   "design": {
     "name": "Hobeika 2018 lateral PPS — left-handed cohort",

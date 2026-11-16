@@ -34,9 +34,9 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 80
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 22,
-        "covered_blocked_missing_publication_parameters": 8,
-        "covered_blocked_toolkit_structure": 43,
+        "covered_runnable_profile": 28,
+        "covered_blocked_missing_publication_parameters": 4,
+        "covered_blocked_toolkit_structure": 41,
         "not_yet_templated_requires_toolkit_structure": 0,
         "not_yet_templated_missing_publication_parameters": 3,
         "candidate_needs_full_text_task_audit": 0,
@@ -45,8 +45,8 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 203
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 30
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 28
+    ) == 45
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 43
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == len(
         status["categories"]["toolkit_structural_gap"]
@@ -420,7 +420,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 28
+    assert len(published_ready) == 43
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -751,19 +751,15 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["looming_duration_2025"]["coverage_category"] == "covered_runnable_profile"
     assert records["looming_duration_2025"]["blocking_constraint_ids"] == []
     assert "hardware calibration" in records["looming_duration_2025"]["source_notes"]
-    assert records["hobeika_2020_methods"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
-    assert records["hobeika_2020_methods"]["blocking_constraint_ids"] == [
-        "exact_audio_envelope_or_gain_files",
-        "hrtf_database_or_binaural_engine_mismatch",
-    ]
+    assert records["hobeika_2020_methods"]["coverage_category"] == "covered_runnable_profile"
+    assert records["hobeika_2020_methods"]["blocking_constraint_ids"] == []
+    assert "original acoustics" in records["hobeika_2020_methods"]["source_notes"]
     assert records["spadone_2021_connectivity"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert "study_specific_physical_apparatus" in records["spadone_2021_connectivity"]["blocking_constraint_ids"]
     assert len(records["spadone_2021_connectivity"]["current_template_ids"]) == 2
-    assert records["hobeika_2018_anisotropy"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
-    assert records["hobeika_2018_anisotropy"]["blocking_constraint_ids"] == [
-        "hrtf_database_or_binaural_engine_mismatch",
-        "exact_audio_envelope_or_gain_files",
-    ]
+    assert records["hobeika_2018_anisotropy"]["coverage_category"] == "covered_runnable_profile"
+    assert records["hobeika_2018_anisotropy"]["blocking_constraint_ids"] == []
+    assert "physical verification" in records["hobeika_2018_anisotropy"]["source_notes"]
     assert records["lamia_2026_arm_movement"]["can_recreate_audiotactile_components_now"] is True
     assert records["serino_2015_peri_trunk_exp1"]["coverage_category"] == "covered_runnable_profile"
     assert records["serino_2015_peri_trunk_exp1"]["can_recreate_audiotactile_components_now"] is True
@@ -892,24 +888,19 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "bassolino_2010_mouse_use",
         "holmes_2020_four_experiments",
         "serino_2007_blind_cane_users",
-        "teneggi_2013_social_face",
     }
     assert {
         record["record_id"]
         for record in records.values()
         if "electrical_tactile_calibration" in record["blocking_constraint_ids"]
     } == {
-        "di_cosmo_2021_phase_coupling",
         "ferroni_2020_schizotypy",
         "mindfulness_pps_2024",
         "murray_2005_grabbing_your_ear",
         "schizophrenia_tool_use_2022",
         "zampini_2005_audiotactile_toj",
         "serino_2007_blind_cane_users",
-        "teneggi_2013_social_face",
-        "ardizzi_ferri_2018_interoceptive",
         "bassolino_2010_mouse_use",
-        "ferri_2015_artificial_valence",
         "ferri_2015_ecological_valence",
     }
     assert {

@@ -6,7 +6,7 @@
   "doi": "10.31234/osf.io/t8h6a",
   "source_url": "https://doi.org/10.31234/osf.io/t8h6a",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Preview the timing illustrated in the preprint appendix. The appendix\u2019s cohort attribution and actual allocation remain unresolved.",
   "reference_parameters": {
     "study_row_id": "doi:10.31234/osf.io/t8h6a",
     "publication_status": "preprint",
@@ -221,7 +221,17 @@
       "Determine which appendix timing and count values were used for the depersonalisation cohort. Verify the block and baseline/catch allocation against original source logs.",
       "Recover the source audio, dual-speaker calibration and tactile trigger/response timing. A single procedural looming cue would alter the task."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "software_preview_allocation": {
+      "paired_rows_per_block": 10,
+      "catch_rows_per_block": 2,
+      "silent_tactile_rows_per_block": 1,
+      "example_blocks": 2,
+      "actual_allocation": null,
+      "pre_audio_reference_delay_ms": 1000,
+      "foreperiod_scope": "Toolkit offset for the silent D0 example; original trial start to nominal audio is unreported."
+    },
+    "preview_source": "Reuse Ardizzi\u2013Ferri synthetic 3 s looming and flat files as two digital examples. Original gain and calibration are unavailable.",
+    "preview_scope": "Timing exemplars only. Per example block: ten paired sound-by-delay rows, two sound-only catches and one silent D0 row. The toolkit sets these demonstration counts."
   },
   "provenance": [
     {

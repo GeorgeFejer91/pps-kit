@@ -1,7 +1,7 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "bassolino_2022_chronic_stroke_pps",
-  "repetitions_per_condition": 1,
+  "repetitions_per_condition": 20,
   "soa_values_ms": [
     300,
     1500,
@@ -9,7 +9,50 @@
   ],
   "spatial_values_cm": [],
   "custom_clip_assets": [],
-  "trial_strips": [],
+  "trial_strips": [
+    {
+      "strip_id": "bassolino-2022-chronic-stroke-hand-pps",
+      "label": "Hand PPS pool",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "body_anchor": "dorsum of tested hand",
+        "target_role": "tactile_detection",
+        "response_mode": "foot_pedal_mouse_click_proxy",
+        "response_input_modality": "mouse_click",
+        "response_capture_device": "mouse",
+        "tactile_stimulation_modality": "mechanical",
+        "source_asset_equivalence": "generated white-noise headphone proxy"
+      },
+      "elements": [
+        {
+          "element_id": "bassolino-2022-audio",
+          "kind": "looming_stimulus",
+          "label": "3 s approach proxy",
+          "source_label": "3 s broadband approach proxy",
+          "source_labels": [
+            "3 s broadband approach proxy"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "bassolino-2022-isi",
+          "kind": "jitter",
+          "label": "Software interval (published middle value)",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            750
+          ],
+          "randomized": false
+        }
+      ]
+    }
+  ],
   "prestimulus_files": [],
-  "preview_trial_count": 0
+  "preview_trial_count": 110
 }

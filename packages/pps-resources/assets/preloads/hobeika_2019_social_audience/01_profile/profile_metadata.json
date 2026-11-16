@@ -6,7 +6,7 @@
   "doi": "10.1098/rsos.181878",
   "source_url": "https://doi.org/10.1098/rsos.181878",
   "verification_status": "partial",
-  "notes": "Source-backed sample schedule. Generated audio, calibrated tactile delivery and original response acquisition affect replication fidelity.",
+  "notes": "The 480-trial software assessment runs one response stream through the isolated and passive-audience conditions. The operator seats a passive partner during the audience blocks and removes the partner during the isolated blocks. The rendered audio, touch cue and mouse response require laboratory validation.",
   "reference_parameters": {
     "study_row_id": "doi:10.1098/rsos.181878::c",
     "profile_type": "lateral_looming_audio_tactile_pps",
@@ -90,12 +90,6 @@
       "timing": "Two repeats per cell in each of five blocks yield ten repeats per context and side\u2013delay cell. The preview uses a fixed 3000 ms after sound offset and equal catch allocation by side. The exact reported jitter sampling and realized within-block composition are unknown.",
       "response": "Mouse press proxy. Calibrated physical tactile delivery and response capture require separate verification."
     },
-    "implementation_gaps": [
-      "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable.",
-      "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration.",
-      "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported.",
-      "The original social response capture procedure requires a trained operator and a second person who remains still as the passive audience. The preview controls one participant."
-    ],
     "reported_cohort": {
       "recruited": 28,
       "analyzed": 26
@@ -109,7 +103,15 @@
       "instruction": "One participant performs the task. The other is asked to remain still and inactive.",
       "order": "Counterbalance isolated and dyad context across participants.",
       "preview_operator_action": "The Toolkit stages two groups of five blocks and counterbalances their order. The operator changes the social context. Exact original block-to-context allocation is unreported."
-    }
+    },
+    "protocol_locator": "Royal Society Open Science 6:181878, \u00a7\u00a72.1\u20132.4 and 3.3, Figs. 1 and 4",
+    "profile_check_complete": true,
+    "remaining_caveats": [
+      "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable.",
+      "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration.",
+      "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported.",
+      "The original social response capture procedure requires a trained operator and a second person who remains still as the passive audience. The preview controls one participant."
+    ]
   },
   "provenance": [
     {

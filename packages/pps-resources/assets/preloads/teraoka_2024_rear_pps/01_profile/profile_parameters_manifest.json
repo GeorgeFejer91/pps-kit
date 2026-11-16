@@ -55,7 +55,7 @@
           {
             "parameter": "profile_gap",
             "status": "missing_publication_parameter",
-            "reason": "The start tone is an unbundled input. Exact cue gain and probe files, channel gains, calibration and original Octave/Playrec routines are unavailable."
+            "reason": "The bundled digital 1 kHz start tone is a synthesized timing cue. Original cue and probe files, speaker gains, calibrated sound levels and the Octave/Playrec routines are unavailable."
           }
         ]
       },
@@ -128,7 +128,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 20,
+      "value": 21,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -302,8 +302,8 @@
       "segment_label": "Segment 1 source/stimulus assets",
       "parameter": "profile_gap",
       "status": "missing_publication_parameter",
-      "value": "The start tone is an unbundled input. Exact cue gain and probe files, channel gains, calibration and original Octave/Playrec routines are unavailable.",
-      "note": "The start tone is an unbundled input. Exact cue gain and probe files, channel gains, calibration and original Octave/Playrec routines are unavailable."
+      "value": "The bundled digital 1 kHz start tone is a synthesized timing cue. Original cue and probe files, speaker gains, calibrated sound levels and the Octave/Playrec routines are unavailable.",
+      "note": "The bundled digital 1 kHz start tone is a synthesized timing cue. Original cue and probe files, speaker gains, calibrated sound levels and the Octave/Playrec routines are unavailable."
     },
     {
       "segment": "3",
@@ -320,14 +320,6 @@
       "status": "missing_publication_parameter",
       "value": "Exact intertrial interval sampling, between-direction order, keypad key and online response deadline are unreported. The original auditory estimation and familiarization schedules are outside the inspection.",
       "note": "Exact intertrial interval sampling, between-direction order, keypad key and online response deadline are unreported. The original auditory estimation and familiarization schedules are outside the inspection."
-    },
-    {
-      "segment": "6",
-      "segment_label": "Segment 6 run setup settings",
-      "parameter": "current_design_validation",
-      "status": "missing_publication_parameter",
-      "value": "",
-      "note": "Trial-start 1 kHz tone file was not found: teraoka_2024_trial_start_1000hz_500ms.wav"
     }
   ],
   "missing_publication_parameters": [
@@ -339,7 +331,7 @@
     {
       "segment": "1",
       "parameter": "profile_gap",
-      "reason": "The start tone is an unbundled input. Exact cue gain and probe files, channel gains, calibration and original Octave/Playrec routines are unavailable."
+      "reason": "The bundled digital 1 kHz start tone is a synthesized timing cue. Original cue and probe files, speaker gains, calibrated sound levels and the Octave/Playrec routines are unavailable."
     },
     {
       "segment": "3",
@@ -350,11 +342,6 @@
       "segment": "2",
       "parameter": "profile_gap",
       "reason": "Exact intertrial interval sampling, between-direction order, keypad key and online response deadline are unreported. The original auditory estimation and familiarization schedules are outside the inspection."
-    },
-    {
-      "segment": "6",
-      "parameter": "current_design_validation",
-      "reason": "Trial-start 1 kHz tone file was not found: teraoka_2024_trial_start_1000hz_500ms.wav"
     }
   ],
   "unsupported_toolkit_structures": [
@@ -413,6 +400,10 @@
     {
       "field": "Auxiliary procedures and baseline-subtraction analysis",
       "source": "https://doi.org/10.1007/s00221-024-06782-2, pp. 800\u2013801, Auditory distance perception task, Speed estimation task and Data analysis. Publisher Supplementary Information, Fig. S2, baseline and raw response times."
+    },
+    {
+      "field": "Bundled trial-start cue",
+      "source": "Teraoka et al. 2024, p. 800, Procedure. PPS Kit generated a 1 kHz stereo sine for 500 ms at a digital peak of 0.1 full scale for timing inspection."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

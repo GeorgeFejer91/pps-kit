@@ -1,16 +1,16 @@
 {
   "template_id": "serino_2015_peri_hand_posture_exp5",
-  "title": "Serino 2015 · Experiment 5, hand posture",
+  "title": "Serino 2015 · Hand posture software assessment",
   "citation": "Serino et al. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
   "source_url": "https://doi.org/10.1038/srep18603",
   "doi": "10.1038/srep18603",
   "verification_status": "partial",
-  "notes": "The reference preview schedules the published event count and spatial probes. Hand positions are set by the operator. The acoustic and tactile envelopes, delivered timing and input hardware still require source matching.",
+  "notes": "Software assessment of Experiment 5. Runs both hand-posture conditions with 432 scheduled trials, continuous synthetic pink noise, a software tactile cue and mouse-click responses. Replication requires the original hand placements and two-speaker stimulus, calibrated hand vibration, and measured gamepad timing.",
   "reference_parameters": {
     "study_row_id": "doi:10.1038/srep18603::e",
     "publication_status": "published",
-    "profile_type": "published_method_inspection",
-    "profile_check_complete": false,
+    "profile_type": "audio_tactile_hand_posture",
+    "profile_check_complete": true,
     "published_method": {
       "tactile_sites": [
         "Right hand dorsum"
@@ -48,8 +48,21 @@
           4318
         ],
         "reason": "Offsets derived from the 22 cm/s nominal motion over the published spatial probe grid (near branch of the existing renderer).",
-        "design_defaults": "Two equal posture pools with one preview block each. The true block allocation and realized order are unknown.",
-        "source": "Synthetic pink noise on the same virtual approach path for both postures. No hand coordinates or anatomical motion are inferred."
+        "design_defaults": "Use two consecutive 108-trial software blocks per posture (216 per posture) to keep each generated block within the runner’s working-memory limit. The published task compares the postures within participants. The original block splits and realized order are unknown.",
+        "source": "Continuous synthetic pink noise on the same virtual approach path for both postures. No hand coordinates or anatomical motion are inferred.",
+        "tactile_and_response": "The toolkit renders the standard 100 ms cue on the tactile channel and records mouse clicks. Each source clip holds its final virtual position for 100 ms so the latest tactile cue can complete before the intertrial gap.",
+        "intertrial_interval": {
+          "published_range_ms": [
+            500,
+            700
+          ],
+          "scheduled_software_values_ms": [
+            500,
+            700
+          ],
+          "allocation": "Paired cells and endpoint baselines cross both fixed gaps with equal repeats. The realized duration stream and complete block order are software choices.",
+          "source": "Article p. 13, Design and Analysis"
+        }
       }
     },
     "publication_parameters": {
@@ -140,15 +153,15 @@
           "gap": "Experiment-specific blocks and randomization are recorded when explicitly reported. Exact randomization seeds unknown."
         },
         "iti_jitter_policy": {
-          "status": "reported",
+          "status": "reported_with_caveat",
           "value": {
-            "iti_ms": [
+            "shuffled_range_ms": [
               500,
               700
-            ],
-            "policy": "randomly shuffled; distribution unspecified"
+            ]
           },
-          "source": "Article pp. 12–13, Design and Analysis"
+          "source": "Article p. 13, Design and Analysis",
+          "gap": "The original values, draw distribution and realized order are unreported."
         },
         "response_window": {
           "status": "not_reported_after_review",
@@ -249,10 +262,12 @@
         }
       }
     },
-    "implementation_gaps": [
+    "remaining_caveats": [
       "The source gives the spatial probe grid and nominal velocity. Original trigger offsets, propagation delays and position-specific sound envelopes are unavailable.",
       "The delivered vibrotactile waveform, actuator acceleration and synchronized gamepad latency require calibration. The 100 ms pulse is the motor command duration.",
-      "Exact target-hand coordinates relative to the physical loudspeaker array are unreported."
+      "Exact target-hand coordinates relative to the physical loudspeaker array are unreported.",
+      "The published intertrial interval is shuffled between 500 and 700 ms. This software assessment balances the two endpoints, then shuffles trial rows with the stored seed. The study’s exact duration draws, posture-block order and response deadline are unreported.",
+      "The operator must set the original physical hand postures and verify acoustic geometry, tactile output and the response device before collecting research data."
     ]
   },
   "design": {
@@ -264,7 +279,8 @@
         "noise_type": "pink",
         "azimuth_deg": 0.0,
         "elevation_deg": 0.0,
-        "gain": 1.0
+        "gain": 1.0,
+        "source_profile": "continuous_noise"
       }
     ],
     "custom_looming_files": [],
@@ -286,7 +302,7 @@
       "azimuth_end_deg": 0.0,
       "elevation_deg": 0.0,
       "padding_pre_s": 0.0,
-      "padding_post_s": 0.0,
+      "padding_post_s": 0.1,
       "sample_rate": 44100,
       "use_inverse_square": true
     },
@@ -326,19 +342,37 @@
                 "Hand-posture reference approach"
               ],
               "randomized": true
+            },
+            {
+              "element_id": "serino-hand-posture-gap",
+              "kind": "jitter",
+              "label": "Intertrial silence",
+              "jitter_values_ms": [
+                500,
+                700
+              ],
+              "randomized": true
             }
-          ]
+          ],
+          "metadata": {
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_input_modality": "mouse_click",
+            "response_capture_device": "mouse",
+            "body_anchor": "Right hand dorsum",
+            "body_part": "hand",
+            "body_side": "right"
+          }
         }
       ],
       "tactile_sites": [
         "Right hand dorsum"
       ],
-      "repetitions_per_condition": 24,
+      "repetitions_per_condition": 6,
       "pair_spatial_values_with_soas": true,
       "auditory_motion_directions": [
         "looming"
       ],
-      "catch_trials_exact": 24,
+      "catch_trials_exact": 12,
       "baseline_soa_values_ms": [
         0,
         4318
@@ -346,17 +380,17 @@
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 2,
+      "blocks": 4,
       "trial_randomization_strategy": "no_immediate_repeats",
       "block_order_randomization": "fixed",
       "max_consecutive_same_trial_type": 2,
       "participants": 19,
       "random_seed": 20151225,
-      "baseline_trials_exact": 48,
+      "baseline_trials_exact": 24,
       "repeat_trial_pool_per_block": true,
       "block_specs": [
         {
-          "label": "Hand near trunk",
+          "label": "Hand near trunk 1",
           "stimulus_types": [
             "Audio-Tactile",
             "Baseline",
@@ -364,14 +398,32 @@
           ]
         },
         {
-          "label": "Hand far trunk",
+          "label": "Hand near trunk 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Hand far trunk 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Hand far trunk 2",
           "stimulus_types": [
             "Audio-Tactile",
             "Baseline",
             "Catch"
           ]
         }
-      ]
+      ],
+      "baseline_crosses_sequence_variants": true,
+      "catch_crosses_sequence_variants": true
     }
   },
   "provenance": [

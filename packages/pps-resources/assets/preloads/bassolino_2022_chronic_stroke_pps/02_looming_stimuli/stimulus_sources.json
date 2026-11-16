@@ -1,5 +1,49 @@
 {
   "schema": "pps-preload-stimulus-sources.v1",
   "template_id": "bassolino_2022_chronic_stroke_pps",
-  "assets": []
+  "assets": [
+    {
+      "label": "3 s broadband approach proxy",
+      "path": "assets/preloads/bassolino_2022_chronic_stroke_pps/02_looming_stimuli/looming_3_s_broadband_approach_proxy.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/bassolino_2022_chronic_stroke_pps/02_looming_stimuli/looming_3_s_broadband_approach_proxy.wav",
+      "sha256": "7510a555ad4d3de84c392b0d16efa156b73cd46a8e830859ae5162f307b7faa1",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "3 s broadband approach proxy",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 105.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
 }

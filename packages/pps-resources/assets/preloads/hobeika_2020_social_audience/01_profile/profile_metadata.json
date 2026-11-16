@@ -6,12 +6,12 @@
   "doi": "10.1250/ast.41.345",
   "source_url": "https://doi.org/10.1250/ast.41.345",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "The software assessment runs one response stream over 480 trials. The operator seats a passive partner during the audience blocks and leaves the chair empty during the isolated blocks. The trial budget and silent-window timing use the matched procedure in the author's thesis.",
   "reference_parameters": {
     "study_row_id": "doi:10.1250/ast.41.345::audience",
     "publication_status": "published",
-    "profile_type": "published_method_inspection",
-    "profile_check_complete": false,
+    "profile_type": "lateral_looming_audio_tactile_social_pps",
+    "profile_check_complete": true,
     "published_method": {
       "parallel_publication_doi": "10.1098/rsos.181878",
       "relationship": "The parallel Royal Society Open Science report has the same three assessments, analyzed counts and multiple statistics. Participant-level overlap is unverified.",
@@ -399,16 +399,21 @@
         }
       }
     },
-    "implementation_gaps": [
-      "Requires shared-clock coordination for two participants, routed and calibrated physical tactile and response paths, and the original audio rendering assets.",
-      "The exact per-block trial manifest, ITI draw distribution and response cutoff are unavailable. Silent-window tactile probes retain the sound sequence."
+    "remaining_caveats": [
+      "The toolkit uses generated pink noise and its binaural engine. Original bubbling-water audio, LISTEN filters, room response and calibrated headphone output are still needed for source-equivalent delivery.",
+      "The preview generates the reported 250 Hz, 20 ms waveform at a digital default and uses a mouse response. Calibrate the physical miniature loudspeaker and validate the button timing. Follow the paper's fixation and seating procedure.",
+      "The author's thesis supplies the trial allocation. The toolkit uses two balanced silence durations at the reported 2,700 and 3,300 ms endpoints. Original jitter draws, catch split and realized order are unreported."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "preview_scope": "Two counterbalanced sets of five blocks. The active participant responds to touch while the passive partner remains still. All baseline trials keep their sound and place touch outside that sound window."
   },
   "provenance": [
     {
       "field": "Study design and execution parameters",
       "source": "https://doi.org/10.1250/ast.41.345. Acoustical Science and Technology p. 345, Material and methods; Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods; Acoustical Science and Technology pp. 346\u2013348, Results, Fig. 2 and Discussion; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399); Hobeika thesis Ch. 7, printed pp. 88\u201391 (PDF pp. 109\u2013112)"
+    },
+    {
+      "field": "Toolkit schedule",
+      "source": "Acoustical Science and Technology pp. 345\u2013346 and Hobeika thesis Chapter 7. Deterministic software allocation with equal auditory-only catch counts across side and silence duration."
     }
   ]
 }

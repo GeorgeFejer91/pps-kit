@@ -1,17 +1,17 @@
 {
   "schema": "pps-preload-profile-segment.v1",
   "template_id": "serino_2015_peri_hand_trunk_exp4",
-  "title": "Serino 2015 \u00b7 Experiment 4, hand by trunk",
+  "title": "Serino 2015 \u00b7 Hand and trunk software assessment",
   "citation": "Serino et al. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
   "doi": "10.1038/srep18603",
   "source_url": "https://doi.org/10.1038/srep18603",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Software assessment of Experiment 4. Runs the 480-trial pool with separately labelled hand and sternum blocks, virtual looming and receding pink noise, a single software tactile channel and mouse-click responses. The physical hand posture, two-speaker output, stimulation sites and button timing require the original apparatus and calibration.",
   "reference_parameters": {
     "study_row_id": "doi:10.1038/srep18603::d",
     "publication_status": "published",
-    "profile_type": "published_method_inspection",
-    "profile_check_complete": false,
+    "profile_type": "audio_tactile_hand_trunk",
+    "profile_check_complete": true,
     "published_method": {
       "tactile_sites": [
         "Right hand dorsum",
@@ -39,7 +39,15 @@
         "sound_only": 32,
         "total": 480
       },
-      "response": "Speeded gamepad response to tactile onset. Compare distance-dependent facilitation by stimulated site."
+      "response": "Speeded gamepad response to tactile onset. Compare distance-dependent facilitation by stimulated site.",
+      "software_assessment": {
+        "timing_reference": "Offsets are derived from nominal 22 cm/s motion between 100 and 5 cm, starting at the far endpoint for approach and at the near endpoint for recession. The physical trigger offsets are unavailable.",
+        "sound": "Two continuous synthetic pink-noise clips use the same virtual frontal path with reversed direction. Each clip holds its final virtual position for 100 ms so the last tactile cue can complete.",
+        "tactile_and_response": "The same 100 ms software tactile cue and mouse response are used in both site conditions. The block label records which site is intended. The software does not switch an actuator or verify body placement.",
+        "block_allocation": "Four 120-trial software blocks, two for each tactile site. Each block includes 96 paired, 16 tactile-only and 8 sound-only trials.",
+        "intervals": "The software balances 500 and 700 ms gaps within the published range, using a deterministic seed.",
+        "source": "Article pp. 5\u20136, Experiment 4 and Fig. 4A, and pp. 11\u201313, Stimuli and Apparatus and Design and Analysis."
+      }
     },
     "publication_parameters": {
       "stimulus": {
@@ -131,15 +139,15 @@
           "gap": "Exact block count and counterbalance unreported."
         },
         "iti_jitter_policy": {
-          "status": "reported",
+          "status": "reported_with_caveat",
           "value": {
-            "iti_ms": [
+            "shuffled_range_ms": [
               500,
               700
-            ],
-            "policy": "randomly shuffled; distribution unspecified"
+            ]
           },
-          "source": "Article pp. 12\u201313, Design and Analysis"
+          "source": "Article p. 13, Design and Analysis",
+          "gap": "The original values, draw distribution and realized order are unreported."
         },
         "response_window": {
           "status": "not_reported_after_review",
@@ -241,12 +249,12 @@
         }
       }
     },
-    "implementation_gaps": [
+    "remaining_caveats": [
       "The source gives the spatial probe grid and nominal velocity. Original trigger offsets, propagation delays and position-specific sound envelopes are unavailable.",
       "The delivered vibrotactile waveform, actuator acceleration and synchronized gamepad latency require calibration. The 100 ms pulse is the motor command duration.",
-      "The trial scheduler must switch the active tactile site by block and time the probe at the paper's measured sound position."
-    ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+      "Match the physical hand posture, the two fixed acoustic speakers and the motor location in each body-site block. The software target channel and mouse response require measured hardware translation before research use.",
+      "The original within-site block splits, site order, interval draws and response deadline are unreported. The software run uses four blocks, with two per site, and combines both sound directions at each site."
+    ]
   },
   "provenance": [
     {

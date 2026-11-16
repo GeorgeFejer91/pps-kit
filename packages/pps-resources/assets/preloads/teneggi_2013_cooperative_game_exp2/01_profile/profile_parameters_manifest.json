@@ -12,22 +12,22 @@
   "visible_variant_label": "A",
   "variant_display": "Teneggi 2013 \u00b7 Experiment 2, cooperative decision - Variant A",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 3,
-    "unsupported_structure_count": 2
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
+    "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
-    "passed": false,
+    "passed": true,
     "segments": [
       {
         "segment": "0",
@@ -39,43 +39,16 @@
       {
         "segment": "1",
         "segment_label": "Segment 1 source/stimulus assets",
-        "passed": false,
-        "field_count": 6,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable."
-          },
-          {
-            "parameter": "profile_gap",
-            "status": "unsupported_toolkit_structure",
-            "reason": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
-          },
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "2",
         "segment_label": "Segment 2 trial rows and sequences",
-        "passed": false,
-        "field_count": 5,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "unsupported_toolkit_structure",
-            "reason": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
-          },
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "3",
@@ -122,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 8,
+      "value": 9,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -265,77 +238,10 @@
       "status": "defaulted",
       "value": "1 part",
       "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
-    },
-    {
-      "segment": "1",
-      "segment_label": "Segment 1 source/stimulus assets",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable.",
-      "note": "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable."
-    },
-    {
-      "segment": "2",
-      "segment_label": "Segment 2 trial rows and sequences",
-      "parameter": "profile_gap",
-      "status": "unsupported_toolkit_structure",
-      "value": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration.",
-      "note": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
-    },
-    {
-      "segment": "2",
-      "segment_label": "Segment 2 trial rows and sequences",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration.",
-      "note": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
-    },
-    {
-      "segment": "1",
-      "segment_label": "Segment 1 source/stimulus assets",
-      "parameter": "profile_gap",
-      "status": "unsupported_toolkit_structure",
-      "value": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment.",
-      "note": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
-    },
-    {
-      "segment": "1",
-      "segment_label": "Segment 1 source/stimulus assets",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment.",
-      "note": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
     }
   ],
-  "missing_publication_parameters": [
-    {
-      "segment": "1",
-      "parameter": "profile_gap",
-      "reason": "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable."
-    },
-    {
-      "segment": "2",
-      "parameter": "profile_gap",
-      "reason": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
-    },
-    {
-      "segment": "1",
-      "parameter": "profile_gap",
-      "reason": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
-    }
-  ],
-  "unsupported_toolkit_structures": [
-    {
-      "segment": "2",
-      "parameter": "profile_gap",
-      "reason": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
-    },
-    {
-      "segment": "1",
-      "parameter": "profile_gap",
-      "reason": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
-    }
-  ],
+  "missing_publication_parameters": [],
+  "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
       "profile_metadata": "assets/preloads/teneggi_2013_cooperative_game_exp2/01_profile/profile_metadata.json",

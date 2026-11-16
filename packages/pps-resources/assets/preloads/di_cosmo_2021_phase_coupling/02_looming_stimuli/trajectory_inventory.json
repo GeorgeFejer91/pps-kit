@@ -1,5 +1,80 @@
 {
   "schema": "pps-preload-trajectory-inventory.v1",
   "template_id": "di_cosmo_2021_phase_coupling",
-  "trajectories": []
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Di Cosmo looming timing preview",
+        "source_kind": "imported_audio",
+        "noise_type": "pink",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.1,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "polar",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Di Cosmo looming timing preview"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/di_cosmo_2021_phase_coupling/02_looming_stimuli/looming_Di_Cosmo_looming_timing_preview.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Di Cosmo flat timing preview",
+        "source_kind": "imported_audio",
+        "noise_type": "pink",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Di Cosmo flat timing preview"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/di_cosmo_2021_phase_coupling/02_looming_stimuli/looming_Di_Cosmo_flat_timing_preview.wav"
+      ]
+    }
+  ]
 }

@@ -28,19 +28,26 @@
       "spatial_values_cm": [],
       "metadata": {
         "publication_timing_anchor": "sound_onset",
-        "delivery": "external_calibrated_electrical",
-        "response_rule": "left_index_button_press_only_for_right_index_target",
-        "profile_scope": "schedule_inspection_only"
+        "response_rule": "respond_only_to_the_timing_marker",
+        "body_anchor": "Hairy right index finger",
+        "tactile_stimulation_modality": "electrical",
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_input_modality": "mouse_click",
+        "response_capture_device": "mouse",
+        "target_role": "tactile_detection_timing_marker",
+        "expected_response": "respond",
+        "primary_analysis_included": false,
+        "source_asset_equivalence": "Software timing marker and mouse response. The electrical target and hardware response require separate qualification."
       },
       "elements": [
         {
           "element_id": "ferri-2015-itv-behavior-audio",
           "kind": "looming_stimulus",
-          "label": "Original sound required",
-          "source_label": "Looming pink noise",
+          "label": "Looming or flat software cue",
+          "source_label": "Looming pink noise preview",
           "source_labels": [
-            "Looming pink noise",
-            "Flat pink noise"
+            "Looming pink noise preview",
+            "Flat pink noise preview"
           ],
           "jitter_values_ms": [],
           "randomized": true

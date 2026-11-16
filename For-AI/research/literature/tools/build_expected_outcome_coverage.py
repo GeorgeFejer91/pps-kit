@@ -1370,8 +1370,14 @@ def build_record(
     # These assessments have run evidence. Their study-level contrasts have no retained outcome comparison.
     has_assessment_run_only = (
         record_id in {
+            "ardizzi_ferri_2018_interoceptive",
             "canzoneri_2013_tool_use_reshaping",
+            "di_cosmo_2021_phase_coupling",
+            "ferri_2015_artificial_valence",
+            "hobeika_2018_anisotropy",
+            "hobeika_2020_methods",
             "looming_duration_2025",
+            "teneggi_2013_social_face",
             "maister_2015_shared_sensory",
             "pregnancy_2018_preprint",
             "pregnancy_2019",

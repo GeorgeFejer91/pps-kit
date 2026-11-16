@@ -14,7 +14,7 @@
         "end_rotation_deg": 0.0,
         "movement_duration_s": 4.318,
         "start_hold_s": 0.0,
-        "end_hold_s": 0.0,
+        "end_hold_s": 0.1,
         "path_length_m": 0.95,
         "coordinate_mode": "cartesian",
         "path_direction": "approach",

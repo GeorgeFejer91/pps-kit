@@ -1,10 +1,10 @@
 {
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "serino_2015_peri_hand_posture_exp5",
-  "title": "Serino 2015 \u00b7 Experiment 5, hand posture",
+  "title": "Serino 2015 \u00b7 Hand posture software assessment",
   "visible_variant_label": "E",
   "publication_status": "published",
-  "profile_type": "published_method_inspection",
+  "profile_type": "audio_tactile_hand_posture",
   "asset_mode": "bundled_local",
   "retrieval_strategy": "bundled_or_download_from_github_pages",
   "local_only": true,
@@ -37,18 +37,18 @@
   ],
   "profile_parameters_manifest": "assets/preloads/serino_2015_peri_hand_posture_exp5/01_profile/profile_parameters_manifest.json",
   "recreation_status": {
-    "primary_category": "toolkit_structural_gap",
-    "category_label": "Toolkit structural gap",
-    "runner_readiness": "blocked_unsupported_toolkit_structure",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 3,
-    "unsupported_structure_count": 1
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
+    "unsupported_structure_count": 0
   },
   "render_contract": {
     "stage": "auditory_looming_prebake",
@@ -61,8 +61,8 @@
       "label": "Hand-posture reference approach",
       "path": "assets/preloads/serino_2015_peri_hand_posture_exp5/02_looming_stimuli/looming_Hand-posture_reference_approach.wav",
       "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/serino_2015_peri_hand_posture_exp5/02_looming_stimuli/looming_Hand-posture_reference_approach.wav",
-      "sha256": "aaaf239c7374a2a3334fdcb06cd3ee0275dc6d3d0604db0f4b12be1f0b47a37b",
-      "duration_s": 4.318005,
+      "sha256": "a08eda6522ee5620ab5d2f9351691341592cd41f380f306690c02079b1e17005",
+      "duration_s": 4.418005,
       "sample_rate": 44100,
       "channels": 2,
       "source_kind": "generated_noise",
@@ -83,7 +83,7 @@
         "end_rotation_deg": 0.0,
         "movement_duration_s": 4.318,
         "start_hold_s": 0.0,
-        "end_hold_s": 0.0,
+        "end_hold_s": 0.1,
         "path_length_m": 0.95,
         "coordinate_mode": "cartesian",
         "path_direction": "approach",
@@ -98,17 +98,7 @@
           "z_m": 0.0
         }
       },
-      "source_profile": "dynaspace_gaussian_burst_train",
-      "source_profile_parameters": {
-        "burst_count_mode": "duration_derived",
-        "burst_duration_s": 0.03,
-        "rise_fall_s": 0.01,
-        "target_period_s": 0.095,
-        "onset_s": 0.3,
-        "active_window_source": "trajectory_movement_duration",
-        "spacing_policy": "symmetric_fit",
-        "standard_basis": "DynaSpace/Hobeika-style Gaussian white-noise burst train: raw DynaSpace audit found 33 peaks at about 95 ms IOI for its active window. PPS-kit derives burst count and equal symmetric spacing from the configured active window so future trajectories can change duration without truncating the final burst. Consensus evidence supports broadband transients for localization/salience while 3DTI/SOFA owns binaural spatial cues."
-      }
+      "source_profile": "continuous_noise"
     }
   ],
   "notes": [

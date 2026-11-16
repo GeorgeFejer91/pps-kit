@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.31234/osf.io/t8h6a",
   "doi": "10.31234/osf.io/t8h6a",
   "verification_status": "partial",
-  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "notes": "Preview the timing illustrated in the preprint appendix. The appendix’s cohort attribution and actual allocation remain unresolved.",
   "reference_parameters": {
     "study_row_id": "doi:10.31234/osf.io/t8h6a",
     "publication_status": "preprint",
@@ -220,33 +220,155 @@
       "Determine which appendix timing and count values were used for the depersonalisation cohort. Verify the block and baseline/catch allocation against original source logs.",
       "Recover the source audio, dual-speaker calibration and tactile trigger/response timing. A single procedural looming cue would alter the task."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "software_preview_allocation": {
+      "paired_rows_per_block": 10,
+      "catch_rows_per_block": 2,
+      "silent_tactile_rows_per_block": 1,
+      "example_blocks": 2,
+      "actual_allocation": null,
+      "pre_audio_reference_delay_ms": 1000,
+      "foreperiod_scope": "Toolkit offset for the silent D0 example; original trial start to nominal audio is unreported."
+    },
+    "preview_source": "Reuse Ardizzi–Ferri synthetic 3 s looming and flat files as two digital examples. Original gain and calibration are unavailable.",
+    "preview_scope": "Timing exemplars only. Per example block: ten paired sound-by-delay rows, two sound-only catches and one silent D0 row. The toolkit sets these demonstration counts."
   },
   "design": {
     "name": "Ferroni 2023 · Depersonalisation PPS preprint",
     "sofa_file": "",
     "noises": [],
-    "custom_looming_files": [],
+    "custom_looming_files": [
+      {
+        "label": "Looming pink-noise proxy",
+        "path": "packages/pps-resources/assets/preloads/ardizzi_ferri_2018_looming_flat/02_looming_stimuli/looming_Looming_pink_noise.wav",
+        "target_duration_s": 3,
+        "render_mode": "preserve",
+        "tone_type": "pink",
+        "motion_mode": "looming"
+      },
+      {
+        "label": "Flat pink-noise proxy",
+        "path": "packages/pps-resources/assets/preloads/ardizzi_ferri_2018_looming_flat/02_looming_stimuli/looming_Flat_pink_noise.wav",
+        "target_duration_s": 3,
+        "render_mode": "preserve",
+        "tone_type": "pink",
+        "motion_mode": "stationary"
+      }
+    ],
     "prestimulus_files": [],
+    "trajectory": {
+      "path_length_m": 1,
+      "propagation_speed_mps": 0.3333333333333333,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    },
     "protocol": {
+      "repetitions_per_condition": 1,
+      "trial_pool_repetition_defaults": {
+        "default": 1
+      },
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
       "spatial_values_cm": [],
-      "soa_values_ms": [],
-      "include_catch_trials": false,
-      "catch_trial_percentage": 0,
-      "include_baseline_trials": false,
-      "baseline_trial_percentage": 0,
-      "baseline_strategy": "none",
-      "trial_strips": [],
-      "tactile_sites": [
-        "hairy dorsal right index finger"
-      ],
       "pair_spatial_values_with_soas": false,
-      "respiratory_phases": [
-        "Any"
+      "auditory_motion_directions": [
+        "looming"
       ],
-      "blocks": 1,
+      "tactile_sites": [
+        "dorsal right index finger"
+      ],
+      "include_catch_trials": true,
+      "catch_trials_exact": 2,
+      "catch_crosses_sequence_variants": true,
+      "include_baseline_trials": true,
+      "baseline_trials_exact": 1,
+      "baseline_strategy": "tactile_only",
+      "baseline_soa_values_ms": [
+        -700
+      ],
+      "baseline_crosses_sequence_variants": false,
+      "blocks": 2,
+      "repeat_trial_pool_per_block": true,
+      "block_specs": [
+        {
+          "label": "Timing example 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Timing example 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "trial_strips": [
+        {
+          "strip_id": "depersonalisation-2023-psyarxiv-pps-trial-example",
+          "label": "Looming or flat PPS trial",
+          "metadata": {
+            "expected_response": "respond",
+            "target_role": "tactile_target",
+            "response_rule": "tactile_detection_proxy",
+            "response_capture_device": "mouse (software proxy)",
+            "tactile_stimulation_modality": "electrical in the paper",
+            "body_anchor": "dorsal right index finger",
+            "electrical_stimulator_model": "Digitimer DS3",
+            "auditory_trajectory_family": "near_far_speaker_intensity_crossfade_or_flat",
+            "source_asset_equivalence": "Ardizzi–Ferri 2018 digital pink-noise preview",
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_input_modality": "mouse_click"
+          },
+          "elements": [
+            {
+              "element_id": "pre-sound-reference",
+              "kind": "jitter",
+              "label": "Inspection foreperiod",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
+            {
+              "element_id": "looming-flat-proxies",
+              "kind": "looming_stimulus",
+              "label": "Looming or flat pink-noise proxy",
+              "source_labels": [
+                "Looming pink-noise proxy",
+                "Flat pink-noise proxy"
+              ],
+              "randomized": true
+            },
+            {
+              "element_id": "post-trial-iti",
+              "kind": "jitter",
+              "label": "Post-trial interval",
+              "jitter_values_ms": [
+                1000
+              ]
+            }
+          ]
+        }
+      ],
       "participants": 1,
-      "block_order_randomization": "fixed"
+      "random_seed": 20230333,
+      "participant_order_policy": {
+        "schema": "pps-participant-order-policy.v1",
+        "algorithm": "fixed",
+        "seed": 20230333
+      }
     }
   },
   "provenance": [

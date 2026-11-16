@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1016/j.cub.2013.01.043",
   "doi": "10.1016/j.cub.2013.01.043",
   "verification_status": "partial",
-  "notes": "Experiment 1 schedule for both social conditions. Each participant receives two consecutive blocks per condition in counterbalanced order. The operator changes the mannequin or unfamiliar-person setting between condition groups. The preview uses generated audio and toolkit response and tactile proxies. The publication's equipment and calibrations are recorded as reference values.",
+  "notes": "Run the PPS assessments mannequin and unfamiliar-person contexts as four 52-trial blocks. The software uses generated auditory cues, tactile-channel markers and mouse clicks.",
   "reference_parameters": {
     "study_row_id": "doi:10.1016/j.cub.2013.01.043::a",
     "profile_type": "face_audio_tactile_social_context",
@@ -19,7 +19,10 @@
     "supplement_url": "https://ars.els-cdn.com/content/image/1-s2.0-S096098221300078X-mmc1.pdf",
     "experiment_1": {
       "participants": 18,
-      "social_conditions": ["mannequin", "unfamiliar live person"],
+      "social_conditions": [
+        "mannequin",
+        "unfamiliar live person"
+      ],
       "partner_distance_cm": 100,
       "instructions": "Maintain gaze on the face of the mannequin or unfamiliar person during the assessment.",
       "condition_order": "Counterbalanced between participants. Complete both blocks of one condition before changing the setting.",
@@ -34,19 +37,49 @@
       "pre_sound_silence_ms": 1000,
       "sound_duration_ms": 3000,
       "post_sound_silence_ms": 1000,
-      "tactile_from_sound_onset_ms": [300, 800, 1500, 2200, 2700],
-      "tactile_from_trial_start_ms": [1300, 1800, 2500, 3200, 3700],
+      "tactile_from_sound_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "tactile_from_trial_start_ms": [
+        1300,
+        1800,
+        2500,
+        3200,
+        3700
+      ],
       "ordinal_perceived_distance_by_delay": {
-        "IN": ["D1", "D2", "D3", "D4", "D5"],
-        "OUT": ["D5", "D4", "D3", "D2", "D1"]
+        "IN": [
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5"
+        ],
+        "OUT": [
+          "D5",
+          "D4",
+          "D3",
+          "D2",
+          "D1"
+        ]
       },
       "distance_definition": "D1 is farthest and D5 is closest. These are ordered perceptual bins. The study does not give metric coordinates for the five bins."
     },
     "published_apparatus": {
       "sound": "Two hidden same-height loudspeakers beside the seated participant, with the near speaker about 5 cm from the right cheek and the other about 100 cm from the near speaker. Both played the same 44.1 kHz pink-noise sample simultaneously with opposing channel gains.",
       "ear_position_spl_db": {
-        "IN": [55, 70],
-        "OUT": [70, 55]
+        "IN": [
+          55,
+          70
+        ],
+        "OUT": [
+          70,
+          55
+        ]
       },
       "sound_envelope": "Exponential rise for IN and exponential fall for OUT. Near and far gain directions were reversed for OUT.",
       "tactile": "Digitimer DS7A constant-current stimulator and Ambu Neuroline electrode pair on the right cheek. One rectangular monophasic pulse with a reported duration of 100 microseconds.",
@@ -64,12 +97,13 @@
         "profile_scope": "Requires its own trial profile. Per-assessment target repetitions and catch allocation are unreported for this variant."
       }
     },
-    "implementation_gaps": [
-      "Exact original pink-noise source and two loudspeaker gain functions are unavailable.",
-      "Exact physical response capture requires the original voice-key threshold, recording latency calibration and response cutoff.",
-      "Exact apparatus-specific tactile delivery requires a calibrated physical stimulator and timing verification.",
-      "Other-person/mannequin context must be arranged and counterbalanced by the operator.",
-      "Economic-game manipulation is a separate procedure in Experiment 2."
+    "profile_scope": "The two 104-trial PPS assessments, mannequin and unfamiliar-person contexts.",
+    "profile_check_complete": true,
+    "remaining_caveats": [
+      "Generated pink noise substitutes for the original opposing loudspeaker gains. Absolute ear-level SPL and exact waveform remain unverified.",
+      "The software uses scheduled right-cheek markers and mouse clicks. The original cheek stimulation and vocal response require synchronized and calibrated external equipment.",
+      "Set up the mannequin and unfamiliar person outside Runner and switch contexts between the two block groups. The participant-order policy provides counterbalanced software ordering.",
+      "Within each social condition the software uses eight trials per sound direction and delay and twenty-four catches. The preview splits each condition evenly across its two blocks. Actual within-block cell quotas, randomized order and physical voice-key response cutoff are unreported."
     ]
   },
   "design": {
@@ -109,8 +143,14 @@
       "use_inverse_square": false
     },
     "protocol": {
-      "repetitions_per_condition": 16,
-      "soa_values_ms": [300, 800, 1500, 2200, 2700],
+      "repetitions_per_condition": 4,
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
       "spatial_values_cm": [],
       "pair_spatial_values_with_soas": false,
       "auditory_motion_directions": [
@@ -122,7 +162,7 @@
       ],
       "include_catch_trials": true,
       "catch_trial_percentage": 23.076923076923077,
-      "catch_trials_exact": 48,
+      "catch_trials_exact": 12,
       "include_baseline_trials": false,
       "baseline_strategy": "none",
       "baseline_soa_values_ms": [],
@@ -131,21 +171,51 @@
       ],
       "blocks": 4,
       "block_specs": [
-        {"label": "Mannequin 1", "stimulus_types": ["Audio-Tactile", "Catch"]},
-        {"label": "Mannequin 2", "stimulus_types": ["Audio-Tactile", "Catch"]},
-        {"label": "Unfamiliar person 1", "stimulus_types": ["Audio-Tactile", "Catch"]},
-        {"label": "Unfamiliar person 2", "stimulus_types": ["Audio-Tactile", "Catch"]}
+        {
+          "label": "Mannequin 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Mannequin 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Unfamiliar person 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Unfamiliar person 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        }
       ],
       "participant_order_policy": {
         "schema": "pps-participant-order-policy.v1",
         "algorithm": "seeded_factoradic_cycle.v1",
         "seed": 20130304,
         "block_groups": [
-          ["Mannequin 1", "Mannequin 2"],
-          ["Unfamiliar person 1", "Unfamiliar person 2"]
+          [
+            "Mannequin 1",
+            "Mannequin 2"
+          ],
+          [
+            "Unfamiliar person 1",
+            "Unfamiliar person 2"
+          ]
         ]
       },
-      "distribute_trial_pool_across_blocks": true,
+      "distribute_trial_pool_across_blocks": false,
       "trial_randomization_strategy": "balanced_shuffle",
       "block_order_randomization": "fixed",
       "max_consecutive_same_trial_type": 2,
@@ -166,7 +236,9 @@
               "element_id": "teneggi-pre-sound-silence",
               "kind": "jitter",
               "label": "Pre-sound silence",
-              "jitter_values_ms": [1000]
+              "jitter_values_ms": [
+                1000
+              ]
             },
             {
               "element_id": "teneggi-face-moving-sound",
@@ -179,13 +251,20 @@
               "element_id": "teneggi-post-sound-silence",
               "kind": "jitter",
               "label": "Post-sound silence",
-              "jitter_values_ms": [1000]
+              "jitter_values_ms": [
+                1000
+              ]
             }
           ]
         }
       ],
       "participants": 18,
-      "random_seed": 20130304
+      "random_seed": 20130304,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 4,
+        "catch": 6
+      },
+      "repeat_trial_pool_per_block": true
     }
   },
   "provenance": [
