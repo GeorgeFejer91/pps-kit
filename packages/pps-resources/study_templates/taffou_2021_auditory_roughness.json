@@ -1,0 +1,367 @@
+{
+  "template_id": "taffou_2021_auditory_roughness",
+  "title": "Taffou 2021 rear-left auditory roughness PPS",
+  "citation": "Taffou, M., Suied, C., & Viaud-Delmon, I. (2021). Auditory roughness elicits defense reactions. Scientific Reports, 11, 956.",
+  "source_url": "https://doi.org/10.1038/s41598-020-79767-0",
+  "doi": "10.1038/s41598-020-79767-0",
+  "verification_status": "partial",
+  "notes": "The timing and block recipe requires two named, unbundled study audio files. Tbefore and Tafter are silent at touch, with a three-second looming sound on both trial types.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1038/s41598-020-79767-0",
+    "publication_status": "published",
+    "profile_type": "rear_left_audiotactile_roughness",
+    "profile_check_complete": false,
+    "reported_participants": 40,
+    "auditory_stimuli": {
+      "import_names": [
+        "Taffou non-rough harmonic study audio",
+        "Taffou rough 70 Hz AM study audio"
+      ],
+      "sample_rate_hz": 44100,
+      "duration_ms": 3000,
+      "fundamental_hz": 500,
+      "harmonics_hz": [
+        1000,
+        1500,
+        2000,
+        2500,
+        3000,
+        3500,
+        4000
+      ],
+      "relative_amplitudes": {
+        "fundamental": 1,
+        "first_overtone": 0.5,
+        "remaining_overtones_approx": 0.25
+      },
+      "rough_source_am": {
+        "frequency_hz": 70,
+        "modulation_depth": 1
+      },
+      "relative_loudness": "The authors used the Moore loudness model for matching and reported a 0.8 dB difference with the rough sound louder. Absolute SPL, exact level adjustment and rendered waveforms are unresolved.",
+      "renderer": "Max/MSP 6.1.8 with Spat, non-individual LISTEN HRTFs, direct sound, reflections through order three and late reverberation. Binaural near-field correction applied to direct sound.",
+      "headphones": "Beyerdynamic DT770",
+      "locator": "p. 2, Stimuli and Apparatus"
+    },
+    "reported_trajectory": {
+      "azimuth_deg_in_paper": 135,
+      "physical_direction": "Rear-left approach",
+      "toolkit_azimuth_deg": -135,
+      "toolkit_azimuth_conversion": "Toolkit uses negative azimuth for the left. The physical side is preserved.",
+      "anchor": "Participant’s head center",
+      "start_cm": 520,
+      "end_cm": 20,
+      "speed_cm_per_s": 166.67,
+      "probe_distance_cm_derived": [
+        520,
+        395,
+        270,
+        145,
+        20
+      ],
+      "locator": "pp. 2–4, Stimuli, Measure of PPS and Fig. 1"
+    },
+    "reported_trial_schedule": {
+      "silence_before_sound_ms": 1000,
+      "sound_duration_ms": 3000,
+      "silence_after_sound_ms_range": [
+        2700,
+        3300
+      ],
+      "post_sound_silence_sampling_rule": null,
+      "between_trial_interval_ms": null,
+      "condition_names": [
+        "Tbefore",
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "Tafter"
+      ],
+      "touch_relative_to_sound_onset_ms": [
+        -650,
+        0,
+        750,
+        1500,
+        2250,
+        3000,
+        3650
+      ],
+      "touch_relative_to_trial_start_ms_derived": [
+        350,
+        1000,
+        1750,
+        2500,
+        3250,
+        4000,
+        4650
+      ],
+      "tactile_repetitions_per_sound_and_delay": 20,
+      "paired_targets_onset_through_offset": 200,
+      "silent_at_touch_targets_with_audio_in_trial": 80,
+      "timing_at_T5": "T5 coincides with nominal sound offset.",
+      "catch_trials_audio_only": 40,
+      "total_trials": 320,
+      "blocks": 10,
+      "trials_per_block": 32,
+      "intermixing": "Tactile conditions randomly intermingled with catches and divided equally in total across ten blocks.",
+      "unknown_allocations": "Per-sound catch counts, per-block trial-type allocations, exact trial order and source seed are unspecified.",
+      "locator": "pp. 3–4, Measure of PPS and Fig. 1"
+    },
+    "tactile_target": {
+      "site": "Palmar surface of left index finger",
+      "actuator": "Veco miniature loudspeaker, 28 mm, 8 Ω",
+      "waveform": "Sinusoidal",
+      "frequency_hz": 250,
+      "duration_ms": 20,
+      "delivered_amplitude": null,
+      "contact_force": null,
+      "locator": "p. 2, Stimuli and Apparatus"
+    },
+    "response_and_analysis": {
+      "controller": "Presentation 16.3",
+      "response": "Press with the right index finger as quickly as possible when touch is detected. Ignore sound and withhold on audio-only trials.",
+      "device": "Wired Essentiel b numeric keypad",
+      "exact_key": null,
+      "online_response_deadline_ms": null,
+      "offline_RT_filter_ms": [
+        100,
+        1000
+      ],
+      "primary_measure": "Participant mean tactile RT by sound type and probe delay after excluding timing-error trials and RTs outside the stated bounds.",
+      "expectancy_adjustment": "The supplement checks slopes by sound type, then uses pooled Tbefore and Tafter data to estimate each participant’s RT trend and remove the estimated change relative to Tbefore.",
+      "locator": "pp. 2–4, Apparatus, Measure of PPS and Statistical analysis; original Supplementary Information, Fig. S2 and Tables S1–S2"
+    },
+    "implemented_controls": [
+      "Two named audio inputs and seven sound-relative tactile timings.",
+      "Sound-bearing silent-at-touch probes at −650 and 3650 ms.",
+      "Ten blocks of 32 with 200 paired targets, 80 silent-at-touch targets and 40 sound-only catches after importing both assets."
+    ],
+    "implementation_gaps": [
+      "Exact authorized rough and non-rough binaural audio files or a verified matching harmonic synthesis and Spat renderer. LISTEN subject/filter, exact source phases, loudness matching and near-field correction remain unresolved.",
+      "Calibrated actuator and scheduler for the calibrated 250 Hz fingertip probe, exact Veco drive amplitude and synchronized physical response capture.",
+      "Exact keypad mapping, online response policy and timing validation with the study’s presentation system.",
+      "Exact post-sound silence sampling, separate intertrial timing and realized randomization and catch allocations."
+    ],
+    "preview_contract": {
+      "asset_import": "Supply both authorized three-second stereo 44.1 kHz study tracks. Import with the two listed names, preserve mode, and unity gain. The Toolkit adds the surrounding silence.",
+      "tactile": "Generated Toolkit tactile output is a timing marker. Matching the reported 250 Hz and 20 ms physical pulse requires a calibrated external route.",
+      "post_sound_silence_ms": 3000,
+      "post_sound_silence_choice": "Fixed midpoint for schedule inspection. The source reports variable silence but gives no sampling rule.",
+      "allocation": "Seeded balanced blocks and equal per-sound catches are Toolkit choices. The source gives total block sizes and catch count.",
+      "distance": "The five mapped distances are derived from the source’s linear path. Distances do not apply to the two silent probes or to catches."
+    }
+  },
+  "design": {
+    "name": "Taffou 2021 rear-left auditory roughness PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 5.2,
+      "end_radius_m": 0.2,
+      "path_direction": "approach",
+      "coordinate_mode": "polar",
+      "path_length_m": 5.0,
+      "propagation_speed_mps": 1.6666666666666667,
+      "azimuth_start_deg": -135,
+      "azimuth_end_deg": -135,
+      "elevation_deg": 0,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 20,
+      "soa_values_ms": [
+        0,
+        750,
+        1500,
+        2250,
+        3000
+      ],
+      "spatial_values_cm": [
+        520,
+        395,
+        270,
+        145,
+        20
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "rear-left looming"
+      ],
+      "tactile_sites": [
+        "palmar left index finger"
+      ],
+      "include_catch_trials": true,
+      "catch_trials_exact": 40,
+      "catch_crosses_sequence_variants": true,
+      "include_baseline_trials": true,
+      "baseline_strategy": "custom",
+      "baseline_custom_trial_mode": "audio_tactile",
+      "baseline_soa_values_ms": [
+        -650,
+        3650
+      ],
+      "baseline_trials_exact": 80,
+      "baseline_crosses_sequence_variants": true,
+      "trial_strips": [
+        {
+          "strip_id": "taffou-2021-roughness",
+          "label": "Rear-left auditory roughness trial",
+          "metadata": {
+            "expected_response": "respond",
+            "target_role": "left_index_vibrotactile_target",
+            "response_mode": "numeric_keypad_press",
+            "response_rule": "respond_only_to_tactile_stimulus",
+            "response_capture_device": "Wired Essentiel b numeric keypad",
+            "response_input_modality": "right_index_keypress",
+            "tactile_stimulation_modality": "vibrotactile",
+            "spatial_hemifield": "rear-left",
+            "body_anchor": "Head center",
+            "source_asset_equivalence": "Original or author-validated audio import required."
+          },
+          "elements": [
+            {
+              "element_id": "taffou-2021-pre",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
+            {
+              "element_id": "taffou-2021-sound",
+              "kind": "looming_stimulus",
+              "label": "Study sound",
+              "source_label": "Taffou non-rough harmonic study audio",
+              "source_labels": [
+                "Taffou non-rough harmonic study audio",
+                "Taffou rough 70 Hz AM study audio"
+              ],
+              "randomized": true
+            },
+            {
+              "element_id": "taffou-2021-post",
+              "kind": "jitter",
+              "label": "Post-sound silence (preview midpoint)",
+              "jitter_values_ms": [
+                3000
+              ]
+            }
+          ]
+        }
+      ],
+      "respiratory_phases": [
+        "PPS assessment"
+      ],
+      "blocks": 10,
+      "block_specs": [
+        {
+          "label": "Block 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 3",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 4",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 5",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 6",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 7",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 8",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 9",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 10",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "distribute_trial_pool_across_blocks": true,
+      "repeat_trial_pool_per_block": false,
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "participants": 1,
+      "random_seed": 20210120
+    }
+  },
+  "provenance": [
+    {
+      "field": "Auditory, tactile and rendering properties",
+      "source": "https://doi.org/10.1038/s41598-020-79767-0, p. 2, Stimuli and Apparatus."
+    },
+    {
+      "field": "Geometry, order and trial allocation",
+      "source": "https://doi.org/10.1038/s41598-020-79767-0, pp. 3–4, Measure of PPS and Fig. 1."
+    },
+    {
+      "field": "Analysis and expectancy correction",
+      "source": "https://doi.org/10.1038/s41598-020-79767-0, pp. 4–8, Statistical analysis and Results. Original Supplementary Information, Fig. S2 and Tables S1–S2."
+    }
+  ]
+}

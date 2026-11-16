@@ -1818,6 +1818,38 @@ def test_dashboard_validates_full_study5_segment0_to_3_pipeline(tmp_path: Path):
     assert state["project_segments"]["4_trial_repetition_pool"]["total_count"] == 264
 
 
+def test_segment3_bakes_declared_vibrotactile_cue(tmp_path: Path):
+    source = tmp_path / "stereo.wav"
+    sample_rate = 8000
+    stereo = np.full((1600, 2), 0.125, dtype=np.float32)
+    sf.write(source, stereo, sample_rate, subtype="PCM_16")
+    waveform = {
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_waveform_shape": "sine",
+        "tactile_frequency_hz": 250,
+        "tactile_duration_ms": 20,
+        "tactile_amplitude": 0.2,
+    }
+
+    target = tmp_path / "target.wav"
+    duration, method = dashboard_app._write_three_channel_trial_wav(
+        target, source, 0.050, tmp_path / "work",
+        waveform_row=dashboard_app._vibrotactile_bake_row(waveform),
+    )
+
+    actual, rate = sf.read(target, dtype="float32", always_2d=True)
+    assert rate == sample_rate
+    assert duration == 0.2
+    assert method == "generated_vibrotactile_waveform"
+    np.testing.assert_array_equal(actual[:, :2], stereo)
+    expected = np.zeros(1600)
+    expected[400:560] = 0.2 * np.sin(2 * np.pi * 250 * np.arange(160) / sample_rate)
+    np.testing.assert_allclose(actual[:, 2], expected, atol=1 / 32768 + 1e-6)
+    assert not dashboard_app._vibrotactile_bake_row({
+        **waveform, "tactile_stimulation_modality": "electrical",
+    })
+
+
 def test_dashboard_trial_pool_honors_tonelli_exact_control_counts(tmp_path: Path):
     design_path = tmp_path / "design.json"
     save_design(_compact_design(), design_path)

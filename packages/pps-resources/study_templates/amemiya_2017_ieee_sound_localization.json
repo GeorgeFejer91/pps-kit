@@ -1,0 +1,192 @@
+{
+  "template_id": "amemiya_2017_ieee_sound_localization",
+  "title": "Amemiya 2017 sound-localization control",
+  "citation": "Amemiya, T., Ikei, Y., Hirota, K., & Kitazaki, M. (2017). Vibration on the soles of the feet evoking a sensation of walking expands peripersonal space. 2017 IEEE World Haptics Conference (WHC), 605–610.",
+  "doi": "10.1109/whc.2017.7989970",
+  "source_url": "https://doi.org/10.1109/whc.2017.7989970",
+  "verification_status": "partial",
+  "notes": "Design inspection of the 64 localization judgments reported after the main 2017 IEEE task. The original acoustic cue, actual chest-reference timing and 1–100 response capture are required for participant use.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1109/whc.2017.7989970::sound_localization",
+    "publication_status": "published",
+    "profile_type": "amemiya_2017_sound_localization",
+    "profile_check_complete": false,
+    "reported_participants": 7,
+    "auditory_stimulus": {
+      "signal": "Amplitude-modulated white noise simulating a virtual approaching source",
+      "playback": "Bose QuietComfort 15 noise-canceling headphones",
+      "nominal_approach_speed_m_per_s": 0.7,
+      "reported_level_range_dba": [
+        55,
+        70
+      ],
+      "gain_law_ambiguity": "The prose and Fig. 2 describe a rising level during approach. The same paragraph says the level decreased 6 dB when distance halved. The delivered gain law remains unresolved.",
+      "doppler_model": "Omitted",
+      "reported_in_fig_2_sound_trace_duration_ms_approx": 5000,
+      "locator": "pp. 606–607, §III.B, Fig. 2"
+    },
+    "timing_evidence": {
+      "distance_cm": [
+        160,
+        120,
+        80,
+        40
+      ],
+      "printed_main_trial_interval_magnitudes_ms": [
+        2290,
+        1710,
+        1140,
+        570
+      ],
+      "main_trial_prose_anchor": "Sound onset (§III.C), without an explicit signed schedule.",
+      "main_trial_figure_anchor": "The dashed marks in Fig. 2 show a time interval from chest pulse to sound offset.",
+      "preview_chest_cue_after_audio_onset_ms": [
+        2710,
+        3290,
+        3860,
+        4430
+      ],
+      "preview_derivation": "Subtract the printed interval magnitudes from Fig. 2's drawn 5000 ms audio window. This gives 3860 ms for the illustrated 80 cm probe, close to the waveform's approximately 3856 ms onset.",
+      "exact_implemented_probe_timing_ms": null,
+      "control_scope": "The localization control uses the four distance locations and the chest pulse as a judgment reference. Its own exact cue delays are unreported. The preview applies the figure-derived main-trial timing as a provisional construction.",
+      "locator": "pp. 606–607, §§III.C–D, Fig. 2"
+    },
+    "preview_equivalence": {
+      "audio": "Generated 5 s, 44.1 kHz, fixed-gain continuous white noise for software timing. These files are preview assets; the reported perceived approach and dB(A) envelope require original or validated calibrated audio.",
+      "trajectory": "Path-length and propagation-speed fields provide the five-second render duration. The paper's 0.7 m/s and nominal probe distances are retained as separate study evidence.",
+      "target": "Any generated Toolkit tactile cue is a software marker for verifying schedule offsets. The Acouve drive waveform and delivery latency require external validation.",
+      "schedule": "One pooled inspection block uses a deterministic replay seed and implements stated total cell repetitions. Participant-specific block order, response capture and physical actuation remain separately gated."
+    },
+    "reported_trial_schedule": {
+      "participants": "The same seven adults as the main chest-detection task.",
+      "repetitions_per_location": 16,
+      "number_of_locations": 4,
+      "reported_trial_count_derived": 64,
+      "reported_order": "Both controls occurred after the main task. Their order was counterbalanced across participants.",
+      "actual_within_control_block_allocation": null,
+      "sole_vibration_present": false,
+      "setup": "Gaze at the fixation point and listen to the approaching sound.",
+      "locator": "p. 607, §III.D and last paragraph of §III.E"
+    },
+    "response_contract": {
+      "task": "At the chest pulse, judge the perceived sound location and press keys to enter the rating.",
+      "numeric_scale": [
+        1,
+        100
+      ],
+      "scale_anchors": [
+        "Very far from the chest",
+        "Very close to the chest"
+      ],
+      "exact_key_entry_or_commit_rule": null,
+      "control_specific_chest_duration_and_frequency": null,
+      "locator": "p. 607, §III.D"
+    },
+    "implemented_controls": [
+      "Four nominal probe locations and 16 trials per location. Heel vibration is absent."
+    ],
+    "implementation_gaps": [
+      "Original 2017 white-noise audio, sample format, dose calibration and author-confirmed magnitude law.",
+      "Exact localization cue timing and calibrated chest-reference actuator scheduler.",
+      "Validated 1–100 numeric-rating scheduler and response capture, with the original rating-page entry and commit rule.",
+      "Exact trial order, block allocation and ITI schedule for the localization control."
+    ]
+  },
+  "design": {
+    "name": "Amemiya 2017 sound-localization control",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Continuous white noise (timing preview)",
+        "noise_type": "white",
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise"
+      }
+    ],
+    "trajectory": {
+      "path_length_m": 1.0,
+      "propagation_speed_mps": 0.2,
+      "sample_rate": 44100,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 16,
+      "soa_values_ms": [
+        2710,
+        3290,
+        3860,
+        4430
+      ],
+      "spatial_values_cm": [
+        160,
+        120,
+        80,
+        40
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "manubrium of sternum"
+      ],
+      "include_catch_trials": false,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "respiratory_phases": [
+        "Localization preview"
+      ],
+      "participants": 1,
+      "blocks": 1,
+      "block_specs": [
+        {
+          "label": "Design inspection only",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        }
+      ],
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "random_seed": 20170608,
+      "trial_strips": [
+        {
+          "strip_id": "sound_localization",
+          "label": "Sound localization at chest cue",
+          "metadata": {
+            "body_anchor": "Manubrium of sternum",
+            "expected_response": "respond",
+            "target_role": "chest_vibrotactile_reference",
+            "response_mode": "numeric_distance_rating",
+            "response_rule": "rate_sound_distance_at_chest_cue",
+            "tactile_stimulation_modality": "vibrotactile",
+            "source_asset_equivalence": "Fixed-gain timing-preview white noise with no original audio or actuator drive.",
+            "response_choice_set": "1–100 (1 = very far, 100 = very close)",
+            "primary_analysis_included": false
+          },
+          "elements": [
+            {
+              "element_id": "sound_localization-audio",
+              "kind": "looming_stimulus",
+              "label": "Continuous white noise (timing preview)",
+              "source_label": "Continuous white noise (timing preview)"
+            }
+          ]
+        }
+      ],
+      "catch_trial_percentage": 0
+    }
+  },
+  "provenance": [
+    {
+      "field": "Sound, probe intervals and chest-reference timing",
+      "source": "https://doi.org/10.1109/whc.2017.7989970, pp. 606–607, §§III.B–III.C and Fig. 2."
+    },
+    {
+      "field": "Control scoring and schedule",
+      "source": "https://doi.org/10.1109/whc.2017.7989970, pp. 606–607, §§III.D–III.E and Fig. 3."
+    }
+  ]
+}

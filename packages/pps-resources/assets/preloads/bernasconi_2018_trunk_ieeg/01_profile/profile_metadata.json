@@ -1,0 +1,170 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "bernasconi_2018_trunk_ieeg",
+  "title": "Bernasconi 2018 trunk PPS with intracranial EEG",
+  "citation": "Bernasconi, F., Noel, J.-P., Park, H. D., Faivre, N., Seeck, M., Spinelli, L., Schaller, K., Blanke, O., & Serino, A. (2018). Audio-Tactile and Peripersonal Space Processing Around the Trunk in Human Parietal and Temporal Cortex: An Intracranial EEG Study. Cerebral Cortex, 28(9), 3385\u20133397.",
+  "doi": "10.1093/cercor/bhy156",
+  "source_url": "https://doi.org/10.1093/cercor/bhy156",
+  "verification_status": "partial",
+  "notes": "Final journal design with a procedural auditory-only preview. The published experiment required three sternum pulses in each tactile-present trial, passive attention and synchronized clinical intracranial EEG. Research launch is blocked.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1093/cercor/bhy156::intracranial-pps",
+    "publication_status": "published",
+    "profile_type": "passive_audio_tactile_trunk_intracranial_eeg",
+    "profile_check_complete": false,
+    "study_inventory": {
+      "formal_experiments": 1,
+      "primary_assessments": 1,
+      "auxiliary_procedures": 0,
+      "cohort": "Six adults with electrodes implanted for clinical evaluation of drug-resistant epilepsy."
+    },
+    "posture_and_response": {
+      "posture": "Lying in bed with the upper body reclined to approximately 135\u00b0 relative to the rest of the body.",
+      "eyes": "Closed throughout",
+      "instructions": "Attend equally to the approaching sound and tactile vibrations.",
+      "overt_response_required": false,
+      "response_scoring": "None. The outcome was intracranial local field potentials."
+    },
+    "auditory_stimulus": {
+      "signal": "Prerecorded white noise approaching from the front, centered on the patient\u2019s body.",
+      "duration_ms": 3000,
+      "maximum_simulated_distance_cm": 200,
+      "nominal_speed_m_s": 0.66,
+      "binaural_recording": "3Dio Omni binaural microphones and a head model, recording two arrays of eight speakers with a reported combined length of 2 m.",
+      "playback": "Etymotic Research ER-4P insert earphones",
+      "original_recording_gain_and_output_calibration": null
+    },
+    "tactile_stimulus": {
+      "site": "Upper sternum",
+      "actuator": "Precision MicroDrives 312-101 shaftless vibration motor",
+      "activation_duration_ms": 100,
+      "nominal_vibration_frequency_hz": 150,
+      "reported_maximum_rotation_rise_time_ms": 50,
+      "controller": "Purpose-made Arduino microcontroller with 10 kHz refresh, controlled by ExpyVR over direct serial.",
+      "delivered_waveform_and_physical_latency": null
+    },
+    "trial_schedule": {
+      "trial_families": [
+        {
+          "id": "A",
+          "label": "Auditory only",
+          "trials_per_patient": 85,
+          "audio_duration_ms": 3000,
+          "tactile_pulse_nominal_onsets_ms": []
+        },
+        {
+          "id": "T",
+          "label": "Tactile only",
+          "trials_per_patient": 85,
+          "audio_duration_ms": 0,
+          "tactile_pulse_nominal_onsets_ms": [
+            500,
+            1500,
+            2500
+          ],
+          "pulse_timing_reference": "Silent trial onset"
+        },
+        {
+          "id": "AT",
+          "label": "Audio-tactile",
+          "trials_per_patient": 85,
+          "audio_duration_ms": 3000,
+          "tactile_pulse_nominal_onsets_ms": [
+            500,
+            1500,
+            2500
+          ],
+          "pulse_timing_reference": "Shared trial and audio onset",
+          "nominal_distance_labels": [
+            "Far",
+            "Middle",
+            "Close"
+          ],
+          "nominal_sound_to_body_distances_cm": [
+            170,
+            100,
+            30
+          ]
+        }
+      ],
+      "nominal_pulse_unit_note": "The journal prints the last delay as \u201c2500 m\u201d. Milliseconds follow from the parallel delays and the three-second trial timeline. Distance labels refer to the nominal AT conditions.",
+      "pulse_jitter_choices_ms": [
+        0,
+        50,
+        100,
+        150,
+        200
+      ],
+      "pulse_jitter_rule": "Apply jitter to each of the three delays. Choice weights, constraints, independence across pulses and realized jitter sequences are unreported.",
+      "intertrial_interval_choices_ms": [
+        1400,
+        1700,
+        1900
+      ],
+      "intertrial_interval_rule": "Shuffle the reported interval choices. Exact sequence and timing reference are unreported.",
+      "trial_order": "The three families were presented in randomized order.",
+      "total_trials_per_patient_derived": 255,
+      "reported_approximate_session_minutes": 20,
+      "block_boundaries": null
+    },
+    "recording_and_analysis": {
+      "recorder": "Micromed System PLUS, with Cz as online reference",
+      "acquisition_hz": 2048,
+      "online_highpass_hz": 0.02,
+      "analysis_hz": 512,
+      "offline_bandpass_hz": [
+        1,
+        40
+      ],
+      "offline_reference": "Adjacent bipolar depth and strip contacts, local mean reference for each grid.",
+      "contacts_implanted_and_retained": [
+        500,
+        480
+      ],
+      "artifact_exclusion": "Exclude electrodes and trials with excessive noise above six interquartile ranges. The exact noise measure and original masks are unreported.",
+      "initial_trial_epoch_ms": [
+        -800,
+        3000
+      ],
+      "initial_trial_centering": "Center each trial epoch to zero.",
+      "stimulus_locked_epoch_ms": [
+        -100,
+        300
+      ],
+      "active_contact_screen": "Compare 0\u2013300 ms with \u2212100\u20130 ms before prestimulus baseline correction. Apply baseline correction to stimulus-locked epochs after identifying responsive contacts.",
+      "primary_contrasts": "Screen active AT contacts, test AT against A+T for nonlinear integration, then test the AT\u2212A responses at far, middle and close distances by one-way ANOVA in the integration-positive contacts.",
+      "complementary_contrast": "Test the three-distance AT\u2212A effect in active AT contacts without an integration gate. Use p < .01 for both the active-AT screen and the PPS test in this complementary analysis.",
+      "tactile_order_control": "Compare the three pulse-order responses within T-only trials to assess expectation or habituation.",
+      "temporal_cluster_method": "Per-contact FieldTrip temporal permutation procedure, with maxsum and 5,000 resamples. The main cluster criterion is p < .05.",
+      "auditory_only_analysis_event_alignment": null,
+      "synchronization_and_trigger_encoding": null
+    },
+    "preview_scope": {
+      "condition": "Only the A family is scheduled for inspection. Its 85 rows each use one 3000 ms stereo preview stimulus. Original intertrial timing and block boundaries are outside the preview.",
+      "auditory_rendering": "The catalog renders white noise along a frontal virtual line with the reported speed and 2 m start. The 2 cm endpoint is calculated from the preview trajectory and the renderer applies inverse-square attenuation. The original recording, amplitude envelope and delivered levels remain unavailable. The local fallback can generate a centered noise clip of the same duration.",
+      "legacy_fields": "The runtime requires a numeric SOA to build the file preview. The 0 ms placeholder has no experimental meaning. The audio-tactile file derived from it has zero repetitions and is omitted from the preview schedule. The legacy design validator still requires an audio-tactile block.",
+      "response": "Preview metadata identifies passive attention and disables the response requirement. Published scoring requires electrode-specific local field potentials."
+    },
+    "implementation_gaps": [
+      "The trial scheduler must intermix A, T and AT and deliver three separately timed sternum pulses within each T and AT trial. The sound and pulse timing require a common clock.",
+      "The clinical acquisition scheduler must synchronize ExpyVR and Arduino stimulus events to the Micromed iEEG recording and preserve passive observation without behavioral scoring.",
+      "Exact source audio, original delivery gains and acoustic calibration, tactile acceleration calibration, hardware latencies and trigger encodings are unavailable.",
+      "Exact pulse-jitter allocation, original trial and interval sequence, block structure and alignment of auditory-only epochs to the corresponding tactile events are unreported or unavailable.",
+      "A clinical iEEG analysis path requires electrode-specific preprocessing, event-aligned local field potentials, referenced contact masks and the two published integration and PPS analysis paths. The exact masks, remaining supplementary implantation table and original analysis code are unavailable."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Clinical cohort, recording arrays, actuator and passive instructions",
+      "source": "https://doi.org/10.1093/cercor/bhy156, pp. 3386\u20133387, Participants, Material and Apparatus, Procedures and Table 1."
+    },
+    {
+      "field": "Trial families, repeated pulses, distance labels, jitter and intertrial intervals",
+      "source": "https://doi.org/10.1093/cercor/bhy156, p. 3387, Procedures."
+    },
+    {
+      "field": "iEEG preparation, integration and PPS contrasts, and the tactile-only control",
+      "source": "https://doi.org/10.1093/cercor/bhy156, pp. 3387\u20133389, Electrodes Implantation, Intracranial EEG recordings, and Preprocessing through Control Analysis."
+    }
+  ]
+}

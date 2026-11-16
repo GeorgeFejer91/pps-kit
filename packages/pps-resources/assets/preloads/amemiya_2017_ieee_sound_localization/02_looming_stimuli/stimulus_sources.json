@@ -1,0 +1,49 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "amemiya_2017_ieee_sound_localization",
+  "assets": [
+    {
+      "label": "Continuous white noise (timing preview)",
+      "path": "assets/preloads/amemiya_2017_ieee_sound_localization/02_looming_stimuli/looming_Continuous_white_noise_timing_preview.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/amemiya_2017_ieee_sound_localization/02_looming_stimuli/looming_Continuous_white_noise_timing_preview.wav",
+      "sha256": "fd1c7e016fd4c518ef1aceda865f087f529e2708e2ab8bf71558aecb8272f609",
+      "duration_s": 5.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Continuous white noise (timing preview)",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

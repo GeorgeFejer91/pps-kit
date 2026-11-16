@@ -1,0 +1,240 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "teraoka_2024_front_pps",
+  "title": "Teraoka 2024 front PPS block",
+  "citation": "Teraoka, R., Kuroda, N., Kojima, R., & Teramoto, W. (2024). Comparison of peripersonal space in front and rear spaces. Experimental Brain Research, 242(4), 797\u2013808.",
+  "doi": "10.1007/s00221-024-06782-2",
+  "source_url": "https://doi.org/10.1007/s00221-024-06782-2",
+  "verification_status": "partial",
+  "notes": "Published front block with an inspection schedule that uses three procedural pink-noise probes and requires an imported start tone. The second direction is a companion variant from the same study. Research launch is blocked.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-024-06782-2",
+    "publication_status": "published",
+    "profile_type": "front_rear_speaker_array_audio_tactile_pps",
+    "profile_check_complete": false,
+    "direction": "front",
+    "direction_deg": 0,
+    "direction_assignment": "One front block and one rear block for each participant. Trial order was randomized within blocks. Between-block order and counterbalancing are unreported.",
+    "participants": {
+      "recruited": 21,
+      "analyzed": 19,
+      "scope": "Undergraduate and graduate students reporting normal hearing and touch."
+    },
+    "apparatus": {
+      "original_audio_output": "Ten upward-facing Aura Sound NSW1-205-A loudspeakers along the head-centered sagittal axis at approximately chest height, driven with GNU Octave 6.2.0 and Playrec.",
+      "speaker_head_distance_cm": [
+        48,
+        64,
+        80,
+        96,
+        112,
+        128,
+        144,
+        160,
+        176,
+        192
+      ],
+      "speaker_height_from_floor_cm": 110,
+      "calibration": {
+        "reported_db_spl": 70,
+        "reference_distance_cm": 48,
+        "measured_at": "Head center with the participant absent",
+        "cue_level_db_spl": null
+      },
+      "posture": "Seated, head stationary and eyes closed during sound presentation. The tactor stays on the anterior chest in both directions."
+    },
+    "paths": [
+      {
+        "distance_label": "near",
+        "speaker_head_distances_cm": [
+          96,
+          80,
+          64,
+          48
+        ],
+        "head_relative_midpoint_cm": 72
+      },
+      {
+        "distance_label": "middle",
+        "speaker_head_distances_cm": [
+          144,
+          128,
+          112,
+          96
+        ],
+        "head_relative_midpoint_cm": 120
+      },
+      {
+        "distance_label": "far",
+        "speaker_head_distances_cm": [
+          192,
+          176,
+          160,
+          144
+        ],
+        "head_relative_midpoint_cm": 168
+      }
+    ],
+    "auditory_timing": {
+      "trial_start_cue": {
+        "waveform": "Pure tone",
+        "frequency_hz": 1000,
+        "duration_ms": 500,
+        "delivery": "All ten speakers simultaneously",
+        "onset_ms_from_trial_start": 0
+      },
+      "tone_offset_to_probe_onset_ms": 1000,
+      "probe_onset_ms_from_trial_start_derived": 1500,
+      "probe_signal": "Pink noise crossfaded over four consecutive loudspeakers using overlapping cosine windows.",
+      "probe_duration_ms": 1000,
+      "probe_rise_and_fall_ms": 10,
+      "nominal_path_length_cm": 48,
+      "nominal_speed_cm_s": 48
+    },
+    "tactile_and_response": {
+      "site": "Anterior chest",
+      "actuator": "SHICOH C1034 vibration stimulator, 9.5 mm diameter",
+      "nominal_frequency_hz": 300,
+      "duration_ms": 100,
+      "intensity": "Well above detection threshold. Exact amplitude and threshold calibration are unreported.",
+      "task": "Respond as quickly as possible to the tactile stimulus with the numeric keypad; withhold when touch is absent.",
+      "exact_key": null,
+      "response_deadline_ms": null
+    },
+    "published_trial_schedule": {
+      "trials_per_direction": 56,
+      "total_main_trials_per_participant": 112,
+      "trial_families": [
+        {
+          "id": "probe_touch",
+          "start_tone": true,
+          "paths": [
+            "near",
+            "middle",
+            "far"
+          ],
+          "touch_after_probe_onset_ms": [
+            250,
+            500,
+            750
+          ],
+          "touch_after_tone_onset_ms_derived": [
+            1750,
+            2000,
+            2250
+          ],
+          "repetitions_per_path_and_timing": 4,
+          "count": 36
+        },
+        {
+          "id": "tone_touch_baseline",
+          "start_tone": true,
+          "paths": [],
+          "touch_after_tone_presentation_ms": [
+            1250,
+            1500,
+            1750
+          ],
+          "touch_after_tone_onset_ms_derived": [
+            1750,
+            2000,
+            2250
+          ],
+          "repetitions_per_timing": 4,
+          "count": 12
+        },
+        {
+          "id": "probe_catch",
+          "start_tone": true,
+          "paths": [
+            "near",
+            "middle",
+            "far"
+          ],
+          "tactile": false,
+          "repetitions_per_path": 2,
+          "count": 6
+        },
+        {
+          "id": "tone_only_catch",
+          "start_tone": true,
+          "paths": [],
+          "tactile": false,
+          "count": 2
+        }
+      ],
+      "timing_anchor_note": "The baseline matches the probe trials. Adding the 500 ms tone duration to the baseline delays gives the same touch times as adding each target SOA to the 1500 ms probe onset. Physical event timestamps are unreported.",
+      "intertrial_interval_ms": {
+        "minimum": 1000,
+        "maximum": 1500,
+        "selection": "Random. The exact sampling distribution and realized intervals are unreported."
+      }
+    },
+    "other_procedures": [
+      {
+        "procedure": "PPS practice",
+        "trials": 10,
+        "scope": "Before the main assessment. Condition allocation is unreported."
+      },
+      {
+        "procedure": "Auditory distance estimation",
+        "trials": 72,
+        "scope": "12 per direction and path. Verbal estimates of the midpoint in meters without a tactile response."
+      },
+      {
+        "procedure": "Auditory speed estimation",
+        "trials": 144,
+        "scope": "Verbal speed magnitude relative to the middle/front reference assigned 10. Normal probes were 48 cm/s, with 32 and 96 cm/s fillers. Main speed analysis includes normal probes."
+      },
+      {
+        "procedure": "Auditory speed familiarization",
+        "trials": null,
+        "scope": "Several practice trials with the speed reference and verbal response."
+      }
+    ],
+    "analysis": "Trim log-transformed RTs once at \u00b13 SD per participant and condition. Collapse tactile timings. Compare probe RTs by direction and distance against the corresponding direction\u2019s no-probe baseline.",
+    "inspection_scope": {
+      "trial_rows_with_imported_cue": 54,
+      "trial_rows_omitted": 2,
+      "matched_baseline": "The inspection builder retains the fixed 500 ms start tone and silences the pink probe. Baseline SOA values are stored relative to the nominal 1500 ms probe onset, including when the probe is silent.",
+      "cue_import_requirement": {
+        "expected_filename": "teraoka_2024_trial_start_1000hz_500ms.wav",
+        "frequency_hz": 1000,
+        "duration_ms": 500,
+        "format": "WAV; preserve duration",
+        "role": "Unbundled fixed audio ingredient; import or point to a calibrated recording. For digital timing inspection only, a 1 kHz centered sine-wave file may be used."
+      },
+      "inspection_only_cue_waveform": {
+        "sample_rate_hz": 44100,
+        "frames": 22050,
+        "channels": 2,
+        "peak_full_scale": 0.1,
+        "construction": "For samples n=0\u202622049, both channels are 0.1 \u00d7 sin(2\u03c0 \u00d7 1000 \u00d7 n / 44100). The digital level is selected for inspection and is not a measured study SPL."
+      },
+      "inspection_only_tactile_waveform": "A 300 Hz, 100 ms digital sine marker uses a peak of 0.2 full scale. The original actuator drive shape and delivered mechanical amplitude are unreported.",
+      "renderer": "Each head-relative path is represented with a straight binaural pink-noise approach. Digital spatialization and level settings are inspection substitutes for the physical crossfading speaker array.",
+      "timing_exclusions": "The schedule omits the two tone-only catches, original randomized intertrial intervals, main-task familiarization and auxiliary tasks. It is not intended for study data collection."
+    },
+    "implementation_gaps": [
+      "The speaker array scheduler must present the start tone simultaneously on all ten calibrated channels and crossfade four speakers per approach. The stereo inspection sources do not implement that physical output.",
+      "The trial scheduler needs two distinct no-touch families: six probe catches and two tone-only catches per direction. The inspection scheduler only produces the six probe catches.",
+      "The start tone is an unbundled input. Exact cue gain and probe files, channel gains, calibration and original Octave/Playrec routines are unavailable.",
+      "The study requires calibrated 300 Hz anterior chest vibration, synchronized keypad timing and the original event clock. The digital inspection does not verify physical vibration or response latency.",
+      "Exact intertrial interval sampling, between-direction order, keypad key and online response deadline are unreported. The original auditory estimation and familiarization schedules are outside the inspection."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Apparatus, geometry, probe rendering and tactile target",
+      "source": "https://doi.org/10.1007/s00221-024-06782-2, pp. 799\u2013800, Apparatus and stimuli and Fig. 1."
+    },
+    {
+      "field": "Directional blocks, start-tone lead, target and baseline timing, catch counts and familiarization",
+      "source": "https://doi.org/10.1007/s00221-024-06782-2, p. 800, Procedure and PPS measurement task."
+    },
+    {
+      "field": "Auxiliary procedures and baseline-subtraction analysis",
+      "source": "https://doi.org/10.1007/s00221-024-06782-2, pp. 800\u2013801, Auditory distance perception task, Speed estimation task and Data analysis. Publisher Supplementary Information, Fig. S2, baseline and raw response times."
+    }
+  ]
+}

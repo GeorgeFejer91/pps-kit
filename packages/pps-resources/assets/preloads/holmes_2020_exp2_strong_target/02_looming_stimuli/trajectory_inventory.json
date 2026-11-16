@@ -1,0 +1,80 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "holmes_2020_exp2_strong_target",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Holmes preview white-noise cue (near)",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 5.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Holmes preview white-noise cue (near)"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/holmes_2020_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Holmes preview white-noise cue (far)",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 105.0,
+        "end_distance_cm": 105.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.05,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Holmes preview white-noise cue (far)"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/holmes_2020_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav"
+      ]
+    }
+  ]
+}

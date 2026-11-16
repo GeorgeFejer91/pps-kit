@@ -66,6 +66,8 @@ from .session_runner import (
     DEFAULT_RENDER_DIR,
     DEFAULT_SESSION_ROOT,
     RunPackage,
+    _apply_tactile_waveform_profile,
+    _tactile_waveform_spec,
     claim_prepared_session,
     load_run_package,
     prepare_segment_run_package,
@@ -5520,7 +5522,7 @@ def _validate_tactile_trial_manifest(manifest: dict[str, Any], *, design: Stimul
         expected_signature = _segment3_design_signature(design)
         manifest_signature = str(manifest.get("design_signature") or "")
         if manifest_signature and manifest_signature != expected_signature:
-            return ["Segment 3 manifest is stale because SOA or baseline settings changed."]
+            return ["Segment 3 manifest is stale because SOA, baseline or waveform settings changed."]
     trial_sequence_manifest = Path(str(manifest.get("trial_sequence_manifest") or ""))
     lineage_errors = validate_segment_lineage(
         manifest,
@@ -6176,13 +6178,41 @@ def _ffmpeg_merge_three_channel(source_stereo_path: Path, tactile_mono_path: Pat
     return completed.returncode == 0 and _path_exists(output_path)
 
 
-def _write_three_channel_trial_wav(output_path: Path, source_audio_path: Path, tactile_onset_s: float, work_dir: Path) -> tuple[float, str]:
+def _vibrotactile_bake_row(variant: dict[str, Any]) -> dict[str, Any]:
+    if str(variant.get("tactile_stimulation_modality") or "").lower() != "vibrotactile":
+        return {}
+    return {
+        **variant,
+        "tactile_channel": 3,
+    }
+
+
+def _write_three_channel_trial_wav(
+    output_path: Path,
+    source_audio_path: Path,
+    tactile_onset_s: float,
+    work_dir: Path,
+    *,
+    waveform_row: dict[str, Any],
+) -> tuple[float, str]:
     import numpy as np
     import soundfile as sf
 
     _ensure_dir(output_path.parent)
     _ensure_dir(work_dir)
     source_data, sample_rate = _read_stereo_audio(Path(source_audio_path))
+    waveform_data, waveform_metadata = _apply_tactile_waveform_profile(
+        source_data,
+        waveform_row,
+        sample_rate=sample_rate,
+        family="audio_tactile",
+        tactile_onset_s=tactile_onset_s,
+    )
+    if waveform_metadata["generated"]:
+        if tactile_onset_s < 0 or waveform_data.shape[0] != source_data.shape[0]:
+            raise ValueError("The declared vibrotactile waveform must fit within the trial audio timeline.")
+        sf.write(_soundfile_path(output_path), waveform_data, sample_rate, subtype="PCM_16")
+        return float(source_data.shape[0] / sample_rate), "generated_vibrotactile_waveform"
     tactile = _tactile_channel(sample_rate, source_data.shape[0], tactile_onset_s)
     digest = hashlib.sha256(str(output_path).encode("utf-8")).hexdigest()[:12]
     source_stereo_path = work_dir / f"{digest}_source_stereo.wav"
@@ -6466,7 +6496,12 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
         digest = _local_file_sha256(output_path)
         output_info = _audio_file_info(output_path)
         audio_only_family = family in {"catch", "auditory_only"}
-        tactile_duration_ms = 0 if audio_only_family else _tactile_cue_duration_ms(int(output_info["sample_rate"]))
+        waveform_generated = merge_engine == "generated_vibrotactile_waveform"
+        tactile_duration_ms = 0
+        if waveform_generated:
+            tactile_duration_ms = _float(variant.get("tactile_duration_ms"), 0.0)
+        elif not audio_only_family:
+            tactile_duration_ms = _tactile_cue_duration_ms(int(output_info["sample_rate"]))
         row_index = int(variant.get("row_index") or 0)
         row_label = str(variant.get("row_label") or f"Row {row_index}")
         channel_role_map = {
@@ -6518,7 +6553,8 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                 "tactile_channel_zero_based": "" if audio_only_family else 2,
                 "tactile_duration_ms": tactile_duration_ms,
                 "merge_engine": merge_engine,
-                "tactile_cue_path": "" if audio_only_family else str(DEFAULT_TACTILE_CUE_PATH),
+                "tactile_waveform_generated": waveform_generated,
+                "tactile_cue_path": "" if audio_only_family or waveform_generated else str(DEFAULT_TACTILE_CUE_PATH),
                 "sha256": digest,
             }
         )
@@ -6540,6 +6576,8 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
             row_index = int(variant.get("row_index") or 0)
             row_label = str(variant.get("row_label") or f"Row {row_index}")
             row_key = (row_index, row_label)
+            waveform_row = _vibrotactile_bake_row(variant)
+            waveform_spec = _tactile_waveform_spec(waveform_row, "audio_tactile")
             variant_index = int(variant.get("variant_index") or 0)
             variant_key = str(variant.get("variant_key") or f"variant_{variant_index:03d}")
             source_path = Path(str(variant.get("file_path") or ""))
@@ -6606,7 +6644,9 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
             for soa_index, soa_ms in enumerate(variant_soa_values):
                 tactile_onset_s = looming_onset_s + int(soa_ms) / 1000.0
                 source_info = _audio_file_info(source_path)
-                tactile_duration_ms = _tactile_cue_duration_ms(int(source_info["sample_rate"]))
+                tactile_duration_ms = (
+                    waveform_spec["duration_ms"] if waveform_spec else _tactile_cue_duration_ms(int(source_info["sample_rate"]))
+                )
                 total_duration_ms = int(source_info["duration_ms"])
                 output_stem = _trial_bake_file_stem(
                     family="audio_tactile",
@@ -6616,7 +6656,9 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                     total_duration_ms=total_duration_ms,
                 )
                 output_path = _unique_output_path(audio_folder, output_stem, ".wav")
-                duration_s, merge_engine = _write_three_channel_trial_wav(output_path, source_path, tactile_onset_s, work_dir)
+                duration_s, merge_engine = _write_three_channel_trial_wav(
+                    output_path, source_path, tactile_onset_s, work_dir, waveform_row=waveform_row
+                )
                 add_manifest_row(
                     family="audio_tactile",
                     variant=variant,
@@ -6669,7 +6711,10 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                         )
                     tactile_onset_s = looming_onset_s + soa_ms / 1000.0
                     baseline_info = _audio_file_info(baseline_source_path)
-                    tactile_duration_ms = _tactile_cue_duration_ms(int(baseline_info["sample_rate"]))
+                    tactile_duration_ms = (
+                        waveform_spec["duration_ms"] if waveform_spec
+                        else _tactile_cue_duration_ms(int(baseline_info["sample_rate"]))
+                    )
                     total_duration_ms = int(baseline_info["duration_ms"])
                     output_stem = _trial_bake_file_stem(
                         family="baseline",
@@ -6681,7 +6726,9 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                         baseline_mode=mode,
                     )
                     output_path = _unique_output_path(baseline_folder, output_stem, ".wav")
-                    duration_s, merge_engine = _write_three_channel_trial_wav(output_path, baseline_source_path, tactile_onset_s, work_dir)
+                    duration_s, merge_engine = _write_three_channel_trial_wav(
+                        output_path, baseline_source_path, tactile_onset_s, work_dir, waveform_row=waveform_row
+                    )
                     add_manifest_row(
                         family="baseline",
                         variant=variant,
@@ -10375,8 +10422,13 @@ def _segment2_design_signature(design: StimulusDesign) -> str:
 
 def _segment3_design_signature(design: StimulusDesign) -> str:
     protocol = design.protocol
+    waveform_policy = {}
+    if any(_vibrotactile_bake_row(strip.metadata or {}).get("tactile_waveform_shape")
+           for strip in protocol.trial_strips):
+        waveform_policy["vibrotactile_waveform_bake"] = 1
     return _stable_json_hash(
         {
+            **waveform_policy,
             "soa_values_ms": list(protocol.soa_values_ms),
             "include_catch_trials": bool(getattr(protocol, "include_catch_trials", False)),
             "include_baseline_trials": bool(protocol.include_baseline_trials),

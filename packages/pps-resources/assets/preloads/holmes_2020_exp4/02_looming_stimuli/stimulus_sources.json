@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "holmes_2020_exp4",
+  "assets": [
+    {
+      "label": "Holmes preview white-noise cue (near)",
+      "path": "assets/preloads/holmes_2020_exp4/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2020_exp4/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+      "sha256": "010fde34d2871acab6db0d00253a0d8926ff3c892d324b1c0a43e320f0023acf",
+      "duration_s": 0.438,
+      "sample_rate": 8000,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Holmes preview white-noise cue (near)",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 2.5,
+        "end_distance_cm": 2.5,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.025,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.025,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Holmes preview white-noise cue (far)",
+      "path": "assets/preloads/holmes_2020_exp4/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2020_exp4/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+      "sha256": "f64abdd06b5ca7cb790766bf88aa127543b5dda41cb532af96f1fdd39447423b",
+      "duration_s": 0.438,
+      "sample_rate": 8000,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Holmes preview white-noise cue (far)",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 70.0,
+        "end_distance_cm": 70.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.7,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.7,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

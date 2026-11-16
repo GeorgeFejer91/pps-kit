@@ -1,0 +1,49 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "bernasconi_2018_trunk_ieeg",
+  "assets": [
+    {
+      "label": "Procedural frontal white noise",
+      "path": "assets/preloads/bernasconi_2018_trunk_ieeg/02_looming_stimuli/looming_Procedural_frontal_white_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/bernasconi_2018_trunk_ieeg/02_looming_stimuli/looming_Procedural_frontal_white_noise.wav",
+      "sha256": "c47e8c682ee4387a7db6487ebbe560866fb2d43ddd123621856c0aba55d100f0",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Procedural frontal white noise",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 200.0,
+        "end_distance_cm": 2.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.98,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 2.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.02,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

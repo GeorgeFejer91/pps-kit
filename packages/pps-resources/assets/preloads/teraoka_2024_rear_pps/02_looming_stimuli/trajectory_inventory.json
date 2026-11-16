@@ -1,0 +1,117 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "teraoka_2024_rear_pps",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Near rear pink-noise probe",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 96.0,
+        "end_distance_cm": 48.0,
+        "start_rotation_deg": 180.0,
+        "end_rotation_deg": 180.0,
+        "movement_duration_s": 1.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.48,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": -0.96,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": -0.48,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Near rear pink-noise probe"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli/looming_Near_rear_pink-noise_probe.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Middle rear pink-noise probe",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 144.0,
+        "end_distance_cm": 96.0,
+        "start_rotation_deg": 180.0,
+        "end_rotation_deg": 180.0,
+        "movement_duration_s": 1.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.48,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": -1.44,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": -0.96,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Middle rear pink-noise probe"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli/looming_Middle_rear_pink-noise_probe.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Far rear pink-noise probe",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 192.0,
+        "end_distance_cm": 144.0,
+        "start_rotation_deg": 180.0,
+        "end_rotation_deg": 180.0,
+        "movement_duration_s": 1.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.48,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": -1.92,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": -1.44,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Far rear pink-noise probe"
+      ],
+      "tone_types": [
+        "pink"
+      ],
+      "asset_paths": [
+        "assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli/looming_Far_rear_pink-noise_probe.wav"
+      ]
+    }
+  ]
+}

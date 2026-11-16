@@ -40,7 +40,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "packages" / "pps-resources" / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 38
+    assert len(templates) == 57
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -49,12 +49,25 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert categorized == template_ids
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
-    assert len(status["categories"]["missing_publication_parameters"]) == 12
+    assert len(status["categories"]["missing_publication_parameters"]) == 31
     assert set(status["categories"]["toolkit_structural_gap"]) == {
+        "amemiya_2017_ieee_foot_sole_vibration",
+        "amemiya_2017_ieee_sound_localization",
         "amemiya_2019_foot_sole_exp1",
         "amemiya_2019_foot_sole_exp2",
+        "bernasconi_2018_trunk_ieeg",
         "ferri_2015_artificial_looming_valence",
         "ferri_2015_ecological_looming_valence",
+        "hobeika_2019_social_collaboration",
+        "hobeika_2019_social_competition",
+        "holmes_2020_exp1",
+        "holmes_2020_exp2_strong_target",
+        "holmes_2020_exp2_weak_target",
+        "holmes_2020_exp3",
+        "holmes_2020_exp4",
+        "taffou_2021_auditory_roughness",
+        "teraoka_2024_front_pps",
+        "teraoka_2024_rear_pps",
     }
 
     allowed_statuses = {
@@ -105,6 +118,25 @@ def test_new_assessment_preloads_preserve_trial_counts_and_launch_gates():
     status = json.loads((root / "profile_recreation_status.json").read_text(encoding="utf-8"))
     expected = {
         "maister_2015_shared_sensory_pps": (50, True),
+        "bassolino_2010_mouse_right_hand": (36, False),
+        "bassolino_2010_mouse_left_hand_no_mouse_first": (48, False),
+        "bassolino_2010_mouse_left_hand_passive_first": (48, False),
+        "amemiya_2017_ieee_foot_sole_vibration": (192, False),
+        "amemiya_2017_ieee_sound_localization": (64, False),
+        "bernasconi_2018_trunk_ieeg": (85, False),
+        "hobeika_2018_anisotropy_left_handed": (240, False),
+        "hobeika_2018_anisotropy_right_handed": (240, False),
+        "hobeika_2019_social_audience": (480, False),
+        "hobeika_2019_social_collaboration": (480, False),
+        "hobeika_2019_social_competition": (480, False),
+        "holmes_2020_exp1": (160, False),
+        "holmes_2020_exp2_strong_target": (160, False),
+        "holmes_2020_exp2_weak_target": (160, False),
+        "holmes_2020_exp3": (160, False),
+        "holmes_2020_exp4": (180, False),
+        "taffou_2021_auditory_roughness": (0, False),
+        "teraoka_2024_front_pps": (54, False),
+        "teraoka_2024_rear_pps": (54, False),
         "teneggi_2013_social_face_pps": (208, False),
         "ardizzi_ferri_2018_looming_flat": (300, False),
         "amemiya_2019_foot_sole_exp1": (180, False),

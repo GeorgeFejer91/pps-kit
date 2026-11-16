@@ -1,0 +1,114 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "holmes_2020_exp1",
+  "title": "Holmes 2020 Experiment 1, weak-target vocal discrimination",
+  "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. Experimental Brain Research, 238, 995\u20131009.",
+  "doi": "10.1007/s00221-020-05771-5",
+  "source_url": "https://doi.org/10.1007/s00221-020-05771-5",
+  "verification_status": "partial",
+  "notes": "Experiment 1 trial allocation with a fixed generated white-noise proxy. Response capture and the original tactile stimulus require external apparatus.",
+  "reference_parameters": {
+    "profile_type": "static_near_far_audio_tactile_pps",
+    "publication_study_row_id": "doi:10.1007/s00221-020-05771-5::a",
+    "formal_experiment": 1,
+    "source_scope": "Main Experiment 1.",
+    "author_project_url": "https://osf.io/73x59/",
+    "reported_design": {
+      "per_block_cell_counts": {
+        "near_weak": 8,
+        "near_strong": 8,
+        "far_weak": 8,
+        "far_strong": 8,
+        "near_no_vibration": 4,
+        "far_no_vibration": 4
+      },
+      "trials_per_block": 40,
+      "formal_blocks": 4,
+      "total_trials_per_participant": 160,
+      "analyzed_participants_in_profile_scope": 14,
+      "order_within_block": "Pseudorandom, with the complete published cell quotas in each block.",
+      "cohort": "16 consented, two unable to complete training, 14 analyzed.",
+      "instruction": "Say tah only on feeling a weak vibration. Withhold for strong vibration and no-vibration catches."
+    },
+    "published_protocol": {
+      "physical_apparatus": {
+        "tactile": "Oticon bone-conducting vibrator held between the index finger and thumb, hand resting on the thigh.",
+        "sound": "Goodmans Active 46 loudspeakers placed 5 cm and 105 cm from the responding hand, approximately aligned with the head without one speaker blocking the other. Approximate auditory level at the head was 80 dB.",
+        "routing": "National Instruments PCIe-6321 records microphone and responses, with a custom circuit selecting near and far loudspeakers. The released hand-task programs use analog tactile and audio outputs and a digital speaker selector at 8 kHz.",
+        "carrier": "A 125 ms white-noise burst at 8 kHz with 5 ms rise and fall. On vibration trials, the auditory and tactile waveforms share the trial carrier. The released code samples a new uniformly distributed white-noise waveform per trial."
+      },
+      "calibration": {
+        "procedure": "Separate pre-task 2IFC with 44 trials, four at the warm-up level and 40 using QUEST. Vibration appears at the center of one of two one-second intervals, separated by 500 ms, and interval onset is announced by a 250 ms LED flash. Respond during 2.25 s with the corresponding interval button. Both LEDs flash twice after an error or miss, missed trials repeat, and approximately 80 dB white noise masks the actuator.",
+        "warm_up_intensity_source_arbitrary_units": 0.75,
+        "quest": {
+          "method": "PsychToolBox3",
+          "threshold_probability": 0.9,
+          "beta": 3.5,
+          "delta": 0.05,
+          "gamma": 0.5,
+          "grain": 0.005
+        },
+        "weak": "Participant's QUEST estimate for about 90% correct detection.",
+        "strong": "1.5 times weak drive. The article describes one unmasked physical detectability check."
+      },
+      "published_hand_timing": {
+        "jitter_before_trial_ms": [
+          1000,
+          2000
+        ],
+        "jitter_distribution": "Pseudorandom uniform.",
+        "reported_trial_duration_ms": 2600,
+        "reported_fixed_iti_ms": 1000,
+        "recording_starts_before_tactile_command_ms": 100,
+        "published_far_audio_advance_ms_approx": 2.9,
+        "archived_command_far_audio_advance_samples": 23,
+        "archived_command_sample_rate_hz": 8000,
+        "archived_command_far_audio_advance_ms": 2.875,
+        "archived_capture_window_ms": 2500,
+        "conflict": "The article reports a separate fixed 1000 ms post-trial pause. The released task loop has no explicit wait at that point. The DAQ buffer is 2500 ms. The original hardware clocks and delivered intervals are not established by either nominal specification."
+      },
+      "response_scoring": {
+        "verbal_response": "tah",
+        "published_anchor": "Tactile onset for touch. Nominal onset for sound-only catches.",
+        "published_timely_interval_ms": [
+          150,
+          2000
+        ],
+        "analysis": "The article uses a microphone threshold 10 SD above the 100 ms baseline and an offline 0.25\u201350 Hz bandpass. The saved script and article give different time anchors. The preview records neither calibrated voice onset nor the original timing categories."
+      },
+      "allocation": "The journal crosses hand dominance and the availability of vision between participants. The operator applies the study's assignments. The clock, sample carrier, and equipment calibration are external to this preview."
+    },
+    "preview": {
+      "preview_audio_kind": "fixed generated white-noise proxy",
+      "preview_audio_duration_ms": 125,
+      "preview_timing": "Use a fixed 1500 ms proxy for the 1000\u20132000 ms foreperiod. Add the 100 ms recording lead to the near sound onset; far sound begins 3 ms earlier and the tactile marker stays at the near trial-relative time. The preview uses the journal's 2600 ms buffer and 1000 ms post-trial pause for Experiments 1\u20133. Experiment 4 uses the released script's 2500 ms buffer with no additional post-buffer wait.",
+      "clock_gap": "The 3 ms sound-onset-relative far delay is a preview rounding of 2.875 ms. It is not a measurement of delivered sound or skin onset.",
+      "sound_location": "The catalogue uses centered procedural signals. Near/far rows retain reported hand-relative distances; the stereo sources do not reproduce the physical spatial contrast. The generic filmstrip cue cell may display \u201clooming\u201d; the generated and original sound positions are stationary.",
+      "response": "Mouse events can exercise the specified response labels. The preview does not implement a vocal or pedal detector or the calibrated tactile thresholds.",
+      "randomization": "The repeated-pool preview preserves each block\u2019s cell counts. The source pseudorandomized within each block; the exact sequences are unverified.",
+      "catch_labels": "A catch inherits its parent row\u2019s display label to allocate equal numbers by distance. Catch type, zero tactile channels and withhold expectation define it. The inherited weak or strong label identifies only the parent row."
+    },
+    "implementation_gaps": [
+      "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware.",
+      "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity.",
+      "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks.",
+      "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified.",
+      "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure.",
+      "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Geometry, timing, trial allocation and instructions",
+      "source": "Holmes et al., Experimental Brain Research 238:995\u20131009, version of record, pp. 997\u20131001, Experiments 1\u20133."
+    },
+    {
+      "field": "Nominal commands and divergences",
+      "source": "OSF 73x59 released Experiment 1 task and analysis scripts. The saved sound offset is 23 samples at 8 kHz and the nominal DAQ duration is 2500 ms."
+    },
+    {
+      "field": "Toolkit-only preview",
+      "source": "Seeded generated white noise and a tactile marker with proxy mouse response; numeric timing rounded where required by integer millisecond fields."
+    }
+  ]
+}

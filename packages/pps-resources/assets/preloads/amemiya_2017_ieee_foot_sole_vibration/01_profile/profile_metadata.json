@@ -1,0 +1,174 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "amemiya_2017_ieee_foot_sole_vibration",
+  "title": "Amemiya 2017 foot-sole vibration PPS",
+  "citation": "Amemiya, T., Ikei, Y., Hirota, K., & Kitazaki, M. (2017). Vibration on the soles of the feet evoking a sensation of walking expands peripersonal space. 2017 IEEE World Haptics Conference (WHC), 605\u2013610.",
+  "doi": "10.1109/whc.2017.7989970",
+  "source_url": "https://doi.org/10.1109/whc.2017.7989970",
+  "verification_status": "partial",
+  "notes": "Design inspection of the 192 conditioning trials in the 2017 IEEE study. Original sound, independently synchronized heel and chest outputs, and the reported condition-block scheduler are required for a participant session.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1109/whc.2017.7989970",
+    "publication_status": "published",
+    "profile_type": "amemiya_2017_bilateral_heel_conditioning_chest_detection",
+    "profile_check_complete": false,
+    "reported_participants": 7,
+    "auditory_stimulus": {
+      "signal": "Amplitude-modulated white noise simulating a virtual approaching source",
+      "playback": "Bose QuietComfort 15 noise-canceling headphones",
+      "nominal_approach_speed_m_per_s": 0.7,
+      "reported_level_range_dba": [
+        55,
+        70
+      ],
+      "gain_law_ambiguity": "The prose and Fig. 2 describe a rising level during approach. The same paragraph says the level decreased 6 dB when distance halved. The delivered gain law remains unresolved.",
+      "doppler_model": "Omitted",
+      "reported_in_fig_2_sound_trace_duration_ms_approx": 5000,
+      "locator": "pp. 606\u2013607, \u00a7III.B, Fig. 2"
+    },
+    "timing_evidence": {
+      "distance_cm": [
+        160,
+        120,
+        80,
+        40
+      ],
+      "printed_main_trial_interval_magnitudes_ms": [
+        2290,
+        1710,
+        1140,
+        570
+      ],
+      "main_trial_prose_anchor": "Sound onset (\u00a7III.C), without an explicit signed schedule.",
+      "main_trial_figure_anchor": "The dashed marks in Fig. 2 show a time interval from chest pulse to sound offset.",
+      "preview_chest_cue_after_audio_onset_ms": [
+        2710,
+        3290,
+        3860,
+        4430
+      ],
+      "preview_derivation": "Subtract the printed interval magnitudes from Fig. 2's drawn 5000 ms audio window. This gives 3860 ms for the illustrated 80 cm probe, close to the waveform's approximately 3856 ms onset.",
+      "exact_implemented_probe_timing_ms": null,
+      "control_scope": "Fig. 2 and \u00a7III.C differ on timing reference. The preview offsets implement the figure interpretation. Verify on the original task before participant use.",
+      "locator": "pp. 606\u2013607, \u00a7III.C, Fig. 2"
+    },
+    "preview_equivalence": {
+      "audio": "Generated 5 s, 44.1 kHz, fixed-gain continuous white noise for software timing. These files are preview assets; the reported perceived approach and dB(A) envelope require original or validated calibrated audio.",
+      "trajectory": "Path-length and propagation-speed fields provide the five-second render duration. The paper's 0.7 m/s and nominal probe distances are retained as separate study evidence.",
+      "target": "Any generated Toolkit tactile cue is a software marker for verifying schedule offsets. The Acouve drive waveform and delivery latency require external validation.",
+      "schedule": "One pooled inspection block uses a deterministic replay seed and implements stated total cell repetitions. Participant-specific block order, response capture and physical actuation remain separately gated."
+    },
+    "heel_conditioning": {
+      "apparatus": "Acouve Lab Vp416 voice coils attached to slippers",
+      "sites": [
+        "left heel",
+        "right heel"
+      ],
+      "conditions": [
+        {
+          "id": "walking_sound_heels",
+          "label": "Walking-sound vibration",
+          "reported_signal": "Recorded footsteps, low-pass filtered at 120 Hz"
+        },
+        {
+          "id": "asynchronous_walking_sound_heels",
+          "label": "Asynchronous walking-sound vibration",
+          "reported_signal": "Same recording, with each step onset asynchronized and randomized each trial"
+        },
+        {
+          "id": "sinusoidal_heels",
+          "label": "60 Hz sinusoidal vibration",
+          "reported_signal": "60 Hz sine, with the same step-onset schedule as the walking-sound condition"
+        }
+      ],
+      "reported_amplitude_matching": "Matched average amplitudes across the three patterns",
+      "rhythmic_figure_example": "Fig. 1A shows approximately 600 ms between alternating visible footstep bursts and 1200 ms on the same heel. This measures an illustrated example.",
+      "physical_drive_amplitude": null,
+      "original_heel_waveform_files": null,
+      "locator": "pp. 606\u2013607, \u00a7III.B and Fig. 1"
+    },
+    "chest_target": {
+      "apparatus": "Acouve Lab Vp216 voice coil on an adjustable neckstrap",
+      "body_site": "Manubrium of sternum",
+      "nominal_frequency_hz": 150,
+      "nominal_duration_ms": 200,
+      "intensity": "Suprathreshold",
+      "figure_scope": "The written Methods and Fig. 2 annotation give 150 Hz and 200 ms. The illustrated trace yields about 200 Hz and 100 ms. Delivered values require verification.",
+      "locator": "pp. 606\u2013607, \u00a7\u00a7III.B\u2013III.C and Figs. 2\u20133"
+    },
+    "reported_trial_schedule": {
+      "conditioning_trials": 192,
+      "repetitions_per_pattern_distance": 16,
+      "blocks": 6,
+      "trials_per_block": 32,
+      "blocks_per_pattern": 2,
+      "condition_block_order": "Modified Latin square across participants with reversal within participant (ABCCBA).",
+      "within_block_order": "Randomly selected sound distance.",
+      "trial_counts_per_distance_within_each_block": null,
+      "planned_rest_after_blocks_minutes": 5,
+      "additional_rest_allowed": true,
+      "reported_feedback": "None",
+      "baseline": {
+        "study_row_id": "doi:10.1109/whc.2017.7989970::tactile_baseline",
+        "response": "Detect the chest pulse as quickly as possible with no sound and no heel vibration.",
+        "trial_count": null,
+        "placement_and_interleaving": null
+      },
+      "catch_schedule": null,
+      "locator": "pp. 606\u2013607, \u00a7III.C"
+    },
+    "response_and_analysis": {
+      "task": "Press on the numeric keyboard as quickly as possible to detect the chest pulse while seated and holding the head still. Ignore the auditory stimulus.",
+      "online_response_window_ms": null,
+      "response_key": null,
+      "offline_rt_inclusion_range_ms": [
+        80,
+        2000
+      ],
+      "offline_window_anchor": "Chest target onset",
+      "primary_analysis": "Use reciprocal reaction times for the repeated-measures heel-pattern \u00d7 distance ANOVA. The Fig. 4 response summaries are RT differences from the tactile-only baseline.",
+      "boundary_definition": "Farthest tested distance with significant facilitation in the one-sided paired tests versus tactile-only baseline.",
+      "locator": "pp. 606\u2013608, \u00a7\u00a7III.C and IV.A, Fig. 4"
+    },
+    "after_main_subjective_walking_control": {
+      "study_row_id": "doi:10.1109/whc.2017.7989970::walking_rating",
+      "scope": "Seven main-task participants performed both controls afterward. The two control orders were counterbalanced in the reported design.",
+      "conditions": [
+        "Walking-sound vibration",
+        "Asynchronous walking-sound vibration",
+        "60 Hz sinusoidal vibration"
+      ],
+      "sound_present": false,
+      "rating_endpoints": [
+        -3,
+        3
+      ],
+      "scale": "Seven-point agreement that the participant felt as if walking.",
+      "response_device": "Numeric keyboard held with the right hand",
+      "block_order": "Pseudorandom",
+      "mean_block_duration_min": 10,
+      "block_count": null,
+      "ratings_per_block": null,
+      "locator": "p. 607, \u00a7III.E"
+    },
+    "implemented_controls": [
+      "Three condition labels \u00d7 four probe locations \u00d7 16 repetitions in the inspection pool."
+    ],
+    "implementation_gaps": [
+      "Original 2017 white-noise audio, sample format, dose calibration and author-confirmed magnitude law.",
+      "Independent synchronized bilateral heel and chest actuator scheduler, Acouve drive files, measured amplitude and verified tactile timing.",
+      "A condition-locking ABCCBA trial scheduler for six blocks plus the original participant assignments and between-block rest.",
+      "Exact sound/chest timing anchor resolution, tactile-only baseline allocation and any catch trials or ITI schedule."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Sound, probe intervals and chest-reference timing",
+      "source": "https://doi.org/10.1109/whc.2017.7989970, pp. 606\u2013607, \u00a7\u00a7III.B\u2013III.C and Fig. 2."
+    },
+    {
+      "field": "Heel waveform, apparatus and main-task schedule",
+      "source": "https://doi.org/10.1109/whc.2017.7989970, pp. 606\u2013607, \u00a7\u00a7III.B\u2013III.C and Figs. 1\u20133."
+    }
+  ]
+}

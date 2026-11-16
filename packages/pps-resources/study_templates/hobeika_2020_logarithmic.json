@@ -173,7 +173,7 @@
     },
     "implementation_gaps": [
       "Exact auditory source delivery, LISTEN HRTF ID, Spat patch and calibrated headphone output are unavailable.",
-      "The 20 ms target is encoded in the trial-row design. The current Segment 3 bake writes the legacy 100 ms tactile cue and uses that duration in the manifest. Calibrated 20 ms tactile delivery and response capture require a verified hardware path.",
+      "The Segment 3 preview synthesizes the stated 20 ms, 250 Hz vibrotactile command. Calibrated tactile delivery and response capture require a verified physical path.",
       "Exact within-range jitter sampling and cross-day assignment details are unreported.",
       "Response-contingent auditory control and discomfort ratings in the separate aBATs require a separate profile."
     ]

@@ -1,0 +1,195 @@
+{
+  "schema": "pps-preload-profile-assets.v1",
+  "template_id": "teraoka_2024_rear_pps",
+  "title": "Teraoka 2024 rear PPS block",
+  "visible_variant_label": "B",
+  "publication_status": "published",
+  "profile_type": "front_rear_speaker_array_audio_tactile_pps",
+  "asset_mode": "bundled_local",
+  "retrieval_strategy": "bundled_or_download_from_github_pages",
+  "local_only": true,
+  "catalog_segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile",
+      "path": "assets/preloads/teraoka_2024_rear_pps/01_profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder",
+      "path": "assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy",
+      "path": "assets/preloads/teraoka_2024_rear_pps/03_baseline_strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer",
+      "path": "assets/preloads/teraoka_2024_rear_pps/04_trial_designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup",
+      "path": "assets/preloads/teraoka_2024_rear_pps/05_run_setup"
+    }
+  ],
+  "profile_parameters_manifest": "assets/preloads/teraoka_2024_rear_pps/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 4,
+    "unsupported_structure_count": 2
+  },
+  "render_contract": {
+    "stage": "auditory_looming_prebake",
+    "engine": "python-sofa-reference",
+    "include_tactile": false,
+    "tactile_policy": "deferred_until_session_preparation"
+  },
+  "assets": [
+    {
+      "label": "Near rear pink-noise probe",
+      "path": "assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli/looming_Near_rear_pink-noise_probe.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli/looming_Near_rear_pink-noise_probe.wav",
+      "sha256": "3e81c11649971d57b6fe0ba185fa7801d85ab8eccfedbcd34ac972b71fb82bd8",
+      "duration_s": 1.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Near rear pink-noise probe",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 96.0,
+        "end_distance_cm": 48.0,
+        "start_rotation_deg": 180.0,
+        "end_rotation_deg": 180.0,
+        "movement_duration_s": 1.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.48,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": -0.96,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": -0.48,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Middle rear pink-noise probe",
+      "path": "assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli/looming_Middle_rear_pink-noise_probe.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli/looming_Middle_rear_pink-noise_probe.wav",
+      "sha256": "245de2de5cb78a3b7077bbdee9a0609eeffadf18daa91ac0d77c1dd62773e69a",
+      "duration_s": 1.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Middle rear pink-noise probe",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 144.0,
+        "end_distance_cm": 96.0,
+        "start_rotation_deg": 180.0,
+        "end_rotation_deg": 180.0,
+        "movement_duration_s": 1.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.48,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": -1.44,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": -0.96,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Far rear pink-noise probe",
+      "path": "assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli/looming_Far_rear_pink-noise_probe.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teraoka_2024_rear_pps/02_looming_stimuli/looming_Far_rear_pink-noise_probe.wav",
+      "sha256": "9a5fe1badca0b9ce95058929458323ffabeab17c26a5f2b0d2b86366020bfe33",
+      "duration_s": 1.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Far rear pink-noise probe",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 192.0,
+        "end_distance_cm": 144.0,
+        "start_rotation_deg": 180.0,
+        "end_rotation_deg": 180.0,
+        "movement_duration_s": 1.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.48,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": -1.92,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": -1.44,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ],
+  "notes": [
+    "Prebaked WAVs are local auditory-only profile assets.",
+    "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
+    "The browser dashboard only orchestrates local companion verification and use of these files."
+  ]
+}

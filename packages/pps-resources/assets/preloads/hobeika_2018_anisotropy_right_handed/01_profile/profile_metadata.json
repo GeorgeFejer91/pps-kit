@@ -1,0 +1,114 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "hobeika_2018_anisotropy_right_handed",
+  "title": "Hobeika 2018 lateral PPS \u2014 right-handed cohort",
+  "citation": "Hobeika, L., Taffou, M., & Viaud-Delmon, I. (2018). Anisotropy of lateral peripersonal space is linked to handedness. Experimental Brain Research 236, 609\u2013618.",
+  "doi": "10.1007/s00221-017-5158-2",
+  "source_url": "https://doi.org/10.1007/s00221-017-5158-2",
+  "verification_status": "partial",
+  "notes": "Source-backed sample schedule. Generated audio, calibrated tactile delivery and original response acquisition affect replication fidelity.",
+  "reference_parameters": {
+    "profile_type": "lateral_looming_audio_tactile_pps",
+    "publication_study_row_id": "doi:10.1007/s00221-017-5158-2",
+    "source_scope": "Right-handed cohort\u2019s assessment. The two cohort profiles differ in target and response hand.",
+    "sound_duration_ms": 3000,
+    "sound_source": "Bubbling-water recording binaurally rendered with nonindividual LISTEN HRTFs.",
+    "published_path": {
+      "coordinate_frame": "head-centered",
+      "hemispaces": [
+        "left",
+        "right"
+      ],
+      "distance_cm": [
+        135,
+        20
+      ],
+      "nominal_speed_cm_s": 38.333333333333336,
+      "azimuth_deg_as_printed": {
+        "left": 60,
+        "right": -60
+      }
+    },
+    "sound_onset_relative_soa_ms": [
+      0,
+      375,
+      750,
+      1125,
+      1500,
+      1875,
+      2250,
+      2625,
+      3000
+    ],
+    "nominal_distances_at_soa_cm": [
+      135.0,
+      120.625,
+      106.25,
+      91.875,
+      77.5,
+      63.125,
+      48.75,
+      34.375,
+      20.0
+    ],
+    "sound_onset_relative_baseline_soa_ms": [
+      -650,
+      3650
+    ],
+    "trial_start_relative_baseline_soa_ms": [
+      350,
+      4650
+    ],
+    "baseline_sound_policy": "The sound still plays in both endpoint control trial types. The target is timed during the pre-sound or post-sound silence.",
+    "pre_sound_silence_ms": 1000,
+    "reported_post_sound_silence_range_ms": [
+      2700,
+      3300
+    ],
+    "preview_post_sound_silence_values_ms": [
+      2700,
+      3300
+    ],
+    "tactile_command": {
+      "site": "palmar left index finger",
+      "waveform": "sine",
+      "duration_ms": 20,
+      "frequency_hz": 250,
+      "actuator": "small loudspeaker"
+    },
+    "response": "Speeded button press with the right index finger on detection of the target. Withhold on auditory-only catches.",
+    "reported_counts": {
+      "blocks": 5,
+      "trials_per_block": 48,
+      "sound_overlap_targets": 180,
+      "silent_window_targets": 40,
+      "sound_only_catches": 20,
+      "target_repeats_per_side_delay_per_context": 10
+    },
+    "preview_substitutions": {
+      "audio": "Generated pink noise rendered on the reported paths with the Toolkit binaural engine. Exact original waveform and spatial-render settings are unavailable.",
+      "timing": "Two balanced post-sound interval endpoints and five repeats per delay, path and endpoint realize ten per delay and path. The actual jitter distribution and block composition are unreported.",
+      "response": "Mouse press proxy. Calibrated physical tactile delivery and response capture require separate verification."
+    },
+    "implementation_gaps": [
+      "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable.",
+      "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration.",
+      "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported."
+    ],
+    "reported_cohort": {
+      "analyzed": 21,
+      "total_recruited_across_groups": 56
+    },
+    "handedness_screening": "FLANDERS. The non-dominant index contacts the trunk midline; respond with the dominant index."
+  },
+  "provenance": [
+    {
+      "field": "Timing, apparatus, counts and context",
+      "source": "Experimental Brain Research 236, 609\u2013618, pp. 611\u2013612, Participants, Materials, Design and procedure, Fig. 1."
+    },
+    {
+      "field": "Toolkit auditory proxy, jitter and allocation defaults",
+      "source": "PPS Kit configuration. Two evenly repeated post-sound interval endpoints span the published range, and the generated catch pool balances across sound sides."
+    }
+  ]
+}

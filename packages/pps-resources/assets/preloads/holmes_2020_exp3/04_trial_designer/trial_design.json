@@ -1,0 +1,274 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "holmes_2020_exp3",
+  "repetitions_per_condition": 10,
+  "soa_values_ms": [
+    0,
+    3
+  ],
+  "spatial_values_cm": [
+    5,
+    105
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "holmes-exp3-near-weak",
+      "label": "Weak vibration, near sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [
+        5.0
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "target_role": "tactile_target",
+        "response_mode": "voice_key_mouse_click_proxy",
+        "response_capture_device": "mouse proxy",
+        "auditory_trajectory_family": "static_near_far_loudspeakers",
+        "auditory_trajectory_direction": "stationary_near",
+        "body_anchor": "participant's hand",
+        "trajectory_start_distance_cm": 5,
+        "trajectory_end_distance_cm": 5,
+        "source_asset_equivalence": "fixed generated white-noise proxy",
+        "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_intensity": "weak",
+        "tactile_intensity_unit": "condition label only"
+      },
+      "elements": [
+        {
+          "element_id": "holmes-exp3-near-weak-pre",
+          "kind": "jitter",
+          "label": "Preview leading silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1600
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "holmes-exp3-near-weak-sound",
+          "kind": "looming_stimulus",
+          "label": "Holmes preview white-noise cue (near)",
+          "source_label": "Holmes preview white-noise cue (near)",
+          "source_labels": [
+            "Holmes preview white-noise cue (near)"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "holmes-exp3-near-weak-post",
+          "kind": "jitter",
+          "label": "Preview trailing silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            3375
+          ],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "holmes-exp3-near-strong",
+      "label": "Strong vibration, near sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [
+        5.0
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "target_role": "tactile_target",
+        "response_mode": "voice_key_mouse_click_proxy",
+        "response_capture_device": "mouse proxy",
+        "auditory_trajectory_family": "static_near_far_loudspeakers",
+        "auditory_trajectory_direction": "stationary_near",
+        "body_anchor": "participant's hand",
+        "trajectory_start_distance_cm": 5,
+        "trajectory_end_distance_cm": 5,
+        "source_asset_equivalence": "fixed generated white-noise proxy",
+        "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_intensity": "strong",
+        "tactile_intensity_unit": "condition label only"
+      },
+      "elements": [
+        {
+          "element_id": "holmes-exp3-near-strong-pre",
+          "kind": "jitter",
+          "label": "Preview leading silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1600
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "holmes-exp3-near-strong-sound",
+          "kind": "looming_stimulus",
+          "label": "Holmes preview white-noise cue (near)",
+          "source_label": "Holmes preview white-noise cue (near)",
+          "source_labels": [
+            "Holmes preview white-noise cue (near)"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "holmes-exp3-near-strong-post",
+          "kind": "jitter",
+          "label": "Preview trailing silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            3375
+          ],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "holmes-exp3-far-weak",
+      "label": "Weak vibration, far sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        3
+      ],
+      "spatial_values_cm": [
+        105.0
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "target_role": "tactile_target",
+        "response_mode": "voice_key_mouse_click_proxy",
+        "response_capture_device": "mouse proxy",
+        "auditory_trajectory_family": "static_near_far_loudspeakers",
+        "auditory_trajectory_direction": "stationary_far",
+        "body_anchor": "participant's hand",
+        "trajectory_start_distance_cm": 105,
+        "trajectory_end_distance_cm": 105,
+        "source_asset_equivalence": "fixed generated white-noise proxy",
+        "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_intensity": "weak",
+        "tactile_intensity_unit": "condition label only"
+      },
+      "elements": [
+        {
+          "element_id": "holmes-exp3-far-weak-pre",
+          "kind": "jitter",
+          "label": "Preview leading silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1597
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "holmes-exp3-far-weak-sound",
+          "kind": "looming_stimulus",
+          "label": "Holmes preview white-noise cue (far)",
+          "source_label": "Holmes preview white-noise cue (far)",
+          "source_labels": [
+            "Holmes preview white-noise cue (far)"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "holmes-exp3-far-weak-post",
+          "kind": "jitter",
+          "label": "Preview trailing silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            3378
+          ],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "holmes-exp3-far-strong",
+      "label": "Strong vibration, far sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        3
+      ],
+      "spatial_values_cm": [
+        105.0
+      ],
+      "metadata": {
+        "expected_response": "respond",
+        "target_role": "tactile_target",
+        "response_mode": "voice_key_mouse_click_proxy",
+        "response_capture_device": "mouse proxy",
+        "auditory_trajectory_family": "static_near_far_loudspeakers",
+        "auditory_trajectory_direction": "stationary_far",
+        "body_anchor": "participant's hand",
+        "trajectory_start_distance_cm": 105,
+        "trajectory_end_distance_cm": 105,
+        "source_asset_equivalence": "fixed generated white-noise proxy",
+        "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_intensity": "strong",
+        "tactile_intensity_unit": "condition label only"
+      },
+      "elements": [
+        {
+          "element_id": "holmes-exp3-far-strong-pre",
+          "kind": "jitter",
+          "label": "Preview leading silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1597
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "holmes-exp3-far-strong-sound",
+          "kind": "looming_stimulus",
+          "label": "Holmes preview white-noise cue (far)",
+          "source_label": "Holmes preview white-noise cue (far)",
+          "source_labels": [
+            "Holmes preview white-noise cue (far)"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        },
+        {
+          "element_id": "holmes-exp3-far-strong-post",
+          "kind": "jitter",
+          "label": "Preview trailing silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            3378
+          ],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 160
+}

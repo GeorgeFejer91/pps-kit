@@ -1,0 +1,121 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "amemiya_2017_ieee_foot_sole_vibration",
+  "repetitions_per_condition": 16,
+  "soa_values_ms": [
+    2710,
+    3290,
+    3860,
+    4430
+  ],
+  "spatial_values_cm": [
+    160,
+    120,
+    80,
+    40
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "walking_sound_heels",
+      "label": "Walking-sound vibration",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "body_anchor": "Manubrium of sternum",
+        "expected_response": "respond",
+        "target_role": "chest_vibrotactile_target",
+        "response_mode": "numeric_keypad_press",
+        "response_rule": "respond_only_to_chest_vibration",
+        "tactile_stimulation_modality": "vibrotactile",
+        "source_asset_equivalence": "Fixed-gain timing-preview white noise with no original audio or actuator drive.",
+        "locomotion_condition": "Walking-sound vibration",
+        "response_capture_device": "Numeric keyboard"
+      },
+      "elements": [
+        {
+          "element_id": "walking_sound_heels-audio",
+          "kind": "looming_stimulus",
+          "label": "Continuous white noise (timing preview)",
+          "source_label": "Continuous white noise (timing preview)",
+          "source_labels": [
+            "Continuous white noise (timing preview)"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "asynchronous_walking_sound_heels",
+      "label": "Asynchronous walking-sound vibration",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "body_anchor": "Manubrium of sternum",
+        "expected_response": "respond",
+        "target_role": "chest_vibrotactile_target",
+        "response_mode": "numeric_keypad_press",
+        "response_rule": "respond_only_to_chest_vibration",
+        "tactile_stimulation_modality": "vibrotactile",
+        "source_asset_equivalence": "Fixed-gain timing-preview white noise with no original audio or actuator drive.",
+        "locomotion_condition": "Asynchronous walking-sound vibration",
+        "response_capture_device": "Numeric keyboard"
+      },
+      "elements": [
+        {
+          "element_id": "asynchronous_walking_sound_heels-audio",
+          "kind": "looming_stimulus",
+          "label": "Continuous white noise (timing preview)",
+          "source_label": "Continuous white noise (timing preview)",
+          "source_labels": [
+            "Continuous white noise (timing preview)"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "sinusoidal_heels",
+      "label": "60 Hz sinusoidal vibration",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "body_anchor": "Manubrium of sternum",
+        "expected_response": "respond",
+        "target_role": "chest_vibrotactile_target",
+        "response_mode": "numeric_keypad_press",
+        "response_rule": "respond_only_to_chest_vibration",
+        "tactile_stimulation_modality": "vibrotactile",
+        "source_asset_equivalence": "Fixed-gain timing-preview white noise with no original audio or actuator drive.",
+        "locomotion_condition": "60 Hz sinusoidal vibration",
+        "response_capture_device": "Numeric keyboard"
+      },
+      "elements": [
+        {
+          "element_id": "sinusoidal_heels-audio",
+          "kind": "looming_stimulus",
+          "label": "Continuous white noise (timing preview)",
+          "source_label": "Continuous white noise (timing preview)",
+          "source_labels": [
+            "Continuous white noise (timing preview)"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 192
+}

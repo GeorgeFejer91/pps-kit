@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "bassolino_2010_mouse_left_hand_no_mouse_first",
+  "assets": [
+    {
+      "label": "Bassolino preview noise, near",
+      "path": "assets/preloads/bassolino_2010_mouse_left_hand_no_mouse_first/02_looming_stimuli/looming_Bassolino_preview_noise_near.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/bassolino_2010_mouse_left_hand_no_mouse_first/02_looming_stimuli/looming_Bassolino_preview_noise_near.wav",
+      "sha256": "588bbb3c6d5c0c5af3c67f62153439d6c45552950f5543623e6a916ad9a1b96b",
+      "duration_s": 0.1,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Bassolino preview noise, near",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 15.0,
+        "end_distance_cm": 15.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.15,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.15,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Bassolino preview noise, far",
+      "path": "assets/preloads/bassolino_2010_mouse_left_hand_no_mouse_first/02_looming_stimuli/looming_Bassolino_preview_noise_far.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/bassolino_2010_mouse_left_hand_no_mouse_first/02_looming_stimuli/looming_Bassolino_preview_noise_far.wav",
+      "sha256": "ce306ea9cd8b68ed6a2b4319b046ed350257e4d1622d51e014de2aeda1c9a050",
+      "duration_s": 0.1,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Bassolino preview noise, far",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 72.0,
+        "end_distance_cm": 72.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.72,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.72,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

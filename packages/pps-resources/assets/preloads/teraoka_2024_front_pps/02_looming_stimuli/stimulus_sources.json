@@ -1,0 +1,135 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "teraoka_2024_front_pps",
+  "assets": [
+    {
+      "label": "Near front pink-noise probe",
+      "path": "assets/preloads/teraoka_2024_front_pps/02_looming_stimuli/looming_Near_front_pink-noise_probe.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teraoka_2024_front_pps/02_looming_stimuli/looming_Near_front_pink-noise_probe.wav",
+      "sha256": "5af2d82492cb94c1698159f7245bfb36660e448ca543249ffadf0dfbdbc5b49f",
+      "duration_s": 1.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Near front pink-noise probe",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 96.0,
+        "end_distance_cm": 48.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 1.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.48,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.96,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.48,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Middle front pink-noise probe",
+      "path": "assets/preloads/teraoka_2024_front_pps/02_looming_stimuli/looming_Middle_front_pink-noise_probe.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teraoka_2024_front_pps/02_looming_stimuli/looming_Middle_front_pink-noise_probe.wav",
+      "sha256": "e9be8b91bf8af1f2c0f067b4513603525d5fa1e842f63d0d804f55a34079e1bc",
+      "duration_s": 1.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Middle front pink-noise probe",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 144.0,
+        "end_distance_cm": 96.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 1.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.48,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.44,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.96,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Far front pink-noise probe",
+      "path": "assets/preloads/teraoka_2024_front_pps/02_looming_stimuli/looming_Far_front_pink-noise_probe.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teraoka_2024_front_pps/02_looming_stimuli/looming_Far_front_pink-noise_probe.wav",
+      "sha256": "f8fdd247d4776a2ca56b686ed60e640277c3fcabe736600f1c07f618fb23af88",
+      "duration_s": 1.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Far front pink-noise probe",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 192.0,
+        "end_distance_cm": 144.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 1.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.48,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.92,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.44,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

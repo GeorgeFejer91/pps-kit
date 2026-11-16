@@ -1,0 +1,463 @@
+{
+  "template_id": "holmes_2020_exp2_weak_target",
+  "title": "Holmes 2020 Experiment 2, weak-target vocal discrimination",
+  "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. Experimental Brain Research, 238, 995–1009.",
+  "source_url": "https://doi.org/10.1007/s00221-020-05771-5",
+  "doi": "10.1007/s00221-020-05771-5",
+  "verification_status": "partial",
+  "notes": "Experiment 2 trial allocation with a fixed generated white-noise proxy. Response capture and the original tactile stimulus require external apparatus. This profile is only for the weak-target participant arm.",
+  "reference_parameters": {
+    "profile_type": "static_near_far_audio_tactile_pps",
+    "publication_study_row_id": "doi:10.1007/s00221-020-05771-5::b",
+    "formal_experiment": 2,
+    "source_scope": "Main Experiment 2. Assigned weak target arm only.",
+    "author_project_url": "https://osf.io/73x59/",
+    "reported_design": {
+      "per_block_cell_counts": {
+        "near_weak": 10,
+        "near_strong": 10,
+        "far_weak": 10,
+        "far_strong": 10
+      },
+      "trials_per_block": 40,
+      "formal_blocks": 4,
+      "total_trials_per_participant": 160,
+      "analyzed_participants_in_profile_scope": 8,
+      "order_within_block": "Pseudorandom, with the complete published cell quotas in each block.",
+      "cohort": "16 new participants, eight assigned to each target intensity.",
+      "instruction": "Say tah only for weak vibration. Each participant uses one target mapping throughout. Every trial has a vibration."
+    },
+    "published_protocol": {
+      "physical_apparatus": {
+        "tactile": "Oticon bone-conducting vibrator held between the index finger and thumb, hand resting on the thigh.",
+        "sound": "Goodmans Active 46 loudspeakers placed 5 cm and 105 cm from the responding hand, approximately aligned with the head without one speaker blocking the other. Approximate auditory level at the head was 80 dB.",
+        "routing": "National Instruments PCIe-6321 records microphone and responses, with a custom circuit selecting near and far loudspeakers. The released hand-task programs use analog tactile and audio outputs and a digital speaker selector at 8 kHz.",
+        "carrier": "A 125 ms white-noise burst at 8 kHz with 5 ms rise and fall. On vibration trials, the auditory and tactile waveforms share the trial carrier. The released code samples a new uniformly distributed white-noise waveform per trial."
+      },
+      "calibration": {
+        "procedure": "Separate pre-task 2IFC with 44 trials, four at the warm-up level and 40 using QUEST. Vibration appears at the center of one of two one-second intervals, separated by 500 ms, and interval onset is announced by a 250 ms LED flash. Respond during 2.25 s with the corresponding interval button. Both LEDs flash twice after an error or miss, missed trials repeat, and approximately 80 dB white noise masks the actuator.",
+        "warm_up_intensity_source_arbitrary_units": 0.75,
+        "quest": {
+          "method": "PsychToolBox3",
+          "threshold_probability": 0.9,
+          "beta": 3.5,
+          "delta": 0.05,
+          "gamma": 0.5,
+          "grain": 0.005
+        },
+        "weak": "Participant's QUEST estimate for about 90% correct detection.",
+        "strong": "1.5 times weak drive. The article describes one unmasked physical detectability check."
+      },
+      "published_hand_timing": {
+        "jitter_before_trial_ms": [
+          1000,
+          2000
+        ],
+        "jitter_distribution": "Pseudorandom uniform.",
+        "reported_trial_duration_ms": 2600,
+        "reported_fixed_iti_ms": 1000,
+        "recording_starts_before_tactile_command_ms": 100,
+        "published_far_audio_advance_ms_approx": 2.9,
+        "archived_command_far_audio_advance_samples": 23,
+        "archived_command_sample_rate_hz": 8000,
+        "archived_command_far_audio_advance_ms": 2.875,
+        "archived_capture_window_ms": 2500,
+        "conflict": "The article reports a separate fixed 1000 ms post-trial pause. The released task loop has no explicit wait at that point. The DAQ buffer is 2500 ms. The original hardware clocks and delivered intervals are not established by either nominal specification."
+      },
+      "response_scoring": {
+        "verbal_response": "tah",
+        "published_anchor": "Tactile onset for touch. Nominal onset for sound-only catches.",
+        "published_timely_interval_ms": [
+          150,
+          2000
+        ],
+        "analysis": "The article uses a microphone threshold 10 SD above the 100 ms baseline and an offline 0.25–50 Hz bandpass. The saved script and article give different time anchors. The preview records neither calibrated voice onset nor the original timing categories."
+      },
+      "allocation": "The journal crosses hand dominance and the availability of vision between participants. The operator applies the study's assignments. The clock, sample carrier, and equipment calibration are external to this preview."
+    },
+    "preview": {
+      "preview_audio_kind": "fixed generated white-noise proxy",
+      "preview_audio_duration_ms": 125,
+      "preview_timing": "Use a fixed 1500 ms proxy for the 1000–2000 ms foreperiod. Add the 100 ms recording lead to the near sound onset; far sound begins 3 ms earlier and the tactile marker stays at the near trial-relative time. The preview uses the journal's 2600 ms buffer and 1000 ms post-trial pause for Experiments 1–3. Experiment 4 uses the released script's 2500 ms buffer with no additional post-buffer wait.",
+      "clock_gap": "The 3 ms sound-onset-relative far delay is a preview rounding of 2.875 ms. It is not a measurement of delivered sound or skin onset.",
+      "sound_location": "The catalogue uses centered procedural signals. Near/far rows retain reported hand-relative distances; the stereo sources do not reproduce the physical spatial contrast. The generic filmstrip cue cell may display “looming”; the generated and original sound positions are stationary.",
+      "response": "Mouse events can exercise the specified response labels. The preview does not implement a vocal or pedal detector or the calibrated tactile thresholds.",
+      "randomization": "The repeated-pool preview preserves each block’s cell counts. The source pseudorandomized within each block; the exact sequences are unverified."
+    },
+    "implementation_gaps": [
+      "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware.",
+      "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity.",
+      "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks.",
+      "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified.",
+      "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure.",
+      "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
+    ]
+  },
+  "design": {
+    "name": "Holmes 2020 Experiment 2, weak-target vocal discrimination",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Holmes preview white-noise cue (near)",
+        "noise_type": "white",
+        "azimuth_deg": 0,
+        "elevation_deg": 0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {
+            "x_m": 0,
+            "y_m": 0.05,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": 0,
+            "y_m": 0.051000000000000004,
+            "z_m": 0
+          },
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.125,
+          "start_hold_s": 0,
+          "end_hold_s": 0
+        }
+      },
+      {
+        "label": "Holmes preview white-noise cue (far)",
+        "noise_type": "white",
+        "azimuth_deg": 0,
+        "elevation_deg": 0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {
+            "x_m": 0,
+            "y_m": 1.05,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": 0,
+            "y_m": 1.051,
+            "z_m": 0
+          },
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.125,
+          "start_hold_s": 0,
+          "end_hold_s": 0
+        }
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 0.5,
+      "end_radius_m": 0.501,
+      "path_direction": "custom",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0,
+      "start_y_m": 0.5,
+      "start_z_m": 0,
+      "end_x_m": 0,
+      "end_y_m": 0.501,
+      "end_z_m": 0,
+      "path_length_m": 0.001,
+      "propagation_speed_mps": 0.008,
+      "azimuth_start_deg": 0,
+      "azimuth_end_deg": 0,
+      "elevation_deg": 0,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 8000,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 10,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 10,
+        "catch": 0
+      },
+      "soa_values_ms": [
+        0,
+        3
+      ],
+      "spatial_values_cm": [
+        5,
+        105
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "stationary"
+      ],
+      "tactile_sites": [
+        "vibrator held between index finger and thumb"
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "catch_trials_exact": 0,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 4,
+      "block_specs": [
+        {
+          "label": "Block 1",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        },
+        {
+          "label": "Block 2",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        },
+        {
+          "label": "Block 3",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        },
+        {
+          "label": "Block 4",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        }
+      ],
+      "repeat_trial_pool_per_block": true,
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "participant_order_policy": {
+        "schema": "pps-participant-order-policy.v1",
+        "algorithm": "fixed",
+        "seed": 202005771,
+        "preview_count": 8
+      },
+      "trial_strips": [
+        {
+          "strip_id": "holmes-exp2-weak-target-near-weak",
+          "label": "Weak vibration, near sound",
+          "soa_values_ms": [
+            0
+          ],
+          "spatial_values_cm": [
+            5
+          ],
+          "metadata": {
+            "expected_response": "respond",
+            "target_role": "tactile_target",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "mouse proxy",
+            "auditory_trajectory_family": "static_near_far_loudspeakers",
+            "auditory_trajectory_direction": "stationary_near",
+            "body_anchor": "participant's hand",
+            "trajectory_start_distance_cm": 5,
+            "trajectory_end_distance_cm": 5,
+            "source_asset_equivalence": "fixed generated white-noise proxy",
+            "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_intensity": "weak",
+            "tactile_intensity_unit": "condition label only"
+          },
+          "elements": [
+            {
+              "element_id": "holmes-exp2-weak-target-near-weak-pre",
+              "kind": "jitter",
+              "label": "Preview leading silence",
+              "jitter_values_ms": [
+                1600
+              ]
+            },
+            {
+              "element_id": "holmes-exp2-weak-target-near-weak-sound",
+              "kind": "looming_stimulus",
+              "label": "Holmes preview white-noise cue (near)",
+              "source_label": "Holmes preview white-noise cue (near)"
+            },
+            {
+              "element_id": "holmes-exp2-weak-target-near-weak-post",
+              "kind": "jitter",
+              "label": "Preview trailing silence",
+              "jitter_values_ms": [
+                3375
+              ]
+            }
+          ]
+        },
+        {
+          "strip_id": "holmes-exp2-weak-target-near-strong",
+          "label": "Strong vibration, near sound",
+          "soa_values_ms": [
+            0
+          ],
+          "spatial_values_cm": [
+            5
+          ],
+          "metadata": {
+            "expected_response": "withhold",
+            "target_role": "tactile_nontarget",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "mouse proxy",
+            "auditory_trajectory_family": "static_near_far_loudspeakers",
+            "auditory_trajectory_direction": "stationary_near",
+            "body_anchor": "participant's hand",
+            "trajectory_start_distance_cm": 5,
+            "trajectory_end_distance_cm": 5,
+            "source_asset_equivalence": "fixed generated white-noise proxy",
+            "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_intensity": "strong",
+            "tactile_intensity_unit": "condition label only"
+          },
+          "elements": [
+            {
+              "element_id": "holmes-exp2-weak-target-near-strong-pre",
+              "kind": "jitter",
+              "label": "Preview leading silence",
+              "jitter_values_ms": [
+                1600
+              ]
+            },
+            {
+              "element_id": "holmes-exp2-weak-target-near-strong-sound",
+              "kind": "looming_stimulus",
+              "label": "Holmes preview white-noise cue (near)",
+              "source_label": "Holmes preview white-noise cue (near)"
+            },
+            {
+              "element_id": "holmes-exp2-weak-target-near-strong-post",
+              "kind": "jitter",
+              "label": "Preview trailing silence",
+              "jitter_values_ms": [
+                3375
+              ]
+            }
+          ]
+        },
+        {
+          "strip_id": "holmes-exp2-weak-target-far-weak",
+          "label": "Weak vibration, far sound",
+          "soa_values_ms": [
+            3
+          ],
+          "spatial_values_cm": [
+            105
+          ],
+          "metadata": {
+            "expected_response": "respond",
+            "target_role": "tactile_target",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "mouse proxy",
+            "auditory_trajectory_family": "static_near_far_loudspeakers",
+            "auditory_trajectory_direction": "stationary_far",
+            "body_anchor": "participant's hand",
+            "trajectory_start_distance_cm": 105,
+            "trajectory_end_distance_cm": 105,
+            "source_asset_equivalence": "fixed generated white-noise proxy",
+            "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_intensity": "weak",
+            "tactile_intensity_unit": "condition label only"
+          },
+          "elements": [
+            {
+              "element_id": "holmes-exp2-weak-target-far-weak-pre",
+              "kind": "jitter",
+              "label": "Preview leading silence",
+              "jitter_values_ms": [
+                1597
+              ]
+            },
+            {
+              "element_id": "holmes-exp2-weak-target-far-weak-sound",
+              "kind": "looming_stimulus",
+              "label": "Holmes preview white-noise cue (far)",
+              "source_label": "Holmes preview white-noise cue (far)"
+            },
+            {
+              "element_id": "holmes-exp2-weak-target-far-weak-post",
+              "kind": "jitter",
+              "label": "Preview trailing silence",
+              "jitter_values_ms": [
+                3378
+              ]
+            }
+          ]
+        },
+        {
+          "strip_id": "holmes-exp2-weak-target-far-strong",
+          "label": "Strong vibration, far sound",
+          "soa_values_ms": [
+            3
+          ],
+          "spatial_values_cm": [
+            105
+          ],
+          "metadata": {
+            "expected_response": "withhold",
+            "target_role": "tactile_nontarget",
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "mouse proxy",
+            "auditory_trajectory_family": "static_near_far_loudspeakers",
+            "auditory_trajectory_direction": "stationary_far",
+            "body_anchor": "participant's hand",
+            "trajectory_start_distance_cm": 105,
+            "trajectory_end_distance_cm": 105,
+            "source_asset_equivalence": "fixed generated white-noise proxy",
+            "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_intensity": "strong",
+            "tactile_intensity_unit": "condition label only"
+          },
+          "elements": [
+            {
+              "element_id": "holmes-exp2-weak-target-far-strong-pre",
+              "kind": "jitter",
+              "label": "Preview leading silence",
+              "jitter_values_ms": [
+                1597
+              ]
+            },
+            {
+              "element_id": "holmes-exp2-weak-target-far-strong-sound",
+              "kind": "looming_stimulus",
+              "label": "Holmes preview white-noise cue (far)",
+              "source_label": "Holmes preview white-noise cue (far)"
+            },
+            {
+              "element_id": "holmes-exp2-weak-target-far-strong-post",
+              "kind": "jitter",
+              "label": "Preview trailing silence",
+              "jitter_values_ms": [
+                3378
+              ]
+            }
+          ]
+        }
+      ],
+      "participants": 8,
+      "random_seed": 202005771
+    }
+  },
+  "provenance": [
+    {
+      "field": "Geometry, timing, trial allocation and instructions",
+      "source": "Holmes et al., Experimental Brain Research 238:995–1009, version of record, pp. 997–1001, Experiments 1–3."
+    },
+    {
+      "field": "Nominal commands and divergences",
+      "source": "OSF 73x59 released Experiment 2 task and analysis scripts. The saved sound offset is 23 samples at 8 kHz and the nominal DAQ duration is 2500 ms."
+    },
+    {
+      "field": "Toolkit-only preview",
+      "source": "Seeded generated white noise and a tactile marker with proxy mouse response; numeric timing rounded where required by integer millisecond fields."
+    }
+  ]
+}

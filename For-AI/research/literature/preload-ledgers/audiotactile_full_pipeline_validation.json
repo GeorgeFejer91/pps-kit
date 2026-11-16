@@ -666,10 +666,17 @@
     },
     {
       "audiotactile_task_family": "static near/far tactile detection around hand/tool space",
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "electrical_tactile_calibration",
+        "voice_key_response_capture"
+      ],
       "citation_short": "Bassolino et al. (2010)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "bassolino_2010_mouse_left_hand_no_mouse_first",
+        "bassolino_2010_mouse_left_hand_passive_first",
+        "bassolino_2010_mouse_right_hand"
+      ],
       "doi": "10.1016/j.neuropsychologia.2009.11.009",
       "expected_effect_direction": "mouse_holding_or_use_extends_right_hand_audio_pps_to_screen_space",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -694,17 +701,29 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "bassolino_2010_mouse_left_hand_no_mouse_first",
+            "bassolino_2010_mouse_left_hand_passive_first",
+            "bassolino_2010_mouse_right_hand"
+          ]
         },
         "source_parameter_extraction": {
-          "blockers": [],
+          "blockers": [
+            "electrical_tactile_calibration",
+            "voice_key_response_capture"
+          ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "full trial counts, tactile calibration, and response mapping need extraction"
+            "Original electrical intensity titration, vowel voice key and calibrated two-speaker output.",
+            "The mouse-motor and concurrent visual letter conditions require the original or independently validated apparatus."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -721,25 +740,51 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [],
+          "blocker_ids": [
+            "electrical_tactile_calibration",
+            "voice_key_response_capture"
+          ],
           "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
-          "profile_readiness": [],
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_missing_parameters",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "bassolino_2010_mouse_left_hand_no_mouse_first"
+            },
+            {
+              "runner_readiness": "blocked_missing_parameters",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "bassolino_2010_mouse_left_hand_passive_first"
+            },
+            {
+              "runner_readiness": "blocked_missing_parameters",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "bassolino_2010_mouse_right_hand"
+            }
+          ],
           "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "full trial counts, tactile calibration, and response mapping need extraction"
+        "Original electrical intensity titration, vowel voice key and calibrated two-speaker output.",
+        "The mouse-motor and concurrent visual letter conditions require the original or independently validated apparatus."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: full trial counts, tactile calibration, and response mapping need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: Original electrical intensity titration, vowel voice key and calibrated two-speaker output.; The mouse-motor and concurrent visual letter conditions require the original or independently validated apparatus.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -752,9 +797,9 @@
         "pdf_status": "paywalled",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "profile_present_but_source_parameters_missing",
       "record_id": "bassolino_2010_mouse_use",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "holmes_2020_systematic_review",
         "pubmed_query_variant_exhaustiveness_2026_06_13"
@@ -3225,11 +3270,15 @@
     {
       "audiotactile_task_family": "lateral PPS audio-tactile task linked to handedness",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Hobeika et al. (2018)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "hobeika_2018_anisotropy_left_handed",
+        "hobeika_2018_anisotropy_right_handed"
+      ],
       "doi": "10.1007/s00221-017-5158-2",
       "expected_effect_direction": "right_handers_show_left_hemispace_pps_expansion_left_handers_symmetric",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -3254,19 +3303,26 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "hobeika_2018_anisotropy_left_handed",
+            "hobeika_2018_anisotropy_right_handed"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "hrtf_database_or_binaural_engine_mismatch",
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact lateral trajectory, timing, and tactile-site mapping need extraction"
+            "Original bubbling-water recording, LISTEN filter and sound-level calibration. The Toolkit encodes the nine concurrent SOAs, two sound-bearing silent controls, and reported cohort-specific target and response hands."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -3284,26 +3340,42 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "hrtf_database_or_binaural_engine_mismatch",
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
-          "profile_readiness": [],
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_missing_parameters",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "hobeika_2018_anisotropy_left_handed"
+            },
+            {
+              "runner_readiness": "blocked_missing_parameters",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "hobeika_2018_anisotropy_right_handed"
+            }
+          ],
           "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "exact lateral trajectory, timing, and tactile-site mapping need extraction"
+        "Original bubbling-water recording, LISTEN filter and sound-level calibration. The Toolkit encodes the nine concurrent SOAs, two sound-bearing silent controls, and reported cohort-specific target and response hands."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact lateral trajectory, timing, and tactile-site mapping need extraction",
+      "next_required_action": "Extract or source the missing paper parameters: Original bubbling-water recording, LISTEN filter and sound-level calibration. The Toolkit encodes the nine concurrent SOAs, two sound-bearing silent controls, and reported cohort-specific target and response hands.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -3316,9 +3388,9 @@
         "pdf_status": "paywalled",
         "supplement_status": "needs_user_download"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "profile_present_but_source_parameters_missing",
       "record_id": "hobeika_2018_anisotropy",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13"
@@ -3536,11 +3608,13 @@
     {
       "audiotactile_task_family": "approaching auditory stimuli plus trunk tactile stimulation during iEEG",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Bernasconi/Noel et al. (2018)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "bernasconi_2018_trunk_ieeg"
+      ],
       "doi": "10.1093/cercor/bhy156",
       "expected_effect_direction": "near_trunk_audio_tactile_trials_show_stronger_neural_integration",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -3565,19 +3639,24 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "bernasconi_2018_trunk_ieeg"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract exact approaching-sound trajectory, far/intermediate/close tactile timings, trunk tactile apparatus, and response/event settings; iEEG endpoint is non-blocking for audiotactile recreation"
+            "Exact loudspeaker gains, individually jittered triple pulses on the sternum, and synchronized clinical iEEG markers and hardware.",
+            "The profile previews 85 auditory-only trials and records the full nominal 255-trial condition schedule."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -3595,26 +3674,35 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "exact_audio_envelope_or_gain_files"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "bernasconi_2018_trunk_ieeg"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract exact approaching-sound trajectory, far/intermediate/close tactile timings, trunk tactile apparatus, and response/event settings; iEEG endpoint is non-blocking for audiotactile recreation"
+        "Exact loudspeaker gains, individually jittered triple pulses on the sternum, and synchronized clinical iEEG markers and hardware.",
+        "The profile previews 85 auditory-only trials and records the full nominal 255-trial condition schedule."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract exact approaching-sound trajectory, far/intermediate/close tactile timings, trunk tactile apparatus, and response/event settings; iEEG endpoint is non-blocking for audiotactile recreation",
+      "next_required_action": "Implement or validate toolkit support for: exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: Exact loudspeaker gains, individually jittered triple pulses on the sternum, and synchronized clinical iEEG markers and hardware.; The profile previews 85 auditory-only trials and records the full nominal 255-trial condition schedule.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -3627,9 +3715,9 @@
         "pdf_status": "downloaded",
         "supplement_status": "needs_user_download"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "ieeg_trunk_2018",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13",
         "web_search_sanity_2026_06_13"
@@ -4244,11 +4332,16 @@
     {
       "audiotactile_task_family": "audio-tactile PPS measurement in social context",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Social coding of multisensory space (2019)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "hobeika_2019_social_audience",
+        "hobeika_2019_social_collaboration",
+        "hobeika_2019_social_competition"
+      ],
       "doi": "10.1098/rsos.181878",
       "expected_effect_direction": "collaboration_extends_right_hemispace_pps",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -4273,19 +4366,29 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "hobeika_2019_social_audience",
+            "hobeika_2019_social_collaboration",
+            "hobeika_2019_social_competition"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "hrtf_database_or_binaural_engine_mismatch",
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact task parameters need extraction; social context is non-blocking"
+            "Original bubbling-water recording and calibrated LISTEN rendering and target/response devices.",
+            "Collaboration and competition need synchronized partner stations. Profile blocks use a fixed preview silence and a balanced allocation because the original jitter and block composition are unreported."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -4303,26 +4406,50 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "hrtf_database_or_binaural_engine_mismatch",
+            "exact_audio_envelope_or_gain_files"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_missing_parameters",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "hobeika_2019_social_audience"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "hobeika_2019_social_collaboration"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "hobeika_2019_social_competition"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "exact task parameters need extraction; social context is non-blocking"
+        "Original bubbling-water recording and calibrated LISTEN rendering and target/response devices.",
+        "Collaboration and competition need synchronized partner stations. Profile blocks use a fixed preview silence and a balanced allocation because the original jitter and block composition are unreported."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact task parameters need extraction; social context is non-blocking",
+      "next_required_action": "Implement or validate toolkit support for: hrtf_database_or_binaural_engine_mismatch, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: Original bubbling-water recording and calibrated LISTEN rendering and target/response devices.; Collaboration and competition need synchronized partner stations. Profile blocks use a fixed preview silence and a balanced allocation because the original jitter and block composition are unreported.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -4335,9 +4462,9 @@
         "pdf_status": "needs_user_download",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "social_coding_2019",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ]
@@ -5372,8 +5499,10 @@
         "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Taffou et al. (2021)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "taffou_2021_auditory_roughness"
+      ],
       "doi": "10.1038/s41598-020-79767-0",
       "expected_effect_direction": "rough_sounds_expand_distance_range_of_tactile_facilitation",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -5398,11 +5527,15 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "taffou_2021_auditory_roughness"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
@@ -5434,15 +5567,23 @@
             "hrtf_database_or_binaural_engine_mismatch",
             "exact_audio_envelope_or_gain_files"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "taffou_2021_auditory_roughness"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
@@ -5453,7 +5594,7 @@
         "Max/MSP Spat LISTEN HRTF subject/filter, near-field compensation, and renderer settings for the rear-left trajectory",
         "exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels"
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact rough/non-rough harmonic source WAVs or fully specified harmonic amplitudes, modulation depth, and phase/envelope settings; Max/MSP Spat LISTEN HRTF subject/filter, near-field compensation, and renderer settings for the rear-left trajectory; exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels",
+      "next_required_action": "Implement or validate toolkit support for: hrtf_database_or_binaural_engine_mismatch, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: exact rough/non-rough harmonic source WAVs or fully specified harmonic amplitudes, modulation depth, and phase/envelope settings; Max/MSP Spat LISTEN HRTF subject/filter, near-field compensation, and renderer settings for the rear-left trajectory; exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -5466,9 +5607,9 @@
         "pdf_status": "downloaded",
         "supplement_status": "downloaded"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "taffou_2021_auditory_roughness",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "openalex_audiotactile_pps_2026_06_13",
         "pubmed_query_variant_exhaustiveness_2026_06_13",
@@ -5477,10 +5618,19 @@
     },
     {
       "audiotactile_task_family": "static near/far sounds paired with weak vibrotactile targets and Go/NoGo response logic",
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "voice_key_response_capture",
+        "exact_audio_envelope_or_gain_files"
+      ],
       "citation_short": "Holmes et al. (2020), four experiments",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "holmes_2020_exp1",
+        "holmes_2020_exp2_strong_target",
+        "holmes_2020_exp2_weak_target",
+        "holmes_2020_exp3",
+        "holmes_2020_exp4"
+      ],
       "doi": "10.1007/s00221-020-05771-5",
       "expected_effect_direction": "small_near_sound_rt_benefit_without_robust_distance_gradient",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -5505,17 +5655,33 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload",
+            "unfinished_preload",
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "holmes_2020_exp1",
+            "holmes_2020_exp2_strong_target",
+            "holmes_2020_exp2_weak_target",
+            "holmes_2020_exp3",
+            "holmes_2020_exp4"
+          ]
         },
         "source_parameter_extraction": {
-          "blockers": [],
+          "blockers": [
+            "voice_key_response_capture",
+            "exact_audio_envelope_or_gain_files"
+          ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "task is publicly documented but needs translation into a static near/far toolkit profile"
+            "Original calibrated sound and tactile delivery, vowel/voice-onset classification and calibrated pedal capture in the driving simulator.",
+            "Five profiles encode the nominal four main experiments, including both target arms in Experiment 2."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -5532,25 +5698,65 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "blocker_ids": [
+            "voice_key_response_capture",
+            "exact_audio_envelope_or_gain_files"
+          ],
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "holmes_2020_exp1"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "holmes_2020_exp2_strong_target"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "holmes_2020_exp2_weak_target"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "holmes_2020_exp3"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "holmes_2020_exp4"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "task is publicly documented but needs translation into a static near/far toolkit profile"
+        "Original calibrated sound and tactile delivery, vowel/voice-onset classification and calibrated pedal capture in the driving simulator.",
+        "Five profiles encode the nominal four main experiments, including both target arms in Experiment 2."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: task is publicly documented but needs translation into a static near/far toolkit profile",
+      "next_required_action": "Implement or validate toolkit support for: voice_key_response_capture, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: Original calibrated sound and tactile delivery, vowel/voice-onset classification and calibrated pedal capture in the driving simulator.; Five profiles encode the nominal four main experiments, including both target arms in Experiment 2.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -5563,9 +5769,9 @@
         "pdf_status": "downloaded",
         "supplement_status": "downloaded"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "holmes_2020_four_experiments",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13",
         "holmes_2020_systematic_review"
@@ -5675,11 +5881,14 @@
     {
       "audiotactile_task_family": "front/rear approaching auditory probe with vibrotactile detection and baseline",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Teraoka et al. (2024)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "teraoka_2024_front_pps",
+        "teraoka_2024_rear_pps"
+      ],
       "doi": "10.1007/s00221-024-06782-2",
       "expected_effect_direction": "rear_space_audio_tactile_facilitation_exceeds_front_space",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -5704,19 +5913,26 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "teraoka_2024_front_pps",
+            "teraoka_2024_rear_pps"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract auditory-probe trajectory, baseline structure, and apparatus geometry"
+            "The original four-speaker cosine-window playback, all-speaker tone cue, calibrated chest vibration and keypad response.",
+            "The reported tone-only catch quotas are recorded. The standard inspection path needs the named tone import and omits the pure cue catch family."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -5734,26 +5950,42 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "exact_audio_envelope_or_gain_files"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "teraoka_2024_front_pps"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "teraoka_2024_rear_pps"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract auditory-probe trajectory, baseline structure, and apparatus geometry"
+        "The original four-speaker cosine-window playback, all-speaker tone cue, calibrated chest vibration and keypad response.",
+        "The reported tone-only catch quotas are recorded. The standard inspection path needs the named tone import and omits the pure cue catch family."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract auditory-probe trajectory, baseline structure, and apparatus geometry",
+      "next_required_action": "Implement or validate toolkit support for: exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: The original four-speaker cosine-window playback, all-speaker tone cue, calibrated chest vibration and keypad response.; The reported tone-only catch quotas are recorded. The standard inspection path needs the named tone import and omits the pure cue catch family.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -5766,9 +5998,9 @@
         "pdf_status": "paywalled",
         "supplement_status": "downloaded"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "teraoka_2024_front_rear",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13",
         "web_search_sanity_2026_06_13"
@@ -6084,11 +6316,15 @@
     {
       "audiotactile_task_family": "looming-sound chest-vibrotactile detection PPS readout with pseudo-walking foot-sole vibration context",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "amemiya_independent_conditioning_delivery",
+        "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Amemiya et al. (2017 pseudo-walking foot-sole vibration)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "amemiya_2017_ieee_foot_sole_vibration",
+        "amemiya_2017_ieee_sound_localization"
+      ],
       "doi": "10.1109/WHC.2017.7989970",
       "expected_effect_direction": "footsole_pseudowalking_vibration_expands_forward_pps",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -6113,19 +6349,27 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "amemiya_2017_ieee_foot_sole_vibration",
+            "amemiya_2017_ieee_sound_localization"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "amemiya_independent_conditioning_delivery",
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract core looming-sound timing/distance profile, chest vibrotactile target timing, response settings, trial counts, and whether the foot-sole vibration context must be represented as a secondary tactile condition for exact task execution"
+            "Original binaural looming file, exact acoustic-to-tactile event reference, independent heel and sternum delivery, and keypad timing.",
+            "The assessment and localization inspection profiles preserve the reported distance cells; the six-block heel order, additional baseline and rating tasks remain apparatus-dependent."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -6143,26 +6387,43 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "amemiya_independent_conditioning_delivery",
+            "exact_audio_envelope_or_gain_files"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "amemiya_2017_ieee_foot_sole_vibration"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "amemiya_2017_ieee_sound_localization"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract core looming-sound timing/distance profile, chest vibrotactile target timing, response settings, trial counts, and whether the foot-sole vibration context must be represented as a secondary tactile condition for exact task execution"
+        "Original binaural looming file, exact acoustic-to-tactile event reference, independent heel and sternum delivery, and keypad timing.",
+        "The assessment and localization inspection profiles preserve the reported distance cells; the six-block heel order, additional baseline and rating tasks remain apparatus-dependent."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract core looming-sound timing/distance profile, chest vibrotactile target timing, response settings, trial counts, and whether the foot-sole vibration context must be represented as a secondary tactile condition for exact task execution",
+      "next_required_action": "Implement or validate toolkit support for: amemiya_independent_conditioning_delivery, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: Original binaural looming file, exact acoustic-to-tactile event reference, independent heel and sternum delivery, and keypad timing.; The assessment and localization inspection profiles preserve the reported distance cells; the six-block heel order, additional baseline and rating tasks remain apparatus-dependent.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -6175,9 +6436,9 @@
         "pdf_status": "paywalled",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "amemiya_2017_pseudowalking_footsole",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "openalex_audiotactile_pps_2026_06_13",
         "web_search_2026_06_13"
@@ -7795,8 +8056,8 @@
       "parsimonious_profile_saved": {
         "not_applicable_adjacent_record": 4,
         "parsimonious_profile_complete": 19,
-        "profile_not_yet_created": 43,
-        "profile_scaffold_present_but_incomplete": 9
+        "profile_not_yet_created": 35,
+        "profile_scaffold_present_but_incomplete": 17
       },
       "source_parameter_extraction": {
         "minimum_source_parameters_captured": 19,
@@ -7804,8 +8065,8 @@
         "source_parameters_missing_or_unresolved": 52
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 49,
-        "blocked_by_toolkit_structure_or_response_contract": 3,
+        "blocked_by_missing_profile_parameters": 43,
+        "blocked_by_toolkit_structure_or_response_contract": 9,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 19
       },
@@ -7823,14 +8084,14 @@
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 17,
       "pipeline_incomplete": 2,
-      "profile_present_but_source_parameters_missing": 6,
-      "source_parameters_missing_before_profile_creation": 43,
-      "toolkit_structure_or_response_contract_missing": 3
+      "profile_present_but_source_parameters_missing": 8,
+      "source_parameters_missing_before_profile_creation": 35,
+      "toolkit_structure_or_response_contract_missing": 9
     },
     "primary_gap_counts": {
-      "profile_present_but_source_parameters_missing": 6,
-      "source_parameters_missing_before_profile_creation": 43,
-      "toolkit_structure_or_response_contract_missing": 3
+      "profile_present_but_source_parameters_missing": 8,
+      "source_parameters_missing_before_profile_creation": 35,
+      "toolkit_structure_or_response_contract_missing": 9
     }
   }
 }

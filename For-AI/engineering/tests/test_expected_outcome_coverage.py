@@ -157,10 +157,10 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 43,
+            "not_yet_templated_missing_publication_parameters": 35,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
-            "template_present_blocked_missing_publication_parameters": 6,
-            "template_present_blocked_toolkit_structure": 3,
+            "template_present_blocked_missing_publication_parameters": 8,
+            "template_present_blocked_toolkit_structure": 9,
             "ready_profile_parameter_run_available_expected_contrast_unvalidated": 2,
         },
     }
@@ -387,6 +387,7 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
 
     for record_id in [
         "serino_2007_blind_cane_users",
+        "taffou_2021_auditory_roughness",
     ]:
         record = records[record_id]
         assert record["runnable_status"] == "template_present_but_blocked"
@@ -399,7 +400,6 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
 
     for record_id in [
         "farne_ladavas_2002_auditory_pps_humans",
-        "taffou_2021_auditory_roughness",
         "cell_reports_medicine_2026_consciousness",
     ]:
         record = records[record_id]

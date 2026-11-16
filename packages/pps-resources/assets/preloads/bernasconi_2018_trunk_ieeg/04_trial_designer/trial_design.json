@@ -1,0 +1,45 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "bernasconi_2018_trunk_ieeg",
+  "repetitions_per_condition": 1,
+  "soa_values_ms": [
+    0
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "bernasconi-2018-auditory-only-preview",
+      "label": "Auditory-only preview",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "passive_attention",
+        "response_mode": "passive",
+        "response_scoring_policy": "none",
+        "target_role": "passive_auditory_stimulus",
+        "primary_analysis_included": false,
+        "source_asset_equivalence": "Procedural preview with substituted recording and output levels."
+      },
+      "elements": [
+        {
+          "element_id": "bernasconi-2018-frontal-white",
+          "kind": "looming_stimulus",
+          "label": "Procedural frontal white noise",
+          "source_label": "Procedural frontal white noise",
+          "source_labels": [
+            "Procedural frontal white noise"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 85
+}

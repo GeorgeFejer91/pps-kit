@@ -268,19 +268,19 @@
     "literature_record_count": 75,
     "literature_record_category_counts": {
       "covered_runnable_profile": 19,
-      "covered_blocked_missing_publication_parameters": 6,
-      "covered_blocked_toolkit_structure": 3,
+      "covered_blocked_missing_publication_parameters": 8,
+      "covered_blocked_toolkit_structure": 9,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 43,
+      "not_yet_templated_missing_publication_parameters": 35,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
-    "current_template_count": 38,
+    "current_template_count": 57,
     "current_profile_check_pass_count": 26,
     "published_profile_check_pass_count": 24,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 12,
-    "current_templates_with_toolkit_structural_gaps": 4,
+    "current_templates_with_missing_publication_parameters": 31,
+    "current_templates_with_toolkit_structural_gaps": 17,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -929,6 +929,174 @@
       "primary_constraint_ids": [
         "hrtf_database_or_binaural_engine_mismatch"
       ]
+    },
+    {
+      "template_id": "hobeika_2018_anisotropy_left_handed",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "hobeika_2018_anisotropy_right_handed",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "bernasconi_2018_trunk_ieeg",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "hobeika_2019_social_audience",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "hobeika_2019_social_collaboration",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "hobeika_2019_social_competition",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "taffou_2021_auditory_roughness",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "holmes_2020_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "holmes_2020_exp2_strong_target",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "holmes_2020_exp2_weak_target",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "holmes_2020_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "holmes_2020_exp4",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "teraoka_2024_front_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "teraoka_2024_rear_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "amemiya_2017_ieee_foot_sole_vibration",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "amemiya_independent_conditioning_delivery",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "amemiya_2017_ieee_sound_localization",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "amemiya_independent_conditioning_delivery",
+        "exact_audio_envelope_or_gain_files"
+      ]
+    },
+    {
+      "template_id": "bassolino_2010_mouse_right_hand",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "electrical_tactile_calibration",
+        "voice_key_response_capture"
+      ]
+    },
+    {
+      "template_id": "bassolino_2010_mouse_left_hand_no_mouse_first",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "electrical_tactile_calibration",
+        "voice_key_response_capture"
+      ]
+    },
+    {
+      "template_id": "bassolino_2010_mouse_left_hand_passive_first",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "electrical_tactile_calibration",
+        "voice_key_response_capture"
+      ]
     }
   ],
   "literature_records": [
@@ -1061,13 +1229,21 @@
         "holmes_2020_systematic_review",
         "pubmed_query_variant_exhaustiveness_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "bassolino_2010_mouse_left_hand_no_mouse_first",
+        "bassolino_2010_mouse_left_hand_passive_first",
+        "bassolino_2010_mouse_right_hand"
+      ],
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "static near/far tactile detection around hand/tool space",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "electrical_tactile_calibration",
+        "voice_key_response_capture"
+      ],
       "missing_publication_parameters": [
-        "full trial counts, tactile calibration, and response mapping need extraction"
+        "Original electrical intensity titration, vowel voice key and calibrated two-speaker output.",
+        "The mouse-motor and concurrent visual letter conditions require the original or independently validated apparatus."
       ]
     },
     {
@@ -1522,15 +1698,19 @@
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "hobeika_2018_anisotropy_left_handed",
+        "hobeika_2018_anisotropy_right_handed"
+      ],
+      "coverage_category": "covered_blocked_missing_publication_parameters",
       "audiotactile_task_family": "lateral PPS audio-tactile task linked to handedness",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
       ],
       "missing_publication_parameters": [
-        "exact lateral trajectory, timing, and tactile-site mapping need extraction"
+        "Original bubbling-water recording, LISTEN filter and sound-level calibration. The Toolkit encodes the nine concurrent SOAs, two sound-bearing silent controls, and reported cohort-specific target and response hands."
       ]
     },
     {
@@ -1578,15 +1758,18 @@
         "pubmed_audio_tactile_pps_2026_06_13",
         "web_search_sanity_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "bernasconi_2018_trunk_ieeg"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "approaching auditory stimuli plus trunk tactile stimulation during iEEG",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files"
       ],
       "missing_publication_parameters": [
-        "extract exact approaching-sound trajectory, far/intermediate/close tactile timings, trunk tactile apparatus, and response/event settings; iEEG endpoint is non-blocking for audiotactile recreation"
+        "Exact loudspeaker gains, individually jittered triple pulses on the sternum, and synchronized clinical iEEG markers and hardware.",
+        "The profile previews 85 auditory-only trials and records the full nominal 255-trial condition schedule."
       ]
     },
     {
@@ -1706,15 +1889,21 @@
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "hobeika_2019_social_audience",
+        "hobeika_2019_social_collaboration",
+        "hobeika_2019_social_competition"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS measurement in social context",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files"
       ],
       "missing_publication_parameters": [
-        "exact task parameters need extraction; social context is non-blocking"
+        "Original bubbling-water recording and calibrated LISTEN rendering and target/response devices.",
+        "Collaboration and competition need synchronized partner stations. Profile blocks use a fixed preview silence and a balanced allocation because the original jitter and block composition are unreported."
       ]
     },
     {
@@ -1910,8 +2099,10 @@
         "pubmed_query_variant_exhaustiveness_2026_06_13",
         "publisher_html_methods_review_2026_07_15"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "taffou_2021_auditory_roughness"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "rear-hemifield looming rough/non-rough sound with speeded tactile detection",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
@@ -1932,13 +2123,23 @@
         "pubmed_audio_tactile_pps_2026_06_13",
         "holmes_2020_systematic_review"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "holmes_2020_exp1",
+        "holmes_2020_exp2_strong_target",
+        "holmes_2020_exp2_weak_target",
+        "holmes_2020_exp3",
+        "holmes_2020_exp4"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "static near/far sounds paired with weak vibrotactile targets and Go/NoGo response logic",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "voice_key_response_capture",
+        "exact_audio_envelope_or_gain_files"
+      ],
       "missing_publication_parameters": [
-        "task is publicly documented but needs translation into a static near/far toolkit profile"
+        "Original calibrated sound and tactile delivery, vowel/voice-onset classification and calibrated pedal capture in the driving simulator.",
+        "Five profiles encode the nominal four main experiments, including both target arms in Experiment 2."
       ]
     },
     {
@@ -1967,15 +2168,19 @@
         "pubmed_audio_tactile_pps_2026_06_13",
         "web_search_sanity_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "teraoka_2024_front_pps",
+        "teraoka_2024_rear_pps"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "front/rear approaching auditory probe with vibrotactile detection and baseline",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files"
       ],
       "missing_publication_parameters": [
-        "extract auditory-probe trajectory, baseline structure, and apparatus geometry"
+        "The original four-speaker cosine-window playback, all-speaker tone cue, calibrated chest vibration and keypad response.",
+        "The reported tone-only catch quotas are recorded. The standard inspection path needs the named tone import and omits the pure cue catch family."
       ]
     },
     {
@@ -2042,15 +2247,20 @@
         "openalex_audiotactile_pps_2026_06_13",
         "web_search_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "amemiya_2017_ieee_foot_sole_vibration",
+        "amemiya_2017_ieee_sound_localization"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "looming-sound chest-vibrotactile detection PPS readout with pseudo-walking foot-sole vibration context",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "amemiya_independent_conditioning_delivery",
+        "exact_audio_envelope_or_gain_files"
       ],
       "missing_publication_parameters": [
-        "extract core looming-sound timing/distance profile, chest vibrotactile target timing, response settings, trial counts, and whether the foot-sole vibration context must be represented as a secondary tactile condition for exact task execution"
+        "Original binaural looming file, exact acoustic-to-tactile event reference, independent heel and sternum delivery, and keypad timing.",
+        "The assessment and localization inspection profiles preserve the reported distance cells; the six-block heel order, additional baseline and rating tasks remain apparatus-dependent."
       ]
     },
     {

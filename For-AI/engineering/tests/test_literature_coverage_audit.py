@@ -35,20 +35,20 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
         "covered_runnable_profile": 19,
-        "covered_blocked_missing_publication_parameters": 6,
-        "covered_blocked_toolkit_structure": 3,
+        "covered_blocked_missing_publication_parameters": 8,
+        "covered_blocked_toolkit_structure": 9,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 43,
+        "not_yet_templated_missing_publication_parameters": 35,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 38
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 57
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
     ) == 26
     assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 24
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
-    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 4
+    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 17
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
     assert coverage["coverage_summary"]["openalex_broad_linked_candidate_like_hits"] == 47
@@ -671,12 +671,15 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "missing_publication_parameters"
     ][0]
     assert records["rossi_sebastiano_2022_visuotactile"]["coverage_category"] == "adjacent_out_of_scope"
-    assert records["teraoka_2024_front_rear"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["teraoka_2024_front_rear"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["teraoka_2024_front_rear"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "exact_audio_envelope_or_gain_files",
     ]
-    assert records["holmes_2020_four_experiments"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["holmes_2020_four_experiments"]["blocking_constraint_ids"] == []
+    assert records["holmes_2020_four_experiments"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert records["holmes_2020_four_experiments"]["blocking_constraint_ids"] == [
+        "voice_key_response_capture",
+        "exact_audio_envelope_or_gain_files",
+    ]
     assert records["kitagawa_2005_sound_complexity"]["coverage_category"] == (
         "not_yet_templated_missing_publication_parameters"
     )
@@ -705,7 +708,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["ronga_2021_newborn_erp"]["blocking_constraint_ids"] == []
     assert records["ferri_2015_jneurosci_itv"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["autism_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["social_coding_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["social_coding_2019"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["social_perception_2017"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["ferroni_2020_tool_observation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["ferroni_2026_pps_plasticity"]["doi"] == "10.1016/j.neuropsychologia.2026.109490"
@@ -739,7 +742,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert "audiovisual/MR provenance metadata are now runner-supported" in records[
         "serino_2018_mixed_reality_pps"
     ]["missing_publication_parameters"][0]
-    assert records["amemiya_2017_pseudowalking_footsole"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["amemiya_2017_pseudowalking_footsole"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["serino_2011_professional_fencers"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["interoception_exteroception_2025"]["doi"] == "10.1073/pnas.2516229122"
     assert records["interoception_exteroception_2025"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -754,7 +757,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "missing_publication_parameters"
     ][0]
     assert records["body_image_social_cognition_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["taffou_2021_auditory_roughness"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["taffou_2021_auditory_roughness"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["taffou_2021_auditory_roughness"]["blocking_constraint_ids"] == [
         "hrtf_database_or_binaural_engine_mismatch",
         "exact_audio_envelope_or_gain_files",
@@ -783,11 +786,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
     assert records["spadone_2021_connectivity"]["missing_publication_parameters"] == [
         "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
     ]
-    assert records["hobeika_2018_anisotropy"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
+    assert records["hobeika_2018_anisotropy"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
     assert records["hobeika_2018_anisotropy"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "hrtf_database_or_binaural_engine_mismatch",
+        "exact_audio_envelope_or_gain_files",
     ]
     assert records["lamia_2026_arm_movement"]["can_recreate_audiotactile_components_now"] is True
     assert records["serino_2015_peri_trunk_exp1"]["coverage_category"] == "covered_runnable_profile"
@@ -872,8 +874,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "biggio_2017_known_parameter_validation_report.json"
     )
     assert records["bassolino_2010_mouse_use"]["doi"] == "10.1016/j.neuropsychologia.2009.11.009"
-    assert records["bassolino_2010_mouse_use"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["bassolino_2010_mouse_use"]["blocking_constraint_ids"] == []
+    assert records["bassolino_2010_mouse_use"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
+    assert records["bassolino_2010_mouse_use"]["blocking_constraint_ids"] == [
+        "electrical_tactile_calibration",
+        "voice_key_response_capture",
+    ]
     assert records["serino_2011_rtms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["serino_2011_rtms"]["blocking_constraint_ids"] == []
     assert records["cimmino_2013_surgical_arm_elongation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
@@ -914,7 +919,12 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         record["record_id"]
         for record in records.values()
         if "voice_key_response_capture" in record["blocking_constraint_ids"]
-    } == {"serino_2007_blind_cane_users", "teneggi_2013_social_face"}
+    } == {
+        "bassolino_2010_mouse_use",
+        "holmes_2020_four_experiments",
+        "serino_2007_blind_cane_users",
+        "teneggi_2013_social_face",
+    }
     assert {
         record["record_id"]
         for record in records.values()
@@ -923,6 +933,7 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "serino_2007_blind_cane_users",
         "teneggi_2013_social_face",
         "ardizzi_ferri_2018_interoceptive",
+        "bassolino_2010_mouse_use",
         "ferri_2015_artificial_valence",
         "ferri_2015_ecological_valence",
     }

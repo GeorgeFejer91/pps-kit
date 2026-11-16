@@ -21,11 +21,11 @@
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 43,
+      "not_yet_templated_missing_publication_parameters": 35,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
       "ready_profile_parameter_run_available_expected_contrast_unvalidated": 2,
-      "template_present_blocked_missing_publication_parameters": 6,
-      "template_present_blocked_toolkit_structure": 3
+      "template_present_blocked_missing_publication_parameters": 8,
+      "template_present_blocked_toolkit_structure": 9
     }
   },
   "expected_outcome_extraction_sources": {
@@ -271,9 +271,13 @@
       "record_id": "bassolino_2010_mouse_use",
       "citation_short": "Bassolino et al. (2010)",
       "doi": "10.1016/j.neuropsychologia.2009.11.009",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "bassolino_2010_mouse_left_hand_no_mouse_first",
+        "bassolino_2010_mouse_left_hand_passive_first",
+        "bassolino_2010_mouse_right_hand"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "mouse_use_extension_of_hand_audio_pps",
@@ -296,9 +300,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2011_rtms",
@@ -1216,9 +1220,12 @@
       "record_id": "hobeika_2018_anisotropy",
       "citation_short": "Hobeika et al. (2018)",
       "doi": "10.1007/s00221-017-5158-2",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "hobeika_2018_anisotropy_left_handed",
+        "hobeika_2018_anisotropy_right_handed"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "handedness_linked_lateral_pps_anisotropy",
@@ -1241,9 +1248,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "noel_2018_neural_adaptation",
@@ -1327,9 +1334,11 @@
       "record_id": "ieeg_trunk_2018",
       "citation_short": "Bernasconi/Noel et al. (2018)",
       "doi": "10.1093/cercor/bhy156",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "bernasconi_2018_trunk_ieeg"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "intracranial_trunk_pps_multisensory_neural_map",
@@ -1355,9 +1364,9 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_passive_ieeg_trunk_looming_profile"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "tonelli_2019_echolocation",
@@ -1582,9 +1591,13 @@
       "record_id": "social_coding_2019",
       "citation_short": "Social coding of multisensory space (2019)",
       "doi": "10.1098/rsos.181878",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "hobeika_2019_social_audience",
+        "hobeika_2019_social_collaboration",
+        "hobeika_2019_social_competition"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "collaboration_selective_pps_boundary_extension",
@@ -1607,9 +1620,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "social_perception_2017",
@@ -1941,9 +1954,11 @@
       "record_id": "taffou_2021_auditory_roughness",
       "citation_short": "Taffou et al. (2021)",
       "doi": "10.1038/s41598-020-79767-0",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "taffou_2021_auditory_roughness"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "affective_roughness_expansion_of_audio_tactile_pps",
@@ -1969,17 +1984,23 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_rear_left_binaural_roughness_looming_profile"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "holmes_2020_four_experiments",
       "citation_short": "Holmes et al. (2020), four experiments",
       "doi": "10.1007/s00221-020-05771-5",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "holmes_2020_exp1",
+        "holmes_2020_exp2_strong_target",
+        "holmes_2020_exp2_weak_target",
+        "holmes_2020_exp3",
+        "holmes_2020_exp4"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "mixed_support_for_near_sound_tactile_rt_benefit",
@@ -2002,9 +2023,9 @@
         "paper_audit_visualization_candidate_count": "7"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "schizophrenia_tool_use_2022",
@@ -2043,9 +2064,12 @@
       "record_id": "teraoka_2024_front_rear",
       "citation_short": "Teraoka et al. (2024)",
       "doi": "10.1007/s00221-024-06782-2",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "teraoka_2024_front_pps",
+        "teraoka_2024_rear_pps"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "front_rear_asymmetry_in_audio_tactile_pps_facilitation",
@@ -2068,9 +2092,9 @@
         "paper_audit_visualization_candidate_count": "3"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "body_image_social_cognition_2024",
@@ -2178,9 +2202,12 @@
       "record_id": "amemiya_2017_pseudowalking_footsole",
       "citation_short": "Amemiya et al. (2017 pseudo-walking foot-sole vibration)",
       "doi": "10.1109/WHC.2017.7989970",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "amemiya_2017_ieee_foot_sole_vibration",
+        "amemiya_2017_ieee_sound_localization"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "pseudowalking_footsole_vibration_extension_of_chest_pps",
@@ -2203,9 +2230,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "novel_two_phase_audio_tactile_2025",

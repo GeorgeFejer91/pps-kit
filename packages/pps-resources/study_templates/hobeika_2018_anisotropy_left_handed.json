@@ -1,0 +1,378 @@
+{
+  "template_id": "hobeika_2018_anisotropy_left_handed",
+  "title": "Hobeika 2018 lateral PPS — left-handed cohort",
+  "citation": "Hobeika, L., Taffou, M., & Viaud-Delmon, I. (2018). Anisotropy of lateral peripersonal space is linked to handedness. Experimental Brain Research 236, 609–618.",
+  "source_url": "https://doi.org/10.1007/s00221-017-5158-2",
+  "doi": "10.1007/s00221-017-5158-2",
+  "verification_status": "partial",
+  "notes": "Source-backed sample schedule. Generated audio, calibrated tactile delivery and original response acquisition affect replication fidelity.",
+  "reference_parameters": {
+    "profile_type": "lateral_looming_audio_tactile_pps",
+    "publication_study_row_id": "doi:10.1007/s00221-017-5158-2",
+    "source_scope": "Left-handed cohort’s assessment. The two cohort profiles differ in target and response hand.",
+    "sound_duration_ms": 3000,
+    "sound_source": "Bubbling-water recording binaurally rendered with nonindividual LISTEN HRTFs.",
+    "published_path": {
+      "coordinate_frame": "head-centered",
+      "hemispaces": [
+        "left",
+        "right"
+      ],
+      "distance_cm": [
+        135,
+        20
+      ],
+      "nominal_speed_cm_s": 38.333333333333336,
+      "azimuth_deg_as_printed": {
+        "left": 60,
+        "right": -60
+      }
+    },
+    "sound_onset_relative_soa_ms": [
+      0,
+      375,
+      750,
+      1125,
+      1500,
+      1875,
+      2250,
+      2625,
+      3000
+    ],
+    "nominal_distances_at_soa_cm": [
+      135.0,
+      120.625,
+      106.25,
+      91.875,
+      77.5,
+      63.125,
+      48.75,
+      34.375,
+      20.0
+    ],
+    "sound_onset_relative_baseline_soa_ms": [
+      -650,
+      3650
+    ],
+    "trial_start_relative_baseline_soa_ms": [
+      350,
+      4650
+    ],
+    "baseline_sound_policy": "The sound still plays in both endpoint control trial types. The target is timed during the pre-sound or post-sound silence.",
+    "pre_sound_silence_ms": 1000,
+    "reported_post_sound_silence_range_ms": [
+      2700,
+      3300
+    ],
+    "preview_post_sound_silence_values_ms": [
+      2700,
+      3300
+    ],
+    "tactile_command": {
+      "site": "palmar right index finger",
+      "waveform": "sine",
+      "duration_ms": 20,
+      "frequency_hz": 250,
+      "actuator": "small loudspeaker"
+    },
+    "response": "Speeded button press with the left index finger on detection of the target. Withhold on auditory-only catches.",
+    "reported_counts": {
+      "blocks": 5,
+      "trials_per_block": 48,
+      "sound_overlap_targets": 180,
+      "silent_window_targets": 40,
+      "sound_only_catches": 20,
+      "target_repeats_per_side_delay_per_context": 10
+    },
+    "preview_substitutions": {
+      "audio": "Generated pink noise rendered on the reported paths with the Toolkit binaural engine. Exact original waveform and spatial-render settings are unavailable.",
+      "timing": "Two balanced post-sound interval endpoints and five repeats per delay, path and endpoint realize ten per delay and path. The actual jitter distribution and block composition are unreported.",
+      "response": "Mouse press proxy. Calibrated physical tactile delivery and response capture require separate verification."
+    },
+    "implementation_gaps": [
+      "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable.",
+      "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration.",
+      "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported."
+    ],
+    "reported_cohort": {
+      "analyzed": 28,
+      "total_recruited_across_groups": 56
+    },
+    "handedness_screening": "FLANDERS. The non-dominant index contacts the trunk midline; respond with the dominant index."
+  },
+  "design": {
+    "name": "Hobeika 2018 lateral PPS — left-handed cohort",
+    "trajectory": {
+      "coordinate_mode": "polar",
+      "path_direction": "approach",
+      "start_radius_m": 1.35,
+      "end_radius_m": 0.2,
+      "azimuth_start_deg": -60.0,
+      "azimuth_end_deg": -60.0,
+      "elevation_deg": 0.0,
+      "path_length_m": 1.15,
+      "propagation_speed_mps": 0.3833333333333333,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": true
+    },
+    "noises": [
+      {
+        "label": "Left-front approach preview",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "motion_mode": "looming",
+        "trajectory_snapshot": {
+          "start_distance_cm": 135,
+          "end_distance_cm": 20,
+          "start_rotation_deg": 300.0,
+          "end_rotation_deg": 300.0,
+          "movement_duration_s": 3,
+          "path_direction": "approach"
+        }
+      },
+      {
+        "label": "Right-front approach preview",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "motion_mode": "looming",
+        "trajectory_snapshot": {
+          "start_distance_cm": 135,
+          "end_distance_cm": 20,
+          "start_rotation_deg": 60.0,
+          "end_rotation_deg": 60.0,
+          "movement_duration_s": 3,
+          "path_direction": "approach"
+        }
+      }
+    ],
+    "protocol": {
+      "repetitions_per_condition": 5,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 5,
+        "baseline": 5,
+        "catch": 5
+      },
+      "soa_values_ms": [
+        0,
+        375,
+        750,
+        1125,
+        1500,
+        1875,
+        2250,
+        2625,
+        3000
+      ],
+      "spatial_values_cm": [
+        135.0,
+        120.625,
+        106.25,
+        91.875,
+        77.5,
+        63.125,
+        48.75,
+        34.375,
+        20.0
+      ],
+      "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "source_trajectory"
+      ],
+      "tactile_sites": [
+        "palmar right index finger"
+      ],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 8.333333333333334,
+      "catch_trials_exact": 20,
+      "catch_crosses_sequence_variants": true,
+      "include_baseline_trials": true,
+      "baseline_strategy": "custom",
+      "baseline_custom_trial_mode": "audio_tactile",
+      "baseline_soa_values_ms": [
+        -650,
+        3650
+      ],
+      "baseline_trial_percentage": 16.666666666666668,
+      "baseline_trials_exact": 40,
+      "baseline_crosses_sequence_variants": true,
+      "blocks": 5,
+      "block_specs": [
+        {
+          "label": "Block 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 3",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 4",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 5",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "distribute_trial_pool_across_blocks": true,
+      "repeat_trial_pool_per_block": false,
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "trial_strips": [
+        {
+          "strip_id": "left-approach",
+          "label": "Left-front approach preview",
+          "audio_tactile_percentage": 75.0,
+          "baseline_percentage": 16.666666666666668,
+          "catch_percentage": 8.333333333333334,
+          "spatial_values_cm": [
+            135.0,
+            120.625,
+            106.25,
+            91.875,
+            77.5,
+            63.125,
+            48.75,
+            34.375,
+            20.0
+          ],
+          "metadata": {
+            "auditory_trajectory_direction": "looming",
+            "spatial_hemifield": "left front",
+            "source_asset_equivalence": "generated pink-noise acoustic proxy",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_waveform_shape": "sine",
+            "tactile_duration_ms": 20,
+            "tactile_frequency_hz": 250,
+            "tactile_amplitude": 0.2,
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_capture_device": "mouse click preview"
+          },
+          "elements": [
+            {
+              "element_id": "left-lead",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
+            {
+              "element_id": "left-sound",
+              "kind": "looming_stimulus",
+              "label": "Left-front approach preview",
+              "source_label": "Left-front approach preview"
+            },
+            {
+              "element_id": "left-trail",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [
+                2700,
+                3300
+              ],
+              "randomized": true
+            }
+          ]
+        },
+        {
+          "strip_id": "right-approach",
+          "label": "Right-front approach preview",
+          "audio_tactile_percentage": 75.0,
+          "baseline_percentage": 16.666666666666668,
+          "catch_percentage": 8.333333333333334,
+          "spatial_values_cm": [
+            135.0,
+            120.625,
+            106.25,
+            91.875,
+            77.5,
+            63.125,
+            48.75,
+            34.375,
+            20.0
+          ],
+          "metadata": {
+            "auditory_trajectory_direction": "looming",
+            "spatial_hemifield": "right front",
+            "source_asset_equivalence": "generated pink-noise acoustic proxy",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_waveform_shape": "sine",
+            "tactile_duration_ms": 20,
+            "tactile_frequency_hz": 250,
+            "tactile_amplitude": 0.2,
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_capture_device": "mouse click preview"
+          },
+          "elements": [
+            {
+              "element_id": "right-lead",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
+            {
+              "element_id": "right-sound",
+              "kind": "looming_stimulus",
+              "label": "Right-front approach preview",
+              "source_label": "Right-front approach preview"
+            },
+            {
+              "element_id": "right-trail",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [
+                2700,
+                3300
+              ],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "participants": 28,
+      "random_seed": 201851582
+    }
+  },
+  "provenance": [
+    {
+      "field": "Timing, apparatus, counts and context",
+      "source": "Experimental Brain Research 236, 609–618, pp. 611–612, Participants, Materials, Design and procedure, Fig. 1."
+    },
+    {
+      "field": "Toolkit auditory proxy, jitter and allocation defaults",
+      "source": "PPS Kit configuration. Two evenly repeated post-sound interval endpoints span the published range, and the generated catch pool balances across sound sides."
+    }
+  ]
+}

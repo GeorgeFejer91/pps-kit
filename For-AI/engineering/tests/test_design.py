@@ -1402,7 +1402,10 @@ def test_all_study_templates_load_and_summarize():
         warnings = validate_design(template.design)
         assert all("Unsupported" not in warning for warning in warnings)
         summary = protocol_summary(template.design)
-        if template.template_id == "ferri_2015_ecological_looming_valence":
+        if template.template_id in {
+            "ferri_2015_ecological_looming_valence",
+            "taffou_2021_auditory_roughness",
+        }:
             assert summary["total_trials"] == 0
             assert any("unknown stimulus source" in warning for warning in warnings)
         else:

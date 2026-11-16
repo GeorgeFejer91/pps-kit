@@ -1,0 +1,81 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "taffou_2021_auditory_roughness",
+  "repetitions_per_condition": 20,
+  "soa_values_ms": [
+    0,
+    750,
+    1500,
+    2250,
+    3000
+  ],
+  "spatial_values_cm": [
+    520,
+    395,
+    270,
+    145,
+    20
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "taffou-2021-roughness",
+      "label": "Rear-left auditory roughness trial",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "respond",
+        "target_role": "left_index_vibrotactile_target",
+        "response_mode": "numeric_keypad_press",
+        "response_rule": "respond_only_to_tactile_stimulus",
+        "response_capture_device": "Wired Essentiel b numeric keypad",
+        "response_input_modality": "right_index_keypress",
+        "tactile_stimulation_modality": "vibrotactile",
+        "spatial_hemifield": "rear-left",
+        "body_anchor": "Head center",
+        "source_asset_equivalence": "Original or author-validated audio import required."
+      },
+      "elements": [
+        {
+          "element_id": "taffou-2021-pre",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "taffou-2021-sound",
+          "kind": "looming_stimulus",
+          "label": "Study sound",
+          "source_label": "Taffou non-rough harmonic study audio",
+          "source_labels": [
+            "Taffou non-rough harmonic study audio",
+            "Taffou rough 70 Hz AM study audio"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        },
+        {
+          "element_id": "taffou-2021-post",
+          "kind": "jitter",
+          "label": "Post-sound silence (preview midpoint)",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            3000
+          ],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 0
+}

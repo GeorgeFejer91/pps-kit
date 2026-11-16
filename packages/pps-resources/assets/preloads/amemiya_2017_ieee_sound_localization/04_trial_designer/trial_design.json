@@ -1,0 +1,55 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "amemiya_2017_ieee_sound_localization",
+  "repetitions_per_condition": 16,
+  "soa_values_ms": [
+    2710,
+    3290,
+    3860,
+    4430
+  ],
+  "spatial_values_cm": [
+    160,
+    120,
+    80,
+    40
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "sound_localization",
+      "label": "Sound localization at chest cue",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "body_anchor": "Manubrium of sternum",
+        "expected_response": "respond",
+        "target_role": "chest_vibrotactile_reference",
+        "response_mode": "numeric_distance_rating",
+        "response_rule": "rate_sound_distance_at_chest_cue",
+        "tactile_stimulation_modality": "vibrotactile",
+        "source_asset_equivalence": "Fixed-gain timing-preview white noise with no original audio or actuator drive.",
+        "response_choice_set": "1\u2013100 (1 = very far, 100 = very close)",
+        "primary_analysis_included": false
+      },
+      "elements": [
+        {
+          "element_id": "sound_localization-audio",
+          "kind": "looming_stimulus",
+          "label": "Continuous white noise (timing preview)",
+          "source_label": "Continuous white noise (timing preview)",
+          "source_labels": [
+            "Continuous white noise (timing preview)"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 64
+}

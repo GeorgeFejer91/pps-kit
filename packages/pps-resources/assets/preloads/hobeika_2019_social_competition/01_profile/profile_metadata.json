@@ -1,0 +1,123 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "hobeika_2019_social_competition",
+  "title": "Hobeika 2019 social PPS \u2014 competition",
+  "citation": "Hobeika, L., Taffou, M., Carpentier, T., & Viaud-Delmon, I. (2019). Social coding of the multisensory space around us. Royal Society Open Science 6, 181878.",
+  "doi": "10.1098/rsos.181878",
+  "source_url": "https://doi.org/10.1098/rsos.181878",
+  "verification_status": "partial",
+  "notes": "Source-backed sample schedule. Generated audio, calibrated tactile delivery and original response acquisition affect replication fidelity.",
+  "reference_parameters": {
+    "profile_type": "lateral_looming_audio_tactile_pps",
+    "publication_study_row_id": "doi:10.1098/rsos.181878::b",
+    "source_scope": "One participant\u2019s competition experiment session with both isolated and dyad conditions.",
+    "sound_duration_ms": 3000,
+    "sound_source": "Bubbling-water recording binaurally rendered with nonindividual LISTEN HRTFs.",
+    "published_path": {
+      "coordinate_frame": "head-centered",
+      "hemispaces": [
+        "left",
+        "right"
+      ],
+      "distance_cm": [
+        135,
+        20
+      ],
+      "nominal_speed_cm_s": 38.333333333333336,
+      "azimuth_deg_as_printed": {
+        "left": -60,
+        "right": 60
+      }
+    },
+    "sound_onset_relative_soa_ms": [
+      0,
+      375,
+      750,
+      1125,
+      1500,
+      1875,
+      2250,
+      2625,
+      3000
+    ],
+    "nominal_distances_at_soa_cm": [
+      135.0,
+      120.625,
+      106.25,
+      91.875,
+      77.5,
+      63.125,
+      48.75,
+      34.375,
+      20.0
+    ],
+    "sound_onset_relative_baseline_soa_ms": [
+      -650,
+      3650
+    ],
+    "trial_start_relative_baseline_soa_ms": [
+      350,
+      4650
+    ],
+    "baseline_sound_policy": "The sound still plays in both endpoint control trial types. The target is timed during the pre-sound or post-sound silence.",
+    "pre_sound_silence_ms": 1000,
+    "reported_post_sound_silence_range_ms": [
+      2700,
+      3300
+    ],
+    "preview_post_sound_silence_values_ms": [
+      3000
+    ],
+    "tactile_command": {
+      "site": "palmar left index finger",
+      "waveform": "sine",
+      "duration_ms": 20,
+      "frequency_hz": 250,
+      "actuator": "28 mm miniature speaker"
+    },
+    "response": "Speeded button press with the right index finger on detection of the target. Withhold on auditory-only catches.",
+    "reported_counts": {
+      "blocks": 10,
+      "trials_per_block": 48,
+      "sound_overlap_targets": 360,
+      "silent_window_targets": 80,
+      "sound_only_catches": 40,
+      "target_repeats_per_side_delay_per_context": 10
+    },
+    "preview_substitutions": {
+      "audio": "Generated pink noise rendered on the reported paths with the Toolkit binaural engine. Exact original waveform and spatial-render settings are unavailable.",
+      "timing": "Two repeats per cell in each of five blocks yield ten repeats per context and side\u2013delay cell. The preview uses a fixed 3000 ms after sound offset and equal catch allocation by side. The exact reported jitter sampling and realized within-block composition are unknown.",
+      "response": "Mouse press proxy. Calibrated physical tactile delivery and response capture require separate verification."
+    },
+    "implementation_gaps": [
+      "Exact bubbling-water source waveform, LISTEN HRTF identity and calibrated headphone transfer are unavailable.",
+      "The preview synthesizes the specified 20 ms, 250 Hz sine at a digital default amplitude. Physical tactile delivery and response capture require calibration.",
+      "Exact post-sound jitter sampling, catch split by sound side and realized trial order are unreported.",
+      "The social trial scheduler does not coordinate a second instrumented participant, synchronize two systems, or capture both responses. The audience manipulation also requires an operator and a separate participant."
+    ],
+    "reported_cohort": {
+      "recruited": 30,
+      "analyzed": 29
+    },
+    "dyad_design": {
+      "conditions": [
+        "Isolated",
+        "Competition"
+      ],
+      "seating": "Fixed seat with same-gender partner seated alongside at 1 m in the dyad session. Leave the chair empty in the isolated session.",
+      "instruction": "Both participants are asked to compete and told only the faster response on a trial is recorded.",
+      "order": "Counterbalance isolated and dyad context across participants.",
+      "preview_operator_action": "The Toolkit stages two groups of five blocks and counterbalances their order. The operator changes the social context. Exact original block-to-context allocation is unreported."
+    }
+  },
+  "provenance": [
+    {
+      "field": "Timing, apparatus, counts and context",
+      "source": "Royal Society Open Science 6, 181878, \u00a7\u00a72.1\u20132.4 and Fig. 1, pp. 3\u20135."
+    },
+    {
+      "field": "Toolkit auditory proxy, jitter and allocation defaults",
+      "source": "PPS Kit configuration. A fixed 3000 ms interval and uniform within-block allocation are preview defaults."
+    }
+  ]
+}

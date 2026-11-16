@@ -1,0 +1,137 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "bassolino_2010_mouse_left_hand_passive_first",
+  "title": "Bassolino 2010 Experiment 2 \u00b7 Left hand, passive first",
+  "citation": "Bassolino, M., Serino, A., Ubaldi, S., & L\u00e0davas, E. (2010). Everyday use of the computer mouse extends peripersonal space representation. Neuropsychologia, 48(3), 803\u2013811.",
+  "doi": "10.1016/j.neuropsychologia.2009.11.009",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2009.11.009",
+  "verification_status": "partial",
+  "notes": "Experiment 2 for the left hand, with 124 reported trials per block. The template requires explicit Segment 4 trial counts. Visual presentation, motor conditions, electrical stimulation and voice response need separate calibrated equipment.",
+  "reference_parameters": {
+    "profile_type": "static_near_far_audio_tactile_pps",
+    "publication_study_row_id": "doi:10.1016/j.neuropsychologia.2009.11.009::left-hand",
+    "formal_experiment": 2,
+    "source_scope": "Main Experiment 2, one of two block-order arms.",
+    "original_design": {
+      "tested_hand": "left",
+      "cohort": "New cohort of 16 right-handed computer users who operate the mouse with their right hand.",
+      "participants_in_profile_scope": 8,
+      "cell_counts_per_block": {
+        "near_weak": 25,
+        "far_weak": 25,
+        "near_strong": 15,
+        "far_strong": 15,
+        "near_catch": 4,
+        "far_catch": 4,
+        "tactile_only_weak": 20,
+        "tactile_only_strong": 16
+      },
+      "trials_per_block": 124,
+      "formal_blocks": 3,
+      "total_formal_trials_per_participant": 372,
+      "condition_order": "The active block is always last. The two other blocks exchange first and second positions across equal halves; this profile represents one half.",
+      "motor_conditions": {
+        "No-mouse": "Hands rest on the table. For Experiment 1 the right hand is palm down. Watch the dot display.",
+        "Passive mouse-hold": "Hold the mouse without moving it. Watch the cursor connect the dots. The original software randomly chose one of ten preprogrammed cursor movement sequences for each trial.",
+        "Active mouse-use": "Use the mouse with the tested hand to connect the dots in any order at a self-selected speed. The experimenter monitored readiness visually; the original study did not record movement kinematics."
+      },
+      "unimodal_control": "20 weak Go and 16 strong NoGo, both without audio. The weak condition provides an RT baseline."
+    },
+    "published_protocol": {
+      "trial_sequence": {
+        "movie_onset_ms": 0,
+        "movie_duration_ms": 2000,
+        "screen": "21-inch monitor, in a dark, quiet room, aligned with the midline, 70 cm from the tested hand.",
+        "movie_contents": "Seven green dots, each approximately 0.5 \u00d7 0.5 cm, on black. The display reverts to black after the movie.",
+        "tactile_onset_ms": 2150,
+        "near_audio_onset_ms": 2150,
+        "far_audio_onset_ms": 2145,
+        "auditory_duration_ms": 100,
+        "nominal_response_period_ms": 1750,
+        "total_ms": 4000,
+        "interspersed_letter_task": {
+          "reported_trials_per_right_hand_block": 8,
+          "letter_duration_ms": 300,
+          "letter_size_cm_height_width": [
+            0.8,
+            0.5
+          ],
+          "letter_placement": "Center of the screen.",
+          "response": "Lift the unstimulated hand. The experimenter visually monitored this response.",
+          "not_reported": "Exact letter list, within-film onset and overlap of letter trials with sound-distance or tactile-target trials."
+        },
+        "task": "Say tah as soon as possible after the weak tactile target. Withhold to strong tactile non-targets and sound-only catches. Ignore the sounds. The original records voice onset via a voice-activated relay.",
+        "practice": "20 familiarization trials before Experiment 1. The exact practice trial mix is unreported. Experiment 2 inherits materials and procedure apart from the documented differences, without separate practice counts."
+      },
+      "physical_apparatus": {
+        "sound": "A 100 ms white-noise burst from one of two hidden, identical speakers at a level equalized to 70 dB at the vertex. Speaker spectra were compared for equivalence.",
+        "distance_from_hand_cm": {
+          "near_approx": 15,
+          "far_approx": 72
+        },
+        "distance_from_head_cm": {
+          "near": 60,
+          "far": 120
+        },
+        "speaker_separation_cm": 70,
+        "geometry": "Near speaker to the right of the tested right hand. The far speaker is in the same plane near the monitor. Both speakers were hidden by a black cardboard box 100 cm long. Experiment 2 inherits apparatus without separate published coordinates for the mirrored placement.",
+        "tactile": "Two Digitimer DS7A constant-current stimulators and two pairs of Ambu Neuroline electrodes on the dorsal index finger. Weak and strong electrode positions were counterbalanced inside versus outside. The issue does not establish the electrical pulse width or exact delivered intensities.",
+        "calibration": "Each participant had individualized weak and strong stimulation. Documented weak detection criterion was \u22659 of 10 with 10 interspersed catches, followed by strong checks at 1.5 times the weak setting requiring 10 of 10. Discrimination had five weak and five strong trials in random order and had to be perfect. The profile provides no electrical current commands.",
+        "software": "XGEN controlled presentation/response logging. C.I.R.O. controlled visual, auditory and tactile delivery. The native tasks and logs are unavailable."
+      },
+      "analysis": "Within each mouse state, compare mean weak-target RT for near and far sounds after excluding observations more than two SD from the mean. Experiment 2 also references unimodal weak-target RT. See original Results for cell-specific estimates."
+    },
+    "preview": {
+      "timing": "The prepared audio uses a 4,000 ms trial with 2,000 ms silence in place of the movie. Sound is 100 ms of generated centered white noise. Far sound begins 5 ms before the common tactile marker time. A tactile marker replaces the unverified electrical waveform.",
+      "response": "The preview describes Go and NoGo as metadata. A button can inspect the response structure; the original response was vocal.",
+      "stationary_sound": "Both sounds use stationary centered markers. The generic filmstrip audio cell may be labeled \u201clooming\u201d.",
+      "catch": "Catch variants are audio only and inherit display labels from parent rows. There is no tactile intensity on a catch.",
+      "baseline": "Use only the near parent row to bake each tactile-only intensity. The baseline recipe silences that parent sound source, so the label denotes an anchor, not an auditory trial.",
+      "left_hand_letter_scope": "The issue reports the visual task in Experiment 1, and procedural inheritance in Experiment 2, without a separately counted Experiment 2 letter schedule."
+    },
+    "published_trial_pool_bake_recipe": {
+      "kind": "trial_repetition_pool",
+      "label": "4_trial_repetition_pool",
+      "trial_pool": {
+        "default_repetitions": 1,
+        "family_repetitions": {
+          "catch": 2
+        },
+        "folder_repetitions": {
+          "row_01__near_weak__target_audio_tactile": 25,
+          "row_01__near_weak__baseline": 20,
+          "row_02__far_weak__target_audio_tactile": 25,
+          "row_02__far_weak__baseline": 0,
+          "row_03__near_strong__target_audio_tactile": 15,
+          "row_03__near_strong__baseline": 16,
+          "row_04__far_strong__target_audio_tactile": 15,
+          "row_04__far_strong__baseline": 0
+        }
+      }
+    },
+    "use_trial_pool_recipe": "After baking trial sequences and tactile channels, enter the folder repetition counts in Segment 4 or pass this recipe to the local companion bake endpoint. The generic template loader does not apply folder repetition overrides.",
+    "implementation_gaps": [
+      "Physical near and far speaker positions, equalization at the head, original sound and original trial-level hardware timing require the original or a calibrated equivalent setup.",
+      "Individualized DS7A stimulus intensity, exact pulse width and separate calibrated weak/strong electrode routes are unverified. The toolkit's shared waveform is a timing marker.",
+      "The original vocal-response device, exact voice threshold and the auxiliary hand-lift response require separate capture hardware and logic.",
+      "The original green-dot movie, letter schedule and onset, passive cursor trajectories and active mouse interactions are missing. Silent segments preserve the movie\u2019s nominal duration. Block labels identify external motor conditions.",
+      "The exact per-row quotas require the Segment 4 folder repetitions documented in this profile. The default filmstrip output shows only representative rows. The paper does not identify the original trial sequence or visual-letter overlap.",
+      "The formal trial budget excludes the auxiliary calibration and familiarization procedures, which require separate administration.",
+      "The exact onset for unimodal tactile-only trials was not reported separately. The preview anchors them at the 2,150 ms tactile time used in the bimodal task."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Original cohort, apparatus, geometry, trial clock, weak/strong calibration and counts",
+      "source": "Bassolino et al., Neuropsychologia 48(3):803\u2013811, version of record, pp. 804\u2013806 \u00a7\u00a72.1.1\u20132.1.3 and Fig. 1."
+    },
+    {
+      "field": "Left-hand cohort, fixed final active block and added tactile-only cells",
+      "source": "Bassolino et al., Neuropsychologia 48(3):803\u2013811, p. 807 \u00a7\u00a73.1.1\u20133.1.2."
+    },
+    {
+      "field": "Timing and rendering preview",
+      "source": "Toolkit-generated white noise and shared tactile marker. Tactile-only preview onset and procedural timing markers are explicit design choices."
+    }
+  ]
+}

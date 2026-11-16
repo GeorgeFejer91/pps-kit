@@ -169,9 +169,16 @@ This file is the active checklist and handoff owner; replace state, do not appen
   social setting between condition groups. The second pass also verifies the
   416-trial Ferri artificial assessment, 688-trial ecological schedule with
   test fixtures, two 576-trial Hobeika variants and two 245-trial Rahmani
-  variants. Exact delivery remains gated. Next implement stable trial-row
-  selection by block for experiments whose conditions use different media
-  or stimulus settings. Physical qualification and the remaining profiles are open.
+  variants. The next review-branch checkpoint adds 19 templates across eight
+  papers. The software catalogue now contains 57 templates. The new entries
+  record partial task recreations, including the Hobeika cohorts, Amemiya heel
+  conditions, Holmes hand and driving tasks, Bassolino mouse conditions,
+  Bernasconi iEEG, Taffou auditory roughness, and Teraoka directional probes.
+  Segment 3 bakes declared vibrotactile commands, including Hobeika’s 20 ms,
+  250 Hz sine. Physical timing, calibration, external tasks, and the missing
+  assets and protocol settings listed by each profile leave all 19 launch
+  gates closed. Next implement trial-family selection by block and the
+  remaining paper-specific scheduling gaps before physical qualification.
 - **Current milestone:** M1, partial. The requested validation task delivered
   verified source fixes and a retained validation run; full validation sign-off
   remains open. M0 setup/review is complete.
