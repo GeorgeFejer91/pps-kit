@@ -32,23 +32,23 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     status = json.loads(STATUS_PATH.read_text(encoding="utf-8"))
 
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
-    assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 75
+    assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 80
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
         "covered_runnable_profile": 19,
-        "covered_blocked_missing_publication_parameters": 8,
-        "covered_blocked_toolkit_structure": 9,
+        "covered_blocked_missing_publication_parameters": 11,
+        "covered_blocked_toolkit_structure": 21,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 35,
+        "not_yet_templated_missing_publication_parameters": 25,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 57
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 81
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
     ) == 26
     assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 24
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
-    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 17
+    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 38
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
     assert coverage["coverage_summary"]["openalex_broad_linked_candidate_like_hits"] == 47
@@ -680,10 +680,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "voice_key_response_capture",
         "exact_audio_envelope_or_gain_files",
     ]
-    assert records["kitagawa_2005_sound_complexity"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
-    assert records["kitagawa_2005_sound_complexity"]["blocking_constraint_ids"] == []
+    assert records["kitagawa_2005_sound_complexity"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert records["kitagawa_2005_sound_complexity"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files",
+    ]
     assert records["tajadura_jimenez_2009_visual_deprivation"]["coverage_category"] == "covered_runnable_profile"
     assert records["tajadura_jimenez_2009_visual_deprivation"]["current_template_ids"] == [
         "tajadura_jimenez_2009_uncrossed_visual_deprivation",
@@ -699,27 +700,31 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "not_yet_templated_missing_publication_parameters"
     )
     assert records["teramoto_2013_visual_deprivation"]["blocking_constraint_ids"] == []
-    assert records["mindfulness_pps_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["newborn_boundaries_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["mindfulness_pps_2024"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
+    assert records["newborn_boundaries_2019"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["newborn_boundaries_2019"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files",
     ]
-    assert records["ronga_2021_newborn_erp"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["ronga_2021_newborn_erp"]["blocking_constraint_ids"] == []
+    assert records["ronga_2021_newborn_erp"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert records["ronga_2021_newborn_erp"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files",
+    ]
     assert records["ferri_2015_jneurosci_itv"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["autism_2019"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["autism_2019"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["social_coding_2019"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["social_perception_2017"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["ferroni_2020_tool_observation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["ferroni_2020_tool_observation"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["ferroni_2026_pps_plasticity"]["doi"] == "10.1016/j.neuropsychologia.2026.109490"
     assert records["ferroni_2026_pps_plasticity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["ferroni_2026_pps_plasticity"]["blocking_constraint_ids"] == [
         "missing_core_soa_iti_baseline_repetition_parameters"
     ]
-    assert records["ageing_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["ageing_2021"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["seeming_confines_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["jazz_duet_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["schizophrenia_tool_use_2022"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["schizophrenia_tool_use_2022"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["novel_two_phase_audio_tactile_2025"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["depersonalisation_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["lower_limb_pps_2017"]["coverage_category"] == "adjacent_out_of_scope"
@@ -849,11 +854,11 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "exact dog/sheep source audio and Audacity amplitude/dynamic matching settings",
         "LISTEN HRTF subject/filter identifier and renderer settings",
     ]
-    assert records["teramoto_2013_beyond_head_audiotactile"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
-    assert records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"] == []
-    assert "tactile_discrimination_or_localization_response" not in records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"]
+    assert records["teramoto_2013_beyond_head_audiotactile"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert records["teramoto_2013_beyond_head_audiotactile"]["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files",
+    ]
     assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == (
         "not_yet_templated_missing_publication_parameters"
     )
@@ -930,6 +935,12 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         for record in records.values()
         if "electrical_tactile_calibration" in record["blocking_constraint_ids"]
     } == {
+        "di_cosmo_2021_phase_coupling",
+        "ferroni_2020_schizotypy",
+        "mindfulness_pps_2024",
+        "murray_2005_grabbing_your_ear",
+        "schizophrenia_tool_use_2022",
+        "zampini_2005_audiotactile_toj",
         "serino_2007_blind_cane_users",
         "teneggi_2013_social_face",
         "ardizzi_ferri_2018_interoceptive",

@@ -1,0 +1,406 @@
+{
+  "schema": "pps-study-profile-parameters.v1",
+  "template_id": "orioli_2019_newborn_auditory",
+  "title": "Orioli 2019 newborn orienting \u00b7 Study 1 auditory comparison",
+  "citation": "Orioli, G., Santoni, A., Dragovic, D., & Farroni, T. (2019). Identifying peripersonal space boundaries in newborns. Scientific Reports, 9, 9370.",
+  "doi": "10.1038/s41598-019-45084-4",
+  "source_url": "https://doi.org/10.1038/s41598-019-45084-4",
+  "verification_status": "partial",
+  "publication_status": "published",
+  "profile_type": "newborn_orienting_auditory_comparison",
+  "paper_group_key": "doi:10.1038/s41598-019-45084-4",
+  "visible_variant_label": "B",
+  "variant_display": "Orioli 2019 newborn orienting \u00b7 Study 1 auditory comparison - Variant B",
+  "recreation_status": {
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 4,
+    "unsupported_structure_count": 1
+  },
+  "segment_0_to_4_profile_checks": {
+    "gate": "segments_0_to_4",
+    "passed": false,
+    "segments": [
+      {
+        "segment": "0",
+        "segment_label": "Segment 0 profile manifest and provenance",
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
+      },
+      {
+        "segment": "1",
+        "segment_label": "Segment 1 source/stimulus assets",
+        "passed": false,
+        "field_count": 6,
+        "blocking_reasons": [
+          {
+            "parameter": "source_stimulus_inventory",
+            "status": "missing_publication_parameter",
+            "reason": "No source assets are available for Segment 1."
+          },
+          {
+            "parameter": "trajectory_snapshots",
+            "status": "missing_publication_parameter",
+            "reason": "No source-level trajectory snapshots are available."
+          },
+          {
+            "parameter": "profile_gap",
+            "status": "missing_publication_parameter",
+            "reason": "The 8000 Hz sound assets with verified output calibration at the participant location and original source envelope are unavailable."
+          },
+          {
+            "parameter": "profile_gap",
+            "status": "unsupported_toolkit_structure",
+            "reason": "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable."
+          },
+          {
+            "parameter": "profile_gap",
+            "status": "missing_publication_parameter",
+            "reason": "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable."
+          }
+        ]
+      },
+      {
+        "segment": "2",
+        "segment_label": "Segment 2 trial rows and sequences",
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
+      },
+      {
+        "segment": "3",
+        "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+        "passed": true,
+        "field_count": 5,
+        "blocking_reasons": []
+      },
+      {
+        "segment": "4",
+        "segment_label": "Segment 4 repetition pool settings",
+        "passed": true,
+        "field_count": 1,
+        "blocking_reasons": []
+      }
+    ]
+  },
+  "field_inventory": [
+    {
+      "segment": "0",
+      "segment_label": "Segment 0 profile manifest and provenance",
+      "parameter": "profile_identity",
+      "status": "reported",
+      "value": {
+        "template_id": "orioli_2019_newborn_auditory",
+        "title": "Orioli 2019 newborn orienting \u00b7 Study 1 auditory comparison"
+      },
+      "note": "Profile ID and title are encoded."
+    },
+    {
+      "segment": "0",
+      "segment_label": "Segment 0 profile manifest and provenance",
+      "parameter": "publication_reference",
+      "status": "reported",
+      "value": {
+        "citation": "Orioli, G., Santoni, A., Dragovic, D., & Farroni, T. (2019). Identifying peripersonal space boundaries in newborns. Scientific Reports, 9, 9370.",
+        "doi": "10.1038/s41598-019-45084-4",
+        "source_url": "https://doi.org/10.1038/s41598-019-45084-4"
+      },
+      "note": "Publication reference metadata is encoded."
+    },
+    {
+      "segment": "0",
+      "segment_label": "Segment 0 profile manifest and provenance",
+      "parameter": "profile_parameter_provenance",
+      "status": "reported",
+      "value": 16,
+      "note": "Profile provenance/reference parameters are encoded."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "source_stimulus_inventory",
+      "status": "missing_publication_parameter",
+      "value": 0,
+      "note": "No source assets are available for Segment 1."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "trajectory_snapshots",
+      "status": "missing_publication_parameter",
+      "value": 0,
+      "note": "No source-level trajectory snapshots are available."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "stimulus_duration",
+      "status": "inferred",
+      "value": 2.0,
+      "note": "Duration inferred from trajectory defaults."
+    },
+    {
+      "segment": "2",
+      "segment_label": "Segment 2 trial rows and sequences",
+      "parameter": "trial_sequence_rows",
+      "status": "reported",
+      "value": 1,
+      "note": "Current Segment 2 row/box representation is encoded."
+    },
+    {
+      "segment": "2",
+      "segment_label": "Segment 2 trial rows and sequences",
+      "parameter": "jitter_values_ms",
+      "status": "defaulted",
+      "value": [],
+      "note": "No explicit jitter box is encoded."
+    },
+    {
+      "segment": "2",
+      "segment_label": "Segment 2 trial rows and sequences",
+      "parameter": "iti_jitter_policy",
+      "status": "defaulted",
+      "value": "no explicit Segment 2 ITI/jitter box",
+      "note": "No explicit ITI/jitter box is encoded; missing ITI/jitter is only a blocker when listed as a publication gap."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "soa_values_ms",
+      "status": "reported",
+      "value": [
+        0
+      ],
+      "note": "SOA values are encoded."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "tactile_sites",
+      "status": "defaulted",
+      "value": [],
+      "note": "Toolkit default tactile site will be used."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "baseline_mode",
+      "status": "reported",
+      "value": "none",
+      "note": "Baseline strategy is encoded."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "baseline_count",
+      "status": "defaulted",
+      "value": 0.0,
+      "note": "No baseline trials are configured."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "catch_mode",
+      "status": "defaulted",
+      "value": 0,
+      "note": "No catch trials are configured."
+    },
+    {
+      "segment": "4",
+      "segment_label": "Segment 4 repetition pool settings",
+      "parameter": "trial_pool_repetitions",
+      "status": "inferred",
+      "value": 1,
+      "note": "Segment 4 can infer repetitions from repetitions_per_condition."
+    },
+    {
+      "segment": "5",
+      "segment_label": "Segment 5 block CSV settings",
+      "parameter": "block_count",
+      "status": "reported",
+      "value": 1,
+      "note": "Block count is encoded."
+    },
+    {
+      "segment": "5",
+      "segment_label": "Segment 5 block CSV settings",
+      "parameter": "row_order_constraints",
+      "status": "reported",
+      "value": 1,
+      "note": "Row order can be preserved through Segment 5."
+    },
+    {
+      "segment": "6",
+      "segment_label": "Segment 6 run setup settings",
+      "parameter": "participants",
+      "status": "reported",
+      "value": 1,
+      "note": "Participant count default is encoded."
+    },
+    {
+      "segment": "6",
+      "segment_label": "Segment 6 run setup settings",
+      "parameter": "experiment_parts",
+      "status": "defaulted",
+      "value": "1 part",
+      "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "profile_gap",
+      "status": "missing_publication_parameter",
+      "value": "The 8000 Hz sound assets with verified output calibration at the participant location and original source envelope are unavailable.",
+      "note": "The 8000 Hz sound assets with verified output calibration at the participant location and original source envelope are unavailable."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "profile_gap",
+      "status": "unsupported_toolkit_structure",
+      "value": "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable.",
+      "note": "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "profile_gap",
+      "status": "missing_publication_parameter",
+      "value": "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable.",
+      "note": "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable."
+    },
+    {
+      "segment": "6",
+      "segment_label": "Segment 6 run setup settings",
+      "parameter": "profile_gap",
+      "status": "missing_publication_parameter",
+      "value": "A neonatal participant session requires the study-specific equipment, procedures, approvals and trained personnel.",
+      "note": "A neonatal participant session requires the study-specific equipment, procedures, approvals and trained personnel."
+    },
+    {
+      "segment": "6",
+      "segment_label": "Segment 6 run setup settings",
+      "parameter": "current_design_validation",
+      "status": "missing_publication_parameter",
+      "value": "",
+      "note": "At least one procedural noise definition or custom looming audio source is required."
+    },
+    {
+      "segment": "6",
+      "segment_label": "Segment 6 run setup settings",
+      "parameter": "current_design_validation",
+      "status": "missing_publication_parameter",
+      "value": "",
+      "note": "At least one tactile body site is required."
+    },
+    {
+      "segment": "6",
+      "segment_label": "Segment 6 run setup settings",
+      "parameter": "current_design_validation",
+      "status": "missing_publication_parameter",
+      "value": "",
+      "note": "Source required for trial inspection references unknown stimulus source(s): Sound 0 \u00b7 8000 Hz at 47 dB, Sound 1 \u00b7 8000 Hz at 55 dB, Sound 2 \u00b7 8000 Hz at 59 dB, Sound 3 \u00b7 8000 Hz at 62.5 dB, Sound 5 \u00b7 8000 Hz at 70 dB"
+    }
+  ],
+  "missing_publication_parameters": [
+    {
+      "segment": "1",
+      "parameter": "source_stimulus_inventory",
+      "reason": "No source assets are available for Segment 1."
+    },
+    {
+      "segment": "1",
+      "parameter": "trajectory_snapshots",
+      "reason": "No source-level trajectory snapshots are available."
+    },
+    {
+      "segment": "1",
+      "parameter": "profile_gap",
+      "reason": "The 8000 Hz sound assets with verified output calibration at the participant location and original source envelope are unavailable."
+    },
+    {
+      "segment": "1",
+      "parameter": "profile_gap",
+      "reason": "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable."
+    },
+    {
+      "segment": "6",
+      "parameter": "profile_gap",
+      "reason": "A neonatal participant session requires the study-specific equipment, procedures, approvals and trained personnel."
+    },
+    {
+      "segment": "6",
+      "parameter": "current_design_validation",
+      "reason": "At least one procedural noise definition or custom looming audio source is required."
+    },
+    {
+      "segment": "6",
+      "parameter": "current_design_validation",
+      "reason": "At least one tactile body site is required."
+    },
+    {
+      "segment": "6",
+      "parameter": "current_design_validation",
+      "reason": "Source required for trial inspection references unknown stimulus source(s): Sound 0 \u00b7 8000 Hz at 47 dB, Sound 1 \u00b7 8000 Hz at 55 dB, Sound 2 \u00b7 8000 Hz at 59 dB, Sound 3 \u00b7 8000 Hz at 62.5 dB, Sound 5 \u00b7 8000 Hz at 70 dB"
+    }
+  ],
+  "unsupported_toolkit_structures": [
+    {
+      "segment": "1",
+      "parameter": "profile_gap",
+      "reason": "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable."
+    }
+  ],
+  "generated_segment_artifacts": {
+    "01_profile": {
+      "profile_metadata": "assets/preloads/orioli_2019_newborn_auditory/01_profile/profile_metadata.json",
+      "profile_parameters_manifest": "assets/preloads/orioli_2019_newborn_auditory/01_profile/profile_parameters_manifest.json"
+    },
+    "02_looming_stimuli": {
+      "stimulus_sources": "assets/preloads/orioli_2019_newborn_auditory/02_looming_stimuli/stimulus_sources.json",
+      "trajectory_inventory": "assets/preloads/orioli_2019_newborn_auditory/02_looming_stimuli/trajectory_inventory.json",
+      "asset_count": 0
+    },
+    "03_baseline_strategy": {
+      "baseline_strategy": "assets/preloads/orioli_2019_newborn_auditory/03_baseline_strategy/baseline_strategy.json"
+    },
+    "04_trial_designer": {
+      "trial_design": "assets/preloads/orioli_2019_newborn_auditory/04_trial_designer/trial_design.json",
+      "trial_row_count": 1
+    },
+    "05_run_setup": {
+      "run_defaults": "assets/preloads/orioli_2019_newborn_auditory/05_run_setup/run_defaults.json",
+      "block_count": 1,
+      "participant_count": 1
+    },
+    "local_segment_0_to_4_profile_gate": {
+      "mode": "publication_parameter_check",
+      "scope": "Segments 0-4 must have no missing or unsupported profile parameters before native app materialization."
+    },
+    "local_segment_1_to_6_materialization": {
+      "mode": "local_companion_batch",
+      "tool": "For-AI/engineering/tooling/materialize_profile_segments.py",
+      "tracked_in_git": false
+    }
+  },
+  "provenance": [
+    {
+      "field": "Arm, cohort, intensity allocation and published analysis",
+      "source": "https://doi.org/10.1038/s41598-019-45084-4, pp. 2\u20135, Results and Tables 1\u20133."
+    },
+    {
+      "field": "Stimulus sequence, gaze coding, apparatus and trial caps",
+      "source": "https://doi.org/10.1038/s41598-019-45084-4, pp. 8\u20139, Method, Table 4 and Fig. 3."
+    }
+  ],
+  "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."
+}

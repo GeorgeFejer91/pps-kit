@@ -1,0 +1,48 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "mul_2019_autism_pps",
+  "assets": [
+    {
+      "label": "Looming pink-noise proxy from Maister 2015",
+      "path": "assets/preloads/mul_2019_autism_pps/02_looming_stimuli/looming_Looming_pink-noise_proxy_from_Maister_2015.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/mul_2019_autism_pps/02_looming_stimuli/looming_Looming_pink-noise_proxy_from_Maister_2015.wav",
+      "sha256": "7736f6b4379a03ca4cab2e28f3d067acfa08e2d9414e69a84e22312b1e213d8d",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "imported_audio",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Looming pink-noise proxy from Maister 2015",
+        "source_kind": "imported_audio",
+        "noise_type": "pink",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "polar",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.1,
+          "z_m": 0.0
+        }
+      }
+    }
+  ]
+}

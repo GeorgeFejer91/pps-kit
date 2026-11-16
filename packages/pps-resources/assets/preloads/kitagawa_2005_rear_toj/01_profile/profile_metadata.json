@@ -1,0 +1,180 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "kitagawa_2005_rear_toj",
+  "title": "Kitagawa 2005 Experiment 1 \u00b7 rear temporal order",
+  "citation": "Kitagawa, N., Zampini, M., & Spence, C. (2005). Audiotactile interactions in near and far space. Experimental Brain Research, 166(3\u20134), 528\u2013537.",
+  "doi": "10.1007/s00221-005-2393-8",
+  "source_url": "https://doi.org/10.1007/s00221-005-2393-8",
+  "verification_status": "partial",
+  "notes": "Eight blocks preserve the published temporal-order cell counts for auditory inspection. Earlobe stimulation and participant data collection are blocked.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-005-2393-8",
+    "publication_status": "published",
+    "profile_type": "rear_audiotactile_temporal_order",
+    "profile_check_complete": false,
+    "participants": {
+      "recruited": 11,
+      "paired_test_n_derived": 10,
+      "paired_front_comparator_n": 7,
+      "paired_test_note": "The paper reports paired tests with 9 degrees of freedom. The reason for the difference from the recruited count is unreported."
+    },
+    "apparatus": {
+      "source": "Two fixed loudspeaker positions 45\u00b0 left and right of the rear axis, 20 cm from head center.",
+      "sound": "White-noise bursts, 9 ms, calibrated to 82 dBA at the head.",
+      "fixation": "Central fixation viewed straight ahead."
+    },
+    "tactile": {
+      "modality": "Electrocutaneous",
+      "sites": [
+        "lower left earlobe",
+        "lower right earlobe"
+      ],
+      "pulse_duration_ms": 9,
+      "voltage_mV_as_printed": 2,
+      "electrode_diameter_cm": 1,
+      "electrode_separation_cm": 1,
+      "plate_dimensions_cm": [
+        2,
+        6
+      ],
+      "preliminary_detection_criterion": "Above 95%",
+      "delivered_current": null,
+      "waveform": null
+    },
+    "published_trial_schedule": {
+      "signed_soa_ms": [
+        -200,
+        -90,
+        -55,
+        -30,
+        -20,
+        20,
+        30,
+        55,
+        90,
+        200
+      ],
+      "sign_rule": "Sound onset minus tactile onset. Negative values indicate sound-first trials.",
+      "first_onset_from_fixation_ms": 750,
+      "auditory_onsets_from_fixation_ms_derived": [
+        750,
+        750,
+        750,
+        750,
+        750,
+        770,
+        780,
+        805,
+        840,
+        950
+      ],
+      "tactile_onsets_from_fixation_ms_derived": [
+        950,
+        840,
+        805,
+        780,
+        770,
+        750,
+        750,
+        750,
+        750,
+        750
+      ],
+      "response_deadline_from_first_stimulus_ms": 3500,
+      "next_fixation_after_trial_end_ms": 750,
+      "side_pairings": [
+        "left sound / left touch",
+        "left sound / right touch",
+        "right sound / left touch",
+        "right sound / right touch"
+      ],
+      "block_trial_counts": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "main_trials_total": 640,
+      "repetitions_per_block_per_soa_and_side_pair": 2,
+      "invalid_response_feedback_ms": 1000,
+      "realized_trial_order": null
+    },
+    "other_procedures": {
+      "practice": {
+        "study_row_id": "doi:10.1007/s00221-005-2393-8::toj-practice",
+        "block_trial_counts": [
+          30,
+          30
+        ],
+        "trials_total": 60,
+        "first_block_signed_soa_ms_derived": [
+          -400,
+          -180,
+          -110,
+          -60,
+          -40,
+          40,
+          60,
+          110,
+          180,
+          400
+        ],
+        "first_block_rule": "Double the formal SOAs.",
+        "per_cell_allocation": null,
+        "second_block_exact_soa_allocation": null
+      }
+    },
+    "response": {
+      "task": "Unspeeded sound-first or touch-first judgment.",
+      "device": "Hand-held two-key response pad operated with the thumbs.",
+      "mapping": {
+        "upper_key": "touch first",
+        "lower_key": "sound first"
+      }
+    },
+    "analysis": {
+      "primary_measure": "Temporal-order judgment. Fit the normal-score transform of touch-first proportions separately by participant and side alignment.",
+      "included_signed_soa_ms": [
+        -90,
+        -55,
+        -30,
+        -20,
+        20,
+        30,
+        55,
+        90
+      ],
+      "excluded_signed_soa_ms": [
+        -200,
+        200
+      ],
+      "jnd": "0.675 divided by slope",
+      "pss": "Negative intercept divided by slope"
+    },
+    "inspection_scope": {
+      "auditory_only_rows": 640,
+      "preview_burst_duration_ms": 10,
+      "auditory_spatialization": "Toolkit stereo pan; rear-left / rear-right placement is reported apparatus geometry.",
+      "details": "Digital, stationary sound bursts and nominal order combinations only. The touch side and lead are annotations; there is no tactile output, independent masker, fixation-light hardware or response scoring. Auditory onset is scheduled from an implicit fixation at the row start. The toolkit SOA control measures a nonnegative delay from sound onset. Touch-first timing remains a planned value."
+    },
+    "implementation_gaps": [
+      "The trial scheduler requires independent auditory and tactile triggers for signed temporal orders plus light feedback. This profile schedules only the auditory member of each pair.",
+      "Speaker and tactile calibration must verify delivered intensity and acoustic-to-skin onset. Original waveform bytes and measured timing are unavailable.",
+      "The original hand-held choice pad, fixation feedback and two-site electrical stimulator are required for response capture and tactile delivery. The reported voltage is a source record and cannot establish delivered current or calibration."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Rear geometry, source burst, electrocutaneous earlobe stimulation and tactile calibration",
+      "source": "https://doi.org/10.1007/s00221-005-2393-8, pp. 529\u2013530, Experiment 1 Methods and Fig. 1."
+    },
+    {
+      "field": "Signed timing, practice, trial counts, response and temporal-order fit",
+      "source": "https://doi.org/10.1007/s00221-005-2393-8, pp. 529\u2013531, Experiment 1 Methods, Results and Table 1."
+    }
+  ]
+}

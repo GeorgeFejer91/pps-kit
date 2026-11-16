@@ -1,0 +1,135 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ferroni_2020_schizotypy_observation",
+  "title": "Ferroni 2020 Experiment 2, PPS before and after observed tool use",
+  "citation": "Ferroni, F., Ardizzi, M., Ferri, F., Tesanovic, A., Langiulli, N., Tonna, M., Marchesi, C., & Gallese, V. (2020). Schizotypy and individual differences in peripersonal space plasticity. Neuropsychologia, 147, 107579.",
+  "doi": "10.1016/j.neuropsychologia.2020.107579",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2020.107579",
+  "verification_status": "partial",
+  "notes": "Source-backed PPS instructions and distinct trial exemplars for both assessments. Full scheduling is gated by incompatible published trial counts and the physical training, electrical stimulation and loudspeaker apparatus.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2020.107579::observation",
+    "profile_check_complete": false,
+    "publication_status": "published",
+    "profile_type": "schizotypy_tool_use_plasticity_pps",
+    "source_scope": "Experiment 2, independent cohort of 35 nonclinical right-handed adults tested with observed tool use.",
+    "original_design": {
+      "participants": 35,
+      "cohort": "Nonclinical right-handed adults.",
+      "experimental_day": [
+        "Session 1, pre-training PPS",
+        "Session 2, tool training",
+        "Session 3, post-training PPS"
+      ],
+      "blocks_per_pps_assessment": 2,
+      "minutes_per_block_approx": 8,
+      "timing_and_allocation": {
+        "paired_tactile_onset_from_sound_onset_ms": [
+          300,
+          800,
+          1500,
+          2200,
+          2700
+        ],
+        "D0_tactile_onset_from_nominal_sound_onset_ms": -700,
+        "post_trial_iti_ms": 1000,
+        "trial_families": [
+          "Paired looming",
+          "Paired flat",
+          "D0 tactile-only baseline in silence",
+          "Looming audio-only catch",
+          "Flat audio-only catch"
+        ],
+        "reported_total_per_assessment": 120,
+        "reported_paired_percent": 60,
+        "reported_repetitions_at_each_delay": 18,
+        "paired_count_implied_by_percent_derived": 72,
+        "minimum_paired_count_implied_by_repetitions_derived": 90,
+        "paired_count_if_repetitions_apply_per_sound_derived": 180,
+        "exact_baseline_and_catch_counts": null,
+        "status": "The printed total and paired proportion conflict with the printed repeat count. The original trial log or author clarification is required."
+      }
+    },
+    "published_protocol": {
+      "posture": "Seated blindfolded, right arm resting palm down.",
+      "sound": {
+        "conditions": [
+          "Looming",
+          "Flat"
+        ],
+        "speakers": "Two speakers separated by 100 cm, near speaker beside the right hand. Exact hand-relative distances at the five delays are unreported.",
+        "reported_duration_ms": 3000,
+        "waveform": "44.1 kHz pink noise edited in Sound Forge 4.5.",
+        "levels": "Looming rises exponentially from 55 to 70 dB, with far speaker fading and near speaker rising. Flat is 62.5 dB."
+      },
+      "touch": {
+        "site": "Hairy dorsal surface of the right index finger",
+        "stimulator": "Digitimer DS7A",
+        "pulse_duration_us": 100,
+        "waveform": "Single rectangular monophasic electrical pulse.",
+        "calibration": "Before each assessment, set the subject-specific current above detection threshold. Reported study ranges describe observations.",
+        "reported_current_ranges_ma": [
+          5.5,
+          9.5
+        ]
+      },
+      "response": {
+        "target": "Press a laptop button promptly with the left index finger when touch occurs.",
+        "catch": "Withhold on a sound-only trial.",
+        "missed_target": "Repeat the trial. Exact deadline, repeat placement and repeat limits are unreported.",
+        "software": "Custom MATLAB"
+      },
+      "training": {
+        "session": 2,
+        "duration_minutes_approx": 8,
+        "actor": "Unfamiliar female confederate",
+        "participant_action": "Hold the clamp stationary in the right hand and watch the confederate use her right-hand clamp.",
+        "tool": "75 cm garbage clamp.",
+        "transfers": 100,
+        "objects": 50,
+        "object_colors": [
+          "red",
+          "green"
+        ],
+        "position": "Two marked areas 85 cm from the participant\u2019s chest. Move the objects one at a time to the second area, then return them.",
+        "familiarization": "The article describes a brief initial warm-up for Experiment 1: transfer two nearby objects 20 cm from the chest with the right hand for about two minutes. Experiment 2 refers to the same methods except for the tool-training stage."
+      },
+      "analysis": {
+        "screen": "Pre-training looming RT sigmoid R\u00b2 of at least 0.50 for inclusion. Trim pre-training RTs more than two SD from the mean.",
+        "primary_endpoint": "Post minus pre looming-sound sigmoid central point in milliseconds. Negative change indicates expansion.",
+        "questionnaire": "Post-task Schizotypal Personality Questionnaire. Relative high/low groups use a median split within experiment. Tie handling and exact group assignment are unresolved.",
+        "contrasts": "Compare change by experiment and SPQ group. Use flat and D0 trials in control analyses."
+      }
+    },
+    "preview": {
+      "allocation": "Each labeled assessment block contains one exemplar per paired SOA and sound, one D0 exemplar and one catch per sound. These 13 inspection events expose distinct published trial types. Original block quotas remain unresolved.",
+      "audio": "Uses the existing three-second Ardizzi\u2013Ferri 2018 pink-noise clips to demonstrate the looming/flat contrast. These derived stereo clips reproduce a relative digital level change and require separate measured physical speaker routing. The laboratory paper reports the same nominal duration and levels; waveform identity and calibrated physical SPL remain unverified.",
+      "baseline_anchor": "Inspection places a 1000 ms pre-sound silence before paired trials so a tactile-only D0 nominally 700 ms before sound can be represented. The exact published foreperiod is unreported.",
+      "phase_boundary": "Conduct training between the labeled pre- and post-training blocks outside the inspection schedule. Electrical timing and button responses use software inspection markers."
+    },
+    "implementation_gaps": [
+      "The printed 120-trial assessment, 60% paired share and 18 repeats per delay conflict. The exact original trial counts, baseline and catch quotas, randomization and repeat-on-miss logic require the source schedule.",
+      "The exact original auditory source files and measured separate loudspeaker gains, calibration and phase are unavailable.",
+      "The tactile scheduler requires individually calibrated Digitimer DS7A stimulation, hardware timing and validated laptop response capture.",
+      "Study execution requires the supervised physical training procedure and original eligibility and analysis workflow outside the inspection."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "PPS stimulus, response, timing and printed allocation",
+      "source": "Ferroni et al. (2020), Neuropsychologia 147:107579, pp. 2\u20134, Fig. 1 and \u00a7\u00a72.1.2.1 and 2.2.2.1."
+    },
+    {
+      "field": "tool training and phase order",
+      "source": "Ferroni et al. (2020), Neuropsychologia 147:107579, pp. 3\u20134, \u00a72.2.2.2 and Fig. 2b."
+    },
+    {
+      "field": "outcomes and estimation",
+      "source": "Ferroni et al. (2020), Neuropsychologia 147:107579, pp. 3\u20136, \u00a7\u00a73\u20134 and Supplementary Results."
+    },
+    {
+      "field": "inspection audio only",
+      "source": "PPS Kit\u2019s existing Ardizzi\u2013Ferri 2018 looming/flat digital proxies. See that profile\u2019s synthesis and checksum records."
+    }
+  ]
+}

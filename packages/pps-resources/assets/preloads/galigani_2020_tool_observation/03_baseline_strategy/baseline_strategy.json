@@ -1,0 +1,16 @@
+{
+  "schema": "pps-preload-baseline-segment.v1",
+  "template_id": "galigani_2020_tool_observation",
+  "baseline_strategy": "tactile_only",
+  "include_baseline_trials": true,
+  "baseline_trials_exact": 24,
+  "baseline_trial_percentage": 20,
+  "baseline_soa_values_ms": [
+    0
+  ],
+  "baseline_crosses_sequence_variants": true,
+  "catch_trial_percentage": 40,
+  "catch_trials_exact": 48,
+  "catch_crosses_sequence_variants": true,
+  "distribute_trial_pool_across_blocks": false
+}

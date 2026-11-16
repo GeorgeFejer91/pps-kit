@@ -1,0 +1,408 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "kitagawa_2005_rear_toj",
+  "repetitions_per_condition": 2,
+  "soa_values_ms": [
+    0
+  ],
+  "spatial_values_cm": [
+    20
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "kitagawa_2005_rear_toj-left-left-sound-first",
+      "label": "left sound / left touch / sound first",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        20,
+        30,
+        55,
+        90,
+        200
+      ],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_side": "left",
+        "planned_touch_side": "left",
+        "planned_alignment": "same",
+        "planned_first_modality": "sound",
+        "planned_soa_sign": -1
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_rear_toj-left-left-sound-first-lead",
+          "kind": "jitter",
+          "label": "Delay from nominal fixation",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            750
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "kitagawa_2005_rear_toj-left-left-sound-first-burst",
+          "kind": "looming_stimulus",
+          "label": "Rear left white-noise burst",
+          "source_label": "Rear left white-noise burst",
+          "source_labels": [
+            "Rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_rear_toj-left-left-touch-first",
+      "label": "left sound / left touch / touch first",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_side": "left",
+        "planned_touch_side": "left",
+        "planned_alignment": "same",
+        "planned_first_modality": "touch",
+        "planned_soa_sign": 1
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_rear_toj-left-left-touch-first-lead",
+          "kind": "jitter",
+          "label": "Delay from nominal fixation",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            770,
+            780,
+            805,
+            840,
+            950
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "kitagawa_2005_rear_toj-left-left-touch-first-burst",
+          "kind": "looming_stimulus",
+          "label": "Rear left white-noise burst",
+          "source_label": "Rear left white-noise burst",
+          "source_labels": [
+            "Rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_rear_toj-left-right-sound-first",
+      "label": "left sound / right touch / sound first",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        20,
+        30,
+        55,
+        90,
+        200
+      ],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_side": "left",
+        "planned_touch_side": "right",
+        "planned_alignment": "opposite",
+        "planned_first_modality": "sound",
+        "planned_soa_sign": -1
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_rear_toj-left-right-sound-first-lead",
+          "kind": "jitter",
+          "label": "Delay from nominal fixation",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            750
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "kitagawa_2005_rear_toj-left-right-sound-first-burst",
+          "kind": "looming_stimulus",
+          "label": "Rear left white-noise burst",
+          "source_label": "Rear left white-noise burst",
+          "source_labels": [
+            "Rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_rear_toj-left-right-touch-first",
+      "label": "left sound / right touch / touch first",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_side": "left",
+        "planned_touch_side": "right",
+        "planned_alignment": "opposite",
+        "planned_first_modality": "touch",
+        "planned_soa_sign": 1
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_rear_toj-left-right-touch-first-lead",
+          "kind": "jitter",
+          "label": "Delay from nominal fixation",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            770,
+            780,
+            805,
+            840,
+            950
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "kitagawa_2005_rear_toj-left-right-touch-first-burst",
+          "kind": "looming_stimulus",
+          "label": "Rear left white-noise burst",
+          "source_label": "Rear left white-noise burst",
+          "source_labels": [
+            "Rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_rear_toj-right-left-sound-first",
+      "label": "right sound / left touch / sound first",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        20,
+        30,
+        55,
+        90,
+        200
+      ],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_side": "right",
+        "planned_touch_side": "left",
+        "planned_alignment": "opposite",
+        "planned_first_modality": "sound",
+        "planned_soa_sign": -1
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_rear_toj-right-left-sound-first-lead",
+          "kind": "jitter",
+          "label": "Delay from nominal fixation",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            750
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "kitagawa_2005_rear_toj-right-left-sound-first-burst",
+          "kind": "looming_stimulus",
+          "label": "Rear right white-noise burst",
+          "source_label": "Rear right white-noise burst",
+          "source_labels": [
+            "Rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_rear_toj-right-left-touch-first",
+      "label": "right sound / left touch / touch first",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_side": "right",
+        "planned_touch_side": "left",
+        "planned_alignment": "opposite",
+        "planned_first_modality": "touch",
+        "planned_soa_sign": 1
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_rear_toj-right-left-touch-first-lead",
+          "kind": "jitter",
+          "label": "Delay from nominal fixation",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            770,
+            780,
+            805,
+            840,
+            950
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "kitagawa_2005_rear_toj-right-left-touch-first-burst",
+          "kind": "looming_stimulus",
+          "label": "Rear right white-noise burst",
+          "source_label": "Rear right white-noise burst",
+          "source_labels": [
+            "Rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_rear_toj-right-right-sound-first",
+      "label": "right sound / right touch / sound first",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        20,
+        30,
+        55,
+        90,
+        200
+      ],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_side": "right",
+        "planned_touch_side": "right",
+        "planned_alignment": "same",
+        "planned_first_modality": "sound",
+        "planned_soa_sign": -1
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_rear_toj-right-right-sound-first-lead",
+          "kind": "jitter",
+          "label": "Delay from nominal fixation",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            750
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "kitagawa_2005_rear_toj-right-right-sound-first-burst",
+          "kind": "looming_stimulus",
+          "label": "Rear right white-noise burst",
+          "source_label": "Rear right white-noise burst",
+          "source_labels": [
+            "Rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_rear_toj-right-right-touch-first",
+      "label": "right sound / right touch / touch first",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_side": "right",
+        "planned_touch_side": "right",
+        "planned_alignment": "same",
+        "planned_first_modality": "touch",
+        "planned_soa_sign": 1
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_rear_toj-right-right-touch-first-lead",
+          "kind": "jitter",
+          "label": "Delay from nominal fixation",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            770,
+            780,
+            805,
+            840,
+            950
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "kitagawa_2005_rear_toj-right-right-touch-first-burst",
+          "kind": "looming_stimulus",
+          "label": "Rear right white-noise burst",
+          "source_label": "Rear right white-noise burst",
+          "source_labels": [
+            "Rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 640
+}

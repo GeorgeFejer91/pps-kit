@@ -9947,9 +9947,18 @@ def _materialize_study_profile_segment1_ingredients(project: DashboardProjectCon
                 "loudness_policy": loudness_policy_for_design(design),
             },
         )
+    inspection = design.study_profile_reference_parameters.get("inspection_scope")
+    cue_import = inspection.get("cue_import_requirement") if isinstance(inspection, dict) else None
+    unbundled_cue = cue_import.get("expected_filename") if isinstance(cue_import, dict) else None
     for audio in design.prestimulus_files:
         asset = assets.get(_source_key(audio.label), {}) or _study_profile_custom_clip_asset(design, audio.label)
         source_path = _profile_materialization_source_path(audio.path, project, asset)
+        if (
+            design.study_profile_reference_parameters.get("profile_check_complete") is False
+            and unbundled_cue == source_path.name
+            and not _path_exists(source_path)
+        ):
+            continue
         target_path = _copy_materialize_ingredient_audio_file(
             source_path,
             project.segment1_dir,

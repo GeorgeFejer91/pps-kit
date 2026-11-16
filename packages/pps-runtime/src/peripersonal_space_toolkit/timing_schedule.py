@@ -102,7 +102,9 @@ class BlockEventSchedule:
             trial_type = str(_row_value(row, "Trial_Type", "trial_type", default="")).strip()
             family = str(_row_value(row, "Family", "family", default="")).strip()
             trial_kind = _trial_kind(trial_type, family)
-            has_looming = trial_kind in {"audio_tactile", "catch", "auditory_only"}
+            baseline_mode = str(_row_value(row, "Baseline_Mode", "baseline_mode", default="")).strip().lower()
+            starts_response_window_with_sound = trial_kind in {"audio_tactile", "catch", "auditory_only"}
+            has_looming = starts_response_window_with_sound or (trial_kind == "baseline" and baseline_mode == "audio_tactile")
             has_tactile = trial_kind in {"audio_tactile", "baseline"}
             soa_ms = _as_float(_row_value(row, "SOA_ms", "soa_ms", default=0), default=0.0)
             trial_start_default = int(round((trial_number - 1) * max(0.0, trial_duration_s) * inferred_sample_rate)) if inferred_sample_rate else None
@@ -128,7 +130,7 @@ class BlockEventSchedule:
                 if trial_start_sample is not None and inferred_sample_rate and has_tactile
                 else None
             )
-            response_default = looming_default if has_looming else tactile_default
+            response_default = looming_default if starts_response_window_with_sound else tactile_default
             common = _trial_payload(
                 row,
                 participant_id=participant_id,

@@ -1,0 +1,290 @@
+{
+  "template_id": "schizophrenia_tool_use_2022",
+  "title": "Ferroni 2022 schizophrenia and control groups, PPS before and after active tool use",
+  "citation": "Ferroni, F., Ardizzi, M., Magnani, F., Ferri, F., Langiulli, N., Rastelli, F., Lucarini, V., Giustozzi, F., Volpe, R., Marchesi, C., Tonna, M., & Gallese, V. (2022). Tool-use Extends Peripersonal Space Boundaries in Schizophrenic Patients. Schizophrenia Bulletin, 48(5), 1085–1093.",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9434469/",
+  "doi": "10.1093/schbul/sbac067",
+  "verification_status": "partial",
+  "notes": "Source-backed PPS instructions and distinct trial exemplars for both assessments. Full scheduling is gated by incompatible published trial counts and the physical training, electrical stimulation and loudspeaker apparatus.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1093/schbul/sbac067",
+    "profile_check_complete": false,
+    "publication_status": "published",
+    "profile_type": "pre_post_tool_use_clinical_pps",
+    "source_scope": "One clinical experiment with 27 participants with schizophrenia and 32 healthy controls. Both groups undergo the same active tool intervention.",
+    "original_design": {
+      "participants": 59,
+      "cohort": {
+        "schizophrenia": 27,
+        "healthy_control": 32
+      },
+      "experimental_day": [
+        "Session 1, pre-training PPS",
+        "Session 2, tool training",
+        "Session 3, post-training PPS"
+      ],
+      "blocks_per_pps_assessment": 2,
+      "minutes_per_block_approx": 8,
+      "timing_and_allocation": {
+        "paired_tactile_onset_from_sound_onset_ms": [
+          300,
+          800,
+          1500,
+          2200,
+          2700
+        ],
+        "D0_tactile_onset_from_nominal_sound_onset_ms": -700,
+        "post_trial_iti_ms": 1000,
+        "trial_families": [
+          "Paired looming",
+          "Paired flat",
+          "D0 tactile-only baseline in silence",
+          "Looming audio-only catch",
+          "Flat audio-only catch"
+        ],
+        "reported_total_per_assessment": 120,
+        "reported_paired_percent": 60,
+        "reported_repetitions_at_each_delay": 18,
+        "paired_count_implied_by_percent_derived": 72,
+        "minimum_paired_count_implied_by_repetitions_derived": 90,
+        "paired_count_if_repetitions_apply_per_sound_derived": 180,
+        "exact_baseline_and_catch_counts": null,
+        "status": "The printed total and paired proportion conflict with the printed repeat count. The original trial log or author clarification is required."
+      }
+    },
+    "published_protocol": {
+      "posture": "Seated blindfolded, right arm resting palm down.",
+      "sound": {
+        "conditions": [
+          "Looming",
+          "Flat"
+        ],
+        "speakers": "Two speakers separated by 100 cm, near speaker beside the right hand. Exact hand-relative distances at the five delays are unreported.",
+        "reported_duration_ms": null,
+        "waveform": "Clinical issue cites the 2020 paradigm. A precursor thesis reports pink noise.",
+        "levels": "Clinical report identifies rising looming and flat intensity. Exact gain curves and duration are unresolved."
+      },
+      "touch": {
+        "site": "Hairy dorsal surface of the right index finger",
+        "stimulator": "Digitimer DS3",
+        "pulse_duration_us": 100,
+        "waveform": "Single rectangular monophasic electrical pulse.",
+        "calibration": "Before each assessment, set the subject-specific current above detection threshold. Reported study ranges describe observations.",
+        "reported_current_ranges_ma": {
+          "healthy_control": [
+            5.2,
+            9.6
+          ],
+          "schizophrenia": [
+            5.5,
+            10.3
+          ]
+        }
+      },
+      "response": {
+        "target": "Press a laptop button promptly with the left index finger when touch occurs.",
+        "catch": "Withhold on a sound-only trial.",
+        "missed_target": "Repeat the trial. Exact deadline, repeat placement and repeat limits are unreported.",
+        "software": "Custom MATLAB"
+      },
+      "training": {
+        "session": 2,
+        "duration_minutes_approx": 10,
+        "actor": "Participant",
+        "participant_action": "Transfer objects with the tool held in the right hand.",
+        "tool": "Object-grasping tool. The clinical paper points to the 2020 protocol for lineage.",
+        "transfers": 100,
+        "objects": 50,
+        "object_colors": [
+          "red",
+          "green"
+        ],
+        "position": "Two marked areas 85 cm from the participant’s chest. Move the objects one at a time to the second area, then return them."
+      },
+      "analysis": {
+        "clinical_measures": "Clinical evaluation and PANSS for the schizophrenia group.",
+        "preprocessing": "Compute 10%-trimmed participant RT means at each of the five looming delays within assessment.",
+        "primary_endpoints": "PPS point of subjective equality and difference limen estimated using Spearman–Kärber.",
+        "contrasts": "Session × Group on PSE and DL. D0 and flat sounds enter control analyses."
+      }
+    },
+    "preview": {
+      "allocation": "Each labeled assessment block contains one exemplar per paired SOA and sound, one D0 exemplar and one catch per sound. These 13 inspection events expose distinct published trial types. Original block quotas remain unresolved.",
+      "audio": "Uses the existing three-second Ardizzi–Ferri 2018 pink-noise clips to demonstrate the looming/flat contrast. These derived stereo clips reproduce a relative digital level change and require separate measured physical speaker routing. The three-second duration and levels are inherited inspection choices for this clinical profile.",
+      "baseline_anchor": "Inspection places a 1000 ms pre-sound silence before paired trials so a tactile-only D0 nominally 700 ms before sound can be represented. The exact published foreperiod is unreported.",
+      "phase_boundary": "Conduct training between the labeled pre- and post-training blocks outside the inspection schedule. Electrical timing and button responses use software inspection markers."
+    },
+    "implementation_gaps": [
+      "The printed 120-trial assessment, 60% paired share and 18 repeats per delay conflict. The exact original trial counts, baseline and catch quotas, randomization and repeat-on-miss logic require the source schedule.",
+      "The exact original auditory source files and measured separate loudspeaker gains, calibration and phase are unavailable.",
+      "The tactile scheduler requires individually calibrated Digitimer DS3 stimulation, hardware timing and validated laptop response capture.",
+      "Study execution requires the supervised physical training procedure and original eligibility and analysis workflow outside the inspection."
+    ]
+  },
+  "design": {
+    "name": "Ferroni 2022 schizophrenia and control groups, PPS before and after active tool use",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [
+      {
+        "label": "Looming pink-noise proxy",
+        "path": "packages/pps-resources/assets/preloads/ardizzi_ferri_2018_looming_flat/02_looming_stimuli/looming_Looming_pink_noise.wav",
+        "target_duration_s": 3,
+        "render_mode": "preserve",
+        "tone_type": "pink",
+        "motion_mode": "looming"
+      },
+      {
+        "label": "Flat pink-noise proxy",
+        "path": "packages/pps-resources/assets/preloads/ardizzi_ferri_2018_looming_flat/02_looming_stimuli/looming_Flat_pink_noise.wav",
+        "target_duration_s": 3,
+        "render_mode": "preserve",
+        "tone_type": "pink",
+        "motion_mode": "stationary"
+      }
+    ],
+    "prestimulus_files": [],
+    "trajectory": {
+      "path_length_m": 1,
+      "propagation_speed_mps": 0.3333333333333333,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 1,
+      "trial_pool_repetition_defaults": {
+        "default": 1
+      },
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "dorsal right index finger"
+      ],
+      "include_catch_trials": true,
+      "catch_trials_exact": 2,
+      "catch_crosses_sequence_variants": true,
+      "include_baseline_trials": true,
+      "baseline_trials_exact": 1,
+      "baseline_strategy": "tactile_only",
+      "baseline_soa_values_ms": [
+        -700
+      ],
+      "baseline_crosses_sequence_variants": false,
+      "blocks": 4,
+      "repeat_trial_pool_per_block": true,
+      "block_specs": [
+        {
+          "label": "Pre-training assessment, block 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Pre-training assessment, block 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Post-training assessment, block 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Post-training assessment, block 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "trial_strips": [
+        {
+          "strip_id": "schizophrenia-tool-use-2022-trial",
+          "label": "Looming or flat PPS trial",
+          "metadata": {
+            "expected_response": "respond",
+            "target_role": "tactile_target",
+            "response_rule": "left_index_laptop_button_to_tactile_target_ignore_sound",
+            "response_capture_device": "laptop button",
+            "tactile_stimulation_modality": "electrical",
+            "body_anchor": "dorsal right index finger",
+            "electrical_stimulator_model": "Digitimer DS3",
+            "auditory_trajectory_family": "near_far_speaker_intensity_crossfade_or_flat",
+            "source_asset_equivalence": "Ardizzi–Ferri 2018 digital pink-noise preview"
+          },
+          "elements": [
+            {
+              "element_id": "pre-sound-reference",
+              "kind": "jitter",
+              "label": "Inspection foreperiod",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
+            {
+              "element_id": "looming-flat-proxies",
+              "kind": "looming_stimulus",
+              "label": "Looming or flat pink-noise proxy",
+              "source_labels": [
+                "Looming pink-noise proxy",
+                "Flat pink-noise proxy"
+              ],
+              "randomized": true
+            },
+            {
+              "element_id": "post-trial-iti",
+              "kind": "jitter",
+              "label": "Post-trial interval",
+              "jitter_values_ms": [
+                1000
+              ]
+            }
+          ]
+        }
+      ],
+      "participants": 59,
+      "random_seed": 202206067
+    }
+  },
+  "provenance": [
+    {
+      "field": "PPS stimulus, response, timing and printed allocation",
+      "source": "Ferroni et al. (2022), Schizophrenia Bulletin 48:1085–1093, p. 1087 and Supplementary Materials §1.2."
+    },
+    {
+      "field": "tool training and phase order",
+      "source": "Ferroni et al. (2022), Schizophrenia Bulletin 48:1085–1093, p. 1087 and Fig. 1b."
+    },
+    {
+      "field": "outcomes and estimation",
+      "source": "Ferroni et al. (2022), Schizophrenia Bulletin 48:1085–1093, pp. 1087–1089 and Supplementary Materials §§1.3–1.6."
+    },
+    {
+      "field": "inspection audio only",
+      "source": "PPS Kit’s existing Ardizzi–Ferri 2018 looming/flat digital proxies. See that profile’s synthesis and checksum records."
+    }
+  ]
+}

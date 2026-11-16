@@ -1,6 +1,6 @@
 # Current work
 
-Reviewed: 2026-11-12. Overall completion goal: **OPEN**.
+Reviewed: 2026-11-16. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
 - **Goal:** deliver the [standalone study preview PWA and offline Planner +
@@ -9,6 +9,19 @@ This file is the active checklist and handoff owner; replace state, do not appen
   The existing
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
+- **Published PPS profiles:** the [study-profile review branch](https://github.com/GeorgeFejer91/pps-kit/tree/codex/pps-study-profiles)
+  has 79 published definitions plus two local lab profiles. It covers 48 of
+  the 94 tracked publications. Seventeen publications have a software-launchable
+  assessment and 31 have gated assessments. This checkpoint adds 24 definitions
+  across 15 publication records, including the two editions of the Cardini
+  pregnancy study. Review the [profile status](../docs/PUBLISHED_STUDY_RECREATION_STATUS.md)
+  for study-specific stimulus, apparatus, trial-allocation and calibration gaps.
+  Canzoneri 2012 now schedules the full sound on all 188 trials, including 32
+  probes delivered during silence. Software emulation recorded 188 audio onsets,
+  112 tactile onsets and 112 response markers. Python and Rust agree on the
+  sample schedule. The next profile work covers the remaining 46 publications
+  and the missing apparatus or runtime contracts for gated studies. Original
+  publications and extraction protocols remain in the private archive.
 - **Timeline-first Runner UI: VERIFIED SOURCE AND HOSTED.** Study 5 Focus
   Mode inspires the native landscape timeline's audio, tactile, and response
   lanes. It shows scheduled cues and software playback positions, with one

@@ -150,7 +150,8 @@ class SessionEventLogger:
             looming_relative_s = _coerce_float(row.get("Looming_Onset_S"), default=stimulus_segment_onset_s)
             tactile_relative_s = _coerce_float(row.get("Tactile_Onset_S"), default=stimulus_segment_onset_s + (soa_ms / 1000.0))
             response_relative_s = _coerce_float(row.get("Response_Window_Onset_S"), default=looming_relative_s)
-            if trial_type in {"Audio-Tactile", "Catch"}:
+            baseline_mode = str(row.get("Baseline_Mode") or row.get("baseline_mode") or "").strip().lower()
+            if trial_type in {"Audio-Tactile", "Catch"} or (trial_type == "Baseline" and baseline_mode == "audio_tactile"):
                 count += self._log_planned(
                     "looming_onset",
                     block_start_unix,

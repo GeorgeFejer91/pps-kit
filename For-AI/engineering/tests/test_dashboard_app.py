@@ -2040,6 +2040,8 @@ def test_dashboard_loads_all_preloads_with_trajectory_inventory(tmp_path: Path):
     client = _client(tmp_path)
     root = Path(__file__).resolve().parents[3]
     templates = client.get("/api/state").json()["templates"]
+    inventory = _read_json_file(root / "packages/pps-resources/assets/preloads/preload_inventory.json")
+    preloads = {profile["template_id"]: profile for profile in inventory["profiles"]}
 
     assert templates
     for template in templates:
@@ -2048,6 +2050,13 @@ def test_dashboard_loads_all_preloads_with_trajectory_inventory(tmp_path: Path):
         sources = design["noises"] + design["custom_looming_files"]
         viewer_sources = loaded["viewer_payload"]["source_trajectories"]
 
+        profile = preloads[template["template_id"]]
+        if not profile["assets"]:
+            assert not profile["segment_6_launchable"], template["template_id"]
+            assert not design["noises"], template["template_id"]
+            for source in sources:
+                assert not (root / source["path"]).is_file(), source["label"]
+            continue
         assert sources, template["template_id"]
         assert len(viewer_sources) == len(sources), template["template_id"]
         for source in sources:
@@ -3412,6 +3421,59 @@ def test_dashboard_rejects_segment3_bake_before_segment2_manifest(tmp_path: Path
 
     assert done["status"] == "failed"
     assert "Bake Segment 2" in done["error"]
+
+
+def test_canzoneri_silent_at_touch_trials_retain_the_sound(tmp_path: Path):
+    from peripersonal_space_toolkit.templates import load_template
+
+    template_path = (
+        Path(__file__).resolve().parents[3] / "packages/pps-resources/study_templates"
+        / "canzoneri_2012_dynamic_sounds.json"
+    )
+    original = design_to_dict(load_template(template_path).design)
+    # Use one deterministic stereo source to inspect the timing and channel mix.
+    original["protocol"]["auditory_motion_directions"] = ["looming"]
+    original["protocol"]["include_catch_trials"] = False
+    original["protocol"]["catch_trial_percentage"] = 0
+    original["protocol"]["catch_trials_exact"] = 0
+    sample_rate = 44100
+    label = original["noises"][0]["label"]
+
+    with _client(tmp_path) as client:
+        design = client.post("/api/templates/__custom__/load").json()["design"]
+        for field in ("name", "noises", "trajectory", "protocol"):
+            design[field] = original[field]
+        source_path = _register_segment1_wav(
+            client, design, label,
+            np.full((3 * sample_rate, 2), 0.25, dtype=np.float32),
+            sample_rate=sample_rate,
+        )
+        design["noises"][0]["prebaked_path"] = str(source_path)
+        for kind in ("trial_sequence_batch", "audiotactile_trial_batch"):
+            job = client.post(
+                "/api/stimulus/bake",
+                json={"participant_id": "P001", "design": design, "bake_recipe": {"kind": kind}},
+            )
+            assert job.status_code == 200, job.text
+            done = _wait_job(client, job.json()["job_id"])
+            assert done["status"] == "succeeded", done
+
+        manifest = _read_json_file(done["result"]["manifest_path"])
+        baselines = {row["soa_ms"]: row for row in manifest["files"] if row["family"] == "baseline"}
+        assert set(baselines) == {-700, 3600}
+        for soa_ms, expected_onset_s in ((-700, 0.3), (3600, 4.6)):
+            row = baselines[soa_ms]
+            assert row["baseline_mode"] == "audio_tactile"
+            assert row["looming_segment_onset_s"] == pytest.approx(1.0)
+            assert row["tactile_onset_s"] == pytest.approx(expected_onset_s)
+            samples, sr = sf.read(dashboard_app._soundfile_path(row["file_path"]), always_2d=True)
+            assert (sr, samples.shape) == (sample_rate, (5 * sample_rate, 3))
+            assert np.count_nonzero(samples[:sr, :2]) == 0
+            assert np.min(np.abs(samples[sr:4 * sr, :2])) > 0.2
+            assert np.count_nonzero(samples[4 * sr:, :2]) == 0
+            expected_cue = dashboard_app._tactile_channel(sr, len(samples), expected_onset_s)
+            assert np.max(np.abs(expected_cue)) > 0.01
+            np.testing.assert_allclose(samples[:, 2], expected_cue, atol=2 / 32768)
 
 
 def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_path: Path, monkeypatch):

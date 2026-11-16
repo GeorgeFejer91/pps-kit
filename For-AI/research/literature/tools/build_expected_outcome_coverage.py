@@ -39,6 +39,79 @@ READY_PROFILE_MOUSE_CLICK_COMPARISON_REPORT = (
 
 
 EXPECTED_OUTCOMES: dict[str, dict[str, Any]] = {
+    "zampini_2005_audiotactile_toj": {
+        "outcome_family": "audiotactile_temporal_order",
+        "primary_expected_effect": (
+            "The naive group needed roughly 80 ms separation for the temporal-order discrimination "
+            "threshold. Spatial alignment had limited influence across the variants."
+        ),
+        "expected_effect_direction": "limited_same_vs_opposite_location_effect",
+        "observable_metric": "Just-noticeable difference of the audio-first response function",
+        "condition_contrast": (
+            "Same versus different side, signed stimulus offsets and the studied experience and "
+            "stimulation variants"
+        ),
+        "source_basis": [
+            "https://doi.org/10.1016/j.actpsy.2004.10.017, Results for Experiments 1–3.",
+        ],
+    },
+    "murray_2005_grabbing_your_ear": {
+        "outcome_family": "spatial_alignment_and_multisensory_integration",
+        "primary_expected_effect": (
+            "Aligned and misaligned bimodal pairs speed detection and show early enhancement of the "
+            "global field power relative to the summed unimodal prediction."
+        ),
+        "expected_effect_direction": "bimodal_facilitation_with_and_without_spatial_alignment",
+        "observable_metric": (
+            "Reaction-time cumulative distributions with race inequality and EEG global field power"
+        ),
+        "condition_contrast": "Aligned and misaligned sound–touch pairs versus corresponding unimodal trials",
+        "source_basis": [
+            "https://doi.org/10.1093/cercor/bhh197, pp. 965–969, Table 1 and Figs. 2–4.",
+        ],
+    },
+    "di_cosmo_2021_phase_coupling": {
+        "outcome_family": "resting_connectivity_and_pps",
+        "primary_expected_effect": (
+            "Stronger left premotor connectivity with bilateral sensorimotor and frontoparietal regions "
+            "is associated with wider PPS in the beta band."
+        ),
+        "expected_effect_direction": "positive_beta_connectivity_pps_extent_association",
+        "observable_metric": "Association between resting-state MEG connectivity and the hand PPS boundary",
+        "condition_contrast": "Individual differences in connectivity and PPS extent across frequency bands",
+        "source_basis": [
+            "https://pubmed.ncbi.nlm.nih.gov/33705822/, article abstract.",
+        ],
+    },
+    "ferroni_2020_schizotypy": {
+        "outcome_family": "tool_use_schizotypy_pps_plasticity",
+        "primary_expected_effect": (
+            "PPS widened after active tool use in Experiment 1. The observation experiment did not show "
+            "an overall expansion. The lower schizotypy group had greater expansion in the joint group "
+            "analysis."
+        ),
+        "expected_effect_direction": "active_expansion_with_smaller_change_in_higher_schizotypy",
+        "observable_metric": "Change in the fitted sigmoid central point from pre- to post-training",
+        "condition_contrast": "Active use versus observation and lower versus higher schizotypy",
+        "source_basis": [
+            "https://pubmed.ncbi.nlm.nih.gov/32758552/, article abstract; full article Results.",
+        ],
+    },
+    "pregnancy_2018_preprint": {
+        "outcome_family": "third_trimester_expansion_of_pps",
+        "primary_expected_effect": (
+            "The third-trimester group shows facilitation at an earlier delay and a shallower fitted RT "
+            "slope than controls."
+        ),
+        "expected_effect_direction": "third_trimester_earlier_facilitation_and_shallower_slope",
+        "observable_metric": "Reaction time by delay and fitted linear slope per visit",
+        "condition_contrast": (
+            "Pregnancy and control groups at second-trimester, third-trimester and postpartum visits"
+        ),
+        "source_basis": [
+            "https://doi.org/10.1101/492017, bioRxiv v1 pp. 4–7, Results.",
+        ],
+    },
     "noel_2015_bodily_self": {
         "outcome_family": "body-location-dependent_pps_boundary_shift",
         "primary_expected_effect": (

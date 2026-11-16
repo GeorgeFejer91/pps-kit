@@ -590,7 +590,11 @@ fn compile_trial_events(
         .to_owned();
     let family = row.value(&["Family", "family"], "").trim().to_owned();
     let trial_kind = trial_kind(&trial_type, &family);
-    let has_looming = matches!(trial_kind, "audio_tactile" | "catch" | "auditory_only");
+    let baseline_mode = row.value(&["Baseline_Mode", "baseline_mode"], "");
+    let starts_response_window_with_sound =
+        matches!(trial_kind, "audio_tactile" | "catch" | "auditory_only");
+    let has_looming = starts_response_window_with_sound
+        || (trial_kind == "baseline" && baseline_mode.trim().eq_ignore_ascii_case("audio_tactile"));
     let has_tactile = matches!(trial_kind, "audio_tactile" | "baseline");
     let soa_ms = as_f64(&row.value(&["SOA_ms", "soa_ms"], "0"), 0.0);
     let trial_duration_s = options.trial_duration_s.max(0.0);
@@ -650,7 +654,7 @@ fn compile_trial_events(
         } else {
             None
         };
-    let response_default = if has_looming {
+    let response_default = if starts_response_window_with_sound {
         looming_default
     } else {
         tactile_default

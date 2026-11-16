@@ -253,10 +253,11 @@ def build_stimulus_assets(
     for asset in design.custom_looming_files:
         source = resolve_path(asset.path)
         target = stimulus_dir / f"looming_{safe_name(asset.label)}.wav"
-        if source.exists() and (force or not target.exists()):
+        if source.is_file() and (force or not target.is_file()):
             if source.resolve() != target.resolve():
                 shutil.copy2(source, target)
-        assets.append(asset_metadata(template, design, asset, target))
+        if target.is_file():
+            assets.append(asset_metadata(template, design, asset, target))
     return assets
 
 

@@ -1,0 +1,49 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "sorrentino_2021_ageing_hand_pps",
+  "assets": [
+    {
+      "label": "3 s white timing reference",
+      "path": "assets/preloads/sorrentino_2021_ageing_hand_pps/02_looming_stimuli/looming_3_s_white_timing_reference.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/sorrentino_2021_ageing_hand_pps/02_looming_stimuli/looming_3_s_white_timing_reference.wav",
+      "sha256": "7eb12251cf332ba2e5c8590d4fe456c37dce72bce88c5544987e3ffa9098b9a0",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "3 s white timing reference",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

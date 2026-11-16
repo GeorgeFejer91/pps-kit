@@ -233,10 +233,17 @@
     },
     {
       "audiotactile_task_family": "static near/far audio-tactile sound-complexity task",
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files"
+      ],
       "citation_short": "Kitagawa et al. (2005)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "kitagawa_2005_rear_toj",
+        "kitagawa_2005_tactile_distractor",
+        "kitagawa_2005_auditory_localization"
+      ],
       "doi": "10.1007/s00221-005-2393-8",
       "expected_effect_direction": "near_rear_complex_sounds_increase_audio_tactile_interference",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -261,17 +268,34 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "kitagawa_2005_rear_toj",
+            "kitagawa_2005_tactile_distractor",
+            "kitagawa_2005_auditory_localization"
+          ]
         },
         "source_parameter_extraction": {
-          "blockers": [],
+          "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
+          ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "full exact timing, response mapping, and stimulus asset details need extraction"
+            "The trial scheduler requires independent auditory and tactile triggers for signed temporal orders plus light feedback. This profile schedules only the auditory member of each pair.",
+            "Speaker and tactile calibration must verify delivered intensity and acoustic-to-skin onset. Original waveform bytes and measured timing are unavailable.",
+            "The original hand-held choice pad, fixation feedback and two-site electrical stimulator are required for response capture and tactile delivery. The reported voltage is a source record and cannot establish delivered current or calibration.",
+            "Original sound waveform bytes and acoustic trigger-to-ear timing are unavailable. The unbundled 250 ms WAV input for each condition requires the reported burst train and calibrated physical rear speaker channels.",
+            "Software response capture requires a lateral choice and correctness scoring. The auditory schedule is for inspection.",
+            "The scheduler requires four independently selected sound-type-by-distance blocks, three calibrated earlobe pulses on the designated channel, a verified 30 ms sound lead, and two footpedals with feedback and scoring.",
+            "The scheduler requires four independently selected sound-type-by-distance blocks and a scoring path for the auditory side choice. The paper leaves the exact control response device and deadline unspecified."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -288,25 +312,56 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
+          ],
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "kitagawa_2005_rear_toj"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "kitagawa_2005_tactile_distractor"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "kitagawa_2005_auditory_localization"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "full exact timing, response mapping, and stimulus asset details need extraction"
+        "The trial scheduler requires independent auditory and tactile triggers for signed temporal orders plus light feedback. This profile schedules only the auditory member of each pair.",
+        "Speaker and tactile calibration must verify delivered intensity and acoustic-to-skin onset. Original waveform bytes and measured timing are unavailable.",
+        "The original hand-held choice pad, fixation feedback and two-site electrical stimulator are required for response capture and tactile delivery. The reported voltage is a source record and cannot establish delivered current or calibration.",
+        "Original sound waveform bytes and acoustic trigger-to-ear timing are unavailable. The unbundled 250 ms WAV input for each condition requires the reported burst train and calibrated physical rear speaker channels.",
+        "Software response capture requires a lateral choice and correctness scoring. The auditory schedule is for inspection.",
+        "The scheduler requires four independently selected sound-type-by-distance blocks, three calibrated earlobe pulses on the designated channel, a verified 30 ms sound lead, and two footpedals with feedback and scoring.",
+        "The scheduler requires four independently selected sound-type-by-distance blocks and a scoring path for the auditory side choice. The paper leaves the exact control response device and deadline unspecified."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: full exact timing, response mapping, and stimulus asset details need extraction",
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: The trial scheduler requires independent auditory and tactile triggers for signed temporal orders plus light feedback. This profile schedules only the auditory member of each pair.; Speaker and tactile calibration must verify delivered intensity and acoustic-to-skin onset. Original waveform bytes and measured timing are unavailable.; The original hand-held choice pad, fixation feedback and two-site electrical stimulator are required for response capture and tactile delivery. The reported voltage is a source record and cannot establish delivered current or calibration.; Original sound waveform bytes and acoustic trigger-to-ear timing are unavailable. The unbundled 250 ms WAV input for each condition requires the reported burst train and calibrated physical rear speaker channels.; Software response capture requires a lateral choice and correctness scoring. The auditory schedule is for inspection.; The scheduler requires four independently selected sound-type-by-distance blocks, three calibrated earlobe pulses on the designated channel, a verified 30 ms sound lead, and two footpedals with feedback and scoring.; The scheduler requires four independently selected sound-type-by-distance blocks and a scoring path for the auditory side choice. The paper leaves the exact control response device and deadline unspecified.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -319,11 +374,12 @@
         "pdf_status": "open_access_unavailable",
         "supplement_status": "not_checked"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "kitagawa_2005_sound_complexity",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
-        "holmes_2020_systematic_review"
+        "holmes_2020_systematic_review",
+        "https://doi.org/10.1007/s00221-005-2393-8"
       ]
     },
     {
@@ -3833,11 +3889,14 @@
     {
       "audiotactile_task_family": "audio-tactile PPS measurement in pregnancy context",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Pregnancy PPS study (2019)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "cardini_2019_pregnancy_trunk_pps"
+      ],
       "doi": "10.1038/s41598-019-45224-w",
       "expected_effect_direction": "third_trimester_expands_pps_and_softens_boundary_transition",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -3862,19 +3921,26 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "cardini_2019_pregnancy_trunk_pps"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract exact audio-tactile PPS timing, distances, trial counts, and response settings; pregnancy context is non-blocking"
+            "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.",
+            "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.",
+            "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -3892,26 +3958,37 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
-          "profile_readiness": [],
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_missing_parameters",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "cardini_2019_pregnancy_trunk_pps"
+            }
+          ],
           "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract exact audio-tactile PPS timing, distances, trial counts, and response settings; pregnancy context is non-blocking"
+        "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.",
+        "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.",
+        "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract exact audio-tactile PPS timing, distances, trial counts, and response settings; pregnancy context is non-blocking",
+      "next_required_action": "Extract or source the missing paper parameters: Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.; Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.; Response deadline, precise foreperiod, end silence and intertrial timing are unreported.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -3924,21 +4001,27 @@
         "pdf_status": "downloaded",
         "supplement_status": "needs_user_download"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "profile_present_but_source_parameters_missing",
       "record_id": "pregnancy_2019",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
-        "pubmed_audio_tactile_pps_2026_06_13"
+        "pubmed_audio_tactile_pps_2026_06_13",
+        "https://doi.org/10.1038/s41598-019-45224-w"
       ]
     },
     {
       "audiotactile_task_family": "newborn audio-tactile PPS boundary task with sound-intensity/distance and tactile response measures",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Identifying PPS boundaries in newborns (2019)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "orioli_2019_newborn_pilot",
+        "orioli_2019_newborn_audiotactile",
+        "orioli_2019_newborn_auditory"
+      ],
       "doi": "10.1038/s41598-019-45084-4",
       "expected_effect_direction": "louder_near_sound_intensity_speeds_newborn_tactile_saccadic_rt",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -3963,19 +4046,31 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "orioli_2019_newborn_pilot",
+            "orioli_2019_newborn_audiotactile",
+            "orioli_2019_newborn_auditory"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract auditory intensity/distance levels, tactile timing, response measure, and infant-specific apparatus separately from participant age"
+            "The 8000 Hz sound assets with verified output calibration at the participant location and original source envelope are unavailable.",
+            "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable.",
+            "Manual forehead contact requires a validated operator protocol and synchronization. Numerical stroke timing, speed, force and brush specifications are unreported.",
+            "A neonatal participant session requires the study-specific equipment, procedures, approvals and trained personnel."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -3993,26 +4088,52 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "orioli_2019_newborn_pilot"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "orioli_2019_newborn_audiotactile"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "orioli_2019_newborn_auditory"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract auditory intensity/distance levels, tactile timing, response measure, and infant-specific apparatus separately from participant age"
+        "The 8000 Hz sound assets with verified output calibration at the participant location and original source envelope are unavailable.",
+        "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable.",
+        "Manual forehead contact requires a validated operator protocol and synchronization. Numerical stroke timing, speed, force and brush specifications are unreported.",
+        "A neonatal participant session requires the study-specific equipment, procedures, approvals and trained personnel."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract auditory intensity/distance levels, tactile timing, response measure, and infant-specific apparatus separately from participant age",
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: The 8000 Hz sound assets with verified output calibration at the participant location and original source envelope are unavailable.; A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable.; Manual forehead contact requires a validated operator protocol and synchronization. Numerical stroke timing, speed, force and brush specifications are unreported.; A neonatal participant session requires the study-specific equipment, procedures, approvals and trained personnel.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -4025,19 +4146,26 @@
         "pdf_status": "downloaded",
         "supplement_status": "needs_user_download"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "newborn_boundaries_2019",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
-        "openalex_audiotactile_pps_2026_06_13"
+        "openalex_audiotactile_pps_2026_06_13",
+        "https://doi.org/10.1038/s41598-019-45084-4"
       ]
     },
     {
       "audiotactile_task_family": "near/far auditory plus electrical tactile stimulation with ERP endpoint",
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files"
+      ],
       "citation_short": "Spatial tuning of multisensory responses in newborns (2021)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "ronga_2021_adult_erp",
+        "ronga_2021_newborn_erp"
+      ],
       "doi": "10.1073/pnas.2024548118",
       "expected_effect_direction": "near_audio_tactile_erp_response_differs_from_far",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -4062,17 +4190,28 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "ronga_2021_adult_erp",
+            "ronga_2021_newborn_erp"
+          ]
         },
         "source_parameter_extraction": {
-          "blockers": [],
+          "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
+          ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract exact near/far auditory apparatus, electrical tactile pulse/calibration values, timing offset, and ERP trigger codes; electrical tactile metadata is now runner-supported"
+            "The original tone file, modulation depth, delivered acoustic calibration and exact physical coordinates are unavailable.",
+            "The scheduler must share a trigger between near/far audio and the electrocutaneous pulse, preserve the 40 ms auditory delay in all four audio-present conditions and intermix the five passive condition rows.",
+            "Recording and analysis require calibrated physical stimulus delivery, compatible EEG acquisition and EEG event response processing. Author trial-order and delivered-timing files are unavailable."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -4089,25 +4228,45 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
+          ],
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "ronga_2021_adult_erp"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "ronga_2021_newborn_erp"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract exact near/far auditory apparatus, electrical tactile pulse/calibration values, timing offset, and ERP trigger codes; electrical tactile metadata is now runner-supported"
+        "The original tone file, modulation depth, delivered acoustic calibration and exact physical coordinates are unavailable.",
+        "The scheduler must share a trigger between near/far audio and the electrocutaneous pulse, preserve the 40 ms auditory delay in all four audio-present conditions and intermix the five passive condition rows.",
+        "Recording and analysis require calibrated physical stimulus delivery, compatible EEG acquisition and EEG event response processing. Author trial-order and delivered-timing files are unavailable."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract exact near/far auditory apparatus, electrical tactile pulse/calibration values, timing offset, and ERP trigger codes; electrical tactile metadata is now runner-supported",
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: The original tone file, modulation depth, delivered acoustic calibration and exact physical coordinates are unavailable.; The scheduler must share a trigger between near/far audio and the electrocutaneous pulse, preserve the 40 ms auditory delay in all four audio-present conditions and intermix the five passive condition rows.; Recording and analysis require calibrated physical stimulus delivery, compatible EEG acquisition and EEG event response processing. Author trial-order and delivered-timing files are unavailable.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -4120,21 +4279,25 @@
         "pdf_status": "downloaded",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "ronga_2021_newborn_erp",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
-        "openalex_audiotactile_pps_2026_06_13"
+        "openalex_audiotactile_pps_2026_06_13",
+        "https://doi.org/10.1073/pnas.2024548118"
       ]
     },
     {
       "audiotactile_task_family": "audio-tactile PPS measurement in autism context",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Altered bodily self-consciousness and PPS in autism (2019)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "mul_2019_autism_pps"
+      ],
       "doi": "10.1177/1362361319838950",
       "expected_effect_direction": "autism_smaller_sharper_pps_and_reduced_full_body_illusion",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -4159,19 +4322,26 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "mul_2019_autism_pps"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact task parameters need extraction; clinical context is non-blocking"
+            "The original pink-noise waveform, playback duration, calibrated two-speaker routing and level envelopes are unavailable.",
+            "The tactile scheduler needs the original or measured equivalent 4 mm magnet tapper, calibrated mechanical contact onset and a synchronized left-hand response button.",
+            "The exact original ITI, trial randomization and online response deadline are unreported."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -4189,26 +4359,37 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "mul_2019_autism_pps"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "exact task parameters need extraction; clinical context is non-blocking"
+        "The original pink-noise waveform, playback duration, calibrated two-speaker routing and level envelopes are unavailable.",
+        "The tactile scheduler needs the original or measured equivalent 4 mm magnet tapper, calibrated mechanical contact onset and a synchronized left-hand response button.",
+        "The exact original ITI, trial randomization and online response deadline are unreported."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact task parameters need extraction; clinical context is non-blocking",
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: The original pink-noise waveform, playback duration, calibrated two-speaker routing and level envelopes are unavailable.; The tactile scheduler needs the original or measured equivalent 4 mm magnet tapper, calibrated mechanical contact onset and a synchronized left-hand response button.; The exact original ITI, trial randomization and online response deadline are unreported.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -4221,11 +4402,12 @@
         "pdf_status": "open_access_unavailable",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "autism_2019",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
-        "pubmed_audio_tactile_pps_2026_06_13"
+        "pubmed_audio_tactile_pps_2026_06_13",
+        "https://doi.org/10.1177/1362361319838950"
       ]
     },
     {
@@ -4895,11 +5077,14 @@
     {
       "audiotactile_task_family": "audio-tactile PPS task around tool-use observation",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files"
       ],
       "citation_short": "Tool-use observation PPS (2020)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "galigani_2020_tool_observation"
+      ],
       "doi": "10.1016/j.neuropsychologia.2020.107622",
       "expected_effect_direction": "active_tool_use_modulates_pps_but_observation_does_not",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -4924,19 +5109,27 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "galigani_2020_tool_observation"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract whether PPS task differs from Canzoneri-style dynamic scaffold"
+            "The original 784 Hz tone waveform, tone ramp, absolute SPL reference and calibration are unavailable. The sound markers do not implement synchronized selection of two separate physical speakers.",
+            "The trial scheduler requires calibrated DS7A electrical timing and contact selection, a measured audio\u2013tactile delay, and right-index response-box input. Original trial clocks and response timeout are unreported.",
+            "The trial jitter scheduler approximates the reported 7\u20139 s interstimulus interval with three discrete values. Original timing and trial order are unreported.",
+            "Each visit requires external sensory threshold setting, physical rake training or the cognitive comparison task. The cognitive task trial allocation and exact visual assets are unreported."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -4954,26 +5147,38 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "galigani_2020_tool_observation"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract whether PPS task differs from Canzoneri-style dynamic scaffold"
+        "The original 784 Hz tone waveform, tone ramp, absolute SPL reference and calibration are unavailable. The sound markers do not implement synchronized selection of two separate physical speakers.",
+        "The trial scheduler requires calibrated DS7A electrical timing and contact selection, a measured audio\u2013tactile delay, and right-index response-box input. Original trial clocks and response timeout are unreported.",
+        "The trial jitter scheduler approximates the reported 7\u20139 s interstimulus interval with three discrete values. Original timing and trial order are unreported.",
+        "Each visit requires external sensory threshold setting, physical rake training or the cognitive comparison task. The cognitive task trial allocation and exact visual assets are unreported."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract whether PPS task differs from Canzoneri-style dynamic scaffold",
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: The original 784 Hz tone waveform, tone ramp, absolute SPL reference and calibration are unavailable. The sound markers do not implement synchronized selection of two separate physical speakers.; The trial scheduler requires calibrated DS7A electrical timing and contact selection, a measured audio\u2013tactile delay, and right-index response-box input. Original trial clocks and response timeout are unreported.; The trial jitter scheduler approximates the reported 7\u20139 s interstimulus interval with three discrete values. Original timing and trial order are unreported.; Each visit requires external sensory threshold setting, physical rake training or the cognitive comparison task. The cognitive task trial allocation and exact visual assets are unreported.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -4986,11 +5191,12 @@
         "pdf_status": "open_access_unavailable",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "ferroni_2020_tool_observation",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
-        "pubmed_audio_tactile_pps_2026_06_13"
+        "pubmed_audio_tactile_pps_2026_06_13",
+        "https://doi.org/10.1016/j.neuropsychologia.2020.107622"
       ]
     },
     {
@@ -5192,11 +5398,14 @@
     {
       "audiotactile_task_family": "audio-tactile PPS task in ageing context",
       "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters",
         "missing_core_soa_iti_baseline_repetition_parameters"
       ],
       "citation_short": "How ageing shapes body and space representations (2021)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "sorrentino_2021_ageing_hand_pps"
+      ],
       "doi": "10.1016/j.cortex.2020.11.021",
       "expected_effect_direction": "ageing_alters_body_representation_but_preserves_near_hand_pps_facilitation",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -5221,19 +5430,26 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "sorrentino_2021_ageing_hand_pps"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "exact task parameters need extraction; age group context is non-blocking"
+            "Original broadband audio, physical two-speaker gain trajectory and calibrated playback levels are unavailable.",
+            "Motor drive and coupling calibration, exact motor vibration frequency and pedal hardware timings are unresolved.",
+            "The trial count allocation between hands and inter-stimulus interval reference are unreported."
           ],
           "paper_audit": {
             "automated_evidence_status": "source_mined",
@@ -5251,26 +5467,37 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
             "missing_core_soa_iti_baseline_repetition_parameters"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "sorrentino_2021_ageing_hand_pps"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "exact task parameters need extraction; age group context is non-blocking"
+        "Original broadband audio, physical two-speaker gain trajectory and calibrated playback levels are unavailable.",
+        "Motor drive and coupling calibration, exact motor vibration frequency and pedal hardware timings are unresolved.",
+        "The trial count allocation between hands and inter-stimulus interval reference are unreported."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: exact task parameters need extraction; age group context is non-blocking",
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, missing_core_soa_iti_baseline_repetition_parameters; also extract/source missing paper parameters: Original broadband audio, physical two-speaker gain trajectory and calibrated playback levels are unavailable.; Motor drive and coupling calibration, exact motor vibration frequency and pedal hardware timings are unresolved.; The trial count allocation between hands and inter-stimulus interval reference are unreported.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "source_mined",
@@ -5283,11 +5510,12 @@
         "pdf_status": "downloaded",
         "supplement_status": "not_found"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "ageing_2021",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
-        "pubmed_audio_tactile_pps_2026_06_13"
+        "pubmed_audio_tactile_pps_2026_06_13",
+        "https://doi.org/10.1016/j.cortex.2020.11.021"
       ]
     },
     {
@@ -5780,11 +6008,14 @@
     {
       "audiotactile_task_family": "audio-tactile PPS task before/after tool-use",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "electrical_tactile_calibration"
       ],
       "citation_short": "Tool-use extends PPS boundaries in schizophrenia (2022)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "schizophrenia_tool_use_2022"
+      ],
       "doi": "10.1093/schbul/sbac067",
       "expected_effect_direction": "tool_use_expands_pps_with_scz_baseline_narrowing",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -5809,19 +6040,27 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "schizophrenia_tool_use_2022"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract PPS task parameters; clinical group and tool-use context are non-blocking"
+            "The printed 120-trial assessment, 60% paired share and 18 repeats per delay conflict. The exact original trial counts, baseline and catch quotas, randomization and repeat-on-miss logic require the source schedule.",
+            "The exact original auditory source files and measured separate loudspeaker gains, calibration and phase are unavailable.",
+            "The tactile scheduler requires individually calibrated Digitimer DS3 stimulation, hardware timing and validated laptop response capture.",
+            "Study execution requires the supervised physical training procedure and original eligibility and analysis workflow outside the inspection."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -5839,26 +6078,38 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
           ],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "schizophrenia_tool_use_2022"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract PPS task parameters; clinical group and tool-use context are non-blocking"
+        "The printed 120-trial assessment, 60% paired share and 18 repeats per delay conflict. The exact original trial counts, baseline and catch quotas, randomization and repeat-on-miss logic require the source schedule.",
+        "The exact original auditory source files and measured separate loudspeaker gains, calibration and phase are unavailable.",
+        "The tactile scheduler requires individually calibrated Digitimer DS3 stimulation, hardware timing and validated laptop response capture.",
+        "Study execution requires the supervised physical training procedure and original eligibility and analysis workflow outside the inspection."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract PPS task parameters; clinical group and tool-use context are non-blocking",
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, electrical_tactile_calibration; also extract/source missing paper parameters: The printed 120-trial assessment, 60% paired share and 18 repeats per delay conflict. The exact original trial counts, baseline and catch quotas, randomization and repeat-on-miss logic require the source schedule.; The exact original auditory source files and measured separate loudspeaker gains, calibration and phase are unavailable.; The tactile scheduler requires individually calibrated Digitimer DS3 stimulation, hardware timing and validated laptop response capture.; Study execution requires the supervised physical training procedure and original eligibility and analysis workflow outside the inspection.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -5871,11 +6122,12 @@
         "pdf_status": "needs_user_download",
         "supplement_status": "paywalled"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "schizophrenia_tool_use_2022",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
-        "pubmed_audio_tactile_pps_2026_06_13"
+        "pubmed_audio_tactile_pps_2026_06_13",
+        "https://doi.org/10.1093/schbul/sbac067"
       ]
     },
     {
@@ -6110,11 +6362,14 @@
     {
       "audiotactile_task_family": "audio-tactile PPS boundary task around focused-attention meditation context",
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "electrical_tactile_calibration"
       ],
       "citation_short": "Mindfulness and PPS boundaries (2024)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "chiarella_2024_mindfulness_cheek_pps"
+      ],
       "doi": "10.3390/bs14040306",
       "expected_effect_direction": "fam_reduces_pps_boundary_sharpness_without_extension_reduction",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -6139,19 +6394,26 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "chiarella_2024_mindfulness_cheek_pps"
+          ]
         },
         "source_parameter_extraction": {
           "blockers": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
           ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract exact audio-tactile PPS task timing, distances, trial counts, and response settings; meditation context is non-blocking unless it changes trial execution"
+            "Original two-speaker pink-noise files, calibrated sound gain functions and exact acoustic calibration are unavailable.",
+            "Exact before-sound and after-sound tactile probe offsets, response deadline and separate intertrial interval are unreported.",
+            "Electrode and electrical stimulator delivery mode and calibration are unresolved. A synchronized apparatus and physical timing validation are needed."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -6169,26 +6431,37 @@
         },
         "toolkit_gui_implementation": {
           "blocker_ids": [
-            "missing_core_soa_iti_baseline_repetition_parameters"
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
           ],
           "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
           "passed": false,
-          "profile_readiness": [],
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_missing_parameters",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "chiarella_2024_mindfulness_cheek_pps"
+            }
+          ],
           "status": "blocked_by_missing_profile_parameters"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract exact audio-tactile PPS task timing, distances, trial counts, and response settings; meditation context is non-blocking unless it changes trial execution"
+        "Original two-speaker pink-noise files, calibrated sound gain functions and exact acoustic calibration are unavailable.",
+        "Exact before-sound and after-sound tactile probe offsets, response deadline and separate intertrial interval are unreported.",
+        "Electrode and electrical stimulator delivery mode and calibration are unresolved. A synchronized apparatus and physical timing validation are needed."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract exact audio-tactile PPS task timing, distances, trial counts, and response settings; meditation context is non-blocking unless it changes trial execution",
+      "next_required_action": "Extract or source the missing paper parameters: Original two-speaker pink-noise files, calibrated sound gain functions and exact acoustic calibration are unavailable.; Exact before-sound and after-sound tactile probe offsets, response deadline and separate intertrial interval are unreported.; Electrode and electrical stimulator delivery mode and calibration are unresolved. A synchronized apparatus and physical timing validation are needed.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -6201,11 +6474,12 @@
         "pdf_status": "needs_user_download",
         "supplement_status": "needs_user_download"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "profile_present_but_source_parameters_missing",
       "record_id": "mindfulness_pps_2024",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
-        "pubmed_audio_tactile_pps_2026_06_13"
+        "pubmed_audio_tactile_pps_2026_06_13",
+        "https://doi.org/10.3390/bs14040306"
       ]
     },
     {
@@ -7705,10 +7979,16 @@
     },
     {
       "audiotactile_task_family": "audiotactile interaction task manipulating cheek, hand, and knee tactile sites with spatially related sounds",
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files"
+      ],
       "citation_short": "Teramoto et al. (2013 beyond head)",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "teramoto_2013_beyond_head_exp1",
+        "teramoto_2013_beyond_head_exp2"
+      ],
       "doi": "10.1007/s00221-013-3574-5",
       "expected_effect_direction": "opposite_side_and_near_head_sounds_increase_tactile_spatial_interference_across_body_parts",
       "expected_outcome_status": "structured_expected_outcome_extracted",
@@ -7733,17 +8013,30 @@
           "status": "no_observed_emulated_comparison"
         },
         "parsimonious_profile_saved": {
-          "evidence": "No current toolkit profile is linked to this literature record.",
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
           "passed": false,
-          "profile_completion_statuses": [],
-          "status": "profile_not_yet_created",
-          "template_ids": []
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "teramoto_2013_beyond_head_exp1",
+            "teramoto_2013_beyond_head_exp2"
+          ]
         },
         "source_parameter_extraction": {
-          "blockers": [],
+          "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
+          ],
           "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
           "missing_parameters": [
-            "extract exact body-site mapping, auditory locations, tactile response/scoring rules, timing, and trial counts before templating"
+            "The synchronized scheduler requires independently addressed pneumatic outputs, a calibrated air-puff trigger-to-skin delay, and matching loudspeaker trigger-to-ear timing. This inspection emits no tactile output.",
+            "The calibrated speaker and headphone masker channels and delivered levels must be measured. The original sound waveforms, exact headphone model and installed calibration are unavailable.",
+            "Two footpedals and correctness scoring are required for response capture. Foreperiod and response deadline settings are unreported.",
+            "The scheduler requires one body part per block and pneumatic output routing by target site and side. The inspection pools all four body sites.",
+            "The scheduler requires eight blocks selected by hand surface, hand position and sound position. The source omits exact knee-side speaker coordinates and within-block side quotas."
           ],
           "paper_audit": {
             "automated_evidence_status": "no_extracted_source",
@@ -7760,25 +8053,47 @@
           "status": "source_parameters_missing_or_unresolved"
         },
         "toolkit_gui_implementation": {
-          "blocker_ids": [],
-          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
+          ],
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
           "passed": false,
-          "profile_readiness": [],
-          "status": "blocked_by_missing_profile_parameters"
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "teramoto_2013_beyond_head_exp1"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "teramoto_2013_beyond_head_exp2"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
         },
         "wav_generation_and_runner_execution": {
           "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
           "passed": false,
-          "runnable_status": "not_yet_templated",
+          "runnable_status": "template_present_but_blocked",
           "source_report": "",
           "status": "runner_execution_not_available_for_record"
         }
       },
       "known_parameter_validation_report": "",
       "missing_publication_parameters": [
-        "extract exact body-site mapping, auditory locations, tactile response/scoring rules, timing, and trial counts before templating"
+        "The synchronized scheduler requires independently addressed pneumatic outputs, a calibrated air-puff trigger-to-skin delay, and matching loudspeaker trigger-to-ear timing. This inspection emits no tactile output.",
+        "The calibrated speaker and headphone masker channels and delivered levels must be measured. The original sound waveforms, exact headphone model and installed calibration are unavailable.",
+        "Two footpedals and correctness scoring are required for response capture. Foreperiod and response deadline settings are unreported.",
+        "The scheduler requires one body part per block and pneumatic output routing by target site and side. The inspection pools all four body sites.",
+        "The scheduler requires eight blocks selected by hand surface, hand position and sound position. The source omits exact knee-side speaker coordinates and within-block side quotas."
       ],
-      "next_required_action": "Extract or source the missing paper parameters: extract exact body-site mapping, auditory locations, tactile response/scoring rules, timing, and trial counts before templating",
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: The synchronized scheduler requires independently addressed pneumatic outputs, a calibrated air-puff trigger-to-skin delay, and matching loudspeaker trigger-to-ear timing. This inspection emits no tactile output.; The calibrated speaker and headphone masker channels and delivered levels must be measured. The original sound waveforms, exact headphone model and installed calibration are unavailable.; Two footpedals and correctness scoring are required for response capture. Foreperiod and response deadline settings are unreported.; The scheduler requires one body part per block and pneumatic output routing by target site and side. The inspection pools all four body sites.; The scheduler requires eight blocks selected by hand surface, hand position and sound position. The source omits exact knee-side speaker coordinates and within-block side quotas.",
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
       "paper_audit": {
         "automated_evidence_status": "no_extracted_source",
@@ -7791,12 +8106,13 @@
         "pdf_status": "paywalled",
         "supplement_status": "needs_user_download"
       },
-      "pipeline_status": "source_parameters_missing_before_profile_creation",
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
       "record_id": "teramoto_2013_beyond_head_audiotactile",
-      "runnable_status": "not_yet_templated",
+      "runnable_status": "template_present_but_blocked",
       "source_basis": [
         "pubmed_query_variant_exhaustiveness_2026_06_13",
-        "web_search_2026_06_13"
+        "web_search_2026_06_13",
+        "https://doi.org/10.1007/s00221-013-3574-5"
       ]
     },
     {
@@ -8026,6 +8342,549 @@
         "pubmed_query_variant_exhaustiveness_2026_06_13",
         "web_search_2026_06_13"
       ]
+    },
+    {
+      "audiotactile_task_family": "Three visits with the same five-offset abdominal touch assessment",
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files"
+      ],
+      "citation_short": "Cardini, F., Fatemi-Ghomi, N., Gajewska-Knapik, K., Gooch, V., & Aspell, J. E. (2018). Maternal brain gain: enlarged representation of peripersonal space in pregnancy. bioRxiv 492017.",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "cardini_2018_pregnancy_trunk_pps"
+      ],
+      "doi": "10.1101/492017",
+      "expected_effect_direction": "third_trimester_earlier_facilitation_and_shallower_slope",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "full_emulated_pipeline_validated": false,
+      "gates": {
+        "expected_outcome_extraction": {
+          "evidence": "Structured expected effect direction is available.",
+          "expected_effect_direction": "third_trimester_earlier_facilitation_and_shallower_slope",
+          "passed": true,
+          "source_basis": [
+            "https://doi.org/10.1101/492017, bioRxiv v1 pp. 4\u20137, Results."
+          ],
+          "status": "structured_expected_outcome_extracted"
+        },
+        "observed_emulated_expected_match": {
+          "evidence": "No observed emulated comparison exists for this record.",
+          "evidence_boundary": "",
+          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "passed": false,
+          "source_report": "",
+          "status": "no_observed_emulated_comparison"
+        },
+        "parsimonious_profile_saved": {
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
+          "passed": false,
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "cardini_2018_pregnancy_trunk_pps"
+          ]
+        },
+        "source_parameter_extraction": {
+          "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
+          ],
+          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
+          "missing_parameters": [
+            "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.",
+            "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.",
+            "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
+          ],
+          "paper_audit": {},
+          "passed": false,
+          "status": "source_parameters_missing_or_unresolved"
+        },
+        "toolkit_gui_implementation": {
+          "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "exact_audio_envelope_or_gain_files"
+          ],
+          "evidence": "Toolkit path cannot be validated until the source parameters/profile are complete.",
+          "passed": false,
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_missing_parameters",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "cardini_2018_pregnancy_trunk_pps"
+            }
+          ],
+          "status": "blocked_by_missing_profile_parameters"
+        },
+        "wav_generation_and_runner_execution": {
+          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
+          "passed": false,
+          "runnable_status": "template_present_but_blocked",
+          "source_report": "",
+          "status": "runner_execution_not_available_for_record"
+        }
+      },
+      "known_parameter_validation_report": "",
+      "missing_publication_parameters": [
+        "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.",
+        "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.",
+        "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
+      ],
+      "next_required_action": "Extract or source the missing paper parameters: Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.; Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.; Response deadline, precise foreperiod, end silence and intertrial timing are unreported.",
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "paper_audit": {},
+      "pipeline_status": "profile_present_but_source_parameters_missing",
+      "record_id": "pregnancy_2018_preprint",
+      "runnable_status": "template_present_but_blocked",
+      "source_basis": [
+        "https://doi.org/10.1101/492017"
+      ]
+    },
+    {
+      "audiotactile_task_family": "Looming versus flat hand PPS and resting-state MEG",
+      "blocking_constraint_ids": [
+        "electrical_tactile_calibration",
+        "exact_audio_envelope_or_gain_files"
+      ],
+      "citation_short": "Di Cosmo, G., Costantini, M., Spadone, S., Pizzella, V., Della Penna, S., Marzetti, L., & Ferri, F. (2021). Phase-coupling of neural oscillations contributes to individual differences in peripersonal space. Neuropsychologia, 156, 107823.",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "di_cosmo_2021_phase_coupling"
+      ],
+      "doi": "10.1016/j.neuropsychologia.2021.107823",
+      "expected_effect_direction": "positive_beta_connectivity_pps_extent_association",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "full_emulated_pipeline_validated": false,
+      "gates": {
+        "expected_outcome_extraction": {
+          "evidence": "Structured expected effect direction is available.",
+          "expected_effect_direction": "positive_beta_connectivity_pps_extent_association",
+          "passed": true,
+          "source_basis": [
+            "https://pubmed.ncbi.nlm.nih.gov/33705822/, article abstract."
+          ],
+          "status": "structured_expected_outcome_extracted"
+        },
+        "observed_emulated_expected_match": {
+          "evidence": "No observed emulated comparison exists for this record.",
+          "evidence_boundary": "",
+          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "passed": false,
+          "source_report": "",
+          "status": "no_observed_emulated_comparison"
+        },
+        "parsimonious_profile_saved": {
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
+          "passed": false,
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "di_cosmo_2021_phase_coupling"
+          ]
+        },
+        "source_parameter_extraction": {
+          "blockers": [
+            "electrical_tactile_calibration",
+            "exact_audio_envelope_or_gain_files"
+          ],
+          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
+          "missing_parameters": [
+            "Original looming and flat sound source files, gain coefficients, file duration and delivered audio calibration are unavailable.",
+            "The behavioral scheduler requires a silent negative-SOA lead-in, exact electrical target timing and calibrated response capture.",
+            "Resting MEG and T1 MRI require external acquisition systems and a validated connectivity pipeline. The exact spectral windowing, fit options, and acquisition-to-analysis data are unavailable."
+          ],
+          "paper_audit": {},
+          "passed": false,
+          "status": "source_parameters_missing_or_unresolved"
+        },
+        "toolkit_gui_implementation": {
+          "blocker_ids": [
+            "electrical_tactile_calibration",
+            "exact_audio_envelope_or_gain_files"
+          ],
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "passed": false,
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "di_cosmo_2021_phase_coupling"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
+        },
+        "wav_generation_and_runner_execution": {
+          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
+          "passed": false,
+          "runnable_status": "template_present_but_blocked",
+          "source_report": "",
+          "status": "runner_execution_not_available_for_record"
+        }
+      },
+      "known_parameter_validation_report": "",
+      "missing_publication_parameters": [
+        "Original looming and flat sound source files, gain coefficients, file duration and delivered audio calibration are unavailable.",
+        "The behavioral scheduler requires a silent negative-SOA lead-in, exact electrical target timing and calibrated response capture.",
+        "Resting MEG and T1 MRI require external acquisition systems and a validated connectivity pipeline. The exact spectral windowing, fit options, and acquisition-to-analysis data are unavailable."
+      ],
+      "next_required_action": "Implement or validate toolkit support for: electrical_tactile_calibration, exact_audio_envelope_or_gain_files; also extract/source missing paper parameters: Original looming and flat sound source files, gain coefficients, file duration and delivered audio calibration are unavailable.; The behavioral scheduler requires a silent negative-SOA lead-in, exact electrical target timing and calibrated response capture.; Resting MEG and T1 MRI require external acquisition systems and a validated connectivity pipeline. The exact spectral windowing, fit options, and acquisition-to-analysis data are unavailable.",
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "paper_audit": {},
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "record_id": "di_cosmo_2021_phase_coupling",
+      "runnable_status": "template_present_but_blocked",
+      "source_basis": [
+        "https://doi.org/10.1016/j.neuropsychologia.2021.107823"
+      ]
+    },
+    {
+      "audiotactile_task_family": "Pre/post looming and flat hand PPS after active or observed tool use",
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "electrical_tactile_calibration"
+      ],
+      "citation_short": "Ferroni, F., Ardizzi, M., Ferri, F., Tesanovic, A., Langiulli, N., Tonna, M., Marchesi, C., & Gallese, V. (2020). Schizotypy and individual differences in peripersonal space plasticity. Neuropsychologia, 147, 107579.",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "ferroni_2020_schizotypy_active",
+        "ferroni_2020_schizotypy_observation"
+      ],
+      "doi": "10.1016/j.neuropsychologia.2020.107579",
+      "expected_effect_direction": "active_expansion_with_smaller_change_in_higher_schizotypy",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "full_emulated_pipeline_validated": false,
+      "gates": {
+        "expected_outcome_extraction": {
+          "evidence": "Structured expected effect direction is available.",
+          "expected_effect_direction": "active_expansion_with_smaller_change_in_higher_schizotypy",
+          "passed": true,
+          "source_basis": [
+            "https://pubmed.ncbi.nlm.nih.gov/32758552/, article abstract; full article Results."
+          ],
+          "status": "structured_expected_outcome_extracted"
+        },
+        "observed_emulated_expected_match": {
+          "evidence": "No observed emulated comparison exists for this record.",
+          "evidence_boundary": "",
+          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "passed": false,
+          "source_report": "",
+          "status": "no_observed_emulated_comparison"
+        },
+        "parsimonious_profile_saved": {
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
+          "passed": false,
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "ferroni_2020_schizotypy_active",
+            "ferroni_2020_schizotypy_observation"
+          ]
+        },
+        "source_parameter_extraction": {
+          "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
+          ],
+          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
+          "missing_parameters": [
+            "The printed 120-trial assessment, 60% paired share and 18 repeats per delay conflict. The exact original trial counts, baseline and catch quotas, randomization and repeat-on-miss logic require the source schedule.",
+            "The exact original auditory source files and measured separate loudspeaker gains, calibration and phase are unavailable.",
+            "The tactile scheduler requires individually calibrated Digitimer DS7A stimulation, hardware timing and validated laptop response capture.",
+            "Study execution requires the supervised physical training procedure and original eligibility and analysis workflow outside the inspection."
+          ],
+          "paper_audit": {},
+          "passed": false,
+          "status": "source_parameters_missing_or_unresolved"
+        },
+        "toolkit_gui_implementation": {
+          "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
+          ],
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "passed": false,
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "ferroni_2020_schizotypy_active"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "ferroni_2020_schizotypy_observation"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
+        },
+        "wav_generation_and_runner_execution": {
+          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
+          "passed": false,
+          "runnable_status": "template_present_but_blocked",
+          "source_report": "",
+          "status": "runner_execution_not_available_for_record"
+        }
+      },
+      "known_parameter_validation_report": "",
+      "missing_publication_parameters": [
+        "The printed 120-trial assessment, 60% paired share and 18 repeats per delay conflict. The exact original trial counts, baseline and catch quotas, randomization and repeat-on-miss logic require the source schedule.",
+        "The exact original auditory source files and measured separate loudspeaker gains, calibration and phase are unavailable.",
+        "The tactile scheduler requires individually calibrated Digitimer DS7A stimulation, hardware timing and validated laptop response capture.",
+        "Study execution requires the supervised physical training procedure and original eligibility and analysis workflow outside the inspection."
+      ],
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, electrical_tactile_calibration; also extract/source missing paper parameters: The printed 120-trial assessment, 60% paired share and 18 repeats per delay conflict. The exact original trial counts, baseline and catch quotas, randomization and repeat-on-miss logic require the source schedule.; The exact original auditory source files and measured separate loudspeaker gains, calibration and phase are unavailable.; The tactile scheduler requires individually calibrated Digitimer DS7A stimulation, hardware timing and validated laptop response capture.; Study execution requires the supervised physical training procedure and original eligibility and analysis workflow outside the inspection.",
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "paper_audit": {},
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "record_id": "ferroni_2020_schizotypy",
+      "runnable_status": "template_present_but_blocked",
+      "source_basis": [
+        "https://doi.org/10.1016/j.neuropsychologia.2020.107579"
+      ]
+    },
+    {
+      "audiotactile_task_family": "Spatial congruence, detection response and time-locked scalp EEG",
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "electrical_tactile_calibration"
+      ],
+      "citation_short": "Murray, M. M., Molholm, S., Michel, C. M., Heslenfeld, D. J., Ritter, W., Javitt, D. C., Schroeder, C. E., & Foxe, J. J. (2005). Grabbing your ear: Rapid auditory\u2013somatosensory multisensory interactions in low-level sensory cortices are not constrained by stimulus alignment. Cerebral Cortex, 15(7), 963\u2013974.",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "murray_2005_audiotactile_alignment"
+      ],
+      "doi": "10.1093/cercor/bhh197",
+      "expected_effect_direction": "bimodal_facilitation_with_and_without_spatial_alignment",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "full_emulated_pipeline_validated": false,
+      "gates": {
+        "expected_outcome_extraction": {
+          "evidence": "Structured expected effect direction is available.",
+          "expected_effect_direction": "bimodal_facilitation_with_and_without_spatial_alignment",
+          "passed": true,
+          "source_basis": [
+            "https://doi.org/10.1093/cercor/bhh197, pp. 965\u2013969, Table 1 and Figs. 2\u20134."
+          ],
+          "status": "structured_expected_outcome_extracted"
+        },
+        "observed_emulated_expected_match": {
+          "evidence": "No observed emulated comparison exists for this record.",
+          "evidence_boundary": "",
+          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "passed": false,
+          "source_report": "",
+          "status": "no_observed_emulated_comparison"
+        },
+        "parsimonious_profile_saved": {
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
+          "passed": false,
+          "profile_completion_statuses": [
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "murray_2005_audiotactile_alignment"
+          ]
+        },
+        "source_parameter_extraction": {
+          "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
+          ],
+          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
+          "missing_parameters": [
+            "Calibrated two-speaker and two-vibrator scheduler and EEG synchronization are required for the simultaneous stimulus timings.",
+            "The original sound file, output calibration, exact audio source coordinates, vibrator acceleration, trigger timing, interstimulus anchor and actual recorded block counts are unavailable.",
+            "Research response capture requires the right-foot pedal and trigger-relative reaction times. Published EEG acquisition and race-model/ERP scoring require validated synchronized acquisition and preprocessing."
+          ],
+          "paper_audit": {},
+          "passed": false,
+          "status": "source_parameters_missing_or_unresolved"
+        },
+        "toolkit_gui_implementation": {
+          "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
+          ],
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "passed": false,
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "murray_2005_audiotactile_alignment"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
+        },
+        "wav_generation_and_runner_execution": {
+          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
+          "passed": false,
+          "runnable_status": "template_present_but_blocked",
+          "source_report": "",
+          "status": "runner_execution_not_available_for_record"
+        }
+      },
+      "known_parameter_validation_report": "",
+      "missing_publication_parameters": [
+        "Calibrated two-speaker and two-vibrator scheduler and EEG synchronization are required for the simultaneous stimulus timings.",
+        "The original sound file, output calibration, exact audio source coordinates, vibrator acceleration, trigger timing, interstimulus anchor and actual recorded block counts are unavailable.",
+        "Research response capture requires the right-foot pedal and trigger-relative reaction times. Published EEG acquisition and race-model/ERP scoring require validated synchronized acquisition and preprocessing."
+      ],
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, electrical_tactile_calibration; also extract/source missing paper parameters: Calibrated two-speaker and two-vibrator scheduler and EEG synchronization are required for the simultaneous stimulus timings.; The original sound file, output calibration, exact audio source coordinates, vibrator acceleration, trigger timing, interstimulus anchor and actual recorded block counts are unavailable.; Research response capture requires the right-foot pedal and trigger-relative reaction times. Published EEG acquisition and race-model/ERP scoring require validated synchronized acquisition and preprocessing.",
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "paper_audit": {},
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "record_id": "murray_2005_grabbing_your_ear",
+      "runnable_status": "template_present_but_blocked",
+      "source_basis": [
+        "https://doi.org/10.1093/cercor/bhh197"
+      ]
+    },
+    {
+      "audiotactile_task_family": "Spatial and signed-SOA audio\u2013tactile temporal order judgments",
+      "blocking_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "electrical_tactile_calibration"
+      ],
+      "citation_short": "Zampini, M., Brown, T., Shore, D. I., Maravita, A., R\u00f6der, B., & Spence, C. (2005). Audiotactile temporal order judgments. Acta Psychologica, 118(3), 277\u2013291.",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "zampini_2005_audiotactile_toj_exp1",
+        "zampini_2005_audiotactile_toj_exp2",
+        "zampini_2005_audiotactile_toj_exp3"
+      ],
+      "doi": "10.1016/j.actpsy.2004.10.017",
+      "expected_effect_direction": "limited_same_vs_opposite_location_effect",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "full_emulated_pipeline_validated": false,
+      "gates": {
+        "expected_outcome_extraction": {
+          "evidence": "Structured expected effect direction is available.",
+          "expected_effect_direction": "limited_same_vs_opposite_location_effect",
+          "passed": true,
+          "source_basis": [
+            "https://doi.org/10.1016/j.actpsy.2004.10.017, Results for Experiments 1\u20133."
+          ],
+          "status": "structured_expected_outcome_extracted"
+        },
+        "observed_emulated_expected_match": {
+          "evidence": "No observed emulated comparison exists for this record.",
+          "evidence_boundary": "",
+          "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+          "passed": false,
+          "source_report": "",
+          "status": "no_observed_emulated_comparison"
+        },
+        "parsimonious_profile_saved": {
+          "evidence": "A template/profile scaffold exists, but minimum source parameters or launch readiness are incomplete.",
+          "passed": false,
+          "profile_completion_statuses": [
+            "unfinished_preload",
+            "unfinished_preload",
+            "unfinished_preload"
+          ],
+          "status": "profile_scaffold_present_but_incomplete",
+          "template_ids": [
+            "zampini_2005_audiotactile_toj_exp1",
+            "zampini_2005_audiotactile_toj_exp2",
+            "zampini_2005_audiotactile_toj_exp3"
+          ]
+        },
+        "source_parameter_extraction": {
+          "blockers": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
+          ],
+          "evidence": "Tracked source/PDF audit does not yet prove all minimum task parameters needed for a runnable profile.",
+          "missing_parameters": [
+            "The trial scheduler requires independent auditory and tactile triggers for signed temporal orders plus light feedback. This profile schedules only the auditory member of each pair.",
+            "Speaker and tactile calibration must verify delivered intensity and acoustic-to-skin onset. Original waveform bytes and measured timing are unavailable.",
+            "The experiment requires separate calibrated 200 Hz vibration at each finger, independent central masking, and toe/heel response capture with visual feedback.",
+            "Exact trial order, practice cell allocations and delivered masker-to-stimulus relation are unreported.",
+            "The tactile apparatus uses a two-site electrocutaneous stimulator with individual nonpainful calibration. The printed voltage range does not supply the pulse waveform, width or delivered current.",
+            "Exact Experiment 3 per-block, per-cell and practice trial allocations are unreported. The inspection uses one auditory presentation per nominal cell."
+          ],
+          "paper_audit": {},
+          "passed": false,
+          "status": "source_parameters_missing_or_unresolved"
+        },
+        "toolkit_gui_implementation": {
+          "blocker_ids": [
+            "missing_core_soa_iti_baseline_repetition_parameters",
+            "electrical_tactile_calibration"
+          ],
+          "evidence": "The current toolkit/GUI schema does not yet model every task-mechanics blocker for this record.",
+          "passed": false,
+          "profile_readiness": [
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "zampini_2005_audiotactile_toj_exp1"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "zampini_2005_audiotactile_toj_exp2"
+            },
+            {
+              "runner_readiness": "blocked_unsupported_toolkit_structure",
+              "segment_0_to_4_profile_checks_passed": false,
+              "segment_1_to_6_materializable": false,
+              "segment_6_launchable": false,
+              "template_id": "zampini_2005_audiotactile_toj_exp3"
+            }
+          ],
+          "status": "blocked_by_toolkit_structure_or_response_contract"
+        },
+        "wav_generation_and_runner_execution": {
+          "evidence": "No record-level mouse-click runner comparison exists because the profile is not fully runnable.",
+          "passed": false,
+          "runnable_status": "template_present_but_blocked",
+          "source_report": "",
+          "status": "runner_execution_not_available_for_record"
+        }
+      },
+      "known_parameter_validation_report": "",
+      "missing_publication_parameters": [
+        "The trial scheduler requires independent auditory and tactile triggers for signed temporal orders plus light feedback. This profile schedules only the auditory member of each pair.",
+        "Speaker and tactile calibration must verify delivered intensity and acoustic-to-skin onset. Original waveform bytes and measured timing are unavailable.",
+        "The experiment requires separate calibrated 200 Hz vibration at each finger, independent central masking, and toe/heel response capture with visual feedback.",
+        "Exact trial order, practice cell allocations and delivered masker-to-stimulus relation are unreported.",
+        "The tactile apparatus uses a two-site electrocutaneous stimulator with individual nonpainful calibration. The printed voltage range does not supply the pulse waveform, width or delivered current.",
+        "Exact Experiment 3 per-block, per-cell and practice trial allocations are unreported. The inspection uses one auditory presentation per nominal cell."
+      ],
+      "next_required_action": "Implement or validate toolkit support for: missing_core_soa_iti_baseline_repetition_parameters, electrical_tactile_calibration; also extract/source missing paper parameters: The trial scheduler requires independent auditory and tactile triggers for signed temporal orders plus light feedback. This profile schedules only the auditory member of each pair.; Speaker and tactile calibration must verify delivered intensity and acoustic-to-skin onset. Original waveform bytes and measured timing are unavailable.; The experiment requires separate calibrated 200 Hz vibration at each finger, independent central masking, and toe/heel response capture with visual feedback.; Exact trial order, practice cell allocations and delivered masker-to-stimulus relation are unreported.; The tactile apparatus uses a two-site electrocutaneous stimulator with individual nonpainful calibration. The printed voltage range does not supply the pulse waveform, width or delivered current.; Exact Experiment 3 per-block, per-cell and practice trial allocations are unreported. The inspection uses one auditory presentation per nominal cell.",
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "paper_audit": {},
+      "pipeline_status": "toolkit_structure_or_response_contract_missing",
+      "record_id": "zampini_2005_audiotactile_toj",
+      "runnable_status": "template_present_but_blocked",
+      "source_basis": [
+        "https://doi.org/10.1016/j.actpsy.2004.10.017"
+      ]
     }
   ],
   "schema": "pps-audiotactile-full-pipeline-validation.v1",
@@ -8046,52 +8905,52 @@
     "gate_status_counts": {
       "expected_outcome_extraction": {
         "not_applicable_adjacent_record": 4,
-        "structured_expected_outcome_extracted": 71
+        "structured_expected_outcome_extracted": 76
       },
       "observed_emulated_expected_match": {
         "emulated_observed_direction_matches_expected": 17,
-        "no_observed_emulated_comparison": 54,
+        "no_observed_emulated_comparison": 59,
         "not_applicable_adjacent_record": 4
       },
       "parsimonious_profile_saved": {
         "not_applicable_adjacent_record": 4,
         "parsimonious_profile_complete": 19,
-        "profile_not_yet_created": 35,
-        "profile_scaffold_present_but_incomplete": 17
+        "profile_not_yet_created": 25,
+        "profile_scaffold_present_but_incomplete": 32
       },
       "source_parameter_extraction": {
         "minimum_source_parameters_captured": 19,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 52
+        "source_parameters_missing_or_unresolved": 57
       },
       "toolkit_gui_implementation": {
-        "blocked_by_missing_profile_parameters": 43,
-        "blocked_by_toolkit_structure_or_response_contract": 9,
+        "blocked_by_missing_profile_parameters": 36,
+        "blocked_by_toolkit_structure_or_response_contract": 21,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 19
       },
       "wav_generation_and_runner_execution": {
         "not_applicable_adjacent_record": 4,
-        "runner_execution_not_available_for_record": 54,
+        "runner_execution_not_available_for_record": 59,
         "wav_runner_mouse_click_emulation_available": 17
       }
     },
     "human_behavioral_observed_record_count": 0,
-    "in_scope_record_count": 71,
-    "literature_record_count": 75,
+    "in_scope_record_count": 76,
+    "literature_record_count": 80,
     "physical_loopback_observed_record_count": 0,
     "pipeline_status_counts": {
       "adjacent_not_applicable": 4,
       "full_emulated_source_to_runner_pipeline_validated": 17,
       "pipeline_incomplete": 2,
-      "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 35,
-      "toolkit_structure_or_response_contract_missing": 9
+      "profile_present_but_source_parameters_missing": 11,
+      "source_parameters_missing_before_profile_creation": 25,
+      "toolkit_structure_or_response_contract_missing": 21
     },
     "primary_gap_counts": {
-      "profile_present_but_source_parameters_missing": 8,
-      "source_parameters_missing_before_profile_creation": 35,
-      "toolkit_structure_or_response_contract_missing": 9
+      "profile_present_but_source_parameters_missing": 11,
+      "source_parameters_missing_before_profile_creation": 25,
+      "toolkit_structure_or_response_contract_missing": 21
     }
   }
 }

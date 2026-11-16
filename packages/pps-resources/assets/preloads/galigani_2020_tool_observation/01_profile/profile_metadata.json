@@ -1,0 +1,164 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "galigani_2020_tool_observation",
+  "title": "Galigani 2020 Group 2, PPS after tool-use training",
+  "citation": "Galigani, M., Castellani, N., Donno, B., Franza, M., Zuber, C., Allet, L., Garbarini, F., & Bassolino, M. (2020). Effect of tool-use observation on metric body representation and peripersonal space. Neuropsychologia, 148, 107622.",
+  "doi": "10.1016/j.neuropsychologia.2020.107622",
+  "source_url": "https://iris.unito.it/handle/2318/1763498?mode=complete",
+  "verification_status": "partial",
+  "notes": "Group 2 had one post-training near/far assessment in each of three counterbalanced visits. Five conditions have 24 trials per assessment. The inspection schedule uses acoustic and tactile timing markers. Research launch requires the physical speaker, response-box and electrical-stimulation setup.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2020.107622",
+    "profile_check_complete": false,
+    "profile_type": "static_near_far_audio_tactile_tool_observation_pps",
+    "publication_status": "published",
+    "source_scope": "Group 2, primary audio-tactile PPS experiment. Group 1 assessed body-landmark localization separately.",
+    "original_design": {
+      "participants": 21,
+      "population": "Healthy, right-handed volunteers. Handedness measured with FLANDERS.",
+      "visit_count": 3,
+      "separation_weeks": 1,
+      "visit_order": "Counterbalanced across participants. Original participant assignments are unreported.",
+      "visit_sequence": [
+        "Estimate electrical detection threshold",
+        "Perform assigned training",
+        "Run the post-training PPS assessment"
+      ],
+      "post_training_assessments_per_visit": 1,
+      "conditions": [
+        "Active rake use",
+        "Observation of rake use",
+        "Cognitive control"
+      ],
+      "trials_per_assessment_by_family": {
+        "T": 24,
+        "ANear": 24,
+        "AFar": 24,
+        "TANear": 24,
+        "TAFar": 24
+      },
+      "trials_per_assessment": 120,
+      "trials_per_participant": 360,
+      "reported_assessment_minutes_approx": 16
+    },
+    "published_protocol": {
+      "assessment_posture": "Seated, right hand resting on the table and holding the rake.",
+      "audio": {
+        "frequency_hz": 784,
+        "duration_ms": 50,
+        "nominal_level_db_approx": 65,
+        "speaker_distance_from_stimulated_hand_cm": {
+          "near_upper_bound_exclusive": 5,
+          "far": 100
+        },
+        "physical_routing": "Separate fixed near and far speakers, one speaker per auditory trial.",
+        "level_reference_and_tone_ramp": null
+      },
+      "touch": {
+        "site": "Right-hand dorsum",
+        "stimulator": "Digitimer DS7A",
+        "pulse_duration_us": 200,
+        "shape": "Nonpainful transcutaneous square pulse",
+        "electrodes": "One common negative and one of two selectable positive contacts per pulse, about 1 cm between contacts.",
+        "calibration": "Before each visit assess individual sensory threshold by the method of limits. Use twice the threshold."
+      },
+      "timing_and_response": {
+        "paired_sound_and_touch": "Nominally simultaneous. The hardware pilot reported sound lagging touch by up to 40 ms.",
+        "interstimulus_interval_ms": [
+          7000,
+          9000
+        ],
+        "interval_policy": "Random jitter. Exact sampling and realized order are unreported.",
+        "target_families": [
+          "T",
+          "TANear",
+          "TAFar"
+        ],
+        "catch_families": [
+          "ANear",
+          "AFar"
+        ],
+        "target_rule": "Press the response-box button with the right index finger as quickly as possible on detecting touch.",
+        "catch_rule": "Withhold for sound without touch.",
+        "online_deadline_ms": null,
+        "control": "Arduino and E-Prime 2.0.",
+        "published_family_mapping": {
+          "T": {
+            "touch": true,
+            "sound": null
+          },
+          "ANear": {
+            "touch": false,
+            "sound": "near"
+          },
+          "AFar": {
+            "touch": false,
+            "sound": "far"
+          },
+          "TANear": {
+            "touch": true,
+            "sound": "near"
+          },
+          "TAFar": {
+            "touch": true,
+            "sound": "far"
+          }
+        }
+      },
+      "training": {
+        "active": {
+          "tool": "100 cm aluminium rake",
+          "task": "Retrieve colored wooden cubes into the corresponding color zones, one cube per cue.",
+          "objects_per_block": 30,
+          "cue_period_s": 5,
+          "blocks": 6,
+          "block_duration_s": 150,
+          "break_duration_s": 60,
+          "reported_total_minutes": 20
+        },
+        "observation": "The experimenter performs the same retrieval from behind and slightly beside the participant. The participant views the movement from a first-person perspective, holds a matching rake stationary and follows the target with their gaze.",
+        "cognitive": {
+          "task": "Judge whether two three-dot triangles point in the same or different directions.",
+          "display_distance_from_hand_cm": 100,
+          "presentation_duration_ms": 50,
+          "interstimulus_interval_ms": 1000,
+          "exact_trial_count": null
+        }
+      },
+      "analysis": {
+        "outcome": "Mean RT by T, TANear and TAFar within each training condition.",
+        "trim": "Exclude RTs more than two SD from the relevant condition or distance mean.",
+        "minimum_detection_accuracy_percent": 97,
+        "catch_accuracy_accounting": null,
+        "model": "3 \u00d7 3 within-participant ANOVA for stimulus condition and training. Planned pairwise comparisons use Bonferroni correction over 18 tests."
+      }
+    },
+    "preview": {
+      "acoustic_marker": "50 ms centered white-noise marker. The near preview placement is 4 cm, within the article\u2019s <5 cm bound. Only timing and separate near/far rows are represented.",
+      "response_and_touch": "The tactile waveform and response events are timing proxies. The original uses individualized electrical stimulation and a calibrated response box.",
+      "timing": "Use simultaneous marker onsets. For the auditory families, 6,950, 7,950 or 8,950 ms of trailing silence plus the 50 ms marker represents the 7\u20139 s interval at three discrete values. Actual interstimulus timing needs measurements on the physical setup.",
+      "trial_labels": "Audio-Tactile and Catch rows use their near or far sound marker to identify TANear, TAFar, ANear and AFar. Baseline rows correspond to T and have no auditory output or speaker-distance condition. Each block repeats the nominal published five-family pool. The seeded participant schedule cycles through the six visit-order permutations.",
+      "external_procedures": "Operator manages visits and the active, observation and cognitive interventions separately."
+    },
+    "implementation_gaps": [
+      "The original 784 Hz tone waveform, tone ramp, absolute SPL reference and calibration are unavailable. The sound markers do not implement synchronized selection of two separate physical speakers.",
+      "The trial scheduler requires calibrated DS7A electrical timing and contact selection, a measured audio\u2013tactile delay, and right-index response-box input. Original trial clocks and response timeout are unreported.",
+      "The trial jitter scheduler approximates the reported 7\u20139 s interstimulus interval with three discrete values. Original timing and trial order are unreported.",
+      "Each visit requires external sensory threshold setting, physical rake training or the cognitive comparison task. The cognitive task trial allocation and exact visual assets are unreported."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "population, visit order and training",
+      "source": "Galigani et al. (2020), Neuropsychologia 148:107622, pp. 2\u20135, \u00a7\u00a72.1\u20132.2.4 and Figs. 1\u20134."
+    },
+    {
+      "field": "audio, electrical target, response, jitter, and trial allocation",
+      "source": "Galigani et al. (2020), Neuropsychologia 148:107622, p. 5, \u00a72.2.4 and Fig. 3."
+    },
+    {
+      "field": "analysis and published condition contrasts",
+      "source": "Galigani et al. (2020), Neuropsychologia 148:107622, pp. 6\u20137, \u00a72.2.5 and Group 2 Results, Fig. 6."
+    }
+  ]
+}

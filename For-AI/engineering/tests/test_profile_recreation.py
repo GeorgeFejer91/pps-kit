@@ -40,7 +40,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "packages" / "pps-resources" / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 57
+    assert len(templates) == 81
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -49,15 +49,19 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert categorized == template_ids
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
-    assert len(status["categories"]["missing_publication_parameters"]) == 31
+    assert len(status["categories"]["missing_publication_parameters"]) == 55
     assert set(status["categories"]["toolkit_structural_gap"]) == {
         "amemiya_2017_ieee_foot_sole_vibration",
         "amemiya_2017_ieee_sound_localization",
         "amemiya_2019_foot_sole_exp1",
         "amemiya_2019_foot_sole_exp2",
         "bernasconi_2018_trunk_ieeg",
+        "di_cosmo_2021_phase_coupling",
         "ferri_2015_artificial_looming_valence",
         "ferri_2015_ecological_looming_valence",
+        "ferroni_2020_schizotypy_active",
+        "ferroni_2020_schizotypy_observation",
+        "galigani_2020_tool_observation",
         "hobeika_2019_social_collaboration",
         "hobeika_2019_social_competition",
         "holmes_2020_exp1",
@@ -65,9 +69,26 @@ def test_profile_recreation_manifests_cover_all_current_templates():
         "holmes_2020_exp2_weak_target",
         "holmes_2020_exp3",
         "holmes_2020_exp4",
+        "kitagawa_2005_auditory_localization",
+        "kitagawa_2005_rear_toj",
+        "kitagawa_2005_tactile_distractor",
+        "mul_2019_autism_pps",
+        "murray_2005_audiotactile_alignment",
+        "orioli_2019_newborn_audiotactile",
+        "orioli_2019_newborn_auditory",
+        "orioli_2019_newborn_pilot",
+        "ronga_2021_adult_erp",
+        "ronga_2021_newborn_erp",
+        "schizophrenia_tool_use_2022",
+        "sorrentino_2021_ageing_hand_pps",
         "taffou_2021_auditory_roughness",
+        "teramoto_2013_beyond_head_exp1",
+        "teramoto_2013_beyond_head_exp2",
         "teraoka_2024_front_pps",
         "teraoka_2024_rear_pps",
+        "zampini_2005_audiotactile_toj_exp1",
+        "zampini_2005_audiotactile_toj_exp2",
+        "zampini_2005_audiotactile_toj_exp3",
     }
 
     allowed_statuses = {
@@ -147,6 +168,30 @@ def test_new_assessment_preloads_preserve_trial_counts_and_launch_gates():
         "hobeika_2020_pseudo_linear": (576, False),
         "rahmani_2025_2s_pps": (245, False),
         "rahmani_2025_3s_pps": (245, False),
+        "cardini_2018_pregnancy_trunk_pps": (65, False),
+        "cardini_2019_pregnancy_trunk_pps": (65, False),
+        "chiarella_2024_mindfulness_cheek_pps": (100, False),
+        "di_cosmo_2021_phase_coupling": (0, False),
+        "ferroni_2020_schizotypy_active": (52, False),
+        "ferroni_2020_schizotypy_observation": (52, False),
+        "galigani_2020_tool_observation": (360, False),
+        "kitagawa_2005_auditory_localization": (0, False),
+        "kitagawa_2005_rear_toj": (640, False),
+        "kitagawa_2005_tactile_distractor": (0, False),
+        "mul_2019_autism_pps": (65, False),
+        "murray_2005_audiotactile_alignment": (2400, False),
+        "orioli_2019_newborn_audiotactile": (0, False),
+        "orioli_2019_newborn_auditory": (0, False),
+        "orioli_2019_newborn_pilot": (0, False),
+        "ronga_2021_adult_erp": (0, False),
+        "ronga_2021_newborn_erp": (0, False),
+        "schizophrenia_tool_use_2022": (52, False),
+        "sorrentino_2021_ageing_hand_pps": (110, False),
+        "teramoto_2013_beyond_head_exp1": (320, False),
+        "teramoto_2013_beyond_head_exp2": (16, False),
+        "zampini_2005_audiotactile_toj_exp1": (640, False),
+        "zampini_2005_audiotactile_toj_exp2": (640, False),
+        "zampini_2005_audiotactile_toj_exp3": (40, False),
     }
     for profile in status["profiles"]:
         template_id = profile["template_id"]

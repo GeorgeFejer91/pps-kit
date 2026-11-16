@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "mul_2019_autism_pps",
+  "title": "Mul 2019 autism, looming sound and tactile PPS",
+  "citation": "Mul, C., Cardini, F., Stagg, S. D., Sadeghi Esfahlani, S., Kiourtsoglou, D., Cardellicchio, P., & Aspell, J. E. (2019). Altered bodily self-consciousness and peripersonal space in autism. Autism, 23(8), 2055\u20132067.",
+  "doi": "10.1177/1362361319838950",
+  "source_url": "https://doi.org/10.1177/1362361319838950",
+  "verification_status": "partial",
+  "notes": "A 65-trial inspection for the audio-tactile PPS task, with 50 tap-present trials and 15 sound-only catches. The published setup used a mechanical tapper and physical loudspeakers. The published full-body illusion was a separate task.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1177/1362361319838950::audiotactile-pps",
+    "profile_check_complete": false,
+    "publication_status": "published",
+    "profile_type": "looming_audio_mechanical_tap_pps",
+    "source_scope": "Audio-tactile hand PPS assessment before the separately administered full-body illusion.",
+    "reported_design": {
+      "cohorts_recruited": {
+        "autistic": 22,
+        "non_autistic": 29
+      },
+      "cohorts_analyzed": {
+        "autistic": 22,
+        "non_autistic": 27
+      },
+      "sample_difference": "Two non-autistic PPS records were excluded after equipment malfunction.",
+      "tactile_onset_delays_from_sound_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2500
+      ],
+      "repetitions_per_paired_delay": 10,
+      "paired_trials": 50,
+      "auditory_only_catches": 15,
+      "tactile_only_trials": 0,
+      "total_trials_per_participant": 65,
+      "order": "Intermixed target and catch trials in randomized order.",
+      "block_boundaries": null
+    },
+    "published_protocol": {
+      "posture": "Participant sits blindfolded.",
+      "sound": {
+        "waveform": "Pink noise in all trials",
+        "placement": "Near loudspeaker beside the right hand and far loudspeaker approximately 1 m farther away.",
+        "motion": "Automatic level modulation across the two fixed speakers gives the impression of approach.",
+        "duration_ms": null,
+        "absolute_level_and_gain_law": null
+      },
+      "tactile_target": {
+        "site": "Right middle finger",
+        "apparatus": "A custom tapper drops a small 4 mm magnet.",
+        "duration_force_and_magnet_distance": null
+      },
+      "response": {
+        "target": "Press a button with the left hand as quickly as possible on feeling the tap.",
+        "catch": "Withhold on a trial without a tap.",
+        "software_and_controller": "National Instruments LabVIEW 8 and Arduino.",
+        "response_timeout_and_iti_ms": null
+      },
+      "analysis": {
+        "outcome": "Paired-trial tactile RT by auditory onset delay and group. Delays are ordinal proximity conditions.",
+        "table": "Use delay-level statistics in Table 3. The article also reports individual linear slopes.",
+        "gap": "Published interaction statistics and reported degrees of freedom cannot resolve the original analysis code or preprocessing."
+      }
+    },
+    "preview": {
+      "sound": "Reuse the packaged three-second Maister 2015 digital looming proxy. Mul cites that task\u2019s apparatus. The Mul source duration, level and envelope are unreported.",
+      "allocation": "Group all 65 events in one inspection pool with a seeded shuffle. Original block boundaries and realized trial order are unreported.",
+      "response": "The inspection represents mechanical tap timing with a tactile-channel marker and left-hand button response semantics."
+    },
+    "implementation_gaps": [
+      "The original pink-noise waveform, playback duration, calibrated two-speaker routing and level envelopes are unavailable.",
+      "The tactile scheduler needs the original or measured equivalent 4 mm magnet tapper, calibrated mechanical contact onset and a synchronized left-hand response button.",
+      "The exact original ITI, trial randomization and online response deadline are unreported."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Cohorts, task order, apparatus, delays and allocation",
+      "source": "Mul et al. (2019), Autism 23(8):2055\u20132067, pp. 2056\u20132057, Participants and PPS Methods."
+    },
+    {
+      "field": "RT analysis and group outcomes",
+      "source": "Mul et al. (2019), Autism 23(8):2055\u20132067, pp. 2060\u20132061, Table 3 and Fig. 5."
+    },
+    {
+      "field": "Acoustic inspection proxy",
+      "source": "PPS Kit Maister 2015 audio rendering for DOI 10.1016/j.neuropsychologia.2014.10.027. See Mul et al., p. 2057 for the apparatus citation."
+    }
+  ]
+}

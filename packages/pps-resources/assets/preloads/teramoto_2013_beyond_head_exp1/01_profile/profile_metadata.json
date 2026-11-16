@@ -1,0 +1,163 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "teramoto_2013_beyond_head_exp1",
+  "title": "Teramoto 2013 Experiment 1 \u00b7 body-part interference",
+  "citation": "Teramoto, W., Nozoe, S., & Sekiyama, K. (2013). Audiotactile interactions beyond the space and body parts around the head. Experimental Brain Research, 228(4), 427\u2013436.",
+  "doi": "10.1007/s00221-013-3574-5",
+  "source_url": "https://doi.org/10.1007/s00221-013-3574-5",
+  "verification_status": "partial",
+  "notes": "The pooled auditory inspection preserves nominal side and body-part cell counts. Research launch requires pneumatic outputs, masked speaker playback and scored footpedal input.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-013-3574-5::experiment_1",
+    "publication_status": "published",
+    "profile_type": "pneumatic_body_part_spatial_interference",
+    "profile_check_complete": false,
+    "participants": {
+      "tested": 18,
+      "mean_age_years": 21.6,
+      "age_range_years": [
+        19,
+        27
+      ]
+    },
+    "apparatus": {
+      "posture": "Seated and blindfolded in a sound-attenuated room.",
+      "near_sound": {
+        "distance_from_head_center_cm": 20,
+        "offset_deg_from_rear_axis": 45,
+        "sides": [
+          "left",
+          "right"
+        ]
+      },
+      "sound": "Stationary white-noise distractor, 50 ms, 90 dBA at ear position.",
+      "headphone_masker": "Continuous white noise, 68 dBA, to mask pneumatic operation.",
+      "audibility_check": "Sample trials confirmed the noise distractor remained audible and stimulator operation was masked.",
+      "sample_trials": null
+    },
+    "tactile": {
+      "modality": "Pneumatic air puff",
+      "pulse_duration_ms": 50,
+      "nozzle_external_diameter_mm": 3,
+      "nozzle_standoff_cm": 2,
+      "supply_pressure_mpa": 0.1,
+      "trigger_to_outlet_ms": 50,
+      "delivered_latency_at_skin_ms": null,
+      "study_timing": "The study compensated the reported trigger-to-outlet delay to align intended sound and air-puff onsets.",
+      "sites": [
+        "cheek",
+        "palm",
+        "hand dorsum",
+        "knee"
+      ],
+      "sides": [
+        "left",
+        "right"
+      ]
+    },
+    "published_trial_schedule": {
+      "block_factors": [
+        {
+          "tactile_site": "cheek",
+          "hand_position": null,
+          "sound_position": "near head"
+        },
+        {
+          "tactile_site": "palm",
+          "hand_position": "beside cheeks",
+          "sound_position": "near head"
+        },
+        {
+          "tactile_site": "hand dorsum",
+          "hand_position": "beside cheeks",
+          "sound_position": "near head"
+        },
+        {
+          "tactile_site": "knee",
+          "hand_position": null,
+          "sound_position": "near head"
+        }
+      ],
+      "block_trial_counts": [
+        80,
+        80,
+        80,
+        80
+      ],
+      "main_trials_total": 320,
+      "per_block_repetitions_per_sound_and_touch_side": 20,
+      "side_pairings": [
+        "left sound / left touch",
+        "left sound / right touch",
+        "right sound / left touch",
+        "right sound / right touch"
+      ],
+      "side_order": "Randomized within the blocked condition.",
+      "block_order": null,
+      "main_trial_mix": "Same-side and opposite-side auditory\u2013tactile pairs.",
+      "nominal_sound_to_touch_physical_soa_ms": 0,
+      "intertrial_interval_ms": null,
+      "foreperiod_ms": null,
+      "measured_physical_soa_ms": null
+    },
+    "other_procedures": {
+      "practice_blocks": [
+        {
+          "study_row_id": "doi:10.1007/s00221-013-3574-5::auditory_practice",
+          "order": 1,
+          "name": "Auditory-only side discrimination",
+          "trials": 40
+        },
+        {
+          "study_row_id": "doi:10.1007/s00221-013-3574-5::tactile_practice",
+          "order": 2,
+          "name": "Tactile-only side discrimination",
+          "trials": 40
+        },
+        {
+          "study_row_id": "doi:10.1007/s00221-013-3574-5::paired_practice",
+          "order": 3,
+          "name": "Paired auditory\u2013tactile side discrimination",
+          "trials": 40
+        }
+      ],
+      "practice_trials_total": 120,
+      "practice_cell_allocations": null
+    },
+    "response": {
+      "device": "Two footpedals",
+      "task": "Respond quickly and accurately to the air-puff side while ignoring the auditory distractor.",
+      "mapping": {
+        "left": "Press left pedal",
+        "right": "Press right pedal"
+      },
+      "online_deadline_ms": null
+    },
+    "analysis": {
+      "inverse_efficiency": "Median correct RT divided by proportion correct in each condition.",
+      "interference": "Opposite-side minus same-side inverse efficiency. Exclude incorrect trials from RT analysis.",
+      "source_discrepancy": "Table 1 prints 354 ms same side, 325 ms different side and +72 ms interference for knee. These entries do not agree with the reported subtraction rule. No replacement is inferred."
+    },
+    "inspection_scope": {
+      "auditory_only_rows": 320,
+      "auditory_spatialization": "Toolkit stereo pan; rear placement is reported apparatus geometry.",
+      "details": "One pooled auditory inspection block contains the 320 nominal sound and touch-side cells. Body part and tactile side are annotations. Independent mask and pneumatic stimuli are omitted."
+    },
+    "implementation_gaps": [
+      "The synchronized scheduler requires independently addressed pneumatic outputs, a calibrated air-puff trigger-to-skin delay, and matching loudspeaker trigger-to-ear timing. This inspection emits no tactile output.",
+      "The calibrated speaker and headphone masker channels and delivered levels must be measured. The original sound waveforms, exact headphone model and installed calibration are unavailable.",
+      "Two footpedals and correctness scoring are required for response capture. Foreperiod and response deadline settings are unreported.",
+      "The scheduler requires one body part per block and pneumatic output routing by target site and side. The inspection pools all four body sites."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Condition blocking, cue delivery, side responses and practice",
+      "source": "https://doi.org/10.1007/s00221-013-3574-5, pp. 429\u2013430, Experiment 1 Apparatus, Procedure, Index, Results, Fig. 1 and Table 1."
+    },
+    {
+      "field": "Pneumatic latency compensation, near speaker placement and masking",
+      "source": "https://doi.org/10.1007/s00221-013-3574-5, p. 429, Experiment 1 Apparatus and Procedure."
+    }
+  ]
+}

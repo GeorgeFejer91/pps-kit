@@ -1,0 +1,152 @@
+{
+  "schema": "pps-preload-profile-assets.v1",
+  "template_id": "murray_2005_audiotactile_alignment",
+  "title": "Murray 2005 auditory\u2013somatosensory alignment",
+  "visible_variant_label": "",
+  "publication_status": "published",
+  "profile_type": "lateral_audiosomatosensory_detection_eeg",
+  "asset_mode": "bundled_local",
+  "retrieval_strategy": "bundled_or_download_from_github_pages",
+  "local_only": true,
+  "catalog_segments": [
+    {
+      "folder": "01_profile",
+      "label": "Profile",
+      "path": "assets/preloads/murray_2005_audiotactile_alignment/01_profile"
+    },
+    {
+      "folder": "02_looming_stimuli",
+      "label": "Looming Stimuli Builder",
+      "path": "assets/preloads/murray_2005_audiotactile_alignment/02_looming_stimuli"
+    },
+    {
+      "folder": "03_baseline_strategy",
+      "label": "Baseline Strategy",
+      "path": "assets/preloads/murray_2005_audiotactile_alignment/03_baseline_strategy"
+    },
+    {
+      "folder": "04_trial_designer",
+      "label": "Trial Designer",
+      "path": "assets/preloads/murray_2005_audiotactile_alignment/04_trial_designer"
+    },
+    {
+      "folder": "05_run_setup",
+      "label": "Run Setup",
+      "path": "assets/preloads/murray_2005_audiotactile_alignment/05_run_setup"
+    }
+  ],
+  "profile_parameters_manifest": "assets/preloads/murray_2005_audiotactile_alignment/01_profile/profile_parameters_manifest.json",
+  "recreation_status": {
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 2,
+    "unsupported_structure_count": 1
+  },
+  "render_contract": {
+    "stage": "auditory_looming_prebake",
+    "engine": "python-sofa-reference",
+    "include_tactile": false,
+    "tactile_policy": "deferred_until_session_preparation"
+  },
+  "assets": [
+    {
+      "label": "Left speaker white noise",
+      "path": "assets/preloads/murray_2005_audiotactile_alignment/02_looming_stimuli/looming_Left_speaker_white_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/murray_2005_audiotactile_alignment/02_looming_stimuli/looming_Left_speaker_white_noise.wav",
+      "sha256": "16de1cca076887f8f0acac3fc4df27d0a2f032f29527eb73f8539ea0af8893a4",
+      "duration_s": 0.03,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Left speaker white noise",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Right speaker white noise",
+      "path": "assets/preloads/murray_2005_audiotactile_alignment/02_looming_stimuli/looming_Right_speaker_white_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/murray_2005_audiotactile_alignment/02_looming_stimuli/looming_Right_speaker_white_noise.wav",
+      "sha256": "b79a570d513e3bb70536801f11d11def69c7a023b60a8c3217c82e0ef4801fdd",
+      "duration_s": 0.03,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Right speaker white noise",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ],
+  "notes": [
+    "Prebaked WAVs are local auditory-only profile assets.",
+    "Tactile timing is introduced later by session preparation from SOA/trial CSVs.",
+    "The browser dashboard only orchestrates local companion verification and use of these files."
+  ]
+}

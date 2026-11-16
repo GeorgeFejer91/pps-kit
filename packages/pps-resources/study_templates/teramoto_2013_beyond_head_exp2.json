@@ -1,0 +1,679 @@
+{
+  "template_id": "teramoto_2013_beyond_head_exp2",
+  "title": "Teramoto 2013 Experiment 2 · hand and sound location",
+  "citation": "Teramoto, W., Nozoe, S., & Sekiyama, K. (2013). Audiotactile interactions beyond the space and body parts around the head. Experimental Brain Research, 228(4), 427–436.",
+  "source_url": "https://doi.org/10.1007/s00221-013-3574-5",
+  "doi": "10.1007/s00221-013-3574-5",
+  "verification_status": "partial",
+  "notes": "The auditory inspection covers only the near-head subset of the nominal condition grid. The published blocks, knee-side speakers and pneumatic apparatus require separate qualification.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-013-3574-5::experiment_2",
+    "publication_status": "published",
+    "profile_type": "pneumatic_hand_and_sound_position_interference",
+    "profile_check_complete": false,
+    "participants": {
+      "tested": 18,
+      "mean_age_years": 23.5,
+      "age_range_years": [
+        21,
+        28
+      ]
+    },
+    "apparatus": {
+      "posture": "Seated and blindfolded in a sound-attenuated room.",
+      "near_sound": {
+        "distance_from_head_center_cm": 20,
+        "offset_deg_from_rear_axis": 45,
+        "sides": [
+          "left",
+          "right"
+        ]
+      },
+      "far_sound": {
+        "description": "Fixed loudspeaker positions just to either side of the knees.",
+        "head_center_distance_cm": null,
+        "azimuth_deg": null
+      },
+      "sound": "Stationary white-noise distractor, 50 ms, 90 dBA at ear position.",
+      "headphone_masker": "Continuous white noise, 68 dBA, to mask pneumatic operation.",
+      "audibility_check": "Sample trials confirmed the noise distractor remained audible and stimulator operation was masked.",
+      "sample_trials": null
+    },
+    "tactile": {
+      "modality": "Pneumatic air puff",
+      "pulse_duration_ms": 50,
+      "nozzle_external_diameter_mm": 3,
+      "nozzle_standoff_cm": 2,
+      "supply_pressure_mpa": 0.1,
+      "trigger_to_outlet_ms": 50,
+      "delivered_latency_at_skin_ms": null,
+      "study_timing": "The study compensated the reported trigger-to-outlet delay to align intended sound and air-puff onsets.",
+      "sites": [
+        "palm",
+        "hand dorsum"
+      ],
+      "sides": [
+        "left",
+        "right"
+      ]
+    },
+    "published_trial_schedule": {
+      "block_factors": [
+        {
+          "tactile_site": "palm",
+          "hand_position": "beside cheeks",
+          "sound_position": "near head"
+        },
+        {
+          "tactile_site": "palm",
+          "hand_position": "beside cheeks",
+          "sound_position": "beside knees"
+        },
+        {
+          "tactile_site": "palm",
+          "hand_position": "on knees",
+          "sound_position": "near head"
+        },
+        {
+          "tactile_site": "palm",
+          "hand_position": "on knees",
+          "sound_position": "beside knees"
+        },
+        {
+          "tactile_site": "hand dorsum",
+          "hand_position": "beside cheeks",
+          "sound_position": "near head"
+        },
+        {
+          "tactile_site": "hand dorsum",
+          "hand_position": "beside cheeks",
+          "sound_position": "beside knees"
+        },
+        {
+          "tactile_site": "hand dorsum",
+          "hand_position": "on knees",
+          "sound_position": "near head"
+        },
+        {
+          "tactile_site": "hand dorsum",
+          "hand_position": "on knees",
+          "sound_position": "beside knees"
+        }
+      ],
+      "block_trial_counts": [
+        40,
+        40,
+        40,
+        40,
+        40,
+        40,
+        40,
+        40
+      ],
+      "main_trials_total": 320,
+      "per_block_repetitions_per_sound_and_touch_side": null,
+      "side_pairings": [
+        "left sound / left touch",
+        "left sound / right touch",
+        "right sound / left touch",
+        "right sound / right touch"
+      ],
+      "side_order": "Randomized within the blocked condition.",
+      "block_order": "Randomized among participants",
+      "main_trial_mix": "Same-side and opposite-side auditory–tactile pairs.",
+      "nominal_sound_to_touch_physical_soa_ms": 0,
+      "intertrial_interval_ms": null,
+      "foreperiod_ms": null,
+      "measured_physical_soa_ms": null
+    },
+    "other_procedures": {
+      "practice_blocks": [
+        {
+          "study_row_id": "doi:10.1007/s00221-013-3574-5::auditory_practice",
+          "order": 1,
+          "name": "Auditory-only side discrimination",
+          "trials": 40
+        },
+        {
+          "study_row_id": "doi:10.1007/s00221-013-3574-5::tactile_practice",
+          "order": 2,
+          "name": "Tactile-only side discrimination",
+          "trials": 40
+        },
+        {
+          "study_row_id": "doi:10.1007/s00221-013-3574-5::paired_practice",
+          "order": 3,
+          "name": "Paired auditory–tactile side discrimination",
+          "trials": 40
+        }
+      ],
+      "practice_trials_total": 120,
+      "practice_cell_allocations": null
+    },
+    "response": {
+      "device": "Two footpedals",
+      "task": "Respond quickly and accurately to the air-puff side while ignoring the auditory distractor.",
+      "mapping": {
+        "left": "Press left pedal",
+        "right": "Press right pedal"
+      },
+      "online_deadline_ms": null
+    },
+    "analysis": {
+      "inverse_efficiency": "Median correct RT divided by proportion correct in each condition.",
+      "interference": "Opposite-side minus same-side inverse efficiency. Exclude incorrect trials from RT analysis."
+    },
+    "inspection_scope": {
+      "auditory_only_rows": 16,
+      "auditory_spatialization": "Toolkit stereo pan; rear placement is reported apparatus geometry.",
+      "unimplemented_knee_side_cells": 16,
+      "details": "One pass over 16 near-head cells uses the reported near speaker geometry and annotations for hand posture, surface and target side. Exact within-block quotas remain unreported. The 16 nominal knee-side cells remain in the published condition matrix, with geometry unresolved."
+    },
+    "implementation_gaps": [
+      "The synchronized scheduler requires independently addressed pneumatic outputs, a calibrated air-puff trigger-to-skin delay, and matching loudspeaker trigger-to-ear timing. This inspection emits no tactile output.",
+      "The calibrated speaker and headphone masker channels and delivered levels must be measured. The original sound waveforms, exact headphone model and installed calibration are unavailable.",
+      "Two footpedals and correctness scoring are required for response capture. Foreperiod and response deadline settings are unreported.",
+      "The scheduler requires eight blocks selected by hand surface, hand position and sound position. The source omits exact knee-side speaker coordinates and within-block side quotas."
+    ]
+  },
+  "design": {
+    "name": "Teramoto 2013 Experiment 2 · hand and sound location inspection",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Near rear left white-noise burst",
+        "noise_type": "white",
+        "azimuth_deg": -135,
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {
+            "x_m": -0.1414214,
+            "y_m": -0.1414214,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": -0.1421285,
+            "y_m": -0.1421285,
+            "z_m": 0
+          },
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.05,
+          "start_hold_s": 0,
+          "end_hold_s": 0
+        }
+      },
+      {
+        "label": "Near rear right white-noise burst",
+        "noise_type": "white",
+        "azimuth_deg": 135,
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {
+            "x_m": 0.1414214,
+            "y_m": -0.1414214,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": 0.1421285,
+            "y_m": -0.1421285,
+            "z_m": 0
+          },
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.05,
+          "start_hold_s": 0,
+          "end_hold_s": 0
+        }
+      }
+    ],
+    "custom_looming_files": [],
+    "trajectory": {
+      "start_radius_m": 0.2,
+      "end_radius_m": 0.201,
+      "path_direction": "custom",
+      "path_length_m": 0.001,
+      "propagation_speed_mps": 0.02,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 48000,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 1,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [
+        20
+      ],
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "stationary"
+      ],
+      "tactile_sites": [
+        "No tactile output in inspection"
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "include_auditory_only_trials": true,
+      "auditory_only_trial_percentage": 0,
+      "auditory_only_crosses_sequence_variants": true,
+      "participants": 18,
+      "blocks": 1,
+      "repeat_trial_pool_per_block": false,
+      "block_specs": [
+        {
+          "label": "Auditory inspection block 1",
+          "stimulus_types": [
+            "Auditory-Only"
+          ]
+        }
+      ],
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "trial_strips": [
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-palm-beside-cheeks-left-left",
+          "label": "palm, hand beside cheeks / left sound / left touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "palm",
+            "planned_hand_position": "beside cheeks",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "left",
+            "planned_touch_side": "left",
+            "planned_alignment": "same"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-palm-beside-cheeks-left-left-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear left white-noise burst",
+              "source_label": "Near rear left white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-palm-beside-cheeks-left-right",
+          "label": "palm, hand beside cheeks / left sound / right touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "palm",
+            "planned_hand_position": "beside cheeks",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "left",
+            "planned_touch_side": "right",
+            "planned_alignment": "opposite"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-palm-beside-cheeks-left-right-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear left white-noise burst",
+              "source_label": "Near rear left white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-palm-beside-cheeks-right-left",
+          "label": "palm, hand beside cheeks / right sound / left touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "palm",
+            "planned_hand_position": "beside cheeks",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "right",
+            "planned_touch_side": "left",
+            "planned_alignment": "opposite"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-palm-beside-cheeks-right-left-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear right white-noise burst",
+              "source_label": "Near rear right white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-palm-beside-cheeks-right-right",
+          "label": "palm, hand beside cheeks / right sound / right touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "palm",
+            "planned_hand_position": "beside cheeks",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "right",
+            "planned_touch_side": "right",
+            "planned_alignment": "same"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-palm-beside-cheeks-right-right-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear right white-noise burst",
+              "source_label": "Near rear right white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-palm-on-knees-left-left",
+          "label": "palm, hand on knees / left sound / left touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "palm",
+            "planned_hand_position": "on knees",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "left",
+            "planned_touch_side": "left",
+            "planned_alignment": "same"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-palm-on-knees-left-left-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear left white-noise burst",
+              "source_label": "Near rear left white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-palm-on-knees-left-right",
+          "label": "palm, hand on knees / left sound / right touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "palm",
+            "planned_hand_position": "on knees",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "left",
+            "planned_touch_side": "right",
+            "planned_alignment": "opposite"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-palm-on-knees-left-right-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear left white-noise burst",
+              "source_label": "Near rear left white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-palm-on-knees-right-left",
+          "label": "palm, hand on knees / right sound / left touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "palm",
+            "planned_hand_position": "on knees",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "right",
+            "planned_touch_side": "left",
+            "planned_alignment": "opposite"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-palm-on-knees-right-left-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear right white-noise burst",
+              "source_label": "Near rear right white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-palm-on-knees-right-right",
+          "label": "palm, hand on knees / right sound / right touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "palm",
+            "planned_hand_position": "on knees",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "right",
+            "planned_touch_side": "right",
+            "planned_alignment": "same"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-palm-on-knees-right-right-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear right white-noise burst",
+              "source_label": "Near rear right white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-beside-cheeks-left-left",
+          "label": "hand dorsum, hand beside cheeks / left sound / left touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "hand dorsum",
+            "planned_hand_position": "beside cheeks",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "left",
+            "planned_touch_side": "left",
+            "planned_alignment": "same"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-beside-cheeks-left-left-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear left white-noise burst",
+              "source_label": "Near rear left white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-beside-cheeks-left-right",
+          "label": "hand dorsum, hand beside cheeks / left sound / right touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "hand dorsum",
+            "planned_hand_position": "beside cheeks",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "left",
+            "planned_touch_side": "right",
+            "planned_alignment": "opposite"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-beside-cheeks-left-right-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear left white-noise burst",
+              "source_label": "Near rear left white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-beside-cheeks-right-left",
+          "label": "hand dorsum, hand beside cheeks / right sound / left touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "hand dorsum",
+            "planned_hand_position": "beside cheeks",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "right",
+            "planned_touch_side": "left",
+            "planned_alignment": "opposite"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-beside-cheeks-right-left-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear right white-noise burst",
+              "source_label": "Near rear right white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-beside-cheeks-right-right",
+          "label": "hand dorsum, hand beside cheeks / right sound / right touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "hand dorsum",
+            "planned_hand_position": "beside cheeks",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "right",
+            "planned_touch_side": "right",
+            "planned_alignment": "same"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-beside-cheeks-right-right-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear right white-noise burst",
+              "source_label": "Near rear right white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-on-knees-left-left",
+          "label": "hand dorsum, hand on knees / left sound / left touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "hand dorsum",
+            "planned_hand_position": "on knees",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "left",
+            "planned_touch_side": "left",
+            "planned_alignment": "same"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-on-knees-left-left-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear left white-noise burst",
+              "source_label": "Near rear left white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-on-knees-left-right",
+          "label": "hand dorsum, hand on knees / left sound / right touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "hand dorsum",
+            "planned_hand_position": "on knees",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "left",
+            "planned_touch_side": "right",
+            "planned_alignment": "opposite"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-on-knees-left-right-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear left white-noise burst",
+              "source_label": "Near rear left white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-on-knees-right-left",
+          "label": "hand dorsum, hand on knees / right sound / left touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "hand dorsum",
+            "planned_hand_position": "on knees",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "right",
+            "planned_touch_side": "left",
+            "planned_alignment": "opposite"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-on-knees-right-left-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear right white-noise burst",
+              "source_label": "Near rear right white-noise burst",
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-on-knees-right-right",
+          "label": "hand dorsum, hand on knees / right sound / right touch",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_touch_site": "hand dorsum",
+            "planned_hand_position": "on knees",
+            "planned_sound_position": "near head",
+            "planned_sound_side": "right",
+            "planned_touch_side": "right",
+            "planned_alignment": "same"
+          },
+          "elements": [
+            {
+              "element_id": "teramoto_2013_beyond_head_exp2-hand-dorsum-on-knees-right-right-burst",
+              "kind": "looming_stimulus",
+              "label": "Near rear right white-noise burst",
+              "source_label": "Near rear right white-noise burst",
+              "randomized": false
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "provenance": [
+    {
+      "field": "Condition blocking, cue delivery, side responses and practice",
+      "source": "https://doi.org/10.1007/s00221-013-3574-5, pp. 431–433, Experiment 2 Stimuli and procedure, Results, Fig. 2 and Table 2."
+    },
+    {
+      "field": "Pneumatic latency compensation, near speaker placement and masking",
+      "source": "https://doi.org/10.1007/s00221-013-3574-5, p. 429, Experiment 1 Apparatus and Procedure as referenced in Experiment 2."
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "template_id": "cardini_2019_pregnancy_trunk_pps",
+  "title": "Cardini 2019 pregnancy trunk PPS",
+  "citation": "Cardini, F., Fatemi-Ghomi, N., Gajewska-Knapik, K., Gooch, V., & Aspell, J. E. (2019). Enlarged representation of peripersonal space in pregnancy. Scientific Reports 9, 8606.",
+  "source_url": "https://doi.org/10.1038/s41598-019-45224-w",
+  "doi": "10.1038/s41598-019-45224-w",
+  "verification_status": "partial",
+  "notes": "The three visits repeat one 65-trial assessment. Inspect the five sound-relative timings and 15 audio-only catch trials per visit.",
+  "reference_parameters": {
+    "publication_status": "published",
+    "profile_type": "published_pps_assessment_timing",
+    "profile_check_complete": false,
+    "study_row_id": "doi:10.1038/s41598-019-45224-w::session-I",
+    "study_row_ids": [
+      "doi:10.1038/s41598-019-45224-w::session-I",
+      "doi:10.1038/s41598-019-45224-w::session-II",
+      "doi:10.1038/s41598-019-45224-w::session-III"
+    ],
+    "source_version": "final journal article",
+    "related_publication_doi": "10.1101/492017",
+    "reported_longitudinal_design": {
+      "same_65_trial_assessment_each_visit": true,
+      "session_I": {
+        "gestational_week_mean": 20,
+        "gestational_week_sd": 3.5,
+        "group_counts": [
+          37,
+          19
+        ]
+      },
+      "session_II": {
+        "gestational_week_mean": 34,
+        "gestational_week_sd": 0.9,
+        "group_counts": [
+          28,
+          17
+        ]
+      },
+      "session_III": {
+        "postpartum_week_mean": 8,
+        "postpartum_week_sd": 1.5,
+        "group_counts": [
+          20,
+          15
+        ]
+      },
+      "group_count_order": [
+        "pregnancy-context group",
+        "nonpregnant control"
+      ]
+    },
+    "reported_source": {
+      "type": "Two copies of the same pink noise with opposing level envelopes.",
+      "nominal_duration_ms": 3000,
+      "sample_rate_hz": 44100,
+      "measured_spl_at_ear_dB": [
+        55,
+        70
+      ],
+      "speaker_separation_cm": 100,
+      "near_speaker_reference": "Close to the left response hand.",
+      "absolute_distances_from_abdomen_cm": null,
+      "absolute_azimuth_deg": null
+    },
+    "reported_trial_schedule": {
+      "target_offsets_from_sound_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2500
+      ],
+      "targets_per_offset": 10,
+      "catch_trials": 15,
+      "target_total": 50,
+      "trial_total": 65,
+      "tactile_only_trials": 0,
+      "trial_order": "Randomized",
+      "intertrial_interval_ms": null
+    },
+    "reported_tactile_response": {
+      "target": "Mechanical abdominal tap",
+      "pulse_duration_ms": null,
+      "tap_force": null,
+      "device": "Custom tapper, Arduino and LabVIEW 8",
+      "response": "Press with the left hand promptly after touch and ignore sound.",
+      "online_response_deadline_ms": null
+    },
+    "reported_analysis": "Compare linear and sigmoid models, then use a linear slope in the longitudinal mixed-effects model.",
+    "inspection_scope": "One complete 65-trial timing pool for a chosen visit. Uses stationary uncalibrated pink noise and a generic touch marker. One software block and a fixed seed are inspection settings. Running it once does not instantiate the other visits.",
+    "implementation_gaps": [
+      "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.",
+      "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.",
+      "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
+    ]
+  },
+  "design": {
+    "name": "Cardini 2019 pregnancy trunk PPS",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "3 s pink timing reference",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "motion_mode": "stationary",
+        "azimuth_deg": 0,
+        "gain": 1.0
+      }
+    ],
+    "trajectory": {
+      "path_length_m": 1,
+      "propagation_speed_mps": 0.3333333333333333,
+      "azimuth_start_deg": 0,
+      "azimuth_end_deg": 0,
+      "sample_rate": 44100,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 10,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 10,
+        "catch": 15
+      },
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2500
+      ],
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "stationary"
+      ],
+      "tactile_sites": [
+        "abdomen"
+      ],
+      "include_catch_trials": true,
+      "catch_trials_exact": 15,
+      "catch_crosses_sequence_variants": false,
+      "include_auditory_only_trials": false,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "baseline_soa_values_ms": [],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "block_specs": [
+        {
+          "label": "Assessment timing inspection",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        }
+      ],
+      "repeat_trial_pool_per_block": false,
+      "block_order_randomization": "fixed",
+      "trial_randomization_strategy": "balanced_shuffle",
+      "trial_strips": [
+        {
+          "strip_id": "cardini-2019-pregnancy-trunk-pps",
+          "label": "Assessment timing inspection",
+          "metadata": {
+            "body_anchor": "abdomen",
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_input_modality": "mouse_click",
+            "response_capture_device": "mouse",
+            "target_role": "tactile_detection"
+          },
+          "elements": [
+            {
+              "element_id": "cardini_2019_pregnancy_trunk_pps-looming_stimulus-audio-timing-reference",
+              "kind": "looming_stimulus",
+              "label": "Audio timing reference",
+              "source_label": "3 s pink timing reference",
+              "source_labels": [
+                "3 s pink timing reference"
+              ],
+              "randomized": false
+            }
+          ]
+        }
+      ],
+      "participants": 56,
+      "random_seed": 20198606
+    }
+  },
+  "provenance": [
+    {
+      "field": "Longitudinal visits, sounds, touch, response and trial allocation",
+      "source": "https://doi.org/10.1038/s41598-019-45224-w, pp. 5–6, Methods and Fig. 2"
+    },
+    {
+      "field": "Analysis and visit-specific contrasts",
+      "source": "https://doi.org/10.1038/s41598-019-45224-w, pp. 2–4, Results"
+    }
+  ]
+}

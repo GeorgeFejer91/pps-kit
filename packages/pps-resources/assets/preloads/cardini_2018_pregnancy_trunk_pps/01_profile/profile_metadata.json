@@ -1,0 +1,108 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "cardini_2018_pregnancy_trunk_pps",
+  "title": "Cardini 2018 maternal brain gain preprint trunk PPS",
+  "citation": "Cardini, F., Fatemi-Ghomi, N., Gajewska-Knapik, K., Gooch, V., & Aspell, J. E. (2018). Maternal brain gain: enlarged representation of peripersonal space in pregnancy. bioRxiv 492017.",
+  "doi": "10.1101/492017",
+  "source_url": "https://doi.org/10.1101/492017",
+  "verification_status": "partial",
+  "notes": "The three visits repeat one 65-trial assessment. Inspect the five sound-relative timings and 15 audio-only catch trials per visit.",
+  "reference_parameters": {
+    "publication_status": "published",
+    "profile_type": "published_pps_assessment_timing",
+    "profile_check_complete": false,
+    "study_row_id": "doi:10.1101/492017::session-I",
+    "study_row_ids": [
+      "doi:10.1101/492017::session-I",
+      "doi:10.1101/492017::session-II",
+      "doi:10.1101/492017::session-III"
+    ],
+    "source_version": "bioRxiv v1",
+    "related_publication_doi": "10.1038/s41598-019-45224-w",
+    "reported_longitudinal_design": {
+      "same_65_trial_assessment_each_visit": true,
+      "session_I": {
+        "gestational_week_mean": 20,
+        "gestational_week_sd": 3.5,
+        "group_counts": [
+          37,
+          19
+        ]
+      },
+      "session_II": {
+        "gestational_week_mean": 34,
+        "gestational_week_sd": 0.9,
+        "group_counts": [
+          28,
+          17
+        ]
+      },
+      "session_III": {
+        "postpartum_week_mean": 8,
+        "postpartum_week_sd": 1.5,
+        "group_counts": [
+          20,
+          15
+        ]
+      },
+      "group_count_order": [
+        "pregnancy-context group",
+        "nonpregnant control"
+      ]
+    },
+    "reported_source": {
+      "type": "Two copies of the same pink noise with opposing level envelopes.",
+      "nominal_duration_ms": 3000,
+      "sample_rate_hz": 44100,
+      "measured_spl_at_ear_dB": [
+        55,
+        70
+      ],
+      "speaker_separation_cm": 100,
+      "near_speaker_reference": "Close to the left response hand.",
+      "absolute_distances_from_abdomen_cm": null,
+      "absolute_azimuth_deg": null
+    },
+    "reported_trial_schedule": {
+      "target_offsets_from_sound_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2500
+      ],
+      "targets_per_offset": 10,
+      "catch_trials": 15,
+      "target_total": 50,
+      "trial_total": 65,
+      "tactile_only_trials": 0,
+      "trial_order": "Randomized",
+      "intertrial_interval_ms": null
+    },
+    "reported_tactile_response": {
+      "target": "Mechanical abdominal tap",
+      "pulse_duration_ms": null,
+      "tap_force": null,
+      "device": "Custom tapper, Arduino and LabVIEW 8",
+      "response": "Press with the left hand promptly after touch and ignore sound.",
+      "online_response_deadline_ms": null
+    },
+    "reported_analysis": "Use session-specific delay-by-group ANOVAs and compare participant linear slopes within each session after excluding fits below R\u00b2 .20.",
+    "inspection_scope": "One complete 65-trial timing pool for a chosen visit. Uses stationary uncalibrated pink noise and a generic touch marker. One software block and a fixed seed are inspection settings. Running it once does not instantiate the other visits.",
+    "implementation_gaps": [
+      "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.",
+      "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.",
+      "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Longitudinal visits, sounds, touch, response and trial allocation",
+      "source": "https://doi.org/10.1101/492017, pp. 8\u201310, Participants, Procedure and Fig. 2"
+    },
+    {
+      "field": "Analysis and visit-specific contrasts",
+      "source": "https://doi.org/10.1101/492017, pp. 4\u20137, Results"
+    }
+  ]
+}

@@ -702,7 +702,7 @@ class ParticipantTrialCsvWriter:
         trial_end = events.get("trial_end", base)
         trial_type = str(_row_value(base, "trial_type", "Trial_Type", default="")).strip()
         family = str(_row_value(base, "family", "Family", default="")).strip()
-        modality = _trial_stimulus_modality(trial_type, family, bool(tactile_onset))
+        modality = _trial_stimulus_modality(trial_type, family, bool(tactile_onset), bool(looming_onset))
         tactile_present = _trial_has_tactile(trial_type, family, bool(tactile_onset))
         catch_trial = _trial_is_catch(trial_type, family)
         audio_present = _trial_has_audio(trial_type, family, bool(looming_onset))
@@ -6417,9 +6417,11 @@ def _trial_has_audio(trial_type: str, family: str, looming_event_seen: bool) -> 
     return "audio" in text or "auditory" in text or "catch" in text
 
 
-def _trial_stimulus_modality(trial_type: str, family: str, tactile_event_seen: bool) -> str:
+def _trial_stimulus_modality(
+    trial_type: str, family: str, tactile_event_seen: bool, looming_event_seen: bool,
+) -> str:
     tactile = _trial_has_tactile(trial_type, family, tactile_event_seen)
-    audio = _trial_has_audio(trial_type, family, False)
+    audio = _trial_has_audio(trial_type, family, looming_event_seen)
     if tactile and audio:
         return "audiotactile"
     if tactile:
@@ -8041,9 +8043,11 @@ def _segment_session_trial_row(
 ) -> dict[str, Any]:
     trial_start_s = trial_start_sample / float(sample_rate)
     trial_end_s = trial_end_sample / float(sample_rate)
-    has_audio = family in {"audio_tactile", "catch", "auditory_only"}
+    baseline_mode = str(_row_value(source, "baseline_mode", "Baseline_Mode", default="")).strip().lower()
+    starts_response_window_with_sound = family in {"audio_tactile", "catch", "auditory_only"}
+    has_audio = starts_response_window_with_sound or (family == "baseline" and baseline_mode == "audio_tactile")
     has_tactile = family in {"audio_tactile", "baseline"}
-    response_window_onset_s = looming_onset_s if has_audio else tactile_onset_s
+    response_window_onset_s = looming_onset_s if starts_response_window_with_sound else tactile_onset_s
     tactile_compensation = dict(tactile_compensation or {})
     tactile_waveform = dict(tactile_waveform or {})
     speaker_switching = dict(speaker_switching or {})

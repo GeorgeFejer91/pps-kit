@@ -1,0 +1,76 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "chiarella_2024_mindfulness_cheek_pps",
+  "title": "Chiarella 2024 mindfulness cheek PPS",
+  "citation": "Chiarella, S. G., De Pastina, R., Raffone, A., & Simione, L. (2024). Mindfulness affects the boundaries of bodily self-representation: The effect of focused-attention meditation in fading the boundary of peripersonal space. Behavioral Sciences 14, 306.",
+  "doi": "10.3390/bs14040306",
+  "source_url": "https://doi.org/10.3390/bs14040306",
+  "verification_status": "partial",
+  "notes": "The preview preserves the five known tactile timings in each pre/post assessment. Twelve untimed endpoint probes per assessment remain documented.",
+  "reference_parameters": {
+    "publication_status": "published",
+    "profile_type": "published_pps_assessment_timing",
+    "profile_check_complete": false,
+    "study_row_id": "doi:10.3390/bs14040306",
+    "reported_design": {
+      "enrolled": 26,
+      "order": [
+        "PRE PPS",
+        "15 min guided focused-attention meditation",
+        "POST PPS"
+      ],
+      "intervention_source": "\u00a72.4.2 and Appendix A",
+      "parallel_control_group": false
+    },
+    "reported_source": {
+      "type": "Pink noise on two loudspeakers with opposing level envelopes.",
+      "sample_rate_hz": 44100,
+      "duration_ms": 3000,
+      "near_speaker_left_cheek_distance_cm": 5,
+      "speaker_separation_cm": 100,
+      "speaker_elevation_cm": 100
+    },
+    "reported_trial_schedule": {
+      "pre_sound_silence_ms": 1000,
+      "post_sound_silence_ms": 1000,
+      "paired_delays_from_sound_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "tactile_probe_repeats_per_delay": 6,
+      "before_and_after_sound_tactile_trials": 12,
+      "before_and_after_sound_probe_offsets_ms": [
+        null,
+        null
+      ],
+      "sound_only_catches": 20,
+      "reported_derived_trials_per_assessment": 62
+    },
+    "reported_tactile_response": {
+      "site": "Left cheek",
+      "device": "Digitimer DS7A with a neurological tip electrode",
+      "reported_pulse_duration_us": 100,
+      "response": "Press the spacebar promptly when touch is detected.",
+      "online_response_deadline_ms": null
+    },
+    "inspection_scope": "Two 50-trial timing subsets with 30 paired trials and 20 audio-only catches each. No times are substituted for T0 and T6. The 15-minute meditation is an experimenter-delivered interval around the assessments. Audio and touch are software markers.",
+    "implementation_gaps": [
+      "Original two-speaker pink-noise files, calibrated sound gain functions and exact acoustic calibration are unavailable.",
+      "Exact before-sound and after-sound tactile probe offsets, response deadline and separate intertrial interval are unreported.",
+      "Electrode and electrical stimulator delivery mode and calibration are unresolved. A synchronized apparatus and physical timing validation are needed."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Speaker geometry, electrical pulse, timers and response",
+      "source": "https://doi.org/10.3390/bs14040306, pp. 4\u20135, \u00a7\u00a72.3\u20132.4.1 and Fig. 1"
+    },
+    {
+      "field": "Fixed intervention order, instructions and analysis",
+      "source": "https://doi.org/10.3390/bs14040306, pp. 5\u20136, \u00a7\u00a72.4\u20132.5 and Appendix A"
+    }
+  ]
+}

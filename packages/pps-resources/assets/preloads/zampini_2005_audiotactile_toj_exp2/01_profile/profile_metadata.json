@@ -1,0 +1,197 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "zampini_2005_audiotactile_toj_exp2",
+  "title": "Zampini 2005 Experiment 2 \u00b7 experienced vibrotactile observers",
+  "citation": "Zampini, M., Brown, T., Shore, D. I., Maravita, A., R\u00f6der, B., & Spence, C. (2005). Audiotactile temporal order judgments. Acta Psychologica, 118(3), 277\u2013291.",
+  "doi": "10.1016/j.actpsy.2004.10.017",
+  "source_url": "https://doi.org/10.1016/j.actpsy.2004.10.017",
+  "verification_status": "partial",
+  "notes": "The eight-block auditory inspection preserves the reported temporal-order cell counts. The vibration, central masker and pedal task require the original apparatus.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.actpsy.2004.10.017::experiment-2",
+    "publication_status": "published",
+    "profile_type": "front_vibrotactile_temporal_order",
+    "profile_check_complete": false,
+    "participants": {
+      "tested": 10,
+      "cohort": "Previous experience with multiple temporal-order judgment experiments"
+    },
+    "apparatus": {
+      "auditory": "Two Audax VE100AO speakers immediately behind the respective tactile sites. White-noise bursts last 9 ms, with nominal level 82 dBA at the head.",
+      "seated_centered_fixation": {
+        "device": "Red LED",
+        "distance_cm": 62,
+        "luminance_cd_m2": 64.3
+      },
+      "listening_positions": {
+        "lateral_offset_from_fixation_cm": [
+          -26,
+          26
+        ],
+        "azimuth_deg_approx": [
+          -24,
+          24
+        ]
+      },
+      "continuous_central_white_noise_masker_dba": 75,
+      "masker_present": true
+    },
+    "tactile": {
+      "modality": "Vibrotactile",
+      "sites": [
+        "left index finger",
+        "right index finger"
+      ],
+      "actuator": "Oticon-A 100 \u03a9 bone-conduction vibrator mounted in a foam cube",
+      "contact_surface_cm": [
+        1.6,
+        2.4
+      ],
+      "carrier_hz": 200,
+      "duration_ms": 9,
+      "calibration": "Clearly suprathreshold",
+      "numeric_amplitude": null
+    },
+    "published_trial_schedule": {
+      "signed_soa_ms": [
+        -200,
+        -90,
+        -55,
+        -30,
+        -20,
+        20,
+        30,
+        55,
+        90,
+        200
+      ],
+      "sign_rule": "Sound onset minus tactile onset. Negative values indicate sound-first trials.",
+      "first_onset_from_fixation_ms": 750,
+      "auditory_onsets_from_fixation_ms_derived": [
+        750,
+        750,
+        750,
+        750,
+        750,
+        770,
+        780,
+        805,
+        840,
+        950
+      ],
+      "tactile_onsets_from_fixation_ms_derived": [
+        950,
+        840,
+        805,
+        780,
+        770,
+        750,
+        750,
+        750,
+        750,
+        750
+      ],
+      "response_deadline_from_first_stimulus_ms": 3500,
+      "next_fixation_after_trial_end_ms": 750,
+      "side_pairings": [
+        "left sound / left touch",
+        "left sound / right touch",
+        "right sound / left touch",
+        "right sound / right touch"
+      ],
+      "block_trial_counts": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "main_trials_total": 640,
+      "repetitions_per_block_per_soa_and_side_pair": 2,
+      "realized_trial_order": null,
+      "valid_response_confirmation_led_ms": 500,
+      "premature_or_missed_response_fixation_flicker_ms": 1000
+    },
+    "other_procedures": {
+      "practice": {
+        "study_row_id": "doi:10.1016/j.actpsy.2004.10.017::vibrotactile-toj-practice",
+        "block_trial_counts": [
+          30,
+          30
+        ],
+        "trials_total": 60,
+        "first_block_signed_soa_ms_derived": [
+          -400,
+          -180,
+          -110,
+          -60,
+          -40,
+          40,
+          60,
+          110,
+          180,
+          400
+        ],
+        "first_block_rule": "Double the formal SOAs.",
+        "per_cell_allocation": null,
+        "second_block_exact_soa_allocation": null
+      }
+    },
+    "response": {
+      "task": "Unspeeded modality-first judgment.",
+      "device": "Normally depressed right-foot toe and heel pedals",
+      "mapping": {
+        "toe_release": "sound first",
+        "heel_release": "touch first"
+      },
+      "confirmation": {
+        "upper_led": "sound first",
+        "lower_led": "touch first"
+      }
+    },
+    "analysis": {
+      "primary_measure": "Temporal-order judgment. Fit the normal-score transform of touch-first proportions separately by participant and side alignment.",
+      "included_signed_soa_ms": [
+        -90,
+        -55,
+        -30,
+        -20,
+        20,
+        30,
+        55,
+        90
+      ],
+      "excluded_signed_soa_ms": [
+        -200,
+        200
+      ],
+      "jnd": "0.675 divided by slope",
+      "pss": "Negative intercept divided by slope"
+    },
+    "inspection_scope": {
+      "auditory_only_rows": 640,
+      "preview_burst_duration_ms": 10,
+      "auditory_spatialization": "Toolkit stereo pan at the two reported azimuths.",
+      "details": "Digital, stationary sound bursts and nominal order combinations only. The touch side and lead are annotations; there is no tactile output, independent masker, fixation-light hardware or response scoring. Auditory onset is scheduled from an implicit fixation at the row start. The toolkit SOA control measures a nonnegative delay from sound onset. Touch-first timing remains a planned value."
+    },
+    "implementation_gaps": [
+      "The trial scheduler requires independent auditory and tactile triggers for signed temporal orders plus light feedback. This profile schedules only the auditory member of each pair.",
+      "Speaker and tactile calibration must verify delivered intensity and acoustic-to-skin onset. Original waveform bytes and measured timing are unavailable.",
+      "The experiment requires separate calibrated 200 Hz vibration at each finger, independent central masking, and toe/heel response capture with visual feedback.",
+      "Exact trial order, practice cell allocations and delivered masker-to-stimulus relation are unreported."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Cohort, speaker setup, tactile stimulus, trial order and response",
+      "source": "https://doi.org/10.1016/j.actpsy.2004.10.017, pp. 283\u2013285, \u00a7\u00a73.1\u20133.2 and Table 1, with Experiment 1 method cross-reference."
+    },
+    {
+      "field": "Comparison timing, apparatus geometry and temporal-order scoring",
+      "source": "https://doi.org/10.1016/j.actpsy.2004.10.017, pp. 280\u2013283, \u00a7\u00a72.1.2\u20132.2, Fig. 1 and Table 1."
+    }
+  ]
+}

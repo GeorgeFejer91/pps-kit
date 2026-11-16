@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "zampini_2005_audiotactile_toj_exp1",
+  "assets": [
+    {
+      "label": "Front left white-noise burst",
+      "path": "assets/preloads/zampini_2005_audiotactile_toj_exp1/02_looming_stimuli/looming_Front_left_white-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/zampini_2005_audiotactile_toj_exp1/02_looming_stimuli/looming_Front_left_white-noise_burst.wav",
+      "sha256": "e2e7737ff6a3b98187cadd568f91b48a5b2e756238ced1d95bf2bcafca20465a",
+      "duration_s": 0.01,
+      "sample_rate": 48000,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Front left white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 62.0,
+        "end_distance_cm": 62.0,
+        "start_rotation_deg": 336.0,
+        "end_rotation_deg": 336.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": -0.252177,
+          "y_m": 0.566398,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.252177,
+          "y_m": 0.566398,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Front right white-noise burst",
+      "path": "assets/preloads/zampini_2005_audiotactile_toj_exp1/02_looming_stimuli/looming_Front_right_white-noise_burst.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/zampini_2005_audiotactile_toj_exp1/02_looming_stimuli/looming_Front_right_white-noise_burst.wav",
+      "sha256": "15a278e5302896b01b478574678f971f6c2cfc5901a8d11b8eb6658441100da3",
+      "duration_s": 0.01,
+      "sample_rate": 48000,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Front right white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 62.0,
+        "end_distance_cm": 62.0,
+        "start_rotation_deg": 24.0,
+        "end_rotation_deg": 24.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.252177,
+          "y_m": 0.566398,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.252177,
+          "y_m": 0.566398,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

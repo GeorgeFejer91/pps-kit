@@ -1,0 +1,50 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "mul_2019_autism_pps",
+  "repetitions_per_condition": 10,
+  "soa_values_ms": [
+    300,
+    800,
+    1500,
+    2200,
+    2500
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "mul-2019-pps-looming",
+      "label": "Looming sound with optional right-middle-finger tap",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "respond",
+        "response_rule": "left_hand_button_press_to_right_middle_finger_tap",
+        "target_role": "tactile_target",
+        "response_capture_device": "button",
+        "tactile_stimulation_modality": "mechanical_tap",
+        "body_anchor": "right middle finger",
+        "auditory_trajectory_family": "near_far_speaker_intensity_crossfade",
+        "source_asset_equivalence": "PPS Kit Maister 2015 looming proxy"
+      },
+      "elements": [
+        {
+          "element_id": "mul-2019-looming-proxy",
+          "kind": "looming_stimulus",
+          "label": "Looming pink-noise proxy from Maister 2015",
+          "source_label": "Looming pink-noise proxy from Maister 2015",
+          "source_labels": [
+            "Looming pink-noise proxy from Maister 2015"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 65
+}

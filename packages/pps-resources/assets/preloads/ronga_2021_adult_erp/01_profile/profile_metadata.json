@@ -1,0 +1,186 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ronga_2021_adult_erp",
+  "title": "Ronga 2021 adult near/far ERP",
+  "citation": "Ronga, I., Galigani, M., Bruno, V., Noel, J.-P., Gazzin, A., Perathoner, C., Serino, A., & Garbarini, F. (2021). Spatial tuning of electrophysiological responses to multisensory stimuli reveals a primitive coding of the body boundaries in newborns. Proceedings of the National Academy of Sciences, 118(12), e2024548118.",
+  "doi": "10.1073/pnas.2024548118",
+  "source_url": "https://doi.org/10.1073/pnas.2024548118",
+  "verification_status": "partial",
+  "notes": "Inspection of the five conditions and published trigger-relative timing for passive EEG. Launch requires calibrated electrocutaneous delivery, physical near/far loudspeakers and synchronized EEG.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1073/pnas.2024548118::adult-erp",
+    "publication_status": "published",
+    "profile_type": "adult_passive_audiotactile_erp",
+    "profile_check_complete": false,
+    "study_inventory": {
+      "formal_experiments": 1,
+      "primary_assessments": 2,
+      "auxiliary_procedures": 4,
+      "scope": "Newborn and adult ERP cohorts have separate schedules within one comparative study."
+    },
+    "cohort": {
+      "analyzed": 25,
+      "women": 15,
+      "mean_age_years": 25.72,
+      "age_sd_years": 4.64,
+      "handedness": "Right-handed according to the Edinburgh Handedness Inventory."
+    },
+    "posture": "Seated comfortably.",
+    "auditory_stimulus": {
+      "signal": "Stationary Audacity-generated amplitude-modulated sinusoid from one of two physical loudspeakers.",
+      "carrier_hz": 784,
+      "modulation_hz": 50,
+      "duration_ms": 50,
+      "rise_ms": 5,
+      "fall_ms": 5,
+      "reported_level_db_approx": 64,
+      "near_distance_cm_less_than": 5,
+      "far_distance_cm": 140,
+      "distance_anchor": "Right stimulated hand",
+      "original_waveform_modulation_depth_and_delivered_reference": null
+    },
+    "tactile_stimulus": {
+      "modality": "Electrocutaneous",
+      "site": "Dorsum of the right hand",
+      "stimulator": "Digitimer DS7A",
+      "waveform": "Constant-current square pulse",
+      "pulse_duration_us": 200,
+      "surface_electrode_separation_cm_approx": 1,
+      "site_shift_cm_approx": 1,
+      "intensity": {
+        "threshold_multiplier": 2,
+        "across_person_mean_current_ma": 4.01,
+        "across_person_sd_current_ma": 1.03
+      }
+    },
+    "trial_schedule": {
+      "blocks": 3,
+      "trials_per_condition_per_block": 12,
+      "trials_per_block": 60,
+      "planned_trial_totals": [
+        180
+      ],
+      "trigger": "Common E-Prime\u2013Arduino trigger used as zero for all five EEG conditions.",
+      "events_ms_from_trigger": [
+        {
+          "id": "T",
+          "tactile": 0,
+          "auditory": null
+        },
+        {
+          "id": "ANear",
+          "tactile": null,
+          "auditory": 40,
+          "speaker": "near"
+        },
+        {
+          "id": "AFar",
+          "tactile": null,
+          "auditory": 40,
+          "speaker": "far"
+        },
+        {
+          "id": "TANear",
+          "tactile": 0,
+          "auditory": 40,
+          "speaker": "near"
+        },
+        {
+          "id": "TAFar",
+          "tactile": 0,
+          "auditory": 40,
+          "speaker": "far"
+        }
+      ],
+      "bimodal_tactile_onset_minus_auditory_onset_ms": -40,
+      "intertrial_interval_ms_range": [
+        4000,
+        6000
+      ],
+      "exact_interval_anchor_and_distribution": null,
+      "order": "Intermix all five conditions with equal trial counts and no more than two identical trials consecutively.",
+      "catch_trials": 0
+    },
+    "response": {
+      "required": false,
+      "mode": "Passive observation and EEG",
+      "behavioral_scoring": "None."
+    },
+    "eeg": {
+      "device": "HandyEEG and SystemPlus Evolution (Micromed)",
+      "layout": "32 Ag/AgCl 10\u201320 electrodes, nose online reference, right-side EOG.",
+      "sampling_hz": 1024,
+      "impedance_kohm_less_than": 5,
+      "epochs_ms_from_trigger": [
+        -500,
+        1000
+      ],
+      "baseline_ms_from_trigger": [
+        -500,
+        0
+      ],
+      "fft_bandpass_hz": [
+        1,
+        30
+      ],
+      "ocular_artifact_processing": "ICA in Letswave 6",
+      "p2_window_ms": [
+        222,
+        338
+      ],
+      "p2_channels": [
+        "Fz",
+        "FC2",
+        "FC3",
+        "FCz",
+        "Cz"
+      ]
+    },
+    "analysis": {
+      "primary": "Within each cohort, compare near vs far and paired ERP vs the algebraic sum of corresponding tactile-only and auditory-only ERPs. Quantify mean P2 amplitude and peak latency.",
+      "outcome_data": "https://doi.org/10.17632/vpbm2w7njn.1",
+      "gfp": "Find an adult global field power window with p < .01 for at least ten consecutive samples. The union boundaries for near and far differences define 222\u2013338 ms."
+    },
+    "auxiliary_procedures": [
+      {
+        "study_row_id": "doi:10.1073/pnas.2024548118::adult-tactile-threshold",
+        "label": "Adult tactile threshold",
+        "scope": "Method of limits prior to the EEG session. Use twice each measured perceptual threshold in the main task.",
+        "starting_level_step_order_and_response_format": null
+      },
+      {
+        "study_row_id": "doi:10.1073/pnas.2024548118::adult-simultaneity",
+        "label": "Adult simultaneity check",
+        "scope": "Adults in the pilot reported perceived simultaneity when sound followed tactile onset by 40 ms.",
+        "auditory_onset_from_tactile_ms": 40,
+        "participant_count_and_trial_schedule": null
+      },
+      {
+        "study_row_id": "doi:10.1073/pnas.2024548118::adult-handedness-inventory",
+        "label": "Adult handedness eligibility",
+        "scope": "The Edinburgh Handedness Inventory established right-handed eligibility. All 25 adults were reported right-handed.",
+        "study_form_and_numerical_cutoff": null
+      }
+    ],
+    "preview_scope": "The source-defined schedule is available for inspection. No acoustic substitution, electronic stimulation or behavioral detection response is supplied.",
+    "implementation_gaps": [
+      "The original tone file, modulation depth, delivered acoustic calibration and exact physical coordinates are unavailable.",
+      "The scheduler must share a trigger between near/far audio and the electrocutaneous pulse, preserve the 40 ms auditory delay in all four audio-present conditions and intermix the five passive condition rows.",
+      "Recording and analysis require calibrated physical stimulus delivery, compatible EEG acquisition and EEG event response processing. Author trial-order and delivered-timing files are unavailable."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Cohort, static near/far geometry and EEG outcomes",
+      "source": "https://doi.org/10.1073/pnas.2024548118, main article pp. 1\u20132 and Fig. 1."
+    },
+    {
+      "field": "Tone, electrocutaneous stimulus, trigger, trial counts and auxiliary checks",
+      "source": "https://doi.org/10.1073/pnas.2024548118, SI Appendix pp. 2\u20133, Participants and Stimuli and experimental task."
+    },
+    {
+      "field": "EEG acquisition, reference, epoch and ERP analyses",
+      "source": "https://doi.org/10.1073/pnas.2024548118, SI Appendix pp. 3\u20135, Electroencephalogram recording and processing and Data analysis."
+    }
+  ]
+}

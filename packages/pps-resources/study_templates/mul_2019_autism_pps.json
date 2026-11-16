@@ -1,0 +1,180 @@
+{
+  "template_id": "mul_2019_autism_pps",
+  "title": "Mul 2019 autism, looming sound and tactile PPS",
+  "citation": "Mul, C., Cardini, F., Stagg, S. D., Sadeghi Esfahlani, S., Kiourtsoglou, D., Cardellicchio, P., & Aspell, J. E. (2019). Altered bodily self-consciousness and peripersonal space in autism. Autism, 23(8), 2055–2067.",
+  "source_url": "https://doi.org/10.1177/1362361319838950",
+  "doi": "10.1177/1362361319838950",
+  "verification_status": "partial",
+  "notes": "A 65-trial inspection for the audio-tactile PPS task, with 50 tap-present trials and 15 sound-only catches. The published setup used a mechanical tapper and physical loudspeakers. The published full-body illusion was a separate task.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1177/1362361319838950::audiotactile-pps",
+    "profile_check_complete": false,
+    "publication_status": "published",
+    "profile_type": "looming_audio_mechanical_tap_pps",
+    "source_scope": "Audio-tactile hand PPS assessment before the separately administered full-body illusion.",
+    "reported_design": {
+      "cohorts_recruited": {
+        "autistic": 22,
+        "non_autistic": 29
+      },
+      "cohorts_analyzed": {
+        "autistic": 22,
+        "non_autistic": 27
+      },
+      "sample_difference": "Two non-autistic PPS records were excluded after equipment malfunction.",
+      "tactile_onset_delays_from_sound_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2500
+      ],
+      "repetitions_per_paired_delay": 10,
+      "paired_trials": 50,
+      "auditory_only_catches": 15,
+      "tactile_only_trials": 0,
+      "total_trials_per_participant": 65,
+      "order": "Intermixed target and catch trials in randomized order.",
+      "block_boundaries": null
+    },
+    "published_protocol": {
+      "posture": "Participant sits blindfolded.",
+      "sound": {
+        "waveform": "Pink noise in all trials",
+        "placement": "Near loudspeaker beside the right hand and far loudspeaker approximately 1 m farther away.",
+        "motion": "Automatic level modulation across the two fixed speakers gives the impression of approach.",
+        "duration_ms": null,
+        "absolute_level_and_gain_law": null
+      },
+      "tactile_target": {
+        "site": "Right middle finger",
+        "apparatus": "A custom tapper drops a small 4 mm magnet.",
+        "duration_force_and_magnet_distance": null
+      },
+      "response": {
+        "target": "Press a button with the left hand as quickly as possible on feeling the tap.",
+        "catch": "Withhold on a trial without a tap.",
+        "software_and_controller": "National Instruments LabVIEW 8 and Arduino.",
+        "response_timeout_and_iti_ms": null
+      },
+      "analysis": {
+        "outcome": "Paired-trial tactile RT by auditory onset delay and group. Delays are ordinal proximity conditions.",
+        "table": "Use delay-level statistics in Table 3. The article also reports individual linear slopes.",
+        "gap": "Published interaction statistics and reported degrees of freedom cannot resolve the original analysis code or preprocessing."
+      }
+    },
+    "preview": {
+      "sound": "Reuse the packaged three-second Maister 2015 digital looming proxy. Mul cites that task’s apparatus. The Mul source duration, level and envelope are unreported.",
+      "allocation": "Group all 65 events in one inspection pool with a seeded shuffle. Original block boundaries and realized trial order are unreported.",
+      "response": "The inspection represents mechanical tap timing with a tactile-channel marker and left-hand button response semantics."
+    },
+    "implementation_gaps": [
+      "The original pink-noise waveform, playback duration, calibrated two-speaker routing and level envelopes are unavailable.",
+      "The tactile scheduler needs the original or measured equivalent 4 mm magnet tapper, calibrated mechanical contact onset and a synchronized left-hand response button.",
+      "The exact original ITI, trial randomization and online response deadline are unreported."
+    ]
+  },
+  "design": {
+    "name": "Mul 2019 autism, looming sound and tactile PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [
+      {
+        "label": "Looming pink-noise proxy from Maister 2015",
+        "path": "packages/pps-resources/assets/preloads/maister_2015_shared_sensory_pps/02_looming_stimuli/looming_Approaching_continuous_pink_noise.wav",
+        "target_duration_s": 3,
+        "render_mode": "preserve",
+        "tone_type": "pink",
+        "motion_mode": "looming"
+      }
+    ],
+    "prestimulus_files": [],
+    "trajectory": {
+      "path_length_m": 1,
+      "propagation_speed_mps": 0.3333333333333333,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 10,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 10,
+        "catch": 15
+      },
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2500
+      ],
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "looming"
+      ],
+      "tactile_sites": [
+        "right middle finger"
+      ],
+      "include_catch_trials": true,
+      "catch_trials_exact": 15,
+      "catch_trial_percentage": 23.076923076923077,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "blocks": 1,
+      "block_specs": [
+        {
+          "label": "Hand PPS assessment",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        }
+      ],
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "trial_strips": [
+        {
+          "strip_id": "mul-2019-pps-looming",
+          "label": "Looming sound with optional right-middle-finger tap",
+          "metadata": {
+            "expected_response": "respond",
+            "response_rule": "left_hand_button_press_to_right_middle_finger_tap",
+            "target_role": "tactile_target",
+            "response_capture_device": "button",
+            "tactile_stimulation_modality": "mechanical_tap",
+            "body_anchor": "right middle finger",
+            "auditory_trajectory_family": "near_far_speaker_intensity_crossfade",
+            "source_asset_equivalence": "PPS Kit Maister 2015 looming proxy"
+          },
+          "elements": [
+            {
+              "element_id": "mul-2019-looming-proxy",
+              "kind": "looming_stimulus",
+              "label": "Looming pink-noise proxy from Maister 2015",
+              "source_label": "Looming pink-noise proxy from Maister 2015"
+            }
+          ]
+        }
+      ],
+      "participants": 51,
+      "random_seed": 201938950
+    }
+  },
+  "provenance": [
+    {
+      "field": "Cohorts, task order, apparatus, delays and allocation",
+      "source": "Mul et al. (2019), Autism 23(8):2055–2067, pp. 2056–2057, Participants and PPS Methods."
+    },
+    {
+      "field": "RT analysis and group outcomes",
+      "source": "Mul et al. (2019), Autism 23(8):2055–2067, pp. 2060–2061, Table 3 and Fig. 5."
+    },
+    {
+      "field": "Acoustic inspection proxy",
+      "source": "PPS Kit Maister 2015 audio rendering for DOI 10.1016/j.neuropsychologia.2014.10.027. See Mul et al., p. 2057 for the apparatus citation."
+    }
+  ]
+}

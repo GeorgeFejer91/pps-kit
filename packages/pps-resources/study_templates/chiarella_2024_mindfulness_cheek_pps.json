@@ -1,0 +1,196 @@
+{
+  "template_id": "chiarella_2024_mindfulness_cheek_pps",
+  "title": "Chiarella 2024 mindfulness cheek PPS",
+  "citation": "Chiarella, S. G., De Pastina, R., Raffone, A., & Simione, L. (2024). Mindfulness affects the boundaries of bodily self-representation: The effect of focused-attention meditation in fading the boundary of peripersonal space. Behavioral Sciences 14, 306.",
+  "source_url": "https://doi.org/10.3390/bs14040306",
+  "doi": "10.3390/bs14040306",
+  "verification_status": "partial",
+  "notes": "The preview preserves the five known tactile timings in each pre/post assessment. Twelve untimed endpoint probes per assessment remain documented.",
+  "reference_parameters": {
+    "publication_status": "published",
+    "profile_type": "published_pps_assessment_timing",
+    "profile_check_complete": false,
+    "study_row_id": "doi:10.3390/bs14040306",
+    "reported_design": {
+      "enrolled": 26,
+      "order": [
+        "PRE PPS",
+        "15 min guided focused-attention meditation",
+        "POST PPS"
+      ],
+      "intervention_source": "§2.4.2 and Appendix A",
+      "parallel_control_group": false
+    },
+    "reported_source": {
+      "type": "Pink noise on two loudspeakers with opposing level envelopes.",
+      "sample_rate_hz": 44100,
+      "duration_ms": 3000,
+      "near_speaker_left_cheek_distance_cm": 5,
+      "speaker_separation_cm": 100,
+      "speaker_elevation_cm": 100
+    },
+    "reported_trial_schedule": {
+      "pre_sound_silence_ms": 1000,
+      "post_sound_silence_ms": 1000,
+      "paired_delays_from_sound_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "tactile_probe_repeats_per_delay": 6,
+      "before_and_after_sound_tactile_trials": 12,
+      "before_and_after_sound_probe_offsets_ms": [
+        null,
+        null
+      ],
+      "sound_only_catches": 20,
+      "reported_derived_trials_per_assessment": 62
+    },
+    "reported_tactile_response": {
+      "site": "Left cheek",
+      "device": "Digitimer DS7A with a neurological tip electrode",
+      "reported_pulse_duration_us": 100,
+      "response": "Press the spacebar promptly when touch is detected.",
+      "online_response_deadline_ms": null
+    },
+    "inspection_scope": "Two 50-trial timing subsets with 30 paired trials and 20 audio-only catches each. No times are substituted for T0 and T6. The 15-minute meditation is an experimenter-delivered interval around the assessments. Audio and touch are software markers.",
+    "implementation_gaps": [
+      "Original two-speaker pink-noise files, calibrated sound gain functions and exact acoustic calibration are unavailable.",
+      "Exact before-sound and after-sound tactile probe offsets, response deadline and separate intertrial interval are unreported.",
+      "Electrode and electrical stimulator delivery mode and calibration are unresolved. A synchronized apparatus and physical timing validation are needed."
+    ]
+  },
+  "design": {
+    "name": "Chiarella 2024 mindfulness cheek PPS",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "3 s pink timing reference",
+        "noise_type": "pink",
+        "source_profile": "continuous_noise",
+        "motion_mode": "stationary",
+        "azimuth_deg": 0,
+        "gain": 1.0
+      }
+    ],
+    "trajectory": {
+      "path_length_m": 1,
+      "propagation_speed_mps": 0.3333333333333333,
+      "azimuth_start_deg": 0,
+      "azimuth_end_deg": 0,
+      "sample_rate": 44100,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 6,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 6,
+        "catch": 20
+      },
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "stationary"
+      ],
+      "tactile_sites": [
+        "left cheek"
+      ],
+      "include_catch_trials": true,
+      "catch_trials_exact": 20,
+      "catch_crosses_sequence_variants": false,
+      "include_auditory_only_trials": false,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "baseline_soa_values_ms": [],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 2,
+      "block_specs": [
+        {
+          "label": "PRE PPS timing inspection",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "POST PPS timing inspection",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        }
+      ],
+      "repeat_trial_pool_per_block": true,
+      "block_order_randomization": "fixed",
+      "trial_randomization_strategy": "balanced_shuffle",
+      "trial_strips": [
+        {
+          "strip_id": "chiarella-2024-mindfulness-cheek-pps",
+          "label": "Assessment timing inspection",
+          "metadata": {
+            "body_anchor": "left cheek",
+            "response_mode": "button_press_mouse_click_proxy",
+            "response_input_modality": "mouse_click",
+            "response_capture_device": "mouse",
+            "target_role": "tactile_detection"
+          },
+          "elements": [
+            {
+              "element_id": "chiarella_2024_mindfulness_cheek_pps-jitter-pre-sound-silence",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                1000
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "chiarella_2024_mindfulness_cheek_pps-looming_stimulus-audio-timing-reference",
+              "kind": "looming_stimulus",
+              "label": "Audio timing reference",
+              "source_label": "3 s pink timing reference",
+              "source_labels": [
+                "3 s pink timing reference"
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "chiarella_2024_mindfulness_cheek_pps-jitter-post-sound-silence",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [
+                1000
+              ],
+              "randomized": false
+            }
+          ]
+        }
+      ],
+      "participants": 26,
+      "random_seed": 20240306
+    }
+  },
+  "provenance": [
+    {
+      "field": "Speaker geometry, electrical pulse, timers and response",
+      "source": "https://doi.org/10.3390/bs14040306, pp. 4–5, §§2.3–2.4.1 and Fig. 1"
+    },
+    {
+      "field": "Fixed intervention order, instructions and analysis",
+      "source": "https://doi.org/10.3390/bs14040306, pp. 5–6, §§2.4–2.5 and Appendix A"
+    }
+  ]
+}

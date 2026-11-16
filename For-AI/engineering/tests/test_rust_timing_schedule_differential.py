@@ -101,6 +101,7 @@ def test_rust_block_event_schedule_matches_python_oracle(tmp_path: Path) -> None
         "Trial_Type",
         "Family",
         "Row_Label",
+        "Baseline_Mode",
         "SOA_ms",
         "Trial_Start_Sample",
         "Looming_Onset_Sample",
@@ -163,6 +164,18 @@ def test_rust_block_event_schedule_matches_python_oracle(tmp_path: Path) -> None
                 "Tactile_Onset_Sample": "",
                 "Response_Window_Onset_Sample": "28000",
                 "Trial_End_Sample": "32000",
+            },
+            {
+                "Trial_Number": "5",
+                "Trial_UID": "T_SOUND_BASELINE",
+                "Trial_Type": "Baseline",
+                "Family": "baseline",
+                "Baseline_Mode": "audio_tactile",
+                "SOA_ms": "-700",
+                "Trial_Start_Sample": "32000",
+                "Looming_Onset_Sample": "36000",
+                "Tactile_Onset_Sample": "35300",
+                "Trial_End_Sample": "40000",
             },
         ],
     )
@@ -254,7 +267,7 @@ def test_rust_block_event_schedule_matches_python_oracle(tmp_path: Path) -> None
             "modern_sample_columns_and_buffer_boundaries",
             modern,
             sample_rate=1000,
-            buffers=[(0, 4000), (4000, 301), (4301, 3699), (8000, 1), (8001, 23999), (32000, 1)],
+            buffers=[(0, 4000), (4000, 301), (4301, 3699), (8000, 1), (8001, 23999), (32000, 8001)],
         ),
         _case("legacy_default_timing", legacy, sample_rate=100, buffers=[(0, 3201)], block_index=3),
         _case("seconds_aliases_and_ties_to_even", seconds, sample_rate=100, buffers=[(0, 5)], block_index=4),
@@ -281,10 +294,17 @@ def test_rust_block_event_schedule_matches_python_oracle(tmp_path: Path) -> None
         ("trial_end", 24000),
         ("looming_onset", 28000),
         ("response_window_onset", 28000),
+        ("trial_start", 32000),
         ("trial_end", 32000),
+        ("tactile_onset", 35300),
+        ("response_window_onset", 35300),
+        ("looming_onset", 36000),
+        ("trial_end", 40000),
     ]
     assert [row["event_type"] for row in modern_result["buffers"][3]] == ["trial_start", "trial_end"]
-    assert [row["event_type"] for row in modern_result["buffers"][-1]] == ["trial_end"]
+    assert [row["event_type"] for row in modern_result["buffers"][-1]] == [
+        "trial_start", "trial_end", "tactile_onset", "response_window_onset", "looming_onset", "trial_end",
+    ]
     assert len(legacy_result["events"]) == 18
     assert [(row["event_type"], row["sample_index"]) for row in seconds_result["events"]] == [
         ("audio_sample_zero", 0),

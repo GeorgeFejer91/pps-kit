@@ -1,0 +1,63 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "kitagawa_2005_rear_toj",
+  "blocks": 8,
+  "participants": 11,
+  "random_seed": 20250604,
+  "trial_randomization_strategy": "balanced_shuffle",
+  "block_order_randomization": "fixed",
+  "repeat_trial_pool_per_block": true,
+  "distribute_trial_pool_across_blocks": false,
+  "baseline_crosses_sequence_variants": true,
+  "catch_crosses_sequence_variants": true,
+  "block_specs": [
+    {
+      "label": "Auditory inspection block 1",
+      "stimulus_types": [
+        "Auditory-Only"
+      ]
+    },
+    {
+      "label": "Auditory inspection block 2",
+      "stimulus_types": [
+        "Auditory-Only"
+      ]
+    },
+    {
+      "label": "Auditory inspection block 3",
+      "stimulus_types": [
+        "Auditory-Only"
+      ]
+    },
+    {
+      "label": "Auditory inspection block 4",
+      "stimulus_types": [
+        "Auditory-Only"
+      ]
+    },
+    {
+      "label": "Auditory inspection block 5",
+      "stimulus_types": [
+        "Auditory-Only"
+      ]
+    },
+    {
+      "label": "Auditory inspection block 6",
+      "stimulus_types": [
+        "Auditory-Only"
+      ]
+    },
+    {
+      "label": "Auditory inspection block 7",
+      "stimulus_types": [
+        "Auditory-Only"
+      ]
+    },
+    {
+      "label": "Auditory inspection block 8",
+      "stimulus_types": [
+        "Auditory-Only"
+      ]
+    }
+  ]
+}

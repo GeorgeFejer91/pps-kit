@@ -1,0 +1,45 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "sorrentino_2021_ageing_hand_pps",
+  "repetitions_per_condition": 20,
+  "soa_values_ms": [
+    300,
+    1500,
+    2700
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "sorrentino-2021-ageing-hand-pps",
+      "label": "Assessment timing inspection",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "body_anchor": "hand dorsum",
+        "response_mode": "button_press_mouse_click_proxy",
+        "response_input_modality": "mouse_click",
+        "response_capture_device": "mouse",
+        "target_role": "tactile_detection"
+      },
+      "elements": [
+        {
+          "element_id": "sorrentino_2021_ageing_hand_pps-looming_stimulus-audio-timing-reference",
+          "kind": "looming_stimulus",
+          "label": "Audio timing reference",
+          "source_label": "3 s white timing reference",
+          "source_labels": [
+            "3 s white timing reference"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 110
+}

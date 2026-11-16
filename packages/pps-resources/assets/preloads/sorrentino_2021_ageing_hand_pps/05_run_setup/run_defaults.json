@@ -1,0 +1,23 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "sorrentino_2021_ageing_hand_pps",
+  "blocks": 1,
+  "participants": 52,
+  "random_seed": 20210301,
+  "trial_randomization_strategy": "balanced_shuffle",
+  "block_order_randomization": "fixed",
+  "repeat_trial_pool_per_block": false,
+  "distribute_trial_pool_across_blocks": false,
+  "baseline_crosses_sequence_variants": false,
+  "catch_crosses_sequence_variants": false,
+  "block_specs": [
+    {
+      "label": "Assessment timing inspection",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Catch",
+        "Baseline"
+      ]
+    }
+  ]
+}

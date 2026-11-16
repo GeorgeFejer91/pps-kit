@@ -1,0 +1,44 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "orioli_2019_newborn_pilot",
+  "repetitions_per_condition": 1,
+  "soa_values_ms": [
+    0
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "orioli_2019_newborn_pilot-inspection",
+      "label": "Source required for trial inspection",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_mode": "video_coded_gaze",
+        "response_rule": "record_first_saccade_after_peripheral_target_onset",
+        "primary_analysis_included": false
+      },
+      "elements": [
+        {
+          "element_id": "orioli_2019_newborn_pilot-sound",
+          "kind": "looming_stimulus",
+          "label": "Published sound",
+          "source_label": "Sound 1 \u00b7 8000 Hz at 55 dB",
+          "source_labels": [
+            "Sound 1 \u00b7 8000 Hz at 55 dB",
+            "Sound 3 \u00b7 8000 Hz at 62.5 dB",
+            "Sound 5 \u00b7 8000 Hz at 70 dB"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 0
+}

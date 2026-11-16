@@ -1,0 +1,276 @@
+{
+  "template_id": "di_cosmo_2021_phase_coupling",
+  "title": "Di Cosmo 2021 looming versus flat PPS",
+  "citation": "Di Cosmo, G., Costantini, M., Spadone, S., Pizzella, V., Della Penna, S., Marzetti, L., & Ferri, F. (2021). Phase-coupling of neural oscillations contributes to individual differences in peripersonal space. Neuropsychologia, 156, 107823.",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2021.107823",
+  "doi": "10.1016/j.neuropsychologia.2021.107823",
+  "verification_status": "partial",
+  "notes": "Inspection of the behavioral looming/flat PPS assessment and the paired resting-state MEG measurement. The behavioral source sounds, calibrated electrical target, response box and external MEG/MRI setup remain required.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2021.107823",
+    "publication_status": "published",
+    "profile_type": "behavioral_pps_with_resting_meg",
+    "profile_check_complete": false,
+    "study_inventory": {
+      "formal_experiments": 1,
+      "primary_assessments": 2,
+      "auxiliary_procedures": 1,
+      "scope": "Behavioral PPS, resting-state MEG and structural MRI on separate days in the same recruited cohort."
+    },
+    "cohort": {
+      "participants_enrolled": 30,
+      "women": 13,
+      "handedness": "Right-handed",
+      "mean_age_years": 21.4,
+      "sd_age_years": 1.3
+    },
+    "auditory_stimulus": {
+      "conditions": [
+        "Looming",
+        "Flat"
+      ],
+      "apparatus": "Two loudspeakers, the proximal speaker 5 cm from the hand and the other 100 cm farther longitudinally.",
+      "looming_intensity_description": "Exponential intensity function used to estimate apparent distance.",
+      "exact_playback_gain_waveform_and_file_duration": null,
+      "apparent_distance_cm_for_d1_to_d5": [
+        97.7,
+        95.3,
+        88.6,
+        70.5,
+        41.7
+      ]
+    },
+    "tactile_stimulus": {
+      "apparatus": "Constant-current paired electrodes",
+      "target": "Right index finger",
+      "pulse_duration_current_and_exact_stimulator": null
+    },
+    "trial_schedule": {
+      "delay_labels": [
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5"
+      ],
+      "tactile_onset_minus_sound_onset_ms": [
+        -700,
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "d0": "Tactile target during silence 700 ms before either sound condition begins.",
+      "target_repetitions_per_sound_and_delay": 18,
+      "target_trials": 216,
+      "catch_trials": 144,
+      "total_trials": 360,
+      "blocks": 3,
+      "trials_per_block_derived": 120,
+      "post_trial_interval_ms": 1000,
+      "order": "Randomize combinations and intermix catch trials.",
+      "per_block_cell_counts_and_exact_list": null
+    },
+    "response": {
+      "participant_position": "Seated and blindfolded, right palm supported on a table.",
+      "target": "Speeded press on Cedrus RB-834 with left index finger to right index-finger stimulation.",
+      "catch": "Withhold on sound-only trials.",
+      "deadline_ms": null
+    },
+    "behavioral_analysis": {
+      "trial_data": "Log-transform tactile reaction times and average by participant, sound condition and delay.",
+      "anova": "Within-participant sound-by-delay repeated measures ANOVA with Bonferroni follow-ups.",
+      "sigmoid": "Fit D1–D5 separately by participant and sound, with asymptotes fixed to the observed extrema and two estimated parameters (central point and width). The exact fitting scale is unresolved.",
+      "looming_midpoint_ms": {
+        "reported_n": 29,
+        "mean": 1292,
+        "sd": 461,
+        "range": [
+          677,
+          2227
+        ]
+      },
+      "flat_minimum_fit_threshold_passed_n": 0
+    },
+    "resting_meg": {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2021.107823::resting-meg",
+      "sessions": 2,
+      "minutes_per_recording": 5,
+      "viewing": "Blindfolded",
+      "system": "ITAB whole-head MEG, 153 dcSQUID magnetometers",
+      "auxiliary_recordings": [
+        "ECG",
+        "EOG"
+      ],
+      "head_localization": "Five coils, 3Space Fastrak fiducial digitization, localization after each recording.",
+      "processing": "Semi-automatic ICA in Curry 6.0; participant T1-based one-shell inner skull BEM and weighted minimum-norm reconstruction, 4 mm grid, three source orientations per voxel.",
+      "bands_hz": {
+        "delta": [
+          2,
+          4
+        ],
+        "theta": [
+          4,
+          8
+        ],
+        "alpha": [
+          8,
+          12
+        ],
+        "beta": [
+          12,
+          30
+        ],
+        "low_gamma": [
+          30,
+          46
+        ],
+        "medium_gamma": [
+          46,
+          64
+        ],
+        "high_gamma": [
+          64,
+          80
+        ]
+      },
+      "connectivity": "Seed-to-voxel Multivariate Interaction Measure by band, with Pearson correlation to the behavioral looming sigmoid midpoint.",
+      "left_premotor_seed_talairach_mm": [
+        -51,
+        -10,
+        20
+      ],
+      "left_a1_control_seed_talairach_mm": [
+        -39,
+        -31,
+        12
+      ],
+      "acquisition_sampling_rate_and_exact_analysis_code": null
+    },
+    "structural_mri": {
+      "study_row_id": "doi:10.1016/j.neuropsychologia.2021.107823::mri-acquisition",
+      "scanner": "3 T Philips Achieva",
+      "sequence": "T1-weighted 3D fast field echo",
+      "transmit": "Whole-body coil",
+      "receive": "Eight-channel phased-array head coil",
+      "isotropic_voxel_mm": 1,
+      "tr_ms": 8.1,
+      "te_ms": 3.7,
+      "flip_angle_deg": 8,
+      "scope": "Individual anatomical coregistration and forward model for MEG."
+    },
+    "preview_scope": "Source-listed trial timing and acquisition parameters are available for inspection. No playback file, electric stimulation or scanner control is bundled.",
+    "implementation_gaps": [
+      "Original looming and flat sound source files, gain coefficients, file duration and delivered audio calibration are unavailable.",
+      "The behavioral scheduler requires a silent negative-SOA lead-in, exact electrical target timing and calibrated response capture.",
+      "Resting MEG and T1 MRI require external acquisition systems and a validated connectivity pipeline. The exact spectral windowing, fit options, and acquisition-to-analysis data are unavailable."
+    ]
+  },
+  "design": {
+    "name": "Di Cosmo 2021 looming versus flat PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
+      "include_catch_trials": true,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": true,
+      "baseline_strategy": "custom",
+      "respiratory_phases": [
+        "Any"
+      ],
+      "block_order_randomization": "fixed",
+      "trial_randomization_strategy": "balanced_shuffle",
+      "participants": 1,
+      "repetitions_per_condition": 18,
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "blocks": 3,
+      "block_specs": [
+        {
+          "label": "Design inspection 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Design inspection 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Design inspection 3",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Baseline",
+            "Catch"
+          ]
+        }
+      ],
+      "trial_strips": [
+        {
+          "strip_id": "di-cosmo-2021-inspection",
+          "label": "Source required for trial inspection",
+          "metadata": {
+            "expected_response": "respond",
+            "response_mode": "left_index_cedrus",
+            "response_rule": "respond_to_tactile_target_only",
+            "primary_analysis_included": false
+          },
+          "elements": [
+            {
+              "element_id": "di-cosmo-2021-sound",
+              "kind": "looming_stimulus",
+              "label": "Published sound",
+              "source_label": "Di Cosmo looming sound",
+              "source_labels": [
+                "Di Cosmo looming sound",
+                "Di Cosmo flat sound"
+              ],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "tactile_sites": [
+        "right index finger"
+      ],
+      "baseline_custom_trial_mode": "audio_tactile",
+      "baseline_soa_values_ms": [
+        -700
+      ],
+      "baseline_trials_exact": 36,
+      "catch_trials_exact": 144,
+      "distribute_trial_pool_across_blocks": true
+    }
+  },
+  "provenance": [
+    {
+      "field": "Behavioral stimuli, geometry, probe delays, response and counts",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2021.107823, PDF pp. 2–3, § 2.2.1 and Fig. 1."
+    },
+    {
+      "field": "Reaction-time analysis and fit",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2021.107823, PDF pp. 3–4, §§ 2.4.1–2.4.2 and 3.1–3.2."
+    },
+    {
+      "field": "Complementary MEG, T1 MRI and connectivity acquisition",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2021.107823, PDF pp. 3–4, §§ 2.3, 2.4.3 and 2.4.4."
+    }
+  ]
+}

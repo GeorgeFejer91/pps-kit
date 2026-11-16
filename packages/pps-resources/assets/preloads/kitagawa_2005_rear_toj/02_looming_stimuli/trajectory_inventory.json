@@ -1,0 +1,80 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "kitagawa_2005_rear_toj",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Rear left white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 20.0,
+        "end_distance_cm": 20.0,
+        "start_rotation_deg": 225.0,
+        "end_rotation_deg": 225.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": -0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Rear left white-noise burst"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/kitagawa_2005_rear_toj/02_looming_stimuli/looming_Rear_left_white-noise_burst.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Rear right white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 20.0,
+        "end_distance_cm": 20.0,
+        "start_rotation_deg": 135.0,
+        "end_rotation_deg": 135.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.141421,
+          "y_m": -0.141421,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Rear right white-noise burst"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/kitagawa_2005_rear_toj/02_looming_stimuli/looming_Rear_right_white-noise_burst.wav"
+      ]
+    }
+  ]
+}

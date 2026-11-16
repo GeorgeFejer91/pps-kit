@@ -1,0 +1,262 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "kitagawa_2005_auditory_localization",
+  "repetitions_per_condition": 25,
+  "soa_values_ms": [
+    0
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "kitagawa_2005_auditory_localization-white-noise-20-left",
+      "label": "white noise, 20 cm / left sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        20.0
+      ],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_type": "white noise",
+        "planned_sound_side": "left"
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_auditory_localization-white-noise-20-left-burst",
+          "kind": "looming_stimulus",
+          "label": "white noise train, 20 cm rear left",
+          "source_label": "white noise train, 20 cm rear left",
+          "source_labels": [
+            "white noise train, 20 cm rear left"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_auditory_localization-white-noise-20-right",
+      "label": "white noise, 20 cm / right sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        20.0
+      ],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_type": "white noise",
+        "planned_sound_side": "right"
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_auditory_localization-white-noise-20-right-burst",
+          "kind": "looming_stimulus",
+          "label": "white noise train, 20 cm rear right",
+          "source_label": "white noise train, 20 cm rear right",
+          "source_labels": [
+            "white noise train, 20 cm rear right"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_auditory_localization-white-noise-70-left",
+      "label": "white noise, 70 cm / left sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        70.0
+      ],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_type": "white noise",
+        "planned_sound_side": "left"
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_auditory_localization-white-noise-70-left-burst",
+          "kind": "looming_stimulus",
+          "label": "white noise train, 70 cm rear left",
+          "source_label": "white noise train, 70 cm rear left",
+          "source_labels": [
+            "white noise train, 70 cm rear left"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_auditory_localization-white-noise-70-right",
+      "label": "white noise, 70 cm / right sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        70.0
+      ],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_type": "white noise",
+        "planned_sound_side": "right"
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_auditory_localization-white-noise-70-right-burst",
+          "kind": "looming_stimulus",
+          "label": "white noise train, 70 cm rear right",
+          "source_label": "white noise train, 70 cm rear right",
+          "source_labels": [
+            "white noise train, 70 cm rear right"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_auditory_localization-1-khz-pure-tone-20-left",
+      "label": "1 kHz pure tone, 20 cm / left sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        20.0
+      ],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_type": "1 kHz pure tone",
+        "planned_sound_side": "left"
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_auditory_localization-1-khz-pure-tone-20-left-burst",
+          "kind": "looming_stimulus",
+          "label": "1 kHz pure tone train, 20 cm rear left",
+          "source_label": "1 kHz pure tone train, 20 cm rear left",
+          "source_labels": [
+            "1 kHz pure tone train, 20 cm rear left"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_auditory_localization-1-khz-pure-tone-20-right",
+      "label": "1 kHz pure tone, 20 cm / right sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        20.0
+      ],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_type": "1 kHz pure tone",
+        "planned_sound_side": "right"
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_auditory_localization-1-khz-pure-tone-20-right-burst",
+          "kind": "looming_stimulus",
+          "label": "1 kHz pure tone train, 20 cm rear right",
+          "source_label": "1 kHz pure tone train, 20 cm rear right",
+          "source_labels": [
+            "1 kHz pure tone train, 20 cm rear right"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_auditory_localization-1-khz-pure-tone-70-left",
+      "label": "1 kHz pure tone, 70 cm / left sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        70.0
+      ],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_type": "1 kHz pure tone",
+        "planned_sound_side": "left"
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_auditory_localization-1-khz-pure-tone-70-left-burst",
+          "kind": "looming_stimulus",
+          "label": "1 kHz pure tone train, 70 cm rear left",
+          "source_label": "1 kHz pure tone train, 70 cm rear left",
+          "source_labels": [
+            "1 kHz pure tone train, 70 cm rear left"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "kitagawa_2005_auditory_localization-1-khz-pure-tone-70-right",
+      "label": "1 kHz pure tone, 70 cm / right sound",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [
+        70.0
+      ],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_sound_type": "1 kHz pure tone",
+        "planned_sound_side": "right"
+      },
+      "elements": [
+        {
+          "element_id": "kitagawa_2005_auditory_localization-1-khz-pure-tone-70-right-burst",
+          "kind": "looming_stimulus",
+          "label": "1 kHz pure tone train, 70 cm rear right",
+          "source_label": "1 kHz pure tone train, 70 cm rear right",
+          "source_labels": [
+            "1 kHz pure tone train, 70 cm rear right"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 0
+}

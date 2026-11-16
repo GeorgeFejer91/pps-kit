@@ -7,8 +7,8 @@
     "evidence_boundary": "Protocol 12, static preview parity, one-block and ready-profile fake-audio runner stress, synthetic loopback, ready-profile contrast audits, and mouse-click participant-like expected-outcome audits prove software scheduling, WAV generation, event/marker, artifact, and comparison-readiness contracts. They do not prove human behavioral PPS effects. Observed scientific outcomes require collected participant data."
   },
   "summary": {
-    "literature_record_count": 75,
-    "structured_expected_outcome_record_count": 71,
+    "literature_record_count": 80,
+    "structured_expected_outcome_record_count": 76,
     "pending_expected_outcome_record_count": 0,
     "adjacent_or_out_of_scope_record_count": 4,
     "runnable_profile_parameter_record_count": 19,
@@ -16,16 +16,16 @@
     "mouse_click_simulated_participant_like_comparison_record_count": 17,
     "synthetic_profile_contrast_comparison_record_count": 17,
     "parameter_run_evidence_only_record_count": 2,
-    "not_runnable_no_observed_comparison_record_count": 52,
+    "not_runnable_no_observed_comparison_record_count": 57,
     "adjacent_not_applicable_record_count": 4,
     "pending_expected_outcome_blocker_counts": {},
     "observed_comparison_gap_counts": {
       "not_applicable_adjacent_out_of_scope": 4,
-      "not_yet_templated_missing_publication_parameters": 35,
+      "not_yet_templated_missing_publication_parameters": 25,
       "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
       "ready_profile_parameter_run_available_expected_contrast_unvalidated": 2,
-      "template_present_blocked_missing_publication_parameters": 8,
-      "template_present_blocked_toolkit_structure": 9
+      "template_present_blocked_missing_publication_parameters": 11,
+      "template_present_blocked_toolkit_structure": 21
     }
   },
   "expected_outcome_extraction_sources": {
@@ -118,9 +118,13 @@
       "record_id": "kitagawa_2005_sound_complexity",
       "citation_short": "Kitagawa et al. (2005)",
       "doi": "10.1007/s00221-005-2393-8",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "kitagawa_2005_rear_toj",
+        "kitagawa_2005_tactile_distractor",
+        "kitagawa_2005_auditory_localization"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "rear_perihead_complex_sound_audio_tactile_interference",
@@ -143,9 +147,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2007_blind_cane_users",
@@ -1420,9 +1424,11 @@
       "record_id": "pregnancy_2019",
       "citation_short": "Pregnancy PPS study (2019)",
       "doi": "10.1038/s41598-019-45224-w",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "cardini_2019_pregnancy_trunk_pps"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "third_trimester_expansion_of_pps",
@@ -1445,17 +1451,21 @@
         "paper_audit_visualization_candidate_count": "7"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "newborn_boundaries_2019",
       "citation_short": "Identifying PPS boundaries in newborns (2019)",
       "doi": "10.1038/s41598-019-45084-4",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "orioli_2019_newborn_pilot",
+        "orioli_2019_newborn_audiotactile",
+        "orioli_2019_newborn_auditory"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "newborn_intensity_defined_auditory_pps_boundary",
@@ -1478,17 +1488,20 @@
         "paper_audit_visualization_candidate_count": "7"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "ronga_2021_newborn_erp",
       "citation_short": "Spatial tuning of multisensory responses in newborns (2021)",
       "doi": "10.1073/pnas.2024548118",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "ronga_2021_adult_erp",
+        "ronga_2021_newborn_erp"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "newborn_near_far_audio_tactile_erp_spatial_tuning",
@@ -1514,17 +1527,19 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats_static_near_far_passive_erp_profile"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "autism_2019",
       "citation_short": "Altered bodily self-consciousness and PPS in autism (2019)",
       "doi": "10.1177/1362361319838950",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "mul_2019_autism_pps"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "autism_smaller_sharper_pps_and_reduced_body_illusion",
@@ -1547,9 +1562,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "disorders_consciousness_2019",
@@ -1756,9 +1771,11 @@
       "record_id": "ferroni_2020_tool_observation",
       "citation_short": "Tool-use observation PPS (2020)",
       "doi": "10.1016/j.neuropsychologia.2020.107622",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "galigani_2020_tool_observation"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "active_tool_use_but_not_observation_modulates_pps",
@@ -1781,9 +1798,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "ferroni_2026_pps_plasticity",
@@ -1855,9 +1872,11 @@
       "record_id": "ageing_2021",
       "citation_short": "How ageing shapes body and space representations (2021)",
       "doi": "10.1016/j.cortex.2020.11.021",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "sorrentino_2021_ageing_hand_pps"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "ageing_alters_body_representation_but_preserves_pps",
@@ -1880,9 +1899,9 @@
         "paper_audit_visualization_candidate_count": "6"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "seeming_confines_2021",
@@ -2031,9 +2050,11 @@
       "record_id": "schizophrenia_tool_use_2022",
       "citation_short": "Tool-use extends PPS boundaries in schizophrenia (2022)",
       "doi": "10.1093/schbul/sbac067",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "schizophrenia_tool_use_2022"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "tool_use_pps_plasticity_in_schizophrenia",
@@ -2056,9 +2077,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "teraoka_2024_front_rear",
@@ -2133,9 +2154,11 @@
       "record_id": "mindfulness_pps_2024",
       "citation_short": "Mindfulness and PPS boundaries (2024)",
       "doi": "10.3390/bs14040306",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "chiarella_2024_mindfulness_cheek_pps"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "focused_attention_meditation_pps_boundary_sharpness_reduction",
@@ -2161,9 +2184,9 @@
         "manual_review_profile_recreation_assessment": "possible_with_caveats"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "serino_2018_mixed_reality_pps",
@@ -2704,9 +2727,12 @@
       "record_id": "teramoto_2013_beyond_head_audiotactile",
       "citation_short": "Teramoto et al. (2013 beyond head)",
       "doi": "10.1007/s00221-013-3574-5",
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "current_template_ids": [],
-      "runnable_status": "not_yet_templated",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "teramoto_2013_beyond_head_exp1",
+        "teramoto_2013_beyond_head_exp2"
+      ],
+      "runnable_status": "template_present_but_blocked",
       "expected_outcome_status": "structured_expected_outcome_extracted",
       "expected_outcome": {
         "outcome_family": "audio_tactile_interference_beyond_perihead_space",
@@ -2729,9 +2755,9 @@
         "paper_audit_visualization_candidate_count": "0"
       },
       "observed_vs_expected_status": "not_runnable_no_observed_comparison",
-      "observed_comparison_gap": "not_yet_templated_missing_publication_parameters",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
       "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
-      "required_next_evidence": "Extract the missing source/PDF profile parameters and create a parsimonious profile before attempting observed-vs-expected evaluation."
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     },
     {
       "record_id": "finisguerra_2015_moving_sounds_motor",
@@ -2818,6 +2844,144 @@
         "source_report": "artifacts/validation_runs/current_goal_biggio_2017_known_parameter_20260715/biggio_2017_known_parameter_validation_report.json",
         "model_boundary": "Paper-specific deterministic participant-like mouse clicks were injected through SessionRunnerController and evaluated from runner-produced analysis rows; not collected participant data, not physical loopback evidence, and not a scientific replication claim."
       }
+    },
+    {
+      "record_id": "pregnancy_2018_preprint",
+      "citation_short": "Cardini, F., Fatemi-Ghomi, N., Gajewska-Knapik, K., Gooch, V., & Aspell, J. E. (2018). Maternal brain gain: enlarged representation of peripersonal space in pregnancy. bioRxiv 492017.",
+      "doi": "10.1101/492017",
+      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "current_template_ids": [
+        "cardini_2018_pregnancy_trunk_pps"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "third_trimester_expansion_of_pps",
+        "primary_expected_effect": "The third-trimester group shows facilitation at an earlier delay and a shallower fitted RT slope than controls.",
+        "expected_effect_direction": "third_trimester_earlier_facilitation_and_shallower_slope",
+        "observable_metric": "Reaction time by delay and fitted linear slope per visit",
+        "condition_contrast": "Pregnancy and control groups at second-trimester, third-trimester and postpartum visits",
+        "source_basis": [
+          "https://doi.org/10.1101/492017, bioRxiv v1 pp. 4–7, Results."
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_missing_publication_parameters",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+    },
+    {
+      "record_id": "di_cosmo_2021_phase_coupling",
+      "citation_short": "Di Cosmo, G., Costantini, M., Spadone, S., Pizzella, V., Della Penna, S., Marzetti, L., & Ferri, F. (2021). Phase-coupling of neural oscillations contributes to individual differences in peripersonal space. Neuropsychologia, 156, 107823.",
+      "doi": "10.1016/j.neuropsychologia.2021.107823",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "di_cosmo_2021_phase_coupling"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "resting_connectivity_and_pps",
+        "primary_expected_effect": "Stronger left premotor connectivity with bilateral sensorimotor and frontoparietal regions is associated with wider PPS in the beta band.",
+        "expected_effect_direction": "positive_beta_connectivity_pps_extent_association",
+        "observable_metric": "Association between resting-state MEG connectivity and the hand PPS boundary",
+        "condition_contrast": "Individual differences in connectivity and PPS extent across frequency bands",
+        "source_basis": [
+          "https://pubmed.ncbi.nlm.nih.gov/33705822/, article abstract."
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+    },
+    {
+      "record_id": "ferroni_2020_schizotypy",
+      "citation_short": "Ferroni, F., Ardizzi, M., Ferri, F., Tesanovic, A., Langiulli, N., Tonna, M., Marchesi, C., & Gallese, V. (2020). Schizotypy and individual differences in peripersonal space plasticity. Neuropsychologia, 147, 107579.",
+      "doi": "10.1016/j.neuropsychologia.2020.107579",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "ferroni_2020_schizotypy_active",
+        "ferroni_2020_schizotypy_observation"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "tool_use_schizotypy_pps_plasticity",
+        "primary_expected_effect": "PPS widened after active tool use in Experiment 1. The observation experiment did not show an overall expansion. The lower schizotypy group had greater expansion in the joint group analysis.",
+        "expected_effect_direction": "active_expansion_with_smaller_change_in_higher_schizotypy",
+        "observable_metric": "Change in the fitted sigmoid central point from pre- to post-training",
+        "condition_contrast": "Active use versus observation and lower versus higher schizotypy",
+        "source_basis": [
+          "https://pubmed.ncbi.nlm.nih.gov/32758552/, article abstract; full article Results."
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+    },
+    {
+      "record_id": "murray_2005_grabbing_your_ear",
+      "citation_short": "Murray, M. M., Molholm, S., Michel, C. M., Heslenfeld, D. J., Ritter, W., Javitt, D. C., Schroeder, C. E., & Foxe, J. J. (2005). Grabbing your ear: Rapid auditory–somatosensory multisensory interactions in low-level sensory cortices are not constrained by stimulus alignment. Cerebral Cortex, 15(7), 963–974.",
+      "doi": "10.1093/cercor/bhh197",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "murray_2005_audiotactile_alignment"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "spatial_alignment_and_multisensory_integration",
+        "primary_expected_effect": "Aligned and misaligned bimodal pairs speed detection and show early enhancement of the global field power relative to the summed unimodal prediction.",
+        "expected_effect_direction": "bimodal_facilitation_with_and_without_spatial_alignment",
+        "observable_metric": "Reaction-time cumulative distributions with race inequality and EEG global field power",
+        "condition_contrast": "Aligned and misaligned sound–touch pairs versus corresponding unimodal trials",
+        "source_basis": [
+          "https://doi.org/10.1093/cercor/bhh197, pp. 965–969, Table 1 and Figs. 2–4."
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
+    },
+    {
+      "record_id": "zampini_2005_audiotactile_toj",
+      "citation_short": "Zampini, M., Brown, T., Shore, D. I., Maravita, A., Röder, B., & Spence, C. (2005). Audiotactile temporal order judgments. Acta Psychologica, 118(3), 277–291.",
+      "doi": "10.1016/j.actpsy.2004.10.017",
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "current_template_ids": [
+        "zampini_2005_audiotactile_toj_exp1",
+        "zampini_2005_audiotactile_toj_exp2",
+        "zampini_2005_audiotactile_toj_exp3"
+      ],
+      "runnable_status": "template_present_but_blocked",
+      "expected_outcome_status": "structured_expected_outcome_extracted",
+      "expected_outcome": {
+        "outcome_family": "audiotactile_temporal_order",
+        "primary_expected_effect": "The naive group needed roughly 80 ms separation for the temporal-order discrimination threshold. Spatial alignment had limited influence across the variants.",
+        "expected_effect_direction": "limited_same_vs_opposite_location_effect",
+        "observable_metric": "Just-noticeable difference of the audio-first response function",
+        "condition_contrast": "Same versus different side, signed stimulus offsets and the studied experience and stimulation variants",
+        "source_basis": [
+          "https://doi.org/10.1016/j.actpsy.2004.10.017, Results for Experiments 1–3."
+        ]
+      },
+      "expected_outcome_extraction_blocker": "structured_expected_outcome_available",
+      "expected_outcome_source_audit": {},
+      "observed_vs_expected_status": "not_runnable_no_observed_comparison",
+      "observed_comparison_gap": "template_present_blocked_toolkit_structure",
+      "observed_evidence_boundary": "The study is not yet runnable as a finished toolkit profile, so no observed comparison exists.",
+      "required_next_evidence": "Resolve profile blockers before attempting observed-vs-expected evaluation."
     }
   ]
 }

@@ -1404,7 +1404,8 @@ def _filmstrip_condition_rows_for_strip(
                     metadata = _variant_metadata(strip, variant)
                     source = metadata.pop("primary_source", {})
                     source_label = str(source.get("label") or metadata.get("sequence_variant_label") or "")
-                    motion_direction = str(source.get("motion_direction") or ("looming" if source else ""))
+                    source_direction = "stationary" if source.get("motion_mode") == "stationary" else "looming"
+                    motion_direction = str(source.get("motion_direction") or (source_direction if source else ""))
                     variant_key = str(metadata.get("sequence_variant_key") or f"variant_{variant_index}")
                     unit_key = f"{strip_id}_{variant_key}_{soa_ms}_{repetition}"
                     rows.append(

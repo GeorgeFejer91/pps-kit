@@ -411,6 +411,31 @@ def test_prepare_segment_run_package_uses_segment5_and_segment6_csvs(tmp_path: P
     assert manifest["source_run_setup_sha256"] == _sha256(run_manifest)
 
 
+@pytest.mark.parametrize("baseline_mode, has_audio", [("audio_tactile", True), ("tactile_only", False)])
+def test_baseline_audio_and_response_onsets_are_independent(tmp_path: Path, baseline_mode, has_audio):
+    run_manifest = _segment_run_setup_fixture(tmp_path)
+    block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"
+    with block_csv.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    rows[0].update(family="baseline", baseline_mode=baseline_mode, looming_segment_onset_s="0.005", tactile_onset_s="0.002")
+    with block_csv.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+    package = prepare_segment_run_package(
+        run_manifest, "P001", session_root=tmp_path / "sessions",
+        created_at=datetime(2026, 1, 2, 3, 4, 5),
+    )
+    with package.blocks[0].manifest_path.open(newline="", encoding="utf-8") as handle:
+        baseline = next(csv.DictReader(handle))
+
+    assert baseline["Family"] == "baseline"
+    assert baseline["Looming_Onset_Sample"] == ("220" if has_audio else "")
+    assert baseline["Tactile_Onset_Sample"] == "88"
+    assert baseline["Response_Window_Onset_Sample"] == baseline["Tactile_Onset_Sample"]
+
+
 def test_prepare_segment_run_package_applies_row_iti_padding(tmp_path: Path):
     run_manifest = _segment_run_setup_fixture(tmp_path)
     block_csv = run_manifest.parent.parent / "5_block_csv_preview" / "block_01_final.csv"

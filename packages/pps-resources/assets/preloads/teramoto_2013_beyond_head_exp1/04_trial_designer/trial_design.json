@@ -1,0 +1,544 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "teramoto_2013_beyond_head_exp1",
+  "repetitions_per_condition": 20,
+  "soa_values_ms": [
+    0
+  ],
+  "spatial_values_cm": [
+    20
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-cheek-fixed-left-left",
+      "label": "cheek / left sound / left touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "cheek",
+        "planned_hand_position": "Unreported or not applicable",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "left",
+        "planned_touch_side": "left",
+        "planned_alignment": "same"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-cheek-fixed-left-left-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear left white-noise burst",
+          "source_label": "Near rear left white-noise burst",
+          "source_labels": [
+            "Near rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-cheek-fixed-left-right",
+      "label": "cheek / left sound / right touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "cheek",
+        "planned_hand_position": "Unreported or not applicable",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "left",
+        "planned_touch_side": "right",
+        "planned_alignment": "opposite"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-cheek-fixed-left-right-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear left white-noise burst",
+          "source_label": "Near rear left white-noise burst",
+          "source_labels": [
+            "Near rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-cheek-fixed-right-left",
+      "label": "cheek / right sound / left touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "cheek",
+        "planned_hand_position": "Unreported or not applicable",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "right",
+        "planned_touch_side": "left",
+        "planned_alignment": "opposite"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-cheek-fixed-right-left-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear right white-noise burst",
+          "source_label": "Near rear right white-noise burst",
+          "source_labels": [
+            "Near rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-cheek-fixed-right-right",
+      "label": "cheek / right sound / right touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "cheek",
+        "planned_hand_position": "Unreported or not applicable",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "right",
+        "planned_touch_side": "right",
+        "planned_alignment": "same"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-cheek-fixed-right-right-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear right white-noise burst",
+          "source_label": "Near rear right white-noise burst",
+          "source_labels": [
+            "Near rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-palm-beside-cheeks-left-left",
+      "label": "palm, hand beside cheeks / left sound / left touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "palm",
+        "planned_hand_position": "beside cheeks",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "left",
+        "planned_touch_side": "left",
+        "planned_alignment": "same"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-palm-beside-cheeks-left-left-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear left white-noise burst",
+          "source_label": "Near rear left white-noise burst",
+          "source_labels": [
+            "Near rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-palm-beside-cheeks-left-right",
+      "label": "palm, hand beside cheeks / left sound / right touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "palm",
+        "planned_hand_position": "beside cheeks",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "left",
+        "planned_touch_side": "right",
+        "planned_alignment": "opposite"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-palm-beside-cheeks-left-right-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear left white-noise burst",
+          "source_label": "Near rear left white-noise burst",
+          "source_labels": [
+            "Near rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-palm-beside-cheeks-right-left",
+      "label": "palm, hand beside cheeks / right sound / left touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "palm",
+        "planned_hand_position": "beside cheeks",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "right",
+        "planned_touch_side": "left",
+        "planned_alignment": "opposite"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-palm-beside-cheeks-right-left-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear right white-noise burst",
+          "source_label": "Near rear right white-noise burst",
+          "source_labels": [
+            "Near rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-palm-beside-cheeks-right-right",
+      "label": "palm, hand beside cheeks / right sound / right touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "palm",
+        "planned_hand_position": "beside cheeks",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "right",
+        "planned_touch_side": "right",
+        "planned_alignment": "same"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-palm-beside-cheeks-right-right-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear right white-noise burst",
+          "source_label": "Near rear right white-noise burst",
+          "source_labels": [
+            "Near rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-hand-dorsum-beside-cheeks-left-left",
+      "label": "hand dorsum, hand beside cheeks / left sound / left touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "hand dorsum",
+        "planned_hand_position": "beside cheeks",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "left",
+        "planned_touch_side": "left",
+        "planned_alignment": "same"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-hand-dorsum-beside-cheeks-left-left-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear left white-noise burst",
+          "source_label": "Near rear left white-noise burst",
+          "source_labels": [
+            "Near rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-hand-dorsum-beside-cheeks-left-right",
+      "label": "hand dorsum, hand beside cheeks / left sound / right touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "hand dorsum",
+        "planned_hand_position": "beside cheeks",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "left",
+        "planned_touch_side": "right",
+        "planned_alignment": "opposite"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-hand-dorsum-beside-cheeks-left-right-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear left white-noise burst",
+          "source_label": "Near rear left white-noise burst",
+          "source_labels": [
+            "Near rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-hand-dorsum-beside-cheeks-right-left",
+      "label": "hand dorsum, hand beside cheeks / right sound / left touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "hand dorsum",
+        "planned_hand_position": "beside cheeks",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "right",
+        "planned_touch_side": "left",
+        "planned_alignment": "opposite"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-hand-dorsum-beside-cheeks-right-left-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear right white-noise burst",
+          "source_label": "Near rear right white-noise burst",
+          "source_labels": [
+            "Near rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-hand-dorsum-beside-cheeks-right-right",
+      "label": "hand dorsum, hand beside cheeks / right sound / right touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "hand dorsum",
+        "planned_hand_position": "beside cheeks",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "right",
+        "planned_touch_side": "right",
+        "planned_alignment": "same"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-hand-dorsum-beside-cheeks-right-right-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear right white-noise burst",
+          "source_label": "Near rear right white-noise burst",
+          "source_labels": [
+            "Near rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-knee-fixed-left-left",
+      "label": "knee / left sound / left touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "knee",
+        "planned_hand_position": "Unreported or not applicable",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "left",
+        "planned_touch_side": "left",
+        "planned_alignment": "same"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-knee-fixed-left-left-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear left white-noise burst",
+          "source_label": "Near rear left white-noise burst",
+          "source_labels": [
+            "Near rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-knee-fixed-left-right",
+      "label": "knee / left sound / right touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "knee",
+        "planned_hand_position": "Unreported or not applicable",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "left",
+        "planned_touch_side": "right",
+        "planned_alignment": "opposite"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-knee-fixed-left-right-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear left white-noise burst",
+          "source_label": "Near rear left white-noise burst",
+          "source_labels": [
+            "Near rear left white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-knee-fixed-right-left",
+      "label": "knee / right sound / left touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "knee",
+        "planned_hand_position": "Unreported or not applicable",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "right",
+        "planned_touch_side": "left",
+        "planned_alignment": "opposite"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-knee-fixed-right-left-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear right white-noise burst",
+          "source_label": "Near rear right white-noise burst",
+          "source_labels": [
+            "Near rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    },
+    {
+      "strip_id": "teramoto_2013_beyond_head_exp1-knee-fixed-right-right",
+      "label": "knee / right sound / right touch",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "inspection_only",
+        "primary_analysis_included": false,
+        "planned_touch_site": "knee",
+        "planned_hand_position": "Unreported or not applicable",
+        "planned_sound_position": "near head",
+        "planned_sound_side": "right",
+        "planned_touch_side": "right",
+        "planned_alignment": "same"
+      },
+      "elements": [
+        {
+          "element_id": "teramoto_2013_beyond_head_exp1-knee-fixed-right-right-burst",
+          "kind": "looming_stimulus",
+          "label": "Near rear right white-noise burst",
+          "source_label": "Near rear right white-noise burst",
+          "source_labels": [
+            "Near rear right white-noise burst"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 320
+}

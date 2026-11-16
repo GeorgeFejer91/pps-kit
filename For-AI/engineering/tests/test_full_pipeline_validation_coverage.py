@@ -44,8 +44,8 @@ def test_full_pipeline_validation_summary_is_conservative():
     pipeline = json.loads(PIPELINE_PATH.read_text(encoding="utf-8"))
     summary = pipeline["summary"]
 
-    assert summary["literature_record_count"] == 75
-    assert summary["in_scope_record_count"] == 71
+    assert summary["literature_record_count"] == 80
+    assert summary["in_scope_record_count"] == 76
     assert summary["adjacent_not_applicable_record_count"] == 4
     assert summary["full_emulated_pipeline_validated_record_count"] == 17
     assert summary["human_behavioral_observed_record_count"] == 0
@@ -58,28 +58,28 @@ def test_full_pipeline_validation_summary_is_conservative():
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 17,
         "pipeline_incomplete": 2,
-        "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 35,
-        "toolkit_structure_or_response_contract_missing": 9,
+        "profile_present_but_source_parameters_missing": 11,
+        "source_parameters_missing_before_profile_creation": 25,
+        "toolkit_structure_or_response_contract_missing": 21,
     }
     assert summary["primary_gap_counts"] == {
-        "profile_present_but_source_parameters_missing": 8,
-        "source_parameters_missing_before_profile_creation": 35,
-        "toolkit_structure_or_response_contract_missing": 9,
+        "profile_present_but_source_parameters_missing": 11,
+        "source_parameters_missing_before_profile_creation": 25,
+        "toolkit_structure_or_response_contract_missing": 21,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
         "minimum_source_parameters_captured": 19,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 52,
+        "source_parameters_missing_or_unresolved": 57,
     }
     assert summary["gate_status_counts"]["observed_emulated_expected_match"] == {
         "emulated_observed_direction_matches_expected": 17,
-        "no_observed_emulated_comparison": 54,
+        "no_observed_emulated_comparison": 59,
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 43,
-        "blocked_by_toolkit_structure_or_response_contract": 9,
+        "blocked_by_missing_profile_parameters": 36,
+        "blocked_by_toolkit_structure_or_response_contract": 21,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 19,
     }
@@ -177,19 +177,25 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
     assert "exact dog/sheep source audio" in taffou["next_required_action"]
 
     newborn = records["newborn_boundaries_2019"]
-    assert newborn["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert newborn["pipeline_status"] == "toolkit_structure_or_response_contract_missing"
     assert newborn["gates"]["source_parameter_extraction"]["status"] == (
         "source_parameters_missing_or_unresolved"
     )
-    assert newborn["gates"]["parsimonious_profile_saved"]["status"] == "profile_not_yet_created"
-    assert newborn["blocking_constraint_ids"] == ["missing_core_soa_iti_baseline_repetition_parameters"]
+    assert newborn["gates"]["parsimonious_profile_saved"]["status"] == "profile_scaffold_present_but_incomplete"
+    assert newborn["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files",
+    ]
 
     kitagawa = records["kitagawa_2005_sound_complexity"]
-    assert kitagawa["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert kitagawa["pipeline_status"] == "toolkit_structure_or_response_contract_missing"
     assert kitagawa["gates"]["toolkit_gui_implementation"]["status"] == (
-        "blocked_by_missing_profile_parameters"
+        "blocked_by_toolkit_structure_or_response_contract"
     )
-    assert kitagawa["blocking_constraint_ids"] == []
+    assert kitagawa["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files",
+    ]
 
     ladavas = records["ladavas_2001_auditory_tactile_extinction"]
     assert ladavas["pipeline_status"] == "source_parameters_missing_before_profile_creation"
@@ -223,11 +229,14 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
     )
 
     ronga = records["ronga_2021_newborn_erp"]
-    assert ronga["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert ronga["pipeline_status"] == "toolkit_structure_or_response_contract_missing"
     assert ronga["gates"]["toolkit_gui_implementation"]["status"] == (
-        "blocked_by_missing_profile_parameters"
+        "blocked_by_toolkit_structure_or_response_contract"
     )
-    assert ronga["blocking_constraint_ids"] == []
+    assert ronga["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "exact_audio_envelope_or_gain_files",
+    ]
 
     serino_2015_exps_4_to_6 = records["serino_2015_exps_4_to_6"]
     assert serino_2015_exps_4_to_6["pipeline_status"] == "source_parameters_missing_before_profile_creation"

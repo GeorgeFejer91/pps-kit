@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "murray_2005_audiotactile_alignment",
+  "assets": [
+    {
+      "label": "Left speaker white noise",
+      "path": "assets/preloads/murray_2005_audiotactile_alignment/02_looming_stimuli/looming_Left_speaker_white_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/murray_2005_audiotactile_alignment/02_looming_stimuli/looming_Left_speaker_white_noise.wav",
+      "sha256": "16de1cca076887f8f0acac3fc4df27d0a2f032f29527eb73f8539ea0af8893a4",
+      "duration_s": 0.03,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Left speaker white noise",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Right speaker white noise",
+      "path": "assets/preloads/murray_2005_audiotactile_alignment/02_looming_stimuli/looming_Right_speaker_white_noise.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/murray_2005_audiotactile_alignment/02_looming_stimuli/looming_Right_speaker_white_noise.wav",
+      "sha256": "b79a570d513e3bb70536801f11d11def69c7a023b60a8c3217c82e0ef4801fdd",
+      "duration_s": 0.03,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Right speaker white noise",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

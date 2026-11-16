@@ -1,0 +1,44 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "ronga_2021_adult_erp",
+  "repetitions_per_condition": 12,
+  "soa_values_ms": [
+    0
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "ronga_2021_adult_erp-inspection",
+      "label": "Source required for trial inspection",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "none",
+        "response_rule": "passive_eeg",
+        "response_mode": "passive",
+        "response_scoring_policy": "none",
+        "primary_analysis_included": false
+      },
+      "elements": [
+        {
+          "element_id": "ronga_2021_adult_erp-sound",
+          "kind": "looming_stimulus",
+          "label": "Published sound",
+          "source_label": "Near 784 Hz modulated study tone",
+          "source_labels": [
+            "Near 784 Hz modulated study tone",
+            "Far 784 Hz modulated study tone"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 0
+}

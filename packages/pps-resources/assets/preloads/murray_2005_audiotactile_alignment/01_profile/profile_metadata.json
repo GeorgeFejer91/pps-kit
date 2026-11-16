@@ -1,0 +1,199 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "murray_2005_audiotactile_alignment",
+  "title": "Murray 2005 auditory\u2013somatosensory alignment",
+  "citation": "Murray, M. M., Molholm, S., Michel, C. M., Heslenfeld, D. J., Ritter, W., Javitt, D. C., Schroeder, C. E., & Foxe, J. J. (2005). Grabbing your ear: Rapid auditory\u2013somatosensory multisensory interactions in low-level sensory cortices are not constrained by stimulus alignment. Cerebral Cortex, 15(7), 963\u2013974.",
+  "doi": "10.1093/cercor/bhh197",
+  "source_url": "https://doi.org/10.1093/cercor/bhh197",
+  "verification_status": "partial",
+  "notes": "Inspection schedule for the eight static left/right stimulus configurations and minimum session length. The software uses stereo noise and nominal timing markers. Research launch requires the original two-speaker and two-vibrator setup, right-foot pedal, calibrated timing and synchronized EEG.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1093/cercor/bhh197",
+    "publication_status": "published",
+    "profile_type": "lateral_audiosomatosensory_detection_eeg",
+    "profile_check_complete": false,
+    "study_inventory": {
+      "formal_experiments": 1,
+      "primary_assessments": 1,
+      "auxiliary_procedures": 1
+    },
+    "cohort": {
+      "healthy_adults_n": 12,
+      "behavior_n": 12,
+      "eeg_n": 8,
+      "age_range_years": [
+        20,
+        34
+      ],
+      "eeg_exclusions_due_to_artifacts": 4,
+      "fixation": "Maintain central fixation."
+    },
+    "auditory_stimulus": {
+      "signal": "White-noise burst",
+      "duration_ms": 30,
+      "rise_ms": 2.5,
+      "fall_ms": 2.5,
+      "sound_level_db_as_reported": 70,
+      "jbl_cm42_speakers": 2,
+      "receiver": "Kenwood VR205",
+      "placement": "One beside each hand, approximately 100\u00b0 apart in azimuth.",
+      "exact_azimuths_distances_waveform_and_meter_weighting": null
+    },
+    "tactile_stimulus": {
+      "device": "Oticon-A 100 \u03a9 bone-conduction vibrator",
+      "site": "One held between thumb and index finger of each hand, away from the knuckles.",
+      "contact_surface_cm": [
+        1.6,
+        2.4
+      ],
+      "duration_ms": 15,
+      "reported_drive_voltage_v": 5,
+      "reported_drive_frequency_hz_approx": 685,
+      "vibrator_sound_isolation": {
+        "foam_wrapped_hands_n": 6,
+        "earplugs_n": 6
+      },
+      "physical_acceleration_and_contact_force": null
+    },
+    "trial_schedule": {
+      "conditions": [
+        {
+          "id": "A_L",
+          "audio": "left",
+          "touch": null
+        },
+        {
+          "id": "A_R",
+          "audio": "right",
+          "touch": null
+        },
+        {
+          "id": "S_L",
+          "audio": null,
+          "touch": "left"
+        },
+        {
+          "id": "S_R",
+          "audio": null,
+          "touch": "right"
+        },
+        {
+          "id": "AS_LL",
+          "audio": "left",
+          "touch": "left",
+          "alignment": "aligned"
+        },
+        {
+          "id": "AS_RR",
+          "audio": "right",
+          "touch": "right",
+          "alignment": "aligned"
+        },
+        {
+          "id": "AS_LR",
+          "audio": "left",
+          "touch": "right",
+          "alignment": "misaligned"
+        },
+        {
+          "id": "AS_RL",
+          "audio": "right",
+          "touch": "left",
+          "alignment": "misaligned"
+        }
+      ],
+      "paired_tactile_onset_minus_audio_onset_ms": 0,
+      "minimum_blocks": 25,
+      "trials_per_block": 96,
+      "trials_per_condition_per_block_derived": 12,
+      "minimum_total_trials_derived": 2400,
+      "order": "All eight configurations intermixed randomly with equal counts within each block.",
+      "interstimulus_interval_ms_range": [
+        1500,
+        4000
+      ],
+      "interval_anchor_and_distribution": null,
+      "catch_trials": 0
+    },
+    "response": {
+      "task": "Press a right-foot pedal as quickly as possible on detection of any auditory, tactile or combined event. Avoid anticipating.",
+      "response_required_for_every_trial_family": true,
+      "response_deadline_ms": null
+    },
+    "pretask_audibility_and_localization": {
+      "study_row_id": "doi:10.1093/cercor/bhh197#audibility-localization",
+      "participants": 12,
+      "scope": "Before testing, confirm the left and right loudspeaker sounds are clearly audible, including with earplugs, and that the participant can identify the emitting speaker.",
+      "reported_result": "All participants could readily localize either speaker.",
+      "trial_count_order_prompt_and_pass_threshold": null
+    },
+    "eeg": {
+      "acquisition": "Neuroscan Synamps",
+      "scalp_electrodes": 128,
+      "nominal_spacing_cm": 2.4,
+      "online_reference": "Nose",
+      "bandpass_hz": [
+        0.05,
+        100
+      ],
+      "sample_rate_hz": 500,
+      "impedance_limit_kohm": 5,
+      "eye_movement_rejection": "Horizontal and vertical EOG",
+      "voltage_artifact_threshold_uv": 60,
+      "epoch_ms": [
+        -100,
+        300
+      ],
+      "prestimulus_baseline_ms": [
+        -100,
+        0
+      ],
+      "erp_channels": 117,
+      "interpolation": "3D spline, excluding EOG and mastoids",
+      "offline_reference": "Average",
+      "gfp_windows_ms": [
+        [
+          50,
+          150
+        ],
+        [
+          200,
+          300
+        ]
+      ],
+      "source_estimation": {
+        "method": "LAURA",
+        "window_ms": [
+          54,
+          94
+        ],
+        "grid_spacing_mm": 6,
+        "mni_nodes": 4024
+      }
+    },
+    "analysis": {
+      "reaction_time": "Within-participant comparisons of each pairing against single modalities, aligned against misaligned, plus Miller race-model inequality using matched single-modality RT distributions.",
+      "erp": "Compare each audio-somatosensory ERP against the algebraic sum of its side-matched auditory and somatosensory ERPs, then compare aligned and misaligned combinations."
+    },
+    "preview_scope": {
+      "schedule": "One software participant with 25 blocks. Each block has 48 nominal simultaneous pairs, 24 single-modality auditory trials and 24 single-modality tactile trial markers. Toolkit Baseline denotes tactile-only stimulation here.",
+      "sound": "Stationary synthetic 30 ms white noise sent to separate stereo channels. The software uses 5 ms ramps. Channel hard-panning is a preview routing choice; it supplies no physical angle, level or binaural cue.",
+      "timing": "Within-block random lists are seeded. Physical interstimulus spacing, pedal capture and acquisition trigger timing remain outside the preview."
+    },
+    "implementation_gaps": [
+      "Calibrated two-speaker and two-vibrator scheduler and EEG synchronization are required for the simultaneous stimulus timings.",
+      "The original sound file, output calibration, exact audio source coordinates, vibrator acceleration, trigger timing, interstimulus anchor and actual recorded block counts are unavailable.",
+      "Research response capture requires the right-foot pedal and trigger-relative reaction times. Published EEG acquisition and race-model/ERP scoring require validated synchronized acquisition and preprocessing."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Cohorts, stimuli, pre-task checks, eight configurations, intervals and detection response",
+      "source": "https://doi.org/10.1093/cercor/bhh197, p. 965, Subjects, Stimuli and Task, and Fig. 1."
+    },
+    {
+      "field": "EEG acquisition, preprocessing, ERP contrast and behavioral analysis",
+      "source": "https://doi.org/10.1093/cercor/bhh197, pp. 965\u2013969, EEG Acquisition and Analyses and Results."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "cardini_2018_pregnancy_trunk_pps",
+  "assets": [
+    {
+      "label": "3 s pink timing reference",
+      "path": "assets/preloads/cardini_2018_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_pink_timing_reference.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/cardini_2018_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_pink_timing_reference.wav",
+      "sha256": "a045f764920e58834701810a1c64a570f56f2a7cd31ea46e41c33821c375f8f5",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "3 s pink timing reference",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 110.0,
+        "end_distance_cm": 110.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "polar",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.1,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

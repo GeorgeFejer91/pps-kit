@@ -1405,6 +1405,14 @@ def test_all_study_templates_load_and_summarize():
         if template.template_id in {
             "ferri_2015_ecological_looming_valence",
             "taffou_2021_auditory_roughness",
+            "di_cosmo_2021_phase_coupling",
+            "kitagawa_2005_auditory_localization",
+            "kitagawa_2005_tactile_distractor",
+            "orioli_2019_newborn_auditory",
+            "orioli_2019_newborn_audiotactile",
+            "orioli_2019_newborn_pilot",
+            "ronga_2021_adult_erp",
+            "ronga_2021_newborn_erp",
         }:
             assert summary["total_trials"] == 0
             assert any("unknown stimulus source" in warning for warning in warnings)

@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "galigani_2020_tool_observation",
+  "assets": [
+    {
+      "label": "Near sound timing marker",
+      "path": "assets/preloads/galigani_2020_tool_observation/02_looming_stimuli/looming_Near_sound_timing_marker.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/galigani_2020_tool_observation/02_looming_stimuli/looming_Near_sound_timing_marker.wav",
+      "sha256": "86e5085dbc4bd6d8ccf4257ae2055090e06eafd680cd7d1fc9d71daae9ea2480",
+      "duration_s": 0.05,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Near sound timing marker",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 4.0,
+        "end_distance_cm": 4.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.04,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.04,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Far sound timing marker",
+      "path": "assets/preloads/galigani_2020_tool_observation/02_looming_stimuli/looming_Far_sound_timing_marker.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/galigani_2020_tool_observation/02_looming_stimuli/looming_Far_sound_timing_marker.wav",
+      "sha256": "df7ef37f3a2b906e6f0ca89d3e013a08f544d0207c7117baae72cd341090af59",
+      "duration_s": 0.05,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Far sound timing marker",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 100.0,
+        "end_distance_cm": 100.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

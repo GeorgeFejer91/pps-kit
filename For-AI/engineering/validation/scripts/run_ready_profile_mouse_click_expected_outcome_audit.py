@@ -38,6 +38,8 @@ import run_ready_profile_runner_smoke as runner_smoke  # noqa: E402
 from peripersonal_space_toolkit.session_runner import (  # noqa: E402
     SessionCaptureOptions,
     SessionRunnerController,
+    _filesystem_path,
+    _path_is_file,
     load_run_package,
 )
 
@@ -877,10 +879,9 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _read_csv(path: Path | str) -> list[dict[str, str]]:
-    path = Path(path)
-    if not path.is_file():
+    if not _path_is_file(path):
         return []
-    with path.open(newline="", encoding="utf-8-sig") as handle:
+    with open(_filesystem_path(path), newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
 
 

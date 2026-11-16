@@ -12,6 +12,11 @@ OUTCOME_PATH = ROOT / "For-AI" / "research" / "literature" / "preload-ledgers" /
 BUILDER_PATH = ROOT / "For-AI" / "research" / "literature" / "tools" / "build_expected_outcome_coverage.py"
 
 STRUCTURED_EXPECTED_OUTCOME_IDS = {
+    "di_cosmo_2021_phase_coupling",
+    "ferroni_2020_schizotypy",
+    "murray_2005_grabbing_your_ear",
+    "pregnancy_2018_preprint",
+    "zampini_2005_audiotactile_toj",
     "ageing_2021",
     "amiel_2025_front_rear",
     "amemiya_2017_pseudowalking_footsole",
@@ -125,7 +130,7 @@ def test_expected_outcome_coverage_matches_literature_records_and_builder():
     assert outcome["source_literature_coverage"] == "For-AI/research/literature/preload-ledgers/audiotactile_literature_coverage.json"
     assert outcome["summary"]["literature_record_count"] == len(outcome["records"]) == len(
         coverage["literature_records"]
-    ) == 75
+    ) == 80
 
     coverage_ids = {record["record_id"] for record in coverage["literature_records"]}
     outcome_ids = {record["record_id"] for record in outcome["records"]}
@@ -143,8 +148,8 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     }
     assert structured_ids == STRUCTURED_EXPECTED_OUTCOME_IDS
     assert outcome["summary"] == {
-        "literature_record_count": 75,
-        "structured_expected_outcome_record_count": 71,
+        "literature_record_count": 80,
+        "structured_expected_outcome_record_count": 76,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
         "runnable_profile_parameter_record_count": 19,
@@ -152,15 +157,15 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "mouse_click_simulated_participant_like_comparison_record_count": 17,
         "synthetic_profile_contrast_comparison_record_count": 17,
         "parameter_run_evidence_only_record_count": 2,
-        "not_runnable_no_observed_comparison_record_count": 52,
+        "not_runnable_no_observed_comparison_record_count": 57,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 35,
+            "not_yet_templated_missing_publication_parameters": 25,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
-            "template_present_blocked_missing_publication_parameters": 8,
-            "template_present_blocked_toolkit_structure": 9,
+            "template_present_blocked_missing_publication_parameters": 11,
+            "template_present_blocked_toolkit_structure": 21,
             "ready_profile_parameter_run_available_expected_contrast_unvalidated": 2,
         },
     }

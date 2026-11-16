@@ -1,0 +1,267 @@
+{
+  "template_id": "ronga_2021_newborn_erp",
+  "title": "Ronga 2021 newborn near/far ERP",
+  "citation": "Ronga, I., Galigani, M., Bruno, V., Noel, J.-P., Gazzin, A., Perathoner, C., Serino, A., & Garbarini, F. (2021). Spatial tuning of electrophysiological responses to multisensory stimuli reveals a primitive coding of the body boundaries in newborns. Proceedings of the National Academy of Sciences, 118(12), e2024548118.",
+  "source_url": "https://doi.org/10.1073/pnas.2024548118",
+  "doi": "10.1073/pnas.2024548118",
+  "verification_status": "partial",
+  "notes": "Inspection of the five conditions and published trigger-relative timing for passive EEG. Launch requires calibrated electrocutaneous delivery, physical near/far loudspeakers and synchronized EEG.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1073/pnas.2024548118::newborn-erp",
+    "publication_status": "published",
+    "profile_type": "newborn_passive_audiotactile_erp",
+    "profile_check_complete": false,
+    "study_inventory": {
+      "formal_experiments": 1,
+      "primary_assessments": 2,
+      "auxiliary_procedures": 4,
+      "scope": "Newborn and adult ERP cohorts have separate schedules within one comparative study."
+    },
+    "cohort": {
+      "enrolled": 30,
+      "analyzed": 25,
+      "mean_age_hours": 52.5,
+      "age_sd_hours": 19.51,
+      "reported_age_range_hours": [
+        18,
+        92
+      ],
+      "exclusions": {
+        "crying_or_irritability": 2,
+        "deep_sleep": 3
+      }
+    },
+    "posture": "Awake and relaxed, held by mother.",
+    "auditory_stimulus": {
+      "signal": "Stationary Audacity-generated amplitude-modulated sinusoid from one of two physical loudspeakers.",
+      "carrier_hz": 784,
+      "modulation_hz": 50,
+      "duration_ms": 50,
+      "rise_ms": 5,
+      "fall_ms": 5,
+      "reported_level_db_approx": 64,
+      "near_distance_cm_less_than": 5,
+      "far_distance_cm": 140,
+      "distance_anchor": "Right stimulated hand",
+      "original_waveform_modulation_depth_and_delivered_reference": null
+    },
+    "tactile_stimulus": {
+      "modality": "Electrocutaneous",
+      "site": "Dorsum of the right hand",
+      "stimulator": "Digitimer DS7A",
+      "waveform": "Constant-current square pulse",
+      "pulse_duration_us": 200,
+      "surface_electrode_separation_cm_approx": 1,
+      "site_shift_cm_approx": 1,
+      "intensity": {
+        "reported_current_ma": 11
+      }
+    },
+    "trial_schedule": {
+      "blocks": [
+        3,
+        6
+      ],
+      "trials_per_condition_per_block": 5,
+      "trials_per_block": 25,
+      "planned_trial_totals": [
+        75,
+        100,
+        125,
+        150
+      ],
+      "block_rule": "Number of blocks adjusted to newborn compliance.",
+      "trigger": "Common E-Prime–Arduino trigger used as zero for all five EEG conditions.",
+      "events_ms_from_trigger": [
+        {
+          "id": "T",
+          "tactile": 0,
+          "auditory": null
+        },
+        {
+          "id": "ANear",
+          "tactile": null,
+          "auditory": 40,
+          "speaker": "near"
+        },
+        {
+          "id": "AFar",
+          "tactile": null,
+          "auditory": 40,
+          "speaker": "far"
+        },
+        {
+          "id": "TANear",
+          "tactile": 0,
+          "auditory": 40,
+          "speaker": "near"
+        },
+        {
+          "id": "TAFar",
+          "tactile": 0,
+          "auditory": 40,
+          "speaker": "far"
+        }
+      ],
+      "bimodal_tactile_onset_minus_auditory_onset_ms": -40,
+      "intertrial_interval_ms_range": [
+        4000,
+        6000
+      ],
+      "exact_interval_anchor_and_distribution": null,
+      "order": "Intermix all five conditions with equal trial counts and no more than two identical trials consecutively.",
+      "catch_trials": 0
+    },
+    "response": {
+      "required": false,
+      "mode": "Passive observation and EEG",
+      "behavioral_scoring": "None."
+    },
+    "eeg": {
+      "device": "HandyEEG and SystemPlus Evolution (Micromed)",
+      "layout": "32 Ag/AgCl 10–20 electrodes, nose online reference, right-side EOG.",
+      "sampling_hz": 1024,
+      "impedance_kohm_less_than": 5,
+      "epochs_ms_from_trigger": [
+        -500,
+        1000
+      ],
+      "baseline_ms_from_trigger": [
+        -500,
+        0
+      ],
+      "fft_bandpass_hz": [
+        1,
+        30
+      ],
+      "ocular_artifact_processing": "ICA in Letswave 6",
+      "p2_window_ms": [
+        280,
+        400
+      ],
+      "p2_channels": [
+        "Fz",
+        "FC1",
+        "FC2",
+        "Cz"
+      ]
+    },
+    "analysis": {
+      "primary": "Within each cohort, compare near vs far and paired ERP vs the algebraic sum of corresponding tactile-only and auditory-only ERPs. Quantify mean P2 amplitude and peak latency.",
+      "outcome_data": "https://doi.org/10.17632/vpbm2w7njn.1",
+      "age_relationship": "Compare newborn near and far multisensory indices with hours since birth."
+    },
+    "auxiliary_procedures": [
+      {
+        "study_row_id": "doi:10.1073/pnas.2024548118::stimulus-pilot",
+        "label": "Newborn sensory adequacy pilot",
+        "participants": 5,
+        "scope": "Separate pilot of sound tolerability and investigator-observed ERP under tactile stimulation. The authors report starting at 4 mA and selecting 11 mA as the weakest tested level eliciting an observable EEG response while newborns remained calm and awake, below motor threshold.",
+        "exposure_count_and_current_steps": null
+      }
+    ],
+    "preview_scope": "The source-defined schedule is available for inspection. No acoustic substitution, electronic stimulation or behavioral detection response is supplied.",
+    "implementation_gaps": [
+      "The original tone file, modulation depth, delivered acoustic calibration and exact physical coordinates are unavailable.",
+      "The scheduler must share a trigger between near/far audio and the electrocutaneous pulse, preserve the 40 ms auditory delay in all four audio-present conditions and intermix the five passive condition rows.",
+      "Recording and analysis require calibrated physical stimulus delivery, compatible EEG acquisition and EEG event response processing. Author trial-order and delivered-timing files are unavailable."
+    ]
+  },
+  "design": {
+    "name": "Ronga 2021 newborn near/far ERP",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "path_length_m": 1,
+      "propagation_speed_mps": 20,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "spatial_values_cm": [],
+      "pair_spatial_values_with_soas": false,
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "respiratory_phases": [
+        "Any"
+      ],
+      "block_order_randomization": "fixed",
+      "trial_randomization_strategy": "balanced_shuffle",
+      "participants": 1,
+      "repetitions_per_condition": 5,
+      "soa_values_ms": [
+        0
+      ],
+      "blocks": 3,
+      "block_specs": [
+        {
+          "label": "Design inspection 1",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        },
+        {
+          "label": "Design inspection 2",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        },
+        {
+          "label": "Design inspection 3",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        }
+      ],
+      "trial_strips": [
+        {
+          "strip_id": "ronga_2021_newborn_erp-inspection",
+          "label": "Source required for trial inspection",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "passive_eeg",
+            "response_mode": "passive",
+            "response_scoring_policy": "none",
+            "primary_analysis_included": false
+          },
+          "elements": [
+            {
+              "element_id": "ronga_2021_newborn_erp-sound",
+              "kind": "looming_stimulus",
+              "label": "Published sound",
+              "source_label": "Near 784 Hz modulated study tone",
+              "source_labels": [
+                "Near 784 Hz modulated study tone",
+                "Far 784 Hz modulated study tone"
+              ],
+              "randomized": true
+            }
+          ]
+        }
+      ],
+      "tactile_sites": [
+        "right hand dorsum"
+      ]
+    }
+  },
+  "provenance": [
+    {
+      "field": "Cohort, static near/far geometry and EEG outcomes",
+      "source": "https://doi.org/10.1073/pnas.2024548118, main article pp. 1–2 and Fig. 1."
+    },
+    {
+      "field": "Tone, electrocutaneous stimulus, trigger, trial counts and auxiliary checks",
+      "source": "https://doi.org/10.1073/pnas.2024548118, SI Appendix pp. 2–3, Participants and Stimuli and experimental task."
+    },
+    {
+      "field": "EEG acquisition, reference, epoch and ERP analyses",
+      "source": "https://doi.org/10.1073/pnas.2024548118, SI Appendix pp. 3–5, Electroencephalogram recording and processing and Data analysis."
+    }
+  ]
+}

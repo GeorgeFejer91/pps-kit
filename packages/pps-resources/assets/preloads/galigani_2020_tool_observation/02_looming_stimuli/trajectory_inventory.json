@@ -1,0 +1,80 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "galigani_2020_tool_observation",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Near sound timing marker",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 4.0,
+        "end_distance_cm": 4.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.04,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.04,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Near sound timing marker"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/galigani_2020_tool_observation/02_looming_stimuli/looming_Near_sound_timing_marker.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Far sound timing marker",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 100.0,
+        "end_distance_cm": 100.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.0,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Far sound timing marker"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/galigani_2020_tool_observation/02_looming_stimuli/looming_Far_sound_timing_marker.wav"
+      ]
+    }
+  ]
+}

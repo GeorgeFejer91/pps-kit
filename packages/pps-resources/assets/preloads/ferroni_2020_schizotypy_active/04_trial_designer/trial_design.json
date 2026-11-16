@@ -1,0 +1,74 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "ferroni_2020_schizotypy_active",
+  "repetitions_per_condition": 1,
+  "soa_values_ms": [
+    300,
+    800,
+    1500,
+    2200,
+    2700
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "ferroni-2020-schizotypy-active-trial",
+      "label": "Looming or flat PPS trial",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "respond",
+        "target_role": "tactile_target",
+        "response_rule": "left_index_laptop_button_to_tactile_target_ignore_sound",
+        "response_capture_device": "laptop button",
+        "tactile_stimulation_modality": "electrical",
+        "body_anchor": "dorsal right index finger",
+        "electrical_stimulator_model": "Digitimer DS7A",
+        "auditory_trajectory_family": "near_far_speaker_intensity_crossfade_or_flat",
+        "source_asset_equivalence": "Ardizzi\u2013Ferri 2018 digital pink-noise preview"
+      },
+      "elements": [
+        {
+          "element_id": "pre-sound-reference",
+          "kind": "jitter",
+          "label": "Inspection foreperiod",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "looming-flat-proxies",
+          "kind": "looming_stimulus",
+          "label": "Looming or flat pink-noise proxy",
+          "source_label": "Looming pink-noise proxy",
+          "source_labels": [
+            "Looming pink-noise proxy",
+            "Flat pink-noise proxy"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        },
+        {
+          "element_id": "post-trial-iti",
+          "kind": "jitter",
+          "label": "Post-trial interval",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 52
+}

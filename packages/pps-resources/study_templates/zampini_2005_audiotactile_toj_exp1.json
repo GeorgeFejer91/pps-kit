@@ -1,0 +1,656 @@
+{
+  "template_id": "zampini_2005_audiotactile_toj_exp1",
+  "title": "Zampini 2005 Experiment 1 · naïve vibrotactile observers",
+  "citation": "Zampini, M., Brown, T., Shore, D. I., Maravita, A., Röder, B., & Spence, C. (2005). Audiotactile temporal order judgments. Acta Psychologica, 118(3), 277–291.",
+  "source_url": "https://doi.org/10.1016/j.actpsy.2004.10.017",
+  "doi": "10.1016/j.actpsy.2004.10.017",
+  "verification_status": "partial",
+  "notes": "The eight-block auditory inspection preserves the reported temporal-order cell counts. The vibration, central masker and pedal task require the original apparatus.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.actpsy.2004.10.017",
+    "publication_status": "published",
+    "profile_type": "front_vibrotactile_temporal_order",
+    "profile_check_complete": false,
+    "participants": {
+      "tested": 8,
+      "cohort": "No prior temporal-order judgment experience"
+    },
+    "apparatus": {
+      "auditory": "Two Audax VE100AO speakers immediately behind the respective tactile sites. White-noise bursts last 9 ms, with nominal level 82 dBA at the head.",
+      "seated_centered_fixation": {
+        "device": "Red LED",
+        "distance_cm": 62,
+        "luminance_cd_m2": 64.3
+      },
+      "listening_positions": {
+        "lateral_offset_from_fixation_cm": [
+          -26,
+          26
+        ],
+        "azimuth_deg_approx": [
+          -24,
+          24
+        ]
+      },
+      "continuous_central_white_noise_masker_dba": 75,
+      "masker_present": true
+    },
+    "tactile": {
+      "modality": "Vibrotactile",
+      "sites": [
+        "left index finger",
+        "right index finger"
+      ],
+      "actuator": "Oticon-A 100 Ω bone-conduction vibrator mounted in a foam cube",
+      "contact_surface_cm": [
+        1.6,
+        2.4
+      ],
+      "carrier_hz": 200,
+      "duration_ms": 9,
+      "calibration": "Clearly suprathreshold",
+      "numeric_amplitude": null
+    },
+    "published_trial_schedule": {
+      "signed_soa_ms": [
+        -200,
+        -90,
+        -55,
+        -30,
+        -20,
+        20,
+        30,
+        55,
+        90,
+        200
+      ],
+      "sign_rule": "Sound onset minus tactile onset. Negative values indicate sound-first trials.",
+      "first_onset_from_fixation_ms": 750,
+      "auditory_onsets_from_fixation_ms_derived": [
+        750,
+        750,
+        750,
+        750,
+        750,
+        770,
+        780,
+        805,
+        840,
+        950
+      ],
+      "tactile_onsets_from_fixation_ms_derived": [
+        950,
+        840,
+        805,
+        780,
+        770,
+        750,
+        750,
+        750,
+        750,
+        750
+      ],
+      "response_deadline_from_first_stimulus_ms": 3500,
+      "next_fixation_after_trial_end_ms": 750,
+      "side_pairings": [
+        "left sound / left touch",
+        "left sound / right touch",
+        "right sound / left touch",
+        "right sound / right touch"
+      ],
+      "block_trial_counts": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "main_trials_total": 640,
+      "repetitions_per_block_per_soa_and_side_pair": 2,
+      "realized_trial_order": null,
+      "valid_response_confirmation_led_ms": 500,
+      "premature_or_missed_response_fixation_flicker_ms": 1000
+    },
+    "other_procedures": {
+      "practice": {
+        "study_row_id": "doi:10.1016/j.actpsy.2004.10.017::vibrotactile-toj-practice",
+        "block_trial_counts": [
+          30,
+          30
+        ],
+        "trials_total": 60,
+        "first_block_signed_soa_ms_derived": [
+          -400,
+          -180,
+          -110,
+          -60,
+          -40,
+          40,
+          60,
+          110,
+          180,
+          400
+        ],
+        "first_block_rule": "Double the formal SOAs.",
+        "per_cell_allocation": null,
+        "second_block_exact_soa_allocation": null
+      }
+    },
+    "response": {
+      "task": "Unspeeded modality-first judgment.",
+      "device": "Normally depressed right-foot toe and heel pedals",
+      "mapping": {
+        "toe_release": "sound first",
+        "heel_release": "touch first"
+      },
+      "confirmation": {
+        "upper_led": "sound first",
+        "lower_led": "touch first"
+      }
+    },
+    "analysis": {
+      "primary_measure": "Temporal-order judgment. Fit the normal-score transform of touch-first proportions separately by participant and side alignment.",
+      "included_signed_soa_ms": [
+        -90,
+        -55,
+        -30,
+        -20,
+        20,
+        30,
+        55,
+        90
+      ],
+      "excluded_signed_soa_ms": [
+        -200,
+        200
+      ],
+      "jnd": "0.675 divided by slope",
+      "pss": "Negative intercept divided by slope"
+    },
+    "inspection_scope": {
+      "auditory_only_rows": 640,
+      "preview_burst_duration_ms": 10,
+      "auditory_spatialization": "Toolkit stereo pan at the two reported azimuths.",
+      "details": "Digital, stationary sound bursts and nominal order combinations only. The touch side and lead are annotations; there is no tactile output, independent masker, fixation-light hardware or response scoring. Auditory onset is scheduled from an implicit fixation at the row start. The toolkit SOA control measures a nonnegative delay from sound onset. Touch-first timing remains a planned value."
+    },
+    "implementation_gaps": [
+      "The trial scheduler requires independent auditory and tactile triggers for signed temporal orders plus light feedback. This profile schedules only the auditory member of each pair.",
+      "Speaker and tactile calibration must verify delivered intensity and acoustic-to-skin onset. Original waveform bytes and measured timing are unavailable.",
+      "The experiment requires separate calibrated 200 Hz vibration at each finger, independent central masking, and toe/heel response capture with visual feedback.",
+      "Exact trial order, practice cell allocations and delivered masker-to-stimulus relation are unreported."
+    ]
+  },
+  "design": {
+    "name": "Zampini 2005 Experiment 1 · naïve vibrotactile observers inspection",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Front left white-noise burst",
+        "noise_type": "white",
+        "azimuth_deg": -24,
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {
+            "x_m": -0.2521767,
+            "y_m": 0.5663982,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": -0.2525835,
+            "y_m": 0.5673117,
+            "z_m": 0
+          },
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.01,
+          "start_hold_s": 0,
+          "end_hold_s": 0
+        }
+      },
+      {
+        "label": "Front right white-noise burst",
+        "noise_type": "white",
+        "azimuth_deg": 24,
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {
+            "x_m": 0.2521767,
+            "y_m": 0.5663982,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": 0.2525835,
+            "y_m": 0.5673117,
+            "z_m": 0
+          },
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.01,
+          "start_hold_s": 0,
+          "end_hold_s": 0
+        }
+      }
+    ],
+    "custom_looming_files": [],
+    "trajectory": {
+      "start_radius_m": 0.2,
+      "end_radius_m": 0.201,
+      "path_direction": "custom",
+      "path_length_m": 0.001,
+      "propagation_speed_mps": 0.1,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 48000,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "repetitions_per_condition": 2,
+      "soa_values_ms": [
+        0
+      ],
+      "spatial_values_cm": [
+        62
+      ],
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "stationary"
+      ],
+      "tactile_sites": [
+        "No tactile output in inspection"
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
+      "include_auditory_only_trials": true,
+      "auditory_only_trial_percentage": 0,
+      "auditory_only_crosses_sequence_variants": true,
+      "participants": 8,
+      "blocks": 8,
+      "repeat_trial_pool_per_block": true,
+      "block_specs": [
+        {
+          "label": "Auditory inspection block 1",
+          "stimulus_types": [
+            "Auditory-Only"
+          ]
+        },
+        {
+          "label": "Auditory inspection block 2",
+          "stimulus_types": [
+            "Auditory-Only"
+          ]
+        },
+        {
+          "label": "Auditory inspection block 3",
+          "stimulus_types": [
+            "Auditory-Only"
+          ]
+        },
+        {
+          "label": "Auditory inspection block 4",
+          "stimulus_types": [
+            "Auditory-Only"
+          ]
+        },
+        {
+          "label": "Auditory inspection block 5",
+          "stimulus_types": [
+            "Auditory-Only"
+          ]
+        },
+        {
+          "label": "Auditory inspection block 6",
+          "stimulus_types": [
+            "Auditory-Only"
+          ]
+        },
+        {
+          "label": "Auditory inspection block 7",
+          "stimulus_types": [
+            "Auditory-Only"
+          ]
+        },
+        {
+          "label": "Auditory inspection block 8",
+          "stimulus_types": [
+            "Auditory-Only"
+          ]
+        }
+      ],
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "trial_strips": [
+        {
+          "strip_id": "zampini_2005_audiotactile_toj_exp1-left-left-sound-first",
+          "label": "left sound / left touch / sound first",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_sound_side": "left",
+            "planned_touch_side": "left",
+            "planned_alignment": "same",
+            "planned_first_modality": "sound",
+            "planned_soa_sign": -1
+          },
+          "elements": [
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-left-left-sound-first-lead",
+              "kind": "jitter",
+              "label": "Delay from nominal fixation",
+              "jitter_values_ms": [
+                750
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-left-left-sound-first-burst",
+              "kind": "looming_stimulus",
+              "label": "Front left white-noise burst",
+              "source_label": "Front left white-noise burst",
+              "randomized": false
+            }
+          ],
+          "soa_values_ms": [
+            20,
+            30,
+            55,
+            90,
+            200
+          ]
+        },
+        {
+          "strip_id": "zampini_2005_audiotactile_toj_exp1-left-left-touch-first",
+          "label": "left sound / left touch / touch first",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_sound_side": "left",
+            "planned_touch_side": "left",
+            "planned_alignment": "same",
+            "planned_first_modality": "touch",
+            "planned_soa_sign": 1
+          },
+          "elements": [
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-left-left-touch-first-lead",
+              "kind": "jitter",
+              "label": "Delay from nominal fixation",
+              "jitter_values_ms": [
+                770,
+                780,
+                805,
+                840,
+                950
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-left-left-touch-first-burst",
+              "kind": "looming_stimulus",
+              "label": "Front left white-noise burst",
+              "source_label": "Front left white-noise burst",
+              "randomized": false
+            }
+          ],
+          "soa_values_ms": [
+            0
+          ]
+        },
+        {
+          "strip_id": "zampini_2005_audiotactile_toj_exp1-left-right-sound-first",
+          "label": "left sound / right touch / sound first",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_sound_side": "left",
+            "planned_touch_side": "right",
+            "planned_alignment": "opposite",
+            "planned_first_modality": "sound",
+            "planned_soa_sign": -1
+          },
+          "elements": [
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-left-right-sound-first-lead",
+              "kind": "jitter",
+              "label": "Delay from nominal fixation",
+              "jitter_values_ms": [
+                750
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-left-right-sound-first-burst",
+              "kind": "looming_stimulus",
+              "label": "Front left white-noise burst",
+              "source_label": "Front left white-noise burst",
+              "randomized": false
+            }
+          ],
+          "soa_values_ms": [
+            20,
+            30,
+            55,
+            90,
+            200
+          ]
+        },
+        {
+          "strip_id": "zampini_2005_audiotactile_toj_exp1-left-right-touch-first",
+          "label": "left sound / right touch / touch first",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_sound_side": "left",
+            "planned_touch_side": "right",
+            "planned_alignment": "opposite",
+            "planned_first_modality": "touch",
+            "planned_soa_sign": 1
+          },
+          "elements": [
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-left-right-touch-first-lead",
+              "kind": "jitter",
+              "label": "Delay from nominal fixation",
+              "jitter_values_ms": [
+                770,
+                780,
+                805,
+                840,
+                950
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-left-right-touch-first-burst",
+              "kind": "looming_stimulus",
+              "label": "Front left white-noise burst",
+              "source_label": "Front left white-noise burst",
+              "randomized": false
+            }
+          ],
+          "soa_values_ms": [
+            0
+          ]
+        },
+        {
+          "strip_id": "zampini_2005_audiotactile_toj_exp1-right-left-sound-first",
+          "label": "right sound / left touch / sound first",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_sound_side": "right",
+            "planned_touch_side": "left",
+            "planned_alignment": "opposite",
+            "planned_first_modality": "sound",
+            "planned_soa_sign": -1
+          },
+          "elements": [
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-right-left-sound-first-lead",
+              "kind": "jitter",
+              "label": "Delay from nominal fixation",
+              "jitter_values_ms": [
+                750
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-right-left-sound-first-burst",
+              "kind": "looming_stimulus",
+              "label": "Front right white-noise burst",
+              "source_label": "Front right white-noise burst",
+              "randomized": false
+            }
+          ],
+          "soa_values_ms": [
+            20,
+            30,
+            55,
+            90,
+            200
+          ]
+        },
+        {
+          "strip_id": "zampini_2005_audiotactile_toj_exp1-right-left-touch-first",
+          "label": "right sound / left touch / touch first",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_sound_side": "right",
+            "planned_touch_side": "left",
+            "planned_alignment": "opposite",
+            "planned_first_modality": "touch",
+            "planned_soa_sign": 1
+          },
+          "elements": [
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-right-left-touch-first-lead",
+              "kind": "jitter",
+              "label": "Delay from nominal fixation",
+              "jitter_values_ms": [
+                770,
+                780,
+                805,
+                840,
+                950
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-right-left-touch-first-burst",
+              "kind": "looming_stimulus",
+              "label": "Front right white-noise burst",
+              "source_label": "Front right white-noise burst",
+              "randomized": false
+            }
+          ],
+          "soa_values_ms": [
+            0
+          ]
+        },
+        {
+          "strip_id": "zampini_2005_audiotactile_toj_exp1-right-right-sound-first",
+          "label": "right sound / right touch / sound first",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_sound_side": "right",
+            "planned_touch_side": "right",
+            "planned_alignment": "same",
+            "planned_first_modality": "sound",
+            "planned_soa_sign": -1
+          },
+          "elements": [
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-right-right-sound-first-lead",
+              "kind": "jitter",
+              "label": "Delay from nominal fixation",
+              "jitter_values_ms": [
+                750
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-right-right-sound-first-burst",
+              "kind": "looming_stimulus",
+              "label": "Front right white-noise burst",
+              "source_label": "Front right white-noise burst",
+              "randomized": false
+            }
+          ],
+          "soa_values_ms": [
+            20,
+            30,
+            55,
+            90,
+            200
+          ]
+        },
+        {
+          "strip_id": "zampini_2005_audiotactile_toj_exp1-right-right-touch-first",
+          "label": "right sound / right touch / touch first",
+          "metadata": {
+            "expected_response": "none",
+            "response_rule": "inspection_only",
+            "primary_analysis_included": false,
+            "planned_sound_side": "right",
+            "planned_touch_side": "right",
+            "planned_alignment": "same",
+            "planned_first_modality": "touch",
+            "planned_soa_sign": 1
+          },
+          "elements": [
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-right-right-touch-first-lead",
+              "kind": "jitter",
+              "label": "Delay from nominal fixation",
+              "jitter_values_ms": [
+                770,
+                780,
+                805,
+                840,
+                950
+              ],
+              "randomized": false
+            },
+            {
+              "element_id": "zampini_2005_audiotactile_toj_exp1-right-right-touch-first-burst",
+              "kind": "looming_stimulus",
+              "label": "Front right white-noise burst",
+              "source_label": "Front right white-noise burst",
+              "randomized": false
+            }
+          ],
+          "soa_values_ms": [
+            0
+          ]
+        }
+      ]
+    }
+  },
+  "provenance": [
+    {
+      "field": "Cohort, speaker setup, tactile stimulus, trial order and response",
+      "source": "https://doi.org/10.1016/j.actpsy.2004.10.017, pp. 280–283, §§2.1–2.2, Fig. 1 and Table 1."
+    },
+    {
+      "field": "Comparison timing, apparatus geometry and temporal-order scoring",
+      "source": "https://doi.org/10.1016/j.actpsy.2004.10.017, pp. 280–283, §§2.1.2–2.2, Fig. 1 and Table 1."
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "orioli_2019_newborn_audiotactile",
+  "title": "Orioli 2019 newborn orienting \u00b7 Study 1 audio-tactile",
+  "citation": "Orioli, G., Santoni, A., Dragovic, D., & Farroni, T. (2019). Identifying peripersonal space boundaries in newborns. Scientific Reports, 9, 9370.",
+  "doi": "10.1038/s41598-019-45084-4",
+  "source_url": "https://doi.org/10.1038/s41598-019-45084-4",
+  "verification_status": "partial",
+  "notes": "Design inspection for the published static-level orienting task. The outcome is the newborn\u2019s gaze shift after peripheral faces appear. Research playback is blocked.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1038/s41598-019-45084-4#study-1-audiotactile",
+    "publication_status": "published",
+    "profile_type": "newborn_orienting_audio_tactile",
+    "profile_check_complete": false,
+    "study_inventory": {
+      "formal_experiments": 2,
+      "primary_assessments": 2,
+      "auxiliary_procedures": 1,
+      "scope": "The pilot and Study 1 are the formal studies. The audio-tactile and auditory-only Study 1 arms used separate groups."
+    },
+    "cohort": {
+      "analyzed": 16,
+      "mean_age_hours": 64.98
+    },
+    "apparatus": {
+      "sound_control": "E-Prime 2.0.10",
+      "screen_diagonal_in": 24,
+      "screen_distance_cm": 35,
+      "speakers": "Two loudspeakers positioned beneath the screen, one beneath each half. Sound levels measured at the newborn head position.",
+      "participant_position": "Awake and alert on the experimenter's lap, eyes aligned with the screen center. Holder views a mirrored head-position monitor and cannot see the stimulus presentation."
+    },
+    "auditory_stimulus": {
+      "carrier_hz": 8000,
+      "signal": "Static sine tone in a fixed physical setup",
+      "duration_ms": 2000,
+      "levels": [
+        {
+          "id": "Sound 0",
+          "level_db_as_reported": 47,
+          "max_trials": 5
+        },
+        {
+          "id": "Sound 1",
+          "level_db_as_reported": 55,
+          "max_trials": 7
+        },
+        {
+          "id": "Sound 2",
+          "level_db_as_reported": 59,
+          "max_trials": 5
+        },
+        {
+          "id": "Sound 3",
+          "level_db_as_reported": 62.5,
+          "max_trials": 7
+        },
+        {
+          "id": "Sound 5",
+          "level_db_as_reported": 70,
+          "max_trials": 7
+        }
+      ],
+      "calibration_weighting_source_samples_and_ramps": null
+    },
+    "tactile_stimulus": {
+      "site": "Forehead midline",
+      "method": "One gentle slow manual paintbrush stroke during the tone.",
+      "onset_ms": null,
+      "duration_ms": null,
+      "force": null
+    },
+    "trial_schedule": {
+      "time_origin": "Onset of central fixation",
+      "fixation_start_ms": 0,
+      "fixation_flicker_hz": 2.5,
+      "sound_start_ms": 3000,
+      "sound_end_ms": 5000,
+      "fixation_end_ms": 5000,
+      "paired_peripheral_face_targets_start_ms": 5000,
+      "paired_peripheral_face_targets_end_ms": 7000,
+      "next_trial_start_ms": 7000,
+      "visual_conditions": "Central white circle flickers on a black background. Then show two identical infant face images, one on either side, with 1 cm pupil diameter.",
+      "max_trials": 31,
+      "order": "Study 1 randomized assignment to audio-tactile or auditory-only arms. Within-arm presentation order is unreported.",
+      "trial_counts_are_caps": true,
+      "catch_trials_described": false,
+      "separate_tactile_only_baseline": false
+    },
+    "response": {
+      "modality": "Video-coded first gaze shift toward either peripheral face",
+      "anchor": "Peripheral faces appear, 5000 ms after central fixation starts.",
+      "validity": "Gaze must be central immediately before peripheral face onset. Offline video coder blind to sound level.",
+      "overt_manual_response": false,
+      "frame_rate_and_exact_acceptance_window": null
+    },
+    "analysis": "At least two valid trials in at least four of five intensity conditions. Test stimulation \u00d7 intensity in the pooled mixed model and compare intensity versus participant-only models within each arm.",
+    "preview_scope": "Source-defined timing and trial caps are available for inspection. Schedule and playback require the listed sound files together with visual targets, offline gaze scoring and any assigned manual stroke.",
+    "implementation_gaps": [
+      "The 8000 Hz sound assets with verified output calibration at the participant location and original source envelope are unavailable.",
+      "A synchronized visual trial scheduler and frame-based gaze response capture are required for fixation, tone and peripheral face events. The source face assets and exact scoring/video settings are unavailable.",
+      "Manual forehead contact requires a validated operator protocol and synchronization. Numerical stroke timing, speed, force and brush specifications are unreported.",
+      "A neonatal participant session requires the study-specific equipment, procedures, approvals and trained personnel."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Arm, cohort, intensity allocation and published analysis",
+      "source": "https://doi.org/10.1038/s41598-019-45084-4, pp. 2\u20135, Results and Tables 1\u20133."
+    },
+    {
+      "field": "Stimulus sequence, gaze coding, apparatus and trial caps",
+      "source": "https://doi.org/10.1038/s41598-019-45084-4, pp. 8\u20139, Method, Table 4 and Fig. 3."
+    }
+  ]
+}

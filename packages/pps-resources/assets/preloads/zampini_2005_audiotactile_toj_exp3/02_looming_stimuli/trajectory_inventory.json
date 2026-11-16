@@ -1,0 +1,80 @@
+{
+  "schema": "pps-preload-trajectory-inventory.v1",
+  "template_id": "zampini_2005_audiotactile_toj_exp3",
+  "trajectories": [
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Front left white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 62.0,
+        "end_distance_cm": 62.0,
+        "start_rotation_deg": 336.0,
+        "end_rotation_deg": 336.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": -0.252177,
+          "y_m": 0.566398,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": -0.252177,
+          "y_m": 0.566398,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Front left white-noise burst"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/zampini_2005_audiotactile_toj_exp3/02_looming_stimuli/looming_Front_left_white-noise_burst.wav"
+      ]
+    },
+    {
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Front right white-noise burst",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 62.0,
+        "end_distance_cm": 62.0,
+        "start_rotation_deg": 24.0,
+        "end_rotation_deg": 24.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.252177,
+          "y_m": 0.566398,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.252177,
+          "y_m": 0.566398,
+          "z_m": 0.0
+        }
+      },
+      "source_labels": [
+        "Front right white-noise burst"
+      ],
+      "tone_types": [
+        "white"
+      ],
+      "asset_paths": [
+        "assets/preloads/zampini_2005_audiotactile_toj_exp3/02_looming_stimuli/looming_Front_right_white-noise_burst.wav"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "murray_2005_audiotactile_alignment",
+  "repetitions_per_condition": 12,
+  "soa_values_ms": [
+    0
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "murray-alignment",
+      "label": "Static lateral detection",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "expected_response": "respond",
+        "response_mode": "right_foot_pedal",
+        "response_rule": "respond_to_any_stimulus",
+        "primary_analysis_included": false
+      },
+      "elements": [
+        {
+          "element_id": "murray-sound",
+          "kind": "looming_stimulus",
+          "label": "Static white noise",
+          "source_label": "Left speaker white noise",
+          "source_labels": [
+            "Left speaker white noise",
+            "Right speaker white noise"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 2400
+}
