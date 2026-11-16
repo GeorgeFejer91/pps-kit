@@ -1,0 +1,237 @@
+{
+  "template_id": "holmes_2020_supp5_intensity_ratio",
+  "title": "Holmes 2020 · Supplementary Experiment 5, intensity-ratio follow-up",
+  "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. Experimental Brain Research, 238, 995–1009.",
+  "source_url": "https://doi.org/10.1007/s00221-020-05771-5",
+  "doi": "10.1007/s00221-020-05771-5",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-020-05771-5::supp5-ratio",
+    "publication_status": "published",
+    "profile_type": "companion_assessment_inspection",
+    "planner_scope": "The source settings describe this companion procedure. The Planner contains no executable trial schedule for it.",
+    "profile_check_complete": false,
+    "published_method": {
+      "scope": "One highly trained observer completed an additional session after the three-observer feasibility series.",
+      "condition_matrix": {
+        "mask": [
+          "continuous white noise",
+          "discrete white-noise bursts"
+        ],
+        "strong_to_weak_ratio": [
+          1.2,
+          1.4,
+          1.6,
+          1.8,
+          2,
+          2.2,
+          2.4
+        ],
+        "reported_blocks": 14
+      },
+      "task": "Classify a single vibration as weak or strong. Its weak reference is the observer's 90% threshold. The assigned ratio scales the stronger vibration.",
+      "outcome": "Compute proportion correctly categorized per mask and ratio block. Supplementary Fig. 4 depicts chance reference and author-reported above-chance blocks. Trial counts, multiplicity treatment and exact block order remain unresolved."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Single tactile vibration classified under continuous or discrete white noise.",
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "2019 Nottingham vibrotactile feasibility apparatus and author-reported Supplementary Fig. 4.",
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "The original ratio session source code and data are unverified. Physical comparability with Experiments 1–4 is unestablished."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "Discrete burst and tactile durations are unreported for this separate follow-up."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "continuous white noise",
+            "discrete white noise bursts"
+          ],
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "renderer_or_apparatus": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "Original delivery hardware configuration and calibration are unreported for the ratio follow-up."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "One interval with threshold-level weak vibration",
+            "One interval with ratio-scaled strong vibration"
+          ],
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Ratio and noise are blocked. One weak or strong vibration per trial.",
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "Trialwise class frequencies and randomization remain unreported."
+        },
+        "blocked_or_random_order": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "Exact order of the fourteen conditions and within-block assignments remains unknown."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "Session-specific ITI and jitter are unreported."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "The deadline and response registration details are unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": "The observer classifies the single presented vibration as weak or strong within each ratio-by-noise block.",
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "Trial timings and feedback remain unreported."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "weak": "90% threshold",
+            "strong_ratio": [
+              1.2,
+              1.4,
+              1.6,
+              1.8,
+              2.0,
+              2.2,
+              2.4
+            ]
+          },
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 14,
+          "source": "Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5"
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "Exact trials per block and the total session denominator are unreported."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires calibrated relative tactile drive, fixed mask conditions and binary weak/strong response capture.",
+      "Original follow-up software, waveform, trial counts and delivered sound and tactile calibration are unavailable."
+    ]
+  },
+  "design": {
+    "name": "Holmes 2020 · Supplementary Experiment 5, intensity-ratio follow-up",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": []
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1007/s00221-020-05771-5. Publisher/OSF methods supplement, printed pp. 24–26, Supplementary Experiment 5"
+    }
+  ]
+}

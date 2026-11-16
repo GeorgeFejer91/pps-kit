@@ -33,10 +33,16 @@
         "response_mode": "numeric_keypad_press",
         "response_capture_device": "Numeric keyboard",
         "response_input_modality": "right_index_keypress",
+        "body_anchor": "Manubrium of the sternum",
         "tactile_stimulation_modality": "vibrotactile",
+        "tactile_calibration_method": "Confirm chest-target perceptibility during practice.",
+        "tactile_waveform_shape": "sine",
         "tactile_frequency_hz": 200,
         "tactile_duration_ms": 100,
-        "source_asset_equivalence": "Procedural preview. Original binaural recording and bilateral conditioning are unavailable."
+        "tactile_amplitude": 0.2,
+        "source_asset_equivalence": "Procedural preview with generated chest marker. Original binaural recording and bilateral conditioning are unavailable.",
+        "renderer_equivalence_boundary": "Digital timing inspection. Chest amplitude and delivered timing require calibration.",
+        "primary_analysis_included": false
       },
       "elements": [
         {
@@ -69,10 +75,16 @@
         "response_mode": "numeric_keypad_press",
         "response_capture_device": "Numeric keyboard",
         "response_input_modality": "right_index_keypress",
+        "body_anchor": "Manubrium of the sternum",
         "tactile_stimulation_modality": "vibrotactile",
+        "tactile_calibration_method": "Confirm chest-target perceptibility during practice.",
+        "tactile_waveform_shape": "sine",
         "tactile_frequency_hz": 200,
         "tactile_duration_ms": 100,
-        "source_asset_equivalence": "Procedural preview. Original binaural recording and bilateral conditioning are unavailable."
+        "tactile_amplitude": 0.2,
+        "source_asset_equivalence": "Procedural preview with generated chest marker. Original binaural recording and bilateral conditioning are unavailable.",
+        "renderer_equivalence_boundary": "Digital timing inspection. Chest amplitude and delivered timing require calibration.",
+        "primary_analysis_included": false
       },
       "elements": [
         {

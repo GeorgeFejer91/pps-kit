@@ -12,7 +12,7 @@
   "catch_crosses_sequence_variants": false,
   "block_specs": [
     {
-      "label": "Assessment timing inspection",
+      "label": "PPS assessment for one visit",
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"

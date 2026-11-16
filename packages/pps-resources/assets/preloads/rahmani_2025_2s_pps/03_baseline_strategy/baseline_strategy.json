@@ -18,5 +18,5 @@
   "catch_trial_percentage": 8.57142857,
   "catch_trials_exact": 21,
   "catch_crosses_sequence_variants": false,
-  "distribute_trial_pool_across_blocks": false
+  "distribute_trial_pool_across_blocks": true
 }

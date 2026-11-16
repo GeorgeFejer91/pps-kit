@@ -6,18 +6,18 @@
       "trajectory_snapshot": {
         "schema": "pps-stimulus-trajectory.v1",
         "label": "Neutral artificial white noise",
-        "source_kind": "generated_noise",
+        "source_kind": "imported_audio",
         "noise_type": "white",
         "start_distance_cm": 110.0,
-        "end_distance_cm": 110.0,
+        "end_distance_cm": 10.0,
         "start_rotation_deg": 0.0,
         "end_rotation_deg": 0.0,
-        "movement_duration_s": 0.0,
+        "movement_duration_s": 3.0,
         "start_hold_s": 0.0,
         "end_hold_s": 0.0,
-        "path_length_m": 0.0,
+        "path_length_m": 1.0,
         "coordinate_mode": "polar",
-        "path_direction": "stationary",
+        "path_direction": "approach",
         "start": {
           "x_m": 0.0,
           "y_m": 1.1,
@@ -25,7 +25,7 @@
         },
         "end": {
           "x_m": 0.0,
-          "y_m": 1.1,
+          "y_m": 0.1,
           "z_m": 0.0
         }
       },

@@ -48,7 +48,28 @@
       "Exact author sound files, loudspeaker routing, and measured SPL calibration are unavailable.",
       "Original physical electrical tactile threshold and Cedrus button timing require laboratory calibration. The toolkit 100 ms tactile-channel cue and mouse response are software proxies.",
       "The separate heartbeat counting, time estimation and self-consciousness assessments require their own procedures."
-    ]
+    ],
+    "profile_check_complete": false,
+    "published_loudspeaker_setup": {
+      "near_reference": "Near the resting right hand. Exact hand-to-speaker separation was not specified.",
+      "far_reference": "100 cm from the near loudspeaker.",
+      "locator": "Cognition 177, p. 80, section 2.2, Apparatus and procedure"
+    },
+    "published_pps_analysis": {
+      "rt_cells": "Mean tactile reaction time at each of the five delays, separately for looming and flat sounds.",
+      "boundary": "Center in milliseconds of the fitted sigmoid for an individual participant.",
+      "model_comparison": "Compare linear and sigmoid RMSE for looming trials with a paired t test.",
+      "locator": "Cognition 177, p. 81, section 2.2, Estimation of individual PPS boundary"
+    },
+    "preview_timing": {
+      "sound_onset_from_trial_start_ms": 0,
+      "sound_duration_ms": 3000,
+      "silence_after_sound_ms": 1000,
+      "software_trial_duration_ms": 4000,
+      "catch_response": "Withhold. Any software catch timer is not a tactile onset.",
+      "tactile_delivery": "The software marker uses the standard tactile-channel waveform. Original electrical delivery requires laboratory qualification.",
+      "response_input": "Mouse click as a software surrogate for the left-index Cedrus RB-834 response."
+    }
   },
   "design": {
     "name": "Ardizzi and Ferri 2018 looming and flat PPS assessment",
@@ -186,6 +207,10 @@
     {
       "field": "Tactile target, response and interval",
       "source": "Cognition 177, pp. 80–81, §2.2. Tactile onset is relative to the acoustic source. Each trial is followed by a 1000 ms interval. The recorded response used the left index finger on a Cedrus RB-834."
+    },
+    {
+      "field": "Individual PPS boundary analysis",
+      "source": "Cognition 177, p. 81, section 2.2, Estimation of individual PPS boundary."
     }
   ]
 }

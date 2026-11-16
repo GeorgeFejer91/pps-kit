@@ -57,20 +57,20 @@ def test_full_pipeline_validation_summary_is_conservative():
     assert summary["pipeline_status_counts"] == {
         "adjacent_not_applicable": 4,
         "full_emulated_source_to_runner_pipeline_validated": 17,
-        "pipeline_incomplete": 2,
-        "profile_present_but_source_parameters_missing": 11,
+        "pipeline_incomplete": 5,
+        "profile_present_but_source_parameters_missing": 8,
         "source_parameters_missing_before_profile_creation": 3,
         "toolkit_structure_or_response_contract_missing": 43,
     }
     assert summary["primary_gap_counts"] == {
-        "profile_present_but_source_parameters_missing": 11,
+        "profile_present_but_source_parameters_missing": 8,
         "source_parameters_missing_before_profile_creation": 3,
         "toolkit_structure_or_response_contract_missing": 43,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
-        "minimum_source_parameters_captured": 19,
+        "minimum_source_parameters_captured": 22,
         "not_applicable_adjacent_record": 4,
-        "source_parameters_missing_or_unresolved": 57,
+        "source_parameters_missing_or_unresolved": 54,
     }
     assert summary["gate_status_counts"]["observed_emulated_expected_match"] == {
         "emulated_observed_direction_matches_expected": 17,
@@ -78,10 +78,10 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 14,
+        "blocked_by_missing_profile_parameters": 11,
         "blocked_by_toolkit_structure_or_response_contract": 43,
         "not_applicable_adjacent_record": 4,
-        "segment_0_to_6_gui_toolkit_path_ready": 19,
+        "segment_0_to_6_gui_toolkit_path_ready": 22,
     }
     assert "not collected participant evidence" in pipeline["scope"]["evidence_boundary"]
 
@@ -255,14 +255,11 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
     assert "Max/MSP/Spat binaural stimuli" in amiel["next_required_action"]
 
     looming_duration = records["looming_duration_2025"]
-    assert looming_duration["pipeline_status"] == "profile_present_but_source_parameters_missing"
-    assert looming_duration["gates"]["toolkit_gui_implementation"]["status"] == (
-        "blocked_by_missing_profile_parameters"
-    )
-    assert looming_duration["blocking_constraint_ids"] == ["hrtf_database_or_binaural_engine_mismatch"]
-    assert "renderer/HRTF provenance metadata are now runner-supported" in looming_duration[
-        "next_required_action"
-    ]
+    assert looming_duration["pipeline_status"] == "pipeline_incomplete"
+    assert looming_duration["gates"]["toolkit_gui_implementation"]["passed"] is True
+    assert looming_duration["gates"]["observed_emulated_expected_match"]["passed"] is False
+    assert looming_duration["blocking_constraint_ids"] == []
+    assert "response counts only" in looming_duration["next_required_action"]
 
     serino_mr = records["serino_2018_mixed_reality_pps"]
     assert serino_mr["pipeline_status"] == "toolkit_structure_or_response_contract_missing"

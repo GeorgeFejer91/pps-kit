@@ -58,7 +58,7 @@
           {
             "parameter": "profile_gap",
             "status": "unsupported_toolkit_structure",
-            "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+            "reason": "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target."
           },
           {
             "parameter": "profile_gap",
@@ -128,7 +128,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 22,
+      "value": 24,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -209,16 +209,16 @@
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_mode",
       "status": "reported",
-      "value": "stationary_burst",
+      "value": "none",
       "note": "Baseline strategy is encoded."
     },
     {
       "segment": "3",
       "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
       "parameter": "baseline_count",
-      "status": "reported",
+      "status": "defaulted",
       "value": 0.0,
-      "note": "Baseline count/percentage settings are encoded."
+      "note": "No baseline trials are configured."
     },
     {
       "segment": "3",
@@ -243,7 +243,7 @@
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "block_count",
       "status": "reported",
-      "value": 1,
+      "value": 6,
       "note": "Block count is encoded."
     },
     {
@@ -283,8 +283,8 @@
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "profile_gap",
       "status": "unsupported_toolkit_structure",
-      "value": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target.",
-      "note": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+      "value": "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target.",
+      "note": "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target."
     },
     {
       "segment": "2",
@@ -340,7 +340,7 @@
     {
       "segment": "2",
       "parameter": "profile_gap",
-      "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+      "reason": "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target."
     },
     {
       "segment": "2",
@@ -372,7 +372,7 @@
     },
     "05_run_setup": {
       "run_defaults": "assets/preloads/amemiya_2019_foot_sole_exp1/05_run_setup/run_defaults.json",
-      "block_count": 1,
+      "block_count": 6,
       "participant_count": 23
     },
     "local_segment_0_to_4_profile_gate": {

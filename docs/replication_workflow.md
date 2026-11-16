@@ -10,13 +10,31 @@ identifier, and known settings are in the profile metadata. The parameter
 manifest lists the settings and apparatus that still need verification before
 a participant run.
 
-The catalogue covers 91 of 94 DOI records with 192 source-linked profiles.
+The catalogue covers 91 of 94 DOI records with 201 source-linked profiles.
 It represents 193 reviewed primary assessment rows and one conference abstract
 series. Repeated sessions with the same assessment may share a profile. Where
 a publication reports a separate companion task or computational model, its
-profile records the relevant conditions and output. Twenty-four profiles
-across 17 publications pass the software launch checks.
+profile records the relevant conditions and output. Twenty-eight profiles
+across 20 DOI records pass the software launch checks.
 
+- Rahmani’s 2 s and 3 s profiles each run 112 paired trials, 112 tactile-only
+  trials and 21 auditory catches with the published onset grid. Both generate an
+  80 Hz, 200 ms tactile waveform. The silent fixation lead-in and the three
+  software blocks reproduce the nominal timing and two breaks. Consult the study
+  for the display, questionnaire and calibrated hardware.
+- Cardini’s preprint and journal profiles each run 50 paired trials and 15
+  auditory catches per visit. The generated pink-noise cue has a rising digital
+  level. The original study uses two loudspeakers and an abdominal tapper.
+- Amemiya’s foot-sole profiles can prepare timing-inspection packages using
+  **Edit as new study** in the Planner. The packages contain 180 and 120
+  illustrated trials with a generated 200 Hz, 100 ms chest cue. Research
+  launch requires the original conditioning tracks, independently calibrated
+  bilateral outputs, the matched baseline and the published block order.
+- Holmes’s journal and OSF profiles retain distinct timing references and
+  expose both Experiment 2 assignments. Ten Planner schedules generate the
+  main trial pools. Eight companion profiles record calibration and controls.
+  Calibrated stimulus delivery, response classification and the driving apparatus
+  are required for research launch.
 - Ferri’s behavioral preview schedules 180 paired trials and 120 audio-only
   catches. The setup requires its two calibrated sound sources and electrical
   delivery.

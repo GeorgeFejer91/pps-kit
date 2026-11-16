@@ -152,21 +152,21 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "structured_expected_outcome_record_count": 76,
         "pending_expected_outcome_record_count": 0,
         "adjacent_or_out_of_scope_record_count": 4,
-        "runnable_profile_parameter_record_count": 19,
+        "runnable_profile_parameter_record_count": 22,
         "observed_behavioral_comparison_record_count": 0,
         "mouse_click_simulated_participant_like_comparison_record_count": 17,
         "synthetic_profile_contrast_comparison_record_count": 17,
-        "parameter_run_evidence_only_record_count": 2,
-        "not_runnable_no_observed_comparison_record_count": 57,
+        "parameter_run_evidence_only_record_count": 5,
+        "not_runnable_no_observed_comparison_record_count": 54,
         "adjacent_not_applicable_record_count": 4,
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
             "not_yet_templated_missing_publication_parameters": 3,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
-            "template_present_blocked_missing_publication_parameters": 11,
+            "template_present_blocked_missing_publication_parameters": 8,
             "template_present_blocked_toolkit_structure": 43,
-            "ready_profile_parameter_run_available_expected_contrast_unvalidated": 2,
+            "ready_profile_parameter_run_available_expected_contrast_unvalidated": 5,
         },
     }
 
@@ -268,7 +268,14 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
     assert "observed_profile_contrast_evidence" not in maister
     assert "observed_mouse_click_participant_like_evidence" not in maister
 
-    assessment_only = {"canzoneri_2013_tool_use_reshaping", "maister_2015_shared_sensory"}
+    new_assessments = {"looming_duration_2025", "pregnancy_2018_preprint", "pregnancy_2019"}
+    for record_id in new_assessments:
+        record = records[record_id]
+        assert record["runnable_status"] == "runnable_profile_parameters_ready"
+        assert record["observed_vs_expected_status"] == "parameter_run_evidence_only_behavioral_effect_unobserved"
+        assert "observed_mouse_click_participant_like_evidence" not in record
+
+    assessment_only = new_assessments | {"canzoneri_2013_tool_use_reshaping", "maister_2015_shared_sensory"}
     nonrunnable_structured = structured_ids - RUNNABLE_STRUCTURED_IDS - assessment_only
     assert nonrunnable_structured
     for record_id in nonrunnable_structured:

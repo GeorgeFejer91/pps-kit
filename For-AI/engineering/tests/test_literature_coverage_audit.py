@@ -34,19 +34,19 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["schema"] == "pps-audiotactile-literature-coverage.v1"
     assert coverage["coverage_summary"]["literature_record_count"] == len(coverage["literature_records"]) == 80
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
-        "covered_runnable_profile": 19,
-        "covered_blocked_missing_publication_parameters": 11,
+        "covered_runnable_profile": 22,
+        "covered_blocked_missing_publication_parameters": 8,
         "covered_blocked_toolkit_structure": 43,
         "not_yet_templated_requires_toolkit_structure": 0,
         "not_yet_templated_missing_publication_parameters": 3,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 194
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 203
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
-    ) == 26
-    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 24
+    ) == 30
+    assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 28
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
     assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == len(
         status["categories"]["toolkit_structural_gap"]
@@ -420,7 +420,7 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
         for entry in coverage["current_template_coverage"]
         if entry["published"] and entry["current_recreation_category"] == "gui_recreatable"
     ]
-    assert len(published_ready) == 24
+    assert len(published_ready) == 28
 
 
 def test_literature_coverage_constraints_focus_on_task_execution():
@@ -748,15 +748,9 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "Max/MSP Spat LISTEN HRTF subject/filter, near-field compensation, and renderer settings for the rear-left trajectory",
         "exact SPL/gain transfer for the reported 76.5/77.3 dBA source levels",
     ]
-    assert records["looming_duration_2025"]["coverage_category"] == (
-        "covered_blocked_missing_publication_parameters"
-    )
-    assert records["looming_duration_2025"]["blocking_constraint_ids"] == [
-        "hrtf_database_or_binaural_engine_mismatch"
-    ]
-    assert "renderer/HRTF provenance metadata are now runner-supported" in records["looming_duration_2025"][
-        "missing_publication_parameters"
-    ][0]
+    assert records["looming_duration_2025"]["coverage_category"] == "covered_runnable_profile"
+    assert records["looming_duration_2025"]["blocking_constraint_ids"] == []
+    assert "hardware calibration" in records["looming_duration_2025"]["source_notes"]
     assert records["hobeika_2020_methods"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
     assert records["hobeika_2020_methods"]["blocking_constraint_ids"] == [
         "exact_audio_envelope_or_gain_files",

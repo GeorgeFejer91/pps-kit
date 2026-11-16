@@ -5,14 +5,14 @@
   "source_url": "https://doi.org/10.17605/osf.io/73x59",
   "doi": "10.17605/osf.io/73x59",
   "verification_status": "partial",
-  "notes": "Inspect the author project's simulator task. The Designer shows the 2.875 ms far cue lead rounded to the nearest millisecond.",
+  "notes": "The trial preview preserves the reported cell counts and represents the archived command timing with balanced discrete foreperiods. Audio, tactile and response previews use the qualified scope recorded below.",
   "reference_parameters": {
     "study_row_id": "doi:10.17605/osf.io/73x59::d",
     "publication_status": "author_project_revision",
-    "profile_type": "published_method_inspection",
+    "profile_type": "static_near_far_audio_tactile_pps",
     "profile_check_complete": false,
     "published_method": {
-      "source_version": "March 2020 manuscript revision 4 in the 2019 OSF project, alongside ExperimentX task code and archived digital command records.",
+      "source_version": "Manuscript revision 4 from March 2020 in OSF project 73x59. The preview follows the archived task buffer and documents the paper-versus-program differences.",
       "analyzed_n": 44,
       "speaker_distances_cm": [
         2.5,
@@ -238,48 +238,368 @@
     "implementation_gaps": [
       "Recreate the driving simulator with independent video replay and active steering sessions, acquire pedal timing and switch tactile loop from index to wheel by condition.",
       "Recover or validate horn samples and calibration, audio/tactile coupling and near/far speaker routing. Exact delivered physical timing is unverified.",
-      "Reconcile manuscript and source-code timing, recover a repeatable order policy, and retain the corresponding apparatus setup for each condition."
+      "Reconcile manuscript and source-code timing, recover a repeatable order policy, and retain the corresponding apparatus setup for each condition.",
+      "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware.",
+      "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity.",
+      "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved.",
+      "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified.",
+      "The exact original car-horn crop, driving video, simulator interactivity and pedal response capture are outside this timing preview.",
+      "Block labels alone do not implement stimulus placement on finger versus wheel or the reported break settings."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "preview_scope": "The Planner generates a limited trial schedule with published counts and archived command anchors. External scientific acquisition remains blocked by the documented apparatus, software and calibration requirements.",
+    "formal_experiment": 4,
+    "reported_design": {
+      "per_block_cell_counts": {
+        "near_horn": 30,
+        "far_horn": 30
+      },
+      "trials_per_block": 60,
+      "formal_blocks": 3,
+      "total_trials_per_participant": 180,
+      "analyzed_participants_in_profile_scope": 44,
+      "order_within_block": "Pseudorandom within each driving context.",
+      "cohort": "46 recruited and 44 analyzed, after two equipment failures.",
+      "instruction": "Press the brake pedal when vibration is felt, while watching or playing the driving simulator."
+    },
+    "published_protocol": {
+      "reported_conditions": {
+        "Away": {
+          "display": "Watch a five-minute first-person Driving Simulator 2013 replay.",
+          "hand_context": "Hands rest on the table beside the wheel.",
+          "stimulator_mount": "Right index finger"
+        },
+        "Passive": {
+          "display": "Watch a replay independent of wheel motion.",
+          "hand_context": "Hold the wheel with both hands.",
+          "stimulator_mount": "Right side of the wheel"
+        },
+        "Active": {
+          "display": "Play Driving Simulator 2013.",
+          "hand_context": "Drive using the wheel.",
+          "stimulator_mount": "Right side of the wheel"
+        }
+      },
+      "speaker_placement": "The near speaker is 2.5 cm from the participant's finger. The far speaker is 70 cm from the finger, beside the monitor in front of the participant.",
+      "reported_horn_duration_ms": 438,
+      "archived_horn": {
+        "public_source": "https://osf.io/download/4mqf7/",
+        "code_url": "https://osf.io/download/asxft/",
+        "input_sha256": "c4f0b6697176858b06764b7ddeecf7163c521095136bf7e364e36864a48ca58d",
+        "crop_matlab_inclusive_samples": [
+          3301,
+          6800
+        ],
+        "command_sample_rate_hz": 8000,
+        "command_duration_ms": 437.5,
+        "audio_gain_near_far": [
+          0.95,
+          1
+        ],
+        "reported_route": "The same car horn drives auditory and tactile channels. The original asset is referenced for lab reconstruction.",
+        "local_reconstruction": "After verifying the downloaded MP3, decode the original mono 11025 Hz samples without resampling. Select MATLAB samples 3301 through 6800 inclusive. Interpret these 3500 decoded samples at 8000 Hz as the original program does, for a 437.5 ms command. The crop is available by source reference for local preparation."
+      },
+      "timing_comparison": {
+        "archived_near_audio_minus_tactile_ms": 0,
+        "archived_far_audio_minus_tactile_ms": -2.875,
+        "nominal_tactile_start_after_daq_start_ms": 100,
+        "archived_buffer_duration_ms": 2500,
+        "archived_uniform_pretrial_wait_ms": [
+          1000,
+          2000
+        ],
+        "archived_preblock_wait_ms": 10000,
+        "command_vs_geometry": "The saved script uses 5 and 105 cm to compute a 23-sample far advance, whereas the actual simulator speaker distances reported in the article are 2.5 and 70 cm. Delivered ear/skin simultaneity and the online deadline are unknown."
+      },
+      "response_comparison": {
+        "journal": "Press the brake pedal as quickly as possible on detecting touch.",
+        "released_docs": "The released script header calls the response switch the clutch. Digital Port0/Line1 does not identify the physical pedal. The stored time base and missing-response treatment vary across preserved material."
+      },
+      "block_order": {
+        "published": "Counterbalance the three contexts. Seventeen analyzed participants had a five-minute stimulation-free break between blocks. Twenty-seven used self-paced breaks.",
+        "preview": "A seeded permutation across the three context labels is a preview. The schedule does not play the replay, host the simulator, change the actuator mount, or enforce physical breaks."
+      }
+    },
+    "preview": {
+      "preview_audio_kind": "duration-matched white-noise marker for the horn",
+      "preview_audio_duration_ms": 438,
+      "preview_timing": "Balance 5 discrete foreperiod levels (1100, 1300, 1500, 1700, 1900 ms) at the midpoints of equal bins in the 1000–2000 ms source interval. Near sound begins 100 ms after nominal recording start. Far begins 3 ms earlier and touch stays at 100 ms. Use the archived 2500 ms DAQ buffer and omit a separate post-buffer pause, following the released loop.",
+      "clock_gap": "The 3 ms sound-onset-relative far delay is a preview rounding of 2.875 ms. It is not a measurement of delivered sound or skin onset.",
+      "sound_location": "The catalogue uses centered procedural signals. Near/far rows retain reported hand-relative distances; the stereo sources do not reproduce the physical spatial contrast. The generic filmstrip cue cell may display “looming”; the generated and original sound positions are stationary.",
+      "response": "Mouse events can exercise the specified response labels. The preview does not implement a vocal or pedal detector or the calibrated tactile thresholds.",
+      "randomization": "The preview balances discrete foreperiod levels within each tactile intensity and sound distance. It uses a seeded order with source-defined cell counts. The original script used independent continuous foreperiod draws and did not impose the preview’s balancing or retain its generator seed.",
+      "foreperiod_stratification_ms": [
+        1100,
+        1300,
+        1500,
+        1700,
+        1900
+      ],
+      "nominal_trial_plus_posttrial_ms_excluding_foreperiod": 2500
+    }
   },
   "design": {
     "name": "Holmes OSF · Experiment 4 · Driving and pedal response",
     "sofa_file": "",
-    "noises": [],
+    "noises": [
+      {
+        "label": "Holmes preview white-noise cue (near)",
+        "noise_type": "white",
+        "azimuth_deg": 0,
+        "elevation_deg": 0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {
+            "x_m": 0,
+            "y_m": 0.025,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": 0,
+            "y_m": 0.026000000000000002,
+            "z_m": 0
+          },
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.438,
+          "start_hold_s": 0,
+          "end_hold_s": 0
+        }
+      },
+      {
+        "label": "Holmes preview white-noise cue (far)",
+        "noise_type": "white",
+        "azimuth_deg": 0,
+        "elevation_deg": 0,
+        "gain": 1.0,
+        "motion_mode": "stationary",
+        "source_profile": "continuous_noise",
+        "trajectory_snapshot": {
+          "coordinate_mode": "cartesian",
+          "path_direction": "stationary",
+          "start": {
+            "x_m": 0,
+            "y_m": 0.7,
+            "z_m": 0
+          },
+          "end": {
+            "x_m": 0,
+            "y_m": 0.701,
+            "z_m": 0
+          },
+          "path_length_m": 0.001,
+          "movement_duration_s": 0.438,
+          "start_hold_s": 0,
+          "end_hold_s": 0
+        }
+      }
+    ],
     "custom_looming_files": [],
     "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 0.5,
+      "end_radius_m": 0.501,
+      "path_direction": "custom",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0,
+      "start_y_m": 0.5,
+      "start_z_m": 0,
+      "end_x_m": 0,
+      "end_y_m": 0.501,
+      "end_z_m": 0,
+      "path_length_m": 0.001,
+      "propagation_speed_mps": 0.00228310502283105,
+      "azimuth_start_deg": 0,
+      "azimuth_end_deg": 0,
+      "elevation_deg": 0,
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 8000,
+      "use_inverse_square": false
+    },
     "protocol": {
-      "spatial_values_cm": [
-        2.5,
-        70
-      ],
+      "repetitions_per_condition": 6,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 6,
+        "catch": 0
+      },
       "soa_values_ms": [
         0,
         3
       ],
-      "include_catch_trials": false,
-      "catch_trial_percentage": 0,
-      "include_baseline_trials": false,
-      "baseline_trial_percentage": 0,
-      "baseline_strategy": "none",
-      "trial_strips": [],
-      "tactile_sites": [
-        "right index finger",
-        "right side of steering wheel"
+      "spatial_values_cm": [
+        2.5,
+        70
       ],
       "pair_spatial_values_with_soas": true,
+      "auditory_motion_directions": [
+        "stationary"
+      ],
+      "tactile_sites": [
+        "right index finger or steering-wheel mount by context"
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "catch_trials_exact": 0,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 1,
-      "participants": 1,
-      "block_order_randomization": "fixed"
+      "blocks": 3,
+      "block_specs": [
+        {
+          "label": "Away",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        },
+        {
+          "label": "Passive",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        },
+        {
+          "label": "Active",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ]
+        }
+      ],
+      "repeat_trial_pool_per_block": true,
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "counterbalanced_rotation",
+      "participant_order_policy": {
+        "schema": "pps-participant-order-policy.v1",
+        "algorithm": "seeded_factoradic_cycle.v1",
+        "seed": 202005771,
+        "preview_count": 44
+      },
+      "trial_strips": [
+        {
+          "strip_id": "holmes-osf-exp4-near-horn",
+          "label": "Horn vibration, near sound",
+          "soa_values_ms": [
+            0
+          ],
+          "spatial_values_cm": [
+            2.5
+          ],
+          "metadata": {
+            "expected_response": "respond",
+            "target_role": "tactile_target",
+            "response_mode": "pedal_mouse_click_proxy",
+            "response_capture_device": "mouse proxy",
+            "auditory_trajectory_family": "static_near_far_loudspeakers",
+            "auditory_trajectory_direction": "stationary_near",
+            "body_anchor": "participant's hand",
+            "trajectory_start_distance_cm": 2.5,
+            "trajectory_end_distance_cm": 2.5,
+            "source_asset_equivalence": "duration-matched white-noise marker for the horn",
+            "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_intensity": "horn",
+            "tactile_intensity_unit": "condition label only"
+          },
+          "elements": [
+            {
+              "element_id": "holmes-osf-exp4-near-horn-pre",
+              "kind": "jitter",
+              "label": "Preview foreperiod and recording lead",
+              "jitter_values_ms": [
+                1200,
+                1400,
+                1600,
+                1800,
+                2000
+              ]
+            },
+            {
+              "element_id": "holmes-osf-exp4-near-horn-sound",
+              "kind": "looming_stimulus",
+              "label": "Holmes preview white-noise cue (near)",
+              "source_label": "Holmes preview white-noise cue (near)"
+            },
+            {
+              "element_id": "holmes-osf-exp4-near-horn-post",
+              "kind": "jitter",
+              "label": "Preview response and intertrial interval",
+              "jitter_values_ms": [
+                1962
+              ]
+            }
+          ]
+        },
+        {
+          "strip_id": "holmes-osf-exp4-far-horn",
+          "label": "Horn vibration, far sound",
+          "soa_values_ms": [
+            3
+          ],
+          "spatial_values_cm": [
+            70
+          ],
+          "metadata": {
+            "expected_response": "respond",
+            "target_role": "tactile_target",
+            "response_mode": "pedal_mouse_click_proxy",
+            "response_capture_device": "mouse proxy",
+            "auditory_trajectory_family": "static_near_far_loudspeakers",
+            "auditory_trajectory_direction": "stationary_far",
+            "body_anchor": "participant's hand",
+            "trajectory_start_distance_cm": 70,
+            "trajectory_end_distance_cm": 70,
+            "source_asset_equivalence": "duration-matched white-noise marker for the horn",
+            "renderer_equivalence_boundary": "centered procedural audio marker for physical loudspeaker placement",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_intensity": "horn",
+            "tactile_intensity_unit": "condition label only"
+          },
+          "elements": [
+            {
+              "element_id": "holmes-osf-exp4-far-horn-pre",
+              "kind": "jitter",
+              "label": "Preview foreperiod and recording lead",
+              "jitter_values_ms": [
+                1197,
+                1397,
+                1597,
+                1797,
+                1997
+              ]
+            },
+            {
+              "element_id": "holmes-osf-exp4-far-horn-sound",
+              "kind": "looming_stimulus",
+              "label": "Holmes preview white-noise cue (far)",
+              "source_label": "Holmes preview white-noise cue (far)"
+            },
+            {
+              "element_id": "holmes-osf-exp4-far-horn-post",
+              "kind": "jitter",
+              "label": "Preview response and intertrial interval",
+              "jitter_values_ms": [
+                1965
+              ]
+            }
+          ]
+        }
+      ],
+      "participants": 44,
+      "random_seed": 202005771
     }
   },
   "provenance": [
     {
       "field": "Study design and execution parameters",
       "source": "https://doi.org/10.17605/osf.io/73x59. OSF manuscript revision 4, pp. 18–20, Experiment 4. OSF 73x59, driving.m and archived command records"
+    },
+    {
+      "field": "Preview timing and matched journal method",
+      "source": "https://osf.io/73x59/. Archived task and analysis scripts; matched published method at https://doi.org/10.1007/s00221-020-05771-5."
     }
   ]
 }

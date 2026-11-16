@@ -6,14 +6,14 @@
   "doi": "10.17605/osf.io/73x59",
   "source_url": "https://doi.org/10.17605/osf.io/73x59",
   "verification_status": "partial",
-  "notes": "Inspect the author project's simulator task. The Designer shows the 2.875 ms far cue lead rounded to the nearest millisecond.",
+  "notes": "The trial preview preserves the reported cell counts and represents the archived command timing with balanced discrete foreperiods. Audio, tactile and response previews use the qualified scope recorded below.",
   "reference_parameters": {
     "study_row_id": "doi:10.17605/osf.io/73x59::d",
     "publication_status": "author_project_revision",
-    "profile_type": "published_method_inspection",
+    "profile_type": "static_near_far_audio_tactile_pps",
     "profile_check_complete": false,
     "published_method": {
-      "source_version": "March 2020 manuscript revision 4 in the 2019 OSF project, alongside ExperimentX task code and archived digital command records.",
+      "source_version": "Manuscript revision 4 from March 2020 in OSF project 73x59. The preview follows the archived task buffer and documents the paper-versus-program differences.",
       "analyzed_n": 44,
       "speaker_distances_cm": [
         2.5,
@@ -239,14 +239,113 @@
     "implementation_gaps": [
       "Recreate the driving simulator with independent video replay and active steering sessions, acquire pedal timing and switch tactile loop from index to wheel by condition.",
       "Recover or validate horn samples and calibration, audio/tactile coupling and near/far speaker routing. Exact delivered physical timing is unverified.",
-      "Reconcile manuscript and source-code timing, recover a repeatable order policy, and retain the corresponding apparatus setup for each condition."
+      "Reconcile manuscript and source-code timing, recover a repeatable order policy, and retain the corresponding apparatus setup for each condition.",
+      "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware.",
+      "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity.",
+      "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved.",
+      "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified.",
+      "The exact original car-horn crop, driving video, simulator interactivity and pedal response capture are outside this timing preview.",
+      "Block labels alone do not implement stimulus placement on finger versus wheel or the reported break settings."
     ],
-    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+    "preview_scope": "The Planner generates a limited trial schedule with published counts and archived command anchors. External scientific acquisition remains blocked by the documented apparatus, software and calibration requirements.",
+    "formal_experiment": 4,
+    "reported_design": {
+      "per_block_cell_counts": {
+        "near_horn": 30,
+        "far_horn": 30
+      },
+      "trials_per_block": 60,
+      "formal_blocks": 3,
+      "total_trials_per_participant": 180,
+      "analyzed_participants_in_profile_scope": 44,
+      "order_within_block": "Pseudorandom within each driving context.",
+      "cohort": "46 recruited and 44 analyzed, after two equipment failures.",
+      "instruction": "Press the brake pedal when vibration is felt, while watching or playing the driving simulator."
+    },
+    "published_protocol": {
+      "reported_conditions": {
+        "Away": {
+          "display": "Watch a five-minute first-person Driving Simulator 2013 replay.",
+          "hand_context": "Hands rest on the table beside the wheel.",
+          "stimulator_mount": "Right index finger"
+        },
+        "Passive": {
+          "display": "Watch a replay independent of wheel motion.",
+          "hand_context": "Hold the wheel with both hands.",
+          "stimulator_mount": "Right side of the wheel"
+        },
+        "Active": {
+          "display": "Play Driving Simulator 2013.",
+          "hand_context": "Drive using the wheel.",
+          "stimulator_mount": "Right side of the wheel"
+        }
+      },
+      "speaker_placement": "The near speaker is 2.5 cm from the participant's finger. The far speaker is 70 cm from the finger, beside the monitor in front of the participant.",
+      "reported_horn_duration_ms": 438,
+      "archived_horn": {
+        "public_source": "https://osf.io/download/4mqf7/",
+        "code_url": "https://osf.io/download/asxft/",
+        "input_sha256": "c4f0b6697176858b06764b7ddeecf7163c521095136bf7e364e36864a48ca58d",
+        "crop_matlab_inclusive_samples": [
+          3301,
+          6800
+        ],
+        "command_sample_rate_hz": 8000,
+        "command_duration_ms": 437.5,
+        "audio_gain_near_far": [
+          0.95,
+          1
+        ],
+        "reported_route": "The same car horn drives auditory and tactile channels. The original asset is referenced for lab reconstruction.",
+        "local_reconstruction": "After verifying the downloaded MP3, decode the original mono 11025 Hz samples without resampling. Select MATLAB samples 3301 through 6800 inclusive. Interpret these 3500 decoded samples at 8000 Hz as the original program does, for a 437.5 ms command. The crop is available by source reference for local preparation."
+      },
+      "timing_comparison": {
+        "archived_near_audio_minus_tactile_ms": 0,
+        "archived_far_audio_minus_tactile_ms": -2.875,
+        "nominal_tactile_start_after_daq_start_ms": 100,
+        "archived_buffer_duration_ms": 2500,
+        "archived_uniform_pretrial_wait_ms": [
+          1000,
+          2000
+        ],
+        "archived_preblock_wait_ms": 10000,
+        "command_vs_geometry": "The saved script uses 5 and 105 cm to compute a 23-sample far advance, whereas the actual simulator speaker distances reported in the article are 2.5 and 70 cm. Delivered ear/skin simultaneity and the online deadline are unknown."
+      },
+      "response_comparison": {
+        "journal": "Press the brake pedal as quickly as possible on detecting touch.",
+        "released_docs": "The released script header calls the response switch the clutch. Digital Port0/Line1 does not identify the physical pedal. The stored time base and missing-response treatment vary across preserved material."
+      },
+      "block_order": {
+        "published": "Counterbalance the three contexts. Seventeen analyzed participants had a five-minute stimulation-free break between blocks. Twenty-seven used self-paced breaks.",
+        "preview": "A seeded permutation across the three context labels is a preview. The schedule does not play the replay, host the simulator, change the actuator mount, or enforce physical breaks."
+      }
+    },
+    "preview": {
+      "preview_audio_kind": "duration-matched white-noise marker for the horn",
+      "preview_audio_duration_ms": 438,
+      "preview_timing": "Balance 5 discrete foreperiod levels (1100, 1300, 1500, 1700, 1900 ms) at the midpoints of equal bins in the 1000\u20132000 ms source interval. Near sound begins 100 ms after nominal recording start. Far begins 3 ms earlier and touch stays at 100 ms. Use the archived 2500 ms DAQ buffer and omit a separate post-buffer pause, following the released loop.",
+      "clock_gap": "The 3 ms sound-onset-relative far delay is a preview rounding of 2.875 ms. It is not a measurement of delivered sound or skin onset.",
+      "sound_location": "The catalogue uses centered procedural signals. Near/far rows retain reported hand-relative distances; the stereo sources do not reproduce the physical spatial contrast. The generic filmstrip cue cell may display \u201clooming\u201d; the generated and original sound positions are stationary.",
+      "response": "Mouse events can exercise the specified response labels. The preview does not implement a vocal or pedal detector or the calibrated tactile thresholds.",
+      "randomization": "The preview balances discrete foreperiod levels within each tactile intensity and sound distance. It uses a seeded order with source-defined cell counts. The original script used independent continuous foreperiod draws and did not impose the preview\u2019s balancing or retain its generator seed.",
+      "foreperiod_stratification_ms": [
+        1100,
+        1300,
+        1500,
+        1700,
+        1900
+      ],
+      "nominal_trial_plus_posttrial_ms_excluding_foreperiod": 2500
+    }
   },
   "provenance": [
     {
       "field": "Study design and execution parameters",
       "source": "https://doi.org/10.17605/osf.io/73x59. OSF manuscript revision 4, pp. 18\u201320, Experiment 4. OSF 73x59, driving.m and archived command records"
+    },
+    {
+      "field": "Preview timing and matched journal method",
+      "source": "https://osf.io/73x59/. Archived task and analysis scripts; matched published method at https://doi.org/10.1007/s00221-020-05771-5."
     }
   ]
 }

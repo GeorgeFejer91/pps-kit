@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "holmes_2020_exp2_strong_target",
   "title": "Holmes 2020 Experiment 2, strong-target vocal discrimination",
-  "visible_variant_label": "B",
+  "visible_variant_label": "C",
   "publication_status": "published",
   "profile_type": "static_near_far_audio_tactile_pps",
   "asset_mode": "bundled_local",

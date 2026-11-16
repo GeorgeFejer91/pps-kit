@@ -1,0 +1,264 @@
+{
+  "template_id": "holmes_2019_osf_exploratory_sound_type",
+  "title": "Holmes OSF · Exploratory sound-type acquisition",
+  "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. OSF 73x59, manuscript revision 4.",
+  "source_url": "https://doi.org/10.17605/osf.io/73x59",
+  "doi": "10.17605/osf.io/73x59",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.17605/osf.io/73x59::sound-type-confounded",
+    "publication_status": "author_project_revision",
+    "profile_type": "companion_assessment_inspection",
+    "planner_scope": "The source settings describe this companion procedure. The Planner contains no executable trial schedule for it.",
+    "profile_check_complete": false,
+    "published_method": {
+      "scope": "Exploratory ExperimentX labelled E4 in the code. The journal's Experiment 4 driving task is E5 in the archive.",
+      "design": "The exploratory acquisition was intended to compare different auditory waveform types and distances in the near/far task. The paper excludes it after discovering that the auditory type and location codes were confounded.",
+      "timing": "The archived routine uses the hand-task DAQ and tactile/vocal routes with a nominal 2.5 s acquisition buffer. The archived material includes both 40- and 48-trial blocks; this does not resolve a valid common analysis schedule.",
+      "outcome": "Only inspect the historical design and staging. The coded sound contrast cannot support an independent causal PPS estimate."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "near": [
+              "white noise",
+              "pink noise"
+            ],
+            "far": [
+              "amplitude-modulated white noise",
+              "1000 Hz tone"
+            ]
+          },
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3; OSF ExperimentX P7_E4_audiotactile4.m, lines 48–92 and 131–166",
+          "gap": "Planned independent sound-by-distance comparison is impossible because each sound type appears at just one distance."
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "OSF ExperimentX task/analysis MATLAB and 64 verified raw command blocks.",
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data.",
+          "gap": "Exact hardware calibration and runtime dependency versions remain unverified."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 125,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data.",
+          "gap": "Duration refers to both acoustic and tactile commands in ms."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "auditory_conditions": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "near": [
+              "white noise",
+              "pink noise"
+            ],
+            "far": [
+              "60 Hz amplitude-modulated white noise",
+              "1000 Hz tone"
+            ]
+          },
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data.",
+          "gap": "The intended independent sound-by-distance comparison was confounded."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": "NI MATLAB session outputs to analog tactile/audio and a digital near/far speaker switch. Microphone is recorded on ai3.",
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data. OSF 73x59 P7_E4_audiotactile4.m lines 112–123.",
+          "gap": "Physical wiring and calibrated output are unverified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": {
+            "weak_near": 12,
+            "weak_far": 12,
+            "strong_near": 12,
+            "strong_far": 12
+          },
+          "source": "OSF ExperimentX P7_E4_audiotactile4.m, lines 48–92 and 131–166",
+          "gap": "Allocation in the saved script. Completed trial and participant counts are not inferred from it."
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Weak/strong and near/far trials sorted by random keys within blocks. Sound type is coupled to distance.",
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data. OSF 73x59 P7_E4_audiotactile4.m lines 131–166.",
+          "gap": "The archived Go class varies across blocks. The block sequence policy remains unverified."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Random-key sort within a block, with realized row order in e.trialarray.",
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data.",
+          "gap": "Exact RNG seed and cross-block assignment remain unverified."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": "Uniform programmed 1–2 s pretrial wait with a 2.5 s foreground DAQ buffer.",
+          "source": "OSF 73x59 P7_E4_audiotactile4.m lines 64–68 and 198–203.",
+          "gap": "A separately declared 1 s ITI is unused in the released loop."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": {
+            "online_search_from_tactile_command_ms": 150,
+            "offline_timely_from_DAQ_start_ms": [
+              150,
+              2000
+            ]
+          },
+          "source": "OSF 73x59 P7_E4_analysis.m lines 47–52 and 138–166. OSF 73x59 P7_E4_audiotactile4.m lines 212–219.",
+          "gap": "The offline threshold start and classification window have different anchors."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": {
+            "MATLAB_target_code_1": "Weak-go",
+            "MATLAB_target_code_2": "Strong-go",
+            "command_blocks_by_go_rule": {
+              "weak_go_40_trial": 44,
+              "strong_go_40_trial": 18,
+              "strong_go_48_trial": 2
+            },
+            "response": "Vocal Go/NoGo discrimination, other intensity is NoGo"
+          },
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data.",
+          "gap": "Go class is determined from the archived e.target code."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "shared_software_base_waveform": true,
+            "aligned_command_pairs_verified": 2576,
+            "aligned_pairs_by_speaker": {
+              "near": 1288,
+              "far": 1288
+            },
+            "complete_blocks_verified": 64,
+            "paired_pulse_duration_ms": 125,
+            "method": "Align the near audio and tactile slices at sample 800 and far audio at sample 777 with tactile at sample 800, zero-based at 8000 Hz. Rescale audio by the archived tactile level divided by the speaker gain. All pairs matched to numerical precision.",
+            "consequence": "The manipulation coupled tactile waveform with auditory type and distance."
+          },
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data.",
+          "gap": "The saved proportional command waveforms establish a joint software manipulation. Delivered mechanical waveform is unmeasured."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "catch_trial_type": {
+          "status": "reported_absent",
+          "value": false,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data.",
+          "gap": "The stored design has no tactile-absent catch family. Go/NoGo trials are assigned from the two tactile intensities."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "catch_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "complete_archived_blocks": 64,
+            "block_trials_histogram": {
+              "40": 62,
+              "48": 2
+            }
+          },
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data.",
+          "gap": "Archive count is for retained complete files."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": 2576,
+          "source": "OSF manuscript pp. 16–17, discussion of Experiments 1–3. OSF 73x59 P7_E4_audiotactile4.m lines 84–110 and 172–196. OSF 73x59 P7_E4X_raw.zip, 64 complete main task MAT workspaces, e, tactile, auditory, e.trialarray and data.",
+          "gap": "Retained complete command trials before the offline 40-per-block cap."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The intended comparison cannot be recovered from confounded sound-type and distance labels. Reproducing the archived procedure requires the original waveform routing and validation of audible condition identities.",
+      "Distinct archived protocol versions, participant-level assignment and original retained analysis scope remain unresolved."
+    ]
+  },
+  "design": {
+    "name": "Holmes OSF · Exploratory sound-type acquisition",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": []
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.17605/osf.io/73x59. OSF manuscript pp. 16–17, discussion of Experiments 1–3"
+    }
+  ]
+}

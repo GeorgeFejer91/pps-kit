@@ -1367,10 +1367,15 @@ def build_record(
     runnable_status = _runnable_status(record, coverage_category, template_ids, adjacent)
     observed_status = _observed_status(expected_status, runnable_status)
     observed_gap = _observed_comparison_gap(expected_status, runnable_status, coverage_category)
-    # These assessment profiles have run evidence. The corresponding study-level
-    # intervention contrast has no retained outcome comparison.
+    # These assessments have run evidence. Their study-level contrasts have no retained outcome comparison.
     has_assessment_run_only = (
-        record_id in {"canzoneri_2013_tool_use_reshaping", "maister_2015_shared_sensory"}
+        record_id in {
+            "canzoneri_2013_tool_use_reshaping",
+            "looming_duration_2025",
+            "maister_2015_shared_sensory",
+            "pregnancy_2018_preprint",
+            "pregnancy_2019",
+        }
         and runnable_status == "runnable_profile_parameters_ready"
     )
     if has_assessment_run_only:
@@ -1407,7 +1412,7 @@ def build_record(
         result["observed_mouse_click_participant_like_evidence"] = observed_mouse_click_evidence
     if has_assessment_run_only:
         result["required_next_evidence"] = (
-            "Validate the study-specific pre/post intervention contrast before claiming an "
+            "Validate the study-specific contrast before claiming an "
             "expected-effect comparison; the available rehearsal checks assessment parameters and "
             "response counts only. Human effects and physical timing remain unobserved."
         )

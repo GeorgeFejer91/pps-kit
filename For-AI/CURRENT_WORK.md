@@ -10,20 +10,17 @@ This file is the active checklist and handoff owner; replace state, do not appen
   [completion review](engineering/validation/docs/completion-review-2026-10-27.md)
   owns native work packages and qualification gates.
 - **Published PPS profiles:** the [study-profile review branch](https://github.com/GeorgeFejer91/pps-kit/tree/codex/pps-study-profiles)
-  includes 192 published-source profiles and two local lab profiles. It covers
-  91 of the 94 DOI records, including 193 reviewed assessment rows and one
-  conference-abstract series. The other three sources are a commentary, a
-  conceptual chapter, and a survey without a PPS measure. See the
-  [replication workflow](../docs/replication_workflow.md#published-study-profiles)
-  and [profile readiness](../docs/PUBLISHED_STUDY_RECREATION_STATUS.md).
-  Twenty-four profiles from 17 publications can launch in software. The new
-  Ferri behavioral, Serino hand-posture and Teneggi pre/post-game previews
-  generate 300, 432 and 208 trial rows respectively. Their research launch
-  gates remain closed pending the specified equipment, source files and
-  calibration. Paredes' pinned author notebooks reproduced the model's
-  two-point prediction. Next, implement the study-specific output and trigger
-  contracts and validate on the corresponding apparatus. Source PDFs and
-  working extraction protocols belong in the private archive.
+  includes 201 source-linked profiles and two local lab profiles. The catalogue
+  covers 193 original assessments and one conference-abstract series across 91
+  of the 94 DOI records. A commentary, a conceptual chapter and an ASMR survey
+  have no original PPS task. Twenty-eight profiles across 20 DOI records can
+  launch in software. Both Rahmani durations and both Cardini versions passed
+  Runner software playback with the published trial totals. Holmes, Amemiya,
+  Ferri and Ardizzi–Ferri gained timing, stimulus or apparatus records. For the
+  remaining research launches, the [profile status](../docs/PUBLISHED_STUDY_RECREATION_STATUS.md)
+  and [workflow](../docs/replication_workflow.md#published-study-profiles)
+  identify the missing inputs, timing or apparatus. Source PDFs and extraction
+  protocols reside in the private archive.
 - **Timeline-first Runner UI: VERIFIED SOURCE AND HOSTED.** Study 5 Focus
   Mode inspires the native landscape timeline's audio, tactile, and response
   lanes. It shows scheduled cues and software playback positions, with one

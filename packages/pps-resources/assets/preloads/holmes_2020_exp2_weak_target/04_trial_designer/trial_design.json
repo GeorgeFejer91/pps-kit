@@ -1,7 +1,7 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "holmes_2020_exp2_weak_target",
-  "repetitions_per_condition": 10,
+  "repetitions_per_condition": 2,
   "soa_values_ms": [
     0,
     3
@@ -44,11 +44,15 @@
         {
           "element_id": "holmes-exp2-weak-target-near-weak-pre",
           "kind": "jitter",
-          "label": "Preview leading silence",
+          "label": "Preview foreperiod and recording lead",
           "source_label": "",
           "source_labels": [],
           "jitter_values_ms": [
-            1600
+            1200,
+            1400,
+            1600,
+            1800,
+            2000
           ],
           "randomized": false
         },
@@ -66,7 +70,7 @@
         {
           "element_id": "holmes-exp2-weak-target-near-weak-post",
           "kind": "jitter",
-          "label": "Preview trailing silence",
+          "label": "Preview response and intertrial interval",
           "source_label": "",
           "source_labels": [],
           "jitter_values_ms": [
@@ -108,11 +112,15 @@
         {
           "element_id": "holmes-exp2-weak-target-near-strong-pre",
           "kind": "jitter",
-          "label": "Preview leading silence",
+          "label": "Preview foreperiod and recording lead",
           "source_label": "",
           "source_labels": [],
           "jitter_values_ms": [
-            1600
+            1200,
+            1400,
+            1600,
+            1800,
+            2000
           ],
           "randomized": false
         },
@@ -130,7 +138,7 @@
         {
           "element_id": "holmes-exp2-weak-target-near-strong-post",
           "kind": "jitter",
-          "label": "Preview trailing silence",
+          "label": "Preview response and intertrial interval",
           "source_label": "",
           "source_labels": [],
           "jitter_values_ms": [
@@ -172,11 +180,15 @@
         {
           "element_id": "holmes-exp2-weak-target-far-weak-pre",
           "kind": "jitter",
-          "label": "Preview leading silence",
+          "label": "Preview foreperiod and recording lead",
           "source_label": "",
           "source_labels": [],
           "jitter_values_ms": [
-            1597
+            1197,
+            1397,
+            1597,
+            1797,
+            1997
           ],
           "randomized": false
         },
@@ -194,7 +206,7 @@
         {
           "element_id": "holmes-exp2-weak-target-far-weak-post",
           "kind": "jitter",
-          "label": "Preview trailing silence",
+          "label": "Preview response and intertrial interval",
           "source_label": "",
           "source_labels": [],
           "jitter_values_ms": [
@@ -236,11 +248,15 @@
         {
           "element_id": "holmes-exp2-weak-target-far-strong-pre",
           "kind": "jitter",
-          "label": "Preview leading silence",
+          "label": "Preview foreperiod and recording lead",
           "source_label": "",
           "source_labels": [],
           "jitter_values_ms": [
-            1597
+            1197,
+            1397,
+            1597,
+            1797,
+            1997
           ],
           "randomized": false
         },
@@ -258,7 +274,7 @@
         {
           "element_id": "holmes-exp2-weak-target-far-strong-post",
           "kind": "jitter",
-          "label": "Preview trailing silence",
+          "label": "Preview response and intertrial interval",
           "source_label": "",
           "source_labels": [],
           "jitter_values_ms": [

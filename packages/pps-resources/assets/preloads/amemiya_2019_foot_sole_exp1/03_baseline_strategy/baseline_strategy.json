@@ -1,19 +1,14 @@
 {
   "schema": "pps-preload-baseline-segment.v1",
   "template_id": "amemiya_2019_foot_sole_exp1",
-  "baseline_strategy": "stationary_burst",
-  "include_baseline_trials": true,
+  "baseline_strategy": "none",
+  "include_baseline_trials": false,
   "baseline_trials_exact": null,
   "baseline_trial_percentage": 0.0,
-  "baseline_soa_values_ms": [
-    2710,
-    3290,
-    3860,
-    4430
-  ],
+  "baseline_soa_values_ms": [],
   "baseline_crosses_sequence_variants": true,
   "catch_trial_percentage": 20,
   "catch_trials_exact": null,
   "catch_crosses_sequence_variants": true,
-  "distribute_trial_pool_across_blocks": false
+  "distribute_trial_pool_across_blocks": true
 }

@@ -79,16 +79,24 @@
     "preview": {
       "preview_audio_kind": "fixed generated white-noise proxy",
       "preview_audio_duration_ms": 125,
-      "preview_timing": "Use a fixed 1500 ms proxy for the 1000–2000 ms foreperiod. Add the 100 ms recording lead to the near sound onset; far sound begins 3 ms earlier and the tactile marker stays at the near trial-relative time. The preview uses the journal's 2600 ms buffer and 1000 ms post-trial pause for Experiments 1–3. Experiment 4 uses the released script's 2500 ms buffer with no additional post-buffer wait.",
+      "preview_timing": "Balance 5 discrete foreperiod levels (1100, 1300, 1500, 1700, 1900 ms) at the midpoints of equal bins in the 1000–2000 ms source interval. Near sound begins 100 ms after nominal recording start. Far begins 3 ms earlier and touch stays at 100 ms. Use the article’s 2600 ms trial and 1000 ms post-trial pause.",
       "clock_gap": "The 3 ms sound-onset-relative far delay is a preview rounding of 2.875 ms. It is not a measurement of delivered sound or skin onset.",
       "sound_location": "The catalogue uses centered procedural signals. Near/far rows retain reported hand-relative distances; the stereo sources do not reproduce the physical spatial contrast. The generic filmstrip cue cell may display “looming”; the generated and original sound positions are stationary.",
       "response": "Mouse events can exercise the specified response labels. The preview does not implement a vocal or pedal detector or the calibrated tactile thresholds.",
-      "randomization": "The repeated-pool preview preserves each block’s cell counts. The source pseudorandomized within each block; the exact sequences are unverified."
+      "randomization": "The preview balances discrete foreperiod levels within each tactile intensity and sound distance. It uses a seeded order with source-defined cell counts. The original script used independent continuous foreperiod draws and did not impose the preview’s balancing or retain its generator seed.",
+      "foreperiod_stratification_ms": [
+        1100,
+        1300,
+        1500,
+        1700,
+        1900
+      ],
+      "nominal_trial_plus_posttrial_ms_excluding_foreperiod": 3600
     },
     "implementation_gaps": [
       "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware.",
       "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity.",
-      "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks.",
+      "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved.",
       "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified.",
       "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure.",
       "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
@@ -177,9 +185,9 @@
       "use_inverse_square": false
     },
     "protocol": {
-      "repetitions_per_condition": 10,
+      "repetitions_per_condition": 2,
       "trial_pool_repetition_defaults": {
-        "audio_tactile": 10,
+        "audio_tactile": 2,
         "catch": 0
       },
       "soa_values_ms": [
@@ -271,9 +279,13 @@
             {
               "element_id": "holmes-exp2-weak-target-near-weak-pre",
               "kind": "jitter",
-              "label": "Preview leading silence",
+              "label": "Preview foreperiod and recording lead",
               "jitter_values_ms": [
-                1600
+                1200,
+                1400,
+                1600,
+                1800,
+                2000
               ]
             },
             {
@@ -285,7 +297,7 @@
             {
               "element_id": "holmes-exp2-weak-target-near-weak-post",
               "kind": "jitter",
-              "label": "Preview trailing silence",
+              "label": "Preview response and intertrial interval",
               "jitter_values_ms": [
                 3375
               ]
@@ -321,9 +333,13 @@
             {
               "element_id": "holmes-exp2-weak-target-near-strong-pre",
               "kind": "jitter",
-              "label": "Preview leading silence",
+              "label": "Preview foreperiod and recording lead",
               "jitter_values_ms": [
-                1600
+                1200,
+                1400,
+                1600,
+                1800,
+                2000
               ]
             },
             {
@@ -335,7 +351,7 @@
             {
               "element_id": "holmes-exp2-weak-target-near-strong-post",
               "kind": "jitter",
-              "label": "Preview trailing silence",
+              "label": "Preview response and intertrial interval",
               "jitter_values_ms": [
                 3375
               ]
@@ -371,9 +387,13 @@
             {
               "element_id": "holmes-exp2-weak-target-far-weak-pre",
               "kind": "jitter",
-              "label": "Preview leading silence",
+              "label": "Preview foreperiod and recording lead",
               "jitter_values_ms": [
-                1597
+                1197,
+                1397,
+                1597,
+                1797,
+                1997
               ]
             },
             {
@@ -385,7 +405,7 @@
             {
               "element_id": "holmes-exp2-weak-target-far-weak-post",
               "kind": "jitter",
-              "label": "Preview trailing silence",
+              "label": "Preview response and intertrial interval",
               "jitter_values_ms": [
                 3378
               ]
@@ -421,9 +441,13 @@
             {
               "element_id": "holmes-exp2-weak-target-far-strong-pre",
               "kind": "jitter",
-              "label": "Preview leading silence",
+              "label": "Preview foreperiod and recording lead",
               "jitter_values_ms": [
-                1597
+                1197,
+                1397,
+                1597,
+                1797,
+                1997
               ]
             },
             {
@@ -435,7 +459,7 @@
             {
               "element_id": "holmes-exp2-weak-target-far-strong-post",
               "kind": "jitter",
-              "label": "Preview trailing silence",
+              "label": "Preview response and intertrial interval",
               "jitter_values_ms": [
                 3378
               ]

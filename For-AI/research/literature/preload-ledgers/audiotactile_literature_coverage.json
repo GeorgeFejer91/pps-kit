@@ -267,20 +267,20 @@
   "coverage_summary": {
     "literature_record_count": 80,
     "literature_record_category_counts": {
-      "covered_runnable_profile": 19,
-      "covered_blocked_missing_publication_parameters": 11,
+      "covered_runnable_profile": 22,
+      "covered_blocked_missing_publication_parameters": 8,
       "covered_blocked_toolkit_structure": 43,
       "not_yet_templated_requires_toolkit_structure": 0,
       "not_yet_templated_missing_publication_parameters": 3,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
-    "current_template_count": 194,
-    "current_profile_check_pass_count": 26,
-    "published_profile_check_pass_count": 24,
+    "current_template_count": 203,
+    "current_profile_check_pass_count": 30,
+    "published_profile_check_pass_count": 28,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 168,
-    "current_templates_with_toolkit_structural_gaps": 150,
+    "current_templates_with_missing_publication_parameters": 173,
+    "current_templates_with_toolkit_structural_gaps": 159,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -928,18 +928,16 @@
     {
       "template_id": "rahmani_2025_2s_pps",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "hrtf_database_or_binaural_engine_mismatch"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The two 245-trial software assessments preserve the seven delays and matched tactile-only baselines, with an 80 Hz, 200 ms digitally generated sawtooth. Fixation display, original acoustics and hardware calibration remain laboratory work."
     },
     {
       "template_id": "rahmani_2025_3s_pps",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "hrtf_database_or_binaural_engine_mismatch"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The two 245-trial software assessments preserve the seven delays and matched tactile-only baselines, with an 80 Hz, 200 ms digitally generated sawtooth. Fixation display, original acoustics and hardware calibration remain laboratory work."
     },
     {
       "template_id": "hobeika_2018_anisotropy_left_handed",
@@ -1010,7 +1008,8 @@
       "primary_constraint_ids": [
         "voice_key_response_capture",
         "exact_audio_envelope_or_gain_files"
-      ]
+      ],
+      "source_notes": "Experiment 1 trial allocation with a fixed generated white-noise proxy. Response capture and the original tactile stimulus require external apparatus."
     },
     {
       "template_id": "holmes_2020_exp2_strong_target",
@@ -1019,7 +1018,8 @@
       "primary_constraint_ids": [
         "voice_key_response_capture",
         "exact_audio_envelope_or_gain_files"
-      ]
+      ],
+      "source_notes": "Experiment 2 trial allocation with a fixed generated white-noise proxy. Response capture and the original tactile stimulus require external apparatus. This profile is only for the strong-target participant arm."
     },
     {
       "template_id": "holmes_2020_exp2_weak_target",
@@ -1028,7 +1028,8 @@
       "primary_constraint_ids": [
         "voice_key_response_capture",
         "exact_audio_envelope_or_gain_files"
-      ]
+      ],
+      "source_notes": "Experiment 2 trial allocation with a fixed generated white-noise proxy. Response capture and the original tactile stimulus require external apparatus. This profile is only for the weak-target participant arm."
     },
     {
       "template_id": "holmes_2020_exp3",
@@ -1037,7 +1038,8 @@
       "primary_constraint_ids": [
         "voice_key_response_capture",
         "exact_audio_envelope_or_gain_files"
-      ]
+      ],
+      "source_notes": "Experiment 3 trial allocation with a fixed generated white-noise proxy. Response capture and the original tactile stimulus require external apparatus."
     },
     {
       "template_id": "holmes_2020_exp4",
@@ -1046,7 +1048,8 @@
       "primary_constraint_ids": [
         "voice_key_response_capture",
         "exact_audio_envelope_or_gain_files"
-      ]
+      ],
+      "source_notes": "Experiment 4 trial allocation with a duration-matched white-noise marker for the horn. Response capture and the original tactile stimulus require external apparatus. The simulator condition labels mark the study's three external contexts."
     },
     {
       "template_id": "teraoka_2024_front_pps",
@@ -1112,20 +1115,16 @@
     {
       "template_id": "cardini_2018_pregnancy_trunk_pps",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters",
-        "exact_audio_envelope_or_gain_files"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The software assessment preserves five delays and 15 audio-only catches per visit. It uses a synthesized pink-noise envelope. The original loudspeakers, tapper and button require separate lab setup."
     },
     {
       "template_id": "cardini_2019_pregnancy_trunk_pps",
       "published": true,
-      "current_recreation_category": "missing_publication_parameters",
-      "primary_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters",
-        "exact_audio_envelope_or_gain_files"
-      ]
+      "current_recreation_category": "gui_recreatable",
+      "primary_constraint_ids": [],
+      "source_notes": "The software assessment preserves five delays and 15 audio-only catches per visit. It uses a synthesized pink-noise envelope. The original loudspeakers, tapper and button require separate lab setup."
     },
     {
       "template_id": "chiarella_2024_mindfulness_cheek_pps",
@@ -1777,7 +1776,8 @@
       "current_recreation_category": "toolkit_structural_gap",
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
-      ]
+      ],
+      "source_notes": "The trial preview preserves the reported cell counts and represents the archived command timing with balanced discrete foreperiods. Audio, tactile and response previews use the qualified scope recorded below."
     },
     {
       "template_id": "holmes_2019_osf_exp2",
@@ -1785,7 +1785,8 @@
       "current_recreation_category": "toolkit_structural_gap",
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
-      ]
+      ],
+      "source_notes": "The trial preview preserves the reported cell counts and represents the archived command timing with balanced discrete foreperiods. Audio, tactile and response previews use the qualified scope recorded below."
     },
     {
       "template_id": "holmes_2019_osf_exp3",
@@ -1793,7 +1794,8 @@
       "current_recreation_category": "toolkit_structural_gap",
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
-      ]
+      ],
+      "source_notes": "The trial preview preserves the reported cell counts and represents the archived command timing with balanced discrete foreperiods. Audio, tactile and response previews use the qualified scope recorded below."
     },
     {
       "template_id": "holmes_2019_osf_exp4",
@@ -1801,7 +1803,8 @@
       "current_recreation_category": "toolkit_structural_gap",
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
-      ]
+      ],
+      "source_notes": "The trial preview preserves the reported cell counts and represents the archived command timing with balanced discrete foreperiods. Audio, tactile and response previews use the qualified scope recorded below."
     },
     {
       "template_id": "hug_2022_guided_reaching",
@@ -2208,6 +2211,96 @@
       "primary_constraint_ids": [
         "study_specific_physical_apparatus"
       ]
+    },
+    {
+      "template_id": "holmes_2020_2ifc_calibration",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "study_specific_physical_apparatus"
+      ],
+      "source_notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements."
+    },
+    {
+      "template_id": "holmes_2020_exploratory_sound_type",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "study_specific_physical_apparatus"
+      ],
+      "source_notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements."
+    },
+    {
+      "template_id": "holmes_2020_supp5_discrimination",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "study_specific_physical_apparatus"
+      ],
+      "source_notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements."
+    },
+    {
+      "template_id": "holmes_2020_supp5_intensity_ratio",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "study_specific_physical_apparatus"
+      ],
+      "source_notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements."
+    },
+    {
+      "template_id": "holmes_2019_osf_2ifc_calibration",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "study_specific_physical_apparatus"
+      ],
+      "source_notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements."
+    },
+    {
+      "template_id": "holmes_2019_osf_exp2_strong_target",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "study_specific_physical_apparatus"
+      ],
+      "source_notes": "The trial preview preserves the reported cell counts and represents the archived command timing with balanced discrete foreperiods. Audio, tactile and response previews use the qualified scope recorded below."
+    },
+    {
+      "template_id": "holmes_2019_osf_exploratory_sound_type",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "study_specific_physical_apparatus"
+      ],
+      "source_notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements."
+    },
+    {
+      "template_id": "holmes_2019_osf_supp5_discrimination",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "study_specific_physical_apparatus"
+      ],
+      "source_notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements."
+    },
+    {
+      "template_id": "holmes_2019_osf_supp5_intensity_ratio",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "voice_key_response_capture",
+        "study_specific_physical_apparatus"
+      ],
+      "source_notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements."
     }
   ],
   "literature_records": [
@@ -2993,18 +3086,12 @@
       "current_template_ids": [
         "cardini_2019_pregnancy_trunk_pps"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "audio-tactile PPS measurement in pregnancy context",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters",
-        "exact_audio_envelope_or_gain_files"
-      ],
-      "missing_publication_parameters": [
-        "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.",
-        "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.",
-        "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
-      ]
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "source_notes": "The software assessment preserves five delays and 15 audio-only catches per visit. It uses a synthesized pink-noise envelope. The original loudspeakers, tapper and button require separate lab setup."
     },
     {
       "record_id": "newborn_boundaries_2019",
@@ -3417,7 +3504,7 @@
       ],
       "missing_publication_parameters": [
         "Original calibrated sound and tactile delivery, vowel/voice-onset classification and calibrated pedal capture in the driving simulator.",
-        "Five profiles encode the nominal four main experiments, including both target arms in Experiment 2."
+        "Five main profiles encode the nominal four experiments, including both Experiment 2 target arms. Four additional profiles record the companion procedures."
       ]
     },
     {
@@ -3595,15 +3682,12 @@
         "rahmani_2025_2s_pps",
         "rahmani_2025_3s_pps"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "looming-cue tactile-response PPS task varying auditory duration",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "hrtf_database_or_binaural_engine_mismatch"
-      ],
-      "missing_publication_parameters": [
-        "Each duration now generates 245 trials with seven delays and matched tactile-only trials. Original HRTF, synchronized visual fixation and the exact haptic waveform and response route remain open. Row-level renderer/HRTF provenance metadata are now runner-supported."
-      ]
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "source_notes": "The two 245-trial software assessments preserve the seven delays and matched tactile-only baselines, with an 80 Hz, 200 ms digitally generated sawtooth. Fixation display, original acoustics and hardware calibration remain laboratory work."
     },
     {
       "record_id": "depersonalisation_2024",
@@ -3907,18 +3991,12 @@
       "current_template_ids": [
         "cardini_2018_pregnancy_trunk_pps"
       ],
-      "coverage_category": "covered_blocked_missing_publication_parameters",
+      "coverage_category": "covered_runnable_profile",
       "audiotactile_task_family": "Three visits with the same five-offset abdominal touch assessment",
-      "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters",
-        "exact_audio_envelope_or_gain_files"
-      ],
-      "missing_publication_parameters": [
-        "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.",
-        "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.",
-        "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
-      ]
+      "can_recreate_audiotactile_components_now": true,
+      "blocking_constraint_ids": [],
+      "missing_publication_parameters": [],
+      "source_notes": "The software assessment preserves five delays and 15 audio-only catches per visit. It uses a synthesized pink-noise envelope. The original loudspeakers, tapper and button require separate lab setup."
     },
     {
       "record_id": "di_cosmo_2021_phase_coupling",

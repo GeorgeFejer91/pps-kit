@@ -4765,27 +4765,27 @@
       "profile_manifest": "assets/preloads/cardini_2018_pregnancy_trunk_pps/preload_manifest.json",
       "profile_parameters_manifest": "assets/preloads/cardini_2018_pregnancy_trunk_pps/01_profile/profile_parameters_manifest.json",
       "recreation_status": {
-        "primary_category": "missing_publication_parameters",
-        "category_label": "Missing publication parameters",
-        "runner_readiness": "blocked_missing_parameters",
-        "profile_checks_passed": false,
-        "gui_recreatable": false,
-        "segment_0_to_4_profile_checks_passed": false,
-        "segment_1_to_6_materializable": false,
-        "finished_profile": false,
-        "segment_6_launchable": false,
-        "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 3,
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
         "unsupported_structure_count": 0
       },
-      "runner_readiness": "blocked_missing_parameters",
-      "profile_checks_passed": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "primary_recreation_category": "missing_publication_parameters",
-      "missing_parameter_count": 3,
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
       "unsupported_structure_count": 0,
       "local_only": true,
       "source_recipe_count": 1,
@@ -4819,35 +4819,35 @@
       "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
       "assets": [
         {
-          "label": "3 s pink timing reference",
-          "path": "assets/preloads/cardini_2018_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_pink_timing_reference.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/cardini_2018_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_pink_timing_reference.wav",
-          "sha256": "a045f764920e58834701810a1c64a570f56f2a7cd31ea46e41c33821c375f8f5",
+          "label": "3 s looming pink noise",
+          "path": "assets/preloads/cardini_2018_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_looming_pink_noise.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/cardini_2018_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_looming_pink_noise.wav",
+          "sha256": "3c9def1cc20d8bf44b6ef883c7c3a090c96d26eba675ea0eef13c42bc4661144",
           "duration_s": 3.0,
           "sample_rate": 44100,
           "channels": 2,
           "source_kind": "generated_noise",
           "noise_type": "pink",
           "tone_type": "pink",
-          "motion_mode": "stationary",
-          "direction_label": "",
+          "motion_mode": "looming",
+          "direction_label": "looming",
           "render_mode": "preserve",
           "include_tactile": false,
           "trajectory_snapshot": {
             "schema": "pps-stimulus-trajectory.v1",
-            "label": "3 s pink timing reference",
+            "label": "3 s looming pink noise",
             "source_kind": "generated_noise",
             "noise_type": "pink",
             "start_distance_cm": 110.0,
-            "end_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
             "start_rotation_deg": 0.0,
             "end_rotation_deg": 0.0,
-            "movement_duration_s": 0.0,
+            "movement_duration_s": 3.0,
             "start_hold_s": 0.0,
             "end_hold_s": 0.0,
-            "path_length_m": 0.0,
+            "path_length_m": 1.0,
             "coordinate_mode": "polar",
-            "path_direction": "stationary",
+            "path_direction": "approach",
             "start": {
               "x_m": 0.0,
               "y_m": 1.1,
@@ -4855,7 +4855,7 @@
             },
             "end": {
               "x_m": 0.0,
-              "y_m": 1.1,
+              "y_m": 0.1,
               "z_m": 0.0
             }
           },
@@ -4875,27 +4875,27 @@
       "profile_manifest": "assets/preloads/cardini_2019_pregnancy_trunk_pps/preload_manifest.json",
       "profile_parameters_manifest": "assets/preloads/cardini_2019_pregnancy_trunk_pps/01_profile/profile_parameters_manifest.json",
       "recreation_status": {
-        "primary_category": "missing_publication_parameters",
-        "category_label": "Missing publication parameters",
-        "runner_readiness": "blocked_missing_parameters",
-        "profile_checks_passed": false,
-        "gui_recreatable": false,
-        "segment_0_to_4_profile_checks_passed": false,
-        "segment_1_to_6_materializable": false,
-        "finished_profile": false,
-        "segment_6_launchable": false,
-        "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 3,
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
         "unsupported_structure_count": 0
       },
-      "runner_readiness": "blocked_missing_parameters",
-      "profile_checks_passed": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "primary_recreation_category": "missing_publication_parameters",
-      "missing_parameter_count": 3,
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
       "unsupported_structure_count": 0,
       "local_only": true,
       "source_recipe_count": 1,
@@ -4929,35 +4929,35 @@
       "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
       "assets": [
         {
-          "label": "3 s pink timing reference",
-          "path": "assets/preloads/cardini_2019_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_pink_timing_reference.wav",
-          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/cardini_2019_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_pink_timing_reference.wav",
-          "sha256": "a045f764920e58834701810a1c64a570f56f2a7cd31ea46e41c33821c375f8f5",
+          "label": "3 s looming pink noise",
+          "path": "assets/preloads/cardini_2019_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_looming_pink_noise.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/cardini_2019_pregnancy_trunk_pps/02_looming_stimuli/looming_3_s_looming_pink_noise.wav",
+          "sha256": "c3b25f07d9928986e6c9f5fd8c1b9e63afca0482d01c6c93e2c9c00d4703afe2",
           "duration_s": 3.0,
           "sample_rate": 44100,
           "channels": 2,
           "source_kind": "generated_noise",
           "noise_type": "pink",
           "tone_type": "pink",
-          "motion_mode": "stationary",
-          "direction_label": "",
+          "motion_mode": "looming",
+          "direction_label": "looming",
           "render_mode": "preserve",
           "include_tactile": false,
           "trajectory_snapshot": {
             "schema": "pps-stimulus-trajectory.v1",
-            "label": "3 s pink timing reference",
+            "label": "3 s looming pink noise",
             "source_kind": "generated_noise",
             "noise_type": "pink",
             "start_distance_cm": 110.0,
-            "end_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
             "start_rotation_deg": 0.0,
             "end_rotation_deg": 0.0,
-            "movement_duration_s": 0.0,
+            "movement_duration_s": 3.0,
             "start_hold_s": 0.0,
             "end_hold_s": 0.0,
-            "path_length_m": 0.0,
+            "path_length_m": 1.0,
             "coordinate_mode": "polar",
-            "path_direction": "stationary",
+            "path_direction": "approach",
             "start": {
               "x_m": 0.0,
               "y_m": 1.1,
@@ -4965,7 +4965,7 @@
             },
             "end": {
               "x_m": 0.0,
-              "y_m": 1.1,
+              "y_m": 0.1,
               "z_m": 0.0
             }
           },
@@ -7203,32 +7203,32 @@
           "label": "Neutral artificial white noise",
           "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_white_noise.wav",
           "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Neutral_artificial_white_noise.wav",
-          "sha256": "57be5bc524de6eeff9a14c1c207b37ce38af7b280455b4a2e86091b072d281d0",
+          "sha256": "92fb1aa1eeed2e95804ccaa89a7bcad7f5ee933553fd5a08b3fbdb27a4777151",
           "duration_s": 3.0,
           "sample_rate": 44100,
           "channels": 2,
-          "source_kind": "generated_noise",
+          "source_kind": "imported_audio",
           "noise_type": "white",
           "tone_type": "white",
-          "motion_mode": "stationary",
-          "direction_label": "looming",
+          "motion_mode": "looming",
+          "direction_label": "",
           "render_mode": "preserve",
           "include_tactile": false,
           "trajectory_snapshot": {
             "schema": "pps-stimulus-trajectory.v1",
             "label": "Neutral artificial white noise",
-            "source_kind": "generated_noise",
+            "source_kind": "imported_audio",
             "noise_type": "white",
             "start_distance_cm": 110.0,
-            "end_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
             "start_rotation_deg": 0.0,
             "end_rotation_deg": 0.0,
-            "movement_duration_s": 0.0,
+            "movement_duration_s": 3.0,
             "start_hold_s": 0.0,
             "end_hold_s": 0.0,
-            "path_length_m": 0.0,
+            "path_length_m": 1.0,
             "coordinate_mode": "polar",
-            "path_direction": "stationary",
+            "path_direction": "approach",
             "start": {
               "x_m": 0.0,
               "y_m": 1.1,
@@ -7236,42 +7236,41 @@
             },
             "end": {
               "x_m": 0.0,
-              "y_m": 1.1,
+              "y_m": 0.1,
               "z_m": 0.0
             }
-          },
-          "source_profile": "continuous_noise"
+          }
         },
         {
           "label": "Negative artificial brown noise",
           "path": "assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_brown_noise.wav",
           "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/ferri_2015_artificial_looming_valence/02_looming_stimuli/looming_Negative_artificial_brown_noise.wav",
-          "sha256": "2453ab4d560496fe23632bf9776c56920e5819cc96a7ea16ddf91c0401f87e93",
+          "sha256": "07463ecc748133d8d50415e72c767d790796569f6f7fe7897184e075e7fe8933",
           "duration_s": 3.0,
           "sample_rate": 44100,
           "channels": 2,
-          "source_kind": "generated_noise",
+          "source_kind": "imported_audio",
           "noise_type": "brown",
           "tone_type": "brown",
-          "motion_mode": "stationary",
-          "direction_label": "looming",
+          "motion_mode": "looming",
+          "direction_label": "",
           "render_mode": "preserve",
           "include_tactile": false,
           "trajectory_snapshot": {
             "schema": "pps-stimulus-trajectory.v1",
             "label": "Negative artificial brown noise",
-            "source_kind": "generated_noise",
+            "source_kind": "imported_audio",
             "noise_type": "brown",
             "start_distance_cm": 110.0,
-            "end_distance_cm": 110.0,
+            "end_distance_cm": 10.0,
             "start_rotation_deg": 0.0,
             "end_rotation_deg": 0.0,
-            "movement_duration_s": 0.0,
+            "movement_duration_s": 3.0,
             "start_hold_s": 0.0,
             "end_hold_s": 0.0,
-            "path_length_m": 0.0,
+            "path_length_m": 1.0,
             "coordinate_mode": "polar",
-            "path_direction": "stationary",
+            "path_direction": "approach",
             "start": {
               "x_m": 0.0,
               "y_m": 1.1,
@@ -7279,11 +7278,10 @@
             },
             "end": {
               "x_m": 0.0,
-              "y_m": 1.1,
+              "y_m": 0.1,
               "z_m": 0.0
             }
-          },
-          "source_profile": "continuous_noise"
+          }
         }
       ]
     },
@@ -10390,8 +10388,8 @@
     {
       "template_id": "holmes_2020_exp1",
       "title": "Holmes 2020 Experiment 1, weak-target vocal discrimination",
-      "visible_variant_label": "A",
-      "variant_display": "Holmes 2020 Experiment 1, weak-target vocal discrimination - Variant A",
+      "visible_variant_label": "B",
+      "variant_display": "Holmes 2020 Experiment 1, weak-target vocal discrimination - Variant B",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
       "asset_mode": "bundled_local",
@@ -10543,8 +10541,8 @@
     {
       "template_id": "holmes_2020_exp2_strong_target",
       "title": "Holmes 2020 Experiment 2, strong-target vocal discrimination",
-      "visible_variant_label": "B",
-      "variant_display": "Holmes 2020 Experiment 2, strong-target vocal discrimination - Variant B",
+      "visible_variant_label": "C",
+      "variant_display": "Holmes 2020 Experiment 2, strong-target vocal discrimination - Variant C",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
       "asset_mode": "bundled_local",
@@ -10696,8 +10694,8 @@
     {
       "template_id": "holmes_2020_exp2_weak_target",
       "title": "Holmes 2020 Experiment 2, weak-target vocal discrimination",
-      "visible_variant_label": "C",
-      "variant_display": "Holmes 2020 Experiment 2, weak-target vocal discrimination - Variant C",
+      "visible_variant_label": "D",
+      "variant_display": "Holmes 2020 Experiment 2, weak-target vocal discrimination - Variant D",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
       "asset_mode": "bundled_local",
@@ -10849,8 +10847,8 @@
     {
       "template_id": "holmes_2020_exp3",
       "title": "Holmes 2020 Experiment 3, vocal detection at either intensity",
-      "visible_variant_label": "D",
-      "variant_display": "Holmes 2020 Experiment 3, vocal detection at either intensity - Variant D",
+      "visible_variant_label": "E",
+      "variant_display": "Holmes 2020 Experiment 3, vocal detection at either intensity - Variant E",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
       "asset_mode": "bundled_local",
@@ -11002,8 +11000,8 @@
     {
       "template_id": "holmes_2020_exp4",
       "title": "Holmes 2020 Experiment 4, driving, near/far and pedal detection",
-      "visible_variant_label": "E",
-      "variant_display": "Holmes 2020 Experiment 4, driving, near/far and pedal detection - Variant E",
+      "visible_variant_label": "F",
+      "variant_display": "Holmes 2020 Experiment 4, driving, near/far and pedal detection - Variant F",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
       "asset_mode": "bundled_local",
@@ -11153,16 +11151,82 @@
       ]
     },
     {
-      "template_id": "holmes_2019_osf_exp1",
-      "title": "Holmes OSF \u00b7 Experiment 1 \u00b7 Weak-target discrimination",
+      "template_id": "holmes_2020_2ifc_calibration",
+      "title": "Holmes 2020 \u00b7 2IFC tactile calibration",
       "visible_variant_label": "A",
-      "variant_display": "Holmes OSF \u00b7 Experiment 1 \u00b7 Weak-target discrimination - Variant A",
-      "publication_status": "author_project_revision",
-      "profile_type": "published_method_inspection",
+      "variant_display": "Holmes 2020 \u00b7 2IFC tactile calibration - Variant A",
+      "publication_status": "published",
+      "profile_type": "companion_assessment_inspection",
       "asset_mode": "bundled_local",
       "retrieval_strategy": "bundled_or_download_from_github_pages",
-      "profile_manifest": "assets/preloads/holmes_2019_osf_exp1/preload_manifest.json",
-      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp1/01_profile/profile_parameters_manifest.json",
+      "profile_manifest": "assets/preloads/holmes_2020_2ifc_calibration/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2020_2ifc_calibration/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 4,
+        "unsupported_structure_count": 2
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 2,
+      "local_only": true,
+      "source_recipe_count": 0,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/holmes_2020_2ifc_calibration/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/holmes_2020_2ifc_calibration/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/holmes_2020_2ifc_calibration/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/holmes_2020_2ifc_calibration/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/holmes_2020_2ifc_calibration/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": []
+    },
+    {
+      "template_id": "holmes_2020_exploratory_sound_type",
+      "title": "Holmes 2020 \u00b7 Exploratory sound-type acquisition",
+      "visible_variant_label": "G",
+      "variant_display": "Holmes 2020 \u00b7 Exploratory sound-type acquisition - Variant G",
+      "publication_status": "published",
+      "profile_type": "companion_assessment_inspection",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/holmes_2020_exploratory_sound_type/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2020_exploratory_sound_type/01_profile/profile_parameters_manifest.json",
       "recreation_status": {
         "primary_category": "toolkit_structural_gap",
         "category_label": "Toolkit structural gap",
@@ -11188,6 +11252,270 @@
       "unsupported_structure_count": 1,
       "local_only": true,
       "source_recipe_count": 0,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/holmes_2020_exploratory_sound_type/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/holmes_2020_exploratory_sound_type/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/holmes_2020_exploratory_sound_type/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/holmes_2020_exploratory_sound_type/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/holmes_2020_exploratory_sound_type/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": []
+    },
+    {
+      "template_id": "holmes_2020_supp5_discrimination",
+      "title": "Holmes 2020 \u00b7 Supplementary Experiment 5, discrimination feasibility",
+      "visible_variant_label": "H",
+      "variant_display": "Holmes 2020 \u00b7 Supplementary Experiment 5, discrimination feasibility - Variant H",
+      "publication_status": "published",
+      "profile_type": "companion_assessment_inspection",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/holmes_2020_supp5_discrimination/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2020_supp5_discrimination/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 5,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 0,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/holmes_2020_supp5_discrimination/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/holmes_2020_supp5_discrimination/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/holmes_2020_supp5_discrimination/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/holmes_2020_supp5_discrimination/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/holmes_2020_supp5_discrimination/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": []
+    },
+    {
+      "template_id": "holmes_2020_supp5_intensity_ratio",
+      "title": "Holmes 2020 \u00b7 Supplementary Experiment 5, intensity-ratio follow-up",
+      "visible_variant_label": "I",
+      "variant_display": "Holmes 2020 \u00b7 Supplementary Experiment 5, intensity-ratio follow-up - Variant I",
+      "publication_status": "published",
+      "profile_type": "companion_assessment_inspection",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/holmes_2020_supp5_intensity_ratio/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2020_supp5_intensity_ratio/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 5,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 0,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/holmes_2020_supp5_intensity_ratio/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/holmes_2020_supp5_intensity_ratio/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/holmes_2020_supp5_intensity_ratio/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/holmes_2020_supp5_intensity_ratio/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/holmes_2020_supp5_intensity_ratio/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": []
+    },
+    {
+      "template_id": "holmes_2019_osf_2ifc_calibration",
+      "title": "Holmes OSF \u00b7 2IFC tactile calibration",
+      "visible_variant_label": "A",
+      "variant_display": "Holmes OSF \u00b7 2IFC tactile calibration - Variant A",
+      "publication_status": "author_project_revision",
+      "profile_type": "companion_assessment_inspection",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/holmes_2019_osf_2ifc_calibration/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_2ifc_calibration/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 4,
+        "unsupported_structure_count": 2
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 2,
+      "local_only": true,
+      "source_recipe_count": 0,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/holmes_2019_osf_2ifc_calibration/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/holmes_2019_osf_2ifc_calibration/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/holmes_2019_osf_2ifc_calibration/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/holmes_2019_osf_2ifc_calibration/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/holmes_2019_osf_2ifc_calibration/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": []
+    },
+    {
+      "template_id": "holmes_2019_osf_exp1",
+      "title": "Holmes OSF \u00b7 Experiment 1 \u00b7 Weak-target discrimination",
+      "visible_variant_label": "B",
+      "variant_display": "Holmes OSF \u00b7 Experiment 1 \u00b7 Weak-target discrimination - Variant B",
+      "publication_status": "author_project_revision",
+      "profile_type": "static_near_far_audio_tactile_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/holmes_2019_osf_exp1/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp1/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 8,
+        "unsupported_structure_count": 2
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 8,
+      "unsupported_structure_count": 2,
+      "local_only": true,
+      "source_recipe_count": 2,
       "catalog_segments": [
         {
           "folder": "01_profile",
@@ -11216,15 +11544,255 @@
         }
       ],
       "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
-      "assets": []
+      "assets": [
+        {
+          "label": "Holmes preview white-noise cue (near)",
+          "path": "assets/preloads/holmes_2019_osf_exp1/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp1/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "sha256": "c60e8629b984ddac23d8bf3f0a8d2eecec355fafe5715e719fe11e934656025b",
+          "duration_s": 0.125,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (near)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 5.0,
+            "end_distance_cm": 5.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        },
+        {
+          "label": "Holmes preview white-noise cue (far)",
+          "path": "assets/preloads/holmes_2019_osf_exp1/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp1/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "sha256": "d612f2bfbe41acca72dddb57ab5477de17bd0694b2bd8c75676ec99867141606",
+          "duration_s": 0.125,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (far)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 105.0,
+            "end_distance_cm": 105.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
+      "template_id": "holmes_2019_osf_exp2_strong_target",
+      "title": "Holmes OSF \u00b7 Experiment 2 \u00b7 Strong target",
+      "visible_variant_label": "D",
+      "variant_display": "Holmes OSF \u00b7 Experiment 2 \u00b7 Strong target - Variant D",
+      "publication_status": "author_project_revision",
+      "profile_type": "static_near_far_audio_tactile_pps",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/holmes_2019_osf_exp2_strong_target/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp2_strong_target/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 8,
+        "unsupported_structure_count": 3
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 8,
+      "unsupported_structure_count": 3,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/holmes_2019_osf_exp2_strong_target/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/holmes_2019_osf_exp2_strong_target/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/holmes_2019_osf_exp2_strong_target/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/holmes_2019_osf_exp2_strong_target/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/holmes_2019_osf_exp2_strong_target/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Holmes preview white-noise cue (near)",
+          "path": "assets/preloads/holmes_2019_osf_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "sha256": "c60e8629b984ddac23d8bf3f0a8d2eecec355fafe5715e719fe11e934656025b",
+          "duration_s": 0.125,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (near)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 5.0,
+            "end_distance_cm": 5.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        },
+        {
+          "label": "Holmes preview white-noise cue (far)",
+          "path": "assets/preloads/holmes_2019_osf_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "sha256": "d612f2bfbe41acca72dddb57ab5477de17bd0694b2bd8c75676ec99867141606",
+          "duration_s": 0.125,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (far)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 105.0,
+            "end_distance_cm": 105.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
     },
     {
       "template_id": "holmes_2019_osf_exp2",
-      "title": "Holmes OSF \u00b7 Experiment 2 \u00b7 Assigned-intensity discrimination",
-      "visible_variant_label": "B",
-      "variant_display": "Holmes OSF \u00b7 Experiment 2 \u00b7 Assigned-intensity discrimination - Variant B",
+      "title": "Holmes OSF \u00b7 Experiment 2 \u00b7 Weak target",
+      "visible_variant_label": "C",
+      "variant_display": "Holmes OSF \u00b7 Experiment 2 \u00b7 Weak target - Variant C",
       "publication_status": "author_project_revision",
-      "profile_type": "published_method_inspection",
+      "profile_type": "static_near_far_audio_tactile_pps",
       "asset_mode": "bundled_local",
       "retrieval_strategy": "bundled_or_download_from_github_pages",
       "profile_manifest": "assets/preloads/holmes_2019_osf_exp2/preload_manifest.json",
@@ -11240,8 +11808,8 @@
         "finished_profile": false,
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 5,
-        "unsupported_structure_count": 1
+        "missing_parameter_count": 8,
+        "unsupported_structure_count": 2
       },
       "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
@@ -11250,10 +11818,10 @@
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
       "primary_recreation_category": "toolkit_structural_gap",
-      "missing_parameter_count": 5,
-      "unsupported_structure_count": 1,
+      "missing_parameter_count": 8,
+      "unsupported_structure_count": 2,
       "local_only": true,
-      "source_recipe_count": 0,
+      "source_recipe_count": 2,
       "catalog_segments": [
         {
           "folder": "01_profile",
@@ -11282,15 +11850,102 @@
         }
       ],
       "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
-      "assets": []
+      "assets": [
+        {
+          "label": "Holmes preview white-noise cue (near)",
+          "path": "assets/preloads/holmes_2019_osf_exp2/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp2/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "sha256": "c60e8629b984ddac23d8bf3f0a8d2eecec355fafe5715e719fe11e934656025b",
+          "duration_s": 0.125,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (near)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 5.0,
+            "end_distance_cm": 5.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        },
+        {
+          "label": "Holmes preview white-noise cue (far)",
+          "path": "assets/preloads/holmes_2019_osf_exp2/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp2/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "sha256": "d612f2bfbe41acca72dddb57ab5477de17bd0694b2bd8c75676ec99867141606",
+          "duration_s": 0.125,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (far)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 105.0,
+            "end_distance_cm": 105.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
     },
     {
       "template_id": "holmes_2019_osf_exp3",
       "title": "Holmes OSF \u00b7 Experiment 3 \u00b7 Both-intensity detection",
-      "visible_variant_label": "C",
-      "variant_display": "Holmes OSF \u00b7 Experiment 3 \u00b7 Both-intensity detection - Variant C",
+      "visible_variant_label": "E",
+      "variant_display": "Holmes OSF \u00b7 Experiment 3 \u00b7 Both-intensity detection - Variant E",
       "publication_status": "author_project_revision",
-      "profile_type": "published_method_inspection",
+      "profile_type": "static_near_far_audio_tactile_pps",
       "asset_mode": "bundled_local",
       "retrieval_strategy": "bundled_or_download_from_github_pages",
       "profile_manifest": "assets/preloads/holmes_2019_osf_exp3/preload_manifest.json",
@@ -11306,8 +11961,8 @@
         "finished_profile": false,
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 5,
-        "unsupported_structure_count": 1
+        "missing_parameter_count": 8,
+        "unsupported_structure_count": 2
       },
       "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
@@ -11316,10 +11971,10 @@
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
       "primary_recreation_category": "toolkit_structural_gap",
-      "missing_parameter_count": 5,
-      "unsupported_structure_count": 1,
+      "missing_parameter_count": 8,
+      "unsupported_structure_count": 2,
       "local_only": true,
-      "source_recipe_count": 0,
+      "source_recipe_count": 2,
       "catalog_segments": [
         {
           "folder": "01_profile",
@@ -11348,19 +12003,259 @@
         }
       ],
       "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
-      "assets": []
+      "assets": [
+        {
+          "label": "Holmes preview white-noise cue (near)",
+          "path": "assets/preloads/holmes_2019_osf_exp3/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp3/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "sha256": "c60e8629b984ddac23d8bf3f0a8d2eecec355fafe5715e719fe11e934656025b",
+          "duration_s": 0.125,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (near)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 5.0,
+            "end_distance_cm": 5.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.05,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        },
+        {
+          "label": "Holmes preview white-noise cue (far)",
+          "path": "assets/preloads/holmes_2019_osf_exp3/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp3/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "sha256": "d612f2bfbe41acca72dddb57ab5477de17bd0694b2bd8c75676ec99867141606",
+          "duration_s": 0.125,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (far)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 105.0,
+            "end_distance_cm": 105.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 1.05,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
     },
     {
       "template_id": "holmes_2019_osf_exp4",
       "title": "Holmes OSF \u00b7 Experiment 4 \u00b7 Driving and pedal response",
-      "visible_variant_label": "D",
-      "variant_display": "Holmes OSF \u00b7 Experiment 4 \u00b7 Driving and pedal response - Variant D",
+      "visible_variant_label": "F",
+      "variant_display": "Holmes OSF \u00b7 Experiment 4 \u00b7 Driving and pedal response - Variant F",
       "publication_status": "author_project_revision",
-      "profile_type": "published_method_inspection",
+      "profile_type": "static_near_far_audio_tactile_pps",
       "asset_mode": "bundled_local",
       "retrieval_strategy": "bundled_or_download_from_github_pages",
       "profile_manifest": "assets/preloads/holmes_2019_osf_exp4/preload_manifest.json",
       "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp4/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 7,
+        "unsupported_structure_count": 2
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 7,
+      "unsupported_structure_count": 2,
+      "local_only": true,
+      "source_recipe_count": 2,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/holmes_2019_osf_exp4/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/holmes_2019_osf_exp4/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/holmes_2019_osf_exp4/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/holmes_2019_osf_exp4/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/holmes_2019_osf_exp4/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": [
+        {
+          "label": "Holmes preview white-noise cue (near)",
+          "path": "assets/preloads/holmes_2019_osf_exp4/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp4/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+          "sha256": "010fde34d2871acab6db0d00253a0d8926ff3c892d324b1c0a43e320f0023acf",
+          "duration_s": 0.438,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (near)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 2.5,
+            "end_distance_cm": 2.5,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.025,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.025,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        },
+        {
+          "label": "Holmes preview white-noise cue (far)",
+          "path": "assets/preloads/holmes_2019_osf_exp4/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp4/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+          "sha256": "f64abdd06b5ca7cb790766bf88aa127543b5dda41cb532af96f1fdd39447423b",
+          "duration_s": 0.438,
+          "sample_rate": 8000,
+          "channels": 2,
+          "source_kind": "generated_noise",
+          "noise_type": "white",
+          "tone_type": "white",
+          "motion_mode": "stationary",
+          "direction_label": "",
+          "render_mode": "preserve",
+          "include_tactile": false,
+          "trajectory_snapshot": {
+            "schema": "pps-stimulus-trajectory.v1",
+            "label": "Holmes preview white-noise cue (far)",
+            "source_kind": "generated_noise",
+            "noise_type": "white",
+            "start_distance_cm": 70.0,
+            "end_distance_cm": 70.0,
+            "start_rotation_deg": 0.0,
+            "end_rotation_deg": 0.0,
+            "movement_duration_s": 0.0,
+            "start_hold_s": 0.0,
+            "end_hold_s": 0.0,
+            "path_length_m": 0.0,
+            "coordinate_mode": "cartesian",
+            "path_direction": "stationary",
+            "start": {
+              "x_m": 0.0,
+              "y_m": 0.7,
+              "z_m": 0.0
+            },
+            "end": {
+              "x_m": 0.0,
+              "y_m": 0.7,
+              "z_m": 0.0
+            }
+          },
+          "source_profile": "continuous_noise"
+        }
+      ]
+    },
+    {
+      "template_id": "holmes_2019_osf_exploratory_sound_type",
+      "title": "Holmes OSF \u00b7 Exploratory sound-type acquisition",
+      "visible_variant_label": "G",
+      "variant_display": "Holmes OSF \u00b7 Exploratory sound-type acquisition - Variant G",
+      "publication_status": "author_project_revision",
+      "profile_type": "companion_assessment_inspection",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/holmes_2019_osf_exploratory_sound_type/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exploratory_sound_type/01_profile/profile_parameters_manifest.json",
       "recreation_status": {
         "primary_category": "toolkit_structural_gap",
         "category_label": "Toolkit structural gap",
@@ -11390,27 +12285,159 @@
         {
           "folder": "01_profile",
           "label": "Profile",
-          "path": "assets/preloads/holmes_2019_osf_exp4/01_profile"
+          "path": "assets/preloads/holmes_2019_osf_exploratory_sound_type/01_profile"
         },
         {
           "folder": "02_looming_stimuli",
           "label": "Looming Stimuli Builder",
-          "path": "assets/preloads/holmes_2019_osf_exp4/02_looming_stimuli"
+          "path": "assets/preloads/holmes_2019_osf_exploratory_sound_type/02_looming_stimuli"
         },
         {
           "folder": "03_baseline_strategy",
           "label": "Baseline Strategy",
-          "path": "assets/preloads/holmes_2019_osf_exp4/03_baseline_strategy"
+          "path": "assets/preloads/holmes_2019_osf_exploratory_sound_type/03_baseline_strategy"
         },
         {
           "folder": "04_trial_designer",
           "label": "Trial Designer",
-          "path": "assets/preloads/holmes_2019_osf_exp4/04_trial_designer"
+          "path": "assets/preloads/holmes_2019_osf_exploratory_sound_type/04_trial_designer"
         },
         {
           "folder": "05_run_setup",
           "label": "Run Setup",
-          "path": "assets/preloads/holmes_2019_osf_exp4/05_run_setup"
+          "path": "assets/preloads/holmes_2019_osf_exploratory_sound_type/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": []
+    },
+    {
+      "template_id": "holmes_2019_osf_supp5_discrimination",
+      "title": "Holmes OSF \u00b7 Supplementary Experiment 5, discrimination feasibility",
+      "visible_variant_label": "H",
+      "variant_display": "Holmes OSF \u00b7 Supplementary Experiment 5, discrimination feasibility - Variant H",
+      "publication_status": "author_project_revision",
+      "profile_type": "companion_assessment_inspection",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/holmes_2019_osf_supp5_discrimination/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_supp5_discrimination/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 5,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 0,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/holmes_2019_osf_supp5_discrimination/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/holmes_2019_osf_supp5_discrimination/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/holmes_2019_osf_supp5_discrimination/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/holmes_2019_osf_supp5_discrimination/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/holmes_2019_osf_supp5_discrimination/05_run_setup"
+        }
+      ],
+      "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
+      "assets": []
+    },
+    {
+      "template_id": "holmes_2019_osf_supp5_intensity_ratio",
+      "title": "Holmes OSF \u00b7 Supplementary Experiment 5, intensity-ratio follow-up",
+      "visible_variant_label": "I",
+      "variant_display": "Holmes OSF \u00b7 Supplementary Experiment 5, intensity-ratio follow-up - Variant I",
+      "publication_status": "author_project_revision",
+      "profile_type": "companion_assessment_inspection",
+      "asset_mode": "bundled_local",
+      "retrieval_strategy": "bundled_or_download_from_github_pages",
+      "profile_manifest": "assets/preloads/holmes_2019_osf_supp5_intensity_ratio/preload_manifest.json",
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_supp5_intensity_ratio/01_profile/profile_parameters_manifest.json",
+      "recreation_status": {
+        "primary_category": "toolkit_structural_gap",
+        "category_label": "Toolkit structural gap",
+        "runner_readiness": "blocked_unsupported_toolkit_structure",
+        "profile_checks_passed": false,
+        "gui_recreatable": false,
+        "segment_0_to_4_profile_checks_passed": false,
+        "segment_1_to_6_materializable": false,
+        "finished_profile": false,
+        "segment_6_launchable": false,
+        "profile_completion_status": "unfinished_preload",
+        "missing_parameter_count": 5,
+        "unsupported_structure_count": 1
+      },
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "primary_recreation_category": "toolkit_structural_gap",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "local_only": true,
+      "source_recipe_count": 0,
+      "catalog_segments": [
+        {
+          "folder": "01_profile",
+          "label": "Profile",
+          "path": "assets/preloads/holmes_2019_osf_supp5_intensity_ratio/01_profile"
+        },
+        {
+          "folder": "02_looming_stimuli",
+          "label": "Looming Stimuli Builder",
+          "path": "assets/preloads/holmes_2019_osf_supp5_intensity_ratio/02_looming_stimuli"
+        },
+        {
+          "folder": "03_baseline_strategy",
+          "label": "Baseline Strategy",
+          "path": "assets/preloads/holmes_2019_osf_supp5_intensity_ratio/03_baseline_strategy"
+        },
+        {
+          "folder": "04_trial_designer",
+          "label": "Trial Designer",
+          "path": "assets/preloads/holmes_2019_osf_supp5_intensity_ratio/04_trial_designer"
+        },
+        {
+          "folder": "05_run_setup",
+          "label": "Run Setup",
+          "path": "assets/preloads/holmes_2019_osf_supp5_intensity_ratio/05_run_setup"
         }
       ],
       "message": "Bundled local profile assets and segment metadata are present in the preload catalog.",
@@ -14570,27 +15597,27 @@
       "profile_manifest": "assets/preloads/rahmani_2025_2s_pps/preload_manifest.json",
       "profile_parameters_manifest": "assets/preloads/rahmani_2025_2s_pps/01_profile/profile_parameters_manifest.json",
       "recreation_status": {
-        "primary_category": "missing_publication_parameters",
-        "category_label": "Missing publication parameters",
-        "runner_readiness": "blocked_missing_parameters",
-        "profile_checks_passed": false,
-        "gui_recreatable": false,
-        "segment_0_to_4_profile_checks_passed": false,
-        "segment_1_to_6_materializable": false,
-        "finished_profile": false,
-        "segment_6_launchable": false,
-        "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 4,
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
         "unsupported_structure_count": 0
       },
-      "runner_readiness": "blocked_missing_parameters",
-      "profile_checks_passed": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "primary_recreation_category": "missing_publication_parameters",
-      "missing_parameter_count": 4,
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
       "unsupported_structure_count": 0,
       "local_only": true,
       "source_recipe_count": 1,
@@ -14680,27 +15707,27 @@
       "profile_manifest": "assets/preloads/rahmani_2025_3s_pps/preload_manifest.json",
       "profile_parameters_manifest": "assets/preloads/rahmani_2025_3s_pps/01_profile/profile_parameters_manifest.json",
       "recreation_status": {
-        "primary_category": "missing_publication_parameters",
-        "category_label": "Missing publication parameters",
-        "runner_readiness": "blocked_missing_parameters",
-        "profile_checks_passed": false,
-        "gui_recreatable": false,
-        "segment_0_to_4_profile_checks_passed": false,
-        "segment_1_to_6_materializable": false,
-        "finished_profile": false,
-        "segment_6_launchable": false,
-        "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 4,
+        "primary_category": "gui_recreatable",
+        "category_label": "GUI-recreatable",
+        "runner_readiness": "ready",
+        "profile_checks_passed": true,
+        "gui_recreatable": true,
+        "segment_0_to_4_profile_checks_passed": true,
+        "segment_1_to_6_materializable": true,
+        "finished_profile": true,
+        "segment_6_launchable": true,
+        "profile_completion_status": "finished_segment_6_launchable",
+        "missing_parameter_count": 0,
         "unsupported_structure_count": 0
       },
-      "runner_readiness": "blocked_missing_parameters",
-      "profile_checks_passed": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "primary_recreation_category": "missing_publication_parameters",
-      "missing_parameter_count": 4,
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "primary_recreation_category": "gui_recreatable",
+      "missing_parameter_count": 0,
       "unsupported_structure_count": 0,
       "local_only": true,
       "source_recipe_count": 1,

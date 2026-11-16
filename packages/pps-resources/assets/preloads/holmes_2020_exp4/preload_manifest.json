@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "holmes_2020_exp4",
   "title": "Holmes 2020 Experiment 4, driving, near/far and pedal detection",
-  "visible_variant_label": "E",
+  "visible_variant_label": "F",
   "publication_status": "published",
   "profile_type": "static_near_far_audio_tactile_pps",
   "asset_mode": "bundled_local",

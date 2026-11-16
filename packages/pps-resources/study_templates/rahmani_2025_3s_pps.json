@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.61782/fa.2025.0866",
   "doi": "10.61782/fa.2025.0866",
   "verification_status": "partial",
-  "notes": "The 3-second audio-tactile assessment preserves the seven nominal touch delays and matched tactile-only baselines. The preview uses a horizontal binaural path, a silent fixation interval and the toolkit tactile cue. Exact physical replication requires the original display and haptic setup.",
+  "notes": "The 3-second audio-tactile assessment preserves the seven nominal touch delays and matched tactile-only baselines. The toolkit runs the 245-trial assessment with a synthesized right-lateral pink-noise path, a 1,000 ms silent lead-in and the reported 80 Hz, 200 ms sawtooth drive. Use the published fixation display, questionnaire and calibrated apparatus for a study replication.",
   "reference_parameters": {
     "study_row_id": "doi:10.61782/fa.2025.0866::duration_3s",
     "profile_type": "right_lateral_looming_duration_pps",
@@ -32,6 +32,7 @@
       2437.5
     ],
     "reported_trial_formula": "245 trials per duration: 112 paired (seven delays × 16), 112 tactile-only (the same seven delays × 16) and 21 sound-only catches.",
+    "published_practice_trial_count": 5,
     "published_breaks_per_duration": 2,
     "original_break_positions": null,
     "original_intertrial_interval_ms": null,
@@ -63,16 +64,19 @@
       "waveform": "80 Hz sawtooth, generated in Audacity",
       "duration_ms": 200,
       "delivery": "Audio-driven haptic actuator on a molded silicone pad, from a separate synchronized channel",
-      "preview_cue_duration_ms": 100
+      "toolkit_cue_duration_ms": 200,
+      "toolkit_digital_amplitude": 0.2,
+      "delivered_haptic_amplitude": null
     },
     "published_response": "Speeded left-side Cherry MX Blue button press after tactile onset; withhold on auditory-only catch. RT is measured from scheduled tactile onset.",
     "preview_timing": "A 1000 ms silent lead-in encodes the nominal fixation-to-trial interval. Fixation display and head-still instruction require the original study procedure.",
     "analysis_exclusions": "Exclude responses ahead of touch and trials with multiple presses. Apply the reported 2.5 SD filter per delay and condition. The study combines adjacent scheduled delays into six overlapping analytic midpoints and applies a sigmoid fit threshold.",
-    "implementation_gaps": [
-      "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics.",
-      "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence.",
-      "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response.",
-      "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
+    "profile_check_complete": true,
+    "remaining_caveats": [
+      "The synthesized headphone audio uses the Toolkit HRTF and virtual trajectory. The original MATLAB audio, HRTF and calibrated playback level remain unavailable.",
+      "The 1,000 ms silent lead-in preserves the fixation-to-trial interval. Run the display fixation, head-still instructions, tactile familiarization, five practice trials and follow-up questionnaire with the original study procedure.",
+      "The waveform uses a digital amplitude of 0.2 for software validation. Calibrate delivered vibration and validate the button response and device latencies before a participant run. The bundled response is a mouse proxy.",
+      "The toolkit distributes 245 trials across three balanced run blocks to provide two breaks. The original break positions and intertrial interval remain unreported. Apply the published order across the two duration profiles."
     ]
   },
   "design": {
@@ -162,16 +166,12 @@
       "respiratory_phases": [
         "Any"
       ],
-      "blocks": 1,
+      "blocks": 3,
+      "distribute_trial_pool_across_blocks": true,
       "block_specs": [
-        {
-          "label": "3 s assessment",
-          "stimulus_types": [
-            "Audio-Tactile",
-            "Baseline",
-            "Catch"
-          ]
-        }
+        {"label": "3 s assessment, run 1", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
+        {"label": "3 s assessment, run 2", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]},
+        {"label": "3 s assessment, run 3", "stimulus_types": ["Audio-Tactile", "Baseline", "Catch"]}
       ],
       "trial_randomization_strategy": "balanced_shuffle",
       "block_order_randomization": "fixed",
@@ -186,7 +186,12 @@
             "body_anchor": "right palm",
             "body_part": "palm",
             "body_side": "right",
-            "response_capture_device": "mouse"
+            "response_capture_device": "mouse",
+            "tactile_stimulation_modality": "vibrotactile",
+            "tactile_waveform_shape": "sawtooth",
+            "tactile_duration_ms": 200,
+            "tactile_frequency_hz": 80,
+            "tactile_amplitude": 0.2
           },
           "elements": [
             {

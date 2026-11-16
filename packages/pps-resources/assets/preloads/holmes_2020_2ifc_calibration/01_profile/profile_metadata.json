@@ -1,0 +1,249 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "holmes_2020_2ifc_calibration",
+  "title": "Holmes 2020 \u00b7 2IFC tactile calibration",
+  "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. Experimental Brain Research, 238, 995\u20131009.",
+  "doi": "10.1007/s00221-020-05771-5",
+  "source_url": "https://doi.org/10.1007/s00221-020-05771-5",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-020-05771-5::2ifc-calibration",
+    "publication_status": "published",
+    "profile_type": "companion_assessment_inspection",
+    "planner_scope": "The source settings describe this companion procedure. The Planner contains no executable trial schedule for it.",
+    "profile_check_complete": false,
+    "published_method": {
+      "scope": "The independent threshold-setting session before the speeded near/far hand tasks.",
+      "timeline": {
+        "intervals_ms": [
+          1000,
+          1000
+        ],
+        "between_intervals_ms": 500,
+        "LED_flash_ms": 250,
+        "nominal_tactile_center_ms": 500,
+        "response_period_after_second_interval_ms": 2250,
+        "post_response_pause_ms": 1000
+      },
+      "procedure": "Deliver a 125 ms vibration during one of the two LED-marked intervals under continuous masking noise. The participant presses the corresponding first/second button. Two flashes from both LEDs follow an incorrect or omitted answer; repeat omissions.",
+      "assessment": {
+        "warm_up_trials": 4,
+        "warm_up_command_level": 0.75,
+        "adaptive_trials": 40,
+        "algorithm": "QUEST in Psychtoolbox 3",
+        "target_correct_probability": 0.9,
+        "beta": 3.5,
+        "lapse": 0.05,
+        "guess_rate": 0.5,
+        "grain": 0.005
+      },
+      "apparatus": "Oticon bone-conducting vibrator held between index finger and thumb, near-80 dB white-noise masking and two red interval LEDs. The separate unmasked strong-target check sets the working comparison at 1.5 times the weak command level."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Continuous auditory white noise mask, with LED interval markers and one vibration.",
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Publisher/OSF Training methods plus 44 retained detection workspaces across Experiments 1\u20133.",
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure. OSF 73x59 P7_E1_raw.zip, P7_E2_raw.zip and P7_E3_raw.zip, Detection*_Intensity*.mat, saved MATLAB e or expt, q1, stim and DAQ arrays.",
+          "gap": "The stand-alone threshold task script and acoustic mask asset remain unverified."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "vibration_ms": 125,
+            "interval_cue_ms": 250,
+            "mask": "Continuous through adaptive training"
+          },
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure. OSF 73x59 P7_E1_raw.zip, P7_E2_raw.zip and P7_E3_raw.zip, Detection*_Intensity*.mat, saved MATLAB e or expt, q1, stim and DAQ arrays.",
+          "gap": "The total duration of the continuous masker varies with session and repeats."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "auditory_conditions": {
+          "status": "reported_with_caveat",
+          "value": [
+            "Continuous white-noise mask during thresholding",
+            "Quiet suprathreshold perceptibility check"
+          ],
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure. OSF 73x59 P7_E1_raw.zip, P7_E2_raw.zip and P7_E3_raw.zip, Detection*_Intensity*.mat, saved MATLAB e or expt, q1, stim and DAQ arrays.",
+          "gap": "Check position and exact acoustic mask asset are unverified."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": "LED markers, two manual response buttons, vibrator, and saved three-column output/two-column input DAQ arrays at 8 kHz.",
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure. OSF 73x59 P7_E1_raw.zip, P7_E2_raw.zip and P7_E3_raw.zip, Detection*_Intensity*.mat, saved MATLAB e or expt, q1, stim and DAQ arrays.",
+          "gap": "The exact training NI port map and mask renderer are unverified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "warmup": 4,
+            "adaptive": 40,
+            "nominal_total": 44
+          },
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Four fixed-level warm-up trials followed by adaptive trials. Target occupies one of two intervals. One quiet strong-check trial is described separately.",
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure. OSF 73x59 P7_E1_raw.zip, P7_E2_raw.zip and P7_E3_raw.zip, Detection*_Intensity*.mat, saved MATLAB e or expt, q1, stim and DAQ arrays.",
+          "gap": "The exact insertion point of the strong check is unknown."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Archived calibration tables have ascending randomization keys and a 1\u201344 row-ID permutation.",
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure. OSF 73x59 P7_E1_raw.zip, P7_E2_raw.zip and P7_E3_raw.zip, Detection*_Intensity*.mat, saved MATLAB e or expt, q1, stim and DAQ arrays.",
+          "gap": "Exact RNG and balance rule remain unverified."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "configured_next_trial_pause_ms": 1000,
+            "configured_preblock_pause_ms": 3000
+          },
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure. OSF 73x59 P7_E1_raw.zip, P7_E2_raw.zip and P7_E3_raw.zip, Detection*_Intensity*.mat, saved MATLAB e or expt, q1, stim and DAQ arrays.",
+          "gap": "The values establish saved settings. Measured between-trial timing remains unverified."
+        },
+        "response_window": {
+          "status": "reported",
+          "value": 2250,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "interval_length_ms": 1000,
+            "interval_gap_ms": 500,
+            "led_flash_ms": 250,
+            "target": "Midway through one of the two intervals",
+            "response_after_interval2_ms": 2250,
+            "feedback": "Two 250 ms flashes of both LEDs for incorrect or missing response",
+            "next_trial_delay_ms": 1000
+          },
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "reported_stimulus": "125 ms white-noise vibration sampled at 8000 Hz",
+            "printed_edge_ms_each": 5,
+            "archived_envelope_length_samples": 1000,
+            "archived_linear_edge_samples_each": 80,
+            "archived_edge_ms_each": 10,
+            "archived_plateau_samples": 840,
+            "archived_normalized_plateau_gain": 0.95,
+            "matching_primary_study_workspaces": 44,
+            "site": "Between index finger and thumb"
+          },
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure. OSF 73x59 P7_E1_raw.zip, P7_E2_raw.zip and P7_E3_raw.zip, Detection*_Intensity*.mat, saved MATLAB e or expt, q1, stim and DAQ arrays.",
+          "gap": "The archived stim.envelope vectors reproduce a linear 80-sample rise and fall with a 0.95 plateau. The ramp samples include each plateau endpoint. The archives establish the command envelope and leave mechanical rise and fall unmeasured."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Main experimental value does not describe this auxiliary procedure."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_rows_per_calibration_workspace": 44,
+            "archived_workspaces_by_experiment": {
+              "E1": 18,
+              "E2": 14,
+              "E3": 12
+            }
+          },
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure. OSF 73x59 P7_E1_raw.zip, P7_E2_raw.zip and P7_E3_raw.zip, Detection*_Intensity*.mat, saved MATLAB e or expt, q1, stim and DAQ arrays.",
+          "gap": "Archive workspace counts do not establish participant counts or required runs per participant."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": 44,
+          "source": "Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure",
+          "gap": "Nominal adaptive sequence. Missing responses were repeated. The strong perceptibility check is separately described."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires a two-interval visual and tactile scheduler, calibrated continuous masking and a response-dependent QUEST loop with omission repeats.",
+      "Actual waveform and drive transfer, nominal-to-physical intensity mapping, thresholds and trainee-specific repeated sequences are unresolved."
+    ]
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1007/s00221-020-05771-5. Journal pp. 997\u2013998, Experiment 1; shared apparatus and procedure"
+    }
+  ]
+}

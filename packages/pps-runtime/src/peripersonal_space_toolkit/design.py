@@ -2005,6 +2005,7 @@ def protocol_sound_sources(design: StimulusDesign) -> list[dict[str, Any]]:
             "source_path": asset.path,
             "target_duration_s": asset.target_duration_s,
             "source_render_mode": asset.render_mode,
+            "motion_mode": asset.motion_mode,
             "stimulus_placement": asset.placement,
             "target_source_label": asset.target_source_label,
             "phase": asset.phase,

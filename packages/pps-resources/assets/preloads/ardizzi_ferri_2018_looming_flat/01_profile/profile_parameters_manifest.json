@@ -113,7 +113,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 19,
+      "value": 24,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -346,6 +346,10 @@
     {
       "field": "Tactile target, response and interval",
       "source": "Cognition 177, pp. 80\u201381, \u00a72.2. Tactile onset is relative to the acoustic source. Each trial is followed by a 1000 ms interval. The recorded response used the left index finger on a Cedrus RB-834."
+    },
+    {
+      "field": "Individual PPS boundary analysis",
+      "source": "Cognition 177, p. 81, section 2.2, Estimation of individual PPS boundary."
     }
   ],
   "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."

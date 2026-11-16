@@ -9,8 +9,8 @@
   "publication_status": "published",
   "profile_type": "static_near_far_audio_tactile_pps",
   "paper_group_key": "doi:10.1007/s00221-020-05771-5",
-  "visible_variant_label": "D",
-  "variant_display": "Holmes 2020 Experiment 3, vocal detection at either intensity - Variant D",
+  "visible_variant_label": "E",
+  "variant_display": "Holmes 2020 Experiment 3, vocal detection at either intensity - Variant E",
   "recreation_status": {
     "primary_category": "toolkit_structural_gap",
     "category_label": "Toolkit structural gap",
@@ -68,7 +68,7 @@
           {
             "parameter": "profile_gap",
             "status": "unsupported_toolkit_structure",
-            "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+            "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
           },
           {
             "parameter": "profile_gap",
@@ -176,13 +176,29 @@
       "parameter": "jitter_values_ms",
       "status": "reported",
       "value": [
+        1200,
+        1400,
         1600,
+        1800,
+        2000,
         3375,
+        1200,
+        1400,
         1600,
+        1800,
+        2000,
         3375,
+        1197,
+        1397,
         1597,
+        1797,
+        1997,
         3378,
+        1197,
+        1397,
         1597,
+        1797,
+        1997,
         3378
       ],
       "note": "Explicit jitter values encoded."
@@ -246,7 +262,7 @@
       "parameter": "trial_pool_repetitions",
       "status": "reported",
       "value": {
-        "audio_tactile": 10,
+        "audio_tactile": 2,
         "catch": 0
       },
       "note": "Segment 4 repetition defaults are encoded."
@@ -312,8 +328,8 @@
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "profile_gap",
       "status": "unsupported_toolkit_structure",
-      "value": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks.",
-      "note": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+      "value": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved.",
+      "note": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
     },
     {
       "segment": "2",
@@ -376,7 +392,7 @@
     {
       "segment": "2",
       "parameter": "profile_gap",
-      "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+      "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
     }
   ],
   "generated_segment_artifacts": {

@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "holmes_2020_exp2_weak_target",
   "title": "Holmes 2020 Experiment 2, weak-target vocal discrimination",
-  "visible_variant_label": "C",
+  "visible_variant_label": "D",
   "publication_status": "published",
   "profile_type": "static_near_far_audio_tactile_pps",
   "asset_mode": "bundled_local",

@@ -14,7 +14,7 @@
   "trial_strips": [
     {
       "strip_id": "cardini-2018-pregnancy-trunk-pps",
-      "label": "Assessment timing inspection",
+      "label": "PPS assessment for one visit",
       "audio_tactile_percentage": null,
       "catch_percentage": null,
       "baseline_percentage": null,
@@ -25,16 +25,18 @@
         "response_mode": "button_press_mouse_click_proxy",
         "response_input_modality": "mouse_click",
         "response_capture_device": "mouse",
-        "target_role": "tactile_detection"
+        "target_role": "tactile_detection",
+        "tactile_stimulation_modality": "mechanical",
+        "source_asset_equivalence": "generated headphone cue, with a 15 dB digital envelope and illustrative geometry"
       },
       "elements": [
         {
           "element_id": "cardini_2018_pregnancy_trunk_pps-looming_stimulus-audio-timing-reference",
           "kind": "looming_stimulus",
-          "label": "Audio timing reference",
-          "source_label": "3 s pink timing reference",
+          "label": "3 s looming pink noise",
+          "source_label": "3 s looming pink noise",
           "source_labels": [
-            "3 s pink timing reference"
+            "3 s looming pink noise"
           ],
           "jitter_values_ms": [],
           "randomized": false

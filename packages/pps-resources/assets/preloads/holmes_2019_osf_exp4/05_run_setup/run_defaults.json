@@ -1,13 +1,33 @@
 {
   "schema": "pps-preload-run-setup-segment.v1",
   "template_id": "holmes_2019_osf_exp4",
-  "blocks": 1,
-  "participants": 1,
-  "random_seed": 20250604,
-  "trial_randomization_strategy": "no_immediate_repeats",
-  "block_order_randomization": "fixed",
-  "repeat_trial_pool_per_block": false,
+  "blocks": 3,
+  "participants": 44,
+  "random_seed": 202005771,
+  "trial_randomization_strategy": "balanced_shuffle",
+  "block_order_randomization": "counterbalanced_rotation",
+  "repeat_trial_pool_per_block": true,
   "distribute_trial_pool_across_blocks": false,
   "baseline_crosses_sequence_variants": true,
-  "catch_crosses_sequence_variants": true
+  "catch_crosses_sequence_variants": true,
+  "block_specs": [
+    {
+      "label": "Away",
+      "stimulus_types": [
+        "Audio-Tactile"
+      ]
+    },
+    {
+      "label": "Passive",
+      "stimulus_types": [
+        "Audio-Tactile"
+      ]
+    },
+    {
+      "label": "Active",
+      "stimulus_types": [
+        "Audio-Tactile"
+      ]
+    }
+  ]
 }

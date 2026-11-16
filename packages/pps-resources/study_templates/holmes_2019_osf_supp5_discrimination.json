@@ -1,0 +1,236 @@
+{
+  "template_id": "holmes_2019_osf_supp5_discrimination",
+  "title": "Holmes OSF · Supplementary Experiment 5, discrimination feasibility",
+  "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. OSF 73x59, manuscript revision 4.",
+  "source_url": "https://doi.org/10.17605/osf.io/73x59",
+  "doi": "10.17605/osf.io/73x59",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.17605/osf.io/73x59::supp5",
+    "publication_status": "author_project_revision",
+    "profile_type": "companion_assessment_inspection",
+    "planner_scope": "The source settings describe this companion procedure. The Planner contains no executable trial schedule for it.",
+    "profile_check_complete": false,
+    "published_method": {
+      "scope": "Three observers tested on replacement Nottingham hardware in 2019, within two approximately one-hour sessions per observer. The stimulator type was similar to the earlier setup.",
+      "conditions": {
+        "interval_design": [
+          "1IFC",
+          "2IFC"
+        ],
+        "task": [
+          "detection",
+          "intensity discrimination"
+        ],
+        "mask": [
+          "continuous white noise",
+          "discrete white-noise bursts"
+        ]
+      },
+      "order": "Reach 90% detection without hitting the QUEST ceiling, then perform detection under each interval/mask combination before the four discrimination blocks.",
+      "discrimination": {
+        "trials_per_block": 44,
+        "weak_level": "Individual 90% detection threshold",
+        "strong_level": "1.5 times threshold",
+        "response_1IFC": "Classify the single presented vibration as weak or strong.",
+        "response_2IFC": "Choose which interval contained the stronger vibration."
+      },
+      "scoring": "The supplement labels 27/44 as above chance. Exact binomial p under chance 0.5 is approximately 0.087 one-sided or 0.174 two-sided. The original calculation and threshold rule are unresolved."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Continuous white noise or discrete noise pulses.",
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "White noise timing and stimuli related to the main experiments.",
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Original hardware for delivering or amplifying stimuli was replaced."
+        },
+        "trajectory_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "No moving-source manipulation in discrimination control."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Control compares noise delivery modes and interval designs."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "No source movement."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "continuous white noise",
+            "discrete white noise"
+          ],
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5"
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": "Same vibrator type, new computer and peripheral hardware.",
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Actual levels need not correspond to Experiments 1–4."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Detection",
+            "Discrimination"
+          ],
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "1-IFC and 2-IFC crossed with continuous and discrete noise for each task.",
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5"
+        },
+        "blocked_or_random_order": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Detect or discriminate tactile intensities under 1- or 2-interval task instructions.",
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": "Train to 90% detection threshold. 2-IFC discrimination uses one threshold stimulus and one at 1.5× threshold. A separate single-participant series varies intensity ratio 1.2–2.4.",
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "No spatially varied audiotactile SOA schedule."
+        },
+        "baseline_strategy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "No PPS-style tactile-only baseline timing."
+        },
+        "catch_trial_type": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported_with_caveat",
+          "value": {
+            "discrimination_trials_per_test": 44
+          },
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Total includes other detection and training sessions with unreported counts."
+        },
+        "baseline_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "one_detection_pass_per_interval_count_by_noise_cell": 1,
+            "one_discrimination_pass_per_interval_count_by_noise_cell": 1,
+            "task_by_interval_count_by_noise_cells": 8
+          },
+          "source": "Holmes et al., publisher/OSF Supplementary Materials, printed pp. 24–26, Supplementary Experiment 5 and Supplementary Fig. 4",
+          "gap": "The supplement says participants performed each task once per interval count and noise mode. Training and repeat block counts are unreported. The separate 14-block follow-up has its own row."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Methods supplement, pp. 24–26, Supplementary Experiment 5",
+          "gap": "Not established independently for the supplementary control."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires both one- and two-interval tactile response modes, matched continuous or discrete masking, separate calibrated thresholds and the original timing parameters.",
+      "The replacement signal generation and amplification change the physical command-to-vibration relation. Detection counts and exact response device are unavailable."
+    ]
+  },
+  "design": {
+    "name": "Holmes OSF · Supplementary Experiment 5, discrimination feasibility",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": []
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.17605/osf.io/73x59. Methods supplement, pp. 24–26, Supplementary Experiment 5"
+    }
+  ]
+}

@@ -6,7 +6,7 @@
   "doi": "10.1101/492017",
   "source_url": "https://doi.org/10.1101/492017",
   "verification_status": "partial",
-  "notes": "The three visits repeat one 65-trial assessment. Inspect the five sound-relative timings and 15 audio-only catch trials per visit.",
+  "notes": "Run one 65-trial trunk PPS assessment for a selected visit. The synthesized headphone cue preserves the 3-second pink noise duration and relative level rise. The original study requires two calibrated speakers, the abdominal tapper and left-hand response hardware.",
   "reference_parameters": {
     "alternate_study_row_ids": [
       "doi:10.1101/492017::session-II",
@@ -14,7 +14,7 @@
     ],
     "publication_status": "published",
     "profile_type": "published_pps_assessment_timing",
-    "profile_check_complete": false,
+    "profile_check_complete": true,
     "study_row_id": "doi:10.1101/492017::session-I",
     "study_row_ids": [
       "doi:10.1101/492017::session-I",
@@ -92,11 +92,19 @@
       "online_response_deadline_ms": null
     },
     "reported_analysis": "Use session-specific delay-by-group ANOVAs and compare participant linear slopes within each session after excluding fits below R\u00b2 .20.",
-    "inspection_scope": "One complete 65-trial timing pool for a chosen visit. Uses stationary uncalibrated pink noise and a generic touch marker. One software block and a fixed seed are inspection settings. Running it once does not instantiate the other visits.",
-    "implementation_gaps": [
-      "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable.",
-      "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified.",
-      "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
+    "profile_scope": "One 65-trial assessment per visit. Repeat with the reported longitudinal visit schedule.",
+    "loudness_policy": {
+      "mode": "digital_dbfs",
+      "calibration_mode": "digital_only",
+      "calibration_status": "digital_only",
+      "start_spl_db": 55,
+      "end_spl_db": 70,
+      "instruction_offset_db": 0
+    },
+    "remaining_caveats": [
+      "The generated headphone cue uses the 15 dB reported level change as a digital envelope. Original near and far speaker envelopes and body-relative source coordinates remain unavailable. Toolkit path and azimuth are illustration settings.",
+      "For the study procedure use a calibrated mechanical abdominal tapper with a synchronized left-hand button and the published blindfolded setup. Preview output is a tactile-channel marker and a mouse response. Tap drive, pulse length, force and physical latencies require verification.",
+      "The original trial order, foreperiod, end silence, intertrial timing and response deadline remain unspecified. The toolkit uses a seeded shuffle and its normal response and trial timing defaults."
     ]
   },
   "provenance": [

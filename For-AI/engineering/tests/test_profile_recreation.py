@@ -43,7 +43,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     status = json.loads((root / "packages" / "pps-resources" / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
     published = [template for template in templates if template.doi]
-    assert len(published) == 192
+    assert len(published) == 201
     assert len({template.doi.lower() for template in published}) == 91
     assert all(template.reference_parameters.get("study_row_id") for template in published)
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
@@ -155,6 +155,11 @@ def test_new_assessment_preloads_preserve_trial_counts_and_launch_gates():
         "hobeika_2019_social_audience": (480, False),
         "hobeika_2019_social_collaboration": (480, False),
         "hobeika_2019_social_competition": (480, False),
+        "holmes_2019_osf_exp1": (160, False),
+        "holmes_2019_osf_exp2": (160, False),
+        "holmes_2019_osf_exp2_strong_target": (160, False),
+        "holmes_2019_osf_exp3": (160, False),
+        "holmes_2019_osf_exp4": (180, False),
         "holmes_2020_exp1": (160, False),
         "holmes_2020_exp2_strong_target": (160, False),
         "holmes_2020_exp2_weak_target": (160, False),
@@ -171,10 +176,10 @@ def test_new_assessment_preloads_preserve_trial_counts_and_launch_gates():
         "ferri_2015_ecological_looming_valence": (0, False),
         "hobeika_2020_logarithmic": (576, False),
         "hobeika_2020_pseudo_linear": (576, False),
-        "rahmani_2025_2s_pps": (245, False),
-        "rahmani_2025_3s_pps": (245, False),
-        "cardini_2018_pregnancy_trunk_pps": (65, False),
-        "cardini_2019_pregnancy_trunk_pps": (65, False),
+        "rahmani_2025_2s_pps": (245, True),
+        "rahmani_2025_3s_pps": (245, True),
+        "cardini_2018_pregnancy_trunk_pps": (65, True),
+        "cardini_2019_pregnancy_trunk_pps": (65, True),
         "chiarella_2024_mindfulness_cheek_pps": (100, False),
         "di_cosmo_2021_phase_coupling": (0, False),
         "ferroni_2020_schizotypy_active": (52, False),
@@ -222,7 +227,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert study5["segment_0_to_4_profile_checks_passed"] is True
     assert study5["missing_parameter_count"] == 0
     assert study5["unsupported_structure_count"] == 0
-    assert len(status["categories"]["gui_recreatable"]) == 26
+    assert len(status["categories"]["gui_recreatable"]) == 30
     assert profiles["canzoneri_2013_tool_use_reshaping"]["profile_checks_passed"] is True
 
     study5_lateral = profiles[STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID]
@@ -432,6 +437,34 @@ def test_source_backed_previews_preserve_trial_families_and_phase_order():
     }
 
 
+def test_replication_assessments_preserve_counts_and_declared_motion():
+    templates = {
+        template.template_id: template
+        for template in load_templates(ROOT / "packages/pps-resources/study_templates")
+    }
+    for seconds, step in ((2, 250), (3, 375)):
+        rows = block_trial_rows(templates[f"rahmani_2025_{seconds}s_pps"].design)
+        assert len({row["block_index"] for row in rows}) == 3
+        assert sum(row["trial_type"] == "Catch" for row in rows) == 21
+        for family in ("Audio-Tactile", "Baseline"):
+            targets = [row for row in rows if row["trial_type"] == family]
+            assert Counter(row["soa_ms"] for row in targets) == {step * i: 16 for i in range(1, 8)}
+            assert {row["tactile_waveform_shape"] for row in targets} == {"sawtooth"}
+            assert {row["tactile_frequency_hz"] for row in targets} == {80}
+            assert {row["tactile_duration_ms"] for row in targets} == {200}
+
+    for year in (2018, 2019):
+        rows = block_trial_rows(templates[f"cardini_{year}_pregnancy_trunk_pps"].design)
+        assert sum(row["trial_type"] == "Catch" for row in rows) == 15
+        assert Counter(row["soa_ms"] for row in rows if row["trial_type"] == "Audio-Tactile") == {
+            300: 10, 800: 10, 1500: 10, 2200: 10, 2500: 10,
+        }
+
+    rows = block_trial_rows(templates["ardizzi_ferri_2018_looming_flat"].design)
+    assert {row["motion_direction"] for row in rows if "flat" in row["noise_label"].lower()} == {"stationary"}
+    assert {row["motion_direction"] for row in rows if "looming" in row["noise_label"].lower()} == {"looming"}
+
+
 def test_barumerli_segment2_expands_analog_motion_to_binaural_source_variants():
     root = ROOT
     trial_design = json.loads(
@@ -463,7 +496,7 @@ def test_protocol12_matrix_targets_ready_published_profiles_and_blocked_samples(
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID not in ready_published
     assert DEFAULT_STUDY_TEMPLATE_ID in ready_all
     assert STUDY5_DYNASPACE_LATERAL_TEMPLATE_ID in ready_all
-    assert len(ready_published) == 24
+    assert len(ready_published) == 28
     assert "maister_2015_shared_sensory_pps" in ready_published
     assert "canzoneri_2013_tool_use_reshaping" in ready_published
     assert set(ready_published) < set(ready_all)

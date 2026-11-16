@@ -37,7 +37,12 @@
         "body_anchor": "right palm",
         "body_part": "palm",
         "body_side": "right",
-        "response_capture_device": "mouse"
+        "response_capture_device": "mouse",
+        "tactile_stimulation_modality": "vibrotactile",
+        "tactile_waveform_shape": "sawtooth",
+        "tactile_duration_ms": 200,
+        "tactile_frequency_hz": 80,
+        "tactile_amplitude": 0.2
       },
       "elements": [
         {

@@ -1,6 +1,6 @@
 {
   "schema": "pps-profile-recreation-status.v1",
-  "profile_count": 194,
+  "profile_count": 203,
   "categories": {
     "gui_recreatable": [
       "study5_box_breathing_pps",
@@ -18,6 +18,8 @@
       "biggio_2017_personal_racket",
       "canzoneri_2013_amputation_prosthesis",
       "canzoneri_2013_tool_use_reshaping",
+      "cardini_2018_pregnancy_trunk_pps",
+      "cardini_2019_pregnancy_trunk_pps",
       "tajadura_jimenez_2009_crossed_visual_deprivation",
       "tajadura_jimenez_2009_uncrossed_visual_deprivation",
       "canzoneri_2012_dynamic_sounds",
@@ -25,6 +27,8 @@
       "galli_2015_wheelchair_full_body",
       "lerner_2021_3d_audio_tactile_boundary",
       "maister_2015_shared_sensory_pps",
+      "rahmani_2025_2s_pps",
+      "rahmani_2025_3s_pps",
       "serino_2015_front_back_trunk_exp2",
       "serino_2015_peri_hand_exp3",
       "serino_2015_peri_trunk_exp1",
@@ -58,8 +62,6 @@
       "canzoneri_2013_amputation_tactile_distance_exp1",
       "canzoneri_2013_amputation_tactile_site_exp3",
       "canzoneri_2013_pointing_control_exp3",
-      "cardini_2018_pregnancy_trunk_pps",
-      "cardini_2019_pregnancy_trunk_pps",
       "cattaneo_2010_haptic_rod_bisection",
       "chiarella_2024_mindfulness_cheek_pps",
       "cimmino_2013_arm_elongation_pps",
@@ -119,10 +121,19 @@
       "holmes_2020_exp2_weak_target",
       "holmes_2020_exp3",
       "holmes_2020_exp4",
+      "holmes_2020_2ifc_calibration",
+      "holmes_2020_exploratory_sound_type",
+      "holmes_2020_supp5_discrimination",
+      "holmes_2020_supp5_intensity_ratio",
+      "holmes_2019_osf_2ifc_calibration",
       "holmes_2019_osf_exp1",
+      "holmes_2019_osf_exp2_strong_target",
       "holmes_2019_osf_exp2",
       "holmes_2019_osf_exp3",
       "holmes_2019_osf_exp4",
+      "holmes_2019_osf_exploratory_sound_type",
+      "holmes_2019_osf_supp5_discrimination",
+      "holmes_2019_osf_supp5_intensity_ratio",
       "hug_2022_guided_reaching",
       "kitagawa_2005_rear_toj",
       "kitagawa_2005_tactile_distractor",
@@ -149,8 +160,6 @@
       "pellencin_2018_social_pps_exp1",
       "pfeiffer_2018_rotation_tactile_exp2",
       "pfeiffer_2018_rotation_audiotactile_exp3",
-      "rahmani_2025_2s_pps",
-      "rahmani_2025_3s_pps",
       "rastelli_2025_affective_touch_exp1",
       "rastelli_2025_affective_touch_exp2",
       "rastelli_2025_affective_touch_exp3",
@@ -276,10 +285,19 @@
       "holmes_2020_exp2_weak_target",
       "holmes_2020_exp3",
       "holmes_2020_exp4",
+      "holmes_2020_2ifc_calibration",
+      "holmes_2020_exploratory_sound_type",
+      "holmes_2020_supp5_discrimination",
+      "holmes_2020_supp5_intensity_ratio",
+      "holmes_2019_osf_2ifc_calibration",
       "holmes_2019_osf_exp1",
+      "holmes_2019_osf_exp2_strong_target",
       "holmes_2019_osf_exp2",
       "holmes_2019_osf_exp3",
       "holmes_2019_osf_exp4",
+      "holmes_2019_osf_exploratory_sound_type",
+      "holmes_2019_osf_supp5_discrimination",
+      "holmes_2019_osf_supp5_intensity_ratio",
       "hug_2022_guided_reaching",
       "kitagawa_2005_rear_toj",
       "kitagawa_2005_tactile_distractor",
@@ -1327,7 +1345,7 @@
               {
                 "parameter": "profile_gap",
                 "status": "unsupported_toolkit_structure",
-                "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+                "reason": "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target."
               },
               {
                 "parameter": "profile_gap",
@@ -1389,7 +1407,7 @@
         {
           "segment": "2",
           "parameter": "profile_gap",
-          "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+          "reason": "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target."
         },
         {
           "segment": "2",
@@ -1459,7 +1477,7 @@
               {
                 "parameter": "profile_gap",
                 "status": "unsupported_toolkit_structure",
-                "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+                "reason": "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target."
               },
               {
                 "parameter": "profile_gap",
@@ -1531,7 +1549,7 @@
         {
           "segment": "2",
           "parameter": "profile_gap",
-          "reason": "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target."
+          "reason": "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target."
         },
         {
           "segment": "2",
@@ -5287,21 +5305,21 @@
       "profile_type": "published_pps_assessment_timing",
       "visible_variant_label": "",
       "variant_display": "Cardini 2018 maternal brain gain preprint trunk PPS",
-      "primary_category": "missing_publication_parameters",
-      "category_label": "Missing publication parameters",
-      "runner_readiness": "blocked_missing_parameters",
-      "profile_checks_passed": false,
-      "gui_recreatable": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "segment_1_to_6_materializable": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 3,
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
       "unsupported_structure_count": 0,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
-        "passed": false,
+        "passed": true,
         "segments": [
           {
             "segment": "0",
@@ -5313,41 +5331,23 @@
           {
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
-            "passed": false,
-            "field_count": 4,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable."
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
-            "passed": false,
-            "field_count": 4,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": false,
-            "field_count": 6,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified."
-              }
-            ]
+            "passed": true,
+            "field_count": 5,
+            "blocking_reasons": []
           },
           {
             "segment": "4",
@@ -5358,23 +5358,7 @@
           }
         ]
       },
-      "missing_publication_parameters": [
-        {
-          "segment": "1",
-          "parameter": "profile_gap",
-          "reason": "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable."
-        },
-        {
-          "segment": "3",
-          "parameter": "profile_gap",
-          "reason": "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified."
-        },
-        {
-          "segment": "2",
-          "parameter": "profile_gap",
-          "reason": "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
-        }
-      ],
+      "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/cardini_2018_pregnancy_trunk_pps/01_profile/profile_parameters_manifest.json"
     },
@@ -5388,21 +5372,21 @@
       "profile_type": "published_pps_assessment_timing",
       "visible_variant_label": "",
       "variant_display": "Cardini 2019 pregnancy trunk PPS",
-      "primary_category": "missing_publication_parameters",
-      "category_label": "Missing publication parameters",
-      "runner_readiness": "blocked_missing_parameters",
-      "profile_checks_passed": false,
-      "gui_recreatable": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "segment_1_to_6_materializable": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 3,
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
       "unsupported_structure_count": 0,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
-        "passed": false,
+        "passed": true,
         "segments": [
           {
             "segment": "0",
@@ -5414,41 +5398,23 @@
           {
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
-            "passed": false,
-            "field_count": 4,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable."
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
-            "passed": false,
-            "field_count": 4,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": false,
-            "field_count": 6,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified."
-              }
-            ]
+            "passed": true,
+            "field_count": 5,
+            "blocking_reasons": []
           },
           {
             "segment": "4",
@@ -5459,23 +5425,7 @@
           }
         ]
       },
-      "missing_publication_parameters": [
-        {
-          "segment": "1",
-          "parameter": "profile_gap",
-          "reason": "Exact two-speaker audio files and calibrated exponential gains, azimuth, and body-referenced distances are unavailable."
-        },
-        {
-          "segment": "3",
-          "parameter": "profile_gap",
-          "reason": "Mechanical tapper drive, pulse duration, force calibration and synchronized response-device hardware are unverified."
-        },
-        {
-          "segment": "2",
-          "parameter": "profile_gap",
-          "reason": "Response deadline, precise foreperiod, end silence and intertrial timing are unreported."
-        }
-      ],
+      "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/cardini_2019_pregnancy_trunk_pps/01_profile/profile_parameters_manifest.json"
     },
@@ -13624,8 +13574,8 @@
       "verification_status": "partial",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
-      "visible_variant_label": "A",
-      "variant_display": "Holmes 2020 Experiment 1, weak-target vocal discrimination - Variant A",
+      "visible_variant_label": "B",
+      "variant_display": "Holmes 2020 Experiment 1, weak-target vocal discrimination - Variant B",
       "primary_category": "toolkit_structural_gap",
       "category_label": "Toolkit structural gap",
       "runner_readiness": "blocked_unsupported_toolkit_structure",
@@ -13681,7 +13631,7 @@
               {
                 "parameter": "profile_gap",
                 "status": "unsupported_toolkit_structure",
-                "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
               },
               {
                 "parameter": "profile_gap",
@@ -13753,7 +13703,7 @@
         {
           "segment": "2",
           "parameter": "profile_gap",
-          "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
         }
       ],
       "profile_parameters_manifest": "assets/preloads/holmes_2020_exp1/01_profile/profile_parameters_manifest.json"
@@ -13766,8 +13716,8 @@
       "verification_status": "partial",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
-      "visible_variant_label": "B",
-      "variant_display": "Holmes 2020 Experiment 2, strong-target vocal discrimination - Variant B",
+      "visible_variant_label": "C",
+      "variant_display": "Holmes 2020 Experiment 2, strong-target vocal discrimination - Variant C",
       "primary_category": "toolkit_structural_gap",
       "category_label": "Toolkit structural gap",
       "runner_readiness": "blocked_unsupported_toolkit_structure",
@@ -13823,7 +13773,7 @@
               {
                 "parameter": "profile_gap",
                 "status": "unsupported_toolkit_structure",
-                "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
               },
               {
                 "parameter": "profile_gap",
@@ -13895,7 +13845,7 @@
         {
           "segment": "2",
           "parameter": "profile_gap",
-          "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
         }
       ],
       "profile_parameters_manifest": "assets/preloads/holmes_2020_exp2_strong_target/01_profile/profile_parameters_manifest.json"
@@ -13908,8 +13858,8 @@
       "verification_status": "partial",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
-      "visible_variant_label": "C",
-      "variant_display": "Holmes 2020 Experiment 2, weak-target vocal discrimination - Variant C",
+      "visible_variant_label": "D",
+      "variant_display": "Holmes 2020 Experiment 2, weak-target vocal discrimination - Variant D",
       "primary_category": "toolkit_structural_gap",
       "category_label": "Toolkit structural gap",
       "runner_readiness": "blocked_unsupported_toolkit_structure",
@@ -13965,7 +13915,7 @@
               {
                 "parameter": "profile_gap",
                 "status": "unsupported_toolkit_structure",
-                "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
               },
               {
                 "parameter": "profile_gap",
@@ -14037,7 +13987,7 @@
         {
           "segment": "2",
           "parameter": "profile_gap",
-          "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
         }
       ],
       "profile_parameters_manifest": "assets/preloads/holmes_2020_exp2_weak_target/01_profile/profile_parameters_manifest.json"
@@ -14050,8 +14000,8 @@
       "verification_status": "partial",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
-      "visible_variant_label": "D",
-      "variant_display": "Holmes 2020 Experiment 3, vocal detection at either intensity - Variant D",
+      "visible_variant_label": "E",
+      "variant_display": "Holmes 2020 Experiment 3, vocal detection at either intensity - Variant E",
       "primary_category": "toolkit_structural_gap",
       "category_label": "Toolkit structural gap",
       "runner_readiness": "blocked_unsupported_toolkit_structure",
@@ -14107,7 +14057,7 @@
               {
                 "parameter": "profile_gap",
                 "status": "unsupported_toolkit_structure",
-                "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
               },
               {
                 "parameter": "profile_gap",
@@ -14179,7 +14129,7 @@
         {
           "segment": "2",
           "parameter": "profile_gap",
-          "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
         }
       ],
       "profile_parameters_manifest": "assets/preloads/holmes_2020_exp3/01_profile/profile_parameters_manifest.json"
@@ -14192,8 +14142,8 @@
       "verification_status": "partial",
       "publication_status": "published",
       "profile_type": "static_near_far_audio_tactile_pps",
-      "visible_variant_label": "E",
-      "variant_display": "Holmes 2020 Experiment 4, driving, near/far and pedal detection - Variant E",
+      "visible_variant_label": "F",
+      "variant_display": "Holmes 2020 Experiment 4, driving, near/far and pedal detection - Variant F",
       "primary_category": "toolkit_structural_gap",
       "category_label": "Toolkit structural gap",
       "runner_readiness": "blocked_unsupported_toolkit_structure",
@@ -14249,7 +14199,7 @@
               {
                 "parameter": "profile_gap",
                 "status": "unsupported_toolkit_structure",
-                "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
               },
               {
                 "parameter": "profile_gap",
@@ -14316,10 +14266,798 @@
         {
           "segment": "2",
           "parameter": "profile_gap",
-          "reason": "The scheduler preview uses an integer 3 ms far advance, a fixed 1500 ms foreperiod, and a fixed nominal response buffer. It cannot recreate the original continuous randomized foreperiod or resolve the procedure clocks."
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
         }
       ],
       "profile_parameters_manifest": "assets/preloads/holmes_2020_exp4/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "holmes_2020_2ifc_calibration",
+      "title": "Holmes 2020 \u00b7 2IFC tactile calibration",
+      "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. Experimental Brain Research, 238, 995\u20131009.",
+      "doi": "10.1007/s00221-020-05771-5",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "companion_assessment_inspection",
+      "visible_variant_label": "A",
+      "variant_display": "Holmes 2020 \u00b7 2IFC tactile calibration - Variant A",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 2,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Actual waveform and drive transfer, nominal-to-physical intensity mapping, thresholds and trainee-specific repeated sequences are unresolved."
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 3,
+            "blocking_reasons": [
+              {
+                "parameter": "source_stimulus_inventory",
+                "status": "missing_publication_parameter",
+                "reason": "No source assets are available for Segment 1."
+              },
+              {
+                "parameter": "trajectory_snapshots",
+                "status": "missing_publication_parameter",
+                "reason": "No source-level trajectory snapshots are available."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "trial_sequence_rows",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Requires a two-interval visual and tactile scheduler, calibrated continuous masking and a response-dependent QUEST loop with omission repeats."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "soa_values_ms",
+                "status": "missing_publication_parameter",
+                "reason": "No SOA values are encoded."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "source_stimulus_inventory",
+          "reason": "No source assets are available for Segment 1."
+        },
+        {
+          "segment": "1",
+          "parameter": "trajectory_snapshots",
+          "reason": "No source-level trajectory snapshots are available."
+        },
+        {
+          "segment": "3",
+          "parameter": "soa_values_ms",
+          "reason": "No SOA values are encoded."
+        },
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "Actual waveform and drive transfer, nominal-to-physical intensity mapping, thresholds and trainee-specific repeated sequences are unresolved."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one procedural noise definition or custom looming audio source is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one SOA value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one spatial value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one tactile body site is required."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "trial_sequence_rows",
+          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+        },
+        {
+          "segment": "5",
+          "parameter": "row_order_constraints",
+          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Requires a two-interval visual and tactile scheduler, calibrated continuous masking and a response-dependent QUEST loop with omission repeats."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/holmes_2020_2ifc_calibration/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "holmes_2020_exploratory_sound_type",
+      "title": "Holmes 2020 \u00b7 Exploratory sound-type acquisition",
+      "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. Experimental Brain Research, 238, 995\u20131009.",
+      "doi": "10.1007/s00221-020-05771-5",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "companion_assessment_inspection",
+      "visible_variant_label": "G",
+      "variant_display": "Holmes 2020 \u00b7 Exploratory sound-type acquisition - Variant G",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Distinct archived protocol versions, participant-level assignment and original retained analysis scope remain unresolved."
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "source_stimulus_inventory",
+                "status": "missing_publication_parameter",
+                "reason": "No source assets are available for Segment 1."
+              },
+              {
+                "parameter": "trajectory_snapshots",
+                "status": "missing_publication_parameter",
+                "reason": "No source-level trajectory snapshots are available."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The intended comparison cannot be recovered from confounded sound-type and distance labels. Reproducing the archived procedure requires the original waveform routing and validation of audible condition identities."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 3,
+            "blocking_reasons": [
+              {
+                "parameter": "trial_sequence_rows",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "soa_values_ms",
+                "status": "missing_publication_parameter",
+                "reason": "No SOA values are encoded."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "source_stimulus_inventory",
+          "reason": "No source assets are available for Segment 1."
+        },
+        {
+          "segment": "1",
+          "parameter": "trajectory_snapshots",
+          "reason": "No source-level trajectory snapshots are available."
+        },
+        {
+          "segment": "3",
+          "parameter": "soa_values_ms",
+          "reason": "No SOA values are encoded."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "The intended comparison cannot be recovered from confounded sound-type and distance labels. Reproducing the archived procedure requires the original waveform routing and validation of audible condition identities."
+        },
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "Distinct archived protocol versions, participant-level assignment and original retained analysis scope remain unresolved."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one procedural noise definition or custom looming audio source is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one SOA value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one spatial value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one tactile body site is required."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "trial_sequence_rows",
+          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+        },
+        {
+          "segment": "5",
+          "parameter": "row_order_constraints",
+          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/holmes_2020_exploratory_sound_type/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "holmes_2020_supp5_discrimination",
+      "title": "Holmes 2020 \u00b7 Supplementary Experiment 5, discrimination feasibility",
+      "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. Experimental Brain Research, 238, 995\u20131009.",
+      "doi": "10.1007/s00221-020-05771-5",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "companion_assessment_inspection",
+      "visible_variant_label": "H",
+      "variant_display": "Holmes 2020 \u00b7 Supplementary Experiment 5, discrimination feasibility - Variant H",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 3,
+            "blocking_reasons": [
+              {
+                "parameter": "source_stimulus_inventory",
+                "status": "missing_publication_parameter",
+                "reason": "No source assets are available for Segment 1."
+              },
+              {
+                "parameter": "trajectory_snapshots",
+                "status": "missing_publication_parameter",
+                "reason": "No source-level trajectory snapshots are available."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 3,
+            "blocking_reasons": [
+              {
+                "parameter": "trial_sequence_rows",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "soa_values_ms",
+                "status": "missing_publication_parameter",
+                "reason": "No SOA values are encoded."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Requires both one- and two-interval tactile response modes, matched continuous or discrete masking, separate calibrated thresholds and the original timing parameters."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The replacement signal generation and amplification change the physical command-to-vibration relation. Detection counts and exact response device are unavailable."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "source_stimulus_inventory",
+          "reason": "No source assets are available for Segment 1."
+        },
+        {
+          "segment": "1",
+          "parameter": "trajectory_snapshots",
+          "reason": "No source-level trajectory snapshots are available."
+        },
+        {
+          "segment": "3",
+          "parameter": "soa_values_ms",
+          "reason": "No SOA values are encoded."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Requires both one- and two-interval tactile response modes, matched continuous or discrete masking, separate calibrated thresholds and the original timing parameters."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The replacement signal generation and amplification change the physical command-to-vibration relation. Detection counts and exact response device are unavailable."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one procedural noise definition or custom looming audio source is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one SOA value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one spatial value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one tactile body site is required."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "trial_sequence_rows",
+          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+        },
+        {
+          "segment": "5",
+          "parameter": "row_order_constraints",
+          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/holmes_2020_supp5_discrimination/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "holmes_2020_supp5_intensity_ratio",
+      "title": "Holmes 2020 \u00b7 Supplementary Experiment 5, intensity-ratio follow-up",
+      "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. Experimental Brain Research, 238, 995\u20131009.",
+      "doi": "10.1007/s00221-020-05771-5",
+      "verification_status": "partial",
+      "publication_status": "published",
+      "profile_type": "companion_assessment_inspection",
+      "visible_variant_label": "I",
+      "variant_display": "Holmes 2020 \u00b7 Supplementary Experiment 5, intensity-ratio follow-up - Variant I",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "source_stimulus_inventory",
+                "status": "missing_publication_parameter",
+                "reason": "No source assets are available for Segment 1."
+              },
+              {
+                "parameter": "trajectory_snapshots",
+                "status": "missing_publication_parameter",
+                "reason": "No source-level trajectory snapshots are available."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Original follow-up software, waveform, trial counts and delivered sound and tactile calibration are unavailable."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "trial_sequence_rows",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Requires calibrated relative tactile drive, fixed mask conditions and binary weak/strong response capture."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "soa_values_ms",
+                "status": "missing_publication_parameter",
+                "reason": "No SOA values are encoded."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "source_stimulus_inventory",
+          "reason": "No source assets are available for Segment 1."
+        },
+        {
+          "segment": "1",
+          "parameter": "trajectory_snapshots",
+          "reason": "No source-level trajectory snapshots are available."
+        },
+        {
+          "segment": "3",
+          "parameter": "soa_values_ms",
+          "reason": "No SOA values are encoded."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Requires calibrated relative tactile drive, fixed mask conditions and binary weak/strong response capture."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Original follow-up software, waveform, trial counts and delivered sound and tactile calibration are unavailable."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one procedural noise definition or custom looming audio source is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one SOA value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one spatial value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one tactile body site is required."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "trial_sequence_rows",
+          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+        },
+        {
+          "segment": "5",
+          "parameter": "row_order_constraints",
+          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/holmes_2020_supp5_intensity_ratio/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "holmes_2019_osf_2ifc_calibration",
+      "title": "Holmes OSF \u00b7 2IFC tactile calibration",
+      "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. OSF 73x59, manuscript revision 4.",
+      "doi": "10.17605/osf.io/73x59",
+      "verification_status": "partial",
+      "publication_status": "author_project_revision",
+      "profile_type": "companion_assessment_inspection",
+      "visible_variant_label": "A",
+      "variant_display": "Holmes OSF \u00b7 2IFC tactile calibration - Variant A",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 2,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Actual waveform and drive transfer, nominal-to-physical intensity mapping, thresholds and trainee-specific repeated sequences are unresolved."
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 3,
+            "blocking_reasons": [
+              {
+                "parameter": "source_stimulus_inventory",
+                "status": "missing_publication_parameter",
+                "reason": "No source assets are available for Segment 1."
+              },
+              {
+                "parameter": "trajectory_snapshots",
+                "status": "missing_publication_parameter",
+                "reason": "No source-level trajectory snapshots are available."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "trial_sequence_rows",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Requires a two-interval visual and tactile scheduler, calibrated continuous masking and a response-dependent QUEST loop with omission repeats."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "soa_values_ms",
+                "status": "missing_publication_parameter",
+                "reason": "No SOA values are encoded."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "source_stimulus_inventory",
+          "reason": "No source assets are available for Segment 1."
+        },
+        {
+          "segment": "1",
+          "parameter": "trajectory_snapshots",
+          "reason": "No source-level trajectory snapshots are available."
+        },
+        {
+          "segment": "3",
+          "parameter": "soa_values_ms",
+          "reason": "No SOA values are encoded."
+        },
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "Actual waveform and drive transfer, nominal-to-physical intensity mapping, thresholds and trainee-specific repeated sequences are unresolved."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one procedural noise definition or custom looming audio source is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one SOA value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one spatial value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one tactile body site is required."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "trial_sequence_rows",
+          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+        },
+        {
+          "segment": "5",
+          "parameter": "row_order_constraints",
+          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Requires a two-interval visual and tactile scheduler, calibrated continuous masking and a response-dependent QUEST loop with omission repeats."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_2ifc_calibration/01_profile/profile_parameters_manifest.json"
     },
     {
       "template_id": "holmes_2019_osf_exp1",
@@ -14328,9 +15066,9 @@
       "doi": "10.17605/osf.io/73x59",
       "verification_status": "partial",
       "publication_status": "author_project_revision",
-      "profile_type": "published_method_inspection",
-      "visible_variant_label": "A",
-      "variant_display": "Holmes OSF \u00b7 Experiment 1 \u00b7 Weak-target discrimination - Variant A",
+      "profile_type": "static_near_far_audio_tactile_pps",
+      "visible_variant_label": "B",
+      "variant_display": "Holmes OSF \u00b7 Experiment 1 \u00b7 Weak-target discrimination - Variant B",
       "primary_category": "toolkit_structural_gap",
       "category_label": "Toolkit structural gap",
       "runner_readiness": "blocked_unsupported_toolkit_structure",
@@ -14341,8 +15079,8 @@
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 5,
-      "unsupported_structure_count": 1,
+      "missing_parameter_count": 8,
+      "unsupported_structure_count": 2,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
         "passed": false,
@@ -14358,18 +15096,8 @@
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
             "passed": false,
-            "field_count": 5,
+            "field_count": 8,
             "blocking_reasons": [
-              {
-                "parameter": "source_stimulus_inventory",
-                "status": "missing_publication_parameter",
-                "reason": "No source assets are available for Segment 1."
-              },
-              {
-                "parameter": "trajectory_snapshots",
-                "status": "missing_publication_parameter",
-                "reason": "No source-level trajectory snapshots are available."
-              },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
@@ -14379,6 +15107,21 @@
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
                 "reason": "The source archive preserves realized orders but no RNG state. Measure physical stimulus timing and calibration independently."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
               }
             ]
           },
@@ -14386,26 +15129,42 @@
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
             "passed": false,
-            "field_count": 4,
+            "field_count": 6,
             "blocking_reasons": [
-              {
-                "parameter": "trial_sequence_rows",
-                "status": "unsupported_toolkit_structure",
-                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
-              },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
                 "reason": "Implement two-interval tactile intensity calibration and a response classifier with the archived microphone filtering and threshold. Preserve the same per-trial noise waveform across tactile and auditory channels."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
               }
             ]
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": true,
-            "field_count": 5,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
+              }
+            ]
           },
           {
             "segment": "4",
@@ -14417,16 +15176,6 @@
         ]
       },
       "missing_publication_parameters": [
-        {
-          "segment": "1",
-          "parameter": "source_stimulus_inventory",
-          "reason": "No source assets are available for Segment 1."
-        },
-        {
-          "segment": "1",
-          "parameter": "trajectory_snapshots",
-          "reason": "No source-level trajectory snapshots are available."
-        },
         {
           "segment": "1",
           "parameter": "profile_gap",
@@ -14443,35 +15192,55 @@
           "reason": "The source archive preserves realized orders but no RNG state. Measure physical stimulus timing and calibration independently."
         },
         {
-          "segment": "6",
-          "parameter": "current_design_validation",
-          "reason": "At least one procedural noise definition or custom looming audio source is required."
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
         }
       ],
       "unsupported_toolkit_structures": [
         {
-          "segment": "2",
-          "parameter": "trial_sequence_rows",
-          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
         },
         {
-          "segment": "5",
-          "parameter": "row_order_constraints",
-          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
         }
       ],
       "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp1/01_profile/profile_parameters_manifest.json"
     },
     {
-      "template_id": "holmes_2019_osf_exp2",
-      "title": "Holmes OSF \u00b7 Experiment 2 \u00b7 Assigned-intensity discrimination",
+      "template_id": "holmes_2019_osf_exp2_strong_target",
+      "title": "Holmes OSF \u00b7 Experiment 2 \u00b7 Strong target",
       "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. OSF 73x59, manuscript revision 4.",
       "doi": "10.17605/osf.io/73x59",
       "verification_status": "partial",
       "publication_status": "author_project_revision",
-      "profile_type": "published_method_inspection",
-      "visible_variant_label": "B",
-      "variant_display": "Holmes OSF \u00b7 Experiment 2 \u00b7 Assigned-intensity discrimination - Variant B",
+      "profile_type": "static_near_far_audio_tactile_pps",
+      "visible_variant_label": "D",
+      "variant_display": "Holmes OSF \u00b7 Experiment 2 \u00b7 Strong target - Variant D",
       "primary_category": "toolkit_structural_gap",
       "category_label": "Toolkit structural gap",
       "runner_readiness": "blocked_unsupported_toolkit_structure",
@@ -14482,8 +15251,8 @@
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 5,
-      "unsupported_structure_count": 1,
+      "missing_parameter_count": 8,
+      "unsupported_structure_count": 3,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
         "passed": false,
@@ -14499,18 +15268,8 @@
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
             "passed": false,
-            "field_count": 5,
+            "field_count": 8,
             "blocking_reasons": [
-              {
-                "parameter": "source_stimulus_inventory",
-                "status": "missing_publication_parameter",
-                "reason": "No source assets are available for Segment 1."
-              },
-              {
-                "parameter": "trajectory_snapshots",
-                "status": "missing_publication_parameter",
-                "reason": "No source-level trajectory snapshots are available."
-              },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
@@ -14520,6 +15279,21 @@
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
                 "reason": "The source archive preserves realized orders but no RNG state. Measure physical stimulus timing and calibration independently."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
               }
             ]
           },
@@ -14527,26 +15301,47 @@
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
             "passed": false,
-            "field_count": 4,
+            "field_count": 7,
             "blocking_reasons": [
-              {
-                "parameter": "trial_sequence_rows",
-                "status": "unsupported_toolkit_structure",
-                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
-              },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
                 "reason": "Implement two-interval tactile intensity calibration and a response classifier with the archived microphone filtering and threshold. Preserve the same per-trial noise waveform across tactile and auditory channels."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
               }
             ]
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": true,
-            "field_count": 5,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
+              }
+            ]
           },
           {
             "segment": "4",
@@ -14558,16 +15353,6 @@
         ]
       },
       "missing_publication_parameters": [
-        {
-          "segment": "1",
-          "parameter": "source_stimulus_inventory",
-          "reason": "No source assets are available for Segment 1."
-        },
-        {
-          "segment": "1",
-          "parameter": "trajectory_snapshots",
-          "reason": "No source-level trajectory snapshots are available."
-        },
         {
           "segment": "1",
           "parameter": "profile_gap",
@@ -14584,21 +15369,218 @@
           "reason": "The source archive preserves realized orders but no RNG state. Measure physical stimulus timing and calibration independently."
         },
         {
-          "segment": "6",
-          "parameter": "current_design_validation",
-          "reason": "At least one procedural noise definition or custom looming audio source is required."
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
         }
       ],
       "unsupported_toolkit_structures": [
         {
-          "segment": "2",
-          "parameter": "trial_sequence_rows",
-          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
         },
         {
-          "segment": "5",
-          "parameter": "row_order_constraints",
-          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp2_strong_target/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "holmes_2019_osf_exp2",
+      "title": "Holmes OSF \u00b7 Experiment 2 \u00b7 Weak target",
+      "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. OSF 73x59, manuscript revision 4.",
+      "doi": "10.17605/osf.io/73x59",
+      "verification_status": "partial",
+      "publication_status": "author_project_revision",
+      "profile_type": "static_near_far_audio_tactile_pps",
+      "visible_variant_label": "C",
+      "variant_display": "Holmes OSF \u00b7 Experiment 2 \u00b7 Weak target - Variant C",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 8,
+      "unsupported_structure_count": 2,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 8,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Synchronize two physical output speakers, the calibrated bone-conducting vibrator and the vocal key with the original output and acquisition clocks."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The source archive preserves realized orders but no RNG state. Measure physical stimulus timing and calibration independently."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Implement two-interval tactile intensity calibration and a response classifier with the archived microphone filtering and threshold. Preserve the same per-trial noise waveform across tactile and auditory channels."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Synchronize two physical output speakers, the calibrated bone-conducting vibrator and the vocal key with the original output and acquisition clocks."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Implement two-interval tactile intensity calibration and a response classifier with the archived microphone filtering and threshold. Preserve the same per-trial noise waveform across tactile and auditory channels."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "The source archive preserves realized orders but no RNG state. Measure physical stimulus timing and calibration independently."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
         }
       ],
       "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp2/01_profile/profile_parameters_manifest.json"
@@ -14610,9 +15592,9 @@
       "doi": "10.17605/osf.io/73x59",
       "verification_status": "partial",
       "publication_status": "author_project_revision",
-      "profile_type": "published_method_inspection",
-      "visible_variant_label": "C",
-      "variant_display": "Holmes OSF \u00b7 Experiment 3 \u00b7 Both-intensity detection - Variant C",
+      "profile_type": "static_near_far_audio_tactile_pps",
+      "visible_variant_label": "E",
+      "variant_display": "Holmes OSF \u00b7 Experiment 3 \u00b7 Both-intensity detection - Variant E",
       "primary_category": "toolkit_structural_gap",
       "category_label": "Toolkit structural gap",
       "runner_readiness": "blocked_unsupported_toolkit_structure",
@@ -14623,8 +15605,8 @@
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 5,
-      "unsupported_structure_count": 1,
+      "missing_parameter_count": 8,
+      "unsupported_structure_count": 2,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
         "passed": false,
@@ -14640,18 +15622,8 @@
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
             "passed": false,
-            "field_count": 5,
+            "field_count": 8,
             "blocking_reasons": [
-              {
-                "parameter": "source_stimulus_inventory",
-                "status": "missing_publication_parameter",
-                "reason": "No source assets are available for Segment 1."
-              },
-              {
-                "parameter": "trajectory_snapshots",
-                "status": "missing_publication_parameter",
-                "reason": "No source-level trajectory snapshots are available."
-              },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
@@ -14661,6 +15633,21 @@
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
                 "reason": "The source archive preserves realized orders but no RNG state. Measure physical stimulus timing and calibration independently."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
               }
             ]
           },
@@ -14668,26 +15655,42 @@
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
             "passed": false,
-            "field_count": 4,
+            "field_count": 6,
             "blocking_reasons": [
-              {
-                "parameter": "trial_sequence_rows",
-                "status": "unsupported_toolkit_structure",
-                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
-              },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
                 "reason": "Implement two-interval tactile intensity calibration and a response classifier with the archived microphone filtering and threshold. Preserve the same per-trial noise waveform across tactile and auditory channels."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
               }
             ]
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": true,
-            "field_count": 5,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
+              }
+            ]
           },
           {
             "segment": "4",
@@ -14699,16 +15702,6 @@
         ]
       },
       "missing_publication_parameters": [
-        {
-          "segment": "1",
-          "parameter": "source_stimulus_inventory",
-          "reason": "No source assets are available for Segment 1."
-        },
-        {
-          "segment": "1",
-          "parameter": "trajectory_snapshots",
-          "reason": "No source-level trajectory snapshots are available."
-        },
         {
           "segment": "1",
           "parameter": "profile_gap",
@@ -14725,21 +15718,41 @@
           "reason": "The source archive preserves realized orders but no RNG state. Measure physical stimulus timing and calibration independently."
         },
         {
-          "segment": "6",
-          "parameter": "current_design_validation",
-          "reason": "At least one procedural noise definition or custom looming audio source is required."
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The two-interval QUEST training and masked/unmasked calibration require a separate executable procedure."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Exact voice-key capture and analysis require the original microphone baseline, filtering and timing conventions. Mouse clicks preview the response rules."
         }
       ],
       "unsupported_toolkit_structures": [
         {
-          "segment": "2",
-          "parameter": "trial_sequence_rows",
-          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
         },
         {
-          "segment": "5",
-          "parameter": "row_order_constraints",
-          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
         }
       ],
       "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp3/01_profile/profile_parameters_manifest.json"
@@ -14751,9 +15764,9 @@
       "doi": "10.17605/osf.io/73x59",
       "verification_status": "partial",
       "publication_status": "author_project_revision",
-      "profile_type": "published_method_inspection",
-      "visible_variant_label": "D",
-      "variant_display": "Holmes OSF \u00b7 Experiment 4 \u00b7 Driving and pedal response - Variant D",
+      "profile_type": "static_near_far_audio_tactile_pps",
+      "visible_variant_label": "F",
+      "variant_display": "Holmes OSF \u00b7 Experiment 4 \u00b7 Driving and pedal response - Variant F",
       "primary_category": "toolkit_structural_gap",
       "category_label": "Toolkit structural gap",
       "runner_readiness": "blocked_unsupported_toolkit_structure",
@@ -14764,8 +15777,8 @@
       "finished_profile": false,
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 5,
-      "unsupported_structure_count": 1,
+      "missing_parameter_count": 7,
+      "unsupported_structure_count": 2,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
         "passed": false,
@@ -14781,18 +15794,8 @@
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
             "passed": false,
-            "field_count": 5,
+            "field_count": 8,
             "blocking_reasons": [
-              {
-                "parameter": "source_stimulus_inventory",
-                "status": "missing_publication_parameter",
-                "reason": "No source assets are available for Segment 1."
-              },
-              {
-                "parameter": "trajectory_snapshots",
-                "status": "missing_publication_parameter",
-                "reason": "No source-level trajectory snapshots are available."
-              },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
@@ -14802,6 +15805,21 @@
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
                 "reason": "Reconcile manuscript and source-code timing, recover a repeatable order policy, and retain the corresponding apparatus setup for each condition."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
               }
             ]
           },
@@ -14809,26 +15827,37 @@
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
             "passed": false,
-            "field_count": 4,
+            "field_count": 6,
             "blocking_reasons": [
-              {
-                "parameter": "trial_sequence_rows",
-                "status": "unsupported_toolkit_structure",
-                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
-              },
               {
                 "parameter": "profile_gap",
                 "status": "missing_publication_parameter",
                 "reason": "Recreate the driving simulator with independent video replay and active steering sessions, acquire pedal timing and switch tactile loop from index to wheel by condition."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "unsupported_toolkit_structure",
+                "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
               }
             ]
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": true,
-            "field_count": 5,
-            "blocking_reasons": []
+            "passed": false,
+            "field_count": 6,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The exact original car-horn crop, driving video, simulator interactivity and pedal response capture are outside this timing preview."
+              }
+            ]
           },
           {
             "segment": "4",
@@ -14840,16 +15869,6 @@
         ]
       },
       "missing_publication_parameters": [
-        {
-          "segment": "1",
-          "parameter": "source_stimulus_inventory",
-          "reason": "No source assets are available for Segment 1."
-        },
-        {
-          "segment": "1",
-          "parameter": "trajectory_snapshots",
-          "reason": "No source-level trajectory snapshots are available."
-        },
         {
           "segment": "2",
           "parameter": "profile_gap",
@@ -14866,9 +15885,187 @@
           "reason": "Reconcile manuscript and source-code timing, recover a repeatable order policy, and retain the corresponding apparatus setup for each condition."
         },
         {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact calibrated tactile signal, actual waveform congruence, and hardware response capture are unverified. The toolkit tactile marker has no calibrated source intensity."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The repeated-pool preview preserves per-block cell counts. The original pseudorandom trial sequence and its independent block-level order are unverified."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The exact original car-horn crop, driving video, simulator interactivity and pedal response capture are outside this timing preview."
+        },
+        {
+          "segment": "5",
+          "parameter": "profile_gap",
+          "reason": "Block labels alone do not implement stimulus placement on finger versus wheel or the reported break settings."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Exact physical speaker switching/timing and source amplitude calibration require the original or calibrated equivalent hardware."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "The scheduler preview uses a 3 ms integer far advance and a balanced finite set of foreperiods. Continuous independent draws, original clocks and physical onset timing are unresolved."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp4/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "holmes_2019_osf_exploratory_sound_type",
+      "title": "Holmes OSF \u00b7 Exploratory sound-type acquisition",
+      "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. OSF 73x59, manuscript revision 4.",
+      "doi": "10.17605/osf.io/73x59",
+      "verification_status": "partial",
+      "publication_status": "author_project_revision",
+      "profile_type": "companion_assessment_inspection",
+      "visible_variant_label": "G",
+      "variant_display": "Holmes OSF \u00b7 Exploratory sound-type acquisition - Variant G",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Distinct archived protocol versions, participant-level assignment and original retained analysis scope remain unresolved."
+              }
+            ]
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "source_stimulus_inventory",
+                "status": "missing_publication_parameter",
+                "reason": "No source assets are available for Segment 1."
+              },
+              {
+                "parameter": "trajectory_snapshots",
+                "status": "missing_publication_parameter",
+                "reason": "No source-level trajectory snapshots are available."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The intended comparison cannot be recovered from confounded sound-type and distance labels. Reproducing the archived procedure requires the original waveform routing and validation of audible condition identities."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 3,
+            "blocking_reasons": [
+              {
+                "parameter": "trial_sequence_rows",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "soa_values_ms",
+                "status": "missing_publication_parameter",
+                "reason": "No SOA values are encoded."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "source_stimulus_inventory",
+          "reason": "No source assets are available for Segment 1."
+        },
+        {
+          "segment": "1",
+          "parameter": "trajectory_snapshots",
+          "reason": "No source-level trajectory snapshots are available."
+        },
+        {
+          "segment": "3",
+          "parameter": "soa_values_ms",
+          "reason": "No SOA values are encoded."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "The intended comparison cannot be recovered from confounded sound-type and distance labels. Reproducing the archived procedure requires the original waveform routing and validation of audible condition identities."
+        },
+        {
+          "segment": "0",
+          "parameter": "profile_gap",
+          "reason": "Distinct archived protocol versions, participant-level assignment and original retained analysis scope remain unresolved."
+        },
+        {
           "segment": "6",
           "parameter": "current_design_validation",
           "reason": "At least one procedural noise definition or custom looming audio source is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one SOA value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one spatial value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one tactile body site is required."
         }
       ],
       "unsupported_toolkit_structures": [
@@ -14883,7 +16080,321 @@
           "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
         }
       ],
-      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exp4/01_profile/profile_parameters_manifest.json"
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_exploratory_sound_type/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "holmes_2019_osf_supp5_discrimination",
+      "title": "Holmes OSF \u00b7 Supplementary Experiment 5, discrimination feasibility",
+      "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. OSF 73x59, manuscript revision 4.",
+      "doi": "10.17605/osf.io/73x59",
+      "verification_status": "partial",
+      "publication_status": "author_project_revision",
+      "profile_type": "companion_assessment_inspection",
+      "visible_variant_label": "H",
+      "variant_display": "Holmes OSF \u00b7 Supplementary Experiment 5, discrimination feasibility - Variant H",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 3,
+            "blocking_reasons": [
+              {
+                "parameter": "source_stimulus_inventory",
+                "status": "missing_publication_parameter",
+                "reason": "No source assets are available for Segment 1."
+              },
+              {
+                "parameter": "trajectory_snapshots",
+                "status": "missing_publication_parameter",
+                "reason": "No source-level trajectory snapshots are available."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 3,
+            "blocking_reasons": [
+              {
+                "parameter": "trial_sequence_rows",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 7,
+            "blocking_reasons": [
+              {
+                "parameter": "soa_values_ms",
+                "status": "missing_publication_parameter",
+                "reason": "No SOA values are encoded."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Requires both one- and two-interval tactile response modes, matched continuous or discrete masking, separate calibrated thresholds and the original timing parameters."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "The replacement signal generation and amplification change the physical command-to-vibration relation. Detection counts and exact response device are unavailable."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "source_stimulus_inventory",
+          "reason": "No source assets are available for Segment 1."
+        },
+        {
+          "segment": "1",
+          "parameter": "trajectory_snapshots",
+          "reason": "No source-level trajectory snapshots are available."
+        },
+        {
+          "segment": "3",
+          "parameter": "soa_values_ms",
+          "reason": "No SOA values are encoded."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "Requires both one- and two-interval tactile response modes, matched continuous or discrete masking, separate calibrated thresholds and the original timing parameters."
+        },
+        {
+          "segment": "3",
+          "parameter": "profile_gap",
+          "reason": "The replacement signal generation and amplification change the physical command-to-vibration relation. Detection counts and exact response device are unavailable."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one procedural noise definition or custom looming audio source is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one SOA value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one spatial value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one tactile body site is required."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "trial_sequence_rows",
+          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+        },
+        {
+          "segment": "5",
+          "parameter": "row_order_constraints",
+          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_supp5_discrimination/01_profile/profile_parameters_manifest.json"
+    },
+    {
+      "template_id": "holmes_2019_osf_supp5_intensity_ratio",
+      "title": "Holmes OSF \u00b7 Supplementary Experiment 5, intensity-ratio follow-up",
+      "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. OSF 73x59, manuscript revision 4.",
+      "doi": "10.17605/osf.io/73x59",
+      "verification_status": "partial",
+      "publication_status": "author_project_revision",
+      "profile_type": "companion_assessment_inspection",
+      "visible_variant_label": "I",
+      "variant_display": "Holmes OSF \u00b7 Supplementary Experiment 5, intensity-ratio follow-up - Variant I",
+      "primary_category": "toolkit_structural_gap",
+      "category_label": "Toolkit structural gap",
+      "runner_readiness": "blocked_unsupported_toolkit_structure",
+      "profile_checks_passed": false,
+      "gui_recreatable": false,
+      "segment_0_to_4_profile_checks_passed": false,
+      "segment_1_to_6_materializable": false,
+      "finished_profile": false,
+      "segment_6_launchable": false,
+      "profile_completion_status": "unfinished_preload",
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 1,
+      "segment_0_to_4_profile_checks": {
+        "gate": "segments_0_to_4",
+        "passed": false,
+        "segments": [
+          {
+            "segment": "0",
+            "segment_label": "Segment 0 profile manifest and provenance",
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
+          },
+          {
+            "segment": "1",
+            "segment_label": "Segment 1 source/stimulus assets",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "source_stimulus_inventory",
+                "status": "missing_publication_parameter",
+                "reason": "No source assets are available for Segment 1."
+              },
+              {
+                "parameter": "trajectory_snapshots",
+                "status": "missing_publication_parameter",
+                "reason": "No source-level trajectory snapshots are available."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Original follow-up software, waveform, trial counts and delivered sound and tactile calibration are unavailable."
+              }
+            ]
+          },
+          {
+            "segment": "2",
+            "segment_label": "Segment 2 trial rows and sequences",
+            "passed": false,
+            "field_count": 4,
+            "blocking_reasons": [
+              {
+                "parameter": "trial_sequence_rows",
+                "status": "unsupported_toolkit_structure",
+                "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+              },
+              {
+                "parameter": "profile_gap",
+                "status": "missing_publication_parameter",
+                "reason": "Requires calibrated relative tactile drive, fixed mask conditions and binary weak/strong response capture."
+              }
+            ]
+          },
+          {
+            "segment": "3",
+            "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+            "passed": false,
+            "field_count": 5,
+            "blocking_reasons": [
+              {
+                "parameter": "soa_values_ms",
+                "status": "missing_publication_parameter",
+                "reason": "No SOA values are encoded."
+              }
+            ]
+          },
+          {
+            "segment": "4",
+            "segment_label": "Segment 4 repetition pool settings",
+            "passed": true,
+            "field_count": 1,
+            "blocking_reasons": []
+          }
+        ]
+      },
+      "missing_publication_parameters": [
+        {
+          "segment": "1",
+          "parameter": "source_stimulus_inventory",
+          "reason": "No source assets are available for Segment 1."
+        },
+        {
+          "segment": "1",
+          "parameter": "trajectory_snapshots",
+          "reason": "No source-level trajectory snapshots are available."
+        },
+        {
+          "segment": "3",
+          "parameter": "soa_values_ms",
+          "reason": "No SOA values are encoded."
+        },
+        {
+          "segment": "2",
+          "parameter": "profile_gap",
+          "reason": "Requires calibrated relative tactile drive, fixed mask conditions and binary weak/strong response capture."
+        },
+        {
+          "segment": "1",
+          "parameter": "profile_gap",
+          "reason": "Original follow-up software, waveform, trial counts and delivered sound and tactile calibration are unavailable."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one procedural noise definition or custom looming audio source is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one SOA value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one spatial value is required."
+        },
+        {
+          "segment": "6",
+          "parameter": "current_design_validation",
+          "reason": "At least one tactile body site is required."
+        }
+      ],
+      "unsupported_toolkit_structures": [
+        {
+          "segment": "2",
+          "parameter": "trial_sequence_rows",
+          "reason": "Profile has not been encoded as current Segment 2 row/box trial-sequence design."
+        },
+        {
+          "segment": "5",
+          "parameter": "row_order_constraints",
+          "reason": "Segment 5 row-order preservation requires Segment 2 row folders."
+        }
+      ],
+      "profile_parameters_manifest": "assets/preloads/holmes_2019_osf_supp5_intensity_ratio/01_profile/profile_parameters_manifest.json"
     },
     {
       "template_id": "hug_2022_guided_reaching",
@@ -18976,21 +20487,21 @@
       "profile_type": "right_lateral_looming_duration_pps",
       "visible_variant_label": "A",
       "variant_display": "Rahmani 2025 2-second looming PPS - Variant A",
-      "primary_category": "missing_publication_parameters",
-      "category_label": "Missing publication parameters",
-      "runner_readiness": "blocked_missing_parameters",
-      "profile_checks_passed": false,
-      "gui_recreatable": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "segment_1_to_6_materializable": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 4,
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
       "unsupported_structure_count": 0,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
-        "passed": false,
+        "passed": true,
         "segments": [
           {
             "segment": "0",
@@ -19002,46 +20513,23 @@
           {
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
-            "passed": false,
-            "field_count": 4,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
-            "passed": false,
-            "field_count": 5,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
-              },
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": false,
-            "field_count": 6,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
-              }
-            ]
+            "passed": true,
+            "field_count": 5,
+            "blocking_reasons": []
           },
           {
             "segment": "4",
@@ -19052,28 +20540,7 @@
           }
         ]
       },
-      "missing_publication_parameters": [
-        {
-          "segment": "1",
-          "parameter": "profile_gap",
-          "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
-        },
-        {
-          "segment": "2",
-          "parameter": "profile_gap",
-          "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
-        },
-        {
-          "segment": "3",
-          "parameter": "profile_gap",
-          "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
-        },
-        {
-          "segment": "2",
-          "parameter": "profile_gap",
-          "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
-        }
-      ],
+      "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/rahmani_2025_2s_pps/01_profile/profile_parameters_manifest.json"
     },
@@ -19087,21 +20554,21 @@
       "profile_type": "right_lateral_looming_duration_pps",
       "visible_variant_label": "B",
       "variant_display": "Rahmani 2025 3-second looming PPS - Variant B",
-      "primary_category": "missing_publication_parameters",
-      "category_label": "Missing publication parameters",
-      "runner_readiness": "blocked_missing_parameters",
-      "profile_checks_passed": false,
-      "gui_recreatable": false,
-      "segment_0_to_4_profile_checks_passed": false,
-      "segment_1_to_6_materializable": false,
-      "finished_profile": false,
-      "segment_6_launchable": false,
-      "profile_completion_status": "unfinished_preload",
-      "missing_parameter_count": 4,
+      "primary_category": "gui_recreatable",
+      "category_label": "GUI-recreatable",
+      "runner_readiness": "ready",
+      "profile_checks_passed": true,
+      "gui_recreatable": true,
+      "segment_0_to_4_profile_checks_passed": true,
+      "segment_1_to_6_materializable": true,
+      "finished_profile": true,
+      "segment_6_launchable": true,
+      "profile_completion_status": "finished_segment_6_launchable",
+      "missing_parameter_count": 0,
       "unsupported_structure_count": 0,
       "segment_0_to_4_profile_checks": {
         "gate": "segments_0_to_4",
-        "passed": false,
+        "passed": true,
         "segments": [
           {
             "segment": "0",
@@ -19113,46 +20580,23 @@
           {
             "segment": "1",
             "segment_label": "Segment 1 source/stimulus assets",
-            "passed": false,
-            "field_count": 4,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "2",
             "segment_label": "Segment 2 trial rows and sequences",
-            "passed": false,
-            "field_count": 5,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
-              },
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
-              }
-            ]
+            "passed": true,
+            "field_count": 3,
+            "blocking_reasons": []
           },
           {
             "segment": "3",
             "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-            "passed": false,
-            "field_count": 6,
-            "blocking_reasons": [
-              {
-                "parameter": "profile_gap",
-                "status": "missing_publication_parameter",
-                "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
-              }
-            ]
+            "passed": true,
+            "field_count": 5,
+            "blocking_reasons": []
           },
           {
             "segment": "4",
@@ -19163,28 +20607,7 @@
           }
         ]
       },
-      "missing_publication_parameters": [
-        {
-          "segment": "1",
-          "parameter": "profile_gap",
-          "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
-        },
-        {
-          "segment": "2",
-          "parameter": "profile_gap",
-          "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
-        },
-        {
-          "segment": "3",
-          "parameter": "profile_gap",
-          "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
-        },
-        {
-          "segment": "2",
-          "parameter": "profile_gap",
-          "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
-        }
-      ],
+      "missing_publication_parameters": [],
       "unsupported_toolkit_structures": [],
       "profile_parameters_manifest": "assets/preloads/rahmani_2025_3s_pps/01_profile/profile_parameters_manifest.json"
     },

@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1177/0956797619869337",
   "doi": "10.1177/0956797619869337",
   "verification_status": "partial",
-  "notes": "Published design scaffold. Original stimuli and independent conditioning outputs are required for launch. Preview timing is derived from Figure 1b. Baseline allocation, exact counterbalancing and hardware timing remain unresolved.",
+  "notes": "Software timing preview with a generated chest-target waveform and procedural audio. Figure 1b supplies the preview offsets. A participant session requires the exact recordings, independent conditioning outputs, baseline allocation and calibrated hardware timing.",
   "reference_parameters": {
     "study_row_id": "doi:10.1177/0956797619869337::exp2",
     "publication_status": "published",
@@ -35,7 +35,7 @@
       "site_waveform_rule": "Use the same walking-sound waveform at the two sites.",
       "forearm_as_percent_of_sole_mean": 52.2,
       "forearm_as_percent_of_sole_sd": 24.3,
-      "individual_forearm_intensity": "Set by subjective staircase and confirm during practice."
+      "individual_forearm_intensity": "Before the main experiment use a subjective staircase to match each participant’s forearm intensity to their own sole sensation. Confirm the match in practice and record the participant-specific setting. The reported mean and SD describe the sample. The staircase step size, reversal rule, stopping criterion and physical gain are unreported."
     },
     "auditory_stimulus": {
       "signal": "White noise emitted from a loudspeaker moved toward a binaural dummy head on a handcart",
@@ -75,6 +75,12 @@
       "frequency_hz": 200,
       "duration_ms": 100,
       "intensity": "Suprathreshold"
+    },
+    "participant_setup": {
+      "posture": "Sit with the head still, the gaze on the frontal fixation cross, and the right hand ready at the numeric keyboard.",
+      "mounts": "Use the neckstrap to position the chest coil over the manubrium. Remove shoes and position the heel coils in slippers. For forearm blocks position the two conditioning coils on the proximal forearms near the elbows.",
+      "chest_perceptibility_check": "Confirm that the participant can feel the chest target on practice trials. The article gives no numerical chest drive level or staircase.",
+      "source": "Published article, pp. 1523–1525, Participants, Stimuli and apparatus, and Procedure."
     },
     "response": {
       "kind": "Speeded tactile detection",
@@ -152,15 +158,34 @@
       }
     ],
     "preview_scope": {
-      "runtime_mode": "Active audio and chest-target design scaffold for inspection",
+      "runtime_mode": "Software timing inspection of active trials only",
+      "chest_marker_waveform": {
+        "waveform": "Generated sine with 200 Hz carrier and 100 ms duration as reported for the chest target and illustrated in Figure 1b.",
+        "normalized_digital_amplitude": 0.2,
+        "amplitude_provenance": "Toolkit software default. Physical drive and on-skin vibration require measurement.",
+        "source_scope": "The figure indicates the carrier shape, while physical amplitude, gate ramps and delivered waveform remain unknown."
+      },
       "auditory_rendering": "Procedural continuous white noise along a virtual approach at the reported velocity. The figure-derived preview uses a 5 s approach with a 1 cm near endpoint and 1 s tail. Those endpoints and the inverse-square setting describe a preview reconstruction.",
       "catch_pool": "The scaffold uses 20% no-chest rows within each active condition. The original catch allocation by condition and block is unknown.",
-      "baseline": "Reference settings retain all four delays and the stationary white-noise mode. Baseline target and catch allocation is unresolved and is omitted from the generated preview pool.",
-      "conditioning_and_blocks": "Condition labels identify the paper’s intended outputs. The active-only illustration occupies one inspection block. The condition waveforms and mirrored participant schedules are unimplemented."
+      "baseline": "The published comparison used constant-level white noise with the same four target delays and no conditioning. The software timing preview excludes baseline trials because their exact allocation and original audio are unresolved.",
+      "conditioning_and_blocks": "Condition labels identify the paper’s intended outputs. The toolkit distributes the illustrated paired and catch pool across equal software blocks. These mix condition labels and keep block audio within the preparation limit. The condition waveforms and mirrored participant schedules are unimplemented."
+    },
+    "replication_inputs": {
+      "source_payloads": "Obtain the original binaural recording, the constant-level baseline audio and the left/right conditioning source waveforms with checked provenance. The article's Open Practices statement on p. 1530 says the data and materials were not made public.",
+      "independent_output_roles": [
+        "Binaural left ear",
+        "Binaural right ear",
+        "Chest detection target",
+        "Left conditioning actuator",
+        "Right conditioning actuator"
+      ],
+      "output_check": "Measure the headphone audio and all three actuator onsets against a common clock. Confirm that an active catch leaves both conditioning outputs playing and that a baseline disables both conditioning outputs. Record the transducers, routing, calibrated drive settings and measured onsets.",
+      "order_and_scoring_check": "Record the participant assignment and baseline placement, confirm that the second conditioning half reverses the first, and verify that numeric-keypad detection RT uses measured chest onset. The printed RT exclusions are offline.",
+      "source": "Published article, pp. 1523–1526 and 1530, Fig. 1, Methods, Analysis and Open Practices."
     },
     "implementation_gaps": [
       "The exact binaural looming source and original left and right conditioning waveforms are unavailable. Absolute output levels, hardware calibration and timing from recorded sound onset are unreported.",
-      "The output scheduler needs independent left and right conditioning channels alongside the headphone channels and chest target. Catch trials suppress only the chest target.",
+      "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target.",
       "The trial scheduler needs a condition-specific block order with a reversed second half and a dedicated constant-level white-noise baseline with its own chest-target and catch trials.",
       "Exact baseline trial allocation and catch counts by condition and block are unreported.",
       "The response scheduler needs numeric-keypad capture timestamped relative to the chest target.",
@@ -241,17 +266,11 @@
       "include_catch_trials": true,
       "catch_trial_percentage": 20,
       "catch_trials_exact": null,
-      "include_baseline_trials": true,
-      "baseline_strategy": "stationary_burst",
-      "baseline_soa_values_ms": [
-        2710,
-        3290,
-        3860,
-        4430
-      ],
-      "baseline_trials_exact": null,
+      "include_baseline_trials": false,
+      "baseline_strategy": "none",
       "participants": 15,
-      "blocks": 1,
+      "blocks": 4,
+      "distribute_trial_pool_across_blocks": true,
       "block_order_randomization": "fixed",
       "trial_randomization_strategy": "balanced_shuffle",
       "trial_strips": [
@@ -270,10 +289,16 @@
             "response_mode": "numeric_keypad_press",
             "response_capture_device": "Numeric keyboard",
             "response_input_modality": "right_index_keypress",
+            "body_anchor": "Manubrium of the sternum",
             "tactile_stimulation_modality": "vibrotactile",
+            "tactile_calibration_method": "Confirm chest-target perceptibility during practice.",
+            "tactile_waveform_shape": "sine",
             "tactile_frequency_hz": 200,
             "tactile_duration_ms": 100,
-            "source_asset_equivalence": "Procedural preview. Original binaural recording and bilateral conditioning are unavailable."
+            "tactile_amplitude": 0.2,
+            "source_asset_equivalence": "Procedural preview with generated chest marker. Original binaural recording and bilateral conditioning are unavailable.",
+            "renderer_equivalence_boundary": "Digital timing inspection. Chest amplitude and delivered timing require calibration.",
+            "primary_analysis_included": false
           },
           "elements": [
             {
@@ -303,10 +328,16 @@
             "response_mode": "numeric_keypad_press",
             "response_capture_device": "Numeric keyboard",
             "response_input_modality": "right_index_keypress",
+            "body_anchor": "Manubrium of the sternum",
             "tactile_stimulation_modality": "vibrotactile",
+            "tactile_calibration_method": "Confirm chest-target perceptibility during practice.",
+            "tactile_waveform_shape": "sine",
             "tactile_frequency_hz": 200,
             "tactile_duration_ms": 100,
-            "source_asset_equivalence": "Procedural preview. Original binaural recording and bilateral conditioning are unavailable."
+            "tactile_amplitude": 0.2,
+            "source_asset_equivalence": "Procedural preview with generated chest marker. Original binaural recording and bilateral conditioning are unavailable.",
+            "renderer_equivalence_boundary": "Digital timing inspection. Chest amplitude and delivered timing require calibration.",
+            "primary_analysis_included": false
           },
           "elements": [
             {
@@ -326,13 +357,10 @@
         "PPS assessment"
       ],
       "block_specs": [
-        {
-          "label": "Design inspection only",
-          "stimulus_types": [
-            "Audio-Tactile",
-            "Catch"
-          ]
-        }
+        {"label": "Timing inspection 1", "stimulus_types": ["Audio-Tactile", "Catch"]},
+        {"label": "Timing inspection 2", "stimulus_types": ["Audio-Tactile", "Catch"]},
+        {"label": "Timing inspection 3", "stimulus_types": ["Audio-Tactile", "Catch"]},
+        {"label": "Timing inspection 4", "stimulus_types": ["Audio-Tactile", "Catch"]}
       ],
       "trial_pool_repetition_defaults": {
         "audio_tactile": 12

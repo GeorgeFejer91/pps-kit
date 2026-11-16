@@ -1,0 +1,13 @@
+{
+  "schema": "pps-preload-run-setup-segment.v1",
+  "template_id": "holmes_2020_2ifc_calibration",
+  "blocks": 6,
+  "participants": 50,
+  "random_seed": 20250604,
+  "trial_randomization_strategy": "no_immediate_repeats",
+  "block_order_randomization": "counterbalanced_rotation",
+  "repeat_trial_pool_per_block": false,
+  "distribute_trial_pool_across_blocks": false,
+  "baseline_crosses_sequence_variants": true,
+  "catch_crosses_sequence_variants": true
+}

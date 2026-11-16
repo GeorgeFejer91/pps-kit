@@ -1,18 +1,34 @@
 {
   "schema": "pps-preload-run-setup-segment.v1",
   "template_id": "rahmani_2025_2s_pps",
-  "blocks": 1,
+  "blocks": 3,
   "participants": 13,
   "random_seed": 20250868,
   "trial_randomization_strategy": "balanced_shuffle",
   "block_order_randomization": "fixed",
   "repeat_trial_pool_per_block": false,
-  "distribute_trial_pool_across_blocks": false,
+  "distribute_trial_pool_across_blocks": true,
   "baseline_crosses_sequence_variants": false,
   "catch_crosses_sequence_variants": false,
   "block_specs": [
     {
-      "label": "2 s assessment",
+      "label": "2 s assessment, run 1",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "2 s assessment, run 2",
+      "stimulus_types": [
+        "Audio-Tactile",
+        "Baseline",
+        "Catch"
+      ]
+    },
+    {
+      "label": "2 s assessment, run 3",
       "stimulus_types": [
         "Audio-Tactile",
         "Baseline",

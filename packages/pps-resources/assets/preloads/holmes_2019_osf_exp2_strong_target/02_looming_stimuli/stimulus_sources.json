@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "holmes_2019_osf_exp2_strong_target",
+  "assets": [
+    {
+      "label": "Holmes preview white-noise cue (near)",
+      "path": "assets/preloads/holmes_2019_osf_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_near.wav",
+      "sha256": "c60e8629b984ddac23d8bf3f0a8d2eecec355fafe5715e719fe11e934656025b",
+      "duration_s": 0.125,
+      "sample_rate": 8000,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Holmes preview white-noise cue (near)",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 5.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Holmes preview white-noise cue (far)",
+      "path": "assets/preloads/holmes_2019_osf_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/holmes_2019_osf_exp2_strong_target/02_looming_stimuli/looming_Holmes_preview_white-noise_cue_far.wav",
+      "sha256": "d612f2bfbe41acca72dddb57ab5477de17bd0694b2bd8c75676ec99867141606",
+      "duration_s": 0.125,
+      "sample_rate": 8000,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "white",
+      "tone_type": "white",
+      "motion_mode": "stationary",
+      "direction_label": "",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Holmes preview white-noise cue (far)",
+        "source_kind": "generated_noise",
+        "noise_type": "white",
+        "start_distance_cm": 105.0,
+        "end_distance_cm": 105.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 0.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 0.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "stationary",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.05,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

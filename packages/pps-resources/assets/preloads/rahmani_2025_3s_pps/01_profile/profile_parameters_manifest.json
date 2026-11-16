@@ -12,22 +12,22 @@
   "visible_variant_label": "B",
   "variant_display": "Rahmani 2025 3-second looming PPS - Variant B",
   "recreation_status": {
-    "primary_category": "missing_publication_parameters",
-    "category_label": "Missing publication parameters",
-    "runner_readiness": "blocked_missing_parameters",
-    "profile_checks_passed": false,
-    "gui_recreatable": false,
-    "segment_0_to_4_profile_checks_passed": false,
-    "segment_1_to_6_materializable": false,
-    "finished_profile": false,
-    "segment_6_launchable": false,
-    "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 4,
+    "primary_category": "gui_recreatable",
+    "category_label": "GUI-recreatable",
+    "runner_readiness": "ready",
+    "profile_checks_passed": true,
+    "gui_recreatable": true,
+    "segment_0_to_4_profile_checks_passed": true,
+    "segment_1_to_6_materializable": true,
+    "finished_profile": true,
+    "segment_6_launchable": true,
+    "profile_completion_status": "finished_segment_6_launchable",
+    "missing_parameter_count": 0,
     "unsupported_structure_count": 0
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
-    "passed": false,
+    "passed": true,
     "segments": [
       {
         "segment": "0",
@@ -39,46 +39,23 @@
       {
         "segment": "1",
         "segment_label": "Segment 1 source/stimulus assets",
-        "passed": false,
-        "field_count": 4,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "2",
         "segment_label": "Segment 2 trial rows and sequences",
-        "passed": false,
-        "field_count": 5,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
-          },
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
-          }
-        ]
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
       },
       {
         "segment": "3",
         "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-        "passed": false,
-        "field_count": 6,
-        "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "missing_publication_parameter",
-            "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
-          }
-        ]
+        "passed": true,
+        "field_count": 5,
+        "blocking_reasons": []
       },
       {
         "segment": "4",
@@ -118,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 22,
+      "value": 24,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {
@@ -240,7 +217,7 @@
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "block_count",
       "status": "reported",
-      "value": 1,
+      "value": 3,
       "note": "Block count is encoded."
     },
     {
@@ -266,62 +243,9 @@
       "status": "defaulted",
       "value": "1 part",
       "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
-    },
-    {
-      "segment": "1",
-      "segment_label": "Segment 1 source/stimulus assets",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics.",
-      "note": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
-    },
-    {
-      "segment": "2",
-      "segment_label": "Segment 2 trial rows and sequences",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence.",
-      "note": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
-    },
-    {
-      "segment": "3",
-      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response.",
-      "note": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
-    },
-    {
-      "segment": "2",
-      "segment_label": "Segment 2 trial rows and sequences",
-      "parameter": "profile_gap",
-      "status": "missing_publication_parameter",
-      "value": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported.",
-      "note": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
     }
   ],
-  "missing_publication_parameters": [
-    {
-      "segment": "1",
-      "parameter": "profile_gap",
-      "reason": "The exact MATLAB HRTF, original synthesized auditory asset, and calibrated playback level are unavailable. The packaged renderer applies its own head-center path acoustics."
-    },
-    {
-      "segment": "2",
-      "parameter": "profile_gap",
-      "reason": "The synchronized 21-inch fixation display and no-head-motion procedure are unsupported on the standard audio-tactile trial path; the preview retains their nominal time reference as silence."
-    },
-    {
-      "segment": "3",
-      "parameter": "profile_gap",
-      "reason": "The original 200 ms 80 Hz sawtooth tactile drive, actuator and Cherry MX Blue button timing require hardware validation. The toolkit uses its 100 ms tactile-channel cue and mouse response."
-    },
-    {
-      "segment": "2",
-      "parameter": "profile_gap",
-      "reason": "Original scheduling files are unavailable. The generated acquisition block preserves all 245 trials while the two break locations and exact intertrial interval are unreported."
-    }
-  ],
+  "missing_publication_parameters": [],
   "unsupported_toolkit_structures": [],
   "generated_segment_artifacts": {
     "01_profile": {
@@ -342,7 +266,7 @@
     },
     "05_run_setup": {
       "run_defaults": "assets/preloads/rahmani_2025_3s_pps/05_run_setup/run_defaults.json",
-      "block_count": 1,
+      "block_count": 3,
       "participant_count": 13
     },
     "local_segment_0_to_4_profile_gate": {
