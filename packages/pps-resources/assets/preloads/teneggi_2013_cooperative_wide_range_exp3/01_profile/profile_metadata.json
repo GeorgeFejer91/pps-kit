@@ -1,0 +1,279 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "teneggi_2013_cooperative_wide_range_exp3",
+  "title": "Teneggi 2013 \u00b7 Experiment 3, wide-range cooperative decision",
+  "citation": "Teneggi, C., Canzoneri, E., di Pellegrino, G., & Serino, A. (2013). Social modulation of peripersonal space boundaries. Current Biology, 23(5), 406-411.",
+  "doi": "10.1016/j.cub.2013.01.043",
+  "source_url": "https://doi.org/10.1016/j.cub.2013.01.043",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cub.2013.01.043::c",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sessions": [
+        "PPS assessment before game",
+        "Cooperative bargaining",
+        "PPS assessment after game"
+      ],
+      "speaker_separation_cm": 200,
+      "partner_distance_cm": 100,
+      "audio_ms": 4000,
+      "pre_and_post_audio_silence_ms": 500,
+      "directions": [
+        "IN"
+      ],
+      "tactile_from_audio_onset_ms": [
+        250,
+        750,
+        1300,
+        1800,
+        2500,
+        3200,
+        3700
+      ],
+      "ordinal_distance_labels": [
+        "D-2",
+        "D-1",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5"
+      ],
+      "per_assessment": {
+        "paired": null,
+        "sound_only": null,
+        "total": null
+      },
+      "response": "Say TAH after right-cheek touch. Compare the distance dependence before and after cooperation."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "signal": "Pink noise",
+            "sample_rate_hz": 44100
+          },
+          "source": "Supplement pp. 7\u20138, Apparatus and Stimuli"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "SoundForge 4.5, identical noise signal on both channels with opposed gains.",
+          "source": "Supplement pp. 7\u20138, Apparatus and Stimuli",
+          "gap": "Original waveform, digital format and exact amplitude coefficients unknown."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 1,
+          "source": "Supplement p. 9 and article Fig. 4"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "speaker_separation_m": 2,
+            "actor_distance_m": 1,
+            "direction": "IN"
+          },
+          "source": "Supplement p. 9 and article Fig. 4"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 4000
+          },
+          "source": "Supplement p. 9 and article Fig. 4"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Supplement pp. 7\u20138, Apparatus and Stimuli",
+          "gap": "Ordinal localization, with no exact distance\u2013time function."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "IN only"
+          ],
+          "source": "Supplement p. 9 and article Fig. 4"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "envelope": "IN rising",
+            "at_ears_spl_db": [
+              55,
+              70
+            ]
+          },
+          "source": "Supplement pp. 7\u20138, Apparatus and Stimuli",
+          "gap": "Exact coefficients for Experiment 3 unknown."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "playback": "Two hidden same-height loudspeakers",
+            "control": "C.I.R.O. on PC",
+            "response": "Voice-activated relay"
+          },
+          "source": "Supplement pp. 7\u20138, Apparatus and Stimuli",
+          "gap": "Speaker, soundcard and relay models and threshold unknown."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": "Seven cheek-pulse delays with IN sound. Main methods describe auditory-only catches.",
+          "source": "Supplement p. 9 and article Fig. 4",
+          "gap": "Exact Experiment 3 trial families and allocation not itemized."
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Supplement p. 9 and article Fig. 4",
+          "gap": "No Experiment 3-specific sequence given."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "phases": [
+              "Pre-game",
+              "Cooperative game",
+              "Post-game"
+            ]
+          },
+          "source": "Supplement p. 9 and article Fig. 4",
+          "gap": "Sub-block composition and counts unknown."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "pre_audio_silence_ms": 500,
+            "post_audio_silence_ms": 500
+          },
+          "source": "Supplement p. 9 and article Fig. 4",
+          "gap": "Separate ITI unknown."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Supplement p. 9, Data Analysis",
+          "gap": "RT referenced to touch. Online cutoff and voice-key threshold unknown."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "In the main PPS tasks, say TAH as quickly as possible upon feeling the cheek pulse. Ignore the sound and withhold responses on sound-only trials. A voice-activated relay captured the response and its timing.",
+          "source": "Current Biology issue p. 410, PPS Task; Supplement pp. 8\u20139, Apparatus and Stimuli and Data Analysis",
+          "gap": "Relay model, trigger threshold and online response deadline are unreported."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "modality": "Electrical",
+            "site": "Right cheek",
+            "waveform": "Single rectangular monophasic pulse",
+            "duration_us": 100,
+            "stimulator": "Digitimer DS7A",
+            "electrodes": "Neuroline",
+            "reported_current_range_ma": [
+              60,
+              90
+            ],
+            "calibration": "Individual clear detection, verified in a check of 10 targets and five catches."
+          },
+          "source": "Supplement pp. 7\u20138, Apparatus and Stimuli",
+          "gap": "The report names a constant-current device and calls the pulse constant voltage. Exact delivered waveform and individual calibration unknown."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "anchor": "Audio onset",
+            "delay_ms": [
+              250,
+              750,
+              1300,
+              1800,
+              2500,
+              3200,
+              3700
+            ],
+            "labels": [
+              "D-2",
+              "D-1",
+              "D1",
+              "D2",
+              "D3",
+              "D4",
+              "D5"
+            ]
+          },
+          "source": "Supplement p. 9 and article Fig. 4"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": "Formal PPS trial families are bimodal targets and audio-only catches. Mannequin or pre-game conditions are comparison conditions.",
+          "source": "Supplement pp. 8\u20139, Design and Procedure"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8\u20139, Design and Procedure",
+          "gap": "No tactile-only trial family."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Audio only. Withhold response.",
+          "source": "Supplement pp. 7\u20138, Apparatus and Stimuli"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Supplement p. 9 and article Fig. 4",
+          "gap": "The eight repetitions for Experiments 1 and 2 are not specified for Experiment 3."
+        },
+        "baseline_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Article PPS Task and supplement p. 9"
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Supplement p. 9 and article Fig. 4",
+          "gap": "Exact Experiment 3 catch count unknown."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Supplement p. 9 and article Fig. 4",
+          "gap": "Sub-block count unknown."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Supplement p. 9 and article Fig. 4",
+          "gap": "Exact total unknown."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable.",
+      "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration.",
+      "The wider-range experiment's actual target and catch trial counts, block allocation and order are unreported."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.cub.2013.01.043. Current Biology issue pp. 409\u2013410, Experiment 3 and Fig. 4, supplement pp. 9\u201311"
+    }
+  ]
+}

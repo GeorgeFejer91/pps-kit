@@ -1,0 +1,92 @@
+{
+  "schema": "pps-preload-stimulus-sources.v1",
+  "template_id": "teneggi_2013_cooperative_game_exp2",
+  "assets": [
+    {
+      "label": "Face-centered moving sound",
+      "path": "assets/preloads/teneggi_2013_cooperative_game_exp2/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_cooperative_game_exp2/02_looming_stimuli/looming_Face-centered_moving_sound.wav",
+      "sha256": "88ab0bc701c3f541d114f0f570f72e69b0157b488cf583edf959e0a81172ab83",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "looming",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Face-centered moving sound",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 105.0,
+        "end_distance_cm": 5.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "approach",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 1.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    },
+    {
+      "label": "Face-centered moving sound - receding",
+      "path": "assets/preloads/teneggi_2013_cooperative_game_exp2/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
+      "url": "https://georgefejer91.github.io/pps-kit/assets/preloads/teneggi_2013_cooperative_game_exp2/02_looming_stimuli/looming_Face-centered_moving_sound_-_receding.wav",
+      "sha256": "ef82efcf6bc931b4e7e178a2acd79472f5497edddd92e8dd2b69c0b497b291b8",
+      "duration_s": 3.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "source_kind": "generated_noise",
+      "noise_type": "pink",
+      "tone_type": "pink",
+      "motion_mode": "looming",
+      "direction_label": "receding",
+      "render_mode": "preserve",
+      "include_tactile": false,
+      "trajectory_snapshot": {
+        "schema": "pps-stimulus-trajectory.v1",
+        "label": "Face-centered moving sound - receding",
+        "source_kind": "generated_noise",
+        "noise_type": "pink",
+        "start_distance_cm": 5.0,
+        "end_distance_cm": 105.0,
+        "start_rotation_deg": 0.0,
+        "end_rotation_deg": 0.0,
+        "movement_duration_s": 3.0,
+        "start_hold_s": 0.0,
+        "end_hold_s": 0.0,
+        "path_length_m": 1.0,
+        "coordinate_mode": "cartesian",
+        "path_direction": "recede",
+        "start": {
+          "x_m": 0.0,
+          "y_m": 0.05,
+          "z_m": 0.0
+        },
+        "end": {
+          "x_m": 0.0,
+          "y_m": 1.05,
+          "z_m": 0.0
+        }
+      },
+      "source_profile": "continuous_noise"
+    }
+  ]
+}

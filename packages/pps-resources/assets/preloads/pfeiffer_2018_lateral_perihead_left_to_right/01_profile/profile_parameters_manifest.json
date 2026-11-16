@@ -9,8 +9,8 @@
   "publication_status": "published",
   "profile_type": "",
   "paper_group_key": "doi:10.1111/ejn.13872",
-  "visible_variant_label": "",
-  "variant_display": "Pfeiffer EJN2018 bilateral lateral trajectory profile",
+  "visible_variant_label": "A",
+  "variant_display": "Pfeiffer EJN2018 bilateral lateral trajectory profile - Variant A",
   "recreation_status": {
     "primary_category": "gui_recreatable",
     "category_label": "GUI-recreatable",
@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 28,
+      "value": 29,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {

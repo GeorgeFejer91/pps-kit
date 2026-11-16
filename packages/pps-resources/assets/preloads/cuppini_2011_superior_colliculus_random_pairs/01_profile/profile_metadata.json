@@ -1,0 +1,280 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "cuppini_2011_superior_colliculus_random_pairs",
+  "title": "Cuppini 2011 \u00b7 Superior colliculus random-pair comparison",
+  "citation": "Cuppini, C., Magosso, E., & Ursino, M. (2011). Organization, maturation, and plasticity of multisensory integration: Insights from computational modeling studies. Frontiers in Psychology, 2, 77.",
+  "doi": "10.3389/fpsyg.2011.00077",
+  "source_url": "https://doi.org/10.3389/fpsyg.2011.00077",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3389/fpsyg.2011.00077::sc_random_comparison",
+    "publication_status": "published",
+    "profile_type": "computational_pps_method",
+    "profile_check_complete": false,
+    "published_method": {
+      "paired_inputs": 200,
+      "spatial_relation": "Co-located audio and visual input",
+      "distribution": "Uniform draws from just below unisensory threshold through near saturation.",
+      "conditions": [
+        "Immature",
+        "Adult intact",
+        "Adult without AES"
+      ],
+      "modes_each_pair": [
+        "Audio",
+        "Visual",
+        "Paired audio and visual"
+      ],
+      "evaluations_derived": 1800,
+      "statistics": "Compare response distributions with Mann\u2013Whitney tests."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Spatial visual and auditory network inputs",
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "populations": [
+              "AEV visual",
+              "FAES auditory",
+              "non-AEV visual",
+              "non-FAES auditory",
+              "SC multisensory"
+            ],
+            "interneuron_populations": 4,
+            "spatial_representation": "One-dimensional topological chains with overlapping receptive fields",
+            "unit": "Sigmoid with threshold and saturation plus low-pass response",
+            "lateral_connections": "Mexican-hat excitation nearby and inhibition at larger distances",
+            "input_competition": "Interneurons suppress ascending inputs under AES influence and mediate competition among ascending modalities"
+          },
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Original implementation and some prior equations and numerical constants remain unavailable."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Independent spatial inputs. Figure comparisons vary locations."
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": "The auditory and visual members of each random pair are spatially aligned.",
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6"
+        },
+        "stimulus_duration": {
+          "status": "source_unavailable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6; Cuppini 2011, pp. 3, 10, 14 and References pp. 20\u201321",
+          "gap": "The review reports approximately steady-state activity without an input duration, integration step or numerical convergence rule. Complete source implementation is unavailable."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Spatial samples replace a moving source."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "A alone",
+            "V alone",
+            "A+V"
+          ],
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "No physical audio waveform is generated."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "Connectionist neural network",
+            "dynamics": {
+              "populations": [
+                "AEV visual",
+                "FAES auditory",
+                "non-AEV visual",
+                "non-FAES auditory",
+                "SC multisensory"
+              ],
+              "interneuron_populations": 4,
+              "spatial_representation": "One-dimensional topological chains with overlapping receptive fields",
+              "unit": "Sigmoid with threshold and saturation plus low-pass response",
+              "lateral_connections": "Mexican-hat excitation nearby and inhibition at larger distances",
+              "input_competition": "Interneurons suppress ascending inputs under AES influence and mediate competition among ascending modalities"
+            },
+            "prior_SC_reference": "Cuppini 2010 numerical Table 1"
+          },
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Solver, code version, time step and phase-specific numerical constants unavailable. The earlier SC table has its own source scope."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "A alone",
+            "V alone",
+            "A+V"
+          ],
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6"
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "The random input set is evaluated in all three model configurations.",
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Exact simulation order and random seed unavailable."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Readout is approximately steady-state activity. Integration duration and tolerance unavailable."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "pair_count": 200,
+            "modality_specific_input_count": 400,
+            "distribution": "Uniform over the effective range from just below unisensory threshold to near saturation",
+            "spatial_alignment": "Spatially aligned auditory and visual pair",
+            "stimulus_presentations_per_pair": [
+              "A alone",
+              "V alone",
+              "A+V"
+            ],
+            "network_states": [
+              "immature",
+              "adult intact",
+              "adult with no AES"
+            ],
+            "exact_amplitude_endpoints": null,
+            "seed": null,
+            "same_sample_scope": "The same set of simulations is described as repeated across all three configurations.",
+            "response_evaluations_derived": 1800,
+            "response_count_note": "200 pairs \u00d7 3 presentation modes \u00d7 3 network states. This is a model evaluation count.",
+            "analysis": {
+              "summary": "Mean and standard deviation",
+              "test": "Mann\u2013Whitney comparisons",
+              "comparisons": "Adult intact cross-modal responses versus immature cross-modal, no-AES cross-modal, adult visual and adult auditory responses",
+              "reported_p_upper_bound": 0.0001,
+              "multiplicity_adjustment": null,
+              "sidedness": null
+            }
+          },
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "This SC simulation concerns visual and auditory modalities."
+        },
+        "soa_table": {
+          "status": "derived",
+          "value": [
+            0
+          ],
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Paired stimulation follows the SC integration procedure. Exact numerical onset implementation unavailable."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Compare intact adult paired responses with immature, no-AES and adult unisensory distributions",
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "The model reference condition is a separate configuration or stimulation mode."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported_with_caveat",
+          "value": {
+            "random_pairs": 200,
+            "each_presented_as": [
+              "A",
+              "V",
+              "A+V"
+            ],
+            "states": 3
+          },
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Exact intensity bounds, random seed and stochastic repeats of the network response unspecified."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": {
+            "A_evaluations": 600,
+            "V_evaluations": 600
+          },
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "200 pairs evaluated under three configurations for each unisensory mode."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "random_pair_draws": 200,
+            "model_response_evaluations": 1800
+          },
+          "source": "Cuppini 2011, p. 7, Statistical analysis and Fig. 6",
+          "gap": "200 pairs \u00d7 3 presentation modes \u00d7 3 network configurations. These are model evaluations."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "A neural network model solver is required. Exact weights, solver settings and the implementation from this figure series are unavailable.",
+      "The amplitude bounds, random seed and exact sample are unreported."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3389/fpsyg.2011.00077. Cuppini 2011, p. 7, Statistical analysis and Fig. 6"
+    }
+  ]
+}

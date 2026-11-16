@@ -1,0 +1,256 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "rastelli_2025_affective_touch_exp2",
+  "title": "Rastelli 2025 \u00b7 Experiment 2 \u00b7 Vibrotactile sweep",
+  "citation": "Rastelli, F., Ferroni, F., Langiulli, N., Crucianelli, L., Gallese, V., & Ardizzi, M. (2025). The spatial reach of affective touch: a new perspective on social peripersonal space. PsyArXiv, version 1.",
+  "doi": "10.31234/osf.io/etvb6_v1",
+  "source_url": "https://doi.org/10.31234/osf.io/etvb6_v1",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.31234/osf.io/etvb6_v1::discriminative",
+    "publication_status": "preprint",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": "35 participants completed the three explicitly numbered tasks in randomized order on one day.",
+      "carrier": "3 s looming sound. In the classic task, the pink-noise source is sampled at 44.1 kHz with an exponential level rise from 55 to 70 dB. The flat control is 62.5 dB.",
+      "analysis": "Compare target reaction times across delays and estimate PSE. Collect separate verbal pleasantness ratings after the task.",
+      "vibration": "Five tactors sweep the hairy right hand distal to proximal over 3 s, with amplitude set above threshold.",
+      "auditory_target": "Respond to a 200 ms beep embedded in the 3 s carrier. Vibration and carrier start together in the paired condition.",
+      "beep_delays_ms_from_common_onset": [
+        200,
+        500,
+        800,
+        2200,
+        2500,
+        2800
+      ],
+      "trial_schedule": "Two blocks and 124 nominal trials. The reported delay repetitions imply 72 paired and 36 auditory-target-only baseline trials, leaving 16 unallocated under those counts."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Looming auditory carrier with a brief beep target.",
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Custom MATLAB presentation. Pink noise sampled at 44.1 kHz.",
+          "source": "Preprint PDF pp. 5\u20136, Experiment 1",
+          "gap": "No source waveform, code or exact sample generation identified."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "moving_sound": 1,
+            "tactile_sweep": 1
+          },
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": "Acoustic approach on the same apparatus as Experiment 1. Tactors activate sequentially from distal to proximal on the right hand.",
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "carrier_ms": 3000,
+            "beep_ms": 200
+          },
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1",
+          "gap": "No physical sound speed or per-tactor activation schedule given."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Looming carrier with beep and touch",
+            "Looming carrier with beep, no touch",
+            "No-beep tactile catch as described"
+          ],
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Shared acoustic hardware and looming sound presentation.",
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1",
+          "gap": "No separate target beep level, envelope or carrier calibration specified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Two table speakers with the Experiment 1 arrangement. Dancer Design TA-5E and Exciter Tactors. Custom MATLAB.",
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Bimodal beep detection",
+            "Auditory-only beep baseline",
+            "Vibrotactile-only catch"
+          ],
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Target timings and sound conditions randomized, with catches intermingled.",
+          "source": "Preprint PDF pp. 5\u20136, Experiment 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Two equal blocks of approximately six minutes each. Randomized target and catch trials.",
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "post_trial_iti_ms": 1000
+          },
+          "source": "Preprint PDF pp. 5\u20136, Experiment 1"
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 5\u20136, Experiment 1",
+          "gap": "Online response cutoff and exact key identifier unreported."
+        },
+        "task_sequence_rules": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "response_target": "auditory beep",
+            "irrelevant_stimulus": "vibrotactile motion",
+            "repeat_wording": "failed to answer tactile target"
+          },
+          "source": "PsyArXiv v1 pp. 6\u20137, Experiment 2",
+          "gap": "Missed auditory-target replacement rule unclear."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "modality": "sequential vibration",
+            "duration_ms": 3000,
+            "actuator_count": 5,
+            "model": "Dancer Design TA-5E and Exciter Tactors",
+            "placement": "Voice coils on hairy skin of right hand",
+            "site_dimensions_cm": [
+              13.5,
+              4
+            ],
+            "direction": "distal to proximal",
+            "calibration": "Clearly above each participant's threshold."
+          },
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1",
+          "gap": "Exact per-tactor timing, waveform, spacing and intensity unavailable."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "beep_minus_carrier_onset_ms": [
+              200,
+              500,
+              800,
+              2200,
+              2500,
+              2800
+            ],
+            "beep_minus_vibration_onset_ms": [
+              200,
+              500,
+              800,
+              2200,
+              2500,
+              2800
+            ]
+          },
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Auditory-only carrier with beep at matching delays. No tactile stimulation.",
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": {
+            "beep_minus_carrier_onset_ms": [
+              200,
+              500,
+              800,
+              2200,
+              2500,
+              2800
+            ]
+          },
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "catch_trial_type": {
+          "status": "reported_with_caveat",
+          "value": "Tactile-only, withhold the beep response.",
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1",
+          "gap": "No exact catch count independently stated."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_delay_bimodal": 12,
+            "per_delay_auditory_only": 6
+          },
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 36,
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1",
+          "gap": "Six delays \u00d7 six auditory-only beep trials, before any missed-response repeats."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1",
+          "gap": "124 total minus 108 nominal target trials leaves 16 trials, but the reported 60/40 split and repeat description do not resolve exact delivered catch allocation."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Preprint PDF pp. 5\u20136, Experiment 1"
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_total": 124,
+            "paired_from_repetitions": 72,
+            "auditory_only_baseline_from_repetitions": 36,
+            "conditional_residual": 16,
+            "paired_percent_from_repetitions": 58.06,
+            "paired_percent_printed": 60
+          },
+          "source": "PsyArXiv v1 pp. 6\u20137, Experiment 2",
+          "gap": "72 paired and 36 baseline from stated repetitions. 16 is a conditional remainder."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Deliver the five individually timed tactors with verified placement and levels, synchronize the beep and carrier, and capture an auditory-target response.",
+      "Recover the beep frequency and envelope, exact tactor sequence, allocations for the remaining trials, and instructions for repeating missed auditory targets."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.31234/osf.io/etvb6_v1. Preprint PDF pp. 6\u20137, Experiment 2 and p. 8, Fig. 1"
+    }
+  ]
+}

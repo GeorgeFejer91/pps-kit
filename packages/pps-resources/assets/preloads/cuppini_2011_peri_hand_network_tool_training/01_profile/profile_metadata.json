@@ -1,0 +1,281 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "cuppini_2011_peri_hand_network_tool_training",
+  "title": "Cuppini 2011 \u00b7 Peri-hand network tool training",
+  "citation": "Cuppini, C., Magosso, E., & Ursino, M. (2011). Organization, maturation, and plasticity of multisensory integration: Insights from computational modeling studies. Frontiers in Psychology, 2, 77.",
+  "doi": "10.3389/fpsyg.2011.00077",
+  "source_url": "https://doi.org/10.3389/fpsyg.2011.00077",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3389/fpsyg.2011.00077::peri_hand_tool_training",
+    "publication_status": "published",
+    "profile_type": "computational_pps_method",
+    "profile_check_complete": false,
+    "published_method": {
+      "training_hand": "Right",
+      "trained_hemisphere": "Left",
+      "inputs": {
+        "visual": "Extended along tool",
+        "tactile": "Region stimulated by grasping tool",
+        "auditory": 0
+      },
+      "plasticity": "Apply Hebbian growth with upper saturation to feedforward visual connections in the trained hemisphere.",
+      "tests": [
+        "Same-side near/far visual-tactile integration",
+        "Cross-side visual-tactile competition"
+      ],
+      "readout": "Compare tactile activity in the trained region and the lateralized extinction simulation."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Tactile and elongated visual training inputs followed by visuotactile test inputs",
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "hemisphere_count": 2,
+            "contralateral_hands": [
+              "right",
+              "left"
+            ],
+            "unimodal_areas_per_hemisphere": [
+              "tactile",
+              "visual",
+              "auditory"
+            ],
+            "multimodal_units_per_hemisphere": 1,
+            "tactile_surface_cm": [
+              10,
+              20
+            ],
+            "visual_and_auditory_field_cm": [
+              15,
+              100
+            ],
+            "lateral_extension_each_cm": 2.5,
+            "forward_extension_cm": 80,
+            "frame": "Hand-centered receptive fields with predefined arrangement"
+          },
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Original implementation and some prior equations and numerical constants remain unavailable."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Independent spatial inputs. Figure comparisons vary locations."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "training": {
+              "tactile": "Patch representing skin input while holding a tool",
+              "visual": "Elongated, task-relevant field representing rake use",
+              "auditory": 0
+            },
+            "post_training_distances_cm": [
+              4,
+              12,
+              20,
+              28,
+              40,
+              60
+            ]
+          },
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Complete numerical stimulation schedule unavailable."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions; Cuppini 2011, pp. 3, 10, 14 and References pp. 20\u201321",
+          "gap": "The 2010a training equation holds touch from onset and specifies no finite offset. The approximately 400 ms run and 300 ms readout describe its assessment. The reviewed 2011 source does not report finite tactile-cue durations for training or post-training assessment, or a solver stopping rule."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Spatial samples replace a moving source."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Zero auditory input during training",
+            "Auditory comparison stays at basal configuration"
+          ],
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "No physical audio waveform is generated."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "Connectionist neural network",
+            "dynamics": {
+              "RF": "Gaussian, auditory larger than visual or tactile",
+              "within_unimodal": "Mexican-hat lateral connections",
+              "feedforward_tactile": "Uniform over the hand",
+              "feedforward_visual_auditory": "Constant over the hand and exponentially decreasing outside",
+              "feedback": "Excitatory with the same arrangement as feedforward",
+              "hemispheric_competition": "A multimodal neuron drives inhibition of unimodal areas in the opposite hemisphere",
+              "readout": "First-order dynamics and static sigmoid"
+            },
+            "prior_SC_reference": null
+          },
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Solver, code version, time step and phase-specific numerical constants unavailable. The earlier SC table has its own source scope."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Tactile plus elongated visual training input",
+            "Unilateral visuotactile retest",
+            "Bilateral visuotactile retest"
+          ],
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions"
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Readout is approximately steady-state activity. Integration duration and tolerance unavailable."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "trained_hand": "Right",
+            "trained_hemisphere": "Left",
+            "inputs": {
+              "tactile": "Patch representing skin input while holding a tool",
+              "visual": "Elongated, task-relevant field representing rake use",
+              "auditory": 0
+            },
+            "plasticity": {
+              "rule": "Hebbian growth with upper saturation",
+              "changed": "Feedforward synapses from active visual neurons to the left multimodal unit",
+              "tactile": "Already at maximum before training",
+              "auditory": "No presynaptic auditory activity during training",
+              "feedback": "Held unchanged"
+            },
+            "training_count_exact": null,
+            "duration_ms": null,
+            "rate": null,
+            "activity_threshold": null,
+            "saturation_value": null,
+            "retest": {
+              "unilateral": "Repeat near and far right visuotactile input",
+              "bilateral": "Repeat left touch with right visual input at the illustrated distance grid",
+              "auditory_retest": "Not reported after training because auditory results are assumed to match pretraining."
+            },
+            "findings": "Visual input in the trained far region behaves as near input. In the RBD configuration both near and far right visual input can suppress left tactile-related activation."
+          },
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": "Right-hand two-patch training input. The cited 2010a training equation uses 3.6 model units in the active regions. The 2011 issue does not give a numerical input scale.",
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Fig. 12A; Magosso 2010a, si34.gif and si111.gif\u2013si113.gif",
+          "gap": "The cited 2010a training equation has no finite offset. The 2011 implementation, exact training duration and post-training probe amplitudes remain unknown."
+        },
+        "soa_table": {
+          "status": "derived",
+          "value": [
+            0
+          ],
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Concurrent inputs are described. No independent temporal-offset manipulation is reported."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Pretraining model and healthy/RBD configurations provide references",
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "The model reference condition is a separate configuration or stimulation mode."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "No repeated tactile-SOA trial design."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "No acquired baseline trial pool."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "total_trial_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions",
+          "gap": "No experimental acquisition trial pool."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "A model solver is required to apply Hebbian learning and reproduce the paired inputs.",
+      "Exact 2011 training count, rate, thresholds and weight saturation are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3389/fpsyg.2011.00077. Cuppini 2011, pp. 13\u201316, Network training and Peri-hand space representation after tool-use, Figs. 12\u201314; Cuppini 2011, pp. 16\u201319, Discussion and predictions"
+    }
+  ]
+}

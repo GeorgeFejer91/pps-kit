@@ -348,22 +348,41 @@ def check_master_blocks() -> list[str]:
 
 def check_study_templates() -> list[str]:
     problems = []
-    template_dir = REPO_ROOT / "packages" / "pps-resources" / "study_templates"
-    templates = sorted(template_dir.glob("*.json"))
+    resources = REPO_ROOT / "packages" / "pps-resources"
+    templates = sorted((resources / "study_templates").glob("*.json"))
     if len(templates) < 15:
         problems.append("expected at least fifteen study template JSON files")
+    status_path = resources / "assets" / "preloads" / "profile_recreation_status.json"
+    catalog = json.loads(status_path.read_text(encoding="utf-8"))
+    statuses = {profile["template_id"]: profile for profile in catalog["profiles"]}
     for path in templates:
+        rel = path.relative_to(REPO_ROOT)
         data = json.loads(path.read_text(encoding="utf-8"))
         for key in ["template_id", "title", "citation", "source_url", "verification_status", "design"]:
             if not data.get(key):
-                problems.append(f"{path.relative_to(REPO_ROOT)} missing {key}")
+                problems.append(f"{rel} missing {key}")
         if data.get("verification_status") not in {"verified", "partial", "unverified"}:
-            problems.append(f"{path.relative_to(REPO_ROOT)} has unknown verification_status")
+            problems.append(f"{rel} has unknown verification_status")
         protocol = data.get("design", {}).get("protocol", {})
+        rows = [strip for strip in protocol.get("trial_strips", []) if strip.get("elements")]
+        reference = data.get("reference_parameters", {})
+        status = statuses.get(data.get("template_id"))
+        if status is None:
+            problems.append(f"{rel} missing generated recreation status")
+        if reference.get("planner_scope"):
+            if rows or status is None or status.get("segment_6_launchable") is not False:
+                problems.append(f"{rel} inspection profile must have no executable rows or launchable status")
+            if not (data.get("doi") and reference.get("published_method") and reference.get("implementation_gaps")):
+                problems.append(f"{rel} inspection profile missing source evidence or execution gaps")
+            continue
         if not protocol.get("soa_values_ms"):
-            problems.append(f"{path.relative_to(REPO_ROOT)} missing protocol SOA values")
-        if not protocol.get("spatial_values_cm"):
-            problems.append(f"{path.relative_to(REPO_ROOT)} missing protocol spatial values")
+            problems.append(f"{rel} missing protocol SOA values")
+        row_positions = rows and (
+            not protocol.get("pair_spatial_values_with_soas")
+            or all(row.get("spatial_values_cm") for row in rows)
+        )
+        if not protocol.get("spatial_values_cm") and not row_positions:
+            problems.append(f"{rel} missing protocol spatial values")
     return problems
 
 

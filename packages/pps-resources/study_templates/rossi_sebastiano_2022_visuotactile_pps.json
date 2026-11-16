@@ -1,0 +1,297 @@
+{
+  "template_id": "rossi_sebastiano_2022_visuotactile_pps",
+  "title": "Rossi Sebastiano 2022 · Expected hand and visuotactile PPS",
+  "citation": "Rossi Sebastiano et al. (2022). Multisensory-driven facilitation within the peripersonal space is modulated by the expectations about stimulus location on the body. Scientific Reports, 12, 20061.",
+  "source_url": "https://doi.org/10.1038/s41598-022-21469-w",
+  "doi": "10.1038/s41598-022-21469-w",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1038/s41598-022-21469-w",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": 20,
+      "blocks": [
+        {
+          "label": "Unilateral",
+          "touch_probability": {
+            "left": 1,
+            "right": 0
+          }
+        },
+        {
+          "label": "Bilateral",
+          "touch_probability": {
+            "left": 0.5,
+            "right": 0.5
+          }
+        }
+      ],
+      "sequence": "Counterbalance block order across participants and randomize conditions within each task.",
+      "visual": "Two 5 mm red LEDs at the two hands, which were 40 cm apart. Flash duration 50 ms. Near and far are defined relative to the stimulated hand.",
+      "tactile": "Hand dorsum DS7A 200 µs current pulse, two times each hand’s perception threshold. One of two sites selected randomly.",
+      "groups": [
+        "T",
+        "VTNear",
+        "VTFar",
+        "VNear",
+        "VFar"
+      ],
+      "allocation": "Methods describe 24 trials per tactile condition and 24 visual-only trials per position. Bilateral pooling and block assignment of the 48 visual-only trials remain ambiguous.",
+      "response": "Press a right-foot pedal when touch is perceived. Rate tactile intensity from 0–7 after each trial. Ignore visual flashes and keep midline fixation.",
+      "analysis": "Compare paired responses to the matched tactile-alone condition, primarily on left-hand trials.",
+      "timing": "Flash and electrical pulse have nominally simultaneous onsets in paired trials."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Visuotactile detection and rating with a static red LED flash and transcutaneous electrical touch",
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1 and Scientific Reports p. 3, Experimental stimuli"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Arduino and E-Prime 2.0 custom script, DS7A and paired LEDs",
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1 and Scientific Reports p. 3, Experimental stimuli",
+          "gap": "Original software, circuit, exact positions, and data unverified."
+        },
+        "trajectory_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Scientific Reports p. 3, Experimental stimuli",
+          "gap": "The visual cues are flashed at fixed LED locations."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Scientific Reports p. 3, Experimental stimuli",
+          "gap": "Near and far use opposite stationary LED positions relative to touched hand."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "visual_ms": 50,
+            "tactile_ms": 0.2
+          },
+          "source": "Scientific Reports p. 3, Experimental stimuli"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Scientific Reports p. 3, Experimental stimuli"
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1",
+          "gap": "This is a visual–tactile study."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1",
+          "gap": "No audio stimulus or gain law."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "controller": "Arduino and E-Prime 2.0",
+            "visual": {
+              "stimulus": "Red LED flash",
+              "duration_ms": 50,
+              "diameter_mm": 5,
+              "leds": 2,
+              "relative": "One LED near each hand. Near is LED by touched hand, far is LED by other hand.",
+              "hand_separation_cm": 40,
+              "distance_caveat": "Exact LED-to-touch distances, vertical placement and luminance unreported. The 40 cm measurement is between hands."
+            },
+            "tactile": "Digitimer DS7A",
+            "response": "Right foot pedal"
+          },
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1 and Scientific Reports p. 3, Experimental stimuli",
+          "gap": "Hardware models for LEDs and pedal, trigger latency and software files unreported."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "T",
+            "VTNear",
+            "VTFar",
+            "VNear catch",
+            "VFar catch"
+          ],
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Randomize stimulus conditions within task blocks",
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Unilateral and bilateral blocks counterbalanced, with half of participants beginning each task",
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reported_inter_stimulus_interval_ms": [
+              4000,
+              5000
+            ]
+          },
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1",
+          "gap": "Selection distribution and exact interval anchor unreported."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1",
+          "gap": "Speeded pedal and post-trial intensity rating are specified, with no numeric deadlines."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Two consecutive task blocks. Half start unilateral, half bilateral. Randomize conditions within task. On touch, speeded right-foot pedal response. After each trial, rate touch 0–7. Ignore flashes and maintain midline fixation.",
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "model": "Digitimer DS7A",
+            "waveform": "constant-current square-wave transcutaneous pulse",
+            "duration_us": 200,
+            "duration_ms": 0.2,
+            "site": "hand dorsum, one of two sites selected randomly",
+            "electrodes": "three surface cup electrodes as reported, exact layout unreported",
+            "stimulus_intensity": "2× each hand's individual perceptual threshold",
+            "left_ma": {
+              "mean": 3.7,
+              "sd": 0.68,
+              "range": [
+                2.62,
+                4.9
+              ]
+            },
+            "right_ma": {
+              "mean": 3.66,
+              "sd": 0.68,
+              "range": [
+                2.8,
+                5.2
+              ]
+            }
+          },
+          "source": "Scientific Reports p. 3, Experimental stimuli"
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_visual_to_tactile_onset_ms": 0,
+            "visual_ms": 50,
+            "tactile_ms": 0.2
+          },
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1 and Scientific Reports p. 3, Experimental stimuli",
+          "gap": "Simultaneous programmed onsets, with no hardware-measured timing error reported."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": {
+            "condition": "Unimodal tactile T matched by task for left-hand responses",
+            "rt_index": "T mean RT minus VT mean RT",
+            "rating_index": "VT mean tactile-intensity rating minus T mean rating",
+            "higher_index": "Greater facilitation",
+            "contrast": "VTNear versus VTFar tests spatial modulation"
+          },
+          "source": "Scientific Reports pp. 3–5, Data analysis, Results and Figs. 2–3"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": "T conditions intermixed with VT and visual-only catch conditions.",
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1",
+          "gap": "No separately timed foreperiod given."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Visual-only flashes at the two LED positions, no tactile target",
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported_with_caveat",
+          "value": 24,
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1",
+          "gap": "The text does not explicitly assign 24 T/VTNear/VTFar trials to each hand or pooled hands in the bilateral block, nor does it unambiguously anchor the stated catch pool to each block. Total delivered trials per block and overall are unresolved."
+        },
+        "baseline_count": {
+          "status": "reported_with_caveat",
+          "value": 24,
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1",
+          "gap": "T is one of three tactile conditions, reported at 24 per condition. Bilateral side and block count scope is unresolved."
+        },
+        "catch_count": {
+          "status": "reported_with_caveat",
+          "value": 48,
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1",
+          "gap": "Reported 24 visual-only trials per position, 48 in the described set. Per-block scope not explicit."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1"
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Scientific Reports pp. 2–3, Experimental procedures and Fig. 1",
+          "gap": "The text does not explicitly assign 24 T/VTNear/VTFar trials to each hand or pooled hands in the bilateral block, nor does it unambiguously anchor the stated catch pool to each block. Total delivered trials per block and overall are unresolved."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires timed independent LEDs and calibrated left/right electrical stimulation with peripheral output timing verification.",
+      "A response workflow must combine a foot-pedal detector with the separate intensity rating. Measured visual–tactile offset, exact LED geometry and delivered trial allocation are unresolved."
+    ],
+    "alternate_study_row_ids": [
+      "doi:10.1038/s41598-022-21469-w#bilateral"
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Rossi Sebastiano 2022 · Expected hand and visuotactile PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1038/s41598-022-21469-w. Scientific Reports pp. 2–3, Experimental procedures and Fig. 1 and Scientific Reports pp. 3–5, Data analysis, Results and Figs. 2–3"
+    }
+  ]
+}

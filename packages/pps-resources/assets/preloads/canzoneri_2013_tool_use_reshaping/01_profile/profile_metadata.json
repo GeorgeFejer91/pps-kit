@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Tool-use PPS plasticity profile. The publication reports an audio-tactile interaction task before and after use of a 1 m tool. This preload recreates the runnable PPS assessment task using the paper-reported method plus the delegated Canzoneri et al. (2012) protocol lineage: 3000 ms IN/OUT pink-noise sounds, T1-T5 tactile delays, T0/T6 tactile-only baselines, 76 auditory-only catches, and two paper blocks. The 20-minute physical tool-use and pointing-control interventions are retained as context rather than automated runner phases.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-013-3532-2::a",
     "profile_type": "audio_tactile_tool_use_plasticity",
     "publication_status": "published",
     "profile_check_complete": true,

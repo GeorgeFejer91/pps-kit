@@ -1,0 +1,372 @@
+{
+  "template_id": "hug_2022_guided_reaching",
+  "title": "Hüg 2022 · Guided reaching and auditory PPS",
+  "citation": "Hüg, M. X., Bermejo, F., Tommasini, F. C., & Di Paolo, E. A. (2022). Effects of guided exploration on reaching measures of auditory peripersonal space. Frontiers in Psychology, 13, 983189.",
+  "source_url": "https://doi.org/10.3389/fpsyg.2022.983189",
+  "doi": "10.3389/fpsyg.2022.983189",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3389/fpsyg.2022.983189",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort_n": {
+        "no_feedback": 10,
+        "active_exploration": 10,
+        "guided_exploration": 10
+      },
+      "static_source": "Reposition a physical Sony SRS-X11 on a narrow table while lateral sources mask setup noise. Calibrate 65 dBA at the head with the source at 100 cm, keeping source gain fixed across locations.",
+      "cue": "Three stationary 100 ms broadband Gaussian noise bursts with 2 ms half-Hamming edges. The 50 ms gaps produce a 400 ms sequence.",
+      "distance_grid_cm": [
+        40,
+        45,
+        50,
+        55,
+        60,
+        65,
+        70,
+        75,
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        150
+      ],
+      "repetitions_per_distance_per_phase": 4,
+      "schedule": "92 pretest, 92 training and 92 posttest trials, preceded by four familiarization trials. Measure arm-only and arm-plus-trunk maximum reach first.",
+      "response": "At cue offset, point by reaching to the perceived location and rest the hand on the table, or report 'too far' without moving. Track location at the hand with Polhemus Patriot.",
+      "training": "No-feedback participants repeat the assessment. Active participants search for physical speaker contact. Guided participants are moved with a sling to contact the source if reachable.",
+      "analysis": "Compute reachability, normalized perceived distance, perceived maximum reach and direction-specific or absolute distance error. The Zenodo observations support nine reused assessment orders but do not determine the original generation or training order."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Stationary Gaussian broadband noise in three bursts",
+          "source": "Hüg et al. 2022, p. 3, Apparatus"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "kind": "Three stationary bursts of Gaussian broadband noise",
+            "band_hz": [
+              20,
+              22000
+            ],
+            "bursts": 3,
+            "burst_ms": 100,
+            "ramp_ms": 2,
+            "ramp_type": "Half-Hamming rise and fall per burst",
+            "gap_ms": 50,
+            "onset_period_ms": 150,
+            "total_ms": 400,
+            "speaker": "Sony SRS-X11 cube, 6.1 cm each side",
+            "ref_spl_dBA": 65,
+            "ref_distance_cm": 100,
+            "calibration_point": "Participant head position",
+            "gain": "Fixed source gain across distances. Ear-level SPL at other locations not reported.",
+            "masking": "Separate lateral speakers masked repositioning before each trial. Spectrum, gain, timing and device models unreported.",
+            "sample_rate_hz": null,
+            "original_asset": null
+          },
+          "source": "Hüg et al. 2022, p. 3, Apparatus",
+          "gap": "Original audio waveform, sample rate, masking signal and MATLAB source unavailable."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Hüg et al. 2022, p. 3, Apparatus",
+          "gap": "Each trial uses a fixed, physically positioned loudspeaker. It is repositioned between trials."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Hüg et al. 2022, p. 3, Apparatus",
+          "gap": "Each trial uses a fixed, physically positioned loudspeaker. It is repositioned between trials."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "whole_ms": 400,
+            "burst_ms": 100,
+            "gap_ms": 50
+          },
+          "source": "Hüg et al. 2022, p. 3, Apparatus"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Hüg et al. 2022, p. 3, Apparatus",
+          "gap": "Each trial uses a fixed, physically positioned loudspeaker. It is repositioned between trials."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": {
+            "target_distance_cm": [
+              40,
+              45,
+              50,
+              55,
+              60,
+              65,
+              70,
+              75,
+              80,
+              85,
+              90,
+              95,
+              100,
+              105,
+              110,
+              115,
+              120,
+              125,
+              130,
+              135,
+              140,
+              145,
+              150
+            ],
+            "masking": "Lateral speakers during repositioning"
+          },
+          "source": "Hüg et al. 2022, p. 3, Apparatus"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "ramp": "2 ms half-Hamming rise and fall",
+            "reference_dBA": 65,
+            "reference_distance_cm": 100,
+            "gain": "fixed"
+          },
+          "source": "Hüg et al. 2022, p. 3, Apparatus",
+          "gap": "Measured ear levels away from 100 cm and digital scale unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "room_m": {
+              "length": 4.2,
+              "width": 3.8,
+              "height": 2.6
+            },
+            "walls": "Absorbent fiberglass, carpet floor",
+            "background_dBA_approx": 17,
+            "T30_ms": 170,
+            "T30_octave_center_hz": 1000,
+            "room_measurement": "REW deconvolution with apparatus mounted and room unoccupied",
+            "table_cm": [
+              150,
+              30
+            ],
+            "table_height_relative_to_ears_cm": -40,
+            "table_reference": "Ruler origin at the vertical projection of the center of the seated participant’s head",
+            "posture": "Seated, blindfolded, head aligned forward. Can lean trunk and extend arm without rising.",
+            "hand_tracker": "Polhemus Patriot at center of hand dorsum, around 15 cm from middle-finger tip",
+            "control_software": "MATLAB, version unspecified",
+            "response_hand": "The 2022 article does not explicitly name the response hand. The 2019 predecessor specifies dominant hand.",
+            "guided_sling": "Soft sling supporting and moving the arm"
+          },
+          "source": "Hüg et al. 2022, p. 3, Apparatus",
+          "gap": "No original control files, sound settings or tracker sample rate."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Reaching response",
+            "Too far verbal response"
+          ],
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Randomized balanced distance trials, within each phase",
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "phases": [
+              "Pretest",
+              "Training",
+              "Posttest"
+            ],
+            "distances_randomized": true
+          },
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1; Zenodo 10.5281/zenodo.7101219 v1.0, dataset_trials.csv",
+          "gap": "Nine assessment orders recovered. Generation, participant allocation rule and training order remain unresolved."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1",
+          "gap": "Approximate 10 min phase breaks stated. Intertrial delay and masking interval unreported."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": {
+            "response_anchor": "End of the 400 ms stimulus"
+          },
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1",
+          "gap": "Maximum response time and prompt timing unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "reachable": "After stimulus, move hand to perceived position and rest it on table. Speaker removed immediately after sound in assessment, eliminating contact feedback.",
+            "unreachable": "Say too far and stay still.",
+            "rules": "Maintain seated posture, head facing front while listening, then reach after sound offset.",
+            "timing_caveat": "Exact deadline, ITI and source-reposition delay unreported. Sound offset is the response cue."
+          },
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1",
+          "gap": "No instrumented tactile target in assessments. Natural contact feedback is a training manipulation."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1",
+          "gap": "No programmed auditory-tactile stimulus pairing."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Pretest without contact feedback and a control group with no feedback in any phase. No tactile-only baseline.",
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": "Pretest before training. Control phase identical to assessments.",
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1"
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1",
+          "gap": "All scheduled trials have an auditory target. A physically unreachable target is a distance condition."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1",
+          "gap": "No tactile SOAs. Four trials per physical distance in each phase."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1",
+          "gap": "No tactile-only baseline. Pretest has 92 trials."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1",
+          "gap": "No catch trial class."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "formal_phases": 3,
+            "assessment_phases": 2,
+            "training_phases": 1
+          },
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "formal": 276,
+            "assessment": 184,
+            "training": 92,
+            "familiarization": 4,
+            "including_practice": 280
+          },
+          "source": "Hüg et al. 2022, pp. 3–4, Design and procedure and Fig. 1",
+          "gap": "23 × 4 × 3 = 276, plus four practice. Per scope, only the two assessment phases feed the analysis."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Recreate a calibrated physically repositioned loudspeaker, room acoustics, masking and tracking. Earphone distance proxies would change the task.",
+      "Implement reachability calibration, reaching and verbal response capture and feedback delivery across the three training groups.",
+      "Recover the original audio samples, masking details, setup/ITI timing and participant order generation."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Hüg 2022 · Guided reaching and auditory PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [
+        40,
+        45,
+        50,
+        55,
+        60,
+        65,
+        70,
+        75,
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        150
+      ],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3389/fpsyg.2022.983189. Frontiers in Psychology, pp. 2–5, setup, procedure, Fig. 1 and Supplementary Tables S1–S3. Zenodo 10.5281/zenodo.7101219"
+    }
+  ]
+}

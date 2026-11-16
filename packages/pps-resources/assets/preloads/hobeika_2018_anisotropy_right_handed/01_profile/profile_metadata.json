@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Source-backed sample schedule. Generated audio, calibrated tactile delivery and original response acquisition affect replication fidelity.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-017-5158-2",
     "profile_type": "lateral_looming_audio_tactile_pps",
     "publication_study_row_id": "doi:10.1007/s00221-017-5158-2",
     "source_scope": "Right-handed cohort\u2019s assessment. The two cohort profiles differ in target and response hand.",

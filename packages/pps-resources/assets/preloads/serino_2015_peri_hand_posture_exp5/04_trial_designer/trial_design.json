@@ -1,0 +1,49 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "serino_2015_peri_hand_posture_exp5",
+  "repetitions_per_condition": 24,
+  "soa_values_ms": [
+    0,
+    864,
+    1727,
+    2591,
+    3455,
+    4318
+  ],
+  "spatial_values_cm": [
+    100,
+    81,
+    62,
+    43,
+    24,
+    5
+  ],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "serino-hand-posture-reference-approach",
+      "label": "Hand-posture approach reference",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {},
+      "elements": [
+        {
+          "element_id": "serino-hand-posture-approach",
+          "kind": "looming_stimulus",
+          "label": "Hand-posture reference approach",
+          "source_label": "Hand-posture reference approach",
+          "source_labels": [
+            "Hand-posture reference approach"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 432
+}

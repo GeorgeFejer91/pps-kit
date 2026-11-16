@@ -1,0 +1,71 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "teneggi_2013_cooperative_game_exp2",
+  "repetitions_per_condition": 4,
+  "soa_values_ms": [
+    300,
+    800,
+    1500,
+    2200,
+    2700
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "teneggi-cooperative-game-assessment",
+      "label": "Social face PPS moving-sound trial",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "response_mode": "voice_key_mouse_click_proxy",
+        "response_capture_device": "mouse_click_proxy",
+        "tactile_stimulation_modality": "electrical_in_publication",
+        "electrical_electrode_site": "right cheek",
+        "source_asset_equivalence": "generated pink-noise proxy",
+        "renderer_equivalence_boundary": "virtual moving source proxy for opposing physical loudspeaker gains"
+      },
+      "elements": [
+        {
+          "element_id": "teneggi-pre-sound-silence",
+          "kind": "jitter",
+          "label": "Pre-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        },
+        {
+          "element_id": "teneggi-face-moving-sound",
+          "kind": "looming_stimulus",
+          "label": "Face-centered moving sound",
+          "source_label": "Face-centered moving sound",
+          "source_labels": [
+            "Face-centered moving sound",
+            "Face-centered moving sound - receding"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        },
+        {
+          "element_id": "teneggi-post-sound-silence",
+          "kind": "jitter",
+          "label": "Post-sound silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 208
+}

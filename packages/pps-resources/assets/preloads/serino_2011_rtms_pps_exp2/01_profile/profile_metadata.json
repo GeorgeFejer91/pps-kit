@@ -1,0 +1,274 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "serino_2011_rtms_pps_exp2",
+  "title": "Serino 2011 \u00b7 rTMS and control blocks",
+  "citation": "Serino, A., Canzoneri, E., & Avenanti, A. (2011). Fronto-parietal areas necessary for a multisensory representation of peripersonal space in humans: an rTMS study. Journal of Cognitive Neuroscience, 23(10), 2956\u20132967.",
+  "doi": "10.1162/jocn_a_00006",
+  "source_url": "https://doi.org/10.1162/jocn_a_00006",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1162/jocn_a_00006::c",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sound": "100 ms white noise from matched fixed loudspeakers at approximately 70 dB at the head vertex.",
+      "touch": "100 \u00b5s single electrical pulses at the dorsal right index finger. Participant-specific weak and strong targets use separate electrode pairs.",
+      "timing": {
+        "tactile_onset_after_near_sound_ms": 0,
+        "tactile_onset_after_far_sound_ms": 5,
+        "anchor": "Programmed onset; the nominal 5 ms far-sound lead compensates for longer acoustic propagation."
+      },
+      "response": "Say \u201ctah\u201d as fast as possible for the instructed tactile intensity. Withhold that response to the other intensity and sound alone.",
+      "participants": 10,
+      "comparison_blocks": [
+        "No rTMS",
+        "Ventral premotor cortex",
+        "Posterior parietal cortex",
+        "Primary visual cortex"
+      ],
+      "target": "Weak right-index pulse; strong pulse is No-Go. The participant holds the hand forward.",
+      "block_pool": {
+        "near_weak": 30,
+        "far_weak": 30,
+        "near_strong": 30,
+        "far_strong": 30,
+        "sound_only": 20
+      },
+      "tactile_only_baseline": false
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "100 ms white-noise bursts",
+          "source": "Article pp. 2957\u20132958, Experiment 1A Materials"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "White noise played over two identical physical loudspeakers. Spectral output checked for consistency.",
+          "source": "Article pp. 2957\u20132958, Experiment 1A Materials",
+          "gap": "Source waveform, speaker model, sample rate and noise-generation recipe remain unknown."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Article pp. 2957\u20132958, Experiment 1A Materials"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "motion": "Stationary speakers",
+            "near_head_cm_approx": 60,
+            "far_head_cm_approx": 160,
+            "near_torso_cm_approx": 50,
+            "far_torso_cm_approx": 150,
+            "speaker_separation_cm": 100,
+            "near_forward_hand_cm_approx": 5
+          },
+          "source": "Article p. 2958, Fig. 1A and Materials"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 100,
+            "tactile_pulse_us": 100
+          },
+          "source": "Article pp. 2957\u20132958, Experiment 1A Materials"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Article pp. 2957\u20132958, Experiment 1A Materials",
+          "gap": "Auditory sources are stationary."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Near fixed speaker",
+            "Far fixed speaker"
+          ],
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "sound_level_db_approx": 70,
+            "measurement_position": "Above head vertex",
+            "level_matching": "Near and far matched"
+          },
+          "source": "Article pp. 2957\u20132958, Experiment 1A Materials",
+          "gap": "Rise/fall, waveform scaling and SPL weighting remain unknown."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "playback": "Two identical physical loudspeakers",
+            "controller": "XGen",
+            "response": "Voice-activated relay"
+          },
+          "source": "Article pp. 2957\u20132958, Experiment 1A Materials; p. 2959, Procedure",
+          "gap": "Speaker model, audio interface, event timing accuracy and relay threshold remain unknown."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "tactile": [
+              "weak target",
+              "strong nontarget"
+            ],
+            "sound": [
+              "near",
+              "far"
+            ],
+            "catch": "Audio only",
+            "hand": "Forward"
+          },
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Weak and strong tactile trials crossed with sound conditions, plus auditory-only catches.",
+          "source": "Article pp. 2958\u20132959, Experiment 1A Procedure",
+          "gap": "Within-block sequence, mixing algorithm and seed remain unknown."
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": {
+            "blocks": 4,
+            "days": 2,
+            "active_sites": [
+              "vPMc",
+              "PPc",
+              "V1"
+            ],
+            "control": "No rTMS",
+            "control_block_order": {
+              "first": 6,
+              "last": 4
+            },
+            "between_block_minimum_minutes": 60,
+            "active_order": "Counterbalanced"
+          },
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "trial_length_s_approx": 3,
+            "block_duration_min_approx": 7
+          },
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure",
+          "gap": "Exact intertrial delay and jitter policy remain unknown."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article p. 2962, Experiment 2 Data Analysis",
+          "gap": "Online acceptance window remains unknown."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Use the Experiment 1B weak-target response rule with the hand forward in each stimulation or control block.",
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "Dorsal right index finger",
+            "modality": "Electrical",
+            "pulse": "Single rectangular monophasic",
+            "duration_us": 100,
+            "stimulator": "Digitimer DS7A",
+            "electrodes": "Two Neuroline pairs, one per intensity",
+            "relative_strong_to_weak": 1.5,
+            "weak_detection_min_of_10": 9,
+            "strong_detection_min_of_10": 10
+          },
+          "source": "Article pp. 2957\u20132959, Experiment 1A Materials and Procedure",
+          "gap": "The article describes constant-current equipment and calls the waveform constant voltage. Per-participant parameters and hardware equivalence remain open."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "reference": "Programmed acoustic onset",
+            "near_ms": 0,
+            "far_ms": 5,
+            "far_note": "Far sound triggered 5 ms before the tactile pulse to compensate for propagation delay."
+          },
+          "source": "Article pp. 2958\u20132959, Experiment 1A Procedure"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": "No tactile-only trial family. A separate no-rTMS block serves as the intervention control.",
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Article pp. 2958\u20132959, Experiment 1A Procedure",
+          "gap": "No auditory onset on tactile-only trials."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Near or far sound without tactile stimulus. No response required.",
+          "source": "Article pp. 2958\u20132959, Experiment 1A Procedure"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_tactile_intensity_by_sound_cell": 30,
+            "cells": 4
+          },
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": {
+            "per_reported_block_pool": 20
+          },
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 4,
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "formal_trials_per_block": 140,
+            "formal_trials_across_four_blocks": 560,
+            "derivation": "Four approximately seven-minute blocks at about 3 s per trial support 140 trials per block."
+          },
+          "source": "Article pp. 2961\u20132962, Experiment 2 Materials and Procedure"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The physical near/far speaker channels and electrical pulse controller need a shared clock, with calibrated level, pulse delivery and physical onset verification.",
+      "A measured voice key must score the currently instructed intensity as Go and the other intensity and sound-only trials as No-Go. A manual button or vibration marker is insufficient.",
+      "The original noise waveform, realized sequence, voice-key threshold and response deadline are unavailable.",
+      "The published neurostimulation comparisons require laboratory rTMS, target localization, individual motor-threshold calibration and a qualified recording setup. PPS Kit does not control this intervention."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1162/jocn_a_00006. Article pp. 2961\u20132963, Table 3 and Figs. 2\u20133"
+    }
+  ]
+}

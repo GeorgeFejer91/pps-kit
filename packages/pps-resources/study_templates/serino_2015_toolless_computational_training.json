@@ -1,0 +1,280 @@
+{
+  "template_id": "serino_2015_toolless_computational_training",
+  "title": "Serino 2015 · Synchronous training network model",
+  "citation": "Serino, A., Canzoneri, E., Marzolla, M., di Pellegrino, G., & Magosso, E. (2015). Extending peripersonal space representation without tool-use: evidence from a combined behavioral-computational approach. Frontiers in Behavioral Neuroscience, 9, 4.",
+  "source_url": "https://doi.org/10.3389/fnbeh.2015.00004",
+  "doi": "10.3389/fnbeh.2015.00004",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3389/fnbeh.2015.00004::computational-model",
+    "publication_status": "published",
+    "profile_type": "computational_pps_method",
+    "profile_check_complete": false,
+    "published_method": {
+      "network": {
+        "tactile_units": [
+          40,
+          20
+        ],
+        "auditory_units": [
+          20,
+          3
+        ],
+        "multisensory_units": 1,
+        "solver": "Forward Euler",
+        "integration_step_ms": 0.4,
+        "neuron_time_constant_ms": 20
+      },
+      "training": {
+        "repeats": 30,
+        "per_cue_ms": 400,
+        "audio_position_cm": [
+          100,
+          5
+        ],
+        "touch": "Hand center",
+        "sync_soa_ms": 0,
+        "async_soa_ms": [
+          200,
+          600
+        ]
+      },
+      "probes": {
+        "positions_cm": [
+          0,
+          10,
+          20,
+          30,
+          40,
+          50,
+          60,
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140
+        ],
+        "duration_ms": 400,
+        "repeats_per_distance": 30,
+        "states": [
+          "Before training",
+          "After synchronous training",
+          "After asynchronous training"
+        ],
+        "modes": [
+          "Auditory alone",
+          "Paired auditory and tactile"
+        ]
+      },
+      "readout": "Final multisensory neuron activity for auditory probes, or time to 90% of the final summed tactile activity for paired probes. Fit the resulting distance-dependent model response."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Localized Gaussian external stimuli with independent spatial and amplitude parameters for the auditory and tactile model inputs.",
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Input formula, numerical integration and parameter table are available.",
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1",
+          "gap": "Original code, implementation environment, RNG and seed are unspecified."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": "Static far auditory training input, then a grid of 15 positions from 0 to 140 cm from the hand in 10 cm steps.",
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "both_model_modalities_ms": 400,
+            "simulation_steps": 1000
+          },
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "synchronous far input training",
+            "asynchronous far input training",
+            "auditory-only probe",
+            "audiotactile probe"
+          ],
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Numerical network with auditory, tactile and multisensory regions. Euler step 0.4 ms.",
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "simulated paired training",
+            "simulated unimodal auditory testing",
+            "simulated synchronous audiotactile testing"
+          ],
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Compare untrained, synchronous-trained and asynchronous-trained network states. Test unisensory and bimodal probes separately.",
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Simulate 30 draws per distance for each test phase.",
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1",
+          "gap": "Iteration order, seeds and implementation files unspecified."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Run 30 training presentations for each trained network. Test each resulting state and untrained baseline with auditory-only and synchronous audio–tactile inputs at 15 sound positions.",
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "input_type": "localized Gaussian applied at hand center",
+            "spatial_sd_cm": 0.3,
+            "duration_ms": 400
+          },
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "synchronous_training_ms": 0,
+            "asynchronous_training_magnitude_range_ms": [
+              200,
+              600
+            ],
+            "test_ms": 0
+          },
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1",
+          "gap": "The reported random asynchronous lag bounds do not specify a distribution or signed direction."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Untrained model is the baseline state; no measured tactile-only behavioral rows.",
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "training_presentations_per_condition": 30,
+            "test_draws_per_position": 30,
+            "positions": 15
+          },
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "training_presentations_per_trained_state": 30,
+            "simulated_trials_per_test_modality_per_network_state": 450
+          },
+          "source": "Model supplement, §§1–3, Eqs. 1–22 and Table 1",
+          "gap": "15 distances × 30 draws for each separate test family and state."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "A numerical model solver is required. The original simulation code, realized random draws and seed are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Serino 2015 · Synchronous training network model",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3389/fnbeh.2015.00004. Main PDF pp. 2–8, Figs. 1–5; Model supplement, §§1–3, Eqs. 1–22 and Table 1."
+    }
+  ]
+}

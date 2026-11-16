@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "di_cosmo_2021_phase_coupling",
   "title": "Di Cosmo 2021 looming versus flat PPS",
-  "visible_variant_label": "",
+  "visible_variant_label": "A",
   "publication_status": "published",
   "profile_type": "behavioral_pps_with_resting_meg",
   "asset_mode": "bundled_local",

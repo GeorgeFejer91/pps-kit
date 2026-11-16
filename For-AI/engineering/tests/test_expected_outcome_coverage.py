@@ -162,10 +162,10 @@ def test_expected_outcome_layer_is_conservative_about_behavioral_validation():
         "pending_expected_outcome_blocker_counts": {},
         "observed_comparison_gap_counts": {
             "not_applicable_adjacent_out_of_scope": 4,
-            "not_yet_templated_missing_publication_parameters": 25,
+            "not_yet_templated_missing_publication_parameters": 3,
             "ready_profile_mouse_click_simulated_participant_like_comparison_available_needs_collected_behavioral_comparison": 17,
             "template_present_blocked_missing_publication_parameters": 11,
-            "template_present_blocked_toolkit_structure": 21,
+            "template_present_blocked_toolkit_structure": 43,
             "ready_profile_parameter_run_available_expected_contrast_unvalidated": 2,
         },
     }
@@ -408,16 +408,10 @@ def test_expected_outcome_blocked_and_adjacent_records_do_not_claim_observed_com
         "cell_reports_medicine_2026_consciousness",
     ]:
         record = records[record_id]
-        assert record["runnable_status"] == "not_yet_templated"
+        assert record["runnable_status"] == "template_present_but_blocked"
         assert record["expected_outcome_status"] == "structured_expected_outcome_extracted"
-        assert record["observed_comparison_gap"] in {
-            "not_yet_templated_missing_publication_parameters",
-            "not_yet_templated_requires_toolkit_structure",
-        }
-        if record["observed_comparison_gap"] == "not_yet_templated_missing_publication_parameters":
-            assert record["required_next_evidence"].startswith("Extract the missing source/PDF profile parameters")
-        else:
-            assert record["required_next_evidence"].startswith("Add the missing toolkit structure")
+        assert record["observed_comparison_gap"] == "template_present_blocked_toolkit_structure"
+        assert record["required_next_evidence"].startswith("Resolve profile blockers")
 
     adjacent = records["barumerli_2026_semantic_looming_auditory_only"]
     assert adjacent["expected_outcome_status"] == "adjacent_out_of_scope"

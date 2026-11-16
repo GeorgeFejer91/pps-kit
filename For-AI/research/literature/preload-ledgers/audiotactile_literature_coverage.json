@@ -269,18 +269,18 @@
     "literature_record_category_counts": {
       "covered_runnable_profile": 19,
       "covered_blocked_missing_publication_parameters": 11,
-      "covered_blocked_toolkit_structure": 21,
+      "covered_blocked_toolkit_structure": 43,
       "not_yet_templated_requires_toolkit_structure": 0,
-      "not_yet_templated_missing_publication_parameters": 25,
+      "not_yet_templated_missing_publication_parameters": 3,
       "candidate_needs_full_text_task_audit": 0,
       "adjacent_out_of_scope": 4
     },
-    "current_template_count": 81,
+    "current_template_count": 194,
     "current_profile_check_pass_count": 26,
     "published_profile_check_pass_count": 24,
     "local_unpublished_profile_check_pass_count": 2,
-    "current_templates_with_missing_publication_parameters": 55,
-    "current_templates_with_toolkit_structural_gaps": 38,
+    "current_templates_with_missing_publication_parameters": 168,
+    "current_templates_with_toolkit_structural_gaps": 150,
     "holmes_2020_reported_articles": 23,
     "holmes_2020_reported_experiments": 46,
     "pubmed_screened_records": 48,
@@ -645,6 +645,17 @@
       "toolkit_status": "requires_native_implementation",
       "example_records": [
         "footsole_vibration_2019"
+      ]
+    },
+    {
+      "id": "study_specific_physical_apparatus",
+      "dimension": "response_capture_or_response_mapping",
+      "description": "The published task couples stimulus delivery, physical apparatus and response or physiological recording. The required devices, synchronized clocks and verification at the participant position or device input are specified in the linked study profiles.",
+      "toolkit_status": "requires_study_specific_hardware_and_validation",
+      "example_records": [
+        "serino_2009_tms",
+        "spadone_2021_connectivity",
+        "ladavas_2001_auditory_tactile_extinction"
       ]
     }
   ],
@@ -1313,6 +1324,890 @@
         "missing_core_soa_iti_baseline_repetition_parameters",
         "electrical_tactile_calibration"
       ]
+    },
+    {
+      "template_id": "amemiya_2019_ntt_pseudo_walking",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "amiel_2025_front_rear",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "aspell_2010_body_visibility_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "aspell_2010_body_visibility_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "aspell_2010_body_visibility_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "avenanti_2012_premotor_suppression_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "avenanti_2012_premotor_suppression_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "bassolino_2022_chronic_stroke_avatar_adjustment",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "bassolino_2022_chronic_stroke_body_landmarks",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "bassolino_2022_chronic_stroke_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "bernasconi_2018_preprint_trunk_ieeg",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "bertoni_2024_healthy_awake_sleep_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "bertoni_2024_clinical_arm_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "bertoni_2026_healthy_awake_sleep_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "bertoni_2026_clinical_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "canzoneri_2013_amputation_tactile_distance_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "canzoneri_2013_amputation_tactile_site_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "canzoneri_2013_pointing_control_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "cattaneo_2010_haptic_rod_bisection",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "cimmino_2013_arm_elongation_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "cimmino_2013_arm_elongation_body_image",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "cimmino_2013_arm_elongation_tactile_distance",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "cimmino_2013_arm_elongation_tactile_pressure",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "cimmino_2013_arm_elongation_two_point",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "cimmino_2013_arm_elongation_von_frey",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "cuppini_2011_peri_hand_network_baseline",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "cuppini_2011_peri_hand_network_tool_training",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "cuppini_2011_superior_colliculus_integration",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "cuppini_2011_superior_colliculus_maturation",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "cuppini_2011_superior_colliculus_random_pairs",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "dellanna_2021_jazz_duet",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "dellanna_2021_jazz_baseline",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "di_cosmo_2021_resting_meg",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "farne_2002_auditory_pps_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "farne_2002_auditory_pps_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "fernandez_diaz_2011_haptic_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "fernandez_diaz_2011_haptic_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "fernandez_diaz_2011_haptic_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "fernandez_diaz_2011_haptic_exp4",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ferri_2015_premotor_itv_behavior",
+      "published": true,
+      "current_recreation_category": "missing_publication_parameters",
+      "primary_constraint_ids": [
+        "missing_core_soa_iti_baseline_repetition_parameters"
+      ]
+    },
+    {
+      "template_id": "ferri_2015_premotor_itv_fmri",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "depersonalisation_2023_psyarxiv_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ferroni_2023_depersonalisation_mental_time_travel",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ferroni_2025_depersonalisation_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ferroni_2025_depersonalisation_mental_time_travel",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ferroni_2026_pps_plasticity_determinants_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ferroni_2026_pps_plasticity_determinants_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ferroni_2026_pps_plasticity_determinants_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ferroni_2026_pps_plasticity_determinants_exp4",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "finisguerra_2015_moving_sounds_motor",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "finn_2024_body_image_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "body_image_social_cognition_2024_active_ipd",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "body_image_social_cognition_2024_passive_ipd",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "galigani_2020_tool_observation_landmarks",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "hobeika_2020_social_audience",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "hobeika_2020_social_collaboration",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "hobeika_2020_social_competition",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "holmes_2019_osf_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "holmes_2019_osf_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "holmes_2019_osf_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "holmes_2019_osf_exp4",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "hug_2022_guided_reaching",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "loescher_2025_cardiac_interoception_pnas",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "loescher_2025_cardiac_interoception_preprint",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ladavas_2001_audiotactile_extinction",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "menning_2005_tactile_priming",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "mul_2019_autism_full_body_illusion",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2013_full_body_conference",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "noel_2018_neural_adaptation",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "noel_2019_consciousness_clinical_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "noel_2019_consciousness_healthy_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "occelli_2010_sound_complexity",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "paredes_2022_pps_group_curve_fitting",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "paredes_2022_pps_parameter_sweeps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "paredes_2022_tactile_discrimination_prediction",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "pellencin_2018_social_pps_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "pellencin_2018_social_pps_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "pfeiffer_2018_rotation_tactile_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "pfeiffer_2018_rotation_audiotactile_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "rastelli_2025_affective_touch_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "rastelli_2025_affective_touch_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "rastelli_2025_affective_touch_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ronga_2021_seeming_confines_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ronga_2021_seeming_confines_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "ronga_2021_seeming_confines_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "rossi_sebastiano_2022_visuotactile_pps",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "sancristobal_2022_ornstein_uhlenbeck_model",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "sancristobal_2022_resting_eeg",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "sancristobal_2022_looming_behavior",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "sancristobal_2022_passive_auditory_eeg",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2007_sighted_cane_training",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2009_tms_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2009_tms_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2011_rtms_pps_exp1b",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2011_rtms_pps_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2011_rtms_pps_exp1a",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2015_peri_hand_trunk_exp4",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2015_peri_hand_posture_exp5",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2015_face_trunk_audio_exp6",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2015_face_trunk_visual_exp7",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2015_toolless_computational_training",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": []
+    },
+    {
+      "template_id": "serino_2018_mixed_reality_pps_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "serino_2018_mixed_reality_pps_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "sorrentino_2021_ageing_avatar_adjustment",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "sorrentino_2021_ageing_body_landmarks",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "spadone_2021_connectivity_behavior",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "spadone_2021_connectivity_fmri",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "tajadura_jimenez_2009_body_surface_spectra_exp1",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "tajadura_jimenez_2009_body_surface_spectra_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "tajadura_jimenez_2009_body_surface_spectra_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "teneggi_2013_cooperative_game_exp2",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "teneggi_2013_cooperative_wide_range_exp3",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
+    },
+    {
+      "template_id": "zampini_2007_front_rear",
+      "published": true,
+      "current_recreation_category": "toolkit_structural_gap",
+      "primary_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ]
     }
   ],
   "literature_records": [
@@ -1325,13 +2220,18 @@
         "pubmed_variant_source_records_2026_06_13",
         "web_search_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "ladavas_2001_audiotactile_extinction"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "near/far auditory-tactile extinction task around the head in a right-brain-damaged patient",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ],
       "missing_publication_parameters": [
-        "extract exact near/far sound distances, sound types, tactile site, trial counts, and clinical extinction-response procedure before any scaffolded profile; row-level cross-modal extinction/report response mapping is now runner-supported"
+        "This clinical procedure requires a participant with the study-defined extinction pattern, an experimenter-held neck contact sensor, physical speaker calibration and independent verbal response coding.",
+        "The precise contact waveform and duration, sound waveform and acoustic onset, original randomization and trial interval are unavailable."
       ]
     },
     {
@@ -1343,13 +2243,19 @@
         "pubmed_variant_source_records_2026_06_13",
         "web_search_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "farne_2002_auditory_pps_exp1",
+        "farne_2002_auditory_pps_exp2"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "front/back near/far auditory-tactile extinction task around the head in right-brain-damaged patients",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ],
       "missing_publication_parameters": [
-        "extract front/back and near/far auditory positions, pure-tone versus complex-sound settings, tactile site, trial counts, and extinction-response procedure; row-level cross-modal extinction/report response mapping is now runner-supported"
+        "The original contact-gated waveform, wideband limits, trial order, touch force, and measured physical onset offsets are unavailable.",
+        "The published task requires a contact sensor controlling a calibrated physical loudspeaker, clinician-led manual stimulation of the lateral neck, and coding of four verbal response alternatives."
       ]
     },
     {
@@ -1415,13 +2321,20 @@
       "source_basis": [
         "holmes_2020_systematic_review"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "serino_2009_tms_exp1",
+        "serino_2009_tms_exp2"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS stimulation with TMS/MEP endpoint",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ],
       "missing_publication_parameters": [
-        "extract audio-tactile task timing, tactile stimulation, MEP/TMS timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
+        "The matched original sound spectrum, waveform, ramps and measured delivery latency are unavailable.",
+        "Requires fixed physical speaker outputs with a synchronized single-pulse TMS and EMG acquisition system, qualified staff and participant-specific motor hotspot and threshold; audio-to-TMS delays must not be interpreted as tactile SOAs.",
+        "The intertrial dorsal hand touch check requires distinct strong and weak solenoid events with visual scoring of the left-foot response."
       ]
     },
     {
@@ -1484,13 +2397,22 @@
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "serino_2011_rtms_pps_exp1a",
+        "serino_2011_rtms_pps_exp1b",
+        "serino_2011_rtms_pps_exp2"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "static near/far audio-tactile PPS task with rTMS context",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ],
       "missing_publication_parameters": [
-        "full audio, tactile, and response settings need extraction"
+        "The physical near/far speaker channels and electrical pulse controller need a shared clock, with calibrated level, pulse delivery and physical onset verification.",
+        "A measured voice key must score the currently instructed intensity as Go and the other intensity and sound-only trials as No-Go. A manual button or vibration marker is insufficient.",
+        "The original noise waveform, realized sequence, voice-key threshold and response deadline are unavailable.",
+        "The published neurostimulation comparisons require laboratory rTMS, target localization, individual motor-threshold calibration and a qualified recording setup. PPS Kit does not control this intervention."
       ]
     },
     {
@@ -1500,13 +2422,20 @@
       "source_basis": [
         "holmes_2020_systematic_review"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "avenanti_2012_premotor_suppression_exp1",
+        "avenanti_2012_premotor_suppression_exp2"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS stimulation with motor-evoked-potential endpoint",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ],
       "missing_publication_parameters": [
-        "extract audio-tactile task timing, tactile stimulation, motor-evoked-potential timing, trigger markers, baseline/ITI policy, and trial counts before templating; runner can now preserve declared external trigger metadata but hardware TTL validation remains outside software-runner scope"
+        "Requires qualified tDCS, participant-specific neuronavigation, motor threshold and single-pulse TMS, time-locked EMG, and calibrated physical loudspeakers. These are laboratory interventions, not executable tactile SOAs.",
+        "Original sound file, participant-level stimulation settings/coordinates, trigger calibration and measured event timings are unavailable. A separate intertrial palm touch attention check also needs a qualified route.",
+        "Resolve the visual-cortex coordinate sign discrepancy in the published table before preparing the active control setup."
       ]
     },
     {
@@ -1597,13 +2526,18 @@
       "source_basis": [
         "holmes_2020_systematic_review"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "cimmino_2013_arm_elongation_pps"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "static near/far audio-tactile PPS task",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ],
       "missing_publication_parameters": [
-        "full audio/tactile/timing parameters need extraction"
+        "Requires two calibrated, independently routed near/far loudspeaker positions and selective delivery of electrical pulses with distinct threshold settings.",
+        "The original pulse width and shape, stimulus order, acoustic arrival offsets, voice-relay settings, and definitive control assignment are unresolved."
       ]
     },
     {
@@ -1721,15 +2655,23 @@
       "source_basis": [
         "openalex_audiotactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "ferri_2015_premotor_itv_behavior",
+        "ferri_2015_premotor_itv_fmri"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "approaching auditory stimuli plus tactile RT PPS boundary task with fMRI endpoint",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract exact behavioral audio-tactile PPS timing, distances, response settings, and auditory trajectory; fMRI/BOLD endpoint is non-blocking for audiotactile recreation"
+        "The original flat and exponential rising pink-noise waveforms, full amplitude envelopes, loudspeaker gains and absolute acoustic calibration are unavailable.",
+        "Requires a calibrated Digitimer DS7A trigger and measured electrical tactile delivery. The software touch marker does not recreate the physical electrical target.",
+        "Original per-sound catch allocations and within-block random sequence are unreported. A balanced split of the reported 120 catches and deterministic shuffling are software scheduling choices.",
+        "The protocol requires trial selection from each participant’s behavioral data, MRI-compatible playback and tactile targets, scanner trigger and BOLD acquisition, and an independent auditory localizer.",
+        "The scanner catch-trial count and post-catch interval are ambiguous in the report; obtain the original schedule before a research run."
       ]
     },
     {
@@ -1866,13 +2808,23 @@
       "source_basis": [
         "holmes_2020_systematic_review"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
-      "audiotactile_task_family": "additional body-part/front-back PPS variants from the same six-experiment paper",
+      "current_template_ids": [
+        "serino_2015_face_trunk_audio_exp6",
+        "serino_2015_peri_hand_posture_exp5",
+        "serino_2015_peri_hand_trunk_exp4"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
+      "audiotactile_task_family": "Separate hand/trunk posture and face/trunk sound-height paradigms from Experiments 4–6.",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ],
       "missing_publication_parameters": [
-        "experiment-specific distance, tactile-site, speaker layout/channel schedule, gain/SPL transfer, and apparatus mappings need extraction; row-level multi-speaker switching is now runner-supported"
+        "The source gives the spatial probe grid and nominal velocity. Original trigger offsets, propagation delays and position-specific sound envelopes are unavailable.",
+        "The delivered vibrotactile waveform, actuator acceleration and synchronized gamepad latency require calibration. The 100 ms pulse is the motor command duration.",
+        "The trial scheduler must switch the active tactile site by block and time the probe at the paper's measured sound position.",
+        "Exact target-hand coordinates relative to the physical loudspeaker array are unreported.",
+        "The scheduler requires the selected face- or sternum-height trajectory aligned to participant position."
       ]
     },
     {
@@ -1952,15 +2904,20 @@
         "holmes_2020_systematic_review",
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "noel_2018_neural_adaptation"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "psychophysical-computational PPS resizing task",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract velocity levels, peri-face/peri-trunk mapping, timing, tactile settings, response settings, and whether the psychophysical task reuses an existing dynamic PPS scaffold"
+        "Implement and calibrate two physical eight-speaker arrays at the assigned cohort height, using the original per-channel gains and measured acoustic onset. The sound spectrum, waveform and delivered level calibration are not recoverable from the paper.",
+        "The runtime must keep the correct offset table and silent-baseline windows tied to each speed. A global SOA product across both speeds changes the reported schedule.",
+        "The rotating 312-101 motor requires calibration of delivered acceleration and timing at the study's forehead or sternum location. Original randomization and intertrial allocation are unavailable."
       ]
     },
     {
@@ -2132,15 +3089,21 @@
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "noel_2019_consciousness_clinical_pps",
+        "noel_2019_consciousness_healthy_pps"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS task with neuroclinical endpoint",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract 5 cm/75 cm auditory-tactile timing, tactile apparatus, response/EEG trigger codes, baseline/ITI policy, and trial counts separately from clinical endpoint"
+        "Requires synchronized acquisition of EEG, independent fixed near/far sound outputs and a calibrated functional electrical stimulation route.",
+        "Requires bedside clinical procedures and validated session coding. Original audio waveform and physical pulse width and onset remain unresolved.",
+        "Original noise/envelope, physical onset measurements and delivered FES pulse width are unresolved."
       ]
     },
     {
@@ -2174,15 +3137,21 @@
       "source_basis": [
         "openalex_audiotactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "pellencin_2018_social_pps_exp1",
+        "pellencin_2018_social_pps_exp2"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS task with social-perception context",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract the core audio-tactile PPS task parameters; social perception context is non-blocking"
+        "The original RealiSM stereoscopic scenes, body alignment and exact cube metrics in participant coordinates are unavailable.",
+        "The virtual-scene scheduler must synchronize the fixation, prerecorded corridor, cube and physical left-hand vibrotactile events with a calibrated reaction-time response route.",
+        "Implement the impression manipulation and counterbalanced social/nonsocial contexts with their staged questionnaire and assessment workflow. Use the source experiment materials under their applicable reuse terms."
       ]
     },
     {
@@ -2277,15 +3246,26 @@
       "source_basis": [
         "pubmed_live_spot_check_ferroni_2026_pps_plasticity_2026_07_15"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "ferroni_2026_pps_plasticity_determinants_exp1",
+        "ferroni_2026_pps_plasticity_determinants_exp2",
+        "ferroni_2026_pps_plasticity_determinants_exp3",
+        "ferroni_2026_pps_plasticity_determinants_exp4"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS plasticity task manipulating sensory, motor, spatial, and bodily-posture determinants",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract the four-experiment audiotactile PPS plasticity task parameters, including auditory trajectories/locations, tactile timing/site/device, determinant manipulations, response rules, baseline/ITI policy, and trial counts before templating"
+        "Exact trial counts, block sizes, intertrial timing and response windows per assessment group are unreported.",
+        "Validate both assessments and the intervening physical training with the corresponding cohort and original geometry. Original realized trial sequences and participant analysis inputs are unavailable.",
+        "Run an independently calibrated dual-speaker electrocutaneous task and a synchronized Vive visual and haptic task. Original channel gain curves and measured stimulus latency are unavailable.",
+        "Recover foot-specific stimulation hardware, timing and foot-centered speaker placement. Calibrate the electrocutaneous and dual-speaker outputs for both effectors.",
+        "Run a synchronized passthrough visual and controller-haptic task and validate body-to-room alignment for the three training orientations.",
+        "Recover posture-specific path coordinates and verify delivered VR and haptic timing in each posture. Reconcile the descending analysis vector with observed trial labels."
       ]
     },
     {
@@ -2295,13 +3275,21 @@
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "spadone_2021_connectivity_behavior",
+        "spadone_2021_connectivity_fmri"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "fMRI audio-tactile task with looming/flat and near/far conditions",
       "can_recreate_audiotactile_components_now": false,
-      "blocking_constraint_ids": [],
+      "blocking_constraint_ids": [
+        "study_specific_physical_apparatus"
+      ],
       "missing_publication_parameters": [
-        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
+        "Requires original loudspeaker envelopes and measured sound level, verified DS7A route and calibration, and original behavioral dataset for the same reanalysis.",
+        "Ferri’s catch proportion belongs to the shared parent task. Spadone does not report its split by sound or block.",
+        "Timed MR-compatible audio and stimulation with scan synchronization and a left-index catch path are required.",
+        "Delivered run manifest, exact catch allocation and event intervals remain unresolved, and the original acquisition and connectivity data are needed for analysis replication."
       ]
     },
     {
@@ -2335,15 +3323,24 @@
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "ronga_2021_seeming_confines_exp1",
+        "ronga_2021_seeming_confines_exp2",
+        "ronga_2021_seeming_confines_exp3"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS remapping after tool-use with electrophysiology",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract PPS task timing, distances, tactile settings, response rules, and trial repetition counts separately from electrophysiology; electrophysiology context is non-blocking unless trigger timing changes task execution"
+        "Requires fixed loudspeaker routing and synchronized, individually calibrated electrical stimulation. The original sound files and delivered timing are unavailable.",
+        "Requires synchronized EEG markers, acquisition and passive-trial processing, along with the original programmed ITI distribution and order.",
+        "The individual reciprocal loudness settings, exact randomization and numeric response deadline are unresolved.",
+        "Requires fixed loudspeaker routing and synchronized, individually calibrated electrical stimulation. Candidate archived tone files have unresolved output channel assignments and delivered timing.",
+        "Requires the rake or visual intervention, synchronized EEG acquisition with original marker semantics, and an operator-validated post-training visit sequencer."
       ]
     },
     {
@@ -2353,15 +3350,22 @@
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "dellanna_2021_jazz_baseline",
+        "dellanna_2021_jazz_duet"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS task after musical interaction context",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract the audiotactile PPS task parameters separately from the musical-interaction manipulation; music/social context is non-blocking unless it changes the task audio assets"
+        "Requires a live musician, intervention and visit sequencing, fixed loudspeaker delivery and electrical tactile calibration.",
+        "The original modulated tone, ear-level calibration, exact timing and block-to-assessment assignment remain unavailable. The response flow also needs the speeded press and separate rating.",
+        "Requires calibrated fixed loudspeakers and DS7A tactile delivery, plus the response-box and separate tactile-rating workflow.",
+        "Original tone, rendered modulation depth, acoustic SPL and exact interstimulus clock reference remain unavailable."
       ]
     },
     {
@@ -2471,15 +3475,19 @@
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "finn_2024_body_image_pps"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile reaction-time PPS boundary task used alongside interpersonal-distance measures",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract exact audio-tactile reaction-time task parameters; body-image/social-cognition variables are non-blocking context"
+        "Requires the original noise and headphone output calibration plus a physically characterized tactile route. Exact vibration duration, envelope, output level and acoustic-to-distance mapping are unavailable.",
+        "Exact intertrial scheduling, response cutoff and baseline correction rule remain unresolved."
       ]
     },
     {
@@ -2514,16 +3522,23 @@
         "openalex_audiotactile_pps_2026_06_13",
         "web_search_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "serino_2018_mixed_reality_pps_exp1",
+        "serino_2018_mixed_reality_pps_exp2"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "mixed-reality PPS task using visual or audiovisual looming stimuli paired with tactile detection",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
         "audiovisual_or_trisensory_trial_family",
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "source PDF reports a trimodal audiovisuotactile Experiment 2 with 2 m virtual-ball approach, 75 cm/s matched dynamic sound, right-cheek 10 ms tactile taps, five delay levels, 540 total trials, and a PPS boundary between D3 and D4/central point near 105 cm; row-level audiovisual/MR provenance metadata are now runner-supported, but exact delay table, original video/3D assets, ExpyVR/RealiSM scripts, binaural source tracks, and physical HMD/audio synchronization remain unresolved before a full runnable profile is honest"
+        "The source stereoscopic scene and first-person body capture, tennis-ball placement, exact tactile delay table and participant-specific geometry are unavailable.",
+        "Requires rendering of the scene and approaching ball against a calibrated headset clock with 10 ms mechanical right-cheek stimulation and an aligned button response. The audio-tactile runner does not reproduce the mixed-reality task.",
+        "The synchronized binaural asset captured with the study's 16-speaker array and the playback gain/calibration settings are unavailable.",
+        "The article's repetitions-by-delay statement does not establish the exact 480 noncatch trial allocation across the conditions. Do not infer Experiment 1's allocation."
       ]
     },
     {
@@ -2597,15 +3612,20 @@
       "source_basis": [
         "pubmed_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "ferroni_2025_depersonalisation_pps"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS and time-perception task",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "determine PPS-task parameters separately from time-perception measures"
+        "Reconcile the paper and supplement trial counts, catch versus baseline split, repeat placement, and output mode from the original task records.",
+        "Recover or validate the two-channel sound cross-fade envelope, physical speaker calibration and synchronized electrocutaneous delivery.",
+        "Verify the scoring pipeline and the reported SD/SE labeling with the original analysis."
       ]
     },
     {
@@ -2615,15 +3635,20 @@
       "source_basis": [
         "pubmed_post_2020_audio_tactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "amiel_2025_front_rear"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "distance-dependent audio-tactile integration in rear and front spaces",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract front/rear sound-spatialization method, distance levels, tactile timing, and exact body-relative trajectory mappings; row-level auditory trajectory-family metadata is now runner-supported"
+        "Recover or validate the 3,250 ms Max/MSP/Spat binaural stimuli, exact burst samples, LISTEN HRTF selection, reverberation and delivered headphone levels.",
+        "Synchronize left-index stimulation and the right-hand response to both silent-window and sound-present events. Validate tactile amplitude and physical trigger latency.",
+        "Recover exact within-block allocation, realized random orders and the post-sound jitter distribution for both counterbalanced sessions."
       ]
     },
     {
@@ -2634,15 +3659,20 @@
         "pubmed_audio_tactile_pps_2026_06_13",
         "openalex_audiotactile_pps_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "loescher_2025_cardiac_interoception_pnas"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile self-relevance task placing the auditory source inside versus outside PPS with tactile responses and EEG/HEP endpoint",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract auditory inside/outside-PPS locations, tactile timing, response window, baseline/ITI policy, trial counts, and EEG/HEP trigger timing requirements"
+        "Deliver the original or validated stationary tone through two physical, calibrated output channels. Reconcile device rate with source rate and measure the near/far ear-level signals.",
+        "Synchronize the calibrated electrical pulse, two loudspeakers, key responses, EEG, ECG and fixation recording on the original timing contract. Reconcile TTL labels with the author event parser.",
+        "The acquisition path must support 4–8 s randomized pre-event timing, auditory-only catches, tactile-only controls and quiet physiological baselines. Validate physiological preprocessing and heartbeat-locked analyses on aligned records."
       ]
     },
     {
@@ -2653,15 +3683,24 @@
         "pubmed_post_2020_audio_tactile_pps_2026_06_13",
         "web_search_sanity_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "bertoni_2026_clinical_pps",
+        "bertoni_2026_healthy_awake_sleep_pps"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "audio-tactile PPS task in sleep/disorders-of-consciousness setting",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract near/far audiotactile stimulus distances, tactile settings, timing, trial counts, response/trigger settings, and apparatus details independently of sleep or clinical endpoint"
+        "Deliver calibrated simultaneous electrical pulses and calibrated sound from two chest-relative positions while synchronizing EEG event codes.",
+        "The overnight branch requires polysomnographic staging, stimulation control, scheduled awakenings, and source-specific dream-report classification.",
+        "Resolve the healthy-awake jitter grid and overnight stimulation/awakening schedule against event logs. Validate artifact handling, montage and spectral index on the acquisition route.",
+        "The bedside branch requires a clinically operated FES stimulator and calibrated arm-relative speakers synchronized to EEG. Candidate playback cannot establish physical equivalence.",
+        "Implement acquisition and outcome scoring for clinical EEG, CRS-R and discharge measures, and verify the preprocessing and 16-channel high-beta aggregation.",
+        "Verify exact FES pulse shape/count, stimulus synchronization and the block-order and intertrial-timing realizations."
       ]
     },
     {
@@ -2813,15 +3852,20 @@
         "pubmed_query_variant_exhaustiveness_2026_06_13",
         "web_search_2026_06_13"
       ],
-      "current_template_ids": [],
-      "coverage_category": "not_yet_templated_missing_publication_parameters",
+      "current_template_ids": [
+        "finisguerra_2015_moving_sounds_motor"
+      ],
+      "coverage_category": "covered_blocked_toolkit_structure",
       "audiotactile_task_family": "moving-sound hand-PPS task with rare tactile targets and motor-system/TMS endpoint",
       "can_recreate_audiotactile_components_now": false,
       "blocking_constraint_ids": [
-        "missing_core_soa_iti_baseline_repetition_parameters"
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus"
       ],
       "missing_publication_parameters": [
-        "extract moving-sound trajectory, tactile target schedule, TMS/MEP trigger codes, baseline timing strategy, and trial counts before templating; vocal/voice-key response metadata is now runner-supported"
+        "The eight-speaker crossfades, waveforms, precise position trigger timestamps and original controller code are unavailable.",
+        "Reproduction requires synchronized qualified TMS/EMG, calibrated auditory and electrical delivery, a documented routing for the vocal attention check, and safe laboratory handling. A tactile SOA cannot stand in for the TMS trigger.",
+        "The paper’s wording does not establish the touch onset relative to the sound. Keep those attention trials distinct from the published 50 ms post-position TMS timing."
       ]
     },
     {

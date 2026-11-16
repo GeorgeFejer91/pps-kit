@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Experiment 1 schedule for both social conditions. Each participant receives two consecutive blocks per condition in counterbalanced order. The operator changes the mannequin or unfamiliar-person setting between condition groups. The preview uses generated audio and toolkit response and tactile proxies. The publication's equipment and calibrations are recorded as reference values.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cub.2013.01.043::a",
     "profile_type": "face_audio_tactile_social_context",
     "implemented_controls": [
       "right-cheek target label",

@@ -1,0 +1,288 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "cuppini_2011_peri_hand_network_baseline",
+  "title": "Cuppini 2011 \u00b7 Peri-hand network baseline",
+  "citation": "Cuppini, C., Magosso, E., & Ursino, M. (2011). Organization, maturation, and plasticity of multisensory integration: Insights from computational modeling studies. Frontiers in Psychology, 2, 77.",
+  "doi": "10.3389/fpsyg.2011.00077",
+  "source_url": "https://doi.org/10.3389/fpsyg.2011.00077",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3389/fpsyg.2011.00077::peri_hand_basal",
+    "publication_status": "published",
+    "profile_type": "computational_pps_method",
+    "profile_check_complete": false,
+    "published_method": {
+      "architecture": {
+        "hemispheres": 2,
+        "hand_grid_cm": [
+          10,
+          20
+        ],
+        "audio_visual_space_cm": [
+          15,
+          100
+        ],
+        "multisensory_units_per_hemisphere": 1
+      },
+      "states": [
+        "Symmetric healthy network",
+        "Right-hemisphere tactile impairment"
+      ],
+      "tests": [
+        "Right touch with near or far visual or auditory input",
+        "Left touch with right-side visual or auditory input"
+      ],
+      "readout": "Tactile and multisensory activity in both hemispheres."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Spatial visual, auditory and tactile network inputs",
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "hemisphere_count": 2,
+            "contralateral_hands": [
+              "right",
+              "left"
+            ],
+            "unimodal_areas_per_hemisphere": [
+              "tactile",
+              "visual",
+              "auditory"
+            ],
+            "multimodal_units_per_hemisphere": 1,
+            "tactile_surface_cm": [
+              10,
+              20
+            ],
+            "visual_and_auditory_field_cm": [
+              15,
+              100
+            ],
+            "lateral_extension_each_cm": 2.5,
+            "forward_extension_cm": 80,
+            "frame": "Hand-centered receptive fields with predefined arrangement"
+          },
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Original implementation and some prior equations and numerical constants remain unavailable."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Independent spatial inputs. Figure comparisons vary locations."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "unilateral": [
+              "Weak right-hand touch alone",
+              "Same touch with right near auditory or visual signal",
+              "Same touch with right far auditory or visual signal"
+            ],
+            "bilateral": "Left tactile signal combined with right visual or auditory signal at several right-hand-relative distances",
+            "near_distance_cm": 4,
+            "far_distance_cm": 60,
+            "near_y_cm": 24,
+            "far_y_cm": 80,
+            "distance_axis": [
+              4,
+              12,
+              20,
+              28,
+              40,
+              60
+            ]
+          },
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Complete numerical stimulation schedule unavailable."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311; Cuppini 2011, pp. 3, 10, 14 and References pp. 20\u201321",
+          "gap": "The 2010a proof reports an approximately 400 ms assessment run with touch held from t0 = 0, and a 300 ms awareness readout without a separate within-run cue offset. The reviewed 2011 source reports approximately steady-state activity without giving cue offset, run duration, integration step or convergence rule. The 30 ms cue in the 2009/2010 spatial-attention study has a separate protocol and precedes a sustained target."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Spatial samples replace a moving source."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Touch alone",
+            "Audio\u2013tactile",
+            "Visuo\u2013tactile"
+          ],
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "No physical audio waveform is generated."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "Connectionist neural network",
+            "dynamics": {
+              "RF": "Gaussian, auditory larger than visual or tactile",
+              "within_unimodal": "Mexican-hat lateral connections",
+              "feedforward_tactile": "Uniform over the hand",
+              "feedforward_visual_auditory": "Constant over the hand and exponentially decreasing outside",
+              "feedback": "Excitatory with the same arrangement as feedforward",
+              "hemispheric_competition": "A multimodal neuron drives inhibition of unimodal areas in the opposite hemisphere",
+              "readout": "First-order dynamics and static sigmoid"
+            },
+            "prior_SC_reference": null
+          },
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Solver, code version, time step and phase-specific numerical constants unavailable. The earlier SC table has its own source scope."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Touch alone",
+            "Audio\u2013tactile",
+            "Visuo\u2013tactile"
+          ],
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311"
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Readout is approximately steady-state activity. Integration duration and tolerance unavailable."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "unilateral": [
+              "Weak right-hand touch alone",
+              "Same touch with right near auditory or visual signal",
+              "Same touch with right far auditory or visual signal"
+            ],
+            "bilateral": "Left tactile signal combined with right visual or auditory signal at several right-hand-relative distances",
+            "near_distance_cm": 4,
+            "far_distance_cm": 60,
+            "near_y_cm": 24,
+            "far_y_cm": 80,
+            "distance_axis": [
+              4,
+              12,
+              20,
+              28,
+              40,
+              60
+            ]
+          },
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": "Punctual spatial touch input, weak for unilateral comparisons and stronger for bilateral comparisons.",
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "The 2010a left-touch test uses nominal 3.6 model units plus noise and a 0.3 cm spatial sigma. The weak unilateral and stronger bilateral inputs in the 2011 figures have no verified numerical settings."
+        },
+        "soa_table": {
+          "status": "derived",
+          "value": [
+            0
+          ],
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Concurrent inputs are described. No independent temporal-offset manipulation is reported."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Unisensory touch and symmetric healthy model provide references",
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "The model reference condition is a separate configuration or stimulation mode."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "No repeated tactile-SOA trial design."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "No acquired baseline trial pool."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "total_trial_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311",
+          "gap": "No experimental acquisition trial pool."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "A model solver is required for lateral competition and cross-hemisphere inhibition.",
+      "Exact stimulus amplitudes, spatial widths, weights and impairment scaling for the reported runs are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3389/fpsyg.2011.00077. Cuppini 2011, pp. 10\u201314, Peri-hand Model Description, Basal Results and Figs. 7\u201311"
+    }
+  ]
+}

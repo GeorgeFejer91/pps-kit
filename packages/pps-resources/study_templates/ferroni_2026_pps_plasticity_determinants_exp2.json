@@ -1,0 +1,299 @@
+{
+  "template_id": "ferroni_2026_pps_plasticity_determinants_exp2",
+  "title": "Ferroni 2026 · Experiment 2 · Motor effector",
+  "citation": "Ferroni, F., Rastelli, F., Langiulli, N., Rinaldi, L. S., Gallese, V., & Ardizzi, M. (2026). Dealing with the world close to our body. Characterizing determinants of peripersonal space plasticity. Neuropsychologia, 229, 109490.",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
+  "doi": "10.1016/j.neuropsychologia.2026.109490",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2026.109490::b",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sessions": [
+        "Pre-training PPS assessment",
+        "Far-space motor training",
+        "Post-training PPS assessment"
+      ],
+      "analysis": "Estimate between-distance PPS location (PSE) and steepness (DL) using Spearman–Kärber on participant-level 10% trimmed reaction time means. Compare session and assigned group with a participant random intercept.",
+      "cohort_n": {
+        "hand": 31,
+        "foot": 27
+      },
+      "hand_assessment": {
+        "cue": "3 s pink noise at 44.1 kHz, exponential nominal gain rise from 55 to 70 dB for looming, flat level 62.5 dB. The near and far loudspeaker gains change in opposite directions.",
+        "near_speaker_cm_from_right_hand": 10,
+        "far_speaker_cm_from_participant": 100,
+        "tactile_onsets_ms_from_audio_onset": [
+          300,
+          800,
+          1500,
+          2200,
+          2700
+        ],
+        "baseline_nominal_ms": -700,
+        "trial_percent": {
+          "paired": 50,
+          "sound_only": 40,
+          "tactile_only": 10
+        },
+        "response": "Left-hand keyboard reaction to a right-index electrocutaneous pulse, with no response for auditory-only catches."
+      },
+      "foot_assessment": "Assess the dorsal right foot with floor-level loudspeakers and foot-directed acoustic motion, as shown in Figure 2. Foot stimulation device and exact source geometry are unreported.",
+      "training": "Hand participants transfer cubes with the right-hand gripper. Foot participants wear a rod and push the cubes with the trained foot. Each completes 100 movements."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": [
+            "Audio-tactile"
+          ],
+          "source": "Ferroni et al. 2026, publisher Fig. 2, experimental setup; Ferroni et al. 2026, mmc1.docx, PPS control analyses, §2.2"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "Neuropsychologia 229 (2026), article 109490, publisher version of record"
+        },
+        "trajectory_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "approach_paths_per_group": 1,
+            "sampled_onsets": 5
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, §§2–3 (pp. 2–7), Figs. 1–4",
+          "gap": "Approach geometry varies by group. Audio assessments also include a stationary control."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "Hand Effector": "Frontal apparent sound approach with near speaker about 10 cm from the right hand and far speaker 100 cm from the participant's body, via explicit Experiment 1 procedure reuse.",
+            "Foot Effector": "Auditory stimulus approaches the same right foot receiving the tactile pulse. Its two floor-level speakers are schematic."
+          },
+          "source": "Ferroni et al. (2026), Neuropsychologia 229:109490, final issue pp. 3–4, §§2.1.2 and 2.2.2 and Fig. 2.",
+          "gap": "Speaker distances use different bodily references. Perceived trajectory coordinates, exact Foot layout and calibrated distance-versus-time curves are unreported."
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "hand_group_sound_ms": 3000
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, §§2.2.1–2 (Experiment 2)",
+          "gap": "The hand protocol explicitly repeats Experiment 1. No separate foot waveform verification."
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, §2 (pp. 2–6)",
+          "gap": "No common value is specified across the four experiments. See the condition-specific Methods and standing code evidence."
+        },
+        "auditory_conditions": {
+          "status": "reported_with_caveat",
+          "value": {
+            "Hand Effector": [
+              "Looming pink noise",
+              "Flat pink noise",
+              "Silent tactile-only baseline"
+            ],
+            "Foot Effector": [
+              "Auditory approach to the right foot",
+              "Unisensory tactile comparison reported in the Experiment 2 control"
+            ]
+          },
+          "source": "Ferroni et al. (2026), Neuropsychologia 229:109490, final issue pp. 3–4, §§2.1.2 and 2.2.2 and Fig. 2. Original publisher mmc1.docx, PPS control analyses §2.2.",
+          "gap": "The source does not give a separate Foot flat-sound assignment or the Foot-specific condition quotas. The controls are reported for Experiment 2 as a whole."
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "Hand Effector": "Looming sound has an exponentially increasing nominal level. Far output decreases from its maximum toward silence while near output rises from its minimum to its maximum.",
+            "Foot Effector": null
+          },
+          "source": "Ferroni et al. (2026), Neuropsychologia 229:109490, final issue pp. 3–4, §§2.1.2 and 2.2.2 and Fig. 2.",
+          "gap": "Per-channel gain coefficients, SPL calibration and Foot playback envelopes are unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "Hand Effector": "Experiment 1 two-speaker audio setup and Digitimer DS3 electrical pulse through paired electrodes on the hairy surface of the right index finger.",
+            "Foot Effector": "Electrical stimulation on the dorsal right foot. Figure 2 depicts two floor-level speakers."
+          },
+          "source": "Ferroni et al. (2026), Neuropsychologia 229:109490, final issue pp. 3–4, §§2.1.2 and 2.2.2 and Fig. 2.",
+          "gap": "The exact Foot stimulator, electrode configuration, channel mapping and acoustic calibration remain unreported."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": {
+            "Hand Effector": {
+              "bimodal": 50,
+              "sound_only_catch": 40,
+              "touch_only_baseline": 10
+            },
+            "Foot Effector": {
+              "looming_plus_tactile_reported": true,
+              "trial_shares": null
+            }
+          },
+          "source": "Ferroni et al. (2026), Neuropsychologia 229:109490, final issue pp. 3–4, §§2.1.2 and 2.2.2 and Fig. 2. Original publisher mmc1.docx, PPS control analyses §2.2.",
+          "gap": "Hand values are percentages for the documented reused assessment. Exact Foot family quotas and within-block counts are unavailable."
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "The mixed design assigns one group per participant and repeats assessment pre/post.",
+          "source": "Ferroni et al. 2026, publisher version of record, §2 (p. 2)",
+          "gap": "Within-session stimulus intermixing and randomization algorithm are unreported."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Random assignment to groups with the same fixed session order.",
+          "source": "Ferroni et al. 2026, publisher version of record, §2 (p. 2)",
+          "gap": "Within-session order and blocking remain unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, §2 (p. 2)",
+          "gap": "The reviewed experiment methods supply no exact ITI and jitter schedule."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, §2 (p. 2)",
+          "gap": "Exact accepted RT window and online timeout are unreported in the article. A standing analysis example uses input-table filtering."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Pre-training PPS assessment, motor tool training, post-training PPS assessment. Approximately 10 minutes per session. The tool is absent from the two assessment sessions.",
+          "source": "Ferroni et al. 2026, publisher version of record, §2 (p. 2)"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": "Right index finger (hand group) or dorsal right foot (foot group). Sound approaches the tested effector. Electrical stimulation.",
+          "source": "Ferroni et al. 2026, publisher version of record, §§2.2.1–2 (Experiment 2)",
+          "gap": "Exact foot electrode positions, hardware settings and pulse width unreported."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "hand_group_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ],
+            "foot_group_figure_5_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ]
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, §§2.2.1–2 (Experiment 2) and publisher Fig. 5",
+          "gap": "Foot grid verified against the plotted times. Foot trigger log unavailable."
+        },
+        "baseline_strategy": {
+          "status": "reported_with_caveat",
+          "value": "Touch-only baseline and multimodal facilitation comparison.",
+          "source": "Ferroni et al. 2026, publisher version of record, §2.1.2 (pp. 3–4)",
+          "gap": "The hand group explicitly repeats Experiment 1. The foot group changes effector and approach target."
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "audio_tactile_ms": -700
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, §2.1.2 (pp. 3–4)",
+          "gap": "Explicit for Hand via §2.1.2. Foot baseline timing is unreported separately."
+        },
+        "catch_trial_type": {
+          "status": "reported_with_caveat",
+          "value": "Looming or flat sound with no tactile pulse.",
+          "source": "Ferroni et al. 2026, publisher version of record, §2.1.2 (pp. 3–4)",
+          "gap": "Explicit for Hand via §2.1.2. Foot catch schedule is unreported separately."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, §§2.2.1–2 (Experiment 2)",
+          "gap": "The reviewed main methods do not report assessment repetitions by onset."
+        },
+        "baseline_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, §3 (pp. 6–7)",
+          "gap": "The documented audio protocol supplies a baseline share without an exact trial total."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, §3 (pp. 6–7)",
+          "gap": "The documented audio protocol supplies a catch share without an exact trial total. The visual allocation is unreported."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "study_sessions": 3
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, §2 (p. 2)",
+          "gap": "Blocks per assessment session are unreported."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, §3 (pp. 6–7)",
+          "gap": "Exact assessment totals are unreported. Training transfers and supplement input-row requirements have separate meanings."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Exact trial counts, block sizes, intertrial timing and response windows per assessment group are unreported.",
+      "Validate both assessments and the intervening physical training with the corresponding cohort and original geometry. Original realized trial sequences and participant analysis inputs are unavailable.",
+      "Recover foot-specific stimulation hardware, timing and foot-centered speaker placement. Calibrate the electrocutaneous and dual-speaker outputs for both effectors."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Ferroni 2026 · Experiment 2 · Motor effector",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [
+        "dorsal right index finger",
+        "dorsal right foot"
+      ],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2026.109490. Ferroni et al. 2026, publisher version of record, §§2.2.1–2 (Experiment 2)"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "serino_2015_toolless_sync_training",
   "title": "Serino 2015 synchronous far audio-tactile PPS training",
-  "visible_variant_label": "",
+  "visible_variant_label": "B",
   "publication_status": "published",
   "profile_type": "audio_tactile_training_plasticity",
   "asset_mode": "bundled_local",

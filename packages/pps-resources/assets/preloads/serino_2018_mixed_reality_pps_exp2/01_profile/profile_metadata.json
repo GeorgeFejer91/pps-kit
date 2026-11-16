@@ -1,0 +1,310 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "serino_2018_mixed_reality_pps_exp2",
+  "title": "Serino 2018 \u00b7 mixed-reality audiovisual\u2013tactile PPS",
+  "citation": "Serino, A., Noel, J. P., Mange, R., Canzoneri, E., Pellencin, E., Ruiz, J. B., Bernasconi, F., Blanke, O., & Herbelin, B. (2018). Peripersonal Space: An Index of Multisensory Body\u2013Environment Interactions in Real, Virtual, and Mixed Realities. Frontiers in ICT, 4, 31.",
+  "doi": "10.3389/fict.2017.00031",
+  "source_url": "https://doi.org/10.3389/fict.2017.00031",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3389/fict.2017.00031::b",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "visual": {
+        "object": "Virtual tennis ball approaches the face, starting nominally 2 m away.",
+        "speed_cm_s": 75,
+        "motion_ms": 2600,
+        "stationary_hold_ms": 400
+      },
+      "trial_timeline": {
+        "fixation_ms": 1200,
+        "pre_motion_ms": 300,
+        "approach_ms": 2600,
+        "hold_ms": 400,
+        "final_no_stimulation_ms": 500,
+        "total_ms": 5000
+      },
+      "target": "10 ms solenoid pulse to right cheek.",
+      "response": "Make a speeded button press when the cheek is touched; ignore the animated ball and withhold on trials without touch.",
+      "analysis": "Compare each multisensory delay's mean RT with the participant's fastest mean tactile-only delay. Fit the uncorrected multisensory means for the PPS transition.",
+      "participants": 26,
+      "audio": "A prerecorded binaural white-noise source follows the tennis ball toward the participant with matched speed and direction.",
+      "schedule": {
+        "blocks": 4,
+        "trials_per_block": 135,
+        "delay_levels": 5,
+        "closest_delay_label": "D1",
+        "catch_trials": 60,
+        "noncatch_trials": 480,
+        "total": 540,
+        "reported_repetitions_per_delay_per_condition": 12,
+        "tactile_only_trials": null
+      }
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "visual": "Virtual looming tennis ball",
+            "audio": "Prerecorded binaural looming white noise",
+            "tactile": "Mechanical solenoid tap to right cheek"
+          },
+          "source": "Frontiers p. 5, Visual Stimuli and Fig. 3C\u2013D and Frontiers pp. 4\u20135, Acoustic Stimuli and Fig. 3A\u2013B and Frontiers p. 6, Procedure"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "visual": "Same visual probe as Experiment 1",
+            "auditory": {
+              "source": "Spatialized white noise prerecorded with 3Dio Omni binaural microphones",
+              "playback": "Bose QC15 stereo noise-canceling headphones",
+              "recording_array": {
+                "speaker_model": "JBL Control 1 Pro WH Pair",
+                "speaker_count": 16,
+                "rows": 2,
+                "speakers_per_row": 8,
+                "nominal_longitudinal_extent_m": 2,
+                "offset_from_midline_cm": 50,
+                "interface": "M-Audio FastTrack Ultra 8R"
+              },
+              "motion": "Presented simultaneously with the virtual ball, with matching speed and direction"
+            }
+          },
+          "source": "Frontiers pp. 4\u20135, Acoustic Stimuli and Fig. 3A\u2013B and Frontiers p. 6, Procedure",
+          "gap": "Original scene, WAV and XML schedule unavailable."
+        },
+        "trajectory_count": {
+          "status": "derived",
+          "value": 1,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "The procedure specifies one looming ball path."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_start_cm": 200,
+            "endpoint": "fictive contact with the face",
+            "speed_cm_s": 75,
+            "direction": "toward face",
+            "stimulus": "virtual tennis ball",
+            "auditory": "Motion matched to ball in speed and direction"
+          },
+          "source": "Frontiers p. 5, Visual Stimuli and Fig. 3C\u2013D and Frontiers p. 6, Procedure",
+          "gap": "Published nominal path is 200 cm. The reported 75 cm/s \u00d7 2.6 s gives 195 cm. Start position and contact geometry require the original scene settings for exact reproduction."
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "visual_approach_ms": 2600,
+            "visual_hold_ms": 400,
+            "touch_ms": 10
+          },
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Visual stimulation stated identical to Experiment 1. Audio file length and tails unreported."
+        },
+        "stimulus_speed": {
+          "status": "reported",
+          "value": {
+            "visual_cm_s": 75,
+            "auditory_cm_s": 75
+          },
+          "source": "Frontiers p. 5, Visual Stimuli and Fig. 3C\u2013D and Frontiers p. 6, Procedure",
+          "gap": "Audio speed reported to match visual ball."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming"
+          ],
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "The sound accompanies the ball during trimodal stimulation."
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Frontiers pp. 4\u20135, Acoustic Stimuli and Fig. 3A\u2013B",
+          "gap": "The prerecorded spatialized sound is described. Its exact waveform, levels and per-speaker envelopes unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "renderer": "RealiSM",
+            "experiment_control": "ExpyVR with Qt4 and Python 2.7",
+            "scene_capture": "Seven stereoscopic GoPro Hero4 pairs on 3D 360hero 3DH3PRO14H rig",
+            "pair_spacing_cm": 6.3,
+            "video_stitching": "Two panoramic views, one per eye",
+            "audio_capture": "Four pairs of 3Dio Omni binaural microphones with interpolation between directions",
+            "HMD": {
+              "model": "Oculus Rift DK2",
+              "resolution_per_eye": [
+                960,
+                1080
+              ],
+              "refresh_Hz": 75,
+              "FOV_deg": {
+                "diagonal_approx": 105,
+                "horizontal_approx": 85
+              }
+            },
+            "body_camera": {
+              "model": "Duo3D MLX",
+              "resolution": [
+                752,
+                480
+              ],
+              "frame_rate_Hz": 56
+            },
+            "body_view": "First-person stereoscopic video of the user's own body overlaid on the panoramic scene",
+            "tracking": "Head rotation around the captured viewpoint",
+            "source": "Spatialized white noise prerecorded with 3Dio Omni binaural microphones",
+            "playback": "Bose QC15 stereo noise-canceling headphones",
+            "recording_array": {
+              "speaker_model": "JBL Control 1 Pro WH Pair",
+              "speaker_count": 16,
+              "rows": 2,
+              "speakers_per_row": 8,
+              "nominal_longitudinal_extent_m": 2,
+              "offset_from_midline_cm": 50,
+              "interface": "M-Audio FastTrack Ultra 8R"
+            },
+            "motion": "Presented simultaneously with the virtual ball, with matching speed and direction",
+            "tactile": "MSTC-3 tappers, M&E Solve"
+          },
+          "source": "Frontiers pp. 3\u20134, Technological Components and Fig. 2 and Frontiers pp. 4\u20135, Acoustic Stimuli and Fig. 3A\u2013B",
+          "gap": "Original code, sound and hardware calibration unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "total": 540,
+            "catches": 60,
+            "noncatch_trials": 480,
+            "reported_repetitions_per_delay_per_condition": 12,
+            "delay_levels": 5
+          },
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "540 total minus 60 catches leaves 480 trials. Five delays \u00d7 12 repetitions gives 60 trials per reported condition. The article does not enumerate eight contributing condition pools or give the exact trimodal and tactile-only allocation."
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "The exact Experiment 2 intermixing and ordering procedure is unspecified."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Four blocks of 135 trials, approximately 12 minutes each.",
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Exact randomization and per-block condition balance unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": "Visual presentation described as the same as Experiment 1.",
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "An independent Experiment 2 trial timing or jitter table is unreported."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "The article specifies speeded button detection. Online timeout and RT inclusion window unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Respond to right-cheek tap. Ignore the approaching audiovisual stimulus. Withhold when touch is absent.",
+          "source": "Frontiers p. 6, Procedure"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "right cheek",
+            "duration_ms": 10,
+            "type": "mechanical solenoid",
+            "model": "MSTC-3, M&E Solve"
+          },
+          "source": "Frontiers pp. 3\u20134, Technological Components and Fig. 2",
+          "gap": "Amplitude, pulse calibration and threshold procedure unreported."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "delay_levels": 5,
+            "relative_anchor": "time from trial start",
+            "mapping": "D1 denotes nearest position."
+          },
+          "source": "Frontiers p. 6, Procedure and Frontiers pp. 8\u20139, Experiment 2 Results and Fig. 5",
+          "gap": "Numeric touch offsets and distances unreported."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Tactile-only controls. Subtract the fastest mean baseline delay per participant.",
+          "source": "Frontiers pp. 6\u20137, Analysis and Eq. 1 and Frontiers pp. 8\u20139, Experiment 2 Results and Fig. 5"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "levels": 5
+          },
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Numeric offsets unreported."
+        },
+        "catch_trial_type": {
+          "status": "source_inconsistency_caveat",
+          "value": "No-touch catch trials.",
+          "source": "Frontiers pp. 5\u20136, Experimental Design and Procedure and Frontiers pp. 6\u20137, Analysis and Eq. 1",
+          "gap": "The Experimental Design and Procedure describe visual-only catches. The Analysis refers to auditory/visual catches. Exact Experiment 2 catch modality and allocation require the original protocol."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported_with_caveat",
+          "value": 12,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "540 total minus 60 catches leaves 480 trials. Five delays \u00d7 12 repetitions gives 60 trials per reported condition. The article does not enumerate eight contributing condition pools or give the exact trimodal and tactile-only allocation."
+        },
+        "baseline_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "540 total minus 60 catches leaves 480 trials. Five delays \u00d7 12 repetitions gives 60 trials per reported condition. The article does not enumerate eight contributing condition pools or give the exact trimodal and tactile-only allocation."
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": 60,
+          "source": "Frontiers p. 6, Procedure"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 4,
+          "source": "Frontiers p. 6, Procedure"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 540,
+          "source": "Frontiers p. 6, Procedure"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The source stereoscopic scene and first-person body capture, tennis-ball placement, exact tactile delay table and participant-specific geometry are unavailable.",
+      "Requires rendering of the scene and approaching ball against a calibrated headset clock with 10 ms mechanical right-cheek stimulation and an aligned button response. The audio-tactile runner does not reproduce the mixed-reality task.",
+      "The synchronized binaural asset captured with the study's 16-speaker array and the playback gain/calibration settings are unavailable.",
+      "The article's repetitions-by-delay statement does not establish the exact 480 noncatch trial allocation across the conditions. Do not infer Experiment 1's allocation."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3389/fict.2017.00031. Frontiers pp. 4\u20135, Acoustic Stimuli and Fig. 3A\u2013B and Frontiers p. 6, Procedure and Frontiers pp. 8\u20139, Experiment 2 Results and Fig. 5"
+    }
+  ]
+}

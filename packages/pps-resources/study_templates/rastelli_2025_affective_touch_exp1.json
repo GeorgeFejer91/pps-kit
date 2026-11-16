@@ -1,0 +1,265 @@
+{
+  "template_id": "rastelli_2025_affective_touch_exp1",
+  "title": "Rastelli 2025 · Experiment 1 · Classic tactile detection",
+  "citation": "Rastelli, F., Ferroni, F., Langiulli, N., Crucianelli, L., Gallese, V., & Ardizzi, M. (2025). The spatial reach of affective touch: a new perspective on social peripersonal space. PsyArXiv, version 1.",
+  "source_url": "https://doi.org/10.31234/osf.io/etvb6_v1",
+  "doi": "10.31234/osf.io/etvb6_v1",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.31234/osf.io/etvb6_v1::classic",
+    "publication_status": "preprint",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": "35 participants completed the three explicitly numbered tasks in randomized order on one day.",
+      "carrier": "3 s looming sound. In the classic task, the pink-noise source is sampled at 44.1 kHz with an exponential level rise from 55 to 70 dB. The flat control is 62.5 dB.",
+      "analysis": "Compare target reaction times across delays and estimate PSE. Collect separate verbal pleasantness ratings after the task.",
+      "tactile_target": "Single 100 μs DS3 electrocutaneous pulse on the hairy right index finger, individually adjusted above detection threshold.",
+      "tactile_onsets_ms_from_audio_onset": [
+        200,
+        500,
+        800,
+        2200,
+        2500,
+        2800
+      ],
+      "audio_setup": "Two speakers about 100 cm apart; the near speaker sits about 10 cm from the right hand.",
+      "trial_schedule": "Two blocks with 166 nominal trials. The six delays with 12 looming and six flat repeats give 108 paired trials. The separately printed paired percentage is 60%.",
+      "response": "Press a key with the left index after touch. Ignore sounds and repeat missed targets."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Pink noise, looming or flat.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Custom MATLAB presentation. Pink noise sampled at 44.1 kHz.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1",
+          "gap": "No source waveform, code or exact sample generation identified."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "moving_sound": 1,
+            "flat_comparator": true
+          },
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": "Apparent approach between two stationary speakers. Near speaker approximately 10 cm from right hand and far speaker 100 cm from near.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 3000,
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 5–6, Experiment 1",
+          "gap": "No calibrated metric speed or distance by SOA reported."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Looming pink noise",
+            "Flat pink noise"
+          ],
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Looming overall intensity increases exponentially from 55 to 70 dB. Flat level is 62.5 dB.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1",
+          "gap": "Exact per-speaker envelope and calibration measurement location unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Two table speakers, Digitimer DS3, laptop and custom MATLAB presentation.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Looming with touch",
+            "Flat with touch",
+            "Tactile-only silence baseline",
+            "Auditory-only catch"
+          ],
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Target timings and sound conditions randomized, with catches intermingled.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Two equal blocks, approximately seven minutes per block.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "post_trial_iti_ms": 1000
+          },
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 5–6, Experiment 1",
+          "gap": "Online response cutoff and exact key identifier unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Press a laptop key with left index as soon as tactile target is detected. Ignore sound. Repeat missed tactile-target trials.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "stimulator": "Digitimer DS3",
+            "site": "hairy right index finger",
+            "pulse_ms": 0.1,
+            "current_mA": [
+              5.2,
+              9.6
+            ],
+            "shape": "single rectangular monophasic"
+          },
+          "source": "PsyArXiv v1 pp. 5–6, Experiment 1",
+          "gap": "Device is constant current, but pulse description says constant voltage."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "tactile_minus_audio_onset_ms": [
+              200,
+              500,
+              800,
+              2200,
+              2500,
+              2800
+            ]
+          },
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Tactile-only control delivered in leading silence.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": {
+            "tactile_minus_audio_onset_ms": -700
+          },
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Looming or flat sound without touch.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "looming": 12,
+            "flat": 6
+          },
+          "source": "PsyArXiv v1 pp. 5–6, Experiment 1",
+          "gap": "Six delays imply 108 paired trials, 65.06% of 166 versus stated 60%."
+        },
+        "baseline_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 5–6, Experiment 1",
+          "gap": "Exact baseline count not reported."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 5–6, Experiment 1",
+          "gap": "Exact catch count not reported."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_total": 166,
+            "looming_from_repetitions": 72,
+            "flat_from_repetitions": 36,
+            "paired_from_repetitions": 108,
+            "paired_percent_from_repetitions": 65.06,
+            "paired_percent_printed": 60,
+            "combined_baseline_and_catch_residual_if_counts_hold": 58
+          },
+          "source": "PsyArXiv v1 pp. 5–6, Experiment 1",
+          "gap": "Trial-family split and handling of missed-target repetitions unavailable."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Recover the physical dual-speaker sound and calibrate synchronous electrocutaneous stimulation and key events.",
+      "Resolve how the 166-trial total, per-delay repeat counts, paired percentage, and baseline/catch quotas apply to the implemented blocks."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Rastelli 2025 · Experiment 1 · Classic tactile detection",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [
+        200,
+        500,
+        800,
+        2200,
+        2500,
+        2800
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [
+        "hairy right index finger"
+      ],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.31234/osf.io/etvb6_v1. Preprint PDF pp. 5–6, Experiment 1"
+    }
+  ]
+}

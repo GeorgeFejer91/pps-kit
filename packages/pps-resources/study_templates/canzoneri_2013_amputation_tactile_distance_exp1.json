@@ -1,0 +1,224 @@
+{
+  "template_id": "canzoneri_2013_amputation_tactile_distance_exp1",
+  "title": "Canzoneri 2013 · Experiment 1, body-metric comparison",
+  "citation": "Canzoneri, E., Marzolla, M., Amoresano, A., Verni, G., & Serino, A. (2013). Amputation and prosthesis implantation shape body and peripersonal space representations. Scientific Reports, 3, 2844.",
+  "source_url": "https://doi.org/10.1038/srep02844",
+  "doi": "10.1038/srep02844",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1038/srep02844::a",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "purpose": "Companion assessment of body representation",
+      "sequence": [
+        "paired touch on forehead",
+        "paired touch along upper arm"
+      ],
+      "pair_distances_times_upper_arm_threshold": [
+        1,
+        1.5,
+        2
+      ],
+      "contact_ms_approx": 1000,
+      "between_sites_ms": 1000,
+      "total_trials": 36,
+      "response": "Untimed verbal choice of the site with the larger perceived separation."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Manual application of pairs of tactile points by an experimenter. Participant blindfolded and lying with the tested arm prone.",
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "tactile distance comparison"
+          ],
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1",
+          "gap": "Order of interpoint-distance pairs not specified."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Patient limb/prosthesis conditions in three blocks, order counterbalanced between participants.",
+          "source": "Canzoneri et al. 2013, Scientific Reports 3:2844 version of record, p. 2, Experiment 1 Results; pp. 6–7, Methods; Canzoneri doctoral thesis Chapter 7 pp. 169–171",
+          "gap": "The order of individual distance pairings and exact counterbalance assignments are unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "inter_tap_interval_ms": 1000
+          },
+          "source": "PDF pp. 6–7, Methods, Experiment 1",
+          "gap": "The one-second interval is between the two tactile presentations within each trial. The intertrial interval is unspecified."
+        },
+        "response_window": {
+          "status": "reported",
+          "value": "Untimed two-alternative verbal choice.",
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "First present a point pair to the forehead, then a longitudinal point pair to the upper arm. Ask which felt farther apart. Respond verbally with forehead or arm.",
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "type": "manual paired points",
+            "application_ms_approx": 1000,
+            "sites": [
+              "forehead",
+              "upper arm along its long axis"
+            ],
+            "separation_multiples_of_individual_upper_arm_threshold": [
+              1,
+              1.5,
+              2
+            ],
+            "threshold_method": "longitudinal two-point discrimination staircase"
+          },
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1"
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "PDF pp. 6–7, Methods, Experiment 1",
+          "gap": "No explicit block count given."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": 36,
+          "source": "PDF pp. 6–7, Methods, Experiment 1",
+          "gap": "Methods state 36 trials for the task. Trial counts by distance pairing and explicit across-condition patient totals are unspecified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "A tactile-only comparison scheduler needs calibrated manual two-point spacing and a verbal two-choice record.",
+      "Exact trial order and cell counts per pairing are unreported."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Canzoneri 2013 · Experiment 1, body-metric comparison",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1038/srep02844. PDF pp. 1–2, Experiment 1 Results and Fig. 1; pp. 6–7, Methods."
+    }
+  ]
+}

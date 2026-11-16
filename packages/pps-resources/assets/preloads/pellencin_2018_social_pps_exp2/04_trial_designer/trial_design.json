@@ -1,0 +1,18 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "pellencin_2018_social_pps_exp2",
+  "repetitions_per_condition": 1,
+  "soa_values_ms": [
+    325,
+    650,
+    975,
+    1300,
+    1625,
+    1950
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [],
+  "prestimulus_files": [],
+  "preview_trial_count": 0
+}

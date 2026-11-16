@@ -1,0 +1,236 @@
+{
+  "template_id": "cimmino_2013_arm_elongation_tactile_distance",
+  "title": "Cimmino 2013 · Tactile distance discrimination",
+  "citation": "Cimmino et al. (2013). Plasticity of body representations after surgical arm elongation in an achondroplasic patient. Restorative Neurology and Neuroscience, 31(3), 287–298.",
+  "source_url": "https://doi.org/10.3233/rnn-120286",
+  "doi": "10.3233/rnn-120286",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3233/rnn-120286::distance_discrimination",
+    "publication_status": "published",
+    "profile_type": "companion_assessment_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "companion_pps_profile_id": "cimmino_2013_arm_elongation_pps",
+      "context": "Companion outcome in the surgical arm-elongation case study.",
+      "apparatus": "Four in-line miniature solenoids on a malleable mount. Each stimulus delivers two simultaneous contacts using the MSTC3 system and custom LabVIEW control.",
+      "sequence": "Stimulate the right humerus first and the neck 250 ms later. Record the spoken two-choice response by manual entry and give no feedback.",
+      "allocation": {
+        "blocks": 2,
+        "per_block": 108,
+        "total": 216,
+        "same": 108,
+        "arm_greater": 54,
+        "neck_greater": 54
+      },
+      "scoring": "Fit the reported psychometric curve. Extract the 50% point and the signed difference between the 75% and 25% locations.",
+      "comparison_n": 26,
+      "stimulus_levels": "Three spatial levels. Adjacent contact spacing is individual two-point threshold plus 5 mm, matched for arm and neck.",
+      "response": "Which of the two sites felt the greater separation between its contacts?"
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "MSTC3, M&E Solve, UK",
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": {
+            "same": 108,
+            "arm_greater": 54,
+            "neck_greater": 54
+          },
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "Totals derived from stated proportions."
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No exact within-block ordering provided."
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No ITI rule specified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No numeric response window stated."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Which of the two regions felt the larger contact separation?",
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "MSTC3, M&E Solve, UK",
+            "sites": [
+              "Right humerus",
+              "Neck"
+            ],
+            "protocol": "Adjacent contact separation = individual 2PD threshold + 5 mm, same on arm and neck"
+          },
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "Additional physical calibration details unreported."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No catch procedure documented for this assessment."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3",
+          "gap": "No separate catch family described."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 216,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires two calibrated dual-contact solenoid arrays, per-participant site spacing and a 250 ms sequencer with manual two-choice response capture.",
+      "Original pulse waveform, contact force and fitting settings are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Cimmino 2013 · Tactile distance discrimination",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3233/rnn-120286. Cimmino et al. 2013, pp. 290–291, §2.2 and Fig. 2; Cimmino et al. 2013, pp. 292–293, §3.2, Tables 2–3"
+    }
+  ]
+}

@@ -7,6 +7,7 @@
   "verification_status": "partial",
   "notes": "Legacy local record ID is Tajadura-Jimenez 2009, but the DOI/PDF are Collignon et al. (2009). This profile recreates the uncrossed-posture static external left/right lateralization block: auditory-only, tactile-only, and congruent audio-tactile trials, 50 repetitions per side and modality. It uses procedural pink-noise bursts and mouse-click left/right choices as runnable proxies for the unshared Adobe Audition audio file and physical response keys.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2009.07.025",
     "profile_check_complete": true,
     "publication_status": "published",
     "profile_type": "static_left_right_audiotactile_lateralization_uncrossed_posture",

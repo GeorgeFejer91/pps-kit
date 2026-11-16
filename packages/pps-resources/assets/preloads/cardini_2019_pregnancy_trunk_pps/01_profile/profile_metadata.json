@@ -8,6 +8,10 @@
   "verification_status": "partial",
   "notes": "The three visits repeat one 65-trial assessment. Inspect the five sound-relative timings and 15 audio-only catch trials per visit.",
   "reference_parameters": {
+    "alternate_study_row_ids": [
+      "doi:10.1038/s41598-019-45224-w::session-II",
+      "doi:10.1038/s41598-019-45224-w::session-III"
+    ],
     "publication_status": "published",
     "profile_type": "published_pps_assessment_timing",
     "profile_check_complete": false,

@@ -1,0 +1,216 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "sorrentino_2021_ageing_avatar_adjustment",
+  "title": "Sorrentino 2021 \u00b7 Ageing and avatar adjustment",
+  "citation": "Sorrentino et al. (2021). How ageing shapes body and space representations: A comparison study between healthy young and older adults. Cortex, 136, 56\u201376.",
+  "doi": "10.1016/j.cortex.2020.11.021",
+  "source_url": "https://doi.org/10.1016/j.cortex.2020.11.021",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cortex.2020.11.021#avatar-adjustment",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": {
+        "younger": 30,
+        "older": 29
+      },
+      "paired_paper_profile_id": "sorrentino_2021_ageing_hand_pps",
+      "display": "Show an age- and gender-matched MakeHuman-derived avatar in a diagonal third-person perspective on a 52 by 32 cm monitor. A white cloth conceals participant shoulders, arms and hands.",
+      "factors": {
+        "body_part": [
+          "hand",
+          "arm"
+        ],
+        "dimension": [
+          "width",
+          "length"
+        ],
+        "side": [
+          "left",
+          "right"
+        ],
+        "initial_setting": [
+          "enlarged",
+          "shrunk"
+        ]
+      },
+      "allocation": {
+        "blocks": 2,
+        "per_block": 16,
+        "total": 32,
+        "repetitions_per_factor_cell": 2
+      },
+      "response": "The displayed dimension starts at the assigned extreme. Participant verbally instructs the experimenter to adjust the shape through the custom keyboard interface until the dimension appears to match their body.",
+      "scoring": "Record the confirmed dimension as a ratio to the age- and gender-matched reference avatar value of 1. Compute normalized width divided by normalized length for the shape index.",
+      "software_scope": "The 16-cell factorial and ratio scoring are specified. Original avatar files, reference-population parameter mappings, starting scale extremes and keyboard increments are unresolved."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Age- and gender-matched visual avatar with adjustable upper-limb dimensions",
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2"
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": "52 \u00d7 32 cm monitor, MakeHuman, custom Python software and experimenter keyboard",
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "Exact model files and code unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Randomized starting extreme, dimension, body part and side",
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2"
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Configure avatar, occlude participant's upper limbs, then verbally guide adjustment of each target dimension.",
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 32,
+          "source": "Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires a visual avatar renderer with individually adjustable dimensions, continuous value capture and operator controls. Study-specific original reference avatar parameters, deformation increment and initial scale ranges are unavailable.",
+      "The physically matched display and viewing setup still require verification."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.cortex.2020.11.021. Cortex pp. 59\u201362, \u00a7\u00a72.2.2, 2.3.2, Fig. 2 and Cortex pp. 58\u201359, \u00a72.1 and Table 1"
+    }
+  ]
+}

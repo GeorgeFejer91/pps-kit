@@ -1,0 +1,234 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "sancristobal_2022_passive_auditory_eeg",
+  "title": "Sancrist\u00f3bal 2022 \u00b7 Passive auditory EEG",
+  "citation": "Sancrist\u00f3bal et al. (2022). Slow Resting State Fluctuations Enhance Neuronal and Behavioral Responses to Looming Sounds. Brain Topography, 35(1), 121\u2013141.",
+  "doi": "10.1007/s10548-021-00826-4",
+  "source_url": "https://doi.org/10.1007/s10548-021-00826-4",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s10548-021-00826-4::passive-listening",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sample": 38,
+      "audio": "A 44.1 kHz pink noise sample lasts 3100 ms. The approach variant increases exponentially from 55 to 70 dB SPL. The flat variant is 62.5 dB SPL.",
+      "preceded_by_rest": "Two five-minute eyes-closed resting EEG runs precede this assessment.",
+      "allocation": {
+        "looming": 30,
+        "flat": 30,
+        "runs": 2,
+        "run_duration_s": 360
+      },
+      "post_offset_isi_ms": [
+        4650,
+        6200,
+        7750
+      ],
+      "response": "Attend to sounds blindfolded with eyes closed and without a manual response.",
+      "eeg": "MR-compatible 64-channel BrainAmp with FCz reference, Iz ground and 5000 Hz sampling in Philips 3 T Achieva. Synchronizer links scanner and recording clocks. Analysis downsamples to 500 Hz and addresses imaging and physiological artifacts.",
+      "analysis": "Compare evoked spectral power for looming and flat, alongside resting autocorrelation and behavioral facilitation."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Pink noise with a constant or increasing SPL envelope",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "editing_software": "Sound Forge 4.5 (Sonic Foundry)",
+            "sample_rate_hz": 44100
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli",
+          "gap": "Original noise files, generator seed, and export bit depth are unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "moving_perceptual_trajectory": 1,
+            "static_comparator": 1
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli; Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 2\u20133, Fig. 1 and caption",
+          "gap": "Intensity-defined apparent approach in headphones."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "movement": "apparent approach defined by level",
+            "device": "MRI headphones"
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli; Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 2\u20133, Fig. 1 and caption",
+          "gap": "No calibrated spatial positions or metric path."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "value": 3100,
+            "unit": "ms"
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli",
+          "gap": "No metric speed reported."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming",
+            "flat"
+          ],
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming_start_dB_SPL": 55,
+            "looming_end_dB_SPL": 70,
+            "looming_envelope": "exponential increase",
+            "flat_dB_SPL": 62.5
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli",
+          "gap": "Exact calibration and headphone transfer function are unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "MRI headphones connected to a NordicNeuroLab audio system.",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Looming listening trial",
+            "Flat listening trial"
+          ],
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "per_condition_total": 30,
+            "distribution": "equally across two runs"
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "Exact trial type randomization is unreported. ISIs were randomized."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "runs": 2,
+            "equal_distribution": true
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "Order of looming and flat conditions within each run is unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "post_sound_isi_ms": [
+              4650,
+              6200,
+              7750
+            ],
+            "selection": "random"
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task; Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 6, PSD, Pearson Correlation, Autocorrelation Window and Statistical Analysis"
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Listen and attend to the sounds while blindfolded with eyes closed. No overt response.",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task; Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 2\u20133, Fig. 1 and caption"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 60,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 5\u20136, Auditory Task",
+          "gap": "30 scheduled sound presentations for each of two conditions. Retained EEG trials were lower after artifact exclusion."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires synchronized MR-compatible sound delivery and EEG with a guided transition from resting runs.",
+      "The original dry audio, physical headphone model and calibration, randomization and interval probabilities are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1007/s10548-021-00826-4. Brain Topography pp. 124\u2013127 and 133, EEG Acquisition, Auditory Task, PSD and Classification Algorithm; publisher ESM1, Figs. S1\u2013S2"
+    }
+  ]
+}

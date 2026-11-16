@@ -1,0 +1,321 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "noel_2018_neural_adaptation",
+  "title": "Noel 2018 \u00b7 sound velocity and face/trunk PPS",
+  "citation": "Noel, J. P., Blanke, O., Magosso, E., & Serino, A. (2018). Neural adaptation accounts for the dynamic resizing of peripersonal space: evidence from a psychophysical-computational approach. Journal of Neurophysiology, 119(6), 2307\u20132333.",
+  "doi": "10.1152/jn.00652.2017",
+  "source_url": "https://doi.org/10.1152/jn.00652.2017",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1152/jn.00652.2017",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": {
+        "enrolled": 32,
+        "face_analyzed": 16,
+        "trunk_analyzed": 15,
+        "assignment": "Forehead versus sternum is between participants. Both velocities occur within each cohort."
+      },
+      "geometry": "Two parallel eight-speaker rows run 2 m toward the body; each is 50 cm out to the side. Adapt the rows to forehead or sternum height. Present broadband noise at the reported 50 dB.",
+      "grid": {
+        "anchor": "Sound onset, or matched silent-trial onset",
+        "distance_at_touch_cm": [
+          175,
+          150,
+          125,
+          100,
+          75,
+          50,
+          25
+        ],
+        "slow": {
+          "speed_cm_s": 25,
+          "tactile_onsets_as_reported_ms": [
+            1000,
+            2000,
+            3000,
+            4000,
+            5000,
+            6000,
+            7000
+          ],
+          "baseline_onsets_ms": [
+            1000,
+            7000
+          ]
+        },
+        "fast": {
+          "speed_cm_s": 75,
+          "tactile_onsets_as_reported_ms": [
+            330,
+            660,
+            1000,
+            1330,
+            1660,
+            2000,
+            2330
+          ],
+          "baseline_onsets_ms": [
+            330,
+            2330
+          ]
+        }
+      },
+      "schedule": {
+        "trials_per_condition": 16,
+        "audio_tactile_trials": 224,
+        "tactile_only_trials": 64,
+        "sound_only_trials": 32,
+        "total": 320,
+        "order": "Randomly intermix speeds and trial families within a participant."
+      },
+      "tactile": "Drive a Precision MicroDrives 312-101 motor at the assigned body site for 100 ms. Motor timing differs from the software trigger.",
+      "response": "Speeded button press for touch. Withhold to sound alone.",
+      "analysis": "Within a participant and speed, subtract the shorter median of the two silent baselines. Fit the corrected delay/distance response separately for each speed and cohort after the published reaction-time exclusions."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Broadband dynamic noise.",
+          "source": "Article p. 2309, Stimulus and Apparatus"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "New article delegates sound movement algorithm to Serino et al. (2015b).",
+          "source": "Article p. 2309, Stimulus and Apparatus",
+          "gap": "Original 2018 sound files or renderer code were not identified."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "spatial_path_count": 1,
+            "velocity_conditions": 2
+          },
+          "source": "Article p. 2309, Procedure"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "nominal_length_m": 2,
+            "direction": "looming from in front toward the body",
+            "distance_at_touch_cm": [
+              175,
+              150,
+              125,
+              100,
+              75,
+              50,
+              25
+            ]
+          },
+          "source": "Article p. 2309, Stimulus and Apparatus"
+        },
+        "stimulus_duration": {
+          "status": "derived",
+          "value": {
+            "slow_ms": 8000,
+            "fast_ms": 2666.6667
+          },
+          "source": "Article p. 2309, Stimulus and Apparatus",
+          "gap": "Nominal transit time from 2 m divided by the reported speed. Exact rendered sample duration and pre/post-sound buffers were not reported."
+        },
+        "stimulus_speed": {
+          "status": "reported",
+          "value": {
+            "slow_cm_s": 25,
+            "fast_cm_s": 75
+          },
+          "source": "Article p. 2309, Stimulus and Apparatus"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Slow approaching broadband noise",
+            "Fast approaching broadband noise"
+          ],
+          "source": "Article p. 2309, Procedure"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Constant reported loudness of 50 dB. Cited renderer changes channel levels with distance.",
+          "source": "Article p. 2309, Stimulus and Apparatus",
+          "gap": "2018 calibration reference, ramp/gate and exact per-channel gains unspecified. The predecessor has an equation/prose attenuation discrepancy."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": "Two arrays of eight JBL Control 1 Pro WH Pair speakers each, M-Audio FastTrack Ultra 8R. Arrays 50 cm to either side and extend 2 m ahead at face or sternum height.",
+          "source": "Article p. 2309, Stimulus and Apparatus",
+          "gap": "Speaker weighting parameters and exact 2018 renderer configuration unresolved."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Audio\u2013tactile target at T1\u2013T7",
+            "Tactile-only baseline at D1 or D7 temporal equivalent",
+            "Auditory-only catch at either speed"
+          ],
+          "source": "Article p. 2309, Procedure"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Slow and Fast across trial types within participant. Body part is between participants.",
+          "source": "Article p. 2309, Procedure"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "All trial types randomized.",
+          "source": "Article p. 2309, Procedure",
+          "gap": "Number of blocks, allocation per block, randomization algorithm and seed unspecified."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article p. 2309, Procedure",
+          "gap": "No ITI, foreperiod distribution, or separate jitter rule identified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article p. 2309, Behavioral Analysis",
+          "gap": "Online deadline unspecified. Analysis excludes RTs below 200 ms or above 900 ms."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Sound starts at trial onset for audio-bearing trials. On tactile vibration, press the controller button quickly and accurately, ignoring the sound. Withhold response on catches.",
+          "source": "Article p. 2309, Procedure"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "modality": "vibration",
+            "sites_by_cohort": {
+              "peri_face": "forehead",
+              "peri_trunk": "sternum"
+            },
+            "motor": "Precision MicroDrives 312-101",
+            "drive_duration_ms": 100,
+            "rated_voltage_V": 3,
+            "rated_current_mA": 60,
+            "rated_frequency_Hz": 150,
+            "mass_g": 5,
+            "surface_mm2": 113,
+            "time_to_max_speed_ms": 50
+          },
+          "source": "Article p. 2309, Stimulus and Apparatus",
+          "gap": "Reported motor ratings do not establish measured acceleration, onset latency or individual calibration."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "anchor": "sound onset",
+            "slow": [
+              1000,
+              2000,
+              3000,
+              4000,
+              5000,
+              6000,
+              7000
+            ],
+            "fast": [
+              330,
+              660,
+              1000,
+              1330,
+              1660,
+              2000,
+              2330
+            ],
+            "distance_at_touch_cm": [
+              175,
+              150,
+              125,
+              100,
+              75,
+              50,
+              25
+            ],
+            "note": "Times retain the precision reported in the Methods."
+          },
+          "source": "Article p. 2309, Procedure"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Silent tactile trials at the two endpoint sampling times D7 and D1, matched separately to each nominal speed. Faster baseline median is used for that participant and speed.",
+          "source": "Article p. 2309, Procedure"
+        },
+        "baseline_timing": {
+          "status": "derived",
+          "value": {
+            "slow_ms": [
+              1000,
+              7000
+            ],
+            "fast_ms": [
+              330,
+              2330
+            ],
+            "anchor": "trial onset corresponding to the sound onset in matched bimodal trials"
+          },
+          "source": "Article p. 2309, Procedure",
+          "gap": "Select T1 and T7 from each reported schedule. No sound plays in the baseline trials."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Looming sound with no tactile target. Withhold response.",
+          "source": "Article p. 2309, Procedure"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": 16,
+          "source": "Article p. 2309, Procedure"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 64,
+          "source": "Article p. 2309, Procedure",
+          "gap": "2 speeds \u00d7 2 timing equivalents \u00d7 16 repetitions."
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": 32,
+          "source": "Article p. 2309, Procedure",
+          "gap": "2 speeds \u00d7 1 catch family \u00d7 16 repetitions."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article p. 2309, Procedure",
+          "gap": "The procedure reports overall trial randomization and total, with no block count."
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 320,
+          "source": "Article p. 2309, Procedure"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Implement and calibrate two physical eight-speaker arrays at the assigned cohort height, using the original per-channel gains and measured acoustic onset. The sound spectrum, waveform and delivered level calibration are not recoverable from the paper.",
+      "The runtime must keep the correct offset table and silent-baseline windows tied to each speed. A global SOA product across both speeds changes the reported schedule.",
+      "The rotating 312-101 motor requires calibration of delivered acceleration and timing at the study's forehead or sternum location. Original randomization and intertrial allocation are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1152/jn.00652.2017. Article pp. 2318\u20132319, Behavioral Results and Fig. 7"
+    }
+  ]
+}

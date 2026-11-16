@@ -9,8 +9,8 @@
   "publication_status": "published",
   "profile_type": "face_audio_tactile_social_context",
   "paper_group_key": "doi:10.1016/j.cub.2013.01.043",
-  "visible_variant_label": "",
-  "variant_display": "Teneggi 2013 social modulation face PPS",
+  "visible_variant_label": "C",
+  "variant_display": "Teneggi 2013 social modulation face PPS - Variant C",
   "recreation_status": {
     "primary_category": "missing_publication_parameters",
     "category_label": "Missing publication parameters",
@@ -112,7 +112,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 12,
+      "value": 13,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {

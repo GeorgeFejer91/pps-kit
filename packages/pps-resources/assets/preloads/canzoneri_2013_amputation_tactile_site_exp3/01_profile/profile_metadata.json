@@ -1,0 +1,257 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "canzoneri_2013_amputation_tactile_site_exp3",
+  "title": "Canzoneri 2013 \u00b7 Experiment 3, hand versus upper arm",
+  "citation": "Canzoneri, E., Marzolla, M., Amoresano, A., Verni, G., & Serino, A. (2013). Amputation and prosthesis implantation shape body and peripersonal space representations. Scientific Reports, 3, 2844.",
+  "doi": "10.1038/srep02844",
+  "source_url": "https://doi.org/10.1038/srep02844",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1038/srep02844::c",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sites": [
+        "Upper arm",
+        "Hand"
+      ],
+      "blocks_per_site": 2,
+      "speaker_geometry": "Keep them fixed relative to the upper arm.",
+      "far_speaker_distance_cm": 100,
+      "sound_ms": 3000,
+      "pre_and_post_audio_silence_ms": 1000,
+      "soa_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "trial_allocation": {
+        "paired_as_printed": 76,
+        "paired_if_full_factorial": 80,
+        "sound_only_as_printed": 76
+      },
+      "response": "Speeded vocal response to electrical touch. Compare site and perceived sound distance."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Dynamic pink noise.",
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Pink-noise source class is specified. C.I.R.O. controlled presentation and response capture.",
+          "source": "PDF p. 7, Methods, Experiments 2 and 3",
+          "gap": "Exact waveform, noise generator/seed, recording chain, and original assets unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": "Same near-to-far speaker geometry referenced to upper arm, with far speaker 100 cm away. Both directions used with the two tactile sites.",
+          "source": "PDF p. 4, Experiment 3 Results and procedure; PDF p. 7, Methods, Experiments 2 and 3; p. 6, Fig. 4"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "sound_ms": 3000,
+            "pre_sound_silence_ms": 1000,
+            "post_sound_silence_ms": 1000
+          },
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "PDF p. 7, Methods, Experiments 2 and 3; p. 6, Fig. 4",
+          "gap": "No metric velocity specified for the amplitude-defined apparent movement."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "IN approaching",
+            "OUT receding"
+          ],
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Exponential rising intensity for IN, falling intensity for OUT. Results describe symmetry between the waveforms.",
+          "source": "PDF p. 7, Methods, Experiments 2 and 3; PDF p. 2, Experiment 2 Results",
+          "gap": "Exact gains, equations, per-speaker trajectories and calibrated SPL absent."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "speaker_count": 2,
+            "speaker_separation_cm_approx": 100,
+            "controller": "PC running C.I.R.O."
+          },
+          "source": "PDF p. 7, Methods, Experiments 2 and 3; p. 6, Fig. 4"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "audiotactile target",
+            "auditory-only catch"
+          ],
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Random combination of target timings and directions, randomly intermingled with catch trials.",
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Two blocks in each Upper Arm and Hand condition, with site order counterbalanced.",
+          "source": "PDF p. 4, Experiment 3 Results and procedure"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "pre_sound_silence_ms": 1000,
+            "post_sound_silence_ms": 1000
+          },
+          "source": "PDF p. 7, Methods, Experiments 2 and 3",
+          "gap": "Exact additional intertrial interval and jitter unspecified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "PDF p. 7, Methods, Experiments 2 and 3",
+          "gap": "Speeded vocal response is specified. Deadline, voice-key threshold and latency compensation are unspecified."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Say TAH as quickly as possible to the tactile target, ignore the sound and withhold on auditory-only catches. Capture RT through a voice-activated relay.",
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "constant-current electrical stimulation",
+            "stimulator": "Digitimer DS7A",
+            "electrodes": "Ambu Neuroline pair",
+            "site": [
+              "upper arm",
+              "hand"
+            ],
+            "intensity": "level not independently quantified for Experiment 3"
+          },
+          "source": "PDF p. 4, Experiment 3 Results and procedure; PDF p. 7, Methods, Experiments 2 and 3",
+          "gap": "Hand electrode coordinates and pulse settings unspecified."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "anchor": "tactile onset minus sound onset",
+            "soa_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ],
+            "IN_in_soa_order": [
+              "D1",
+              "D2",
+              "D3",
+              "D4",
+              "D5"
+            ],
+            "OUT_in_soa_order": [
+              "D5",
+              "D4",
+              "D3",
+              "D2",
+              "D1"
+            ],
+            "distance_coding": "D1 farthest, D5 closest"
+          },
+          "source": "PDF p. 7, Methods, Experiments 2 and 3; p. 6, Fig. 4"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": "The Methods allocate all trials to tactile targets with sound and auditory-only catches. No tactile-only family in the reported design.",
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Sound only, no tactile target. Withhold response.",
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "source_inconsistency_caveat",
+          "value": 8,
+          "source": "PDF p. 7, Methods, Experiments 2 and 3",
+          "gap": "Eight repeats at five delays in both directions imply 80 target trials. The same sentence states 76."
+        },
+        "baseline_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": {
+            "per_described_two_block_pool": 76
+          },
+          "source": "PDF p. 7, Methods, Experiments 2 and 3"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_site_condition": 2,
+            "conditions": 2,
+            "total_per_participant": 4
+          },
+          "source": "PDF p. 4, Experiment 3 Results and procedure"
+        },
+        "total_trial_count": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "printed_tactile_targets": 76,
+            "printed_auditory_only_catches": 76,
+            "printed_sum_per_two_block_pool": 152,
+            "repetitions_stated": 8,
+            "factorial_tactile_targets": 80,
+            "factorial_plus_printed_catches": 156
+          },
+          "source": "PDF p. 4, Experiment 3 Results and procedure; PDF p. 7, Methods, Experiments 2 and 3",
+          "gap": "Methods describe the conflicting target counts for a two-block task. Experiment 3 states two blocks per tactile site. Exact per-site and per-participant totals require the original trial files."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The reported target trial count conflicts with the stated factorial repetitions. The original trial files are needed for exact allocation per site.",
+      "A calibrated two-site electrocutaneous and vocal response scheduler must reproduce the physical apparatus."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1038/srep02844. PDF p. 4, Experiment 3 Results and procedure; PDF pp. 5\u20137, Figs. 3\u20134 and Methods."
+    }
+  ]
+}

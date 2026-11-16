@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "teneggi_2013_social_face_pps",
   "title": "Teneggi 2013 social modulation face PPS",
-  "visible_variant_label": "",
+  "visible_variant_label": "C",
   "publication_status": "published",
   "profile_type": "face_audio_tactile_social_context",
   "asset_mode": "bundled_local",

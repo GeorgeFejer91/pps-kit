@@ -1,0 +1,251 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ladavas_2001_audiotactile_extinction",
+  "title": "L\u00e0davas 2001 \u00b7 single-case auditory\u2013tactile extinction",
+  "citation": "L\u00e0davas, E., Pavani, F., & Farn\u00e8, A. (2001). Auditory peripersonal space in humans: a case of auditory-tactile extinction. Neurocase, 7(2), 97\u2013103.",
+  "doi": "10.1093/neucas/7.2.97",
+  "source_url": "https://doi.org/10.1093/neucas/7.2.97",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1093/neucas/7.2.97",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": "One right-hemisphere injury case with preserved unilateral touch and left tactile extinction. The related 2002 group report may include the same patient; independent sessions are not established by matching case details.",
+      "geometry": {
+        "body_anchor": "head",
+        "sound_quadrants": [
+          "Right-front",
+          "Right-rear"
+        ],
+        "head_distances_cm": [
+          20,
+          70
+        ],
+        "angle_deg": 45,
+        "speaker_height": "Ear level"
+      },
+      "stimulus": "Manual contact under one second gates the white-noise burst or 1500 Hz tone at 70 dB SPL measured at the ear. The simultaneous cross-modal target is contact on the left lateral neck.",
+      "schedule": {
+        "sessions": 3,
+        "blocks_per_session": 9,
+        "trials_per_block": 40,
+        "crossmodal_trials": 960,
+        "tactile_only_control_trials": 120,
+        "total_trials": 1080,
+        "trials_per_family_per_block": 10,
+        "blank_catches": 270
+      },
+      "response": "Say which side was perceived immediately after stimulation, regardless of modality, or report neither. Compare left-touch detection against the within-block touch-only trials."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": [
+            "White-noise burst",
+            "1.5 kHz pure tone"
+          ],
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "Live speaker output enabled by an optically isolated contact circuit and remote switch.",
+          "source": "L\u00e0davas et al. (2001), Neurocase 7(2), pp. 98\u2013100, Materials and methods"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "L\u00e0davas et al. (2001), Neurocase 7(2), p. 99, Fig. 2 and surrounding Methods",
+          "gap": "Fixed loudspeaker positions with equalized levels."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "L\u00e0davas et al. (2001), Neurocase 7(2), p. 99, Fig. 2 and surrounding Methods",
+          "gap": "Fixed loudspeaker positions with equalized levels."
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": "Brief manual contact, under 1 s. Sound lasts only while contact closes the circuit and the switch permits emission.",
+          "source": "L\u00e0davas et al. (2001), Neurocase 7(2), pp. 98\u2013100, Materials and methods",
+          "gap": "No programmed exact pulse duration or distribution."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "L\u00e0davas et al. (2001), Neurocase 7(2), p. 99, Fig. 2 and surrounding Methods",
+          "gap": "Fixed loudspeaker positions with equalized levels."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": {
+            "signals": [
+              "White-noise burst",
+              "1.5 kHz pure tone"
+            ],
+            "speaker_positions": [
+              {
+                "sector": "Right front",
+                "distance_cm": 20
+              },
+              {
+                "sector": "Right front",
+                "distance_cm": 70
+              },
+              {
+                "sector": "Right rear",
+                "distance_cm": 20
+              },
+              {
+                "sector": "Right rear",
+                "distance_cm": 70
+              }
+            ]
+          },
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "L\u00e0davas et al. (2001), Neurocase 7(2), p. 99, Fig. 2 and surrounding Methods",
+          "gap": "Fixed loudspeaker positions with equalized levels."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "One 0.3 W, 8 \u03a9 loudspeaker repositioned at ear level on a metal stand. White-noise bursts or a 1,500 Hz pure tone at 70 dB SPL at the participant's ear.",
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "unimodal_tactile": [
+              "Left neck touch",
+              "Right neck touch",
+              "Simultaneous bilateral neck touches",
+              "Blank catch"
+            ],
+            "crossmodal": [
+              "Left neck touch",
+              "Right sound",
+              "Left neck touch with simultaneous right sound",
+              "Blank catch"
+            ]
+          },
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "The nine conditions are blocked. The four families are randomized within each block.",
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Trials randomized within each condition block. Block order randomized between sessions.",
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "L\u00e0davas et al. (2001), Neurocase 7(2), pp. 98\u2013100, Materials and methods",
+          "gap": "The full indexed Materials and methods do not report this setting."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": "Immediate verbal response. Prompt if absent.",
+          "source": "L\u00e0davas et al. (2001), Neurocase 7(2), pp. 98\u2013100, Materials and methods",
+          "gap": "No timeout in milliseconds is given."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Name the perceived side or absence immediately after stimulation, regardless of modality. Prompt if no spontaneous answer. A second experimenter records each answer.",
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": "Light contact with a 1 cm\u00b2 touch-sensitive sensor just below the mastoid behind the ear. In the tactile-only condition a matching sensor is also attached to the right index finger of the experimenter.",
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_sound_minus_touch_ms": 0
+          },
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2",
+          "gap": "The contact triggers sound. No measured onset lag or acoustic arrival timing."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": {
+            "unimodal_tactile_block": "One block per session, sensor inactive. Equal left-only, right-only, bilateral and blank trials.",
+            "crossmodal_comparator": "Left-touch-only trials embedded in each cross-modal block, compared with simultaneous left touch and right sound."
+          },
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": "Left-touch-only comparator uses the same manual-contact procedure with no sound.",
+          "source": "L\u00e0davas et al. (2001), Neurocase 7(2), pp. 98\u2013100, Materials and methods",
+          "gap": "Measured contact times and intertrial intervals are unavailable."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "No stimulus. In tactile-only blocks no touch is applied. In cross-modal blocks neither touch nor sound is presented.",
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": "10 presentations per trial family per block, across three sessions.",
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": {
+            "unimodal_block_total": 120,
+            "of_which_touch_trials": 90,
+            "crossmodal_matched_left_only_total": 240
+          },
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2",
+          "gap": "3 \u00d7 40 for tactile-only blocks, 3 \u00d7 30 for their stimulus trials, and 3 \u00d7 8 \u00d7 10 for matched touch-only trials."
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": 270,
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2",
+          "gap": "3 sessions \u00d7 9 blocks \u00d7 10 catches."
+        },
+        "block_count": {
+          "status": "derived",
+          "value": 27,
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2",
+          "gap": "9 conditions per session \u00d7 3 sessions."
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 1080,
+          "source": "Neurocase pp. 98\u2013100, Materials and methods and Fig. 2",
+          "gap": "3 sessions \u00d7 9 blocks \u00d7 40 trials."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "This clinical procedure requires a participant with the study-defined extinction pattern, an experimenter-held neck contact sensor, physical speaker calibration and independent verbal response coding.",
+      "The precise contact waveform and duration, sound waveform and acoustic onset, original randomization and trial interval are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1093/neucas/7.2.97. Neurocase pp. 98\u2013100, Materials and methods and Fig. 2; Neurocase pp. 99\u2013100, Fig. 2 and Results"
+    }
+  ]
+}

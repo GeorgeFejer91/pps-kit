@@ -1,0 +1,279 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ferroni_2026_pps_plasticity_determinants_exp1",
+  "title": "Ferroni 2026 \u00b7 Experiment 1 \u00b7 Sensory modality",
+  "citation": "Ferroni, F., Rastelli, F., Langiulli, N., Rinaldi, L. S., Gallese, V., & Ardizzi, M. (2026). Dealing with the world close to our body. Characterizing determinants of peripersonal space plasticity. Neuropsychologia, 229, 109490.",
+  "doi": "10.1016/j.neuropsychologia.2026.109490",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2026.109490",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2026.109490::a",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sessions": [
+        "Pre-training PPS assessment",
+        "Far-space motor training",
+        "Post-training PPS assessment"
+      ],
+      "analysis": "Estimate between-distance PPS location (PSE) and steepness (DL) using Spearman\u2013K\u00e4rber on participant-level 10% trimmed reaction time means. Compare session and assigned group with a participant random intercept.",
+      "cohort_n": {
+        "audio_tactile": 29,
+        "visuo_tactile": 29
+      },
+      "audio_tactile": {
+        "cue": "3 s pink noise at 44.1 kHz, exponential nominal gain rise from 55 to 70 dB for looming, flat level 62.5 dB. The near and far loudspeaker gains change in opposite directions.",
+        "near_speaker_cm_from_right_hand": 10,
+        "far_speaker_cm_from_participant": 100,
+        "tactile_onsets_ms_from_audio_onset": [
+          300,
+          800,
+          1500,
+          2200,
+          2700
+        ],
+        "baseline_nominal_ms": -700,
+        "trial_percent": {
+          "paired": 50,
+          "sound_only": 40,
+          "tactile_only": 10
+        },
+        "response": "Left-hand keyboard reaction to a right-index electrocutaneous pulse, with no response for auditory-only catches."
+      },
+      "visuo_tactile": {
+        "cue": "A virtual 6.5 cm red sphere approaches in HTC Vive Pro video passthrough, rendered with Unity 2019.4.34 at 75 cm/s.",
+        "tactile_onsets_ms_from_visual_onset": [
+          433,
+          866,
+          1299,
+          1732,
+          2165
+        ],
+        "seated_reported_distances_cm": [
+          167.17,
+          134.67,
+          102.17,
+          69.67,
+          37.12
+        ],
+        "response": "Left-hand controller button after a 10 ms right-controller vibration."
+      },
+      "training": "Seated participants use an 82 cm right-hand gripper to move 50 cubes individually between marked areas 85 cm from the chest, then return them for 100 movements."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": [
+            "Audio-tactile",
+            "Visuo-tactile"
+          ],
+          "source": "Ferroni et al. 2026, publisher Fig. 1, experimental setup; Ferroni et al. 2026, mmc1.docx, PPS control analyses, \u00a72.1"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "Neuropsychologia 229 (2026), article 109490, publisher version of record"
+        },
+        "trajectory_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "approach_paths_per_group": 1,
+            "sampled_onsets": 5
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a7\u00a72\u20133 (pp. 2\u20137), Figs. 1\u20134",
+          "gap": "Approach geometry varies by group. Audio assessments also include a stationary control."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": "Hand illustrated for both groups. Audio-tactile group has two table loudspeakers. Visuo-tactile group has a headset, handheld controllers and a virtual red sphere.",
+          "source": "Ferroni et al. 2026, publisher Fig. 1, experimental setup; Ferroni et al. 2026, publisher Fig. 5, tactile-onset axis and RT traces",
+          "gap": "Absolute geometry and trajectory profile unverified."
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "audio_tactile_sound_ms": 3000
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72.1.2 (pp. 3\u20134)",
+          "gap": "Visual stimulus full playback duration is unreported."
+        },
+        "stimulus_speed": {
+          "status": "reported_with_caveat",
+          "value": {
+            "visual_cm_s": 75
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72.1.2 (pp. 3\u20134)",
+          "gap": "Auditory apparent trajectory physical speed is unreported."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Looming pink noise",
+            "Flat pink noise",
+            "No sound during tactile baseline"
+          ],
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72.1.2 (pp. 3\u20134)"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Exponential nominal rise for looming sound. Far output decreases from maximum to silence while near output rises from minimum to maximum. Exact channel gain functions and SPL calibration are unreported.",
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72.1.2 (pp. 3\u20134)",
+          "gap": "Channel calibration and digital gain coefficients unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Two physical loudspeakers, Digitimer DS3 and keyboard in the audio-tactile group. HTC Vive Pro headset and controllers in the visuo-tactile group.",
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a7\u00a72.1.1\u20132 (Experiment 1)"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": {
+            "bimodal": 50,
+            "sound_only_catch": 40,
+            "touch_only_baseline": 10
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72.1.2 (pp. 3\u20134)",
+          "gap": "The audio-tactile group in Experiment 1."
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "The mixed design assigns one group per participant and repeats assessment pre/post.",
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72 (p. 2)",
+          "gap": "Within-session stimulus intermixing and randomization algorithm are unreported."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Random assignment to groups with the same fixed session order.",
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72 (p. 2)",
+          "gap": "Within-session order and blocking remain unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72 (p. 2)",
+          "gap": "The reviewed experiment methods supply no exact ITI and jitter schedule."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72 (p. 2)",
+          "gap": "Exact accepted RT window and online timeout are unreported in the article. A standing analysis example uses input-table filtering."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Pre-training PPS assessment, motor tool training, post-training PPS assessment. Approximately 10 minutes per session. The tool is absent from the two assessment sessions.",
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72 (p. 2)"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "audio_tactile": {
+              "device": "Digitimer DS3",
+              "shape": "Single monophasic rectangular constant-current pulse",
+              "site": "Dorsal right index finger, with paired electrodes."
+            },
+            "visuo_tactile": {
+              "device": "Right HTC Vive Pro controller",
+              "site": "Right hand",
+              "duration_ms": 10
+            }
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a7\u00a72.1.1\u20132 (Experiment 1)",
+          "gap": "Electrical pulse width and current setting are unreported."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "audio_tactile_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ],
+            "visuo_tactile_ms": [
+              433,
+              866,
+              1299,
+              1732,
+              2165
+            ]
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a7\u00a72.1.1\u20132 (Experiment 1)"
+        },
+        "baseline_strategy": {
+          "status": "reported_with_caveat",
+          "value": "Touch-only baseline and multimodal facilitation comparison.",
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72.1.2 (pp. 3\u20134)",
+          "gap": "The audio-tactile group in Experiment 1."
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "audio_tactile_ms": -700
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72.1.2 (pp. 3\u20134)",
+          "gap": "Applies to the audio-tactile group. Visual baseline timing is unreported."
+        },
+        "catch_trial_type": {
+          "status": "reported_with_caveat",
+          "value": "Looming or flat sound with no tactile pulse.",
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72.1.2 (pp. 3\u20134)",
+          "gap": "Applies to the audio-tactile group. Visual catch details are unreported."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a7\u00a72.1.1\u20132 (Experiment 1)",
+          "gap": "The reviewed main methods do not report assessment repetitions by onset."
+        },
+        "baseline_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a73 (pp. 6\u20137)",
+          "gap": "The documented audio protocol supplies a baseline share without an exact trial total."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a73 (pp. 6\u20137)",
+          "gap": "The documented audio protocol supplies a catch share without an exact trial total. The visual allocation is unreported."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "study_sessions": 3
+          },
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a72 (p. 2)",
+          "gap": "Blocks per assessment session are unreported."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. 2026, publisher version of record, \u00a73 (pp. 6\u20137)",
+          "gap": "Exact assessment totals are unreported. Training transfers and supplement input-row requirements have separate meanings."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Exact trial counts, block sizes, intertrial timing and response windows per assessment group are unreported.",
+      "Validate both assessments and the intervening physical training with the corresponding cohort and original geometry. Original realized trial sequences and participant analysis inputs are unavailable.",
+      "Run an independently calibrated dual-speaker electrocutaneous task and a synchronized Vive visual and haptic task. Original channel gain curves and measured stimulus latency are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2026.109490. Ferroni et al. 2026, publisher version of record, \u00a7\u00a72.1.1\u20132 (Experiment 1)"
+    }
+  ]
+}

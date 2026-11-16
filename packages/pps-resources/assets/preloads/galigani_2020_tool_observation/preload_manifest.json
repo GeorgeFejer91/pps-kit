@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "galigani_2020_tool_observation",
   "title": "Galigani 2020 Group 2, PPS after tool-use training",
-  "visible_variant_label": "",
+  "visible_variant_label": "A",
   "publication_status": "published",
   "profile_type": "static_near_far_audio_tactile_tool_observation_pps",
   "asset_mode": "bundled_local",

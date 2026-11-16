@@ -7,6 +7,7 @@
   "verification_status": "partial",
   "notes": "One logarithmic-distance session of the two-day study. Both source types and both silent-at-touch controls are encoded. Pair with the other distance profile and counterbalance session order across participants. The review gate remains blocked pending acoustic, tactile, and response validation.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.jneumeth.2019.108534",
     "profile_type": "right_front_looming_fixed_expectancy_audio_tactile_pps",
     "publication_study_row_id": "doi:10.1016/j.jneumeth.2019.108534",
     "source_scope": "The audiotactile reaction-time assessment. The three auditory discomfort tests and handedness screening are separate.",

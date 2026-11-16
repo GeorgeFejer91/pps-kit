@@ -1,0 +1,252 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "holmes_2019_osf_exp4",
+  "title": "Holmes OSF \u00b7 Experiment 4 \u00b7 Driving and pedal response",
+  "citation": "Holmes, N. P., Martin, D. J., Mitchell, W., Noorani, Z., & Thorne, A. (2020). Do sounds near the hand facilitate tactile reaction times? Four experiments and a meta-analysis provide mixed support and suggest a small effect size. OSF 73x59, manuscript revision 4.",
+  "doi": "10.17605/osf.io/73x59",
+  "source_url": "https://doi.org/10.17605/osf.io/73x59",
+  "verification_status": "partial",
+  "notes": "Inspect the author project's simulator task. The Designer shows the 2.875 ms far cue lead rounded to the nearest millisecond.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.17605/osf.io/73x59::d",
+    "publication_status": "author_project_revision",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "source_version": "March 2020 manuscript revision 4 in the 2019 OSF project, alongside ExperimentX task code and archived digital command records.",
+      "analyzed_n": 44,
+      "speaker_distances_cm": [
+        2.5,
+        70
+      ],
+      "driving_conditions": {
+        "Away": "Watch replay with hands beside the wheel. Stimulate right index finger.",
+        "Passive": "Hold the wheel and watch a replay. Stimulate the wheel at the right hand.",
+        "Active": "Operate the simulator with the same wheel stimulation site."
+      },
+      "trial_schedule": "Three counterbalanced driving conditions, with 30 trials per near/far distance within each condition, for 180 trials.",
+      "output_commands": {
+        "audio_file": "car_horn.mp3",
+        "source_hz": 11025,
+        "inclusive_sample_crop": [
+          3301,
+          6800
+        ],
+        "output_hz": 8000,
+        "nominal_duration_ms": 437.5,
+        "audio_minus_tactile_ms": {
+          "near": 0,
+          "far": -2.875
+        }
+      },
+      "response": "Brake as quickly as possible after feeling vibration. The 150 ms detection start is measured from the tactile command.",
+      "published_profile_ids": [
+        "holmes_2020_exp4"
+      ]
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Car horn waveform for auditory distractor and vibrotactile drive.",
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "Author's OSF Experiment4 folder supplies the exact car horn MP3 input and driving.m.",
+          "source": "OSF Experiment4 driving.m, settings and trial loop"
+        },
+        "trajectory_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Manuscript pp. 6\u201311, Experiment 1",
+          "gap": "The sound sources are stationary."
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "fixed_locations_cm": [
+              2.5,
+              70
+            ],
+            "reference": "participant's finger"
+          },
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "paper_ms": 438,
+            "code_ms": 437.5
+          },
+          "source": "Manuscript pp. 18\u201320, Experiment 4; OSF Experiment4 driving.m, settings and trial loop",
+          "gap": "Published value rounds the 3500-sample segment at 8000 output samples/s."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Manuscript pp. 6\u201311, Experiment 1",
+          "gap": "No movement."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "near static",
+            "far static"
+          ],
+          "source": "Manuscript pp. 6\u201311, Experiment 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "near_output_scalar": 0.95,
+            "far_output_scalar": 1
+          },
+          "source": "OSF Experiment4 driving.m, settings and trial loop",
+          "gap": "Code multipliers. Physical SPL calibration unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Driving Simulator 2013, computer steering wheel and foot pedals. Vibrator on right index or right rear of wheel. Two fixed speakers.",
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Car horn vibration with near sound",
+            "Car horn vibration with far sound"
+          ],
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Pseudorandom near/far trials within each of the three driving-related conditions.",
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "One 60-trial block per condition. Away, Passive and Active order counterbalanced.",
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "code_pretrial_delay_ms": [
+              1000,
+              2000
+            ],
+            "code_recording_window_ms": 2500,
+            "code_configured_iti_ms": 1000
+          },
+          "source": "Manuscript pp. 18\u201320, Experiment 4; OSF Experiment4 driving.m, settings and trial loop",
+          "gap": "Public code draws uniform pretrial delay. ITI variable is defined but unused in that trial loop. Between-block breaks varied by cohort."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": {
+            "code_recording_window_ms": 2500,
+            "code_tactile_onset_after_recording_ms": 100,
+            "code_detection_starts_after_tactile_ms": 150
+          },
+          "source": "OSF Experiment4 driving.m, settings and trial loop",
+          "gap": "Code locates pedal input in recorded samples. Separate timeout behavior beyond the window is unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Press brake pedal as soon as vibration is felt while watching or playing the simulator.",
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "drive": "car horn waveform",
+            "duration_ms": 438,
+            "site_by_condition": {
+              "Away": "right index finger",
+              "Passive": "right side of steering wheel",
+              "Active": "right side of steering wheel"
+            }
+          },
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        },
+        "soa_table": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "code_audio_minus_tactile_output_onset_ms": {
+              "near": 0,
+              "far": -2.875
+            }
+          },
+          "source": "Manuscript pp. 18\u201320, Experiment 4; OSF Experiment4 driving.m, settings and trial loop",
+          "gap": "Paper reports 2.5 and 70 cm speaker distances and no exact scheduling offset. Code computes 23 samples at 8 kHz from a different pair of distances (5 and 105 cm). Do not infer measured arrival synchrony."
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": false,
+          "source": "Manuscript pp. 18\u201320, Experiment 4",
+          "gap": "Each trial pairs horn vibration with sound."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Manuscript pp. 18\u201320, Experiment 4",
+          "gap": "No tactile-only baseline."
+        },
+        "catch_trial_type": {
+          "status": "reported_absent",
+          "value": false,
+          "source": "Manuscript pp. 18\u201320, Experiment 4",
+          "gap": "All 60 trials per block contain a tactile target."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_distance_per_driving_condition": 30
+          },
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        },
+        "baseline_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Manuscript pp. 18\u201320, Experiment 4",
+          "gap": "All trials contain a sound."
+        },
+        "catch_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Manuscript pp. 18\u201320, Experiment 4",
+          "gap": "No no-touch trials reported in the stated allocation."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 3,
+          "source": "Manuscript pp. 18\u201320, Experiment 4"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 180,
+          "source": "Manuscript pp. 18\u201320, Experiment 4",
+          "gap": "Three driving conditions \u00d7 60 targets each."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Recreate the driving simulator with independent video replay and active steering sessions, acquire pedal timing and switch tactile loop from index to wheel by condition.",
+      "Recover or validate horn samples and calibration, audio/tactile coupling and near/far speaker routing. Exact delivered physical timing is unverified.",
+      "Reconcile manuscript and source-code timing, recover a repeatable order policy, and retain the corresponding apparatus setup for each condition."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.17605/osf.io/73x59. OSF manuscript revision 4, pp. 18\u201320, Experiment 4. OSF 73x59, driving.m and archived command records"
+    }
+  ]
+}

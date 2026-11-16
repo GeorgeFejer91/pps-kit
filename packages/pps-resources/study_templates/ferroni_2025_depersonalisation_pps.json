@@ -1,0 +1,289 @@
+{
+  "template_id": "ferroni_2025_depersonalisation_pps",
+  "title": "Ferroni 2025 · Depersonalisation and looming PPS",
+  "citation": "Ferroni, F., Arcuri, E., Ardizzi, M., Chinchella, N., Gallese, V., & Ciaunica, A. (2025). Lost in time and space? Multisensory processing of peripersonal space and time perception in people with frequent experiences of depersonalisation. Quarterly Journal of Experimental Psychology, 78(6), 1177–1194.",
+  "source_url": "https://doi.org/10.1177/17470218241261645",
+  "doi": "10.1177/17470218241261645",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1177/17470218241261645",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": "70 adults stratified into groups of 35 using low (≤20) and high (≥50) Cambridge Depersonalisation Scale scores.",
+      "sessions": "Counterbalance the PPS and mental time travel tasks on the same day. The time travel task measures temporal judgment in the same study and has a distinct design.",
+      "response": "Detect a single pulse applied to the hairy side of the right index finger, while blindfolded with right palm down. Ignore the looming and flat sounds and respond quickly to touch.",
+      "analysis": "Compare reaction times across five sound-relative delays. Estimate PSE and DL from trimmed reaction-time means and compare the score groups.",
+      "version": "2025 journal issue, online-first publication in 2024.",
+      "sound": "3 s stimuli sampled at 44.1 kHz. For looming, the far output decreases and the near output increases. Supplement places the speakers 100 cm apart.",
+      "nominal_paired_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "nominal_baseline_onset_ms": -700,
+      "touch_setup": "Paired electrodes and a Digitimer DS3 deliver a single 100 μs pulse in the supplementary settings. Individual adjustments appeared above threshold. The main text and supplement describe electrical output differently.",
+      "response_hardware": "Left index finger at keyboard. Missed target trials repeat.",
+      "allocation": "Main text reports 60% paired trials, with tactile baselines and sound-only catches making up the rest. Supplement prints two blocks, 120 total trials and 18 targets per delay by sound, figures that do not imply the stated proportions."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Pink noise (1/f), used in flat and looming conditions.",
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 4, The PPS task"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "noise": "pink noise",
+            "sample_rate_hz": 44100
+          },
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 4, The PPS task",
+          "gap": "Original waveform, generator and seed unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "apparent_approach": 1,
+            "static_comparator": 1
+          },
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), pp. 4–5, The PPS task and Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "near_speaker_distance_from_right_hand_cm_approx": 10,
+            "far_speaker_distance_from_body_cm": 100,
+            "method": "Fade out far speaker while fading in near speaker.",
+            "interspeaker_separation_cm_reported": 100
+          },
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), pp. 4–5, The PPS task and Fig. 1; SAGE journal supplement, §1 Apparatus and Procedure of Peripersonal Space task",
+          "gap": "Far-speaker distance has different anchors in the supplement and earlier main-PDF review. Metric apparent speed and exact 3D coordinates are unresolved."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 3000,
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 4, The PPS task"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), pp. 4–5, The PPS task and Fig. 1",
+          "gap": "The speakers are fixed and apparent motion is intensity-based. A rate from subtracting distances defined relative to different anchors is unsupported."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming",
+            "flat"
+          ],
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), pp. 4–5, The PPS task and Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming_level_db": [
+              55,
+              70
+            ],
+            "looming_shape": "exponential increase",
+            "flat_level_db": 62.5,
+            "far_channel": "decreases to silence",
+            "near_channel": "increases to maximum"
+          },
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), pp. 4–5, The PPS task and Fig. 1",
+          "gap": "Exact per-channel gain curves, their calibration and the level reference are unverified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Two physical loudspeakers, near the right hand and far from the participant.",
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), pp. 4–5, The PPS task and Fig. 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Audio-tactile target",
+            "Auditory-only catch",
+            "Unimodal tactile baseline"
+          ],
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 5, The PPS task and Fig. 1"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "audio_tactile_target_percent": 60,
+            "catch_plus_baseline_percent": 40,
+            "targets_and_catches": "randomly intermingled"
+          },
+          "source": "SAGE journal supplement, §1 Apparatus and Procedure of Peripersonal Space task",
+          "gap": "The absolute quotas conflict. Baseline placement and catch/baseline split are unresolved."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "printed_block_count": 2,
+            "targets_and_catches": "randomly intermingled"
+          },
+          "source": "SAGE journal supplement, §1 Apparatus and Procedure of Peripersonal Space task",
+          "gap": "The supplement reports two blocks. Exact trial order, randomization algorithm and repetition scope are unverified. The earlier schizophrenia supplement contains the same timing and allocation wording. The journal depersonalisation supplement reports these values directly, but the original task and session logs are unavailable."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "printed_iti_ms": 1000
+          },
+          "source": "SAGE journal supplement, §1 Apparatus and Procedure of Peripersonal Space task",
+          "gap": "The earlier schizophrenia supplement contains the same timing and allocation wording. The journal depersonalisation supplement reports these values directly, but the original task and session logs are unavailable. Jitter and the interval reference beyond following the trial are unverified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), pp. 4–5, The PPS task and Fig. 1",
+          "gap": "The prior review found no numeric PPS response deadline."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Ignore the sounds, respond rapidly to touch with the left index finger on a keyboard, and repeat a trial after a missed response.",
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), pp. 4–5, The PPS task and Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "Digitimer DS3",
+            "target_site": "hairy surface of right index finger",
+            "delivery": "paired electrodes",
+            "waveform": "single rectangular monophasic pulse",
+            "pulse_width_us": 100,
+            "observed_intensity_range_mA": [
+              4.8,
+              9.4
+            ],
+            "calibration": "set clearly above individual threshold at session start"
+          },
+          "source": "SAGE journal supplement, §1 Apparatus and Procedure of Peripersonal Space task",
+          "gap": "The device is described as constant-current and the pulse as constant-voltage. Actual electrical drive configuration requires apparatus evidence."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "D1": 300,
+            "D2": 800,
+            "D3": 1500,
+            "D4": 2200,
+            "D5": 2700,
+            "unit": "ms",
+            "anchor": "auditory onset"
+          },
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 5, The PPS task and Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Unimodal touch during silence before the nominal sound period to control expectancy.",
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 5, The PPS task and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": {
+            "D0": -700,
+            "unit": "ms",
+            "anchor": "nominal sound onset"
+          },
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 5, The PPS task and Fig. 1"
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Looming or flat sound without tactile stimulation.",
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 5, The PPS task and Fig. 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported_with_caveat",
+          "value": {
+            "printed_count_per_delay_by_sound": 18
+          },
+          "source": "SAGE journal supplement, §1 Apparatus and Procedure of Peripersonal Space task",
+          "gap": "18 targets × 5 delays × 2 sounds would give 180 target trials. The printed 60% of 120 gives 72 targets. The document does not reconcile the two."
+        },
+        "baseline_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 5, The PPS task and Fig. 1",
+          "gap": "Tactile-only baseline shares the 40% remainder with auditory-only catches. Its separate allocation is unknown."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 5, The PPS task and Fig. 1",
+          "gap": "Auditory-only catches share the 40% remainder with D0. Their separate allocation is unknown."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": 2,
+          "source": "SAGE journal supplement, §1 Apparatus and Procedure of Peripersonal Space task",
+          "gap": "The earlier schizophrenia supplement contains the same timing and allocation wording. The journal depersonalisation supplement reports these values directly, but the original task and session logs are unavailable. The trial and block denominators remain unresolved."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": 120,
+          "source": "SAGE journal supplement, §1 Apparatus and Procedure of Peripersonal Space task",
+          "gap": "18 targets × 5 delays × 2 sounds would give 180 target trials. The printed 60% of 120 gives 72 targets. The document does not reconcile the two."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Reconcile the paper and supplement trial counts, catch versus baseline split, repeat placement, and output mode from the original task records.",
+      "Recover or validate the two-channel sound cross-fade envelope, physical speaker calibration and synchronized electrocutaneous delivery.",
+      "Verify the scoring pipeline and the reported SD/SE labeling with the original analysis."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Ferroni 2025 · Depersonalisation and looming PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [
+        "hairy right index finger"
+      ],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1177/17470218241261645. Issue pp. 1179–1183, Participants, The PPS task and Fig. 1A, and supplementary PPS Methods"
+    }
+  ]
+}

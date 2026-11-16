@@ -1,0 +1,387 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "loescher_2025_cardiac_interoception_pnas",
+  "title": "Loescher 2025 \u00b7 Cardiac interoception and near/far PPS",
+  "citation": "Loescher, M., Haggard, P., & Tallon-Baudry, C. (2025). Interoception vs. Exteroception: Cardiac interoception competes with tactile perception, yet also facilitates self-relevance encoding. Proceedings of the National Academy of Sciences, 122(49), e2516229122.",
+  "doi": "10.1073/pnas.2516229122",
+  "source_url": "https://doi.org/10.1073/pnas.2516229122",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1073/pnas.2516229122",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "analyzed_n": 37,
+      "apparatus": "Place two fixed Visaton FRS 8 loudspeakers forward of the participant, less than 10 cm and 130 cm from the right hand. Stabilize the head in a chinrest and fix gaze past the far speaker.",
+      "tone": {
+        "nominal_frequency_hz": 784,
+        "nominal_duration_ms": 50,
+        "source_wav_sample_rate_hz": 48000,
+        "requested_device_sample_rate_hz": 44100,
+        "scope": "The original WAV samples and software output request differ in rate. Delivered tone duration and spectrum depend on how the playback path handled the mismatch."
+      },
+      "tactile_target": "A 200 \u03bcs square electrocutaneous pulse delivered on the right hand dorsum with a Digitimer DS7A. Recheck twice-threshold intensity when changing electrode site after each block.",
+      "bimodal_timing": "The task code commands sound 40 ms after the tactile trigger. The preprocessing re-creates touch onset 40 ms before the bimodal audio marker. Actual delivery follows hardware latency.",
+      "pool": {
+        "blocks": 5,
+        "trials_per_block": 60,
+        "per_condition_per_block": 12,
+        "conditions": [
+          "Audio-tactile near",
+          "Audio-tactile far",
+          "Tactile only",
+          "Auditory only near",
+          "Auditory only far"
+        ]
+      },
+      "timing": "Sample the pre-event delay uniformly from 4 to 8 s. Enter and exit each block with a 30 s physiological rest reference. The 1 s response window is anchored to the tactile command in tactile trials.",
+      "response": "Right-index key press for tactile events, withheld on sound-only trials.",
+      "analysis": "Classify trials by observed cardiac phase and relate heartbeat-evoked EEG and tactile reaction time to the fixed near/far contrast. The original analysis also evaluates somatosensory potentials, and applies heartbeat shuffles.",
+      "version": "PNAS version of record. The task materials and 2025 preprint describe the acquisition lineage."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported_with_caveat",
+          "value": {
+            "paper": {
+              "nominal_hz": 784,
+              "nominal_ms": 50,
+              "level_db_approx": 60,
+              "calibration": "Room EQ Wizard and MiniDSP EARS, equalization at the sources. Near remains subjectively louder."
+            },
+            "wave": {
+              "name": "puresound_784Hz.wav",
+              "rate_hz": 48000,
+              "bits": 16,
+              "channels": 1,
+              "frames": 2401,
+              "duration_ms": 50.020833333333336,
+              "spectral_peak_hz": 784.0576171875,
+              "peak_pcm_sample": 29492
+            },
+            "code": {
+              "device_rate_hz": 44100,
+              "driver": "PsychPortAudio",
+              "amplifier": "Marantz per script header",
+              "outputs": {
+                "near": {
+                  "slave_channel": 2,
+                  "gain": 0.15
+                },
+                "far": {
+                  "slave_channel": 5,
+                  "gain": 0.265
+                }
+              },
+              "master_gain": 1,
+              "amplifier_knob_value_comment": 50,
+              "wav_rate_return_used": false
+            },
+            "mismatch": {
+              "conditional_effective_hz": 720.3529357910156,
+              "conditional_duration_ms": 54.44444444444444,
+              "assumption": "If unresampled PCM is rendered at the requested 44.1 kHz rate. The experiment\u2019s delivered spectrum and hardware clock are unverified. Preserve paper, file and code values separately."
+            }
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli; OSF yzmx4 v.1.1, Task/Code/INTESPACE_task.m, ll. 101\u2013188 and 301\u2013520; OSF yzmx4 v.1.1, Task/Stimuli/puresound_784Hz.wav, RIFF header and PCM spectrum",
+          "gap": "If unresampled PCM is rendered at the requested 44.1 kHz rate. The experiment\u2019s delivered spectrum and hardware clock are unverified. Preserve paper, file and code values separately."
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "protocol": "MATLAB 2017b/Psychtoolbox",
+            "source": "Original OSF task code and tone verified",
+            "file": {
+              "path": "Task/Stimuli/puresound_784Hz.wav",
+              "osf_id": "685419331572426516eb70b7",
+              "bytes": 4846,
+              "sha256": "dde2375ea174a2146381564f47db85d37d3ae2f35ad2f9a13c9f12ebbda2d286",
+              "storage": "external_verified"
+            }
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli; OSF yzmx4 v.1.1, Task/Code/INTESPACE_task.m, ll. 101\u2013188 and 301\u2013520; OSF yzmx4 v.1.1, Task/Stimuli/puresound_784Hz.wav, RIFF header and PCM spectrum",
+          "gap": "The WAV rate and playback request differ. Delivered sound and realized study build unverified."
+        },
+        "trajectory_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli",
+          "gap": "The sound is presented at two stationary sites."
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "movement": "none",
+            "speaker_distance_from_hand_cm": {
+              "near": "<10",
+              "far": 130
+            }
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli"
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "paper_nominal_ms": 50,
+            "wav_duration_ms": 50.020833333333336,
+            "conditional_duration_ms": 54.44444444444444
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli; OSF yzmx4 v.1.1, Task/Stimuli/puresound_784Hz.wav, RIFF header and PCM spectrum; OSF yzmx4 v.1.1, Task/Code/INTESPACE_task.m, ll. 101\u2013188 and 301\u2013520",
+          "gap": "If unresampled PCM is rendered at the requested 44.1 kHz rate. The experiment\u2019s delivered spectrum and hardware clock are unverified. Preserve paper, file and code values separately."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli",
+          "gap": "The speakers are stationary."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Near fixed tone",
+            "Far fixed tone"
+          ],
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "paper": {
+              "nominal_hz": 784,
+              "nominal_ms": 50,
+              "level_db_approx": 60,
+              "calibration": "Room EQ Wizard and MiniDSP EARS, equalization at the sources. Near remains subjectively louder."
+            },
+            "code": {
+              "device_rate_hz": 44100,
+              "driver": "PsychPortAudio",
+              "amplifier": "Marantz per script header",
+              "outputs": {
+                "near": {
+                  "slave_channel": 2,
+                  "gain": 0.15
+                },
+                "far": {
+                  "slave_channel": 5,
+                  "gain": 0.265
+                }
+              },
+              "master_gain": 1,
+              "amplifier_knob_value_comment": 50,
+              "wav_rate_return_used": false
+            }
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli; OSF yzmx4 v.1.1, Task/Code/INTESPACE_task.m, ll. 101\u2013188 and 301\u2013520",
+          "gap": "Source equalization and per-channel software gains reported. Delivered loudness and ear calibration unverified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Two Visaton FRS 8 full-range speakers on table. Matlab 2017b/Psychtoolbox on MacBook Air. BioSemi ActiveTwo EEG and ECG at 1024 Hz.",
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "ATnear",
+            "ATfar",
+            "T",
+            "Anear",
+            "Afar"
+          ],
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "All five trial conditions randomly intermixed in every block.",
+          "source": "PNAS p. 8, Experimental Procedure"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Five blocks each with randomized trial order.",
+          "source": "PNAS p. 8, Experimental Procedure",
+          "gap": "Randomization algorithm and seed not reported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "foreperiod_ms": [
+              4000,
+              8000
+            ],
+            "code_distribution": "Uniform draws from MATLAB rand scaled and offset to [4,8) seconds. Separate randperm shuffles trial modality and balanced distances.",
+            "sound_relative_to_touch_ms": 40,
+            "touch_relative_to_sound_ms": -40,
+            "software_acoustic_path_delay_ms": [
+              0,
+              0
+            ],
+            "response_max_ms": 1000,
+            "post_hit_ms": 100,
+            "after_catch_false_alarm_code_ms": 5000,
+            "physiological_baseline_ms_each": 30000,
+            "block_baseline_count": 2,
+            "ttl": {
+              "initial_file": 24,
+              "quiet_baseline": 1,
+              "trial_start": 2,
+              "auditory_only": 4,
+              "tactile_only": 8,
+              "bimodal": 16,
+              "response": 32
+            },
+            "ttl_note": "Code is consistent with Task README PDF p. 3 trigger list. Task README PDF p. 2 diagram swaps the auditory and tactile labels for 4 and 8. In the bimodal branch the TTL 16 write follows the scheduled sound-start call; distinguish the tactile command from the EEG event marker."
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli; OSF yzmx4 v.1.1, Task/Code/INTESPACE_task.m, ll. 101\u2013188 and 301\u2013520",
+          "gap": "Code confirms uniform nominal foreperiod. Realized random draws and hardware timing unverified."
+        },
+        "response_window": {
+          "status": "reported",
+          "value": {
+            "maximum_ms": 1000,
+            "response": "Key press with right index finger for tactile targets. Withhold response on auditory-only catches."
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli"
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": {
+            "foreperiod_ms": [
+              4000,
+              8000
+            ],
+            "code_distribution": "Uniform draws from MATLAB rand scaled and offset to [4,8) seconds. Separate randperm shuffles trial modality and balanced distances.",
+            "sound_relative_to_touch_ms": 40,
+            "touch_relative_to_sound_ms": -40,
+            "software_acoustic_path_delay_ms": [
+              0,
+              0
+            ],
+            "response_max_ms": 1000,
+            "post_hit_ms": 100,
+            "after_catch_false_alarm_code_ms": 5000,
+            "physiological_baseline_ms_each": 30000,
+            "block_baseline_count": 2,
+            "ttl": {
+              "initial_file": 24,
+              "quiet_baseline": 1,
+              "trial_start": 2,
+              "auditory_only": 4,
+              "tactile_only": 8,
+              "bimodal": 16,
+              "response": 32
+            },
+            "ttl_note": "Code is consistent with Task README PDF p. 3 trigger list. Task README PDF p. 2 diagram swaps the auditory and tactile labels for 4 and 8. In the bimodal branch the TTL 16 write follows the scheduled sound-start call; distinguish the tactile command from the EEG event marker."
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli; OSF yzmx4 v.1.1, Task/Code/INTESPACE_task.m, ll. 101\u2013188 and 301\u2013520; OSF yzmx4 v.1.1, Task/README - Task.pdf, pp. 1\u20135",
+          "gap": "Includes code-only 5 s false-alarm timeout and trigger-label discrepancy."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "stimulator": "Digitimer DS7A",
+            "modality": "Single constant-current electrical square pulse",
+            "site": "Right hand dorsum, between middle and index tendons or middle and ring tendons",
+            "electrodes": "Two flat Ag/AgCl surface contacts, 8 mm diameter",
+            "pulse_us": 200,
+            "pulse_ms": 0.2,
+            "calibration": "Twice individual detection threshold from method of limits. Alternate site and recalibrate every block.",
+            "reported_mean_mA": 3.7,
+            "reported_sd_mA": 0.7,
+            "range_v1_printed_mA": [
+              25.3,
+              51
+            ],
+            "range_v2_and_journal_mA": [
+              2.5,
+              5.1
+            ],
+            "range_note": "The v1 range excludes its own mean. The later versions explicitly correct the printed range."
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli",
+          "gap": "The preprint v1 range is retained as version-specific evidence."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "reference": "tactile onset",
+            "sound_onset_ms": 40,
+            "equivalent_touch_onset_relative_to_sound_ms": -40
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Tactile-only T condition within each block. Separately, every block starts and ends with 30 s of quiet sitting for physiological baseline.",
+          "source": "PNAS p. 8, Experimental Procedure"
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": {
+            "unimodal_tactile_after_trial_start_ms": [
+              4000,
+              8000
+            ],
+            "standalone_physiological_baseline_ms": 30000
+          },
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli; PNAS p. 8, Experimental Procedure"
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Auditory-only near and far, withhold key press.",
+          "source": "PNAS pp. 3 and 8, Fig. 1 and Task and Stimuli"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_condition_per_block": 12,
+            "per_condition_all_blocks": 60
+          },
+          "source": "PNAS p. 8, Experimental Procedure"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 60,
+          "source": "PNAS p. 8, Experimental Procedure",
+          "gap": "One tactile-only cell \u00d7 12 repetitions \u00d7 5 blocks, excluding the quiet-sitting intervals and training."
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": 120,
+          "source": "PNAS p. 8, Experimental Procedure",
+          "gap": "Two auditory-only conditions \u00d7 12 repetitions \u00d7 5 blocks."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 5,
+          "source": "PNAS p. 8, Experimental Procedure"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 300,
+          "source": "PNAS p. 8, Experimental Procedure"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Deliver the original or validated stationary tone through two physical, calibrated output channels. Reconcile device rate with source rate and measure the near/far ear-level signals.",
+      "Synchronize the calibrated electrical pulse, two loudspeakers, key responses, EEG, ECG and fixation recording on the original timing contract. Reconcile TTL labels with the author event parser.",
+      "The acquisition path must support 4\u20138 s randomized pre-event timing, auditory-only catches, tactile-only controls and quiet physiological baselines. Validate physiological preprocessing and heartbeat-locked analyses on aligned records."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1073/pnas.2516229122. Methods, Task and Stimuli and Fig. 1. Author OSF project yzmx4 v1.1, task code and event conversion"
+    }
+  ]
+}

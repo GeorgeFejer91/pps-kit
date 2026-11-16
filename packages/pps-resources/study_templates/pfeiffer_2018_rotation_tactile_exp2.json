@@ -1,0 +1,309 @@
+{
+  "template_id": "pfeiffer_2018_rotation_tactile_exp2",
+  "title": "Pfeiffer 2018 · Experiment 2, rotation and touch",
+  "citation": "Pfeiffer, C., Noel, J. P., Serino, A., & Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. European Journal of Neuroscience, 47(7), 800-811.",
+  "source_url": "https://doi.org/10.1111/ejn.13872",
+  "doi": "10.1111/ejn.13872",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1111/ejn.13872::b",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "conditions": [
+        "Leftward yaw",
+        "Rightward yaw",
+        "Stationary reference"
+      ],
+      "head_pitch_deg_approx": 30,
+      "touch": {
+        "site": "Forehead centre",
+        "motor_command_ms": 200,
+        "command_onsets_ms": [
+          500,
+          1000,
+          1500,
+          2000,
+          2500,
+          3000,
+          3500
+        ],
+        "anchor": "Trial and, where applicable, rotation onset"
+      },
+      "pool": {
+        "rotation_paired": 140,
+        "stationary_touch": 70,
+        "known_main_total": 210,
+        "extra_catches": null
+      },
+      "response": "Detect touch quickly. Compare reaction time across yaw directions, stationary reference and seven latencies."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "No experimental sound."
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "No auditory stimulus."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "No auditory path."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "No sound trajectory."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "tactile_ms": 200
+          },
+          "source": "Journal pp. 802–803, Stimuli and apparatus and Fig. 1"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "No acoustic trajectory."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "No experimental audio."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "No auditory stimulus."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "platform": "200 cm motorized platform, padded racing seat, PCI-7352 servo and LabVIEW 8.6",
+            "tactile": "Precision MicroDrives shaftless motor model 312-101",
+            "fixation": {
+              "monitor": "Samsung Syncmaster 2233RZ",
+              "refresh_hz": 120,
+              "diagonal_inches": 22,
+              "eye_distance_cm": 29,
+              "visual_angles_deg": {
+                "vertical": 56,
+                "horizontal": 80
+              }
+            }
+          },
+          "source": "Journal p. 803, Vestibular stimuli and Fig. 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "derived",
+          "value": {
+            "rotating_touch": 140,
+            "stationary_touch": 70
+          },
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "Two rotation directions and one stationary condition, seven offsets and ten per cell."
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Left, right, and stationary time cells, same procedure as Experiment 1.",
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "Exact scheduling of trial types and catch allocations unknown."
+        },
+        "blocked_or_random_order": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "Exact blocks and sequence unspecified."
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "after_stimulation_deceleration_ms": 1000,
+            "stationary_rest_ms": [
+              2500,
+              3500
+            ],
+            "uniform_step_ms": 100
+          },
+          "source": "Journal p. 803, Vestibular stimuli and Fig. 1"
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pp. 803–804, Experiment 1",
+          "gap": "Speeded response; numeric cutoff unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "response": "right index on serial keyboard as quickly and accurately as possible to forehead vibration",
+            "ignore": "sound and rotation as applicable",
+            "no_target": "withhold"
+          },
+          "source": "Journal p. 804, Experiment 2"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "center of forehead",
+            "device": "Precision MicroDrives shaftless motor model 312-101",
+            "duration_ms": 200,
+            "nominal_frequency_hz": 150,
+            "specifications": {
+              "voltage_v": 3,
+              "current_ma": 60,
+              "rpm": 9000,
+              "mass_g": 5,
+              "area_mm2": 113,
+              "rise_to_max_speed_ms": 50
+            }
+          },
+          "source": "Journal pp. 802–803, Stimuli and apparatus and Fig. 1",
+          "gap": "Values for voltage/current/speed are motor specifications; delivered amplitude and force unreported."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "labels": [
+              "T1",
+              "T2",
+              "T3",
+              "T4",
+              "T5",
+              "T6",
+              "T7"
+            ],
+            "onset_ms": [
+              500,
+              1000,
+              1500,
+              2000,
+              2500,
+              3000,
+              3500
+            ],
+            "anchor": "trial onset and rotation onset when active"
+          },
+          "source": "Journal p. 804, Experiment 2"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Stationary tactile-only at matched onset times.",
+          "source": "Journal p. 804, Experiment 2"
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": {
+            "trial_onset_ms": [
+              500,
+              1000,
+              1500,
+              2000,
+              2500,
+              3000,
+              3500
+            ],
+            "audio_present": false
+          },
+          "source": "Journal pp. 803–804, Experiment 1"
+        },
+        "catch_trial_type": {
+          "status": "reported_with_caveat",
+          "value": "Experiment 2 refers to Experiment 1 procedure.",
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "No separate catch family and count explicitly enumerated for this experiment."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": 10,
+          "source": "Journal p. 804, Experiment 2"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 70,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "Seven delays × ten repeats in the stationary condition."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "Exact catch count unknown."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pp. 803–804, Experiment 1",
+          "gap": "Block count not enumerated."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "main": 210
+          },
+          "source": "Journal p. 804, Experiment 2",
+          "gap": "Three conditions × seven times × ten. Extra catches unverified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "A vestibular drive scheduler with encoder feedback must synchronize measured yaw and tactile onset. Exact device latency and realized trajectory require calibration.",
+      "Catch count and trial allocation beyond the main 210 trials are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Pfeiffer 2018 · Experiment 2, rotation and touch",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [
+        "Forehead centre"
+      ],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1111/ejn.13872. Journal p. 804, Experiment 2; Journal p. 803, Vestibular stimuli and Fig. 1"
+    }
+  ]
+}

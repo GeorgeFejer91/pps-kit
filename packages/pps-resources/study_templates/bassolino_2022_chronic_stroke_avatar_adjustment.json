@@ -1,0 +1,221 @@
+{
+  "template_id": "bassolino_2022_chronic_stroke_avatar_adjustment",
+  "title": "Bassolino 2022 · Chronic stroke avatar adjustment",
+  "citation": "Bassolino et al. (2022). Body and peripersonal space representations in chronic stroke patients with upper limb motor deficits. Brain Communications, 4(4), fcac179.",
+  "source_url": "https://doi.org/10.1093/braincomms/fcac179",
+  "doi": "10.1093/braincomms/fcac179",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1093/braincomms/fcac179#avatar-adjustment",
+    "publication_status": "published",
+    "profile_type": "companion_assessment_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "companion_pps_profile_id": "bassolino_2022_chronic_stroke_pps",
+      "analyzed": {
+        "patients": 60,
+        "controls": 47
+      },
+      "display": "Age- and gender-matched MakeHuman avatar in diagonal perspective on a 52 × 32 cm display. Cover shoulders, arms and hands with white cloth.",
+      "factors": {
+        "body_part": [
+          "hand",
+          "arm"
+        ],
+        "dimension": [
+          "width",
+          "length"
+        ],
+        "side": [
+          "left",
+          "right"
+        ],
+        "starting_extreme": [
+          "enlarged",
+          "shrunk"
+        ]
+      },
+      "allocation": {
+        "blocks": 2,
+        "per_block": 16,
+        "total": 32,
+        "per_cell": 2
+      },
+      "response": "Participant says how to adjust the highlighted dimension and verbally confirms perceived match. The experimenter operates the keyboard.",
+      "outcome": "Record adjusted/reference ratio for the dimension. Compute shape index by dividing normalized width by normalized length."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Age/gender matched adjustable visual avatar",
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": "52 × 32 cm monitor and MakeHuman-derived model",
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results",
+          "gap": "The supplement links the 1.1.0 release page. Exact installed build unverified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Limb order randomized",
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Verbally guide experimenter keyboard adjustments until felt size matches",
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 32,
+          "source": "Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires an operator-controlled avatar renderer, age- and gender-specific reference assets, dimensional change and continuous confirmation capture.",
+      "Original model parameters, starting scales, update increments and delivered visual calibration are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Bassolino 2022 · Chronic stroke avatar adjustment",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1093/braincomms/fcac179. Supplement pp. 8–10, 16–19, §1.4 and AAT results"
+    }
+  ]
+}

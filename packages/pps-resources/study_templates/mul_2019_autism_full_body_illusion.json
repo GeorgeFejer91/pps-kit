@@ -1,0 +1,236 @@
+{
+  "template_id": "mul_2019_autism_full_body_illusion",
+  "title": "Mul 2019 · Full-body illusion and self-location",
+  "citation": "Mul et al. (2019). Altered bodily self-consciousness and peripersonal space in autism. Autism, 23(8), 2055–2067.",
+  "source_url": "https://doi.org/10.1177/1362361319838950",
+  "doi": "10.1177/1362361319838950",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1177/1362361319838950::full-body-illusion",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": {
+        "autistic": 22,
+        "non_autistic": 25
+      },
+      "paired_behavior_profile_id": "mul_2019_autism_pps",
+      "sequence": "The four illusion episodes follow the PPS task. Randomize body versus object crossed with synchronous versus asynchronous stroking, one 120 s episode per condition.",
+      "camera_setup": "Custom Unity camera feed to an Oculus Rift CV1. Camera is 230 cm from the visible back or person-sized box. In box conditions the participant stands 100 cm laterally from the box and outside the view. The experimenter stays out of frame.",
+      "latency_ms": {
+        "synchronous_exclusive_upper_bound": 50,
+        "asynchronous_visual_delay": 400
+      },
+      "stimulation": "Stroke the participant's back manually with a stick. For object episodes stroke the box and the participant's back simultaneously at corresponding locations, with two sticks.",
+      "response": "After each induction, close eyes, remove HMD, guide the participant 150 cm backward, and record their standing location after they walk to the estimated origin. Follow with seven statements on a seven-level agreement scale, with randomized item order.",
+      "outcome": "Calculate self-location drift and score the illusion and control questionnaire items separately. An additional forehead-letter task appears only in the related thesis procedure."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "body_or_box_to_camera_cm": 230,
+            "participant_offset_from_box_cm": 100,
+            "box": "cardboard, person-sized height and width",
+            "camera_view": "participant's back or box; experimenter out of view",
+            "hmd": "Oculus Rift CV1",
+            "control": "custom Unity camera feed"
+          },
+          "source": "Mul accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "body synchronous",
+            "body asynchronous",
+            "object synchronous",
+            "object asynchronous"
+          ],
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Four separate induction conditions, presented in randomized order.",
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Randomized condition order. Seven questionnaire items also randomized.",
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1",
+          "gap": "Transition durations and recovery periods across conditions unspecified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Mul accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1",
+          "gap": "No deadline specified for walking or ratings."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "stroking_per_condition_ms": 120000,
+            "synchronous_visual_latency_ms": {
+              "less_than": 50
+            },
+            "asynchronous_visual_delay_ms": 400,
+            "asynchrony_direction": "visual feed delayed relative to touch",
+            "after_each_condition": [
+              "close eyes and remove HMD",
+              "guided 150 cm backward",
+              "walk to estimated start",
+              "rate seven statements"
+            ]
+          },
+          "source": "Mul accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "site": "back",
+            "mechanism": "manual stick stroking; in object conditions a second stick synchronously strokes the box",
+            "duration_s": 120
+          },
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 4,
+          "source": "Accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": {
+            "condition_episodes": 4
+          },
+          "source": "Mul accepted manuscript pp. 8–11, Methods (ii), Fig. 1 and Table 1",
+          "gap": "Two nested measurement procedures per episode."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires controlled live camera and head-mounted display timing with measured end-to-end latency, synchronized manual stroking and a supervised eyes-closed walking protocol.",
+      "The original Unity project and frame delivery measurements are unavailable. The software needs an induction, walking and rating sequence and continuous displacement recording."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Mul 2019 · Full-body illusion and self-location",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1177/1362361319838950. Autism pp. 2056–2057, Participants and Materials and procedure; Autism pp. 2057–2058, FBI methods and Fig. 1; Autism pp. 2058–2059, FBI drift Results and Figs. 2–3; Autism pp. 2057–2060, FBI questionnaires, Table 1 and Fig. 4"
+    }
+  ]
+}

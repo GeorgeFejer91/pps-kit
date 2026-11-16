@@ -1,0 +1,225 @@
+{
+  "template_id": "sorrentino_2021_ageing_body_landmarks",
+  "title": "Sorrentino 2021 · Ageing and body landmarks",
+  "citation": "Sorrentino et al. (2021). How ageing shapes body and space representations: A comparison study between healthy young and older adults. Cortex, 136, 56–76.",
+  "source_url": "https://doi.org/10.1016/j.cortex.2020.11.021",
+  "doi": "10.1016/j.cortex.2020.11.021",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cortex.2020.11.021#body-landmarks",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": {
+        "younger": 29,
+        "older": 29
+      },
+      "paired_paper_profile_id": "sorrentino_2021_ageing_hand_pps",
+      "placement": "Forearm secured palm-down, aligned with shoulder, 20 cm from body midline and 10 cm from table border. Collect physical landmark measurements while the participant is blindfolded. Remove the eyeshades but occlude the upper limb and shoulders with an 80 by 80 cm board and cloth.",
+      "landmarks": [
+        "index fingertip",
+        "ring fingertip",
+        "radial styloid",
+        "ulnar styloid",
+        "olecranon"
+      ],
+      "allocation": "Five judgments per landmark per side imply 25 per limb and 50 total. Landmark and arm order are randomized. The description of five blocks does not fully establish the nesting by side.",
+      "response": "The experimenter moves a one-centimeter retroreflective marker along the forearm axis. The participant calls stop when it matches the felt landmark, and may request lateral or longitudinal correction. Capture the confirmed estimate using OptiTrack V120:TRIO, Motive and custom MATLAB.",
+      "analysis": "Use two-dimensional landmark distances for hand and arm lengths and widths. Normalize each perceived dimension to its actual anatomical counterpart. Shape index divides normalized width by normalized length."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Visible manual marker for localization of a hidden anatomical landmark",
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1"
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Retroreflective marker and OptiTrack V120:TRIO/Motive 1.7.5",
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Landmarks randomized across blocks. Left and right tested in randomized order.",
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "Block nesting across sides is not explicit."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Record actual points while blindfolded, then record visually guided perceived positions while the limb is concealed.",
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "The main PPS field has no analogue in this procedure."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": 5,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "Exact hand/block nesting is unspecified."
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 50,
+          "source": "Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1",
+          "gap": "5 landmarks × 5 repeats × 2 limbs. Ground-truth measurements excluded."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires a concealed physical limb setup with calibrated 2D optical measurement and capture of spoken adjustments and continuous coordinates.",
+      "Exact realized trial nesting, per-participant calibration and coordinate transforms remain unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Sorrentino 2021 · Ageing and body landmarks",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.cortex.2020.11.021. Cortex pp. 59–61, §§2.2.1, 2.3.1, Fig. 1 and Cortex pp. 58–59, §2.1 and Table 1"
+    }
+  ]
+}

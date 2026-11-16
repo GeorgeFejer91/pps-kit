@@ -1,0 +1,301 @@
+{
+  "template_id": "noel_2019_consciousness_clinical_pps",
+  "title": "Noel 2019 · Bedside arm PPS and EEG",
+  "citation": "Noel et al. (2019). Peri-personal space encoding in patients with disorders of consciousness and cognitive-motor dissociation. NeuroImage: Clinical, 24, 101940.",
+  "source_url": "https://doi.org/10.1016/j.nicl.2019.101940",
+  "doi": "10.1016/j.nicl.2019.101940",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.nicl.2019.101940::b",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "conditions": [
+        "T",
+        "ANear",
+        "AFar",
+        "ATNear",
+        "ATFar"
+      ],
+      "sound": "50 ms white-noise bursts from Logitech Z120 speakers at 5 or 75 cm from the stimulated arm, approximately 65.2 and 64.1 dB SPL.",
+      "tactile": "MEDEL MOTIONSTIM 8, 50 ms FES train at 35 Hz. Active contacts at extensor digitorum communis toward elbow, shoulder ground. Set to 70% individual motor threshold.",
+      "soa_ms": 0,
+      "iti_ms": [
+        1500,
+        2000
+      ],
+      "allocation": {
+        "per_group_per_block": 50,
+        "per_block": 250
+      },
+      "response": "No overt task response. The ERP index compares paired trials against the sum of the position-matched unimodal responses.",
+      "participants": 17,
+      "sessions": 30,
+      "blocks_observed": 96,
+      "posture": "Supine, approximately 130° as reported. Three patients used left-arm FES and their EEG was mirrored for analysis.",
+      "eeg": "16-channel g.USBamp or g.Nautilus, 500 or 512 Hz, right earlobe reference.",
+      "clinical": "Use the healthy-derived windows and electrodes to compare repeated sessions by clinical classification, and test association with EEG complexity."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Static white-noise bursts.",
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1"
+        },
+        "source_provenance": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1; PDF p. 4, §§2.5.1–2.5.2",
+          "gap": "Original noise asset, generation method, sample rate and software controlling stimulus delivery not reported. eegdev is acquisition software."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "stationary": true,
+            "near_cm": 5,
+            "far_cm": 75,
+            "anchor": "extended stimulated arm",
+            "axis": "depth",
+            "posture": "supine about 130°"
+          },
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1; PDF pp. 3–4, §§2.4.1–2.4.2"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 50
+          },
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "auditory near",
+            "auditory far",
+            "audiotactile near",
+            "audiotactile far"
+          ],
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "near_dB_SPL": 65.2,
+            "far_dB_SPL": 64.1
+          },
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1",
+          "gap": "Exact waveform ramps, gain settings, and level measurement instrument/reference position not reported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "speakers": 2,
+            "speaker_model": "Logitech Z120 Portable Speakers",
+            "tactile_device": "MEDEL MOTIONSTIM 8"
+          },
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "T",
+            "Anear",
+            "Afar",
+            "ATnear",
+            "ATfar"
+          ],
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Five conditions intermixed with equal numbers in every block.",
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Fully randomized trial order within each block. Short breaks between blocks.",
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "iti_range_ms": [
+              1500,
+              2000
+            ],
+            "distribution": "uniform"
+          },
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2",
+          "gap": "Whether the interval is referenced to stimulus onset or offset is unspecified."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Same passive trial design with supine patient positioning. Adjust number of sessions and blocks for clinical availability.",
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "stimulator": "MEDEL MOTIONSTIM 8",
+            "mode": "functional electrical stimulation",
+            "electrodes": "Flextrode Plus pair",
+            "site": "extensor digitorum communis, dorsal arm toward elbow",
+            "side": "right in most patients; left in three due to clinical or apparatus constraints",
+            "earth_contact": "right shoulder",
+            "stimulation_window_ms": 50,
+            "pulse_repetition_hz": 35,
+            "percent_individual_motor_threshold": 70,
+            "reported_current_range_mA": [
+              5,
+              11
+            ],
+            "left_stimulation_eeg": "left–right symmetrically flipped"
+          },
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1",
+          "gap": "No distinct individual pulse width or shape specified."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "bimodal_ms": 0,
+            "reference": "tactile onset minus auditory onset",
+            "no_ladder": true
+          },
+          "source": "PDF p. 3, §§2.3.1–2.3.2; p. 4, Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Actual T, Anear and Afar rows form algebraic unisensory sums for comparison with ATnear and ATfar. Separately correct each EEG epoch relative to the prestimulus mean.",
+          "source": "PDF p. 4, §§2.5.1–2.5.2; PDF pp. 5–6 and 9–11, §§2.6–3.2 and Figs. 2–7"
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": {
+            "epoch_ms": [
+              -100,
+              500
+            ],
+            "baseline_ms": [
+              -100,
+              0
+            ],
+            "anchor": "stimulus onset"
+          },
+          "source": "PDF p. 4, §§2.5.1–2.5.2"
+        },
+        "catch_trial_type": {
+          "status": "reported_absent",
+          "value": "All trials are stimuli for passive EEG. No no-go catch condition.",
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_condition_per_block": 50
+          },
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        },
+        "baseline_count": {
+          "status": "reported",
+          "value": {
+            "tactile_only_per_block": 50,
+            "auditory_near_per_block": 50,
+            "auditory_far_per_block": 50
+          },
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        },
+        "catch_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_session_range": [
+              1,
+              7
+            ],
+            "mean_per_session": 3.2,
+            "total_blocks": 96,
+            "sessions": 30
+          },
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "per_block": 250,
+            "per_session_possible_range": [
+              250,
+              1750
+            ],
+            "aggregate_administered_trials": 24000
+          },
+          "source": "PDF pp. 3–4, §§2.4.1–2.4.2",
+          "gap": "250 × 1–7 blocks per session and 250 × 96 across the study, before artifact rejection."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires synchronized acquisition of EEG, independent fixed near/far sound outputs and a calibrated functional electrical stimulation route.",
+      "Requires bedside clinical procedures and validated session coding. Original audio waveform and physical pulse width and onset remain unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Noel 2019 · Bedside arm PPS and EEG",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.nicl.2019.101940. PDF pp. 2–4, §§2.2.2–2.5.2; PDF pp. 5–6 and 9–11, §§2.6–3.2 and Figs. 2–7."
+    }
+  ]
+}

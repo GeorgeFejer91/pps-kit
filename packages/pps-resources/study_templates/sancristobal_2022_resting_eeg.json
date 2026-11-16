@@ -1,0 +1,239 @@
+{
+  "template_id": "sancristobal_2022_resting_eeg",
+  "title": "Sancristóbal 2022 · Eyes-closed resting EEG",
+  "citation": "Sancristóbal et al. (2022). Slow Resting State Fluctuations Enhance Neuronal and Behavioral Responses to Looming Sounds. Brain Topography, 35(1), 121–141.",
+  "source_url": "https://doi.org/10.1007/s10548-021-00826-4",
+  "doi": "10.1007/s10548-021-00826-4",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s10548-021-00826-4::resting-eeg",
+    "publication_status": "published",
+    "profile_type": "companion_assessment_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "companion_auditory_eeg_profile_id": "sancristobal_2022_passive_auditory_eeg",
+      "participants": 38,
+      "sequence": "Day 2 starts with two 300 s eyes-closed resting recordings without task stimuli, followed by passive auditory EEG.",
+      "acquisition": "Use a nominal 64-channel BrainAmp MR and synchronized Philips 3 T scanner at 5000 Hz. Reference FCz, ground Iz, and downsample to 500 Hz after removing gradient artifact.",
+      "spectral_estimation": {
+        "window_s": 1,
+        "step_ms": 10,
+        "tapers": 3,
+        "fft_samples": 512,
+        "reported_bandwidth_hz": 4,
+        "bands_hz": {
+          "alpha": [
+            7,
+            13
+          ],
+          "low_beta": [
+            13,
+            20
+          ],
+          "high_beta": [
+            20,
+            30
+          ],
+          "low_gamma": [
+            30,
+            45
+          ]
+        }
+      },
+      "scoring": "Compute band-power autocorrelation in 20 s windows with 10 s overlap. Average autocorrelations within run, take the full width at half maximum and average across the two runs. Exclude channel-participant pairs if any spectral burst exceeds six IQR from the median."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Simultaneous BrainAmp MR EEG and 3 T Philips Achieva acquisition.",
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF pp. 4–5, EEG Acquisition and EEG Data Pre-processing"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Two consecutive five-minute runs, before passive listening.",
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session"
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Rest with eyes closed, with no stimulus.",
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session; Sancristóbal et al., author-shared journal PDF, PDF pp. 2–3, Fig. 1 and caption"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session"
+        },
+        "total_trial_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancristóbal et al., author-shared journal PDF, PDF p. 5, Resting State Session",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires two stimulus-free timed recording runs with synchronized MR-compatible EEG and artifact monitoring.",
+      "The exact taper convention and software parameters, numerical cross-run exclusion threshold and original EEG inputs are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Sancristóbal 2022 · Eyes-closed resting EEG",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1007/s10548-021-00826-4. Brain Topography pp. 124–126 and 129, EEG Acquisition, Resting State Session, Autocorrelation Window and Fig. 3; publisher ESM1, Figs. S1–S2"
+    }
+  ]
+}

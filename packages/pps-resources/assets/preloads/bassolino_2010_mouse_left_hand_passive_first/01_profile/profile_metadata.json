@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Experiment 2 for the left hand, with 124 reported trials per block. The template requires explicit Segment 4 trial counts. Visual presentation, motor conditions, electrical stimulation and voice response need separate calibrated equipment.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2009.11.009::left-hand",
     "profile_type": "static_near_far_audio_tactile_pps",
     "publication_study_row_id": "doi:10.1016/j.neuropsychologia.2009.11.009::left-hand",
     "formal_experiment": 2,

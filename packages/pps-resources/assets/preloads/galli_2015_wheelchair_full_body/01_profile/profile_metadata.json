@@ -8,6 +8,11 @@
   "verification_status": "partial",
   "notes": "Wheelchair-training PPS task. The profile captures the reported front/back trunk PPS timing and trial formula; the original 16-speaker Gaussian-amplitude arrays are represented as two virtual moving-source trajectories while active/passive/blindfolded wheelchair training remains experiment context.",
   "reference_parameters": {
+    "study_row_id": "doi:10.3389/fpsyg.2015.00639::a",
+    "alternate_study_row_ids": [
+      "doi:10.3389/fpsyg.2015.00639::b",
+      "doi:10.3389/fpsyg.2015.00639::c"
+    ],
     "sound_velocity_mps": 0.75,
     "sound_path_m": 2.0,
     "tactile_delays_ms": [

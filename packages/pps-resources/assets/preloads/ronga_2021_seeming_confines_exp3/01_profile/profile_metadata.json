@@ -1,0 +1,309 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ronga_2021_seeming_confines_exp3",
+  "title": "Ronga 2021 \u00b7 Tool use and EEG",
+  "citation": "Ronga et al. (2021). Seeming confines: Electrophysiological evidence of peripersonal space remapping following tool-use in humans. Cortex, 144, 133\u2013150.",
+  "doi": "10.1016/j.cortex.2021.08.004",
+  "source_url": "https://doi.org/10.1016/j.cortex.2021.08.004",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cortex.2021.08.004::exp3",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sound": "Two fixed near/far loudspeakers, less than 5 cm and 145 cm from the stimulated hand. Nominal 50 ms, 784 Hz tones.",
+      "touch": "200 \u00b5s DS7A square pulse at twice the participant\u2019s perception threshold, to the dorsum of the right hand.",
+      "timing": "Tactile event is nominal time zero for paired trials; sound starts 40 ms after it. Auditory-alone and tactile-alone trials anchor to their sole event. Publication reports randomized 7000\u20139000 ms ITIs.",
+      "allocation": "Five conditions (T, ANear, AFar, TANear, TAFar), 24 trials each per assessment in two blocks.",
+      "participants": 20,
+      "visits": "Two counterbalanced visits, each followed by the behavioral and EEG assessment. In one visit, participants spend 20 minutes dragging small plastic cubes with a 145 cm rake. In the other, they spend 20 minutes comparing the direction of sequential arrows 145 cm from their right hand.",
+      "analysis": "Behavioral far-minus-near RT and near-minus-far ERP indices, plus time-frequency results.",
+      "recorded_schedule": "The public EEG record contains 78 blocks of 60 markers and two blocks of 58 and 64 markers. Those observations do not resolve the programmed ITI, delivered onset times, or reasons for atypical counts.",
+      "source_assets": "Mendeley Data 10.17632/j5t3tzfh29.1 includes five candidate stimulus WAVs and native EEG trigger records. ANear and TANear use different dominant channels. Physical channel mapping and binding to the timed stimulation controller are unresolved."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported_with_caveat",
+          "value": {
+            "manuscript_nominal_hz": 784,
+            "author_assets": {
+              "AFar": 784,
+              "ANear": 784,
+              "TAFar": 784,
+              "TANear": 784
+            }
+          },
+          "source": "Cortex final issue p. 136, section 2.2, and Mendeley Data v1 (10.17632/j5t3tzfh29.1), common-grid FFT on dominant audio channels of the archived WAV files.",
+          "gap": "All four dominant audio channels peak at 784.0 Hz on a 0.1 Hz zero-padded FFT grid. The previous approximate 800 Hz estimate is superseded. TANear and ANear use different dominant channels. Hardware routing and file binding are unverified."
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "sample_rate_hz": 44100,
+            "bit_depth": 16,
+            "channels": 2,
+            "wav_ms": {
+              "AFar": 50,
+              "ANear": 50,
+              "TAFar": 50,
+              "TANear": 50.068,
+              "T": 100
+            },
+            "source": "Original E-Prime project/run files and five condition WAVs in author deposit.",
+            "runtime_header_version": "2.0.10.356 SP2",
+            "e_studio_project_header_version": "2.0.10.252"
+          },
+          "source": "Mendeley Data 10.17632/j5t3tzfh29.1, Study materials README and file manifest",
+          "gap": "The visible project/run headers differ by software version. List2 also differs by experiment revision. Embedded trial lists, script-to-WAV binding and hardware output routing remain unverified."
+        },
+        "trajectory_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "type": "two stationary loudspeakers",
+            "distances_from_right_hand_cm": {
+              "near_exclusive_upper_bound": 5,
+              "far": 145
+            },
+            "reference": "stimulated right hand"
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "manuscript_tone_ms": 50,
+            "deposited_file_ms": {
+              "AFar": 50,
+              "ANear": 50,
+              "TAFar": 50,
+              "TANear": 50.068,
+              "T": 100
+            }
+          },
+          "source": "Mendeley Data 10.17632/j5t3tzfh29.1, Study materials WAVs, verified PCM inspection",
+          "gap": "T is a no-tone control file. Its 100 ms file length is not the electrical pulse duration."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "Stationary sources."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "near sound",
+            "far sound"
+          ],
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "gain_envelope": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "manuscript_nominal": "Same source amplitude from both loudspeakers.",
+            "digital_pcm": {
+              "dominant_channel": {
+                "AFar": 1,
+                "ANear": 2,
+                "TAFar": 1,
+                "TANear": 1
+              },
+              "approximate_dominant_hz": {
+                "AFar": 784,
+                "ANear": 784,
+                "TAFar": 784,
+                "TANear": 784
+              },
+              "TANear_full_scale_samples": 8,
+              "T_peak_absolute_pcm_counts": 9,
+              "TANear_relative_to_TAFar_rms_db_derived": 0.592
+            }
+          },
+          "source": "Turin author manuscript, \u00a72.2.2; Mendeley Data 10.17632/j5t3tzfh29.1, Study materials WAVs, verified PCM inspection",
+          "gap": "TANear differs in digital amplitude and channel. Its dominant audio channel 1 reaches both PCM rails. The archived peak and amplitude do not establish delivered waveform, routing or ear-level SPL."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speakers": 2,
+            "software": "E-Prime 2.0",
+            "tactile_trigger_control": "E-Prime to Arduino",
+            "nominal_tone_db_approx": 64,
+            "verified_file_routing": {
+              "AFar": 1,
+              "ANear": 2,
+              "TAFar": 1,
+              "TANear": 1
+            }
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption; Mendeley Data 10.17632/j5t3tzfh29.1, Study materials WAVs, verified PCM inspection",
+          "gap": "Asset channel assignment is verified. Physical output mapping, calibration, E-Prime binding and measured latency are not."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "T (tactile only)",
+            "ANear (near auditory only)",
+            "AFar (far auditory only)",
+            "TANear (near paired)",
+            "TAFar (far paired)"
+          ],
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Five conditions belong to the same multimodal paradigm.",
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "Exact condition sequence and balancing within each block unspecified."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Two visits seven days apart, with counterbalanced tool-use versus visual-control order. A 20 min intervention precedes two approximately eight minute PPS blocks in each visit.",
+          "source": "Turin author manuscript, \u00a72.2.3",
+          "gap": "Per-block sequence, seed and assignment schedule unavailable."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "range_ms": [
+              7000,
+              9000
+            ],
+            "randomized": true
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "No distribution, steps or precise onset/offset clock specified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Turin author manuscript, \u00a72.2.3",
+          "gap": "No online response deadline stated."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Complete 20 min of the visit's intervention. Then focus on right hand, ignore audio and press a key with the right index finger as quickly as possible on touch.",
+          "source": "Turin author manuscript, \u00a72.2.3"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "non-painful transcutaneous constant-current square-wave pulse",
+            "pulse_us": 200,
+            "stimulator": "Digitimer DS7A",
+            "site": "right hand dorsum",
+            "surface_bipolar_electrode_spacing_cm_approx": 1,
+            "threshold_reference": "twice individual detection threshold measured by method of limits before each session",
+            "electrode_reposition_cm_approx": 1,
+            "reported_group_mean_and_sd_ma": [
+              3.6,
+              1.4
+            ]
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "Group summary only."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "audio_after_tactile_ms": 40,
+            "tactile_minus_audio_ms": -40,
+            "paired_conditions": [
+              "TANear",
+              "TAFar"
+            ]
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Separate T, ANear and AFar references. RT uses T and paired trials. ERP uses paired minus the sum of corresponding unimodal responses. Near-minus-far paired response compares interventions.",
+          "source": "Turin author manuscript, \u00a7\u00a72.2.2.1 and 2.3.2"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "No sound in T trials, so no within-trial audio-relative SOA."
+        },
+        "catch_trial_type": {
+          "status": "reported_with_caveat",
+          "value": "The two auditory-only conditions have no touch and are ignored.",
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "These are independently analyzed sensory controls in the EEG experiments. They can function as no-go trials in detection tasks, but the manuscript does not label them dedicated catches."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": 24,
+          "source": "Turin author manuscript, \u00a72.2.3"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": {
+            "per_assessment": 24,
+            "across_visits": 48
+          },
+          "source": "Turin author manuscript, \u00a72.2.3",
+          "gap": "Same five-condition design after each intervention."
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": {
+            "per_assessment": 48,
+            "across_visits": 96
+          },
+          "source": "Turin author manuscript, \u00a72.2.3",
+          "gap": "Two audio-only EEG reference conditions \u00d7 24 per visit, with no tactile response."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_assessment": 2,
+            "visits": 2,
+            "approx_minutes_per_block": 8
+          },
+          "source": "Turin author manuscript, \u00a72.2.3"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "per_assessment": 120,
+            "tactile_only": 24,
+            "paired_near": 24,
+            "paired_far": 24,
+            "auditory_only_near": 24,
+            "auditory_only_far": 24,
+            "across_visits": 240
+          },
+          "source": "Turin author manuscript, \u00a72.2.3",
+          "gap": "Five conditions \u00d7 24 per visit, twice. Training trials are separate."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires fixed loudspeaker routing and synchronized, individually calibrated electrical stimulation. Candidate archived tone files have unresolved output channel assignments and delivered timing.",
+      "Requires the rake or visual intervention, synchronized EEG acquisition with original marker semantics, and an operator-validated post-training visit sequencer."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.cortex.2021.08.004. AperTO PDF pp. 11\u201320, \u00a7\u00a72.2.3\u20132.3 and \u00a73.3; publisher Figs. 1\u20132 and 4; AperTO PDF pp. 6\u20138, \u00a7\u00a72.1\u20132.2 and publisher Fig. 1"
+    }
+  ]
+}

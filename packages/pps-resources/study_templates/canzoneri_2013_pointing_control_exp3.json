@@ -1,0 +1,294 @@
+{
+  "template_id": "canzoneri_2013_pointing_control_exp3",
+  "title": "Canzoneri 2013 · Experiment 3, pointing control",
+  "citation": "Canzoneri, E., Ubaldi, S., Rastelli, V., Finisguerra, A., Bassolino, M., & Serino, A. (2013). Tool-use reshapes the boundaries of body and peripersonal space representations. Experimental Brain Research, 228, 25-42.",
+  "source_url": "https://doi.org/10.1007/s00221-013-3532-2",
+  "doi": "10.1007/s00221-013-3532-2",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-013-3532-2::b",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "conditions": [
+        "Pre-pointing assessment",
+        "Post-pointing assessment"
+      ],
+      "training": "Point with the arm toward an object beyond reachable space.",
+      "stimulus": "3000 ms pink noise, apparent approach and recession, and forearm tactile stimulation.",
+      "soa_from_sound_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "audio_only_share_reported": 0.4,
+      "paired_share_reported": 0.6,
+      "response": "Speeded vocal detection. Evaluate the distance-by-phase contrast and compare pre/post sigmoid centers."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Pink noise",
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Two physical loudspeakers. Canzoneri et al. 2012 is the named procedure precedent.",
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "Original stimulus audio and exact rendering implementation unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "IN": "far to near",
+            "OUT": "near to far",
+            "speaker_separation_cm_approx": 100
+          },
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "Distances at the five perceived positions and precise speaker coordinates unreported."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 3000
+          },
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "The speaker separation is physical. Apparent velocity is not calibrated."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "IN approach",
+            "OUT recession"
+          ],
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "IN and OUT described as symmetric.",
+          "source": "Article pp. 27–30, Experiment 1A Methods and Results",
+          "gap": "Exact envelopes, absolute playback levels, and calibration unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speaker_count": 2,
+            "near": "on table near right forearm",
+            "far": "on floor approximately 100 cm from near speaker",
+            "response": "voice-activated relay"
+          },
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "Speaker and relay models and placement heights unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "AT_percent": 60,
+            "A_only_percent": 40
+          },
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Paired audio-touch and audio-only catches",
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "Exact trial intermix and ordering rule unspecified."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Two 20-minute pointing blocks. Baseline assessment order is counterbalanced. Each pointing block is immediately followed by one assessment, with each task assessed once post-training and the task order counterbalanced.",
+          "source": "Article pp. 37–39, Experiment 3 Methods and Fig. 6",
+          "gap": "Internal trial order unspecified."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "An extra between-trial interval, jitter, and randomization rule are unreported. The 1000 ms flanks are within trial."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "Instruction to respond immediately. The deadline and voice-key acceptance rule are unspecified."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "pre_sound_ms": 1000,
+            "audio_ms": 3000,
+            "post_sound_ms": 1000,
+            "participant": "seated blindfolded with right arm prone on side table",
+            "response": "Say TAH as soon as touch is detected and ignore sound. Withhold on sound-only trials."
+          },
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "hairy right forearm",
+            "intensity": "well above detection threshold"
+          },
+          "source": "Article pp. 27–30, Experiment 1A Methods and Results",
+          "gap": "Device, electrical or mechanical settings, pulse duration, calibration steps and precise site unreported."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "sound_onset_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ],
+            "trial_onset_ms": [
+              1300,
+              1800,
+              2500,
+              3200,
+              3700
+            ],
+            "IN_positions": [
+              "D1",
+              "D2",
+              "D3",
+              "D4",
+              "D5"
+            ],
+            "OUT_positions": [
+              "D5",
+              "D4",
+              "D3",
+              "D2",
+              "D1"
+            ],
+            "distance_order": "D1 farthest to D5 nearest"
+          },
+          "source": "Article pp. 28 and 30, Fig. 1A and distance recoding"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": {
+            "tactile_only": false,
+            "reason": "Reported paired and audio-only trials sum to 100%."
+          },
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "No tactile-only baseline. Pre-training assessment is a separate factor."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Audio-only with no target and no response expected",
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "Exact per-direction and per-SOA repeats unreported."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "The two reported trial families exhaust the schedule."
+        },
+        "catch_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "percentage": 40
+          },
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "Exact count and allocation between IN and OUT unreported."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "pre_pps_assessments": 1,
+            "post_pps_assessments": 1,
+            "pointing_blocks": 2,
+            "pointing_block_minutes": 20
+          },
+          "source": "Article pp. 37–39, Experiment 3 Methods and Fig. 6",
+          "gap": "Number of stimulus blocks within PPS assessments unreported."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 27–30, Experiment 1A Methods and Fig. 1A",
+          "gap": "Percentages cannot recover the total trial count."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Exact original two-speaker gain functions and the full trial-family allocation are unreported.",
+      "Physical tactile site calibration and voice-key latency require a measured response scheduler."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Canzoneri 2013 · Experiment 3, pointing control",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [
+        "Right forearm"
+      ],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1007/s00221-013-3532-2. Article pp. 37–39, Experiment 3 Methods and Fig. 6"
+    }
+  ]
+}

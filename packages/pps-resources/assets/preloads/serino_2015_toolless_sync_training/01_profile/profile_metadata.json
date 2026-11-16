@@ -8,6 +8,10 @@
   "verification_status": "partial",
   "notes": "Training-induced PPS plasticity profile. The preload captures the measurement assessment block: 3000 ms pink-noise IN/OUT sounds, right-hand tactile detection, T1-T5 SOAs, and auditory-only catch trials. The synchronous versus asynchronous training protocol is retained as context metadata because the PPS Toolkit profile recreates the runnable audiotactile measurement task rather than the intervention schedule.",
   "reference_parameters": {
+    "study_row_id": "doi:10.3389/fnbeh.2015.00004::behavioral-pps",
+    "alternate_study_row_ids": [
+      "doi:10.3389/fnbeh.2015.00004::behavioral-training"
+    ],
     "profile_type": "audio_tactile_training_plasticity",
     "sound_duration_ms": 3000,
     "tactile_target_probability": 0.77,

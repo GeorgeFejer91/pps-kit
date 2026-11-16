@@ -7,6 +7,7 @@
   "verification_status": "verified",
   "notes": "Companion ready profile for Noel 2015 Experiment 2. It captures the reported back-space looming PPS task with back vibration and source-backed synchronous/asynchronous stroking block labels. Exact waveform, gain law, speaker switching, SPL, speaker model, and full sound-file offset remain original-author provenance gaps.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cognition.2015.07.012::b",
     "profile_type": "published_variant",
     "experiment_label": "Experiment 2 back-space looming with back vibration",
     "front_space_companion_template_id": "noel_2015_bodily_self",

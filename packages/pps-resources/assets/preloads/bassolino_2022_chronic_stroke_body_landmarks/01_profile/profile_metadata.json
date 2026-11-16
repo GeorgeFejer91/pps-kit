@@ -1,0 +1,188 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "bassolino_2022_chronic_stroke_body_landmarks",
+  "title": "Bassolino 2022 \u00b7 Chronic stroke body landmarks",
+  "citation": "Bassolino et al. (2022). Body and peripersonal space representations in chronic stroke patients with upper limb motor deficits. Brain Communications, 4(4), fcac179.",
+  "doi": "10.1093/braincomms/fcac179",
+  "source_url": "https://doi.org/10.1093/braincomms/fcac179",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1093/braincomms/fcac179#body-landmarks",
+    "publication_status": "published",
+    "profile_type": "companion_assessment_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "companion_pps_profile_id": "bassolino_2022_chronic_stroke_pps",
+      "analyzed": {
+        "patients": 58,
+        "controls": 45
+      },
+      "placement": "Secure forearm palm down, aligned with shoulder about 20 cm from midline. Place elbow 8\u201310 cm from table border. Record actual landmark coordinates with eyes covered, then hide the limb and shoulders using an 80 \u00d7 80 cm cover and cloth and remove the blindfold.",
+      "landmarks": [
+        "index fingertip",
+        "ring fingertip",
+        "radial styloid",
+        "ulnar styloid",
+        "olecranon"
+      ],
+      "allocation": {
+        "landmarks_per_block": 5,
+        "blocks_per_side": 5,
+        "per_side": 25,
+        "total": 50,
+        "ordering": "Randomize landmarks within blocks and test side order."
+      },
+      "response": "Show the landmark on the experimenter's body, move a 1 cm marker along the forearm axis, and record the participant's confirmed location after verbal corrections.",
+      "capture": "OptiTrack V120:TRIO, Motive and custom MATLAB. Compute perceived/actual length and width ratios for each hand and arm. Shape index divides normalized width by normalized length."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Visible manually moved marker and hidden anatomical landmark",
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "1 cm retroreflective marker, OptiTrack V120:TRIO, Motive 1.7.5 Final 64-bit (2015), MATLAB R2018a custom capture",
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Five landmarks randomized within each of five blocks, with five repeats per landmark. Both sides in randomized order.",
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Experimenter shows landmark on own body, manually moves marker along forearm axis. Participant says stop and can ask for forward, backward or lateral corrections before final confirmation.",
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": 5,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137",
+          "gap": "Five blocks described in the task. Sides both tested with five repetitions per landmark, while combined block nesting is not explicit."
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 50,
+          "source": "Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137",
+          "gap": "5 landmarks \u00d7 5 repeats \u00d7 2 sides, excluding ground truth."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires physical occlusion, calibrated optical tracking and a continuous-coordinate response flow linked to verbal corrections.",
+      "The realized order and original placement coordinate recordings are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1093/braincomms/fcac179. Brain Communications pp. 4\u20136, BLT, and Supplement pp. 6\u20137"
+    }
+  ]
+}

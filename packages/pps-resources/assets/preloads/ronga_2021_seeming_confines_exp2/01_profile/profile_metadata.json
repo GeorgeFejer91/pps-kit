@@ -1,0 +1,244 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ronga_2021_seeming_confines_exp2",
+  "title": "Ronga 2021 \u00b7 Passive EEG pilot",
+  "citation": "Ronga et al. (2021). Seeming confines: Electrophysiological evidence of peripersonal space remapping following tool-use in humans. Cortex, 144, 133\u2013150.",
+  "doi": "10.1016/j.cortex.2021.08.004",
+  "source_url": "https://doi.org/10.1016/j.cortex.2021.08.004",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cortex.2021.08.004::exp2",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sound": "Two fixed near/far loudspeakers, less than 5 cm and 145 cm from the stimulated hand. Nominal 50 ms, 784 Hz tones.",
+      "touch": "200 \u00b5s DS7A square pulse at twice the participant\u2019s perception threshold, to the dorsum of the right hand.",
+      "timing": "Tactile event is nominal time zero for paired trials; sound starts 40 ms after it. Auditory-alone and tactile-alone trials anchor to their sole event. Publication reports randomized 7000\u20139000 ms ITIs.",
+      "allocation": "Five conditions (T, ANear, AFar, TANear, TAFar), 24 trials each per assessment in two blocks.",
+      "participants": 10,
+      "sound_level": "Equal nominal output amplitude for the two speakers.",
+      "response": "Attend to touch without a motor response. Use the tactile and auditory alone waveforms in the near and far superadditivity contrasts."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "type": "brief static tone",
+            "nominal_frequency_hz": 784
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "source_provenance": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Turin author manuscript, \u00a72.2.2",
+          "gap": "Waveform files specific to the passive EEG pilot are unverified."
+        },
+        "trajectory_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "type": "two stationary loudspeakers",
+            "distances_from_right_hand_cm": {
+              "near_exclusive_upper_bound": 5,
+              "far": 145
+            },
+            "reference": "stimulated right hand"
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 50
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "Stationary sources."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "near sound",
+            "far sound"
+          ],
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Nominally the same source amplitude at both speakers.",
+          "source": "Turin author manuscript, \u00a72.2.2",
+          "gap": "Measured ear-level values for the pilot and the envelope are not independently specified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speakers": 2,
+            "software": "E-Prime 2.0",
+            "tactile_trigger_control": "E-Prime to Arduino",
+            "nominal_tone_db_approx": 64
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "Speaker model, angular coordinates, channel routing, calibration reference and stimulus-loop latency unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "T (tactile only)",
+            "ANear (near auditory only)",
+            "AFar (far auditory only)",
+            "TANear (near paired)",
+            "TAFar (far paired)"
+          ],
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Five conditions belong to the same multimodal paradigm.",
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "Exact condition sequence and balancing within each block unspecified."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Two approximately eight minute blocks.",
+          "source": "Turin author manuscript, \u00a72.2.2",
+          "gap": "Exact trial sequence not specified."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "range_ms": [
+              7000,
+              9000
+            ],
+            "randomized": true
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "No distribution, steps or precise onset/offset clock specified."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Turin author manuscript, \u00a72.2.2",
+          "gap": "No motor response in Experiment 2."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Attend to touch and ignore sound. No motor response required.",
+          "source": "Turin author manuscript, \u00a72.2.2 and \u00a72.2.2.1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "non-painful transcutaneous constant-current square-wave pulse",
+            "pulse_us": 200,
+            "stimulator": "Digitimer DS7A",
+            "site": "right hand dorsum",
+            "surface_bipolar_electrode_spacing_cm_approx": 1,
+            "threshold_reference": "twice individual detection threshold measured by method of limits before each session",
+            "electrode_reposition_cm_approx": 1,
+            "reported_group_mean_and_sd_ma": [
+              4.1,
+              1.5
+            ]
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "Group summary only."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "audio_after_tactile_ms": 40,
+            "tactile_minus_audio_ms": -40,
+            "paired_conditions": [
+              "TANear",
+              "TAFar"
+            ]
+          },
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Record T, ANear and AFar separately. At each location, subtract summed unimodal ERP waveforms from the corresponding paired ERP.",
+          "source": "Turin author manuscript, \u00a7\u00a72.2.2.1 and 2.3.2"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Turin author manuscript, \u00a72.2 and Fig. 1 caption",
+          "gap": "No sound in T trials, so no within-trial audio-relative SOA."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "ANear and AFar are unimodal EEG reference conditions in the passive task. No behavioral catch scoring.",
+          "source": "Turin author manuscript, \u00a72.2.2"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": 24,
+          "source": "Turin author manuscript, \u00a72.2.2"
+        },
+        "baseline_count": {
+          "status": "reported",
+          "value": 24,
+          "source": "Turin author manuscript, \u00a72.2.2"
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": 48,
+          "source": "Turin author manuscript, \u00a72.2.2",
+          "gap": "Two auditory-only EEG reference conditions \u00d7 24. No behavioral catches."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_assessment": 2,
+            "approx_minutes_per_block": 8
+          },
+          "source": "Turin author manuscript, \u00a72.2.2"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "per_assessment": 120,
+            "tactile_only": 24,
+            "paired_near": 24,
+            "paired_far": 24,
+            "auditory_only_near": 24,
+            "auditory_only_far": 24
+          },
+          "source": "Turin author manuscript, \u00a72.2.2",
+          "gap": "Five conditions \u00d7 24."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires fixed loudspeaker routing and synchronized, individually calibrated electrical stimulation. The original sound files and delivered timing are unavailable.",
+      "Requires synchronized EEG markers, acquisition and passive-trial processing, along with the original programmed ITI distribution and order."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.cortex.2021.08.004. AperTO PDF pp. 9\u201311 and 16, \u00a72.2.2, \u00a73.2 and publisher Fig. 3; AperTO PDF pp. 6\u20138, \u00a7\u00a72.1\u20132.2 and publisher Fig. 1"
+    }
+  ]
+}

@@ -7,6 +7,7 @@
   "verification_status": "partial",
   "notes": "Upper-limb amputation/prosthesis PPS profile. The profile captures the reported dynamic IN/OUT pink-noise task, T1-T5 tactile timing, upper-arm electrical tactile target, auditory-only catch rows, and two-block runner contract. Clinical group, prosthesis-worn state, and tested limb/body-part assignment are retained as analysis/context metadata rather than separate audio-tactile task mechanics.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1038/srep02844::b",
     "profile_type": "audio_tactile_clinical_upper_limb_pps",
     "reported_groups": ["upper-limb amputees", "healthy controls"],
     "prosthesis_factor": "healthy limb, amputated limb without prosthesis, and amputated limb with prosthesis are paper-level condition/context factors",

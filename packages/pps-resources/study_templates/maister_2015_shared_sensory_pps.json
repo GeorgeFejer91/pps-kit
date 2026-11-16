@@ -7,6 +7,7 @@
   "verification_status": "partial",
   "notes": "This profile runs one scored 50-trial PPS assessment. Use it before and after each of the two live interpersonal-stimulation conditions. Perform the 2-minute intervention and the post-block questionnaire outside Runner. The original order counterbalances synchronous and asynchronous stimulation and uses a different confederate in each block. The supplied audio is synthesized for headphone preview.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2014.10.027",
     "profile_type": "interpersonal_stimulation_pps_assessment",
     "profile_scope": "One of four scored PPS assessments, with no in-run intervention or questionnaire.",
     "source_study_row": "doi:10.1016/j.neuropsychologia.2014.10.027",

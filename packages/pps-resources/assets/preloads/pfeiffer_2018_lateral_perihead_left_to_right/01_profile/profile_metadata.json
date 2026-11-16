@@ -8,6 +8,7 @@
   "verification_status": "verified",
   "notes": "Trajectory/noise profile from the local Pfeiffer_EJN2018 simulator reference. It encodes pink-noise lateral movement geometry, mirrored left-to-right/right-to-left source variants, and sample rate; FABIAN HRIR rendering remains the standardized under-the-hood app resource, not a Pfeiffer-specific user choice. Experiment-level congruent rotation, incongruent rotation, and no-rotation labels are retained as runner block context for expected-outcome auditing; passive whole-body vestibular rotation is external apparatus context and is not synthesized into the WAV files.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1111/ejn.13872::a",
     "reference_file": "Example-configs/Pfeiffer_EJN2018.zip/12022013_MovingSoundSourceSimulator.m",
     "model_dimensions": "2D horizontal spherical-head model",
     "trajectory_plane_height_m": 0.0,

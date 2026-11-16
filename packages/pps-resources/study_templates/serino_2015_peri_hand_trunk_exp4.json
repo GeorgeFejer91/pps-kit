@@ -1,0 +1,281 @@
+{
+  "template_id": "serino_2015_peri_hand_trunk_exp4",
+  "title": "Serino 2015 · Experiment 4, hand by trunk",
+  "citation": "Serino et al. (2015). Body part-centered and full body-centered peripersonal space representations. Scientific Reports, 5, 18603.",
+  "source_url": "https://doi.org/10.1038/srep18603",
+  "doi": "10.1038/srep18603",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1038/srep18603::d",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "tactile_sites": [
+        "Right hand dorsum",
+        "Sternum"
+      ],
+      "hand_posture": "Hand beside the sternum without contact.",
+      "paired_trial_factors": {
+        "directions": [
+          "looming",
+          "receding"
+        ],
+        "probe_distances_cm": [
+          5,
+          24,
+          43,
+          62,
+          81,
+          100
+        ],
+        "repeats_per_cell": 16
+      },
+      "pool": {
+        "paired": 384,
+        "tactile_only": 64,
+        "sound_only": 32,
+        "total": 480
+      },
+      "response": "Speeded gamepad response to tactile onset. Compare distance-dependent facilitation by stimulated site."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Pink noise at 44.1 kHz.",
+          "source": "Supplement pp. 1–2, 2-speaker setup"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Supplement documents noise synthesis with SoundForge 4.5 for the 2-speaker setup.",
+          "source": "Supplement pp. 1–2, 2-speaker setup",
+          "gap": "Exact waveform and channel assets unlocated."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Article pp. 11–13, Methods"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": "Apparent approach or recession between fixed near and far speakers.",
+          "source": "Article pp. 11–13, Methods",
+          "gap": "Main Methods report 100 cm speaker separation. Fig. 1 and supplement give approximate body-relative endpoints."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 11–13, Methods",
+          "gap": "Exact acoustic file duration unavailable. Do not derive it from nominal range until onset position and silence are established."
+        },
+        "stimulus_speed": {
+          "status": "reported",
+          "value": {
+            "nominal_cm_s": 22
+          },
+          "source": "Article pp. 11–13, Methods"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming",
+            "receding"
+          ],
+          "source": "Article pp. 11–13, Methods"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming_db_spl": [
+              55,
+              70
+            ],
+            "receding_db_spl": [
+              70,
+              55
+            ],
+            "shape": "exponential overall level change with opposing speaker activation"
+          },
+          "source": "Supplement pp. 1–2, 2-speaker setup",
+          "gap": "Exact channel coefficients and original waveform unknown."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Two M-Audio Studiophile AV 360 speakers, one near and one far. SoundForge 4.5 synthesis.",
+          "source": "Supplement pp. 1–2, 2-speaker setup"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Bimodal vibration plus sound",
+            "Tactile-only baseline",
+            "Sound-only catch"
+          ],
+          "source": "Article pp. 12–13, Design and Analysis"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Five to seven distance cells depending on experiment. Bimodal and unimodal control families.",
+          "source": "Article pp. 12–13, Design and Analysis",
+          "gap": "Exact scheduling across conditions and order unspecified."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Hand and trunk assessed in separate blocks.",
+          "source": "Article pp. 5–6, Experiment 4 and Fig. 4A",
+          "gap": "Exact block count and counterbalance unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "iti_ms": [
+              500,
+              700
+            ],
+            "policy": "randomly shuffled; distribution unspecified"
+          },
+          "source": "Article pp. 12–13, Design and Analysis"
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 11–13, Methods",
+          "gap": "Online response deadline and exact gamepad key unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Respond quickly to vibration with designated Xbox 360 gamepad button, sampled at 125 Hz. Ignore the moving cue and withhold on no-touch trials.",
+          "source": "Article pp. 12–13, Design and Analysis"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "Precision MicroDrives 312–101",
+            "activation_ms": 100,
+            "rated_frequency_hz": 150,
+            "rated_speed_rpm": 9000,
+            "rated_voltage_v": 3,
+            "rated_current_ma": 60,
+            "surface_mm2": 113,
+            "reported_time_to_max_speed_ms": 50,
+            "sites": [
+              "right hand dorsum",
+              "sternum"
+            ]
+          },
+          "source": "Article pp. 5–6, Experiment 4 and Fig. 4A; Article pp. 11–13, Methods",
+          "gap": "Separate stimulation-site blocks. Hand near but not touching the sternum."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "distance_at_touch_cm": [
+              5,
+              24,
+              43,
+              62,
+              81,
+              100
+            ]
+          },
+          "source": "Article pp. 5–6, Experiment 4 and Fig. 4A",
+          "gap": "Distances and nominal motion are reported. Exact software onset times, rendering origin and trigger delays are unavailable."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Two silent tactile timings equivalent to nearest and farthest bimodal samples. Subtract fastest mean tactile-only RT for each participant's comparison.",
+          "source": "Article pp. 12–13, Design and Analysis"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "distance_anchors_cm": [
+              5,
+              100
+            ]
+          },
+          "source": "Article pp. 12–13, Design and Analysis",
+          "gap": "Exact time offsets not reported."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Auditory cue with no vibration. Withhold response.",
+          "source": "Article pp. 12–13, Design and Analysis"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": 16,
+          "source": "Article pp. 12–13, Design and Analysis"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 64,
+          "source": "Article pp. 12–13, Design and Analysis",
+          "gap": "2 baseline cells × 2 tactile sites × 16."
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": 32,
+          "source": "Article pp. 12–13, Design and Analysis",
+          "gap": "1 catch cell × 2 tactile sites × 16."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 12–13, Design and Analysis",
+          "gap": "Exact block count unreported."
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 480,
+          "source": "Article pp. 12–13, Design and Analysis"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The source gives the spatial probe grid and nominal velocity. Original trigger offsets, propagation delays and position-specific sound envelopes are unavailable.",
+      "The delivered vibrotactile waveform, actuator acceleration and synchronized gamepad latency require calibration. The 100 ms pulse is the motor command duration.",
+      "The trial scheduler must switch the active tactile site by block and time the probe at the paper's measured sound position."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Serino 2015 · Experiment 4, hand by trunk",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1038/srep18603. Article pp. 5–6, Experiment 4 and Fig. 4A"
+    }
+  ]
+}

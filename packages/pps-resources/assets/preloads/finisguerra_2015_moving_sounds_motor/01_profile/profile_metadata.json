@@ -1,0 +1,319 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "finisguerra_2015_moving_sounds_motor",
+  "title": "Finisguerra 2015 \u00b7 sound motion and corticospinal excitability",
+  "citation": "Finisguerra, A., Canzoneri, E., Serino, A., Pozzo, T., & Bassolino, M. (2015). Moving sounds within the peripersonal space modulate the motor system. Neuropsychologia, 70, 421\u2013428.",
+  "doi": "10.1016/j.neuropsychologia.2014.09.043",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2014.09.043",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": {
+        "recruited": 18,
+        "main_analysis": 13
+      },
+      "sound": {
+        "directions": [
+          "Approaching",
+          "Receding"
+        ],
+        "speakers": 8,
+        "spacing_cm": 15,
+        "path_cm": 105,
+        "speed_cm_s": 35,
+        "duration_ms": 3000,
+        "nominal_nearest_level_db": 70
+      },
+      "timing": {
+        "probe_distances_cm": [
+          15,
+          30,
+          45,
+          60,
+          75,
+          90
+        ],
+        "TMS_pulse_after_nominal_probe_ms": 50,
+        "precise_delay_from_sound_onset_ms": null,
+        "intertrial_interval_ms": [
+          10000,
+          12000
+        ]
+      },
+      "schedule": {
+        "main_blocks": 4,
+        "main_TMS": 144,
+        "attention_touch_trials": 24,
+        "total_main": 168,
+        "comparators": "Separate silent PRE and POST TMS blocks, then touch-cued sound-location check."
+      },
+      "response": "No voluntary motor response on sound\u2013TMS trials. Give a speeded verbal report for rare right-hand electrical touch trials. Normalize the right first dorsal interosseous peak-to-peak MEP against pooled silent pre/post baseline."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Apparent moving sound in approaching and receding directions",
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Eight hidden serial speakers, custom microcontroller and MATLAB",
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1",
+          "gap": "Original sound files and playback code are unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speakers": 8,
+            "spacing_cm": 15,
+            "reported_path_cm": 105,
+            "direction": [
+              "IN approaching",
+              "OUT receding"
+            ],
+            "probe_positions_cm": [
+              15,
+              30,
+              45,
+              60,
+              75,
+              90
+            ],
+            "duration_ms": 3000,
+            "speed_cm_s": 35,
+            "unlabelled_endpoint_speakers": 2,
+            "figure_direction_colors": {
+              "IN approaching": "red",
+              "OUT receding": "blue"
+            },
+            "figure_caption_arm_to_first_source_cm": 15
+          },
+          "source": "Finisguerra et al. (2015), \u00a72.3.1 and original publisher Fig. 1a",
+          "gap": "The caption gives 15 cm arm-to-first-source separation. The two unlabeled end speakers and the six 15\u201390 cm nominal probes do not establish an absolute 3D coordinate origin or exact channel-switch schedule."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 3000,
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1"
+        },
+        "stimulus_speed": {
+          "status": "reported",
+          "value": 35,
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "IN approaching",
+            "OUT receding"
+          ],
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Microcontroller varies volume across serial speakers, with a 70 dB maximum at the closest position for both directions.",
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1",
+          "gap": "Original envelope shape, speaker switch times and calibration reference details are unknown."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "playback": {
+              "speakers": 8,
+              "spacing_cm": 15,
+              "reported_path_cm": 105,
+              "direction": [
+                "IN approaching",
+                "OUT receding"
+              ],
+              "probe_positions_cm": [
+                15,
+                30,
+                45,
+                60,
+                75,
+                90
+              ],
+              "duration_ms": 3000,
+              "speed_cm_s": 35
+            },
+            "driver": "Custom MATLAB, microcontroller volume sequencing, and CED-triggered TMS",
+            "calibration": "Phonometer before each experimental block. Maximum 70 dB at the near position in both directions.",
+            "unknown": "Signal identity, transfer law, channel gains, software versions, loudspeaker models, meter weighting, microphone position and room geometry."
+          },
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1",
+          "gap": "Signal identity, transfer law, channel gains, software versions, loudspeaker models, meter weighting, microphone position and room geometry."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "moving sound + TMS/EMG",
+            "moving sound + rare tactile target without TMS",
+            "silent TMS PRE/POST",
+            "silent tactile-only PRE/POST"
+          ],
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1 and Neuropsychologia pp. 422\u2013424, \u00a7\u00a72.3.1, 3.2"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Rare touch trials randomized among direction \u00d7 distance TMS trials. Silent baselines separate.",
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1 and Neuropsychologia pp. 422\u2013424, \u00a7\u00a72.3.1, 3.2"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "PRE \u2192 four experimental blocks \u2192 POST, then localization. Main directions and distances randomized.",
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1 and Neuropsychologia p. 424, \u00a7\u00a72.3.2, 3.1",
+          "gap": "The authors distribute TMS trials equally across four blocks. Per-block catch counts are unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "main_iti_ms": [
+              10000,
+              12000
+            ],
+            "touch_tms_separation_ms": [
+              4000,
+              5000
+            ]
+          },
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1",
+          "gap": "The described interval is software-controlled. Selection distribution and interval anchor are unknown. The paper gives the touch-to-TMS gap as at least 4\u20135 s."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1",
+          "gap": "Speeded verbal detection applies to rare touch. No exact deadline or capture latency."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": [
+            "fit EMG and tactile electrodes",
+            "establish FDI hotspot and resting motor threshold",
+            "silent PRE baseline",
+            "main EXP",
+            "silent POST baseline",
+            "sound localization"
+          ],
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1 and Neuropsychologia p. 424, \u00a7\u00a72.3.2, 3.1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "right hand dorsum",
+            "stimulator": "Digitimer DS7A constant current",
+            "electrodes": "two Ambu Neuroline neurological electrodes",
+            "gap": "Current, pulse width, waveform and intensity selection method are unreported."
+          },
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1",
+          "gap": "Current, pulse width, waveform and intensity selection method are unreported."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "probe_distances_cm": [
+              15,
+              30,
+              45,
+              60,
+              75,
+              90
+            ],
+            "delay_ms_after_nominal_position": 50,
+            "trigger": "MATLAB via CED",
+            "exact_audio_onset_offsets_ms": null
+          },
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1",
+          "gap": "The TMS delay uses the time the sound reaches a position. Exact offsets from audio onset and numerical peripheral tactile SOAs are unknown."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "100 \u00d7 mean experimental peak-to-peak MEP / mean pooled PRE and POST MEP.",
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a7\u00a72.3.1, 3.2"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": "Silent PRE and POST resting TMS blocks bookend the main experiment.",
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a7\u00a72.3.1, 3.2",
+          "gap": "Baseline pulse-to-pulse timing unreported."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Occasional right-hand electrical cue with speeded verbal detection and no TMS",
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "tms_per_direction_position": 12,
+            "touch_per_direction_position": 2
+          },
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1"
+        },
+        "baseline_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reported_per_block": 12,
+            "blocks": 2,
+            "touch_trials_per_block": 2
+          },
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a7\u00a72.3.1, 3.2",
+          "gap": "Paper describes 12 trials measuring excitability and two trials with touch and no TMS in each block. Inclusion of those two in the stated 12 is unclear."
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": 24,
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "main": 4,
+            "baseline": 2
+          },
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1 and Neuropsychologia pp. 422\u2013424, \u00a7\u00a72.3.1, 3.2"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "main_tms": 144,
+            "main_touch": 24,
+            "main_total": 168
+          },
+          "source": "Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1",
+          "gap": "Main experimental session only. Baselines, calibration and post-task localization are separate."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The eight-speaker crossfades, waveforms, precise position trigger timestamps and original controller code are unavailable.",
+      "Reproduction requires synchronized qualified TMS/EMG, calibrated auditory and electrical delivery, a documented routing for the vocal attention check, and safe laboratory handling. A tactile SOA cannot stand in for the TMS trigger.",
+      "The paper\u2019s wording does not establish the touch onset relative to the sound. Keep those attention trials distinct from the published 50 ms post-position TMS timing."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2014.09.043. Neuropsychologia pp. 422\u2013424, \u00a72.3.1 and Fig. 1 and Neuropsychologia p. 422, \u00a72.2"
+    }
+  ]
+}

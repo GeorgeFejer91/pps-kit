@@ -1,0 +1,218 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "cimmino_2013_arm_elongation_von_frey",
+  "title": "Cimmino 2013 \u00b7 Von Frey tactile detection",
+  "citation": "Cimmino et al. (2013). Plasticity of body representations after surgical arm elongation in an achondroplasic patient. Restorative Neurology and Neuroscience, 31(3), 287\u2013298.",
+  "doi": "10.3233/rnn-120286",
+  "source_url": "https://doi.org/10.3233/rnn-120286",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3233/rnn-120286::von_frey",
+    "publication_status": "published",
+    "profile_type": "companion_assessment_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "companion_pps_profile_id": "cimmino_2013_arm_elongation_pps",
+      "context": "Companion outcome in the surgical arm-elongation case study.",
+      "comparison_n": 26,
+      "stimulus": "Apply the North Coast Medical monofilament perpendicular to the arm until it bends. The labelled range is 0.008\u2013300 g.",
+      "staircase": {
+        "directions": [
+          "ascending",
+          "descending"
+        ],
+        "contacts_per_level": 10,
+        "catches_per_level": 5,
+        "threshold_correct_contacts": 6
+      },
+      "response": "Record verbal detection. The study\u2019s table uses a score whose physical unit cannot be resolved from the Methods."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "North Coast Medical Von Frey fibres",
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "actual": 10,
+            "catch": 5,
+            "scope": "per staircase level"
+          },
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1"
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No exact within-block ordering provided."
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No ITI rule specified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No numeric response window stated."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Verbal felt / did not feel",
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "North Coast Medical Von Frey fibres",
+            "sites": "Arm, with exact Von Frey placement unspecified in \u00a72.1",
+            "protocol": {
+              "directions": [
+                "Ascending",
+                "Descending"
+              ],
+              "stimulus_present_per_level": 10,
+              "catch_per_level": 5,
+              "threshold_correct_present": 6
+            }
+          },
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "Additional physical calibration details unreported."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "No-contact catches",
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "No auditory source or audio\u2013tactile timing in this assessment."
+        },
+        "catch_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "per_level": 5,
+            "total": null
+          },
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "Number of levels unresolved."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "Formal block count not specified."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1",
+          "gap": "Total trials not specified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires the calibrated monofilament kit, standardized contact and a manual adaptive present-versus-absent response workflow.",
+      "Exact arm site, force-level steps, contact durations and tabulated score units are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3233/rnn-120286. Cimmino et al. 2013, p. 290, \u00a72.1, and p. 292, \u00a73.1 and Table 1"
+    }
+  ]
+}

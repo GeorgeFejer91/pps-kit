@@ -1,0 +1,274 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "cattaneo_2010_haptic_rod_bisection",
+  "title": "Cattaneo 2010 \u00b7 Number priming and haptic bisection",
+  "citation": "Cattaneo et al. (2010). Crossmodal interaction between the mental number line and peripersonal haptic space representation in sighted and blind individuals. Attention, Perception, & Psychophysics, 72(4), 885\u2013890.",
+  "doi": "10.3758/app.72.4.885",
+  "source_url": "https://doi.org/10.3758/app.72.4.885",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3758/app.72.4.885",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": {
+        "early_blind": 17,
+        "blindfolded_sighted": 23
+      },
+      "apparatus": "Four fixed wooden rods of 300, 350, 400 or 450 mm, 14 mm diameter, centered on the body midline with midpoint approximately 380 mm from midsternum.",
+      "audio": "Prerecorded female voice saying 2, 8 or \u2018blah\u2019, starting with rod exploration. Digit trains use ten repetitions at approximately one per second. Exact control token count unreported.",
+      "repetitions": {
+        "rods": 4,
+        "conditions": 3,
+        "per_cell": 3,
+        "total": 36
+      },
+      "procedure": "Start with the right palm at about the midpoint. Explore with the right index for 10 s and indicate the estimated midpoint. Experimenter records position to nearest mm and initial scan direction.",
+      "outcome": "Signed midpoint error as a percentage of half-length and initially explored direction."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Prerecorded spoken digit or nonword during active haptic rod bisection",
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Number Presentation"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "conditions": {
+              "small": "2",
+              "large": "8",
+              "control": "blah"
+            },
+            "voice": "Female speaker, prerecorded using unspecified sound program",
+            "digit_repetitions": 10,
+            "nominal_digit_rate_Hz": 1,
+            "train_duration_ms": 10000,
+            "onset": "Concurrent with start of rod exploration",
+            "control_note": "Control is a nonword. Exact control repetition count and timing not separately stated.",
+            "unreported": "Spoken language, per-token duration, voice identity, audio file format, SPL, playback model and location, sample rate, and original audio files."
+          },
+          "source": "Cattaneo et al. 2010, p. 887, Number Presentation",
+          "gap": "Spoken language, per-token duration, voice identity, audio file format, SPL, playback model and location, sample rate, and original audio files."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cattaneo et al. 2010, p. 887, Number Presentation",
+          "gap": "No auditory movement."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Number Presentation",
+          "gap": "Rod stationary and participant scans it."
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "exploration_ms": 10000,
+            "digit_train_ms": 10000
+          },
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Number Presentation",
+          "gap": "Per-token and exact control timing unreported."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task",
+          "gap": "Finger speed self-paced."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": {
+            "small": "2",
+            "large": "8",
+            "control": "blah"
+          },
+          "source": "Cattaneo et al. 2010, p. 887, Number Presentation"
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cattaneo et al. 2010, p. 887, Number Presentation",
+          "gap": "Signal level and envelope unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "rod": {
+              "rod_lengths_mm": [
+                300,
+                350,
+                400,
+                450
+              ],
+              "rod_diameter_mm": 14,
+              "material": "Wood",
+              "mount": "Horizontal rods fixed by Velcro to wooden panel",
+              "reference": "Rod midpoint centered on body midline",
+              "midsternum_to_midpoint_mm_approx": 380,
+              "measurement_marks": "Pen markings in millimeters, imperceptible by touch"
+            },
+            "audio": "Recorded female voice"
+          },
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Number Presentation",
+          "gap": "Playback device and location unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "rod_lengths_mm": [
+              300,
+              350,
+              400,
+              450
+            ],
+            "audio_conditions": {
+              "small": "2",
+              "large": "8",
+              "control": "blah"
+            }
+          },
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Number Presentation"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Rod lengths and audio conditions randomized",
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Rod lengths and audio conditions presented in random order.",
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task",
+          "gap": "Exact run order, randomizer, seed, block structure and intertrial timing unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cattaneo et al. 2010, p. 887, Procedure",
+          "gap": "Between-trial timing unreported. Session about 45 min."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": {
+            "scan_ms": 10000,
+            "response_anchor": "End of scan"
+          },
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task",
+          "gap": "10 s is the exploration duration. Midpoint response deadline unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "pre": "Experimenter places right palm over rod midpoint, with possible small offsets either way.",
+            "start": "Lift palm and begin exploring with right index finger as audio starts.",
+            "during": "Scan in preferred initial direction. Repeated traversals allowed within 10 s.",
+            "response": "At scan end, indicate estimated midpoint with right index finger.",
+            "record": "Experimenter reads the roughly 1 mm fingertip mark, measures position to nearest mm, and logs initial scan direction.",
+            "feedback": "No feedback during testing."
+          },
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Number Presentation"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "kind": "Active rod contact",
+            "effector": "Right index finger",
+            "rod": {
+              "rod_lengths_mm": [
+                300,
+                350,
+                400,
+                450
+              ],
+              "rod_diameter_mm": 14,
+              "material": "Wood",
+              "mount": "Horizontal rods fixed by Velcro to wooden panel",
+              "reference": "Rod midpoint centered on body midline",
+              "midsternum_to_midpoint_mm_approx": 380,
+              "measurement_marks": "Pen markings in millimeters, imperceptible by touch"
+            }
+          },
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Number Presentation",
+          "gap": "Active continuous rod exploration with concurrent speech. No delivered tactile pulse or event SOA."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Nonword blah as the within-participant comparator for signed bisection bias.",
+          "source": "Cattaneo et al. 2010, p. 887, Number Presentation; Cattaneo et al. 2010, pp. 887\u2013888, Results and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": "Control accompanies rod exploration",
+          "source": "Cattaneo et al. 2010, p. 887, Number Presentation",
+          "gap": "Separate token timing unavailable."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task",
+          "gap": "No catch class described."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Number Presentation",
+          "gap": "Active continuous rod exploration with concurrent speech. No delivered tactile pulse or event SOA. Three repetitions per rod \u00d7 audio cell."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 12,
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task",
+          "gap": "Four lengths \u00d7 three nonword trials."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task",
+          "gap": "No catch class."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task",
+          "gap": "Practice and 36 formal trials described. Block segmentation unavailable."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "formal": 36,
+            "practice_min_derived": 4
+          },
+          "source": "Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Procedure",
+          "gap": "Practice includes every rod length. Exact total number of practice trials unspecified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires instrumented physical rod setup, manual or sensor midpoint measurement, and scoring of first movement.",
+      "Original speech samples and exact control train, nominal levels, delivery coordinates and intertrial timing remain unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3758/app.72.4.885. Cattaneo et al. 2010, p. 886, Participants and Table 1; Cattaneo et al. 2010, pp. 886\u2013887, Haptic Line Bisection Task; Cattaneo et al. 2010, p. 887, Number Presentation; Cattaneo et al. 2010, pp. 887\u2013888, Results and Fig. 1; Cattaneo et al. 2010, p. 888, initial scanning direction analysis"
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "template_id": "cimmino_2013_arm_elongation_two_point",
+  "title": "Cimmino 2013 · Two-point tactile acuity",
+  "citation": "Cimmino et al. (2013). Plasticity of body representations after surgical arm elongation in an achondroplasic patient. Restorative Neurology and Neuroscience, 31(3), 287–298.",
+  "source_url": "https://doi.org/10.3233/rnn-120286",
+  "doi": "10.3233/rnn-120286",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3233/rnn-120286::two_point",
+    "publication_status": "published",
+    "profile_type": "companion_assessment_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "companion_pps_profile_id": "cimmino_2013_arm_elongation_pps",
+      "context": "Companion outcome in the surgical arm-elongation case study.",
+      "comparison_n": 26,
+      "stimulus": "Use a Med Core adjustable aesthesiometer with the tips oriented vertically on the ventral arm just above the elbow. Blindfold the participant.",
+      "procedure": "Randomly intermix one and two contacts. Record the participant’s spoken count. The smallest separation correctly identified on five successive two-point presentations defines threshold.",
+      "staircase": {
+        "ascending_start_cm": 1,
+        "descending_start_cm": 5,
+        "step_cm": 1,
+        "reported_update": "Decrease after correct response. Increase after error.",
+        "caveat": "The source describes one update rule for two starting directions."
+      }
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Med Core adjustable aesthesiometer",
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "Exact allocation not given."
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Random single/double taps",
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1"
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No ITI rule specified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No numeric response window stated."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Verbal one or two",
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "Med Core adjustable aesthesiometer",
+            "sites": "Ventral arm just above elbow, vertically oriented tips",
+            "protocol": {
+              "ascending_start_cm": 1,
+              "descending_start_cm": 5,
+              "step_cm": 1,
+              "stated_correct_rule": "Decrease by 1 cm after correct response",
+              "stated_error_rule": "Increase by 1 cm after error",
+              "criterion": "Minimum two-point distance correctly perceived five consecutive times",
+              "implementation_caveat": "The text gives both starting modes but describes only one update rule. Ascending-specific update and number of trials not clear."
+            }
+          },
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "Additional physical calibration details unreported."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No catch procedure documented for this assessment."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "No separate catch family described."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "Formal block count not specified."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1",
+          "gap": "Total trials not specified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires an adjustable calibrated aesthesiometer, standardized tactile contact and an operator-controlled staircase with spoken one-versus-two capture.",
+      "Ascending-only update, exact trial count, pressure and contact duration are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Cimmino 2013 · Two-point tactile acuity",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3233/rnn-120286. Cimmino et al. 2013, p. 290, §2.1, and p. 292, §3.1 and Table 1"
+    }
+  ]
+}

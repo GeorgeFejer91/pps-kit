@@ -1,0 +1,186 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "body_image_social_cognition_2024_passive_ipd",
+  "title": "Finn 2024 \u00b7 passive interpersonal distance",
+  "citation": "Finn, D., Cardini, F., Aspell, J. E., Swami, V., & Todd, J. (2024). The impact of body image on social cognition: Fear of negative evaluation mediates the relationship between body surveillance and interpersonal distance in women. Body Image, 51, 101777.",
+  "doi": "10.1016/j.bodyim.2024.101777",
+  "source_url": "https://doi.org/10.1016/j.bodyim.2024.101777",
+  "verification_status": "partial",
+  "notes": "Companion interpersonal-distance assessment from the same cohort as the PPS task. The physical procedure is available for inspection; there is no electronic playback or launchable schedule.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.bodyim.2024.101777#passive-ipd",
+    "publication_status": "published",
+    "profile_type": "live_interpersonal_distance_companion",
+    "profile_check_complete": false,
+    "published_method": {
+      "scope": "Companion interpersonal-distance measure in the paper\u2019s single cohort. The active and passive measures precede the separate audio\u2013tactile PPS task.",
+      "cohort": {
+        "completed": 79,
+        "analyzed": 75,
+        "technical_loss": 4
+      },
+      "physical_setup": {
+        "starting_interpersonal_separation_cm": 200,
+        "room": "Use the same quiet lab and fixed starting floor markers. The same researcher wore plain black clothing across sessions.",
+        "measurement": "Measure in centimeters between the outside edges of the start and comfort markers with a tape."
+      },
+      "repetitions": "The publication describes one stop placement in each condition and gives no repeat policy.",
+      "task_order": "Administer after active IPD and the return to starting positions, before PPS.",
+      "participant_response": "Remain still and tell the approaching researcher when the proximity becomes uncomfortable.",
+      "researcher_behavior": "Approach at a consistent natural gait with gaze downward and a neutral expression. Stop at the participant\u2019s verbal signal and mark the position.",
+      "analysis": "Relate the reported distance in centimeters to the self-report variables; use the study\u2019s correlation and multiple-comparison procedures."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Live researcher approach-distance procedure",
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "mover": "Researcher",
+            "initial_separation_cm": 200
+          },
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices",
+          "gap": "The manuscript describes measuring between start and stop stickers. It reports the result as preferred IPD. Exact scoring transform or sticker reference point for absolute interpersonal separation is unclear."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Floor stickers and tape measure",
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "After active condition and return to start",
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Stand still and say when the approaching researcher becomes uncomfortably close. Researcher marks stop location.",
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices"
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.8, Interpersonal distance indices",
+          "gap": "One placement is described in each condition. No repeats are specified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires a live researcher, marked floor locations, observer-controlled recording of the comfort stop and a physical distance measurement. The audio\u2013tactile playback scheduler has no equivalent task or response field.",
+      "The paper does not resolve how the measured start-to-stop marker distance maps to absolute interpersonal separation. Establish and record the reference points and scoring transform before interpreting distances.",
+      "The exact room geometry, approach speed and original instruction script are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.bodyim.2024.101777. Body Image 51, 101777, \u00a7\u00a72.1, 2.2.8, 2.3 and \u00a7\u00a73.2\u20133.3; the active mediation estimates also appear in Fig. 1."
+    }
+  ]
+}

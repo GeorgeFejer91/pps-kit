@@ -1,0 +1,254 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "sancristobal_2022_looming_behavior",
+  "title": "Sancrist\u00f3bal 2022 \u00b7 Looming-sound tactile detection",
+  "citation": "Sancrist\u00f3bal et al. (2022). Slow Resting State Fluctuations Enhance Neuronal and Behavioral Responses to Looming Sounds. Brain Topography, 35(1), 121\u2013141.",
+  "doi": "10.1007/s10548-021-00826-4",
+  "source_url": "https://doi.org/10.1007/s10548-021-00826-4",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s10548-021-00826-4",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sample": 38,
+      "audio": "A 44.1 kHz pink noise sample lasts 3100 ms. The approach variant increases exponentially from 55 to 70 dB SPL. The flat variant is 62.5 dB SPL.",
+      "touch": "Single 100 \u00b5s rectangular monophasic DS7A pulse on the dorsal right index finger, with individually validated suprathreshold settings.",
+      "sound_onset_relative_soa_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "count": {
+        "paired_per_sound_per_delay": 18,
+        "paired": 180,
+        "derived_auditory_only": 120,
+        "derived_trial_total": 300,
+        "blocks": 3
+      },
+      "post_trial_iti_ms": 1000,
+      "response": "Speeded left-index Cedrus RB-834 response for touch, withhold on auditory-only. Compare RT for looming and flat sound.",
+      "other_acquisition": "An eyes-closed and unstimulated resting EEG assessment preceded the passive auditory task on day 2."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Pink noise with a constant or increasing SPL envelope",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "editing_software": "Sound Forge 4.5 (Sonic Foundry)",
+            "sample_rate_hz": 44100
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli",
+          "gap": "Original noise files, generator seed, and export bit depth are unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "moving_perceptual_trajectory": 1,
+            "static_comparator": 1
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli; Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 2\u20133, Fig. 1 and caption"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "movement": "apparent approach",
+            "layout": "fixed loudspeaker pair",
+            "near_anchor": "right hand",
+            "interspeaker_distance_cm": 100
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task; Sancrist\u00f3bal et al., author-shared journal PDF, PDF pp. 2\u20133, Fig. 1 and caption",
+          "gap": "Exact near-speaker distance, head-relative azimuth, speaker elevation and channel gain paths are unspecified."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "value": 3100,
+            "unit": "ms"
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli; Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task",
+          "gap": "No measured speed or distance-by-time mapping for apparent approach."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming",
+            "flat"
+          ],
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming_start_dB_SPL": 55,
+            "looming_end_dB_SPL": 70,
+            "looming_envelope": "exponential increase",
+            "flat_dB_SPL": 62.5
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Auditory Stimuli",
+          "gap": "Calibration equipment, placement and exact per-speaker mixing are unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "output": "physical speakers",
+            "speaker_count": 2,
+            "interspeaker_distance_cm": 100
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Audiotactile target",
+            "Auditory-only catch"
+          ],
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": {
+            "audio_tactile_percent": 60,
+            "auditory_only_catch_percent": 40,
+            "order": "randomly intermingled"
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": {
+            "blocks": 3,
+            "allocation": "equal sized blocks",
+            "schedule": "random intermixing"
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "post_trial_iti_ms": 1000
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task",
+          "gap": "Exact deadline and response scoring window are unspecified."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Ignore sound. Respond quickly to a tactile target with the left index finger on Cedrus RB-834.",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "stimulator": "Digitimer DS7A",
+            "site": "hairy surface of the right index finger",
+            "electrodes": 2,
+            "pulse_duration_us": 100,
+            "pulse_form": "single rectangular monophasic pulse",
+            "reported_current_mA_range": [
+              60,
+              90
+            ]
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 4, Tactile Stimuli; Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task",
+          "gap": "The article describes constant-current equipment and also uses constant-voltage wording for the pulse. Digitimer's DS7A specification describes constant current. Actual delivered waveform is unverified."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "values": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ],
+            "unit": "ms",
+            "reference": "auditory onset"
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": false,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task",
+          "gap": "The behavioral schedule assigns 60% to audiotactile targets and the other 40% to sound-only catches."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task",
+          "gap": "No tactile-only baseline in this behavioral procedure."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Looming or flat sound without a tactile target",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": 18,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task",
+          "gap": "The two reported families cover the entire behavioral allocation."
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": 120,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task",
+          "gap": "Five delays \u00d7 two sound conditions \u00d7 18 trials = 180 targets. 180 / 0.60 = 300 trials. The 40% complement is 120 catch trials. Three equally sized blocks give 100 trials per block. The split by sound and target allocation per block are unspecified."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 3,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 300,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 5, Behavioral Audio-Tactile Task",
+          "gap": "Five delays \u00d7 two sound conditions \u00d7 18 trials = 180 targets. 180 / 0.60 = 300 trials. The 40% complement is 120 catch trials. Three equally sized blocks give 100 trials per block. The split by sound and target allocation per block are unspecified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires the matched dry noise and exact intensity envelopes with physical audio calibration, right-index electrical stimulation and synchronized Cedrus responses.",
+      "Audit identifies inconsistent current/voltage terminology. Delivered waveform and per-block allocation by sound are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1007/s10548-021-00826-4. Brain Topography pp. 124\u2013125, Auditory Stimuli, Tactile Stimuli, Behavioral Audio-Tactile Task and Fig. 1; Brain Topography p. 127, behavioral Results"
+    }
+  ]
+}

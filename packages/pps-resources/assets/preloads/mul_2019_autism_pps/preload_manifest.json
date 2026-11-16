@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "mul_2019_autism_pps",
   "title": "Mul 2019 autism, looming sound and tactile PPS",
-  "visible_variant_label": "",
+  "visible_variant_label": "B",
   "publication_status": "published",
   "profile_type": "looming_audio_mechanical_tap_pps",
   "asset_mode": "bundled_local",

@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Session 1 audio-tactile assessment with matched looming and flat pink-noise schedules. The two preview clips reproduce the relative intensity contrast in digital audio. Physical loudspeaker calibration, electrical stimulation, response-box timing and the separate interoception assessments require the original lab procedures.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cognition.2018.04.001",
     "profile_type": "looming_flat_audio_tactile_pps",
     "publication_study_row_id": "doi:10.1016/j.cognition.2018.04.001",
     "source_scope": "Session 1, tactile reaction time with either looming or flat sound. The heartbeat and time-estimation tasks are separately administered in Session 2.",

@@ -1,0 +1,226 @@
+{
+  "template_id": "ferroni_2023_depersonalisation_mental_time_travel",
+  "title": "Ferroni 2023 · Mental time travel companion task preprint",
+  "citation": "Ferroni, F., Arcuri, E., Ardizzi, M., Chinchella, N., Gallese, V., & Ciaunica, A. (2023). Lost in time and space? Multisensory processing of peripersonal space and time perception in Depersonalisation. PsyArXiv, version 1.",
+  "source_url": "https://doi.org/10.31234/osf.io/t8h6a",
+  "doi": "10.31234/osf.io/t8h6a",
+  "verification_status": "partial",
+  "notes": "Inspect the study's companion visual temporal judgment assessment. Experimental launch requires timed visual presentation and individualized event-year scoring.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.31234/osf.io/t8h6a::mental-time-travel",
+    "publication_status": "preprint",
+    "profile_type": "companion_visual_temporal_judgment",
+    "profile_check_complete": false,
+    "published_method": {
+      "role": "Companion temporal judgment assessment in the same study and cohort as the audiotactile PPS assessment.",
+      "cohort": "70 adults in two groups of 35 defined by depersonalisation experience scores. The order of the same-day PPS and temporal judgment tasks was counterbalanced.",
+      "imagined_self_locations_years_from_present": {
+        "past": -10,
+        "present": 0,
+        "future": 10
+      },
+      "schedule": {
+        "main_presentations": 3,
+        "scheduled_main_trials": 72,
+        "listed_trials_per_presentation": 24,
+        "listed_biographical_trials_per_presentation": 12,
+        "listed_general_trials_per_presentation": 12,
+        "nominal_relative_past_or_future_slots_per_event_type": 6,
+        "separate_practice_trials": 8
+      },
+      "presentation": "Counterbalance temporal-context order. Before each context, instruct imagery from that point in time. Show events as centered text on a 15-inch monitor about 60 cm away. Text stays visible until a left or right index response, followed by 1,000 ms before the next item.",
+      "response": "Judge whether the event occurs earlier or later than the assigned temporal context. Counterbalance the response key mapping. Assess reaction time from text onset and score correctness against the event-year knowledge collected from each participant.",
+      "analysis": "Divide mean response latency by response accuracy to estimate inverse efficiency. Use the present context to assess self-referencing and compare past and future with the present to assess self-projection.",
+      "source_version": "PsyArXiv v1. Its appendix lists the English event prompts with planned labels. Two prompts have changed English wording in the later journal supplement.",
+      "partner_pps_profile_id": "depersonalisation_2023_psyarxiv_pps",
+      "stimulus_inventory": "The preprint appendix lists the same 72 nominal context, type and relative-time assignments as the journal. The preprint appendix does not specify the delivered Italian prompt strings."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "display_in": 15,
+            "viewing_distance_cm_approx": 60,
+            "software": "MATLAB R2019b with Psychophysics Toolbox 3"
+          },
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "biographical and general events",
+            "relative past or relative future"
+          ],
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Per condition, balance biographical and general items and relative past/future labels.",
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Counterbalance Past, Present, Future. Eight randomized practice items precede task.",
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "interstimulus_interval_ms": 1000
+          },
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "response_window": {
+          "status": "reported",
+          "value": "Slide remains visible until key response.",
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Imagine yourself in the past 10 years, now, or future 10 years. Judge whether each described event is earlier or later than that imagined time. Left/right key mapping counterbalanced. Post-task event-year questionnaire supports response scoring.",
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 3,
+          "source": "PsyArXiv v1 pp. 6–7, Mental Time Travel; Appendix Table 1"
+        },
+        "total_trial_count": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "unique_stimuli_per_time_condition": 24,
+            "time_conditions": 3,
+            "practice_items": 8
+          },
+          "source": "PsyArXiv v1 p. 7 and Supplementary Table 1",
+          "gap": "The sentence says 72 trials per time condition while the item table has 24 per condition, 72 items total. Any within-condition repetition count is unclear."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The task requires response-dismissed visual text, balanced temporal contexts, counterbalanced response bindings and event-referenced keyboard timestamps.",
+      "Recover the actual prompt order, practice settings and presentation code. The published tables establish planned item assignments. Realized order and exposure require task records.",
+      "Scoring depends on the participant's stated event years and the study's handling of ambiguous or missing dates. The original response and scoring artifacts are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Ferroni 2023 · Mental time travel companion task preprint",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 3,
+      "participants": 70,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.31234/osf.io/t8h6a. PsyArXiv v1 §§2.1–2.3, pp. 5–7, Mental Time Travel, and pp. 25–26, Appendix Table 1"
+    }
+  ]
+}

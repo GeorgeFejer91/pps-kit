@@ -1,0 +1,317 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "pfeiffer_2018_rotation_audiotactile_exp3",
+  "title": "Pfeiffer 2018 \u00b7 Experiment 3, auditory\u2013vestibular congruency",
+  "citation": "Pfeiffer, C., Noel, J. P., Serino, A., & Blanke, O. (2018). Vestibular modulation of peripersonal space boundaries. European Journal of Neuroscience, 47(7), 800-811.",
+  "doi": "10.1111/ejn.13872",
+  "source_url": "https://doi.org/10.1111/ejn.13872",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1111/ejn.13872::c",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "conditions": [
+        "Congruent sound and rotation",
+        "Incongruent sound and rotation"
+      ],
+      "touch": {
+        "site": "Forehead centre",
+        "motor_command_ms": 200,
+        "command_onsets_ms": [
+          500,
+          1000,
+          1500,
+          2000,
+          2500,
+          3000,
+          3500
+        ],
+        "anchor": "Trial, sound and rotation onset"
+      },
+      "pool": {
+        "main_conditions": 2,
+        "repeats_per_condition_and_soa": 10,
+        "known_main_total": 140,
+        "extra_catches": null
+      },
+      "response": "Detect touch quickly. Compare congruency effects and peri-head boundary across the sound-distance grid."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "audio": "pink noise",
+            "channels": "stereo binaural"
+          },
+          "source": "Journal pp. 802\u2013803, Stimuli and apparatus and Fig. 1"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "language": "MATLAB",
+            "head_diameter_cm": 18,
+            "rendering": "interaural level and time differences via spatial filters"
+          },
+          "source": "Journal pp. 802\u2013803, Stimuli and apparatus and Fig. 1",
+          "gap": "Four candidate WAVs and a related MATLAB script are verified in the private backup. Their timing differs from the published sequence. Exact playback files, filter settings and hardware calibration remain unverified."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Journal pp. 802\u2013803, Stimuli and apparatus and Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "type": "stereo pink noise",
+            "device": "Bose QC15 noise-cancelling headphones",
+            "renderer": "custom MATLAB binaural filters, spherical 18 cm head model, standard head transfer function",
+            "path": "straight radial path along left or right binaural axis toward center of head",
+            "stages": [
+              {
+                "duration_ms": 1000,
+                "stationary_cm": 100
+              },
+              {
+                "duration_ms": 2000,
+                "approach_cm_s": 50
+              },
+              {
+                "duration_ms": 1000,
+                "stationary_cm": 0
+              }
+            ]
+          },
+          "source": "Journal pp. 802\u2013803, Stimuli and apparatus and Fig. 1"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "sound_ms": 4000,
+            "tactile_ms": 200
+          },
+          "source": "Journal pp. 802\u2013803, Stimuli and apparatus and Fig. 1"
+        },
+        "stimulus_speed": {
+          "status": "reported",
+          "value": {
+            "moving_segment_mps": 0.5,
+            "stationary_segment_mps": 0
+          },
+          "source": "Journal pp. 802\u2013803, Stimuli and apparatus and Fig. 1"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": {
+            "congruent": [
+              [
+                "left rotation",
+                "Leftward Sound"
+              ],
+              [
+                "right rotation",
+                "Rightward Sound"
+              ]
+            ],
+            "incongruent": [
+              [
+                "left rotation",
+                "Rightward Sound"
+              ],
+              [
+                "right rotation",
+                "Leftward Sound"
+              ]
+            ]
+          },
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4"
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pp. 802\u2013803, Stimuli and apparatus and Fig. 1",
+          "gap": "Absolute audio level, distance-gain law and exact binaural filters unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "audio": "Bose QC15 noise-cancelling headphones",
+            "rendering": "custom MATLAB binaural filters, spherical 18 cm head model, standard head transfer function",
+            "tactile": "Precision MicroDrives shaftless motor model 312-101",
+            "response": "serial keyboard"
+          },
+          "source": "Journal pp. 802\u2013803, Stimuli and apparatus and Fig. 1",
+          "gap": "Audio file, software release, playback latency and response key unreported."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": {
+            "trimodal_main": 140,
+            "congruency_cells": 2,
+            "distance_cells": 7,
+            "repeats_each": 10
+          },
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4",
+          "gap": "10 per onset cell carried over from Experiment 2. Exact component direction allocation and catches unknown."
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Left, right and no-sound baseline conditions and seven onset cells intermixed; catch trials no touch.",
+          "source": "Journal pp. 803\u2013804, Experiment 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Two congruency families collapse opposite left/right direction pairings.",
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4",
+          "gap": "Exact raw direction balance, blocks and sequence unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "after_stimulation_deceleration_ms": 1000,
+            "stationary_rest_ms": [
+              2500,
+              3500
+            ],
+            "uniform_step_ms": 100
+          },
+          "source": "Journal p. 803, Vestibular stimuli and Fig. 1"
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pp. 803\u2013804, Experiment 1",
+          "gap": "Speeded response; numeric cutoff unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "response": "right index on serial keyboard as quickly and accurately as possible to forehead vibration",
+            "ignore": "sound and rotation as applicable",
+            "no_target": "withhold",
+            "practice_min_trials": 10,
+            "practice_recorded": false
+          },
+          "source": "Journal pp. 803\u2013804, Experiment 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "center of forehead",
+            "device": "Precision MicroDrives shaftless motor model 312-101",
+            "duration_ms": 200,
+            "nominal_frequency_hz": 150,
+            "specifications": {
+              "voltage_v": 3,
+              "current_ma": 60,
+              "rpm": 9000,
+              "mass_g": 5,
+              "area_mm2": 113,
+              "rise_to_max_speed_ms": 50
+            }
+          },
+          "source": "Journal pp. 802\u2013803, Stimuli and apparatus and Fig. 1",
+          "gap": "Values for voltage/current/speed are motor specifications; delivered amplitude and force unreported."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "labels": [
+              "D7",
+              "D6",
+              "D5",
+              "D4",
+              "D3",
+              "D2",
+              "D1"
+            ],
+            "onset_ms": [
+              500,
+              1000,
+              1500,
+              2000,
+              2500,
+              3000,
+              3500
+            ],
+            "anchor": "trial/sound/rotation onset in rotating trials"
+          },
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4; Journal p. 803, Vestibular stimuli and Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": {
+            "within_experiment_stationary": false,
+            "reference": "Experiment 1 and 2 baselines from other cohorts"
+          },
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4",
+          "gap": "No within-experiment stationary tactile-only condition."
+        },
+        "catch_trial_type": {
+          "status": "reported_with_caveat",
+          "value": "Refers to Experiment 2 procedure.",
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4",
+          "gap": "Exact catch types unreported."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported_with_caveat",
+          "value": 10,
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4",
+          "gap": "Reported as same number of repetitions per onset delay as Experiment 2. Component direction counts unknown."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4",
+          "gap": "The stated Experiment 3 detection design comprises only congruent and incongruent trimodal conditions."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4",
+          "gap": "Exact count unreported."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pp. 803\u2013804, Experiment 1",
+          "gap": "Block count not enumerated."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "main": 140
+          },
+          "source": "Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4",
+          "gap": "2 \u00d7 7 \u00d7 10 using collapsed design. Catch total and component balance unknown."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "A vestibular drive scheduler must synchronize rotation with the directional headphone signal and tactile trigger and log the encoder position.",
+      "Exact physical output calibration, rotation-direction allocation within congruency and catch count are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1111/ejn.13872. Journal pp. 804 and 806\u2013808, Experiment 3 and Fig. 4; Journal p. 803, Vestibular stimuli and Fig. 1"
+    }
+  ]
+}

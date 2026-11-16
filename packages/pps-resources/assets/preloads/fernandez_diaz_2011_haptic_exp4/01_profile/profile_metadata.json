@@ -1,0 +1,273 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "fernandez_diaz_2011_haptic_exp4",
+  "title": "Fern\u00e1ndez-D\u00edaz 2011 \u00b7 Rear parallelity and mirror matching",
+  "citation": "Fern\u00e1ndez-D\u00edaz and Travieso (2011). Performance in haptic geometrical matching tasks depends on movement and position of the arms. Acta Psychologica, 136(3), 382\u2013389.",
+  "doi": "10.1016/j.actpsy.2011.01.003",
+  "source_url": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.actpsy.2011.01.003::experiment-4",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "table_geometry_cm": [
+        148,
+        72,
+        80
+      ],
+      "coordinate_frame": "Lateral relative to table midline and depth from near edge, in cm.",
+      "bar_setup": "20 cm pivoted bar with 1.1 cm diameter and arrow-shaped ends on a magnetized steel table.",
+      "participants": 30,
+      "posture": "Blindfolded, standing with back to table.",
+      "factors": {
+        "reference_xy_cm": [
+          [
+            -30,
+            20
+          ],
+          [
+            30,
+            20
+          ]
+        ],
+        "orientations_deg": [
+          0,
+          45,
+          90,
+          135
+        ],
+        "paired_test_positions": "Contralateral, two positions for parallel and inner position for mirror"
+      },
+      "blocks": "Counterbalance the two task blocks and randomize trials within them. 16 parallel and eight mirror trials.",
+      "task": "Rotate the test bar to be parallel to the reference or its mirror image. For parallel trials also identify which ends point in the same direction.",
+      "outcome": "Signed angular error. Reverse right-hand reference signs for the rear analysis.",
+      "source_discrepancy": "Figure 5 panel label calls the mirror task frontal. Methods and figure caption locate it in rear space."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Manual haptic bar matching",
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "Acta Psychologica 136(3) (2011), pp. 382\u2013389, publisher version of record",
+          "source": "https://www.sciencedirect.com/science/article/pii/S0001691811000047"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, pp. 383\u2013384, \u00a72.1 and Fig. 1",
+          "gap": "Fixed bar and speaker locations."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, pp. 383\u2013384, \u00a72.1 and Fig. 1",
+          "gap": "No moving external stimulus."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, pp. 383\u2013384, \u00a72.1 and Fig. 1",
+          "gap": "Participants adjust a bar. The external cue is stationary."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "bar_apparatus": {
+              "unit": "cm",
+              "axes": [
+                "lateral from table midline",
+                "depth from near edge"
+              ],
+              "participant_origin_xy": [
+                0,
+                0
+              ],
+              "table_width_depth_height_cm": [
+                148,
+                72,
+                80
+              ],
+              "table_disk_count": 15,
+              "table": "Magnetized stainless steel",
+              "bar_length_cm": 20,
+              "bar_diameter_cm": 1.1,
+              "bar_mount": "Pinned pivot with magnetic resistance and arrow-shaped ends"
+            },
+            "speaker_xy_cm": [],
+            "bar_xy_cm": [
+              [
+                -60,
+                20
+              ],
+              [
+                -30,
+                20
+              ],
+              [
+                30,
+                20
+              ],
+              [
+                60,
+                20
+              ]
+            ]
+          },
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "reference_bar_xy_cm": [
+              [
+                -30,
+                20
+              ],
+              [
+                30,
+                20
+              ]
+            ],
+            "reference_orientation_deg": [
+              0,
+              45,
+              90,
+              135
+            ],
+            "parallelity_test_bar": "Either contralateral position",
+            "mirror_test_bar": "Contralateral inner position",
+            "task": [
+              "Parallelity",
+              "Mirror"
+            ]
+          },
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Two task blocks with counterbalanced task order. Randomized trials within each task for each participant.",
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Two task blocks with counterbalanced task order. Randomized trials within each task for each participant.",
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, \u00a7\u00a72\u20136",
+          "gap": "The verified issue does not specify this setting. Original session and trial files are unavailable."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": "Otherwise followed Experiment 1 procedure. No separate rear-task deadline stated.",
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": [
+            "Demonstrate parallel and mirror drawings",
+            "Blindfold before entering",
+            "Stand facing away from table",
+            "Match the two bars under the assigned task",
+            "Indicate corresponding bar ends for angle scoring"
+          ],
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": "Active exploration or adjustment of pivoted stainless steel bars.",
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, pp. 383\u2013384, \u00a72.1 and Fig. 1"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, \u00a7\u00a72\u20136",
+          "gap": "No programmed tactile pulses or sampled SOAs."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, \u00a7\u00a72\u20136",
+          "gap": "No timed tactile-only baseline."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, \u00a7\u00a72\u20136",
+          "gap": "The trial factors use bar angles and locations."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 24,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires rear-mounted physical bar apparatus, blinded participant positioning and continuous angle capture.",
+      "Participant-specific trial order and raw angular scoring records are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.actpsy.2011.01.003. Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 387, \u00a76.1"
+    }
+  ]
+}

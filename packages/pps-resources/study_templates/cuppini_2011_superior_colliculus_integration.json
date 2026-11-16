@@ -1,0 +1,298 @@
+{
+  "template_id": "cuppini_2011_superior_colliculus_integration",
+  "title": "Cuppini 2011 · Superior colliculus integration",
+  "citation": "Cuppini, C., Magosso, E., & Ursino, M. (2011). Organization, maturation, and plasticity of multisensory integration: Insights from computational modeling studies. Frontiers in Psychology, 2, 77.",
+  "source_url": "https://doi.org/10.3389/fpsyg.2011.00077",
+  "doi": "10.3389/fpsyg.2011.00077",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3389/fpsyg.2011.00077::sc_integration",
+    "publication_status": "published",
+    "profile_type": "computational_pps_method",
+    "profile_check_complete": false,
+    "published_method": {
+      "simulation": "Five main unisensory and multisensory populations with four interneuron populations.",
+      "input_modes": [
+        "Auditory only",
+        "Visual only",
+        "Paired auditory and visual"
+      ],
+      "effectiveness_levels": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "illustrated_auditory_offsets_deg": [
+        -18,
+        -9,
+        -1.8,
+        0
+      ],
+      "deactivation_conditions": [
+        "AES intact",
+        "Entire AES deactivated",
+        "AEV deactivated",
+        "FAES deactivated"
+      ],
+      "readout": "Steady-state normalized responses and enhancement relative to the stronger unisensory response."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Spatial visual and auditory network inputs",
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "populations": [
+              "AEV visual",
+              "FAES auditory",
+              "non-AEV visual",
+              "non-FAES auditory",
+              "SC multisensory"
+            ],
+            "interneuron_populations": 4,
+            "spatial_representation": "One-dimensional topological chains with overlapping receptive fields",
+            "unit": "Sigmoid with threshold and saturation plus low-pass response",
+            "lateral_connections": "Mexican-hat excitation nearby and inhibition at larger distances",
+            "input_competition": "Interneurons suppress ascending inputs under AES influence and mediate competition among ascending modalities"
+          },
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Original implementation and some prior equations and numerical constants remain unavailable."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Independent spatial inputs. Figure comparisons vary locations."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "visual": "Fixed at receptive-field center",
+            "auditory_relative_offsets_deg_fig3": [
+              -18,
+              -9,
+              -1.8,
+              0
+            ]
+          },
+          "source": "Cuppini et al. (2011), Frontiers in Psychology, p. 5, original Fig. 3.",
+          "gap": "Additional sweep points and numerical input strength are unspecified."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini et al. (2011), Frontiers in Psychology, pp. 3–7, model and simulations. Cuppini et al. (2011), Experimental Brain Research, Methods, training phase.",
+          "gap": "The Frontiers review provides no numerical duration for its simulations. The distinct 2011 Experimental Brain Research companion specifies 50 ms per training input. Its use in the review and the duration of assessment inputs remain unverified."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Spatial samples replace a moving source."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "A alone",
+            "V alone",
+            "A+V"
+          ],
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "No physical audio waveform is generated."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "Connectionist neural network",
+            "dynamics": {
+              "populations": [
+                "AEV visual",
+                "FAES auditory",
+                "non-AEV visual",
+                "non-FAES auditory",
+                "SC multisensory"
+              ],
+              "interneuron_populations": 4,
+              "spatial_representation": "One-dimensional topological chains with overlapping receptive fields",
+              "unit": "Sigmoid with threshold and saturation plus low-pass response",
+              "lateral_connections": "Mexican-hat excitation nearby and inhibition at larger distances",
+              "input_competition": "Interneurons suppress ascending inputs under AES influence and mediate competition among ascending modalities"
+            },
+            "prior_SC_reference": "Cuppini 2010 numerical Table 1"
+          },
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Solver, code version, time step and phase-specific numerical constants unavailable. The earlier SC table has its own source scope."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "A alone",
+            "V alone",
+            "A+V"
+          ],
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4"
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Readout is approximately steady-state activity. Integration duration and tolerance unavailable."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "effectiveness": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "stimulus_modes": [
+              "A alone",
+              "V alone",
+              "A+V simultaneous"
+            ],
+            "spatial_test": "Strong visual input at the observed RF center and strong auditory input at varying spatial offsets",
+            "deactivation_conditions": [
+              "AES intact",
+              "Entire AES deactivated",
+              "AEV deactivated",
+              "FAES deactivated"
+            ]
+          },
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "This SC simulation concerns visual and auditory modalities."
+        },
+        "soa_table": {
+          "status": "derived",
+          "value": [
+            0
+          ],
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Simultaneous paired input is encoded as nominal zero. Exact numerical onset implementation unavailable."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Compare paired model response with unisensory response and with cortical deactivation states",
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "The model reference condition is a separate configuration or stimulation mode."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "No repeated tactile-SOA trial design."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "No acquired baseline trial pool."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "total_trial_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4",
+          "gap": "No experimental acquisition trial pool."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "A neural network model solver is required. Exact weights, solver settings and the implementation from this figure series are unavailable.",
+      "Exact drive amplitudes and the full disparity grid are unreported."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Cuppini 2011 · Superior colliculus integration",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3389/fpsyg.2011.00077. Cuppini 2011, pp. 3–5, SC Model Description, Multisensory integration and Figs. 1–4"
+    }
+  ]
+}

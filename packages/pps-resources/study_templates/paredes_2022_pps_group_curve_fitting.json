@@ -1,0 +1,369 @@
+{
+  "template_id": "paredes_2022_pps_group_curve_fitting",
+  "title": "Paredes 2022 · Group PPS curve fitting",
+  "citation": "Paredes, R., Ferri, F., & Seriès, P. (2022). Influence of E/I balance and pruning in peri-personal space differences in schizophrenia: A computational approach. Schizophrenia Research, 248, 368–377.",
+  "source_url": "https://doi.org/10.1016/j.schres.2021.06.026",
+  "doi": "10.1016/j.schres.2021.06.026",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.schres.2021.06.026::pps_model_fitting",
+    "publication_status": "published",
+    "profile_type": "computational_pps_method",
+    "profile_check_complete": false,
+    "published_method": {
+      "grid": {
+        "tactile_units": [
+          20,
+          10
+        ],
+        "auditory_units": [
+          20,
+          3
+        ],
+        "multisensory_units": 1
+      },
+      "simulation": {
+        "delays_ms": [
+          300,
+          700,
+          1100,
+          1500,
+          1900,
+          2300,
+          2700
+        ],
+        "separate_fixed_audio_positions_cm": [
+          111,
+          99,
+          87,
+          75,
+          63,
+          51,
+          39
+        ],
+        "external_input_ms": 100
+      },
+      "calibration": "Fit synthetic RT curves to group summaries for controls, schizophrenia and high schizotypy.",
+      "author_notebooks": [
+        "https://github.com/renatoparedes/SCZ_PPS_Model/blob/e881e2d74717d24fa24a5b30ed2f794b5d96b1db/HC_model.ipynb",
+        "https://github.com/renatoparedes/SCZ_PPS_Model/blob/e881e2d74717d24fa24a5b30ed2f794b5d96b1db/HC_Fitting.ipynb",
+        "https://github.com/renatoparedes/SCZ_PPS_Model/blob/e881e2d74717d24fa24a5b30ed2f794b5d96b1db/SCZ_Fitting_Lex_Pr.ipynb",
+        "https://github.com/renatoparedes/SCZ_PPS_Model/blob/e881e2d74717d24fa24a5b30ed2f794b5d96b1db/SPQ_Fitting_Lex.ipynb"
+      ],
+      "caveat": "Compare like edition and group. The published analysis and the archived notebook configurations have separately documented provenance."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Spatial auditory and tactile network inputs",
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "deterministic": true,
+            "noise_sources_removed": true,
+            "modality_amplitude_model_units": {
+              "tactile": 2.5,
+              "auditory": 3.6
+            },
+            "spatial_input_sigma_cm": {
+              "tactile": 0.3,
+              "auditory": 0.3
+            },
+            "RF_peak_model_units": {
+              "tactile": 1,
+              "auditory": 1
+            },
+            "RF_sigma_cm": {
+              "tactile": 0.5,
+              "auditory": 10
+            },
+            "RF_input_combination": "Gaussian receptive-field overlap with Gaussian external input",
+            "duration_ms": 100,
+            "duration_caveat": "100 ms is modeled input persistence. The empirical tactile pulse was 100 µs."
+          },
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "Original empirical audio assets and publisher supplement unavailable. Model code defines input amplitudes and Gaussian widths."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "Independent fixed auditory positions stand in for inferred apparent sound distances."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "delays_ms": [
+              300,
+              700,
+              1100,
+              1500,
+              1900,
+              2300,
+              2700
+            ],
+            "distances_cm": [
+              111,
+              99,
+              87,
+              75,
+              63,
+              51,
+              39
+            ],
+            "nominal_conversion": "x = 120 cm − 30 cm/s × delay_s",
+            "fixed_positions": true
+          },
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "Sound motion is encoded by fixed spatial probes. The 30 cm/s mapping is a model assumption."
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "model_input_ms": 100
+          },
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "Model input persistence has a different scope from the 3000 ms empirical noise and 100 µs tactile pulse."
+        },
+        "stimulus_speed": {
+          "status": "reported_with_caveat",
+          "value": 30,
+          "source": "Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "Assumed apparent speed for delay-to-distance conversion. The empirical study did not measure speed."
+        },
+        "auditory_conditions": {
+          "status": "reported_with_caveat",
+          "value": [
+            "HC",
+            "SCZ",
+            "H-SPQ"
+          ],
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "These labels identify model states. Auditory input amplitude and form remain fixed."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "No sound waveform is rendered by the network."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "implementation": "Python numerical model in Jupyter notebooks",
+            "reference_commit": "e881e2d74717d24fa24a5b30ed2f794b5d96b1db",
+            "grid": {
+              "tactile_grid": [
+                20,
+                10
+              ],
+              "tactile_extent_cm": [
+                10,
+                5
+              ],
+              "auditory_grid": [
+                20,
+                3
+              ],
+              "auditory_extent_cm": [
+                200,
+                30
+              ],
+              "multisensory_units": 1,
+              "tactile_grid_spacing_cm": 0.5,
+              "auditory_grid_spacing_cm": 10,
+              "tactile_center_cm": [
+                5,
+                2.5
+              ],
+              "auditory_lateral_cm": 5,
+              "modeled_hand": "Left as labeled in §2.2. The empirical stimulus was on the right hand. Coordinates are relative to the modeled hand."
+            },
+            "dynamics": {
+              "timestep_ms": 0.4,
+              "time_constant_ms": 20,
+              "update": "Forward Euler state update and rectified sigmoid activation with indexed step lags as implemented",
+              "unisensory_activation_parameters": {
+                "minimum_term": -0.12,
+                "maximum": 1,
+                "center": 19.43,
+                "gain": 0.34
+              },
+              "multisensory_activation_parameters": {
+                "minimum_term": 0,
+                "maximum": 1,
+                "center": 12,
+                "gain": 0.6
+              },
+              "initialization": "Zero activity and internal state"
+            }
+          },
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "Static code inspection. No execution or exact historical Python/dependency environment validated."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "One auditory spatial input and one tactile spatial input for each model condition"
+          ],
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)"
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "The assessed procedure is a deterministic neural simulation. Human acquisition settings are described separately under empirical_reference."
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "The assessed procedure is a deterministic neural simulation. Human acquisition settings are described separately under empirical_reference."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "The assessed procedure is a deterministic neural simulation. Human acquisition settings are described separately under empirical_reference."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": {
+            "integration_ms": 100,
+            "threshold": {
+              "threshold_fraction": 0.9,
+              "comparison": "Strictly greater",
+              "pooling": "Any tactile unit",
+              "raw_rt": "First threshold-crossing index multiplied by the 0.4 ms step. Argmax returns 0 for a trace with no crossing.",
+              "motor_mapping": "Linear slope and intercept from simulated RT to empirical RT. The fitting objective clips negative coefficients to zero."
+            }
+          },
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "A no-crossing trace returns zero in the code. Human response deadline is outside this model."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": [
+            "Fit HC synaptic decay using group sigmoid",
+            "Fit SCZ and H-SPQ parameters",
+            "Rescale raw model RT to the group curves",
+            "Compare candidate fits"
+          ],
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "spatial_center_cm": [
+              5,
+              2.5
+            ],
+            "amplitude_model_units": 2.5,
+            "gaussian_sigma_cm": 0.3,
+            "duration_ms": 100
+          },
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "Temporal delays are converted to spatial probes. Both modeled inputs are held together during the integration period."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "HC parameterization supplies the model comparison reference",
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "The empirical pre-sound reference does not form a separate model trial."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "The assessed procedure is a deterministic neural simulation. Human acquisition settings are described separately under empirical_reference."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "One deterministic trajectory per condition in the inspected source. No repeated stochastic trial pool."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "HC is a model state."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "The assessed procedure is a deterministic neural simulation. Human acquisition settings are described separately under empirical_reference."
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "The assessed procedure is a deterministic neural simulation. Human acquisition settings are described separately under empirical_reference."
+        },
+        "total_trial_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d)",
+          "gap": "Model locations, parameter grids and simulation steps replace an experimental trial pool."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The model requires the author numerical notebooks and the group-level fitting inputs. A participant trial scheduler is inapplicable.",
+      "Final native supplement and exact grid-search/fit settings for every figure are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Paredes 2022 · Group PPS curve fitting",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.schres.2021.06.026. Edinburgh accepted manuscript, printed pp. 6–7 (PDF pp. 7–8), §2.2 and Fig. 1; Edinburgh accepted manuscript, printed pp. 7–10 (PDF pp. 8–11), §§2.3–2.4 and Eqs. 1–3; PPS_model.ipynb, cells 3, 5, 11, 17, 19 (author submission snapshot e881e2d); HC_model.ipynb, cells 3, 5, 11, 17, 19, 21, 23 (author submission snapshot e881e2d); HC_Fitting.ipynb, cells 2–5 (author submission snapshot e881e2d); SCZ_Fitting_Lex_Pr.ipynb, cells 2–5 and 10 (author submission snapshot e881e2d); SPQ_Fitting_Lex.ipynb, cells 2–5 and 9 (author submission snapshot e881e2d); Edinburgh accepted manuscript, printed pp. 10–11 and Fig. 3 (PDF pp. 11–12, 30), §3.2, Eq. 4 and Table 1"
+    }
+  ]
+}

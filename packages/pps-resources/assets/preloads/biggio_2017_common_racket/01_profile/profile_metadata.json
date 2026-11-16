@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Common-racket session of the reported static near/far audio-tactile PPS task. It preserves the 90-trial session unit and keeps the racket context as row metadata rather than changing the generated WAV structure.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2017.07.018",
     "profile_check_complete": true,
     "publication_status": "published",
     "profile_type": "static_near_far_electrical_voice_response_tool_context",

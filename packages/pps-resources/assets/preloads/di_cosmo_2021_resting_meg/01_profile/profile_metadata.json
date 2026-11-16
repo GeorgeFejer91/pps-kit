@@ -1,0 +1,202 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "di_cosmo_2021_resting_meg",
+  "title": "Di Cosmo 2021 \u00b7 Resting MEG and PPS boundary",
+  "citation": "Di Cosmo et al. (2021). Phase-coupling of neural oscillations contributes to individual differences in peripersonal space. Neuropsychologia, 156, 107823.",
+  "doi": "10.1016/j.neuropsychologia.2021.107823",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2021.107823",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2021.107823::resting-meg",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "relationship": "The behavioral PPS task, resting MEG and supporting structural MRI used separate days with the same enrolled cohort. Correlate resting connectivity with each participant's behavioral looming sigmoid midpoint.",
+      "paired_behavior_profile_id": "di_cosmo_2021_phase_coupling",
+      "participants_enrolled": 30,
+      "resting_runs": {
+        "count": 2,
+        "duration_s": 300,
+        "blindfolded": true
+      },
+      "acquisition": "ITAB whole-head system with 153 dcSQUID magnetometers and concurrent ECG and EOG. Five head coils track positioning. Digitize fiducials and locate the head after each run.",
+      "structural_coregistration": "Individual T1 supports a one-shell inner-skull BEM. Apply weighted minimum-norm source estimates on a 4 mm grid with three components per voxel.",
+      "analysis": "Compute seed-to-voxel Multivariate Interaction Measure from left premotor cortex (Talairach \u221251, \u221210, 20 mm) with a left primary auditory control seed (\u221239, \u221231, 12 mm). Pearson correlations relate band-limited connectivity to the individual PPS midpoint.",
+      "analysis_discrepancy": "The Figure 2B printed correlation is positive, while its plotted relationship, caption and Results describe a negative association."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "Verified Neuropsychologia publisher issue and its imaging Methods.",
+          "source": "Di Cosmo et al. (2021), Neuropsychologia 156, 107823, PDF pp. 3\u20134, \u00a7\u00a72.3 and 2.4.3\u20132.4.4"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": "ITAB 153-channel dcSQUID MEG, ECG/EOG, five scalp coils and 3Space Fastrak digitizer.",
+          "source": "Di Cosmo et al. (2021), Neuropsychologia 156, 107823, PDF pp. 3\u20134, \u00a7\u00a72.3 and 2.4.3\u20132.4.4",
+          "gap": "Acquisition sampling rate and filters remain unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Separate days for behavioral task, resting MEG and structural MRI. The introduction describes behavioral assessment before MEG.",
+          "source": "Di Cosmo et al. (2021), Neuropsychologia 156, 107823, PDF pp. 2\u20133, \u00a7\u00a72.1\u20132.3",
+          "gap": "Individual visit intervals and exact MRI ordering unspecified."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "task_sequence_rules": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "resting_recordings": 2,
+            "minutes_each": 5
+          },
+          "source": "Di Cosmo et al. (2021), Neuropsychologia 156, 107823, PDF p. 3, \u00a72.3"
+        },
+        "total_trial_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Di Cosmo et al. 2021, Elsevier article preview, Introduction; Di Cosmo et al. 2021, journal Abstract (PMID 33705822)",
+          "gap": "Resting-state MEG does not present the audio-tactile PPS task."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires timed silent rest blocks, clinical-grade MEG with ECG/EOG, participant-specific structural coregistration and a validated source connectivity pipeline.",
+      "Acquisition sampling and filters, artifact rejection thresholds, spectral windows and exact correlation correction settings remain unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2021.107823. Di Cosmo et al. (2021), Neuropsychologia 156, 107823, PDF pp. 3\u20134, \u00a7\u00a72.3 and 2.4.3\u20132.4.4"
+    }
+  ]
+}

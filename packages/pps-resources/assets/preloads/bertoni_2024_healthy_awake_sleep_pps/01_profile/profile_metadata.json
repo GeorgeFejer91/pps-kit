@@ -1,0 +1,276 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "bertoni_2024_healthy_awake_sleep_pps",
+  "title": "Bertoni 2024 preprint \u00b7 Awake and overnight chest PPS",
+  "citation": "Bertoni et al. (2024). Multisensory integration in Peripersonal Space indexes consciousness states in sleep and disorders of consciousness. bioRxiv v1.",
+  "doi": "10.1101/2024.10.25.619776",
+  "source_url": "https://doi.org/10.1101/2024.10.25.619776",
+  "verification_status": "partial",
+  "notes": "Preprint study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1101/2024.10.25.619776",
+    "publication_status": "preprint",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": {
+        "awake": 15,
+        "sleep": 13,
+        "REM": 12
+      },
+      "trial_families": [
+        "T",
+        "AN",
+        "AF",
+        "ANT",
+        "AFT"
+      ],
+      "geometry": "Fixed sound positions 30 and 130 cm above the chest. Each sound lasts 100 ms and each tactile stimulus 5 ms. The preprint does not specify paired onset offset.",
+      "awake": {
+        "blocks": 3,
+        "per_block": 110,
+        "per_family_per_block": 22,
+        "iti_ms": [
+          2500,
+          3000
+        ],
+        "iti_step_printed_ms": 100,
+        "posture": "Lying with eyes closed",
+        "per_trial_response": false
+      },
+      "overnight": {
+        "stages": [
+          "N2",
+          "N3",
+          "REM"
+        ],
+        "stimulation_block_minutes": 5,
+        "rest_block_minutes": 5,
+        "alarm_ms": 1500,
+        "first_interview_question_after_alarm_ms": 10000,
+        "actual_trial_counts": null,
+        "stimulation_iti_ms": null
+      },
+      "interview": "Verbal interphone report of dream experience, experience without recall, or no experience, with branch-dependent sensory ratings and alertness.",
+      "analysis": "Compare centroparietal high-beta near-minus-far multisensory contrast across wake and sleep stages and reported mental states."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "White-noise bursts.",
+          "source": "bioRxiv v1 pp. 4 and 17\u201318, Fig. 1 and Stimuli"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Generated using E-Prime 2.",
+          "source": "bioRxiv v1 pp. 4 and 17\u201318, Fig. 1 and Stimuli",
+          "gap": "Original noise seed, sample rate and waveform files are unspecified."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "stationary": true,
+            "near_cm": 30,
+            "far_cm": 130,
+            "anchor": "chest",
+            "direction": "above chest in bed"
+          },
+          "source": "bioRxiv v1 pp. 4 and 17\u201318, Fig. 1 and Stimuli"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 100
+          },
+          "source": "bioRxiv v1 pp. 4 and 17\u201318, Fig. 1 and Stimuli"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "AN",
+            "AF",
+            "ANT",
+            "AFT"
+          ],
+          "source": "bioRxiv v1 pp. 4 and 17\u201318, Fig. 1 and Stimuli"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reported_threshold_adjustment": "individual threshold plus 40%",
+            "reported_level_mean_dB": 51,
+            "SD_dB": 4.01
+          },
+          "source": "bioRxiv v1 p. 17, auditory threshold staircase",
+          "gap": "Reference domain for the 40% adjustment and per-speaker equalization are unspecified in this edition."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speaker_count": 2,
+            "speaker_model": null,
+            "tactile_device": "Digitimer DS7AH",
+            "generator": "E-Prime 2"
+          },
+          "source": "bioRxiv v1 pp. 4 and 17\u201318, Fig. 1 and Stimuli",
+          "gap": "Commercial loudspeakers in the preprint. The journal key-resources table names Logitech Z120."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "T",
+            "AN",
+            "AF",
+            "ANT",
+            "AFT"
+          ],
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Five conditions fully randomized within a block, with 22 of each condition.",
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Three wakefulness blocks. Trials fully randomized within each block.",
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "printed_range_ms": [
+              2500,
+              3000
+            ],
+            "printed_step_ms": 100,
+            "printed_random_steps": 5
+          },
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session",
+          "gap": "The endpoints imply six possible values if both are eligible. Exact eligible bins, weights and event anchor are unverified."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Lie in bed with eyes closed, receive stimulation passively while EEG is recorded. No active per-trial response.",
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "Digitimer DS7AH",
+            "site": "Chest, 2 cm below manubrium sternum",
+            "window_ms": 5,
+            "calibration": "Subjective match to selected PPS sound",
+            "reported_mean_mA": 8.7,
+            "SD_mA": 5.5
+          },
+          "source": "bioRxiv v1 pp. 4 and 17\u201318, Fig. 1 and Stimuli",
+          "gap": "Pulse shape and ambiguous adjustment direction are described for calibration. Acquisition waveform, trigger and electrode geometry unresolved."
+        },
+        "soa_table": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "bioRxiv v1 pp. 4 and 17\u201318, Fig. 1 and Stimuli",
+          "gap": "The preprint labels paired rows ANT and AFT but gives no numeric or explicit healthy onset alignment. The journal STAR Methods p. e2 explicitly states synchronized onsets."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Tactile-only and auditory near/far trials serve as unimodal controls. EEG and spectral analyses use prestimulus reference measurements.",
+          "source": "bioRxiv v1 pp. 19 and 21\u201324, healthy EEG, spectral and statistical methods"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "epoch_ms": [
+              -1000,
+              2000
+            ],
+            "anchor": "stimulus onset",
+            "baseline": "prestimulus mean for EEG; mean baseline PSD across all five conditions"
+          },
+          "source": "bioRxiv v1 pp. 19 and 21\u201324, healthy EEG, spectral and statistical methods",
+          "gap": "The source does not give a distinct range for the EEG baseline window within the prestimulus epoch."
+        },
+        "catch_trial_type": {
+          "status": "reported_absent",
+          "value": "No response-inhibition condition among five passive EEG stimulus families.",
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_condition_per_block": 22
+          },
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "baseline_count": {
+          "status": "reported",
+          "value": {
+            "T_per_block": 22,
+            "AN_per_block": 22,
+            "AF_per_block": 22
+          },
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "catch_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_wake_participant": 3,
+            "approx_minutes_per_block": 7
+          },
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "per_block": 110,
+            "per_participant": 330
+          },
+          "source": "bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session",
+          "gap": "Five conditions \u00d7 22 repetitions \u00d7 3 blocks."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires synchronized EEG and polysomnography, fixed-speaker routing, calibrated chest stimulation, closed-loop stage detection and overnight interphone interviews.",
+      "Healthy preprint paired offset, exact set of ITI levels and overnight per-trial schedule are unresolved. Journal-version settings are separate."
+    ],
+    "alternate_study_row_ids": [
+      "doi:10.1101/2024.10.25.619776::sleep-pps"
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1101/2024.10.25.619776. bioRxiv v1 pp. 4 and 17\u201318, Fig. 1 and Stimuli; bioRxiv v1 pp. 4 and 18, Fig. 1 and Protocol \u2013 awake session; bioRxiv v1 pp. 19 and 21\u201324, healthy EEG, spectral and statistical methods; bioRxiv v1 pp. 5\u20137, Fig. 2"
+    }
+  ]
+}

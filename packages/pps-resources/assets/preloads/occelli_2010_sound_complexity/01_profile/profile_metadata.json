@@ -1,0 +1,382 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "occelli_2010_sound_complexity",
+  "title": "Occelli 2010 \u00b7 sound complexity and dynamic capture",
+  "citation": "Occelli, V., Spence, C., & Zampini, M. (2010). Assessing the effect of sound complexity on the audiotactile cross-modal dynamic capture task. Quarterly Journal of Experimental Psychology, 63(4), 694\u2013704.",
+  "doi": "10.1080/17470210903068989",
+  "source_url": "https://doi.org/10.1080/17470210903068989",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1080/17470210903068989",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": 22,
+      "conditions": {
+        "auditory_target": "Discriminate the direction of the two-pulse auditory stream and ignore the tactile stream.",
+        "tactile_target": "Discriminate the direction of the two-pulse tactile stream and ignore the auditory stream.",
+        "common_factors": [
+          "Target direction",
+          "Congruent or incongruent distractor direction",
+          "Synchronous or delayed distractor",
+          "Tone or noise"
+        ],
+        "order": "Counterbalance target modality; run both sound types in separate blocks within each modality."
+      },
+      "geometry": "Two physical sources 15 cm left and right of midline, roughly 50 cm from the body, paired with tactors next to the corresponding index fingers.",
+      "audio": {
+        "tone_choices_hz": [
+          450,
+          500,
+          550
+        ],
+        "noise_band_hz": [
+          20,
+          10000
+        ],
+        "task_level_dba_at_head": 82,
+        "continuous_masking_level_db_as_printed": 75
+      },
+      "timing": {
+        "pulses_per_stream": 2,
+        "duration_per_pulse_ms": 50,
+        "pulse_ISI_ms_as_printed": 100,
+        "distractor_start_after_target_ms": [
+          0,
+          500
+        ],
+        "earliest_response_from_trial_start_ms": 750,
+        "post_response_interval_ms": [
+          1900,
+          1950,
+          2000,
+          2050,
+          2100
+        ]
+      },
+      "schedule": {
+        "test_blocks_per_modality": 2,
+        "trials_per_test_block": 96,
+        "total_derived": 384,
+        "target_only_trials": "Practice only."
+      },
+      "response": "Release the pedal corresponding to the perceived target direction, prioritizing accuracy. The pedal-mapping details are described in the companion thesis, Experiment 6 (p. 171). Analyze target-direction accuracy separately by attended modality."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Noise bursts and pure tones.",
+          "source": "Occelli et al. (2010), journal Abstract"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "target_and_distractor_audio_types": [
+              "Pure tone",
+              "Noise"
+            ],
+            "tone_frequency_choices_hz": [
+              450,
+              500,
+              550
+            ],
+            "noise_bandwidth_hz": [
+              20,
+              10000
+            ],
+            "task_level_dba_at_head": 82,
+            "task_pulse_duration_ms": 50,
+            "pulses_per_stream": 2,
+            "isi_ms_as_printed": 100,
+            "timing_gap": "The paper names a 100 ms ISI. The event file or onset measurements are unavailable."
+          },
+          "source": "Occelli, Spence and Zampini 2010, final QJEP issue, pp. 697\u2013698, Method, Procedure and Fig. 1",
+          "gap": "Exact audio files, gain and sample rate remain unreported."
+        },
+        "trajectory_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "stream_directions": [
+              "leftward",
+              "rightward"
+            ],
+            "positions_per_modality": 2
+          },
+          "source": "Occelli doctoral thesis Experiment 6, printed pp. 169\u2013171, Fig. 8",
+          "gap": "Exact journal-version equivalence remains unverified."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speaker_offset_from_midline_cm": [
+              -15,
+              15
+            ],
+            "speaker_distance_from_body_cm_approx": 50,
+            "tactors": "Directly in front of the paired speakers",
+            "hand_contact": "Matching left and right index fingertips"
+          },
+          "source": "Occelli doctoral thesis Experiment 6, printed pp. 169\u2013170, Fig. 8",
+          "gap": "Exact journal-version equivalence remains unverified."
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "pulses_per_stream": 2,
+            "pulse_duration_ms": 50,
+            "reported_interstimulus_interval_ms": 100
+          },
+          "source": "Occelli, Spence and Zampini 2010, final QJEP issue, pp. 697\u2013698, Method, Procedure and Fig. 1",
+          "gap": "The paper names a 100 ms ISI. The event file or onset measurements are unavailable."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Occelli et al. 2010, Quarterly Journal of Experimental Psychology pp. 697\u2013698, Apparatus, materials, design, and procedure",
+          "gap": "Apparent motion uses successive presentations from two fixed sources 30 cm apart. There is no continuous physical movement speed."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "noise",
+            "pure tone"
+          ],
+          "source": "Occelli et al. (2010), journal Abstract"
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Occelli et al. 2010, Quarterly Journal of Experimental Psychology pp. 697\u2013698, Apparatus, materials, design, and procedure",
+          "gap": "The article reports 82 dB(A) at the head for the stimulus pulses and a separate 75 dB masker. The pulse amplitude envelope and ramps are unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "task_loudspeakers": {
+              "n": 2,
+              "model": "Dell A215",
+              "left_right_cm_from_midline": [
+                -15,
+                15
+              ],
+              "distance_from_body_cm_approx": 50
+            },
+            "masker": {
+              "n": 2,
+              "position": "Behind task speakers",
+              "distance_cm_from_participant": 60,
+              "level_db_as_printed": 75,
+              "bandwidth_hz": [
+                20,
+                10000
+              ],
+              "schedule": "Continuous across the experimental session"
+            },
+            "tactors": {
+              "n": 2,
+              "model": "Oticon-A, 100 \u03a9",
+              "placement": "Immediately in front of matching task loudspeaker on 3 cm foam",
+              "contact": [
+                "Left index fingertip",
+                "Right index fingertip"
+              ]
+            },
+            "response": "One pedal beneath the toes of each foot",
+            "control": "E-Prime via computer parallel port and custom relay",
+            "environment": "Dim room, participants blindfolded and instructed to keep the head still facing forward"
+          },
+          "source": "Occelli, Spence and Zampini 2010, final QJEP issue, pp. 697\u2013698, Method, Procedure and Fig. 1",
+          "gap": "E-Prime version and measured system delays unreported."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Crossmodal congruent stream pair",
+            "Crossmodal incongruent stream pair"
+          ],
+          "source": "Occelli et al. (2010), journal Abstract"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "within_block_factors": [
+              "congruent or incongruent direction",
+              "synchronous or asynchronous streams",
+              "leftward or rightward target"
+            ],
+            "block_factors": [
+              "target modality",
+              "sound type"
+            ]
+          },
+          "source": "Occelli doctoral thesis Experiment 6, printed pp. 170\u2013172",
+          "gap": "Exact ordering, per-cell quotas, and journal-version equivalence remain unverified."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "blocks_per_target_modality": 2,
+            "sound_types_by_block": [
+              "noise",
+              "pure tone"
+            ],
+            "target_modality_order": "Half started with tactile targets and half with auditory targets"
+          },
+          "source": "Occelli doctoral thesis Experiment 6, printed p. 170",
+          "gap": "The thesis reports counterbalancing across target modalities. The exact ordering of sound-type blocks and journal-version equivalence remain unverified."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "after_recorded_response_ms": [
+              1900,
+              1950,
+              2000,
+              2050,
+              2100
+            ],
+            "selection": "Random"
+          },
+          "source": "Occelli doctoral thesis Experiment 6, printed p. 171",
+          "gap": "Sampling probabilities and journal-version equivalence remain unverified."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": {
+            "earliest_ms_from_trial_start": 750,
+            "deadline_ms": null,
+            "instruction": "Accuracy before speed"
+          },
+          "source": "Occelli, Spence and Zampini 2010, final QJEP issue, pp. 697\u2013698, Method, Procedure and Fig. 1",
+          "gap": "Response gate is reported. The upper response limit is not stated."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": "Report the auditory direction by releasing the corresponding footpedal and ignore the other modality.",
+          "source": "Occelli doctoral thesis Experiment 6, printed p. 171",
+          "gap": "The journal abstract confirms the task instruction. The pedal mapping comes from the thesis."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "pulse_duration_ms": 50,
+            "pulses_per_stream": 2,
+            "isi_ms_as_printed": 100,
+            "stimulation": "Suprathreshold",
+            "sites": [
+              "Left index fingertip",
+              "Right index fingertip"
+            ],
+            "file_description": "Methods say the sound file also activated the tactors. Discussion says vibrotactile properties were held constant.",
+            "waveform_gap": "The exact tactile source file and whether its spectrum varied across audio blocks remain unresolved.",
+            "manufacturer_drive_range_hz": [
+              200,
+              4000
+            ],
+            "manufacturer_preferred_band_hz": [
+              550,
+              750
+            ],
+            "range_scope": "Manufacturer specification in Method footnote 1. Actual delivered tactile spectrum is unknown."
+          },
+          "source": "Occelli, Spence and Zampini 2010, final QJEP issue, pp. 697\u2013698, Method, Procedure and Fig. 1",
+          "gap": "The exact tactile source file and whether its spectrum varied across audio blocks remain unresolved."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "distractor_delay_ms": [
+              0,
+              500
+            ],
+            "asynchronous_relation": "Distractor later"
+          },
+          "source": "Occelli, Spence and Zampini 2010, final QJEP issue, pp. 697\u2013698, Method, Procedure and Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": {
+            "main_trial_baseline": false,
+            "practice_only_target_stream": true,
+            "practice_trials_per_session": 12
+          },
+          "source": "Quarterly Journal of Experimental Psychology pp. 697\u2013698, Method, Procedure and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Occelli et al. 2010, Quarterly Journal of Experimental Psychology pp. 697\u2013698, Apparatus, materials, design, and procedure",
+          "gap": "The directional-discrimination test compares paired streams. The 12 target-only trials are a separate practice block."
+        },
+        "catch_trial_type": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Occelli et al. 2010, Quarterly Journal of Experimental Psychology pp. 697\u2013698, Apparatus, materials, design, and procedure",
+          "gap": "Methods describe paired target and distractor test streams and separate unimodal practice. No catch or no-go family is described."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Occelli et al. 2010, Quarterly Journal of Experimental Psychology pp. 697\u2013698, Apparatus, materials, design, and procedure",
+          "gap": "The 96-trial block total and synchronous or 500 ms delayed stream conditions are reported. The exact number at each synchrony, congruency, direction and frequency combination is unreported."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Occelli et al. 2010, Quarterly Journal of Experimental Psychology pp. 697\u2013698, Apparatus, materials, design, and procedure",
+          "gap": "The tested conditions compare paired streams. The separate 12-trial unimodal block per session is practice and is excluded from the test baseline count."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Occelli et al. 2010, Quarterly Journal of Experimental Psychology pp. 697\u2013698, Apparatus, materials, design, and procedure",
+          "gap": "The 96-trial block total is reported. The article gives no catch quota."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "test_blocks_per_target_modality": 2,
+            "trials_per_test_block": 96,
+            "practice_blocks_per_session": 1
+          },
+          "source": "Occelli doctoral thesis Experiment 6, printed pp. 170\u2013171",
+          "gap": "Exact journal-version equivalence remains unverified."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "test_trials_per_target_modality_derived": 192,
+            "test_trials_across_modalities_derived": 384,
+            "practice_trials_per_session": 12,
+            "derivation": "Two modalities \u00d7 two blocks per modality \u00d7 96 test trials per block"
+          },
+          "source": "Occelli doctoral thesis Experiment 6, printed pp. 170\u2013171",
+          "gap": "Exact journal-version equivalence remains unverified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires separate left/right audio and tactile outputs, support for two pulses per target and distractor stream, a two-pedal release response and continuous calibrated masking audio. The usual single tactile target and single response do not express this experiment.",
+      "Verify the printed 100 ms interstimulus interval against original event files (onset-to-onset versus silent gap), the delivered tactile waveform, triggered timing, sound assets and full allocation before research execution."
+    ],
+    "alternate_study_row_ids": [
+      "doi:10.1080/17470210903068989::tactile-target"
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1080/17470210903068989. Quarterly Journal of Experimental Psychology pp. 697\u2013698, Method, Procedure and Fig. 1; Quarterly Journal of Experimental Psychology pp. 698\u2013700, Results, Fig. 2 and Table 1"
+    }
+  ]
+}

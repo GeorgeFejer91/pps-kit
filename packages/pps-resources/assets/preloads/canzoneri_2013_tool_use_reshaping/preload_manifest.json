@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "canzoneri_2013_tool_use_reshaping",
   "title": "Canzoneri 2013 tool-use PPS reshaping",
-  "visible_variant_label": "",
+  "visible_variant_label": "B",
   "publication_status": "published",
   "profile_type": "audio_tactile_tool_use_plasticity",
   "asset_mode": "bundled_local",

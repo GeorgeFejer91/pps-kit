@@ -1,0 +1,11 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "loescher_2025_cardiac_interoception_pnas",
+  "repetitions_per_condition": 1,
+  "soa_values_ms": [],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [],
+  "prestimulus_files": [],
+  "preview_trial_count": 0
+}

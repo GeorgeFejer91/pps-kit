@@ -1,0 +1,285 @@
+{
+  "template_id": "serino_2011_rtms_pps_exp1b",
+  "title": "Serino 2011 · hand posture and sound distance",
+  "citation": "Serino, A., Canzoneri, E., & Avenanti, A. (2011). Fronto-parietal areas necessary for a multisensory representation of peripersonal space in humans: an rTMS study. Journal of Cognitive Neuroscience, 23(10), 2956–2967.",
+  "source_url": "https://doi.org/10.1162/jocn_a_00006",
+  "doi": "10.1162/jocn_a_00006",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1162/jocn_a_00006::b",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sound": "100 ms white noise from matched fixed loudspeakers at approximately 70 dB at the head vertex.",
+      "touch": "100 µs single electrical pulses at the dorsal right index finger. Participant-specific weak and strong targets use separate electrode pairs.",
+      "timing": {
+        "tactile_onset_after_near_sound_ms": 0,
+        "tactile_onset_after_far_sound_ms": 5,
+        "anchor": "Programmed onset; the nominal 5 ms far-sound lead compensates for longer acoustic propagation."
+      },
+      "response": "Say “tah” as fast as possible for the instructed tactile intensity. Withhold that response to the other intensity and sound alone.",
+      "participants": 18,
+      "hand_to_fixed_speakers_cm_approx": {
+        "forward": {
+          "near": 5,
+          "far": 100
+        },
+        "backward": {
+          "near": 80,
+          "far": 180
+        }
+      },
+      "tactile_only_baseline": false
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "100 ms white-noise bursts",
+          "source": "Article pp. 2957–2958, Experiment 1A Materials"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "White noise played over two identical physical loudspeakers. Spectral output checked for consistency.",
+          "source": "Article pp. 2957–2958, Experiment 1A Materials",
+          "gap": "Source waveform, speaker model, sample rate and noise-generation recipe remain unknown."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Article pp. 2957–2958, Experiment 1A Materials"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "motion": "Fixed speakers. Only arm position changes.",
+            "forward_hand_speaker_cm_approx": {
+              "near": 5,
+              "far": 100
+            },
+            "backward_hand_speaker_cm_approx": {
+              "near": 80,
+              "far": 180
+            }
+          },
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure; Fig. 1B"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 100,
+            "tactile_pulse_us": 100
+          },
+          "source": "Article pp. 2957–2958, Experiment 1A Materials"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Article pp. 2957–2958, Experiment 1A Materials",
+          "gap": "Auditory sources are stationary."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Near fixed speaker",
+            "Far fixed speaker"
+          ],
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "sound_level_db_approx": 70,
+            "measurement_position": "Above head vertex",
+            "level_matching": "Near and far matched"
+          },
+          "source": "Article pp. 2957–2958, Experiment 1A Materials",
+          "gap": "Rise/fall, waveform scaling and SPL weighting remain unknown."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "playback": "Two identical physical loudspeakers",
+            "controller": "XGen",
+            "response": "Voice-activated relay"
+          },
+          "source": "Article pp. 2957–2958, Experiment 1A Materials; p. 2959, Procedure",
+          "gap": "Speaker model, audio interface, event timing accuracy and relay threshold remain unknown."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "tactile": [
+              "weak target",
+              "strong nontarget"
+            ],
+            "sound": [
+              "near",
+              "far"
+            ],
+            "catch": "Audio only"
+          },
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Weak and strong tactile trials crossed with sound conditions, plus auditory-only catches.",
+          "source": "Article pp. 2958–2959, Experiment 1A Procedure",
+          "gap": "Within-block sequence, mixing algorithm and seed remain unknown."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "blocks": 2,
+            "factor": "Hand forward vs backward",
+            "order": "Counterbalanced"
+          },
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure",
+          "gap": "Exact allocation of the reported 140-trial pool between positions remains unclear."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "trial_length_s_approx": 3
+          },
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure",
+          "gap": "Exact intertrial delay and jitter policy remain unknown."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article p. 2960, Experiment 1B Data analysis",
+          "gap": "Online acceptance window remains unknown."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Give the vocal response to the weak tactile target only. Withhold for strong tactile nontarget and audio-only trials.",
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure; Experiment 1A Procedure"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "Dorsal right index finger",
+            "modality": "Electrical",
+            "pulse": "Single rectangular monophasic",
+            "duration_us": 100,
+            "stimulator": "Digitimer DS7A",
+            "electrodes": "Two Neuroline pairs, one per intensity",
+            "relative_strong_to_weak": 1.5,
+            "weak_detection_min_of_10": 9,
+            "strong_detection_min_of_10": 10
+          },
+          "source": "Article pp. 2957–2959, Experiment 1A Materials and Procedure",
+          "gap": "The article describes constant-current equipment and calls the waveform constant voltage. Per-participant parameters and hardware equivalence remain open."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "reference": "Programmed acoustic onset",
+            "near_ms": 0,
+            "far_ms": 5,
+            "far_note": "Far sound triggered 5 ms before the tactile pulse to compensate for propagation delay."
+          },
+          "source": "Article pp. 2958–2959, Experiment 1A Procedure"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": "The design includes near and far auditory conditions only. No tactile-only comparison trials.",
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Article pp. 2958–2959, Experiment 1A Procedure",
+          "gap": "No auditory onset on tactile-only trials."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Near or far sound without tactile stimulus. No response required.",
+          "source": "Article pp. 2958–2959, Experiment 1A Procedure"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported_with_caveat",
+          "value": {
+            "per_tactile_intensity_by_sound_cell": 30,
+            "cells": 4
+          },
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure",
+          "gap": "Allocation per hand-position block remains unclear."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure"
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": {
+            "in_reported_pool": 20,
+            "near": 10,
+            "far": 10
+          },
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Article pp. 2958–2959, Experiment 1A Procedure"
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reported_formal_trial_pool": 140
+          },
+          "source": "Article p. 2960, Experiment 1B Materials and Procedure",
+          "gap": "The methods state a total of 140 trials and two posture blocks. They do not give counts by posture block."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The physical near/far speaker channels and electrical pulse controller need a shared clock, with calibrated level, pulse delivery and physical onset verification.",
+      "A measured voice key must score the currently instructed intensity as Go and the other intensity and sound-only trials as No-Go. A manual button or vibration marker is insufficient.",
+      "The original noise waveform, realized sequence, voice-key threshold and response deadline are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Serino 2011 · hand posture and sound distance",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1162/jocn_a_00006. Article pp. 2959–2960, Table 2 and Fig. 1A–B"
+    }
+  ]
+}

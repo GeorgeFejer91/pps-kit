@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "3D Tune-In/Unity PPS mapping study. The preload catalog expands the paper's twelve virtual source directions into local auditory-only trajectory assets for the dynamic and flat pink-noise source types. The runnable profile captures the reported 144 audio-tactile condition rows; subject-specific body/head scaling and exact Unity/3D Tune-In rendering remain provenance caveats.",
   "reference_parameters": {
+    "study_row_id": "doi:10.3389/frvir.2021.644214",
     "audio_engine": "3D Tune-In Toolkit in Unity",
     "directions_reported": 12,
     "virtual_sound_source_radius_m": 1.2,

@@ -1,0 +1,328 @@
+{
+  "template_id": "avenanti_2012_premotor_suppression_exp2",
+  "title": "Avenanti 2012 · parietal and visual active control",
+  "citation": "Avenanti, A., Annela, L., & Serino, A. (2012). Suppression of premotor cortex disrupts motor coding of peripersonal space. NeuroImage, 63(1), 281–288.",
+  "source_url": "https://doi.org/10.1016/j.neuroimage.2012.06.063",
+  "doi": "10.1016/j.neuroimage.2012.06.063",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuroimage.2012.06.063::parietal-visual-meps",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sound": {
+        "type": "White noise",
+        "duration_ms": 300,
+        "level_db_approx_at_vertex": 70,
+        "hand_to_speakers_cm_approx": [
+          5,
+          100
+        ],
+        "head_to_speakers_cm_approx": [
+          60,
+          160
+        ]
+      },
+      "timing": {
+        "sound_onset_to_M1_pulse_ms": [
+          50,
+          175,
+          300
+        ],
+        "intertrial_interval_ms": [
+          10000,
+          12000
+        ]
+      },
+      "schedule": {
+        "counterbalanced_sessions": 2,
+        "minimum_days_between_sessions": 7,
+        "blocks_per_session": 2,
+        "main_trials_per_session": 84,
+        "total_main_trials": 168,
+        "stimulus_free_MEP_baseline": false
+      },
+      "response": "Main trials generate right first dorsal interosseous MEPs rather than manual responses. Separately record whether the participant detects strong palm touches in the intertrial interval.",
+      "analysis": "Compare raw peak-to-peak MEP amplitude by session, near/far speaker and pulse delay. The 300 ms near-minus-far index supports the between-experiment comparison.",
+      "participants": 14,
+      "intervention_sessions": [
+        "Active tDCS over left posterior parietal cortex",
+        "Active tDCS over primary visual cortex"
+      ]
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "White-noise burst",
+          "source": "Journal p. 282, Auditory stimulation"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Two identical speakers. Spectral recordings checked for equal emitted frequencies.",
+          "source": "Journal p. 282, Auditory stimulation",
+          "gap": "Original waveform, sample rate and speaker model unspecified."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "static_source_positions": 2,
+            "moving_paths": 0
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "static_speakers": 2,
+            "side": "right",
+            "near_hand_cm_approx": 5,
+            "far_hand_cm_approx": 100,
+            "speaker_separation_cm": 100,
+            "head_cm_approx": [
+              60,
+              160
+            ],
+            "torso_cm_approx": [
+              50,
+              150
+            ]
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "Speaker azimuth and elevation not numerically reported."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 300
+          },
+          "source": "Journal p. 282, Auditory stimulation"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "Stationary sources."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "near",
+            "far"
+          ],
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_db_approx": 70,
+            "calibration": "equal at vertex by phonometer"
+          },
+          "source": "Journal p. 282, Auditory stimulation",
+          "gap": "Calibration weighting, absolute tolerances and burst ramps unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "loudspeakers": 2,
+            "EMG": {
+              "model": "Biopac MP-150",
+              "muscle": "right first dorsal interosseus (FDI)",
+              "bandpass_hz": [
+                30,
+                500
+              ],
+              "sample_hz": 5000,
+              "electrodes": "Ag/AgCl belly-tendon montage, wrist ground",
+              "analysis_software": "AcqKnowledge 4.10"
+            },
+            "TMS": {
+              "model": "Magstim Rapid²",
+              "coil": "figure of eight",
+              "site": "left M1 hand area",
+              "positioning": "tangential, handle backward and lateral at 45°; optimal scalp position maximizes right FDI MEP, 1 cm search grid, marked on cap",
+              "stimulus_percent_rMT": 120,
+              "rMT_criterion": {
+                "reference_muscle": "right FDI",
+                "min_mep_uV": 50,
+                "probability_percent": 50
+              }
+            }
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1; Journal p. 283, Electromyography and TMS",
+          "gap": "Speaker, sound controller and synchronization calibration unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "audio_TMS": 84,
+            "blocks": 2,
+            "per_block": 42,
+            "separate_attention": "during ITI"
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Random combination of two sound positions and three pulse delays. No tactile target during main trial.",
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "sessions": 2,
+            "min_days_between": 7,
+            "session_order": "counterbalanced",
+            "blocks_per_session": 2,
+            "block_order": "randomized"
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "Exact per-cell repetition schedule and interval between tDCS and first probe unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "range_ms": [
+              10000,
+              12000
+            ]
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "Interval varies between stated limits. Distribution and increments unspecified."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "No behavioral response during main MEP trials. Attention responses are separate."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "main": "After tDCS session, present sound, pulse at assigned delay, record MEP from right FDI",
+            "attention": "Monitor palm for strong touches during ITIs; ignore sound"
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 282–283, Tactile stimulation",
+          "gap": "No tactile stimulation during main trials. Intertrial attention protocol separate."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "sound_onset_to_TMS_pulse_ms": [
+              50,
+              175,
+              300
+            ],
+            "tactile_onset": "not part of primary trial"
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": {
+            "stimulus_free_MEP_baseline": false,
+            "comparison": "post-sham or active site control. All primary trials have sound."
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "No stimulus-free MEP baseline described."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 282–283, Tactile stimulation",
+          "gap": "Weak tactile nontarget in the ITI is separate from primary sound–TMS trials."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "No tactile SOA grid in primary trials."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "Two blocks comprise randomized sound and pulse-delay combinations."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "No primary catch family."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_session": 2,
+            "per_experiment": 4
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "per_session": 84,
+            "across_two_sessions": 168
+          },
+          "source": "Journal pp. 282–283, Design, Procedure and Fig. 1",
+          "gap": "Two blocks × 42 per session. Each participant attends two post-tDCS sessions."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires qualified tDCS, participant-specific neuronavigation, motor threshold and single-pulse TMS, time-locked EMG, and calibrated physical loudspeakers. These are laboratory interventions, not executable tactile SOAs.",
+      "Original sound file, participant-level stimulation settings/coordinates, trigger calibration and measured event timings are unavailable. A separate intertrial palm touch attention check also needs a qualified route.",
+      "Resolve the visual-cortex coordinate sign discrepancy in the published table before preparing the active control setup."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Avenanti 2012 · parietal and visual active control",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.neuroimage.2012.06.063. Journal pp. 282–283, Design, Procedure and Fig. 1; Journal pp. 284–285, Data analysis, Results, Table 1 and Figs. 3–5"
+    }
+  ]
+}

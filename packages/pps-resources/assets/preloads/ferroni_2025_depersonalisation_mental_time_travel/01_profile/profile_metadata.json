@@ -1,0 +1,250 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "ferroni_2025_depersonalisation_mental_time_travel",
+  "title": "Ferroni 2025 \u00b7 Mental time travel companion task",
+  "citation": "Ferroni, F., Arcuri, E., Ardizzi, M., Chinchella, N., Gallese, V., & Ciaunica, A. (2025). Lost in time and space? Multisensory processing of peripersonal space and time perception in people with frequent experiences of depersonalisation. Quarterly Journal of Experimental Psychology, 78(6), 1177\u20131194.",
+  "doi": "10.1177/17470218241261645",
+  "source_url": "https://doi.org/10.1177/17470218241261645",
+  "verification_status": "partial",
+  "notes": "Inspect the study's companion visual temporal judgment assessment. Experimental launch requires timed visual presentation and individualized event-year scoring.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1177/17470218241261645::mental-time-travel",
+    "publication_status": "published",
+    "profile_type": "companion_visual_temporal_judgment",
+    "profile_check_complete": false,
+    "published_method": {
+      "role": "Companion temporal judgment assessment in the same study and cohort as the audiotactile PPS assessment.",
+      "cohort": "70 adults in two groups of 35 defined by depersonalisation experience scores. The order of the same-day PPS and temporal judgment tasks was counterbalanced.",
+      "imagined_self_locations_years_from_present": {
+        "past": -10,
+        "present": 0,
+        "future": 10
+      },
+      "schedule": {
+        "main_presentations": 3,
+        "scheduled_main_trials": 72,
+        "listed_trials_per_presentation": 24,
+        "listed_biographical_trials_per_presentation": 12,
+        "listed_general_trials_per_presentation": 12,
+        "nominal_relative_past_or_future_slots_per_event_type": 6,
+        "separate_practice_trials": 8
+      },
+      "presentation": "Counterbalance temporal-context order. Before each context, instruct imagery from that point in time. Show events as centered text on a 15-inch monitor about 60 cm away. Text stays visible until a left or right index response, followed by 1,000 ms before the next item.",
+      "response": "Judge whether the event occurs earlier or later than the assigned temporal context. Counterbalance the response key mapping. Assess reaction time from text onset and score correctness against the event-year knowledge collected from each participant.",
+      "analysis": "Divide mean response latency by response accuracy to estimate inverse efficiency. Use the present context to assess self-referencing and compare past and future with the present to assess self-projection.",
+      "source_version": "2025 journal issue, first published online in 2024.",
+      "partner_pps_profile_id": "ferroni_2025_depersonalisation_pps",
+      "stimulus_inventory": "The journal supplement lists 72 entries including repetitions, with 42 distinct Italian prompt strings. Confirm delivered repetitions and translations against the original study material."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "display": "15-inch colour monitor",
+            "viewing_distance_cm_approx": 60,
+            "stimulus_placement": "Centre of the screen",
+            "presentation_and_response_software": [
+              "MATLAB 2019b",
+              "Psychophysics Toolbox 3"
+            ]
+          },
+          "source": "Ferroni et al., verified QJEP 78(6) issue pp. 1181\u20131182, The MTT task.",
+          "gap": "The exact monitor model, resolution, refresh rate and original task code remain unreported."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "biographical events",
+            "general events"
+          ],
+          "source": "SAGE journal supplement, \u00a73 Events of the Mental Travel task and Supplementary Table 1"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "table_slots": 72,
+            "temporal_contexts": [
+              "past",
+              "present",
+              "future"
+            ],
+            "slots_per_context": 24,
+            "slots_per_context_and_event_type": 12,
+            "slots_per_context_event_type_and_relative_time": 6,
+            "distinct_italian_prompt_strings": 42
+          },
+          "source": "SAGE journal supplement, \u00a73 Events of the Mental Travel task and Supplementary Table 1",
+          "gap": "A priori allocation is verified. Individual trial ordering and realized labels need the issue methods and run logs."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Same-day PPS and MTT order balanced across participants.",
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 4, Design and experimental procedure",
+          "gap": "The MTT context order and trial randomization require the main methods."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reported_mtt_interval_ms": 1000
+          },
+          "source": "Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "The exact interval anchors and any jitter await direct review."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": {
+            "start": "Onset of the event text on screen",
+            "end": "Participant response, which removes the text",
+            "reported_isi_ms": 1000,
+            "numeric_deadline_ms": null
+          },
+          "source": "Ferroni et al., verified QJEP 78(6) issue pp. 1181\u20131182, The MTT task.",
+          "gap": "The display is response-terminated. The 1,000 ms is the interstimulus interval. A separate timeout or late-response rule is unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": "Classify biographical and general events as relative past or future from the assigned past, present or future self-reference.",
+          "source": "SAGE journal supplement, \u00a73 Events of the Mental Travel task and Supplementary Table 1",
+          "gap": "The answer key is personalized from the separate event-knowledge questionnaire. Within-task presentation order is unverified."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645",
+          "gap": "No tactile delay trials in the MTT procedure."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "SAGE journal record, Abstract, DOI 10.1177/17470218241261645; Ferroni et al. journal PDF, as documented by depersonalisation_2024 (2026-06-16), p. 6, Mental Time Travel task",
+          "gap": "Mental Time Travel uses temporal classification of events."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "main_presentations": 3,
+            "trials_per_presentation": 24,
+            "self_location_conditions": [
+              "Present",
+              "Past (10 years earlier)",
+              "Future (10 years later)"
+            ],
+            "condition_order": "Balanced across participants",
+            "separate_practice_stimuli": 8
+          },
+          "source": "Ferroni et al., verified QJEP 78(6) issue pp. 1181\u20131182, The MTT task.",
+          "gap": "Each main slide presentation is one temporal-context condition. Exact within-condition event ordering remains unreported."
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 72,
+          "source": "SAGE journal supplement, \u00a73 Events of the Mental Travel task and Supplementary Table 1",
+          "gap": "Planned table slots. The delivered count, omissions, practice and repeated presentations need run logs."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The task requires response-dismissed visual text, balanced temporal contexts, counterbalanced response bindings and event-referenced keyboard timestamps.",
+      "Recover the actual prompt order, practice settings and presentation code. The published tables establish planned item assignments. Realized order and exposure require task records.",
+      "Scoring depends on the participant's stated event years and the study's handling of ambiguous or missing dates. The original response and scoring artifacts are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1177/17470218241261645. Journal issue pp. 1181\u20131183, The MTT task and Fig. 1B, and SAGE Supplement \u00a73 and Table 1"
+    }
+  ]
+}

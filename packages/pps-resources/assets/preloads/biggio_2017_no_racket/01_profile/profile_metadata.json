@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "No-racket session of the reported static near/far audio-tactile PPS task. It preserves the 90-trial session unit: 30 near audio-tactile targets, 30 far audio-tactile targets, and 30 sound-only catches split equally across near/far locations. Exact pink-noise file, far lead, ITI, response timeout, and electrical tactile pulse/current were not reported, so those are labelled as toolkit defaults or derived approximations.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2017.07.018",
     "profile_check_complete": true,
     "publication_status": "published",
     "profile_type": "static_near_far_electrical_voice_response_tool_context",

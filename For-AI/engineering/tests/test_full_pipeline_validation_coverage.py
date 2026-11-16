@@ -59,13 +59,13 @@ def test_full_pipeline_validation_summary_is_conservative():
         "full_emulated_source_to_runner_pipeline_validated": 17,
         "pipeline_incomplete": 2,
         "profile_present_but_source_parameters_missing": 11,
-        "source_parameters_missing_before_profile_creation": 25,
-        "toolkit_structure_or_response_contract_missing": 21,
+        "source_parameters_missing_before_profile_creation": 3,
+        "toolkit_structure_or_response_contract_missing": 43,
     }
     assert summary["primary_gap_counts"] == {
         "profile_present_but_source_parameters_missing": 11,
-        "source_parameters_missing_before_profile_creation": 25,
-        "toolkit_structure_or_response_contract_missing": 21,
+        "source_parameters_missing_before_profile_creation": 3,
+        "toolkit_structure_or_response_contract_missing": 43,
     }
     assert summary["gate_status_counts"]["source_parameter_extraction"] == {
         "minimum_source_parameters_captured": 19,
@@ -78,8 +78,8 @@ def test_full_pipeline_validation_summary_is_conservative():
         "not_applicable_adjacent_record": 4,
     }
     assert summary["gate_status_counts"]["toolkit_gui_implementation"] == {
-        "blocked_by_missing_profile_parameters": 36,
-        "blocked_by_toolkit_structure_or_response_contract": 21,
+        "blocked_by_missing_profile_parameters": 14,
+        "blocked_by_toolkit_structure_or_response_contract": 43,
         "not_applicable_adjacent_record": 4,
         "segment_0_to_6_gui_toolkit_path_ready": 19,
     }
@@ -198,14 +198,14 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
     ]
 
     ladavas = records["ladavas_2001_auditory_tactile_extinction"]
-    assert ladavas["pipeline_status"] == "source_parameters_missing_before_profile_creation"
-    assert ladavas["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_missing_profile_parameters"
-    assert ladavas["blocking_constraint_ids"] == []
+    assert ladavas["pipeline_status"] == "toolkit_structure_or_response_contract_missing"
+    assert ladavas["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_toolkit_structure_or_response_contract"
+    assert ladavas["blocking_constraint_ids"]
 
     farne = records["farne_ladavas_2002_auditory_pps_humans"]
-    assert farne["pipeline_status"] == "source_parameters_missing_before_profile_creation"
-    assert farne["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_missing_profile_parameters"
-    assert farne["blocking_constraint_ids"] == []
+    assert farne["pipeline_status"] == "toolkit_structure_or_response_contract_missing"
+    assert farne["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_toolkit_structure_or_response_contract"
+    assert farne["blocking_constraint_ids"]
 
     serino_2007 = records["serino_2007_blind_cane_users"]
     assert serino_2007["pipeline_status"] == "profile_present_but_source_parameters_missing"
@@ -239,17 +239,20 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
     ]
 
     serino_2015_exps_4_to_6 = records["serino_2015_exps_4_to_6"]
-    assert serino_2015_exps_4_to_6["pipeline_status"] == "source_parameters_missing_before_profile_creation"
+    assert serino_2015_exps_4_to_6["pipeline_status"] == "toolkit_structure_or_response_contract_missing"
     assert serino_2015_exps_4_to_6["gates"]["toolkit_gui_implementation"]["status"] == (
-        "blocked_by_missing_profile_parameters"
+        "blocked_by_toolkit_structure_or_response_contract"
     )
-    assert serino_2015_exps_4_to_6["blocking_constraint_ids"] == []
+    assert serino_2015_exps_4_to_6["blocking_constraint_ids"]
 
     amiel = records["amiel_2025_front_rear"]
-    assert amiel["pipeline_status"] == "source_parameters_missing_before_profile_creation"
-    assert amiel["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_missing_profile_parameters"
-    assert amiel["blocking_constraint_ids"] == ["missing_core_soa_iti_baseline_repetition_parameters"]
-    assert "trajectory-family metadata is now runner-supported" in amiel["next_required_action"]
+    assert amiel["pipeline_status"] == "toolkit_structure_or_response_contract_missing"
+    assert amiel["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_toolkit_structure_or_response_contract"
+    assert amiel["blocking_constraint_ids"] == [
+        "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus",
+    ]
+    assert "Max/MSP/Spat binaural stimuli" in amiel["next_required_action"]
 
     looming_duration = records["looming_duration_2025"]
     assert looming_duration["pipeline_status"] == "profile_present_but_source_parameters_missing"
@@ -262,13 +265,14 @@ def test_full_pipeline_blocks_at_the_first_unproven_layer():
     ]
 
     serino_mr = records["serino_2018_mixed_reality_pps"]
-    assert serino_mr["pipeline_status"] == "source_parameters_missing_before_profile_creation"
-    assert serino_mr["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_missing_profile_parameters"
+    assert serino_mr["pipeline_status"] == "toolkit_structure_or_response_contract_missing"
+    assert serino_mr["gates"]["toolkit_gui_implementation"]["status"] == "blocked_by_toolkit_structure_or_response_contract"
     assert serino_mr["blocking_constraint_ids"] == [
         "audiovisual_or_trisensory_trial_family",
         "missing_core_soa_iti_baseline_repetition_parameters",
+        "study_specific_physical_apparatus",
     ]
-    assert "audiovisual/MR provenance metadata are now runner-supported" in serino_mr[
+    assert "stereoscopic scene" in serino_mr[
         "next_required_action"
     ]
 

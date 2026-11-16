@@ -1,0 +1,372 @@
+{
+  "template_id": "serino_2009_tms_exp2",
+  "title": "Serino 2009 · motor response with hand rotated",
+  "citation": "Serino, A., Annella, L., & Avenanti, A. (2009). Motor Properties of Peripersonal Space in Humans. PLOS ONE, 4(8), e6582.",
+  "source_url": "https://doi.org/10.1371/journal.pone.0006582",
+  "doi": "10.1371/journal.pone.0006582",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1371/journal.pone.0006582::arm-rotated",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": 12,
+      "sound": {
+        "duration_ms": 150,
+        "nominal_head_level_db": 70,
+        "head_to_speakers_cm_approx": [
+          60,
+          165
+        ]
+      },
+      "schedule": {
+        "sound_onset_to_TMS_ms": [
+          50,
+          100,
+          200,
+          300
+        ],
+        "main_blocks": 6,
+        "main_TMS_trials": 192,
+        "blocks_per_intensity": 3,
+        "rMT_intensities_percent": [
+          120,
+          140
+        ],
+        "intertrial_interval_ms": [
+          10000,
+          12000
+        ],
+        "baseline": "Sound-free pre/post TMS trials calibrate the motor-evoked potential index."
+      },
+      "response": "No voluntary response to the main sound–TMS trials. Record peak-to-peak MEP from right first dorsal interosseous and abductor digiti minimi. Strong touch during the interval is a separate attention check.",
+      "hand_to_speakers_cm_approx_text": [
+        80,
+        180
+      ],
+      "near_speaker_to_hand_cm_figure": 90,
+      "geometry_caveat": "The near speaker distance differs between the prose and Figure 1. The head-referenced sound positions remain the same."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Publisher PDF pp. 2 and 4, Auditory stimulation",
+          "gap": "Brief matched sound from one of two speakers. Signal class and waveform unreported."
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Spectral recordings checked for equality at origin. Sound meter used to match levels at head before each block.",
+          "source": "Publisher PDF pp. 2 and 4, Auditory stimulation",
+          "gap": "Raw audio, exact spectral content and speaker models unreported."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "static_positions": 2,
+            "moving_paths": 0
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "near_hand_cm_approx": 80,
+            "far_hand_cm_approx": 180,
+            "near_head_cm_approx": 60,
+            "far_head_cm_approx": 165,
+            "between_speakers_cm": 100,
+            "near_hand_cm_figure": 90
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1",
+          "gap": "Methods give approximately 80 cm from hand to NEAR speaker. Figure 1 inset labels 90 cm for the same setup. Keep both."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 150
+          },
+          "source": "Publisher PDF pp. 2 and 4, Auditory stimulation"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1",
+          "gap": "Stationary sources."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": {
+            "head": [
+              "near",
+              "far"
+            ],
+            "hand": [
+              "both distant"
+            ]
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "matched_level_db": 70,
+            "anchor": "participant head"
+          },
+          "source": "Publisher PDF pp. 2 and 4, Auditory stimulation",
+          "gap": "SPL weighting, exact waveform and envelope unknown."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speaker_count": 2,
+            "emg": "Biopac MP-150",
+            "recording_muscles": [
+              "right FDI",
+              "right ADM"
+            ],
+            "electrodes": "Ag–AgCl belly–tendon pairs with wrist ground",
+            "emg_bandpass_hz": [
+              20,
+              1000
+            ],
+            "emg_sample_hz": 5000,
+            "TMS": {
+              "model": "Magstim Rapid2",
+              "coil": "figure of eight",
+              "target": "left motor cortex hand area, position chosen to maximize both recorded MEPs",
+              "angle_deg": 45,
+              "orientation": "tangential to scalp, handle backward and lateral",
+              "intensity_percent_rMT": [
+                120,
+                140
+              ],
+              "rMT_criterion": {
+                "mep_uV_min": 50,
+                "probability_percent": 50,
+                "reference": "higher-threshold muscle, usually ADM"
+              }
+            }
+          },
+          "source": "Publisher PDF p. 2, Transcranial Magnetic stimulation; Publisher PDF pp. 2 and 4, Auditory stimulation",
+          "gap": "Speaker models and exact task-control software unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "auditory_TMS": 192,
+            "baseline": "TMS-only in pre/post blocks",
+            "tactile_attention": "asynchronous within ITI"
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Near/far and delay are randomized. Intensity varies by block. Tactile attention stimuli are placed in intertrial intervals.",
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "main_blocks": 6,
+            "blocks_per_intensity": 3,
+            "intensity_percent_rMT": [
+              120,
+              140
+            ],
+            "order": "random"
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1",
+          "gap": "Per-block cell allocation and exact main block sizes unspecified."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "range_ms": [
+              10000,
+              12000
+            ],
+            "policy": "randomly varying"
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1",
+          "gap": "Distribution, increments and exact boundary not stated."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher PDF p. 4, Tactile stimulation",
+          "gap": "No button or vocal response during main MEP trial. No numeric deadline for separate attention response."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "main": "Sound followed by single TMS pulse at assigned delay. Record MEPs in both hand muscles.",
+            "instruction": "Ignore sound and monitor hand for infrequent strong tactile target between main trials."
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "middle of dorsal right hand",
+            "actuators": {
+              "kind": "miniaturized solenoids",
+              "vendor": "M & E Solve",
+              "n": 3,
+              "spacing_mm": 5
+            },
+            "stimuli": {
+              "weak": "one solenoid, 5 ms",
+              "strong": "all three together"
+            },
+            "response": "lift left foot tip only for strong",
+            "capture": "experimenter visual monitoring",
+            "target_percent_as_reported": 20,
+            "preceding_sounds": "equally often near and far",
+            "separation_from_TMS": "at least 4–5 s as reported"
+          },
+          "source": "Publisher PDF p. 4, Tactile stimulation",
+          "gap": "Auxiliary probe. No calibrated tap amplitude or exact strong duration. No synchronous touch in main MEP trials."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "sound_to_TMS_ms": [
+              50,
+              100,
+              200,
+              300
+            ],
+            "anchor": "sound onset",
+            "acoustic_tactile_pairing": false
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": {
+            "timing": [
+              "pre",
+              "post"
+            ],
+            "audio": false,
+            "touch": false,
+            "intensity_percent_rMT": [
+              120,
+              140
+            ],
+            "reported_trials_per_block": 12
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": "Pre and post main experiment, TMS without audio or tactile target.",
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1"
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher PDF p. 4, Tactile stimulation",
+          "gap": "No audio-only catch family for primary MEP design. Weak tactile nontargets serve as separate attention-task no-go events."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1",
+          "gap": "No audio–tactile SOA grid. Twelve repeats of each sound × TMS delay × TMS intensity cell."
+        },
+        "baseline_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "trials_per_baseline_block": 12,
+            "phases": [
+              "pre",
+              "post"
+            ],
+            "intensities_percent_rMT": [
+              120,
+              140
+            ]
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1",
+          "gap": "Text describes two 12-trial baseline blocks before and after. It does not unambiguously enumerate the aggregate by intensity and phase."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Publisher PDF p. 4, Tactile stimulation",
+          "gap": "No separate primary catch family."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "main_blocks": 6,
+            "blocks_per_intensity": 3,
+            "baseline_phases": [
+              "pre",
+              "post"
+            ]
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1",
+          "gap": "Exact number of baseline blocks at each phase and rest policy not fully enumerated."
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": {
+            "experimental_TMS_trials": 192,
+            "excludes_baselines": true,
+            "attention_events": "intertrial count not enumerated"
+          },
+          "source": "Publisher PDF pp. 2–3, Procedure and Fig. 1"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The matched original sound spectrum, waveform, ramps and measured delivery latency are unavailable.",
+      "Requires fixed physical speaker outputs with a synchronized single-pulse TMS and EMG acquisition system, qualified staff and participant-specific motor hotspot and threshold; audio-to-TMS delays must not be interpreted as tactile SOAs.",
+      "The intertrial dorsal hand touch check requires distinct strong and weak solenoid events with visual scoring of the left-foot response."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Serino 2009 · motor response with hand rotated",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1371/journal.pone.0006582. Publisher PDF pp. 2–3, Procedure and Fig. 1; Publisher PDF pp. 4–6, Data analysis, Results and Figs. 2–4"
+    }
+  ]
+}

@@ -1,0 +1,271 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "farne_2002_auditory_pps_exp2",
+  "title": "Farn\u00e8 2002 \u00b7 tactile\u2013auditory extinction",
+  "citation": "Farn\u00e8, A., & L\u00e0davas, E. (2002). Auditory Peripersonal Space in Humans. Journal of Cognitive Neuroscience, 14(7), 1030\u20131043.",
+  "doi": "10.1162/089892902320474481",
+  "source_url": "https://doi.org/10.1162/089892902320474481",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1162/089892902320474481::b",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": {
+        "n": 8,
+        "scope": "Subset of Experiment 1 without measured auditory neglect or extinction. Their matched right-rear observations are reused."
+      },
+      "apparatus": "White noise from a static left-rear speaker, 45\u00b0 off the sagittal plane at 20 or 70 cm from the head. The experimenter touches the right lateral neck.",
+      "schedule": {
+        "new_crossmodal_blocks_per_session": 2,
+        "sessions": 2,
+        "new_trials": 160,
+        "trials_per_family_per_block": 10,
+        "trial_families": [
+          "Left sound only",
+          "Right neck touch only",
+          "Paired left sound and right touch",
+          "Blank"
+        ]
+      },
+      "response": "Use the same four verbal alternatives as Experiment 1. The outcome here is left-sound detection, with left-sound-only trials as the within-block comparison."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Wideband white-noise burst",
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "MIT Press version of record. Manual contact-triggered white-noise or pure-tone output.",
+          "source": "Farn\u00e8 and L\u00e0davas (2002), MIT Press pp. 1040\u20131041, Methods, Experiment 1"
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "static_speaker_positions": 2,
+            "moving_trajectories": 0
+          },
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "speaker_count": 1,
+            "mount": "adjustable stand at ear level",
+            "head_distance_cm": [
+              20,
+              70
+            ],
+            "side": "left",
+            "quadrants": [
+              "back left"
+            ],
+            "angle_from_sagittal_axis_deg": 45
+          },
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption"
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "tactile_contact_s_lt": 1,
+            "sound": "same duration as sensor contact"
+          },
+          "source": "MIT Press version of record pp. 1040\u20131041, Materials and Procedure",
+          "gap": "No fixed duration or contact-duration distribution. Sound-only contact is on experimenter's thumb."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "MIT Press version of record pp. 1040\u20131041, Experiment 1, Fig. 1 caption",
+          "gap": "Static loudspeaker positions."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": {
+            "sound": "white noise",
+            "head_distance_cm": [
+              20,
+              70
+            ],
+            "space": "back left"
+          },
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "level_db": 70,
+            "measurement_site": "patient ear",
+            "match": "all speaker positions and sound types"
+          },
+          "source": "MIT Press version of record pp. 1040\u20131041, Experiment 1, Fig. 1 caption",
+          "gap": "Weighting, exact sound shaping and level tolerances unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speaker": {
+              "power_w": 0.3,
+              "impedance_ohm": 8
+            },
+            "sensor_area_cm2": 1,
+            "switch": "remote switch and optically isolated circuit",
+            "sensor": "worn on experimenter's finger",
+            "response_capture": "second experimenter records verbal report"
+          },
+          "source": "MIT Press version of record pp. 1040\u20131041, Materials and Procedure",
+          "gap": "Speaker make/model and component timing unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "derived",
+          "value": {
+            "right_touch_only": 10,
+            "left_sound_only": 10,
+            "combined": 10,
+            "no_stimulus": 10
+          },
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption",
+          "gap": "Experiment 2 refers to Experiment 1 for unchanged procedures and lists mirrored families."
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Four event families pseudorandom within a block. Sound identity, quadrant and distance vary across cross-modal blocks.",
+          "source": "MIT Press version of record pp. 1040\u20131041, Experiment 1, Fig. 1 caption"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "conditions_in_separate_blocks": true,
+            "condition_order": "randomized across subjects and sessions",
+            "within_block": "same pseudorandom order in each condition",
+            "sessions": 2
+          },
+          "source": "MIT Press version of record pp. 1040\u20131041, Experiment 1, Fig. 1 caption",
+          "gap": "Exact pseudorandom sequence and randomization algorithm unavailable."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "MIT Press version of record pp. 1040\u20131041, Experiment 1, Fig. 1 caption",
+          "gap": "Verbal warning before stimuli is described for the unimodal control. Exact foreperiod and ITI unreported."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "MIT Press version of record pp. 1040\u20131041, Experiment 1, Fig. 1 caption",
+          "gap": "Respond immediately after stimulation, with prompt as needed. Numeric deadline unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "choices": [
+              "left",
+              "right",
+              "both",
+              "none"
+            ],
+            "rule": "Report sides of perceived events after stimulation, irrespective of modality. Experimenter prompts if no spontaneous reply."
+          },
+          "source": "MIT Press version of record pp. 1040\u20131041, Materials and Procedure"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "right lateral neck below mastoid",
+            "delivery": "brief light contact by touch-sensitive sensor",
+            "contact_duration_upper_bound_s": 1,
+            "force": "not reported"
+          },
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption",
+          "gap": "Exact force and duration unavailable."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "target_onset_minus_audio_trigger_ms": 0,
+            "anchor": "sensor contact activates sound and delivers touch",
+            "physical_arrival": "not measured"
+          },
+          "source": "MIT Press version of record pp. 1040\u20131041, Materials and Procedure"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Left sound only is the main comparison for acoustic extinction. Right touch only is also a trial family.",
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "MIT Press version of record pp. 1040\u20131041, Experiment 1, Fig. 1 caption",
+          "gap": "No audio in the single-touch comparison. No sound-relative delay."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Neither touch nor sound. Correct report is none.",
+          "source": "MIT Press version of record pp. 1040\u20131041, Experiment 1, Fig. 1 caption"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "combined": 10,
+            "stimulus_trigger_offset_ms": 0,
+            "within_crossmodal_block": true
+          },
+          "source": "MIT Press version of record pp. 1040\u20131041, Experiment 1, Fig. 1 caption"
+        },
+        "baseline_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "left_sound_only_per_new_block": 10,
+            "all_new_blocks_if_two_passes": 40
+          },
+          "source": "MIT Press version of record pp. 1034\u20131036, 1041, Fig. 4 and Experiment 2 Methods",
+          "gap": "Two additional conditions run with Experiment 1; two passes inherited rather than separately enumerated."
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": 10,
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption",
+          "gap": "Block composition carried over from Experiment 1."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "new_crossmodal_blocks_per_session": 2,
+            "sessions": 2
+          },
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption",
+          "gap": "Two mirrored conditions are added alongside Experiment 1. Session count carried over, not independently enumerated."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": 160,
+          "source": "MIT Press version of record pp. 1034\u20131036 and 1041, Experiment 2, Fig. 4 caption",
+          "gap": "Two new conditions \u00d7 40 \u00d7 two sessions, based on unchanged Experiment 1 procedure. No separate delivered-trial log."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The original contact-gated waveform, wideband limits, trial order, touch force, and measured physical onset offsets are unavailable.",
+      "The published task requires a contact sensor controlling a calibrated physical loudspeaker, clinician-led manual stimulation of the lateral neck, and coding of four verbal response alternatives."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1162/089892902320474481. MIT Press version of record pp. 1034\u20131036, 1041, Fig. 4 and Experiment 2 Methods"
+    }
+  ]
+}

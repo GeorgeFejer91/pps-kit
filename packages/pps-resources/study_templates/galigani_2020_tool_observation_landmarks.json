@@ -1,0 +1,227 @@
+{
+  "template_id": "galigani_2020_tool_observation_landmarks",
+  "title": "Galigani 2020 · Tool observation and body landmarks",
+  "citation": "Galigani et al. (2020). Effect of tool-use observation on metric body representation and peripersonal space. Neuropsychologia, 148, 107622.",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2020.107622",
+  "doi": "10.1016/j.neuropsychologia.2020.107622",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2020.107622::landmarks",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": {
+        "enrolled": 21,
+        "analyzed": 19
+      },
+      "paired_study_profile_id": "galigani_2020_tool_observation",
+      "sequence": "Group 1 is independently recruited from Group 2’s stationary PPS cohort. Balance active versus observation session order and test immediately before and after training in each of the two sessions.",
+      "placement": "Fix the right forearm palm down, shoulder-aligned and 20 cm from body midline. Register the physical wrist and elbow while the participant is blindfolded. Hide the forearm and shoulders using a board and cloth and remove the eye covering.",
+      "training": "The experimenter or participant uses a 100 cm rake to retrieve colored cubes during six active cue blocks with intervening breaks. In observation the experimenter acts in the participant’s first-person view while the participant holds a matching rake still.",
+      "allocation": {
+        "landmarks": [
+          "ulnar styloid",
+          "olecranon"
+        ],
+        "repetitions_per_landmark_per_assessment": 10,
+        "assessments": 4,
+        "total_judgments": 80
+      },
+      "response": "The experimenter moves a retroreflective marker along the table. The participant calls stop and may request lateral or along-table corrections. Use the confirmed point from OptiTrack V120:TRIO with the Motive/MATLAB setup.",
+      "analysis": "Compare perceived-to-actual landmark distance ratios across assessment and training. The distance ratio is dimensionless despite unit labels in the Results."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Visible marker moved by the experimenter along a table over the occluded forearm.",
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "OptiTrack V120:Trio and Motive 1.7.5, with a custom MATLAB R2018a recording script.",
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": "Marker travels along table's longitudinal axis. Participant may request corrections in both axes.",
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Exact initial marker coordinates and hand-movement speed unreported."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "No fixed marker movement duration or judgment deadline stated."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "80 × 80 cm board and shoulder occlusion, retroreflective marker on wooden stick, OptiTrack and MATLAB.",
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "wrist ulnar styloid location",
+            "elbow olecranon location"
+          ],
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Ten randomized trials for each of two landmarks per assessment.",
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Pre and post assessments for active and observational training. Training order balanced.",
+          "source": "Journal pre-proof pp. 7–9 (PDF pp. 9–11), §§2.2.1–2.2.3"
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "No fixed verbal response deadline."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Say stop when the marker reaches the perceived hidden landmark. Participant may request position adjustments.",
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Actual anatomical positions recorded before testing. Compare pre- and post-training landmark ratios.",
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "10 repetitions per visual landmark, with no tactile SOA."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "Body-landmark judgment has no audiovisual or tactile target paradigm."
+        },
+        "block_count": {
+          "status": "derived",
+          "value": 4,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "2 assessments for each of 2 training conditions, excluding training blocks."
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 80,
+          "source": "Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3",
+          "gap": "2 landmarks × 10 judgments × 2 phases × 2 training conditions, excluding actual-position calibration."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires a calibrated optical marker and physical occlusion, manually guided marker recollection, and a verified two-visit behavioral training schedule.",
+      "Original coordinate-registration workflow, realized target order and per-trial point recordings are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Galigani 2020 · Tool observation and body landmarks",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2020.107622. Version of record pp. 4, 6–7, §§2.2.3, 2.2.5 and 3.1, Figs. 2, 4 and 5; Journal pre-proof pp. 9–10 (PDF pp. 11–12), §2.2.3; Results §3.1"
+    }
+  ]
+}

@@ -2,6 +2,42 @@
 
 This workflow describes the public, reusable path for reproducing the Study 5 audio-tactile PPS task or adapting it with the stimulus designer.
 
+## Published study profiles
+
+Select a published profile in the Planner and check its
+[recreation status](PUBLISHED_STUDY_RECREATION_STATUS.md). Its citation, study
+identifier, and known settings are in the profile metadata. The parameter
+manifest lists the settings and apparatus that still need verification before
+a participant run.
+
+The catalogue covers 91 of 94 DOI records with 192 source-linked profiles.
+It represents 193 reviewed primary assessment rows and one conference abstract
+series. Repeated sessions with the same assessment may share a profile. Where
+a publication reports a separate companion task or computational model, its
+profile records the relevant conditions and output. Twenty-four profiles
+across 17 publications pass the software launch checks.
+
+- Ferri’s behavioral preview schedules 180 paired trials and 120 audio-only
+  catches. The setup requires its two calibrated sound sources and electrical
+  delivery.
+- Serino’s hand-posture preview schedules 288 paired trials, 96 touch-only
+  baselines, and 48 sound-only catches. Its virtual trajectory and block
+  partition are software choices. The published physical placement and
+  delivered timing need verification.
+- Teneggi’s bargaining-game preview schedules 104 trials before the game and
+  104 after. The software uses a virtual moving sound and placeholder response
+  and touch channels. The lab setup requires the game, cheek stimulation,
+  physical sound, and vocal response capture.
+- Paredes’ two-point prediction can be rerun with the
+  [pinned author notebooks](https://github.com/renatoparedes/SCZ_PPS_Model/tree/e881e2d74717d24fa24a5b30ed2f794b5d96b1db).
+  The profile records the reproduced computational output and links the inputs.
+
+Three sources have no original PPS task in this catalogue. They are the
+[Serino commentary](https://doi.org/10.1016/j.tics.2016.01.005), the
+[Dijkerman and Medendorp conceptual chapter](https://doi.org/10.1093/oso/9780198851738.003.0005),
+and the [Flockton ASMR survey](https://doi.org/10.1101/2025.09.02.673729).
+The survey reports subjective ASMR and affect ratings without a PPS measure.
+
 ## 1. Install
 
 Run the Windows setup script from the repository root:

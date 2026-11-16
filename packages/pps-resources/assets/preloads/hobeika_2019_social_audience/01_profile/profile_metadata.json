@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Source-backed sample schedule. Generated audio, calibrated tactile delivery and original response acquisition affect replication fidelity.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1098/rsos.181878::c",
     "profile_type": "lateral_looming_audio_tactile_pps",
     "publication_study_row_id": "doi:10.1098/rsos.181878::c",
     "source_scope": "One participant\u2019s audience experiment session with both isolated and dyad conditions.",

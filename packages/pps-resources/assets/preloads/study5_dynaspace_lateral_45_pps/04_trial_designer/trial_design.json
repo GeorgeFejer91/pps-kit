@@ -122,7 +122,9 @@
       "gap_s": 0.0,
       "sequence_order": 1,
       "motion_mode": "stationary",
-      "trajectory_snapshot": {}
+      "trajectory_snapshot": {},
+      "display_color_hex": "",
+      "source_input_path": ""
     },
     {
       "label": "Exhale instruction",
@@ -137,7 +139,9 @@
       "gap_s": 0.0,
       "sequence_order": 1,
       "motion_mode": "stationary",
-      "trajectory_snapshot": {}
+      "trajectory_snapshot": {},
+      "display_color_hex": "",
+      "source_input_path": ""
     }
   ],
   "preview_trial_count": 144

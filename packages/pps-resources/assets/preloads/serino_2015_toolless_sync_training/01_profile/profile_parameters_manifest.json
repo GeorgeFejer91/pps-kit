@@ -9,8 +9,8 @@
   "publication_status": "published",
   "profile_type": "audio_tactile_training_plasticity",
   "paper_group_key": "doi:10.3389/fnbeh.2015.00004",
-  "visible_variant_label": "",
-  "variant_display": "Serino 2015 synchronous far audio-tactile PPS training",
+  "visible_variant_label": "B",
+  "variant_display": "Serino 2015 synchronous far audio-tactile PPS training - Variant B",
   "recreation_status": {
     "primary_category": "gui_recreatable",
     "category_label": "GUI-recreatable",
@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 19,
+      "value": 21,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {

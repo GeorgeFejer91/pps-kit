@@ -1,0 +1,446 @@
+{
+  "template_id": "ferri_2015_premotor_itv_behavior",
+  "title": "Ferri 2015 · behavioral looming versus flat PPS",
+  "citation": "Ferri, F., Costantini, M., Huang, Z., Perrucci, M. G., Ferretti, A., Romani, G. L., & Northoff, G. (2015). Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. Journal of Neuroscience, 35(49), 16328–16339.",
+  "source_url": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+  "doi": "10.1523/jneurosci.1696-15.2015",
+  "verification_status": "partial",
+  "notes": "The trial design includes two 3100 ms pink-noise conditions, five tactile delays, 300 trials across three blocks, and fixed intertrial silence. Import calibrated original audio and qualify electrical delivery before participant use.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1523/jneurosci.1696-15.2015::behavior",
+    "publication_status": "published",
+    "profile_type": "looming_flat_audio_tactile_pps",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": {
+        "enrolled": 38,
+        "accepted_boundary_fits": 28
+      },
+      "sound": {
+        "signal": "Pink noise at 44100 Hz",
+        "duration_ms": 3100,
+        "looming_levels_db": [
+          55,
+          70
+        ],
+        "looming_envelope": "Rising exponential in the editor",
+        "flat_level_db": 62.5,
+        "playback": "Two physical loudspeakers separated by 100 cm"
+      },
+      "schedule": {
+        "anchor": "Sound onset",
+        "tactile_onsets_ms": [
+          300,
+          800,
+          1500,
+          2200,
+          2700
+        ],
+        "repetitions_per_sound_and_delay": 18,
+        "touch_trials": 180,
+        "sound_only_catches": 120,
+        "tactile_only_baseline": false,
+        "blocks": 3,
+        "total": 300,
+        "intertrial_interval_ms": 1000
+      },
+      "response": "Press with left index finger for single electrical pulse at the hairy right index finger. Withhold on sound-only trials.",
+      "analysis": "Take the mean of log reaction times by sound and delay, then compare linear and sigmoid fits for looming; the midpoint is expressed in milliseconds after sound onset.",
+      "software_schedule": {
+        "scope": "Use the existing scheduler with two unchanged imported clips, source-conditioned Audio-Tactile trials and audio-only Catch trials. Use the same 1000 ms silent gap for both. No tactile fixture or manual proxy constitutes research delivery.",
+        "catch_split": "60 per sound is a balanced software allocation, because the article gives the overall catch count but not the split.",
+        "onsets": "The five delays are tied to source onset; the model-derived distances are descriptive and do not create independent runtime conditions.",
+        "required_imports": [
+          "Looming pink noise",
+          "Flat pink noise"
+        ],
+        "expected_block_size": 100
+      }
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "noise": "pink (1/f)",
+            "sample_hz": 44100,
+            "conditions": [
+              "looming pink noise",
+              "flat pink noise"
+            ]
+          },
+          "source": "Author web-print PDF p. 2, Stimuli"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "editor": "Sound Forge 4.5",
+            "levels": {
+              "looming_exponential_db": [
+                55,
+                70
+              ],
+              "flat_db": 62.5
+            }
+          },
+          "source": "Author web-print PDF p. 2, Stimuli",
+          "gap": "Exact waveforms, seed and processing scripts not available."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "looming": 1,
+            "flat": 1,
+            "flat_role": "stationary intensity control"
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reference": "right hand",
+            "speaker_separation_cm": 100,
+            "model_derived_positions_cm": [
+              97.7,
+              95.3,
+              88.6,
+              70.5,
+              41.7
+            ],
+            "SOAs_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ]
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5–6, Behavioral Data analysis and Results",
+          "gap": "Distances model-derived from intensity, not independently measured source positions. Near offset and azimuth unknown."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 3100,
+            "tactile_us": 100
+          },
+          "source": "Author web-print PDF p. 2, Stimuli"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "Apparent approach via intensity, with no physical source velocity."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming pink noise",
+            "flat pink noise"
+          ],
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming_exponential_db": [
+              55,
+              70
+            ],
+            "flat_db": 62.5
+          },
+          "source": "Author web-print PDF p. 2, Stimuli",
+          "gap": "Gain coefficients, SPL weighting and calibration unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "behavior": "two loudspeakers, Cedrus RB-834 response box",
+            "control": "custom MATLAB",
+            "near": "near right hand",
+            "far": "100 cm from near speaker"
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "Exact speaker, soundcard and MATLAB version unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "derived",
+          "value": {
+            "audio_tactile": 180,
+            "auditory_only_catch": 120,
+            "total": 300
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "18 × five delays × two sounds gives 180 targets. At 60% of all trials this implies 300 total, with 120 catches."
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Targets from both sounds and five delays randomly intermingled with auditory-only catches.",
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "blocks": 3,
+            "equal_size": true,
+            "within_block": "random"
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "No exact per-block condition allocation or random sequence."
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "fixed_ms": 1000
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "Speed instruction and outlier rule described. Online deadline unspecified."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "posture": "seated blindfolded with right hand palm down on table",
+            "response": "Left-index button press when tactile target present. Ignore sound."
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "site": "hairy right index finger",
+            "device": "Digitimer DS7A",
+            "pulse_shape": "single rectangular monophasic pulse",
+            "duration_us": 100,
+            "reported_current_range_mA": [
+              60,
+              90
+            ],
+            "calibration": {
+              "initial": "minimum then increase until perceived",
+              "validation_targets": 10,
+              "validation_empty_catches": 5,
+              "required_percent_correct": 100,
+              "step_on_error_mA": 5
+            }
+          },
+          "source": "Author web-print PDF p. 2, Stimuli",
+          "gap": "Paper names a constant-current device but calls the delivered pulse constant voltage. Exact output mode and individual levels unverified."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "tactile_onset_after_audio_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ]
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": {
+            "separate_tactile_only": false,
+            "reason": "60% audio–tactile and 40% auditory-only exhaust the behavioral trial pool."
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "No tactile-only baseline."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Sound-only (looming or flat); withhold response.",
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": 18,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "Exhaustive main trial families leave no tactile-only trials."
+        },
+        "catch_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "percent": 40,
+            "derived_total": 120
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "120 from 180 paired trials at 60%. Exact sound-by-block allocation not enumerated."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 3,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 300,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "180 targets at 60% gives 300; three equal blocks imply 100 per block."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The original flat and exponential rising pink-noise waveforms, full amplitude envelopes, loudspeaker gains and absolute acoustic calibration are unavailable.",
+      "Requires a calibrated Digitimer DS7A trigger and measured electrical tactile delivery. The software touch marker does not recreate the physical electrical target.",
+      "Original per-sound catch allocations and within-block random sequence are unreported. A balanced split of the reported 120 catches and deterministic shuffling are software scheduling choices."
+    ]
+  },
+  "design": {
+    "name": "Ferri 2015 · behavioral looming versus flat PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [
+      {
+        "label": "Looming pink noise",
+        "path": "",
+        "target_duration_s": 3.1,
+        "render_mode": "preserve",
+        "tone_type": "pink",
+        "motion_mode": "looming"
+      },
+      {
+        "label": "Flat pink noise",
+        "path": "",
+        "target_duration_s": 3.1,
+        "render_mode": "preserve",
+        "tone_type": "pink",
+        "motion_mode": "stationary"
+      }
+    ],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 40,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [
+        {
+          "strip_id": "ferri-2015-itv-behavior",
+          "label": "Looming or flat pink noise with right-index target",
+          "soa_values_ms": [
+            300,
+            800,
+            1500,
+            2200,
+            2700
+          ],
+          "metadata": {
+            "publication_timing_anchor": "sound_onset",
+            "delivery": "external_calibrated_electrical",
+            "response_rule": "left_index_button_press_only_for_right_index_target",
+            "profile_scope": "schedule_inspection_only"
+          },
+          "elements": [
+            {
+              "element_id": "ferri-2015-itv-behavior-audio",
+              "kind": "looming_stimulus",
+              "label": "Original sound required",
+              "source_label": "Looming pink noise",
+              "source_labels": [
+                "Looming pink noise",
+                "Flat pink noise"
+              ],
+              "randomized": true
+            },
+            {
+              "element_id": "ferri-2015-itv-iti",
+              "kind": "jitter",
+              "label": "Intertrial silence",
+              "jitter_values_ms": [
+                1000
+              ],
+              "randomized": false
+            }
+          ]
+        }
+      ],
+      "tactile_sites": [
+        "Hairy right index finger"
+      ],
+      "blocks": 3,
+      "repetitions_per_condition": 18,
+      "pair_spatial_values_with_soas": false,
+      "catch_trials_exact": 120,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "participants": 38,
+      "catch_crosses_sequence_variants": true,
+      "trial_pool_repetition_defaults": {
+        "audio_tactile": 18,
+        "catch": 60
+      },
+      "distribute_trial_pool_across_blocks": true,
+      "block_specs": [
+        {
+          "label": "Block 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Block 3",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        }
+      ],
+      "random_seed": 20151639
+    },
+    "trajectory": {
+      "padding_pre_s": 0,
+      "padding_post_s": 0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1523/jneurosci.1696-15.2015. Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1; Author web-print PDF pp. 2–3 and 5–6, Behavioral Data analysis and Results"
+    }
+  ]
+}

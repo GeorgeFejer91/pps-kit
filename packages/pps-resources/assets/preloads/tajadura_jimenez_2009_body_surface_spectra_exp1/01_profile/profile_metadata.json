@@ -1,0 +1,313 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "tajadura_jimenez_2009_body_surface_spectra_exp1",
+  "title": "Tajadura-Jim\u00e9nez 2009 \u00b7 earlobe detection and sound distance",
+  "citation": "Tajadura-Jim\u00e9nez, A., Kitagawa, N., V\u00e4ljam\u00e4e, A., Zampini, M., Murray, M. M., & Spence, C. (2009). Auditory\u2013somatosensory multisensory interactions are spatially modulated by stimulated body surface and acoustic spectra. Neuropsychologia, 47(1), 195\u2013205.",
+  "doi": "10.1016/j.neuropsychologia.2008.07.025",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2008.07.025",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2008.07.025::experiment_1",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "timing": {
+        "sound_ms": 50,
+        "tactile_ms": 50,
+        "nominal_simultaneous_trial_SOA_ms": 0,
+        "interstimulus_range_ms": [
+          1500,
+          3500
+        ],
+        "sound_ramp_each_ms": 10
+      },
+      "response": "Respond rapidly to any sound, touch or paired event with a button held in the right hand. The analysis retains reaction times between 150 and 1000 ms.",
+      "analysis": "Compare paired RTs with each modality alone, including response distributions and a probability-summation prediction. This static-distance design does not fit a continuous boundary.",
+      "participants": 15,
+      "geometry": {
+        "tactile": "Lower tip of one earlobe",
+        "near_speaker_cm": [
+          20,
+          10
+        ],
+        "far_speaker_cm": [
+          70,
+          -10
+        ],
+        "coordinate_note": "Absolute left/right offset from head center, then height relative to the ear."
+      },
+      "sound": "White noise measured at 50 dBA at the ear.",
+      "schedule": {
+        "blocks": 2,
+        "per_block": {
+          "sound_only": 40,
+          "touch_only": 40,
+          "paired": 80
+        },
+        "total": 320,
+        "no_stimulus_catches": 0
+      }
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Static loudspeaker noise bursts and electrocutaneous pulses",
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "noise": "White noise",
+            "duration_ms": 50,
+            "ramp_each_ms": 10,
+            "level_dBA": 50,
+            "level_reference": "Measured at the participant's ear position",
+            "delivery": "One custom loudspeaker per auditory-containing trial",
+            "speaker_cone_diameter_cm": 8,
+            "positions": [
+              {
+                "speaker": "near-left",
+                "lateral_cm": -20,
+                "height_relative_to_ear_cm": 10
+              },
+              {
+                "speaker": "near-right",
+                "lateral_cm": 20,
+                "height_relative_to_ear_cm": 10
+              },
+              {
+                "speaker": "far-left",
+                "lateral_cm": -70,
+                "height_relative_to_ear_cm": -10
+              },
+              {
+                "speaker": "far-right",
+                "lateral_cm": 70,
+                "height_relative_to_ear_cm": -10
+              }
+            ],
+            "lateral_coordinate_note": "Signed lateral position uses negative for left as an encoding of the article\u2019s named sides; these are head-center lateral offsets."
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Original audio and script unavailable. Noise-generation method, digital format and random waveform policy are unspecified."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Stationary physical loudspeakers. This task has no trajectory."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Stationary physical loudspeakers. This task has no trajectory."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "auditory_ms": 50,
+            "electrocutaneous_ms": 50
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Stationary physical loudspeakers. This task has no trajectory."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Near, 20 cm left/right",
+            "Far, 70 cm left/right"
+          ],
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "ramp_each_ms": 10,
+            "shape": null,
+            "level_dBA": 50
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Ramp shape and calibration instrument are unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "control": "Presentation 9.90",
+            "speaker": "One custom loudspeaker per auditory-containing trial",
+            "stimulator": "Custom electrical stimulator with 1 cm circular gel-backed electrodes",
+            "response": "Speeded press of button held in right hand"
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Custom speaker and stimulator model details are unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "A, a sound alone",
+            "S, one electrocutaneous pulse alone",
+            "AS, simultaneous onset of one sound and one pulse"
+          ],
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Stimulus conditions presented pseudorandomly within blocks",
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": {
+            "main_blocks": 2,
+            "trials_per_block": 160,
+            "total_trials": 320,
+            "allocation_per_block": {
+              "auditory_only": 40,
+              "somatosensory_only": 40,
+              "auditory_somatosensory": 80
+            },
+            "each_auditory_or_paired_cell_per_block": 10,
+            "each_somatosensory_cell_per_block": 20,
+            "mean_minutes_per_block": 10,
+            "practice_included": false
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reported_interstimulus_range_ms": [
+              1500,
+              3500
+            ],
+            "draw_rule": null
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "The report gives an interstimulus interval range. Exact distribution and timing anchor are unspecified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4; Neuropsychologia p. 198, \u00a72.4",
+          "gap": "Analysis retains 150\u20131000 ms. Online response deadline unspecified."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "fixation": "Dark room, seated with chin on rest. Green eye-level fixation LED 2 m ahead.",
+            "instructions": [
+              "Fixate the green LED",
+              "Respond rapidly to any stimulus in any modality",
+              "Avoid anticipatory responses"
+            ],
+            "response": "Speeded press of button held in right hand",
+            "posture": null
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "modality": "Electrocutaneous",
+            "site": "Lower tip of the left or right earlobe",
+            "pulse_ms": 50,
+            "pulses_per_event": 1,
+            "delivery": "Custom electrical stimulator with 1 cm circular gel-backed electrodes",
+            "level_printed_approx_mV": 2,
+            "level_note": "Approximate value and unit as printed. Exact individual settings, pulse waveform and delivered current are unreported.",
+            "threshold": "Individually adjusted to a comfortable suprathreshold level, defined as greater than 95% detection during a preliminary test."
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Approximate value and unit as printed. Exact individual settings, pulse waveform and delivered current are unreported."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_bimodal_ms": [
+              0
+            ],
+            "anchor": "Sound onset"
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Actual acoustic arrival, hardware latency and synchrony verification are unspecified."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Compare paired detection RTs with auditory-only and somatosensory-only RTs. Contrast empirical and modeled cumulative response distributions.",
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4; Neuropsychologia p. 198, \u00a72.4"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Single-stimulus comparison trials have no sound-relative time for a touch-only event."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "The exhaustive stimulus families all require a response."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "AS_per_cell_per_block": 10,
+            "S_per_cell_per_block": 20
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": {
+            "S_total": 80,
+            "A_total": 80
+          },
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Two blocks \u00d7 40 trials per single-stimulus family per block."
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "No no-go family in the exhaustive trial grid."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 320,
+          "source": "Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4",
+          "gap": "Two blocks \u00d7 160 formal trials."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires fixed physical loudspeaker positions paired independently with left and right calibrated electrocutaneous outputs. Timestamp both modalities and record an identical speeded response for all unimodal and paired trials.",
+      "Exact sound samples, speaker impulse responses, tactile waveform/current calibration, trial order and online response timing are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2008.07.025. Neuropsychologia p. 197, \u00a7\u00a72 and 2.1.1; Neuropsychologia pp. 196\u2013197, Fig. 1 and \u00a72.1.2; Neuropsychologia p. 197, \u00a7\u00a72.1.3\u20132.1.4; Neuropsychologia p. 198, \u00a72.4; Neuropsychologia pp. 198\u2013199, \u00a73.1, Fig. 2 and Table 1"
+    }
+  ]
+}

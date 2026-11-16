@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "serino_2007_blind_cane_users",
   "title": "Serino 2007 blind cane-user static near/far PPS",
-  "visible_variant_label": "",
+  "visible_variant_label": "A",
   "publication_status": "published",
   "profile_type": "static_near_far_electrical_gonogo_tool_context",
   "asset_mode": "bundled_local",

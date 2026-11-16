@@ -1,0 +1,258 @@
+{
+  "template_id": "depersonalisation_2023_psyarxiv_pps",
+  "title": "Ferroni 2023 · Depersonalisation PPS preprint",
+  "citation": "Ferroni, F., Arcuri, E., Ardizzi, M., Chinchella, N., Gallese, V., & Ciaunica, A. (2023). Lost in time and space? Multisensory processing of peripersonal space and time perception in Depersonalisation. PsyArXiv, version 1.",
+  "source_url": "https://doi.org/10.31234/osf.io/t8h6a",
+  "doi": "10.31234/osf.io/t8h6a",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.31234/osf.io/t8h6a",
+    "publication_status": "preprint",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": "70 adults stratified into groups of 35 using low (≤20) and high (≥50) Cambridge Depersonalisation Scale scores.",
+      "sessions": "Counterbalance the PPS and mental time travel tasks on the same day. The time travel task measures temporal judgment in the same study and has a distinct design.",
+      "response": "Detect a single pulse applied to the hairy side of the right index finger, while blindfolded with right palm down. Ignore the looming and flat sounds and respond quickly to touch.",
+      "analysis": "Compare reaction times across five sound-relative delays. Estimate PSE and DL from trimmed reaction-time means and compare the score groups.",
+      "version": "PsyArXiv v1, before journal revision.",
+      "confirmed": "Main text describes looming and flat cues, with Digitimer DS3 electrodes on the hairy dorsal right index finger.",
+      "provisional_supplement": {
+        "paired_delays_ms": [
+          300,
+          800,
+          1500,
+          2200,
+          2700
+        ],
+        "baseline_delay_ms": -700,
+        "intertrial_interval_ms": 1000,
+        "scope": "Appendix settings occur alongside unrelated clinical sample and pre/post training language. The main preprint describes a different population and design. The printed counts also conflict."
+      }
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Looming and flat sound; exact source spectrum not specified in this version.",
+          "source": "Preprint p. 6, PPS task and Fig. 2A"
+        },
+        "source_provenance": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint p. 6, PPS task and Fig. 2A",
+          "gap": "Exact waveform or source file provenance unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "moving_trajectories": 1,
+            "static_sound_comparator": true
+          },
+          "source": "Preprint p. 6, PPS task and Fig. 2A"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": "Apparent approach in front of right hand. Fig. 2A shows two positions separated by 1 m.",
+          "source": "Preprint p. 6, PPS task and Fig. 2A"
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint p. 6, PPS task and Fig. 2A",
+          "gap": "Exact sound duration unreported."
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint p. 6, PPS task and Fig. 2A",
+          "gap": "No calibrated metric speed or position-by-delay mapping supplied."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming",
+            "flat"
+          ],
+          "source": "Preprint p. 6, PPS task and Fig. 2A"
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint p. 6, PPS task and Fig. 2A",
+          "gap": "Fig. 2A distinguishes increasing and flat intensities. Numeric levels and per-channel gains unavailable."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": "Two table speakers with 100 cm separation and DS3 Digitimer on right index.",
+          "source": "Preprint p. 6, Fig. 2A; p. 23, §1",
+          "gap": "Speaker model, exact near-speaker distance and rendering code unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": [
+            "Sound with tactile target",
+            "Tactile-only silence control",
+            "Auditory-only catch"
+          ],
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Results and supplement support a tactile-only comparison. Exact quotas and top-up handling are uncertain."
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Appendix says delay and sound randomized and intermingled with catches.",
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Exact cell balancing and block-level allocation uncertain."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "PPS and MTT task order balanced. Appendix describes randomized PPS trials in two equal blocks.",
+          "source": "Preprint pp. 6 and 23",
+          "gap": "Appendix mis-scopes other procedure details. Confirm exact PPS allocation in journal source."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "post_trial_iti_ms": 1000
+          },
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Reported in appendix only. Jitter policy and trial-start timing unavailable."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint p. 6, PPS task and Fig. 2A",
+          "gap": "Online cutoff and response key identifier unavailable."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": "Respond to touch quickly, ignore sound. Appendix describes left-index laptop button and repeats after misses.",
+          "source": "Preprint pp. 6 and 23",
+          "gap": "The main methods establish tactile detection. Appendix-only repeat criteria remain provisional."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "device": "DS3 Digitimer",
+            "site": "hairy surface of right index",
+            "shape": "single rectangular monophasic electrical pulse",
+            "provisional_duration_ms": 0.1
+          },
+          "source": "Preprint pp. 6 and 23",
+          "gap": "Main article names constant-current stimulator and calls the pulse constant-voltage. Pulse duration occurs in the inconsistent appendix. The appendix's current ranges are labeled controls versus schizophrenia and cannot be assigned to the DP groups."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "tactile_minus_audio_onset_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ]
+          },
+          "source": "Preprint pp. 9 and 23",
+          "gap": "Main results confirm five ordered D labels. Numerical offsets come from the inconsistent appendix."
+        },
+        "baseline_strategy": {
+          "status": "reported_with_caveat",
+          "value": "Unisensory tactile stimulus during leading silence. Flat sound is a separate comparator.",
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "The reported silence-relative timing comes from the appendix."
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "tactile_minus_audio_onset_ms": -700
+          },
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Appendix only. No separate trial-start anchor established."
+        },
+        "catch_trial_type": {
+          "status": "reported_with_caveat",
+          "value": "Looming or flat sound only, no tactile target.",
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Appendix only."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "appendix_reported_per_delay": 18
+          },
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Even if 18 counts both audio conditions combined, five delays give 90 tactile targets, which is inconsistent with 60% of 120."
+        },
+        "baseline_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Tactile-only count cannot be recovered from inconsistent quotas."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Sound-only count cannot be recovered from inconsistent quotas."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": 2,
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Appendix says two equal blocks, with details needing journal confirmation."
+        },
+        "total_trial_count": {
+          "status": "source_inconsistency_caveat",
+          "value": 120,
+          "source": "Preprint p. 23, Supplementary Materials §1",
+          "gap": "Reported total conflicts with the 60% tactile-target share and 18 targets per delay."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Determine which appendix timing and count values were used for the depersonalisation cohort. Verify the block and baseline/catch allocation against original source logs.",
+      "Recover the source audio, dual-speaker calibration and tactile trigger/response timing. A single procedural looming cue would alter the task."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Ferroni 2023 · Depersonalisation PPS preprint",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [
+        "hairy dorsal right index finger"
+      ],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.31234/osf.io/t8h6a. PsyArXiv v1 pp. 5–10, Methods and PPS results, and pp. 23–26, appended sections"
+    }
+  ]
+}

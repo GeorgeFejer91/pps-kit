@@ -7,6 +7,7 @@
   "verification_status": "partial",
   "notes": "Experiment 1 specification and trial-pool preview. White and brown preview audio represent the two reported noise colors. The original amplitude envelopes, frequency-band power matching and clinical stimulation require separate verification.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2015.03.001::a",
     "profile_type": "audio_tactile_looming_valence",
     "implemented_controls": [
       "Tactile timing at 300–3000 ms in 300-ms steps, with D0 at −500 ms on trials that still present the sound.",

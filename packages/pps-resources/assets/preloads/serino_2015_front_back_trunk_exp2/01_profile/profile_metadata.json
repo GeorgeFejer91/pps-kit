@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Front/back trunk mapping with sounds crossing the body. The original 16-speaker Gaussian-amplitude array is represented as the reported 1 m front-to-1 m back virtual moving-source path, with the published 372-trial Experiment 2 formula encoded for runner use.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1038/srep18603::b",
     "distances_cm": [
       95,
       80,

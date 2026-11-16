@@ -1,0 +1,243 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "amemiya_2019_ntt_pseudo_walking",
+  "title": "Amemiya 2019 \u00b7 Seated pseudo-walking and trunk PPS",
+  "citation": "Amemiya, T. (2019). Creating a Walking Sensation for the Seated\u2014A Sensation of Pseudo-walking Expands Peripersonal Space. NTT Technical Review, 17(11), 23\u201327.",
+  "doi": "10.53829/ntr201911fa4",
+  "source_url": "https://doi.org/10.53829/ntr201911fa4",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.53829/ntr201911fa4",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "source_scope": "Technical feature summarizing one underlying assessment, with no independent cohort established by the feature.",
+      "sound": "Frontally approaching headphone white noise simulated by sound-level variation.",
+      "heel_conditions": "Compare bilateral playback of recorded footsteps low-pass filtered at 120 Hz, asynchronous playback with randomized step onsets, and 60 Hz sinusoidal vibration at step onsets. Average amplitude is matched across active conditions.",
+      "chest_target": "A suprathreshold 150 Hz sinusoidal chest vibration, delivered by a pendant voice-coil in the Japanese companion. Detect it quickly with a button press.",
+      "distances_cm": [
+        40,
+        80,
+        120,
+        160
+      ],
+      "reference": "English Figure 3 describes a no-vibration reference. Japanese Figure 3 describes an absent auditory-stimulus condition. The records do not establish which cue or cues the comparison omitted."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Looming white noise, chest target vibration and heel conditioning",
+          "source": "Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "signal": "White noise with sound-level changes simulating approach",
+            "direction": "Frontal approach",
+            "headphones": "Reported in Japanese companion",
+            "speed_mps": null
+          },
+          "source": "Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3; Amemiya 2019, NTT Technical Journal, pp. 19\u201320 and Figs. 2\u20134",
+          "gap": "Waveforms, output level, duration and exact rendering unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 1,
+          "source": "Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": "Frontal approach toward body",
+          "source": "Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3; Amemiya 2019, NTT Technical Journal, pp. 19\u201320 and Figs. 2\u20134",
+          "gap": "Start and stop distances and geometric coordinates unspecified."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for stimulus duration was not recovered from the available source."
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for stimulus speed was not recovered from the available source."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Looming white noise"
+          ],
+          "source": "Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Level changes simulate distance",
+          "source": "Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3; Amemiya 2019, NTT Technical Journal, pp. 19\u201320 and Figs. 2\u20134",
+          "gap": "Exact gain law unavailable."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "sole": "Voice-coil vibrators at heels",
+            "chest": "Pendant voice coil",
+            "audio": "Headphones"
+          },
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Journal, pp. 19\u201320 and Figs. 2\u20134",
+          "gap": "Specific device models not given in the feature or companion."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": [
+            "Synchronous footsteps",
+            "Asynchronous footsteps",
+            "60 Hz sine",
+            "Reference"
+          ],
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Reference definitions differ between captions."
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for condition intermixing was not recovered from the available source."
+        },
+        "blocked_or_random_order": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for blocked or random order was not recovered from the available source."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for iti jitter policy was not recovered from the available source."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for response window was not recovered from the available source."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": "Speeded chest vibration detection, button press in Japanese companion.",
+          "source": "Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3; Amemiya 2019, NTT Technical Journal, pp. 19\u201320 and Figs. 2\u20134",
+          "gap": "Response deadline and stimulus triggers unspecified."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "target": {
+              "site": "Chest",
+              "frequency_hz": 150,
+              "waveform": "Sinusoidal in Japanese companion",
+              "threshold": "Suprathreshold",
+              "apparatus": "Pendant voice coil in Japanese companion",
+              "duration_ms": null
+            },
+            "heel": {
+              "walking_sound": "Bilateral heel playback of recorded footsteps low-pass filtered at 120 Hz",
+              "asynchronous": "Same recording with randomized step onsets",
+              "tone": "60 Hz sinusoidal vibration timed to the footstep onsets",
+              "amplitude": "Average amplitudes equal across the three active patterns. Calibration unit and amplitude value unspecified."
+            }
+          },
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3; Amemiya 2019, NTT Technical Journal, pp. 19\u201320 and Figs. 2\u20134",
+          "gap": "Target duration, absolute output and exact heel timing unreported."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "delay_count": 4,
+            "distances_cm": [
+              40,
+              80,
+              120,
+              160
+            ],
+            "anchor": "Approach sound onset",
+            "numeric_soa_ms": null
+          },
+          "source": "Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Four distances plotted. Numeric SOAs absent."
+        },
+        "baseline_strategy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "english": "Figure 3 labels the reference no-vibration baseline.",
+            "japanese": "Companion Fig. 3 labels the reference as an auditory-stimulus-absent condition.",
+            "caveat": "The reference definitions differ. Whether the English report's reference omitted the sole signal, approach sound or both needs the main methods."
+          },
+          "source": "Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3; Amemiya 2019, NTT Technical Journal, pp. 19\u201320 and Figs. 2\u20134",
+          "gap": "The reference definitions differ. Whether the English report's reference omitted the sole signal, approach sound or both needs the main methods."
+        },
+        "baseline_timing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for baseline timing was not recovered from the available source."
+        },
+        "catch_trial_type": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for catch trial type was not recovered from the available source."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for repetitions per tactile soa condition was not recovered from the available source."
+        },
+        "baseline_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for baseline count was not recovered from the available source."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for catch count was not recovered from the available source."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for block count was not recovered from the available source."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Amemiya 2019, NTT Technical Review, p. 24, \u00a72 and Figs. 1\u20132; Amemiya 2019, NTT Technical Review, pp. 24\u201325, \u00a73 and Fig. 3",
+          "gap": "Evidence for total trial count was not recovered from the available source."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Recover the numeric sound-relative delays, sound-level trajectory, conditioning waveform and delivered timing for bilateral heel and chest channels.",
+      "Establish the reference condition, repetition and catch allocation, response window, and physical amplitude calibration from the original experiment records.",
+      "Synchronize independent conditioning and chest-target stimulus outputs with response capture and verify tactile perceptibility."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.53829/ntr201911fa4. NTT Technical Review, pp. 24\u201326, \u00a7\u00a72\u20133 and Figs. 1\u20134. Japanese NTT Technical Journal companion, pp. 19\u201320, Figs. 2\u20134"
+    }
+  ]
+}

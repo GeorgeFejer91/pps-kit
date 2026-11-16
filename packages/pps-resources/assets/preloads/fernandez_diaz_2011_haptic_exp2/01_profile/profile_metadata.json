@@ -1,0 +1,365 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "fernandez_diaz_2011_haptic_exp2",
+  "title": "Fern\u00e1ndez-D\u00edaz 2011 \u00b7 Acoustic pointing with a bar",
+  "citation": "Fern\u00e1ndez-D\u00edaz and Travieso (2011). Performance in haptic geometrical matching tasks depends on movement and position of the arms. Acta Psychologica, 136(3), 382\u2013389.",
+  "doi": "10.1016/j.actpsy.2011.01.003",
+  "source_url": "https://doi.org/10.1016/j.actpsy.2011.01.003",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.actpsy.2011.01.003::experiment-2",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "table_geometry_cm": [
+        148,
+        72,
+        80
+      ],
+      "coordinate_frame": "Lateral relative to table midline and depth from near edge, in cm.",
+      "bar_setup": "20 cm pivoted bar with 1.1 cm diameter and arrow-shaped ends on a magnetized steel table.",
+      "frontal_pivots_xy_cm": [
+        [
+          -60,
+          20
+        ],
+        [
+          -60,
+          60
+        ],
+        [
+          60,
+          20
+        ],
+        [
+          60,
+          60
+        ]
+      ],
+      "participants": 15,
+      "speakers": {
+        "coordinates_xy_cm": [
+          [
+            -60,
+            120
+          ],
+          [
+            0,
+            80
+          ],
+          [
+            0,
+            120
+          ],
+          [
+            60,
+            120
+          ]
+        ],
+        "height_cm": 80,
+        "white_noise_ms": 5000,
+        "dBA": 50
+      },
+      "conditions": {
+        "pivots": 4,
+        "speakers": 4,
+        "trials": 16,
+        "randomized": true
+      },
+      "procedure": "Blindfolded participant points the test bar at the active speaker during the noise, then lifts their hand at sound offset.",
+      "analysis": "Continuous signed error relative to correct speaker direction from the bar pivot. Reverse left-hand pointing signs for ANOVA."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": [
+            "Stationary white noise",
+            "Manual test-bar adjustment"
+          ],
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "Acta Psychologica 136(3) (2011), pp. 382\u2013389, publisher version of record",
+          "source": "https://www.sciencedirect.com/science/article/pii/S0001691811000047"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, pp. 383\u2013384, \u00a72.1 and Fig. 1",
+          "gap": "Fixed bar and speaker locations."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, pp. 383\u2013384, \u00a72.1 and Fig. 1",
+          "gap": "No moving external stimulus."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "value": 5000,
+            "unit": "ms"
+          },
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, pp. 383\u2013384, \u00a72.1 and Fig. 1",
+          "gap": "Participants adjust a bar. The external cue is stationary."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": {
+            "duration_ms": 5000,
+            "source": "Four fixed JBL speakers",
+            "speaker_xy_cm": [
+              [
+                -60,
+                120
+              ],
+              [
+                0,
+                80
+              ],
+              [
+                0,
+                120
+              ],
+              [
+                60,
+                120
+              ]
+            ],
+            "height_cm": 80,
+            "noise": "White",
+            "level_dBA": 50,
+            "scope": "White noise, level, brand and height are explicit for Experiment 2. Experiment 3 refers to the same setup and states its 5 s duration."
+          },
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1",
+          "gap": "50 dBA nominal level. Exact gain, rise/fall and calibration are unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "bar_apparatus": {
+              "unit": "cm",
+              "axes": [
+                "lateral from table midline",
+                "depth from near edge"
+              ],
+              "participant_origin_xy": [
+                0,
+                0
+              ],
+              "table_width_depth_height_cm": [
+                148,
+                72,
+                80
+              ],
+              "table_disk_count": 15,
+              "table": "Magnetized stainless steel",
+              "bar_length_cm": 20,
+              "bar_diameter_cm": 1.1,
+              "bar_mount": "Pinned pivot with magnetic resistance and arrow-shaped ends"
+            },
+            "speaker_xy_cm": [
+              [
+                -60,
+                120
+              ],
+              [
+                0,
+                80
+              ],
+              [
+                0,
+                120
+              ],
+              [
+                60,
+                120
+              ]
+            ],
+            "bar_xy_cm": [
+              [
+                -60,
+                20
+              ],
+              [
+                -60,
+                60
+              ],
+              [
+                60,
+                20
+              ],
+              [
+                60,
+                60
+              ]
+            ]
+          },
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "test_bar_xy_cm": [
+              [
+                -60,
+                20
+              ],
+              [
+                -60,
+                60
+              ],
+              [
+                60,
+                20
+              ],
+              [
+                60,
+                60
+              ]
+            ],
+            "speaker_xy_cm": [
+              [
+                -60,
+                120
+              ],
+              [
+                0,
+                80
+              ],
+              [
+                0,
+                120
+              ],
+              [
+                60,
+                120
+              ]
+            ]
+          },
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Randomized separately for each participant.",
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Randomized separately for each participant.",
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, \u00a7\u00a72\u20136",
+          "gap": "The verified issue does not specify this setting. Original session and trial files are unavailable."
+        },
+        "response_window": {
+          "status": "reported",
+          "value": {
+            "max_ms": 5000,
+            "anchor": "Sound onset"
+          },
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": [
+            "Blindfolded at the frontal setup",
+            "One speaker starts a 5 s noise",
+            "Point the test bar to the sound",
+            "Lift hand at sound offset",
+            "Record the angular setting"
+          ],
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": "Active exploration or adjustment of pivoted stainless steel bars.",
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, pp. 383\u2013384, \u00a72.1 and Fig. 1"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, \u00a7\u00a72\u20136",
+          "gap": "No programmed tactile pulses or sampled SOAs."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, \u00a7\u00a72\u20136",
+          "gap": "No timed tactile-only baseline."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, \u00a7\u00a72\u20136",
+          "gap": "The trial factors use bar angles and locations."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1",
+          "gap": "The paper describes the session and trials without enumerating blocks."
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 16,
+          "source": "Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires physical pivot bar and continuous angular recording plus a four-speaker calibrated output route.",
+      "Original sound and exact channel mapping are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.actpsy.2011.01.003. Fern\u00e1ndez-D\u00edaz and Travieso 2011, final Acta Psychologica issue, p. 385, \u00a73.1 and Fig. 1"
+    }
+  ]
+}

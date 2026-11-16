@@ -1,0 +1,223 @@
+{
+  "template_id": "serino_2013_full_body_conference",
+  "title": "Noel 2013 · Full-body audiotactile PPS conference series",
+  "citation": "Noel, J.-P., Galli, G., Blanke, O., & Serino, A. (2013). Audio-tactile multisensory integration as a proxy for full body peri-personal space. Multisensory Research, 26 Supplement, 181.",
+  "source_url": "https://doi.org/10.1163/22134808-000s0136",
+  "doi": "10.1163/22134808-000s0136",
+  "verification_status": "partial",
+  "notes": "The conference abstract supports comparison-level inspection. Experiment boundaries, participant cohorts and individual schedules require the source methods.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1163/22134808-000s0136",
+    "publication_status": "conference_abstract",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "source_scope": "Proceedings abstract summarizes a series of at least two experiments, with no exact formal count or mapping of the comparisons to cohorts.",
+      "reported_comparisons": [
+        "Front versus rear",
+        "Full-body versus peri-hand",
+        "Separation of the hand from trunk",
+        "Velocity of incoming stimulation"
+      ],
+      "later_primary_publications": "A later formal publication can clarify how its own paradigms were implemented. The abstract gives no cross-reference establishing which complete later methods and participants correspond to each conference comparison."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported_with_caveat",
+          "value": "Audiotactile task involving incoming stimuli",
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "Exact sound and tactile waveforms are absent from the abstract."
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "Published Brill conference abstract",
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181"
+        },
+        "trajectory_count": {
+          "status": "reported_with_caveat",
+          "value": "Incoming sound is reported, with front/back and velocity comparisons.",
+          "source": "Noel, Galli, Blanke and Serino (2013), historical Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "Experiment count, trajectories per experiment and renderer unresolved."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": "Front and rear PPS boundaries are reported. Incoming motion is explicit for the qualitative velocity comparison.",
+          "source": "Noel, Galli, Blanke and Serino (2013), final Brill abstract, Multisensory Research 26 Supplement, p. 181.",
+          "gap": "The abstract does not establish the motion direction of each front/rear boundary condition, the geometry, the movement renderer or the kinematic schedule."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "stimulus_speed": {
+          "status": "reported_with_caveat",
+          "value": "Qualitative association between approach velocity and PPS expansion",
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "Exact speed values and condition assignment absent from the abstract."
+        },
+        "auditory_conditions": {
+          "status": "reported_with_caveat",
+          "value": [
+            "front versus rear space",
+            "different incoming velocities"
+          ],
+          "source": "Noel, Galli, Blanke and Serino (2013), historical Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "These comparisons need not belong to the same experiment."
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "renderer_or_apparatus": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "blocked_or_random_order": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "task_sequence_rules": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": "Audio–tactile paradigm compared trunk/full-body and peri-hand representations.",
+          "source": "Noel, Galli, Blanke and Serino (2013), historical Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "Tactile site, body side, hardware and timing by experiment unresolved."
+        },
+        "soa_table": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "baseline_strategy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "baseline_timing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "catch_trial_type": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "baseline_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Noel, Galli, Blanke and Serino 2013, final Brill abstract, Multisensory Research 26 Supplement, p. 181",
+          "gap": "The complete published abstract omits this detail. The separately presented poster and underlying experiment files remain unavailable."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Recover the original poster or full methods and establish experiment boundaries and cohort assignments before defining separate schedules.",
+      "The abstract does not report source audio, target geometry and devices, timing, trial allocations, catch/baseline rules or response instructions."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Noel 2013 · Full-body audiotactile PPS conference series",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1163/22134808-000s0136. Printed Multisensory Research 26 Supplement, p. 181, 14th International Multisensory Research Forum"
+    }
+  ]
+}

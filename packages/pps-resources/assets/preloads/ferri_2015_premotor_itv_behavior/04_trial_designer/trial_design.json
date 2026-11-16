@@ -1,0 +1,64 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "ferri_2015_premotor_itv_behavior",
+  "repetitions_per_condition": 18,
+  "soa_values_ms": [
+    300,
+    800,
+    1500,
+    2200,
+    2700
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "ferri-2015-itv-behavior",
+      "label": "Looming or flat pink noise with right-index target",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "spatial_values_cm": [],
+      "metadata": {
+        "publication_timing_anchor": "sound_onset",
+        "delivery": "external_calibrated_electrical",
+        "response_rule": "left_index_button_press_only_for_right_index_target",
+        "profile_scope": "schedule_inspection_only"
+      },
+      "elements": [
+        {
+          "element_id": "ferri-2015-itv-behavior-audio",
+          "kind": "looming_stimulus",
+          "label": "Original sound required",
+          "source_label": "Looming pink noise",
+          "source_labels": [
+            "Looming pink noise",
+            "Flat pink noise"
+          ],
+          "jitter_values_ms": [],
+          "randomized": true
+        },
+        {
+          "element_id": "ferri-2015-itv-iti",
+          "kind": "jitter",
+          "label": "Intertrial silence",
+          "source_label": "",
+          "source_labels": [],
+          "jitter_values_ms": [
+            1000
+          ],
+          "randomized": false
+        }
+      ]
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 300
+}

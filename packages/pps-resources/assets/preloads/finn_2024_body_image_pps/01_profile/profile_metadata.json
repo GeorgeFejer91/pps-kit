@@ -1,0 +1,246 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "finn_2024_body_image_pps",
+  "title": "Finn 2024 \u00b7 Body image and headphone looming PPS",
+  "citation": "Finn et al. (2024). The impact of body image on social cognition: Fear of negative evaluation mediates the relationship between body surveillance and interpersonal distance in women. Body Image, 51, 101777.",
+  "doi": "10.1016/j.bodyim.2024.101777",
+  "source_url": "https://doi.org/10.1016/j.bodyim.2024.101777",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.bodyim.2024.101777",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sample": {
+        "completed": 79,
+        "analyzed": 75
+      },
+      "audio": "Three-second 44.1 kHz pink-noise approach presented over headphones by increasing level.",
+      "tactile": "Nonpainful vibration on left index finger, attached with medical tape.",
+      "timings_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "allocation": {
+        "paired_per_delay": 12,
+        "paired": 60,
+        "tactile_only_each_at_300_and_2700_ms": 7,
+        "tactile_only": 14,
+        "audio_only": 7,
+        "total": 81
+      },
+      "response": "Blindfolded participant presses the space bar with right index on vibration and ignores the sound.",
+      "outcomes": "Compare delay-dependent RT and an individual PPS slope against body-image measures. Active and passive interpersonal distance use separate physical assessments.",
+      "baseline": "Correct paired RT with tactile-only observations. Exact pooling and sign conventions are unreported."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Looming pink noise over headphones plus left-index vibration",
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "3000 ms rising pink-noise clips at 44.1 kHz, Arduino and LabView 8",
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "Headphone model, signal identity, bit depth, channels, SPL, gain law and distance mapping unreported."
+        },
+        "trajectory_count": {
+          "status": "derived",
+          "value": 1,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "One approach trajectory family follows from the single reported direction."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": "Perceived approaching sound through intensity increase",
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "Only ordinal positions at five delays. No calibrated spatial trajectory."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 3000,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "No distance or velocity was measured."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "rising pink noise"
+          ],
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Gradually increasing intensity",
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "No exact curve or absolute levels."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "audio": "Headphones",
+            "control": "Arduino and LabView 8",
+            "response": "Keyboard"
+          },
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "Hardware model and exact calibration unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "sound plus touch",
+            "touch only",
+            "sound-only catch"
+          ],
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "All 81 trials randomized",
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Randomized trial order",
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "Block count and sequence generation unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "Overall task lasted approximately 12\u201315 min. No trial-level interval rule is reported."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "Speeded response required. No deadline or feedback timing."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": [
+            "digital consent",
+            "computer self-report",
+            "active then passive IPD",
+            "PPS",
+            "height and weight",
+            "debrief"
+          ],
+          "source": "Accepted manuscript \u00a72.3, Procedures"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "Non-painful vibration",
+            "site": "Left index finger",
+            "attachment": "Medical tape",
+            "gap": "Exact stimulator, drive signal, pulse duration, acceleration and threshold procedure unreported."
+          },
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "Exact stimulator, drive signal, pulse duration, acceleration and threshold procedure unreported."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "anchor": "sound onset",
+            "soa_ms": {
+              "D1": 300,
+              "D2": 800,
+              "D3": 1500,
+              "D4": 2200,
+              "D5": 2700
+            }
+          },
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "baseline_strategy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "delays_ms": [
+              300,
+              2700
+            ],
+            "trials_per_delay": 7,
+            "purpose": "Tactile-only reference and expectancy control",
+            "correction": "Participant means for D1\u2013D5 corrected using unimodal RTs",
+            "gap": "The exact subtractor, pooling or matching rule, and signed correction convention are unreported."
+          },
+          "source": "Accepted manuscript \u00a7\u00a72.4, 3.1, and Table 1 and Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "The exact subtractor, pooling or matching rule, and signed correction convention are unreported."
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": {
+            "nominal_soa_ms": [
+              300,
+              2700
+            ],
+            "audio_present": false
+          },
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Looming sound with no tactile cue",
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": 12,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "baseline_count": {
+          "status": "reported",
+          "value": 14,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": 7,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 81,
+          "source": "Accepted manuscript \u00a72.2.9, Peripersonal space",
+          "gap": "5 \u00d7 12 + 14 + 7."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires the original noise and headphone output calibration plus a physically characterized tactile route. Exact vibration duration, envelope, output level and acoustic-to-distance mapping are unavailable.",
+      "Exact intertrial scheduling, response cutoff and baseline correction rule remain unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.bodyim.2024.101777. Accepted manuscript \u00a72.2.9, Peripersonal space and Accepted manuscript \u00a7\u00a72.4, 3.1, and Table 1"
+    }
+  ]
+}

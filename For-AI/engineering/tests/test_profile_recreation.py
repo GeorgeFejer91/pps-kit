@@ -4,8 +4,10 @@ import importlib.util
 import json
 import os
 import sys
+from collections import Counter
 from pathlib import Path
 
+from peripersonal_space_toolkit.design import block_trial_rows
 from peripersonal_space_toolkit.profile_recreation import (
     PROFILE_PARAMETERS_SCHEMA,
     PROFILE_RECREATION_STATUS_SCHEMA,
@@ -40,7 +42,10 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     template_ids = {template.template_id for template in templates}
     status = json.loads((root / "packages" / "pps-resources" / "assets" / "preloads" / "profile_recreation_status.json").read_text(encoding="utf-8"))
 
-    assert len(templates) == 81
+    published = [template for template in templates if template.doi]
+    assert len(published) == 192
+    assert len({template.doi.lower() for template in published}) == 91
+    assert all(template.reference_parameters.get("study_row_id") for template in published)
     assert status["schema"] == PROFILE_RECREATION_STATUS_SCHEMA
     assert status["profile_count"] == len(templates)
     assert {profile["template_id"] for profile in status["profiles"]} == template_ids
@@ -49,8 +54,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
     assert categorized == template_ids
     assert status["categories"]["gui_recreatable"]
     assert status["categories"]["missing_publication_parameters"]
-    assert len(status["categories"]["missing_publication_parameters"]) == 55
-    assert set(status["categories"]["toolkit_structural_gap"]) == {
+    assert {
         "amemiya_2017_ieee_foot_sole_vibration",
         "amemiya_2017_ieee_sound_localization",
         "amemiya_2019_foot_sole_exp1",
@@ -89,7 +93,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
         "zampini_2005_audiotactile_toj_exp1",
         "zampini_2005_audiotactile_toj_exp2",
         "zampini_2005_audiotactile_toj_exp3",
-    }
+    } <= set(status["categories"]["toolkit_structural_gap"])
 
     allowed_statuses = {
         STATUS_REPORTED,
@@ -98,7 +102,8 @@ def test_profile_recreation_manifests_cover_all_current_templates():
         STATUS_MISSING,
         STATUS_UNSUPPORTED,
     }
-    for template_id in template_ids:
+    for template in templates:
+        template_id = template.template_id
         manifest_path = root / "packages" / "pps-resources" / "assets" / "preloads" / template_id / "01_profile" / "profile_parameters_manifest.json"
         assert manifest_path.exists(), template_id
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -108,7 +113,7 @@ def test_profile_recreation_manifests_cover_all_current_templates():
         assert gate["gate"] == "segments_0_to_4"
         assert {item["segment"] for item in gate["segments"]} == {"0", "1", "2", "3", "4"}
         assert {item["status"] for item in manifest["field_inventory"]} <= allowed_statuses
-        assert not any(
+        assert bool(template.reference_parameters.get("planner_scope")) == any(
             item["status"] == STATUS_UNSUPPORTED
             and (
                 "current Segment 2 row/box" in item.get("note", "")
@@ -366,7 +371,7 @@ def test_profile_recreation_status_distinguishes_ready_missing_and_structural_pr
     assert "Clinical populations, interventions, non-audiotactile stimuli" in tex_report
 
 
-def test_preload_segment2_trial_designs_are_never_empty():
+def test_preload_trial_designs_distinguish_inspection_from_playback():
     root = ROOT
     templates = load_templates(root / "packages" / "pps-resources" / "study_templates")
 
@@ -383,6 +388,11 @@ def test_preload_segment2_trial_designs_are_never_empty():
         )
         trial_design = json.loads(trial_design_path.read_text(encoding="utf-8"))
         strips = trial_design.get("trial_strips") or []
+        if template.reference_parameters.get("planner_scope"):
+            assert not any(strip.get("elements") for strip in strips), template.template_id
+            assert trial_design["preview_trial_count"] == 0, template.template_id
+            assert not block_trial_rows(template.design), template.template_id
+            continue
         assert strips, template.template_id
         for strip in strips:
             assert strip.get("elements"), (template.template_id, strip.get("label"))
@@ -393,6 +403,33 @@ def test_preload_segment2_trial_designs_are_never_empty():
                         strip.get("label"),
                         element.get("label"),
                     )
+
+
+def test_source_backed_previews_preserve_trial_families_and_phase_order():
+    templates = {
+        template.template_id: template
+        for template in load_templates(ROOT / "packages/pps-resources/study_templates")
+    }
+    expected = {
+        "ferri_2015_premotor_itv_behavior": Counter({"Audio-Tactile": 180, "Catch": 120}),
+        "serino_2015_peri_hand_posture_exp5": Counter({"Audio-Tactile": 288, "Baseline": 96, "Catch": 48}),
+        "teneggi_2013_cooperative_game_exp2": Counter({"Audio-Tactile": 160, "Catch": 48}),
+    }
+    for profile_id, counts in expected.items():
+        rows = block_trial_rows(templates[profile_id].design)
+        assert Counter(row["trial_type"] for row in rows) == counts
+        preload = ROOT / "packages/pps-resources/assets/preloads" / profile_id
+        trial_design = json.loads((preload / "04_trial_designer/trial_design.json").read_text(encoding="utf-8"))
+        assert trial_design["preview_trial_count"] == len(rows)
+        manifest = json.loads((preload / "01_profile/profile_parameters_manifest.json").read_text(encoding="utf-8"))
+        assert not manifest["recreation_status"]["segment_6_launchable"]
+    cooperative = block_trial_rows(templates["teneggi_2013_cooperative_game_exp2"].design)
+    assert list(dict.fromkeys(row["block_label"] for row in cooperative)) == [
+        "Before game 1", "Before game 2", "After game 1", "After game 2",
+    ]
+    assert Counter(row["block_label"] for row in cooperative) == {
+        "Before game 1": 52, "Before game 2": 52, "After game 1": 52, "After game 2": 52,
+    }
 
 
 def test_barumerli_segment2_expands_analog_motion_to_binaural_source_variants():

@@ -1,0 +1,452 @@
+{
+  "template_id": "teneggi_2013_cooperative_game_exp2",
+  "title": "Teneggi 2013 · Experiment 2, cooperative decision",
+  "citation": "Teneggi, C., Canzoneri, E., di Pellegrino, G., & Serino, A. (2013). Social modulation of peripersonal space boundaries. Current Biology, 23(5), 406-411.",
+  "source_url": "https://doi.org/10.1016/j.cub.2013.01.043",
+  "doi": "10.1016/j.cub.2013.01.043",
+  "verification_status": "partial",
+  "notes": "The preview schedules the original pre- and post-game assessment trial totals. It uses pink-noise and response/tactile proxies. Arrange the bargaining game, physical sound system, and calibrated cheek stimulation and voice capture separately.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cub.2013.01.043::b",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "group_assignment": {
+        "cooperative": 16,
+        "noncooperative": 16
+      },
+      "sessions": [
+        "PPS assessment before game",
+        "One-shot bargaining game",
+        "PPS assessment after game"
+      ],
+      "context": "Use the same partner before and after. Confederate role is counterbalanced.",
+      "audio_ms": 3000,
+      "directions": [
+        "IN",
+        "OUT"
+      ],
+      "tactile_from_audio_onset_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "per_assessment": {
+        "paired": 80,
+        "sound_only": 24,
+        "total": 104
+      },
+      "response": "Say TAH after right-cheek touch. Compare the fitted boundary before and after the game by assigned group.",
+      "software_preview": {
+        "blocks": 4,
+        "trials_per_block": 52,
+        "total_trials": 208,
+        "order": "Two assessment blocks before the game and two after. The toolkit uses an evenly allocated schedule within the planned assessment and generates a reproducible shuffled order.",
+        "stimulus": "Synthetic pink noise and a virtual moving-source renderer approximate the stimulus timing. The exact two physical gains and source waveform remain unavailable."
+      }
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "signal": "Pink noise",
+            "sample_rate_hz": 44100
+          },
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "SoundForge 4.5, identical noise signal on both channels with opposed gains.",
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli",
+          "gap": "Original waveform, digital format and exact amplitude coefficients unknown."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "mode": "Gain-based apparent motion across fixed same-height speakers",
+            "near_speaker_to_cheek_cm_approx": 5,
+            "speaker_separation_cm_approx": 100,
+            "directions": [
+              "far to near",
+              "near to far"
+            ]
+          },
+          "source": "Article Fig. 1 and supplement p. 7"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 3000
+          },
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli",
+          "gap": "Ordinal localization, with no exact distance–time function."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "IN approach",
+            "OUT recession"
+          ],
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "at_ears_spl_db": {
+              "IN": [
+                55,
+                70
+              ],
+              "OUT": [
+                70,
+                55
+              ]
+            },
+            "overall_envelope": "Exponential",
+            "channel_pattern": "Opposed gains with both loudspeakers active."
+          },
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli",
+          "gap": "Exact per-channel amplitude curves and measured calibration conditions unknown."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "playback": "Two hidden same-height loudspeakers",
+            "control": "C.I.R.O. on PC",
+            "response": "Voice-activated relay"
+          },
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli",
+          "gap": "Speaker, soundcard and relay models and threshold unknown."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "target": "Right-cheek electrical pulse at five delays × IN/OUT",
+            "catch": "Sound only"
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "randomized": true,
+            "targets_per_condition": 80,
+            "catches_per_condition": 24
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure",
+          "gap": "Catch allocation by direction and exact sequence unknown."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "phases": [
+              "Pre-game",
+              "Game",
+              "Post-game"
+            ],
+            "blocks_per_condition": 2
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure",
+          "gap": "Row-to-block allocation unknown."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "pre_audio_silence_ms": 1000,
+            "post_audio_silence_ms": 1000
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure",
+          "gap": "Separate ITI and jitter policy unknown."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Supplement p. 9, Data Analysis",
+          "gap": "RT referenced to touch. Online cutoff and voice-key threshold unknown."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "In the main PPS tasks, say TAH as quickly as possible upon feeling the cheek pulse. Ignore the sound and withhold responses on sound-only trials. A voice-activated relay captured the response and its timing.",
+          "source": "Current Biology issue p. 410, PPS Task; Supplement pp. 8–9, Apparatus and Stimuli and Data Analysis",
+          "gap": "Relay model, trigger threshold and online response deadline are unreported."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "modality": "Electrical",
+            "site": "Right cheek",
+            "waveform": "Single rectangular monophasic pulse",
+            "duration_us": 100,
+            "stimulator": "Digitimer DS7A",
+            "electrodes": "Neuroline",
+            "reported_current_range_ma": [
+              60,
+              90
+            ],
+            "calibration": "Individual clear detection, verified in a check of 10 targets and five catches."
+          },
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli",
+          "gap": "The report names a constant-current device and calls the pulse constant voltage. Exact delivered waveform and individual calibration unknown."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "anchor": "Audio onset",
+            "delay_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ],
+            "distance_order_IN": [
+              "D1",
+              "D2",
+              "D3",
+              "D4",
+              "D5"
+            ],
+            "distance_order_OUT": [
+              "D5",
+              "D4",
+              "D3",
+              "D2",
+              "D1"
+            ]
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": "Formal PPS trial families are bimodal targets and audio-only catches. Mannequin or pre-game conditions are comparison conditions.",
+          "source": "Supplement pp. 8–9, Design and Procedure"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Supplement pp. 8–9, Design and Procedure",
+          "gap": "No tactile-only trial family."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Audio only. Withhold response.",
+          "source": "Supplement pp. 7–8, Apparatus and Stimuli"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "repetitions": 8,
+            "delays": 5,
+            "directions": 2
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": {
+            "tactile_only": 0,
+            "derivation": "Reported pool exhausted by target and catch families."
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure"
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": {
+            "per_condition": 24
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_condition": 2,
+            "equal_trial_counts": true
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "per_condition": 104,
+            "derivation": "8 × 5 × 2 + 24"
+          },
+          "source": "Supplement pp. 8–9, Design and Procedure"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable.",
+      "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration.",
+      "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
+    ]
+  },
+  "design": {
+    "name": "Teneggi 2013 · Experiment 2, cooperative decision",
+    "sofa_file": "",
+    "noises": [
+      {
+        "label": "Face-centered moving sound",
+        "noise_type": "pink",
+        "azimuth_deg": 0.0,
+        "elevation_deg": 0.0,
+        "gain": 1.0,
+        "source_profile": "continuous_noise"
+      }
+    ],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "trajectory": {
+      "start_radius_m": 1.05,
+      "end_radius_m": 0.05,
+      "path_direction": "approach",
+      "coordinate_mode": "cartesian",
+      "start_x_m": 0.0,
+      "start_y_m": 1.05,
+      "start_z_m": 0.0,
+      "end_x_m": 0.0,
+      "end_y_m": 0.05,
+      "end_z_m": 0.0,
+      "path_length_m": 1.0,
+      "propagation_speed_mps": 0.3333333333333333,
+      "azimuth_start_deg": 0.0,
+      "azimuth_end_deg": 0.0,
+      "elevation_deg": 0.0,
+      "padding_pre_s": 0.0,
+      "padding_post_s": 0.0,
+      "sample_rate": 44100,
+      "use_inverse_square": false
+    },
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "include_catch_trials": true,
+      "catch_trial_percentage": 23.076923076923077,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [
+        {
+          "strip_id": "teneggi-cooperative-game-assessment",
+          "label": "Social face PPS moving-sound trial",
+          "metadata": {
+            "response_mode": "voice_key_mouse_click_proxy",
+            "response_capture_device": "mouse_click_proxy",
+            "tactile_stimulation_modality": "electrical_in_publication",
+            "electrical_electrode_site": "right cheek",
+            "source_asset_equivalence": "generated pink-noise proxy",
+            "renderer_equivalence_boundary": "virtual moving source proxy for opposing physical loudspeaker gains"
+          },
+          "elements": [
+            {
+              "element_id": "teneggi-pre-sound-silence",
+              "kind": "jitter",
+              "label": "Pre-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
+            },
+            {
+              "element_id": "teneggi-face-moving-sound",
+              "kind": "looming_stimulus",
+              "label": "Face-centered moving sound",
+              "source_label": "Face-centered moving sound",
+              "randomized": true
+            },
+            {
+              "element_id": "teneggi-post-sound-silence",
+              "kind": "jitter",
+              "label": "Post-sound silence",
+              "jitter_values_ms": [
+                1000
+              ]
+            }
+          ]
+        }
+      ],
+      "tactile_sites": [
+        "right cheek"
+      ],
+      "repetitions_per_condition": 4,
+      "pair_spatial_values_with_soas": false,
+      "auditory_motion_directions": [
+        "looming",
+        "receding"
+      ],
+      "catch_trials_exact": 12,
+      "baseline_soa_values_ms": [],
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 4,
+      "block_specs": [
+        {
+          "label": "Before game 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "Before game 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "After game 1",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        },
+        {
+          "label": "After game 2",
+          "stimulus_types": [
+            "Audio-Tactile",
+            "Catch"
+          ]
+        }
+      ],
+      "distribute_trial_pool_across_blocks": false,
+      "trial_randomization_strategy": "balanced_shuffle",
+      "block_order_randomization": "fixed",
+      "max_consecutive_same_trial_type": 2,
+      "participants": 32,
+      "random_seed": 20130305,
+      "repeat_trial_pool_per_block": true
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.cub.2013.01.043. Current Biology issue pp. 407–409, Experiment 2 and Fig. 3, supplement pp. 7 and 10–11"
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "serino_2007_sighted_cane_training",
+  "title": "Serino 2007 \u00b7 Sighted cohort cane training",
+  "citation": "Serino, A., Bassolino, M., Farn\u00e8, A., & L\u00e0davas, E. (2007). Extended Multisensory Space in Blind Cane Users. Psychological Science, 18(7), 642\u2013648.",
+  "doi": "10.1111/j.1467-9280.2007.01952.x",
+  "source_url": "https://doi.org/10.1111/j.1467-9280.2007.01952.x",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1111/j.1467-9280.2007.01952.x::sighted",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": "16 right-handed sighted adults with normal or corrected vision, blindfolded during testing and training.",
+      "assessment_sequence": "Counterbalance pre-training blocks for a 125 cm cane and a load-matched 14 cm handle. Repeat the cane condition immediately after training and one day later, with no intervening cane use.",
+      "intervention": "Spend 10 minutes using the cane to locate objects on the floor, 50\u2013150 cm ahead and up to 80 cm laterally on either side.",
+      "sound": "A 150 ms white-noise burst comes from near the right hand or from the floor near the cane tip, approximately 125 cm from the hand. The loudspeakers are matched at the ears to 70 dB.",
+      "command_soa_ms_touch_minus_audio": {
+        "near": 0,
+        "far": 5
+      },
+      "touch": "Two pairs of electrodes on the dorsal right index finger, with weak/strong electrode nesting counterbalanced. Titrate the weak target to about 90% perceptibility and the strong nontarget to 100%.",
+      "response": "Give a speeded vocal response to the weak target. Withhold for strong stimulation and sound-only catches.",
+      "trial_pool": "The described 150-trial task has 30 rows for each near/far by weak/strong cell and 30 auditory-only catches. Thirty practice trials precede assessment. The publication does not state a grand total for the four assessment conditions."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "White-noise burst",
+          "source": "Journal pp. 643\u2013644, Procedure and Materials"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Two identical loudspeakers. Computer recordings of both outputs compared spectrally.",
+          "source": "Journal pp. 643\u2013644, Procedure and Materials",
+          "gap": "Original noise file, seed, sample rate and filter settings unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "static_locations": 2,
+            "moving_trajectories": 0
+          },
+          "source": "Journal pp. 643\u2013644, Procedure and Materials"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "near": "close to stimulated hand",
+            "far": "floor approximately 125 cm from stimulated hand, near fixed cane tip"
+          },
+          "source": "Journal pp. 643\u2013644, Procedure and Materials and rendered Fig. 1",
+          "gap": "The rendered plan and side views confirm the two speaker locations relative to the hand and cane tip. The schematic supplies no numerical near offset or far azimuth/elevation."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 150
+          },
+          "source": "Journal pp. 643\u2013644, Procedure and Materials"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal pp. 643\u2013644, Procedure and Materials",
+          "gap": "Stationary physical loudspeakers."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "near",
+            "far"
+          ],
+          "source": "Journal pp. 643\u2013644, Procedure and Materials"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "level_at_participant_ear_db": 70,
+            "match": "both speakers adjusted to equal level, spectra checked"
+          },
+          "source": "Journal pp. 643\u2013644, Procedure and Materials",
+          "gap": "Burst ramps, SPL weighting, sound-meter model and calibration tolerances unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speaker_count": 2,
+            "software": "XGen",
+            "response": "voice-activated relay"
+          },
+          "source": "Journal pp. 643\u2013644, Procedure and Materials",
+          "gap": "Speaker and relay models, soundcard, and XGen build unspecified."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "weak_near": 30,
+            "weak_far": 30,
+            "strong_near": 30,
+            "strong_far": 30,
+            "sound_only_catch": 30
+          },
+          "source": "Journal p. 643, trial-family paragraph"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Both sound locations and both electrical intensities appear within the described task, with audio-only catches.",
+          "source": "Journal p. 643, trial-family paragraph",
+          "gap": "Within-condition order, randomization and catch-location allocation unspecified."
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": {
+            "conditions": [
+              "125 cm cane",
+              "14 cm weighted handle"
+            ],
+            "order": "counterbalanced",
+            "hand": "right",
+            "posture": "right arm rests on armchair and cane tip rests on floor at fixed position",
+            "handle": "same material, weight equated to load exerted by cane",
+            "added_assessments": [
+              "cane immediately after 10 minutes of training",
+              "cane one day after training with no intervening use"
+            ]
+          },
+          "source": "Journal p. 644, condition order and training"
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pp. 643\u2013644, Procedure and Materials",
+          "gap": "Within- and between-trial timing policy unreported."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pp. 643\u2013644, Procedure and Materials",
+          "gap": "The target is speeded. The voice-key window and cutoff are unspecified."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "response": "Say TAH as quickly as possible for the weak target. Withhold for strong tactile nontargets and audio-only catches. Ignore audio.",
+            "practice_trials": 30,
+            "practice_scope": "before the experiment"
+          },
+          "source": "Journal pp. 643\u2013644, Procedure and Materials"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "modality": "constant-current electrical",
+            "site": "upper side of right index finger",
+            "stimulators": {
+              "model": "Digitimer DS7A",
+              "count": 2
+            },
+            "electrodes": {
+              "model": "Ambu Neuroline",
+              "pairs": 2,
+              "routing": "one pair weak, one pair strong",
+              "placement": "Weak pair between strong electrodes in half the participants. Reverse nesting in the other half."
+            },
+            "perceptual_calibration": {
+              "weak_detection_percent_approx": 90,
+              "strong_detection_percent": 100
+            }
+          },
+          "source": "Journal pp. 643\u2013644, Procedure and Materials",
+          "gap": "Current, pulse duration, shape, electrode spacing and pretest staircase unspecified."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "near_audio_onset_minus_tactile_ms": 0,
+            "far_audio_onset_minus_tactile_ms": -5,
+            "near_tactile_onset_minus_audio_ms": 0,
+            "far_tactile_onset_minus_audio_ms": 5,
+            "reason": "Advance far speaker output to compensate for sound travel. Intended arrival alignment at participant."
+          },
+          "source": "Journal pp. 643\u2013644, Procedure and Materials"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": {
+            "tactile_only": false,
+            "reason": "The four paired families and the auditory-only catch family exhaust the reported trial pool."
+          },
+          "source": "Journal p. 643, trial-family paragraph"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Journal p. 643, trial-family paragraph",
+          "gap": "No tactile-only trials. Cane or handle and pre-training are comparison conditions."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Sound-only no-response catch",
+          "source": "Journal p. 643, trial-family paragraph"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "weak_near": 30,
+            "weak_far": 30,
+            "strong_near": 30,
+            "strong_far": 30
+          },
+          "source": "Journal p. 643, trial-family paragraph"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Journal p. 643, trial-family paragraph",
+          "gap": "The reported trial families account for all 150 trials."
+        },
+        "catch_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "task_count": 30,
+            "percentage": 20
+          },
+          "source": "Journal p. 643, trial-family paragraph",
+          "gap": "The article lists 30 of 150. Catch allocation by speaker and catch ordering unreported."
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": 4,
+          "source": "Journal p. 644, condition order and training",
+          "gap": "Four assessment conditions. Internal block structure not stated."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reported_described_task": 150,
+            "arithmetic_if_repeated_for_each_condition": 600,
+            "practice_reported_separately": 30
+          },
+          "source": "Psychological Science issue PDF pp. 643\u2013644, Procedure and Materials and rendered Fig. 1",
+          "gap": "Per-condition multiplication is conditional; exact delivered block/session counts not given."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Calibrate the two physical loudspeakers and DS7A electrode routes, synchronize vocal timing, and recover the waveform, stimulation settings, ITI, and response deadline.",
+      "Stage and validate counterbalanced cane/handle tests and separate immediate/next-day sessions with the sighted training procedure. Recover exact catch allocation and observed trial schedules."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1111/j.1467-9280.2007.01952.x. Psychological Science pp. 643\u2013646, Procedure and Materials, Figs. 1\u20133, Results and Discussion"
+    }
+  ]
+}

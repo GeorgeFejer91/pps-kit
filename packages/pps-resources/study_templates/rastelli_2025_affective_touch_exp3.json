@@ -1,0 +1,287 @@
+{
+  "template_id": "rastelli_2025_affective_touch_exp3",
+  "title": "Rastelli 2025 · Experiment 3 · Affective brushing",
+  "citation": "Rastelli, F., Ferroni, F., Langiulli, N., Crucianelli, L., Gallese, V., & Ardizzi, M. (2025). The spatial reach of affective touch: a new perspective on social peripersonal space. PsyArXiv, version 1.",
+  "source_url": "https://doi.org/10.31234/osf.io/etvb6_v1",
+  "doi": "10.31234/osf.io/etvb6_v1",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.31234/osf.io/etvb6_v1::affective",
+    "publication_status": "preprint",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": "35 participants completed the three explicitly numbered tasks in randomized order on one day.",
+      "carrier": "3 s looming sound. In the classic task, the pink-noise source is sampled at 44.1 kHz with an exponential level rise from 55 to 70 dB. The flat control is 62.5 dB.",
+      "analysis": "Compare target reaction times across delays and estimate PSE. Collect separate verbal pleasantness ratings after the task.",
+      "brushing": "Start manual soft-brush contact 2 s before the auditory carrier and continue for its 3 s duration. Alternate across two zones. Methods say hairy right hand, proximal to distal; the figure caption says arm, distal to proximal.",
+      "auditory_target": "A 200 ms beep embedded in the 3 s carrier is the detection target.",
+      "reported_delays_ms": [
+        200,
+        500,
+        800,
+        2200,
+        2500,
+        2800
+      ],
+      "anchor_ambiguity": "The carrier onset is compatible with the delay table, while the Methods also refer to tactile onset. The manual brush leads the carrier, so anchors differ by 2 s.",
+      "trial_schedule": "Two blocks and 124 nominal trials. The reported delay repetitions imply 72 paired and 36 auditory-target-only baseline trials, leaving 16 unallocated under those counts."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Looming carrier with brief beep target.",
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Custom MATLAB presentation. Pink noise sampled at 44.1 kHz.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1",
+          "gap": "No source waveform, code or exact sample generation identified."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "moving_sound": 1,
+            "manual_brush_sweep": 1
+          },
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "source_inconsistency_caveat",
+          "value": "Auditory approach with manual stroke over two marked areas.",
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Methods describe proximal-to-distal stroke on the right hand. Fig. 1 describes distal-to-proximal stroke on the arm."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "carrier_ms": 3000,
+            "beep_ms": 200
+          },
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Discussion describes CT-optimal touch. Exact delivered brush speed or force is unavailable."
+        },
+        "auditory_conditions": {
+          "status": "reported_with_caveat",
+          "value": [
+            "Looming carrier with beep",
+            "Auditory-only beep baseline",
+            "No-beep control"
+          ],
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Text describes auditory and tactile catches ambiguously. Exact no-target audio schedule unavailable."
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Shared acoustic hardware and looming carrier.",
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Beep amplitude, frequency and calibration unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Two speakers, cosmetic make-up brush and custom MATLAB presentation.",
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": [
+            "Bimodal beep detection",
+            "Auditory-only beep baseline",
+            "Catch"
+          ],
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Catch wording does not establish how auditory-only trials are divided between baseline and catch."
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Target timings and sound conditions randomized, with catches intermingled.",
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Two equal blocks of approximately six minutes each. Randomized trials.",
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1"
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "post_trial_iti_ms": 1000
+          },
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 5–6, Experiment 1",
+          "gap": "Online response cutoff and exact key identifier unreported."
+        },
+        "task_sequence_rules": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "target": "auditory beep",
+            "repeat_wording": "tactile target",
+            "methods_direction": "proximal to distal",
+            "figure_1_caption_direction": "distal to proximal"
+          },
+          "source": "PsyArXiv v1 pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Missed-beep replacement and stroke direction remain unresolved."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "material": "soft cosmetic brush",
+            "zones_cm": [
+              13.5,
+              4
+            ],
+            "alternation": "two zones",
+            "methods_site": "hairy right hand",
+            "figure_caption_site": "arm",
+            "methods_direction": "proximal to distal",
+            "figure_caption_direction": "distal to proximal",
+            "lead_ms": 2000,
+            "concurrent_ms": 3000
+          },
+          "source": "PsyArXiv v1 pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Direction, anatomic placement and exact brush timing remain unverified."
+        },
+        "soa_table": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "delays_ms": [
+              200,
+              500,
+              800,
+              2200,
+              2500,
+              2800
+            ],
+            "brush_lead_ms": 2000,
+            "anchor": "auditory onset is consistent with carrier; wording also names tactile onset"
+          },
+          "source": "PsyArXiv v1 pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "The onset phrases cannot both be literal; preserve both descriptions."
+        },
+        "baseline_strategy": {
+          "status": "reported_with_caveat",
+          "value": "Auditory-only baseline per the Methods.",
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Methods say auditory-only stimulation also occurs on catches. Condition list or code needed."
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_beep_delays_ms": [
+              200,
+              500,
+              800,
+              2200,
+              2500,
+              2800
+            ]
+          },
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Methods say timing preserved from Experiment 2. Exact control timing anchor is not independently specified."
+        },
+        "catch_trial_type": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "methods": "auditory-only catches or tactile trials",
+            "baseline": "auditory stimuli",
+            "prior_task": "vibration-only catch"
+          },
+          "source": "PsyArXiv v1 pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "No trial list to classify exact catch family."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_delay_bimodal": 12,
+            "per_delay_auditory_only": 6
+          },
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1"
+        },
+        "baseline_count": {
+          "status": "reported_with_caveat",
+          "value": 36,
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Six delays × six auditory-only targets. Baseline versus catch labeling needs confirmation."
+        },
+        "catch_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Preprint PDF pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "Exact count and modality allocation unverified."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Preprint PDF pp. 5–6, Experiment 1"
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_total": 124,
+            "paired_from_repetitions": 72,
+            "auditory_only_baseline_from_repetitions": 36,
+            "conditional_residual": 16,
+            "paired_percent_from_repetitions": 58.06,
+            "paired_percent_printed": 60
+          },
+          "source": "PsyArXiv v1 pp. 7–8, Experiment 3 and Fig. 1",
+          "gap": "72 paired and 36 baseline from stated repetitions. 16 is a conditional remainder."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Resolve the conflicting brush direction, body location, and target timing anchor against the original task materials.",
+      "Synchronize brush contact with the beep/looming carrier and validate the manual application, beep parameters and trial counts. No source-calibrated automated brush route is available."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Rastelli 2025 · Experiment 3 · Affective brushing",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.31234/osf.io/etvb6_v1. Preprint PDF pp. 7–8, Experiment 3 and Fig. 1"
+    }
+  ]
+}

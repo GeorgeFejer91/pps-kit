@@ -1,0 +1,334 @@
+{
+  "template_id": "paredes_2022_tactile_discrimination_prediction",
+  "title": "Paredes 2022 · Tactile discrimination prediction",
+  "citation": "Paredes, R., Ferri, F., & Seriès, P. (2022). Influence of E/I balance and pruning in peri-personal space differences in schizophrenia: A computational approach. Schizophrenia Research, 248, 368–377.",
+  "source_url": "https://doi.org/10.1016/j.schres.2021.06.026",
+  "doi": "10.1016/j.schres.2021.06.026",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.schres.2021.06.026::two_point_prediction",
+    "publication_status": "published",
+    "profile_type": "computational_pps_method",
+    "profile_check_complete": false,
+    "published_method": {
+      "tactile_input_centers_cm": [
+        [
+          4,
+          2.5
+        ],
+        [
+          6,
+          2.5
+        ]
+      ],
+      "auditory_input": 0,
+      "duration_ms": 100,
+      "solver_step_ms": 0.4,
+      "conditions": [
+        "HC",
+        "SCZ"
+      ],
+      "author_notebooks": [
+        "https://github.com/renatoparedes/SCZ_PPS_Model/blob/e881e2d74717d24fa24a5b30ed2f794b5d96b1db/Predictions.ipynb",
+        "https://github.com/renatoparedes/SCZ_PPS_Model/blob/e881e2d74717d24fa24a5b30ed2f794b5d96b1db/HC_model.ipynb"
+      ],
+      "verification": {
+        "route": "Executed the pinned model cells and the HC and SCZ prediction calls without plotting.",
+        "tactile_map_dimensions": [
+          20,
+          10
+        ],
+        "cross_section_y_cm": 2.5,
+        "response_peaks": {
+          "HC": 0.99641598,
+          "SCZ": 0.9996177
+        },
+        "response_at_x5_cm": {
+          "HC": 0.33032195,
+          "SCZ": 0.90367154
+        },
+        "units": "Normalized model activity"
+      }
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Two simultaneous Gaussian tactile network inputs",
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": {
+            "model": {
+              "tactile_grid": [
+                20,
+                10
+              ],
+              "tactile_extent_cm": [
+                10,
+                5
+              ],
+              "auditory_grid": [
+                20,
+                3
+              ],
+              "auditory_extent_cm": [
+                200,
+                30
+              ],
+              "multisensory_units": 1,
+              "tactile_grid_spacing_cm": 0.5,
+              "auditory_grid_spacing_cm": 10,
+              "tactile_center_cm": [
+                5,
+                2.5
+              ],
+              "auditory_lateral_cm": 5,
+              "modeled_hand": "Left as labeled in §2.2. The empirical stimulus was on the right hand. Coordinates are relative to the modeled hand."
+            },
+            "prediction": {
+              "coordinates_cm": [
+                [
+                  4,
+                  2.5
+                ],
+                [
+                  6,
+                  2.5
+                ]
+              ],
+              "spacing_cm": 2,
+              "onset": "Simultaneous model input",
+              "simulation_ms": 100,
+              "timestep_ms": 0.4,
+              "source_width_cm": 0.3,
+              "input_amplitude_model_units": 3.25,
+              "conditions": [
+                "HC",
+                "SCZ"
+              ],
+              "SCZ_Lex_prediction": 0.99460344,
+              "note": "Prediction notebook uses 0.99460344, slightly different from 0.99454028 in the SCZ PPS-fit notebook.",
+              "auditory_input": "Zero",
+              "readout": "End-of-run tactile activation map and cross section at y=2.5 cm. No observed participant discrimination threshold.",
+              "finding": "HC has two separated modeled activity peaks. SCZ configuration yields more overlap."
+            }
+          },
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 100,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "implementation": "Python numerical model in author notebooks",
+            "dt_ms": 0.4,
+            "duration_ms": 100
+          },
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Source code inspected without execution."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Outcome is steady-state activation at the end of the run. No model RT is measured."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": [
+            "Configure HC or SCZ state",
+            "Apply two simultaneous tactile Gaussian inputs",
+            "Run 100 ms",
+            "Inspect final activity map and y=2.5 cm section"
+          ],
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported",
+          "value": {
+            "coordinates_cm": [
+              [
+                4,
+                2.5
+              ],
+              [
+                6,
+                2.5
+              ]
+            ],
+            "spacing_cm": 2,
+            "onset": "Simultaneous model input",
+            "simulation_ms": 100,
+            "timestep_ms": 0.4,
+            "source_width_cm": 0.3,
+            "input_amplitude_model_units": 3.25,
+            "conditions": [
+              "HC",
+              "SCZ"
+            ],
+            "SCZ_Lex_prediction": 0.99460344,
+            "note": "Prediction notebook uses 0.99460344, slightly different from 0.99454028 in the SCZ PPS-fit notebook.",
+            "auditory_input": "Zero",
+            "readout": "End-of-run tactile activation map and cross section at y=2.5 cm. No observed participant discrimination threshold.",
+            "finding": "HC has two separated modeled activity peaks. SCZ configuration yields more overlap."
+          },
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)"
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "HC versus SCZ network",
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        },
+        "total_trial_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)",
+          "gap": "Two-point tactile-only simulation does not implement an auditory PPS task."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Open the pinned author notebooks to reproduce the model outputs. This computational protocol requires an external solver and has no participant trial scheduler."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Paredes 2022 · Tactile discrimination prediction",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.schres.2021.06.026. Edinburgh accepted manuscript, printed pp. 11–12 and Fig. 4 (PDF pp. 12–13, 31), §3.3; Predictions.ipynb, cells 2–5 (author submission snapshot e881e2d); HC_model.ipynb, cell 23 (author submission snapshot e881e2d)"
+    }
+  ]
+}

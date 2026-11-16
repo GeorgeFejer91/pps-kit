@@ -7,6 +7,7 @@
   "verification_status": "partial",
   "notes": "Rear hemi-field binaural looming dog/sheep design. The GUI expands the reported rear-left and rear-right paths into separate source assets, but exact dog/sheep source audio and LISTEN-HRTF rendering are not bundled.",
   "reference_parameters": {
+    "study_row_id": "doi:10.3389/fpsyt.2014.00122",
     "source_database": "LISTEN HRTF in original paper",
     "headphones": "Sennheiser HD650",
     "stimulus_sample_rate_hz": 44100,

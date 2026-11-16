@@ -9,8 +9,8 @@
   "publication_status": "published",
   "profile_type": "audio_tactile_tool_use_plasticity",
   "paper_group_key": "doi:10.1007/s00221-013-3532-2",
-  "visible_variant_label": "",
-  "variant_display": "Canzoneri 2013 tool-use PPS reshaping",
+  "visible_variant_label": "B",
+  "variant_display": "Canzoneri 2013 tool-use PPS reshaping - Variant B",
   "recreation_status": {
     "primary_category": "gui_recreatable",
     "category_label": "GUI-recreatable",
@@ -95,7 +95,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 28,
+      "value": 29,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {

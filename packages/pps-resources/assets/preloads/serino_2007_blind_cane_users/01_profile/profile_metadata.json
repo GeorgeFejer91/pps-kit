@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Manual PDF audit extracted the static near/far audio-tactile task: 150 ms white-noise bursts, near hand versus far cane/handle-tip source positions, weak electrical tactile targets, strong electrical tactile nontargets, auditory-only catch trials, and vocal response to weak tactile targets. Exact source noise, electrical pulse details, ITI, and numeric response window were not reported, so this profile is a known-parameter runnable contract rather than a full physical reproduction.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1111/j.1467-9280.2007.01952.x::blind",
     "publication_status": "published",
     "profile_type": "static_near_far_electrical_gonogo_tool_context",
     "manual_review_file": "For-AI/research/literature/audiotactile-paper-metadata-audit/manual_reviews/serino_2007_blind_cane_users.json",

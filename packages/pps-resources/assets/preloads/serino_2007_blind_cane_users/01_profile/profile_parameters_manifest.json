@@ -9,8 +9,8 @@
   "publication_status": "published",
   "profile_type": "static_near_far_electrical_gonogo_tool_context",
   "paper_group_key": "doi:10.1111/j.1467-9280.2007.01952.x",
-  "visible_variant_label": "",
-  "variant_display": "Serino 2007 blind cane-user static near/far PPS",
+  "visible_variant_label": "A",
+  "variant_display": "Serino 2007 blind cane-user static near/far PPS - Variant A",
   "recreation_status": {
     "primary_category": "missing_publication_parameters",
     "category_label": "Missing publication parameters",
@@ -118,7 +118,7 @@
       "segment_label": "Segment 0 profile manifest and provenance",
       "parameter": "profile_parameter_provenance",
       "status": "reported",
-      "value": 22,
+      "value": 23,
       "note": "Profile provenance/reference parameters are encoded."
     },
     {

@@ -1,0 +1,360 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "menning_2005_tactile_priming",
+  "title": "Menning 2005 \u00b7 tactile priming of auditory attention",
+  "citation": "Menning, H., Ackermann, H., Hertrich, I., & Mathiak, K. (2005). Spatial auditory attention is modulated by tactile priming. Experimental Brain Research, 164(1), 41\u201347.",
+  "doi": "10.1007/s00221-004-2212-7",
+  "source_url": "https://doi.org/10.1007/s00221-004-2212-7",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-004-2212-7",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": {
+        "recruited": 15,
+        "analyzed_derived": 14
+      },
+      "sound": {
+        "kind": "HRTF-filtered white noise from air tubes",
+        "duration_ms": 160,
+        "rise_ms": 20,
+        "fall_ms": 20,
+        "level_db_spl": 70,
+        "positions": {
+          "face": {
+            "azimuth_deg": [
+              -80,
+              80
+            ],
+            "elevation_deg": 0,
+            "distance_m_as_reported": 0
+          },
+          "hand": {
+            "azimuth_deg": [
+              -45,
+              45
+            ],
+            "elevation_deg": -45,
+            "distance_m": 1
+          }
+        }
+      },
+      "tactile": {
+        "duration_ms": 50,
+        "delivery": "Pneumatic cushions",
+        "sites": [
+          "Left cheek",
+          "Right cheek",
+          "Left middle finger",
+          "Right middle finger"
+        ],
+        "tactile_onset_minus_sound_onset_ms": [
+          -300,
+          -200
+        ]
+      },
+      "schedule": {
+        "auditory_onset_spacing_ms": [
+          1200,
+          1400
+        ],
+        "trials_per_block": 360,
+        "trials": 2160,
+        "order": [
+          "SEVEN",
+          "THREE-ODD",
+          "TWO-BACK",
+          "TWO-BACK",
+          "THREE-ODD",
+          "SEVEN"
+        ],
+        "visual_item_every_nth_sound": 2,
+        "visual_update_after_sound_ms": 400,
+        "baseline": "Unprimed sound events at all four audio positions."
+      },
+      "response": "No speeded auditory or tactile response. The participant performs the ongoing visual distraction task. Analyze MEG responses time-locked to sound and compare source side, source region and priming."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "White-noise bursts",
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Binaural white noise generated in MATLAB 6.5",
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis",
+          "gap": "Original files and random seed unavailable."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Menning et al. 2005, journal Abstract (PMID 15726341)",
+          "gap": "Four discrete virtual positions without reported motion."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Menning et al. 2005, journal Abstract (PMID 15726341)",
+          "gap": "No continuous trajectory in the reported cueing design."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "duration_ms": 160
+          },
+          "source": "Journal p. 42, Materials and methods, Stimuli"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Menning et al. 2005, journal Abstract (PMID 15726341)",
+          "gap": "The sounds represent fixed locations."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": {
+            "face": {
+              "azimuth_deg": [
+                -80,
+                80
+              ],
+              "elevation_deg": 0,
+              "distance_m": 0
+            },
+            "hand": {
+              "azimuth_deg": [
+                -45,
+                45
+              ],
+              "elevation_deg": -45,
+              "distance_m": 1
+            }
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "rise_ms": 20,
+            "fall_ms": 20,
+            "level_db_spl": 70
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis",
+          "gap": "Exact ramp shape and acoustic calibration procedure unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "air_tubes": "E-A-R-tone 3A",
+            "hrtf_ear_models_n": 13,
+            "recognition_gt_pct": 90,
+            "meg": "CTF Systems 151-channel gradiometer"
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis",
+          "gap": "Exact individual HRTFs and audio calibration recordings unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": {
+            "with_prime": "Randomized left/right hand or face tactile site followed 200\u2013300 ms later by a spatial noise burst.",
+            "without_prime": "Sound without a preceding tactile cue.",
+            "visual_distraction_tasks": 3
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis",
+          "gap": "Comparator scheduling, trial counts and visual-task allocation require the journal methods."
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Auditory and tactile place and side independently pseudorandomized",
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis",
+          "gap": "Exact restrictions and random seed unreported."
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": [
+            "SEVEN",
+            "THREE-ODD",
+            "TWO-BACK",
+            "TWO-BACK",
+            "THREE-ODD",
+            "SEVEN"
+          ],
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "auditory_onset_to_onset_ms": [
+              1200,
+              1400
+            ],
+            "tactile_cue_lead_relative_to_paired_sound_ms": [
+              200,
+              300
+            ],
+            "visual_update_every_nth_auditory_stimulus": 2,
+            "visual_update_after_auditory_onset_ms": 400,
+            "figure_sequence": [
+              "Auditory S1",
+              "Tactile pre-cue",
+              "Auditory S2",
+              "Visual distraction item change"
+            ],
+            "scope": "The diagram is one event sequence. Exact experimental trial and block boundaries, interval sampling distributions, and primed/unprimed quotas remain unverified."
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis",
+          "gap": "The intersound interval is known. Trial-boundary ITI and the interval distribution remain unverified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Menning et al. 2005, Experimental Brain Research pp. 42\u201343, Distraction tasks and Data analysis",
+          "gap": "Visual distraction runs continuously and targets require a two-thumb button response. No behavioral response deadline is reported. The MEG source-analysis interval is separate."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": {
+            "auditory_onset_to_onset_ms": [
+              1200,
+              1400
+            ],
+            "tactile_cue_lead_relative_to_paired_sound_ms": [
+              200,
+              300
+            ],
+            "visual_update_every_nth_auditory_stimulus": 2,
+            "visual_update_after_auditory_onset_ms": 400,
+            "figure_sequence": [
+              "Auditory S1",
+              "Tactile pre-cue",
+              "Auditory S2",
+              "Visual distraction item change"
+            ],
+            "scope": "The diagram is one event sequence. Exact experimental trial and block boundaries, interval sampling distributions, and primed/unprimed quotas remain unverified."
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis",
+          "gap": "Visual distraction task contents and assignment to blocks remain unverified."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "air_puff_ms": 50,
+            "delivery": "Pneumatic inflation of four small air cushions",
+            "sites": [
+              "left cheek",
+              "right cheek",
+              "left middle finger",
+              "right middle finger"
+            ],
+            "lead_ms": [
+              200,
+              300
+            ],
+            "source": "Journal p. 42, Materials and methods, Stimuli"
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis",
+          "gap": "Air pressure and delivered onset measurements unreported."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "tactile_minus_audio_onset_ms_range": [
+              -300,
+              -200
+            ],
+            "reported_lead_ms_range": [
+              200,
+              300
+            ]
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis"
+        },
+        "baseline_strategy": {
+          "status": "reported_with_caveat",
+          "value": "Compare auditory responses following tactile primes with responses to sounds without a preceding tactile cue.",
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis",
+          "gap": "Unprimed responses are plotted. Comparator scheduling and counts require the journal methods."
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "unimodal_anchor": "Auditory onset",
+            "intersound_interval_ms": [
+              1200,
+              1400
+            ],
+            "meg_epoch_ms_relative_to_sound": [
+              -400,
+              800
+            ]
+          },
+          "source": "Menning et al. 2005, Experimental Brain Research pp. 42\u201343, Distraction tasks and Data analysis",
+          "gap": "Sound-only sweeps omit the tactile prime. The 400 ms pre-sound window belongs to MEG data analysis. No separate baseline-only timing policy is described."
+        },
+        "catch_trial_type": {
+          "status": "reported_with_caveat",
+          "value": "No explicit catch family is described for the auditory\u2013tactile stream. Visual targets belong to the separate distractor task.",
+          "source": "Journal pp. 42\u201343, Distraction tasks and Fig. 1",
+          "gap": "Audio/tactile and visual events overlap; visual targets do not define auditory catches."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported_with_caveat",
+          "value": {
+            "per_audiotactile_site_pair": 90
+          },
+          "source": "Journal p. 43, Data acquisition and Data analysis",
+          "gap": "90 sweeps per site pair. Counts at individual cue-lead values were not reported."
+        },
+        "baseline_count": {
+          "status": "reported",
+          "value": {
+            "180_per_unimodal_sound_location": 180,
+            "unimodal_locations": 4
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis"
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Menning et al. 2005, Experimental Brain Research pp. 42\u201343, Distraction tasks and Data analysis",
+          "gap": "Sound-only sweeps are MEG baseline trials. Participants disregard the auditory and tactile events. Visual-task non-targets are a separate response stream with no catch quota reported."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 6,
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": {
+            "sweeps": 2160,
+            "sweeps_per_block": 360
+          },
+          "source": "Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The participant-selected spatial filters and original MATLAB output, air-tube and pneumatic calibration, audio trigger codes and exact stimulus streams are unavailable.",
+      "This passive main task requires synchronized presentation of tactile primes and sound, a concurrent visual distractor with separate responses, and whole-head MEG. The runtime does not schedule or acquire this combination."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1007/s00221-004-2212-7. Experimental Brain Research pp. 42\u201343, Participants, Stimuli, Distraction tasks and Fig. 1; Experimental Brain Research p. 43, Data acquisition and Data analysis; Experimental Brain Research pp. 43\u201346, Results and Tables 1\u20133"
+    }
+  ]
+}

@@ -7,6 +7,7 @@
   "verification_status": "partial",
   "notes": "Experiment 2 trial allocation with a fixed generated white-noise proxy. Response capture and the original tactile stimulus require external apparatus. This profile is only for the strong-target participant arm.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-020-05771-5::b",
     "profile_type": "static_near_far_audio_tactile_pps",
     "publication_study_row_id": "doi:10.1007/s00221-020-05771-5::b",
     "formal_experiment": 2,

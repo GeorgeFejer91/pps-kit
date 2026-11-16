@@ -1,0 +1,313 @@
+{
+  "template_id": "bassolino_2022_chronic_stroke_pps",
+  "title": "Bassolino 2022 · Chronic stroke hand PPS",
+  "citation": "Bassolino et al. (2022). Body and peripersonal space representations in chronic stroke patients with upper limb motor deficits. Brain Communications, 4(4), fcac179.",
+  "source_url": "https://doi.org/10.1093/braincomms/fcac179",
+  "doi": "10.1093/braincomms/fcac179",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1093/braincomms/fcac179",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": {
+        "patients_analyzed": 39,
+        "controls_analyzed": 36
+      },
+      "conditions": "Assess the affected and unaffected hand in randomized order, with the participant seated blindfolded and the tested arm supported.",
+      "sound": "Three-second broadband looming sound using two physical loudspeakers, one near the tested hand and one 100 cm from the near speaker.",
+      "touch": "100 ms nominal Precision MicroDrives 312-101 vibration on the dorsum of the tested hand.",
+      "delays_ms": {
+        "D3": 300,
+        "D2": 1500,
+        "D1": 2700
+      },
+      "counts": {
+        "paired_per_delay": 20,
+        "tactile_only_per_delay": 10,
+        "auditory_only": 20,
+        "total_described": 110
+      },
+      "count_scope": "Supplement does not establish whether this count set covers one or both tested hands.",
+      "isi_ms": [
+        500,
+        750,
+        1000
+      ],
+      "response": "Respond to vibration within 2000 ms using a foot pedal. Controls use right foot and patients their unaffected foot.",
+      "analysis": "Subtract each participant’s fastest mean tactile-only delay from paired RT. Limb grouping in this minimum-selection rule is unresolved.",
+      "companion_measures": "Body landmark localization and avatar adjustment are distinct companion outcomes."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Looming broadband audio and hand-dorsum vibration",
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "ExpyVR controls physical near/far speakers and vibration",
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "Original waveform, frequency band, envelope, software build, sound level and speaker models unknown."
+        },
+        "trajectory_count": {
+          "status": "derived",
+          "value": 1,
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "One approach family described, repeated for each hand."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "family": "Looming dynamic broadband noise",
+            "duration_ms": 3000,
+            "direction": "Apparent approach toward tested hand via intensity",
+            "near_cm_from_hand": 0,
+            "far_cm_from_near_speaker": 100,
+            "physical_speakers": 2,
+            "software": "ExpyVR",
+            "gaps": "Original waveform, frequency band, envelope, software build, sound level and speaker models unknown."
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "Three ordered positions. The 0 and 100 cm values locate speakers and do not give the perceived distance at each tactile event."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 3000,
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15"
+        },
+        "stimulus_speed": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "Physical speaker spacing and sound duration do not establish a measured speed."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming broadband noise"
+          ],
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Manipulated intensity across two speakers",
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "No channel envelopes or SPL reported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "speakers": 2,
+            "software": "ExpyVR",
+            "pedal": "Controls right foot, patients unaffected foot",
+            "vibrator": "Precision MicroDrives 312-101 shaftless motor"
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "Exact configuration, speaker model and pedal model unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "bimodal",
+            "tactile-only",
+            "auditory-only catch"
+          ],
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Bimodal delay randomized, with tactile-only and auditory catch trials",
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "Exact ordering and balancing across all families not separately described."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Both limbs tested in randomized order",
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "Number and contents of blocks unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "isi_values_ms": [
+              500,
+              750,
+              1000
+            ],
+            "random": true
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "Distribution and interval anchor unreported."
+        },
+        "response_window": {
+          "status": "reported",
+          "value": {
+            "anchor": "tactile onset",
+            "duration_ms": 2000
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15"
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": "Pretreatment baseline testing. Left/right or affected/unaffected sides tested in randomized order within task. Cross-task order and timing not reported.",
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15 and Brain Communications pp. 3–4, Participants"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "Precision MicroDrives 312-101 shaftless motor",
+            "site": "Dorsum of hand",
+            "duration_ms": 100,
+            "listed_voltage_v": 3,
+            "listed_current_ma": 60,
+            "listed_speed_rpm": 9000,
+            "listed_frequency_hz": 150,
+            "unqualified_g": 5,
+            "calibration_gap": "No measured waveform, intensity or drive conditions. Paper's unqualified 5 g is ambiguous. Vendor reference reports different model speed/frequency figures."
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "No measured waveform, intensity or drive conditions. Paper's unqualified 5 g is ambiguous. Vendor reference reports different model speed/frequency figures."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "anchor": "sound onset",
+            "values_ms": {
+              "D3": 300,
+              "D2": 1500,
+              "D1": 2700
+            }
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15"
+        },
+        "baseline_strategy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "delays_ms": [
+              300,
+              1500,
+              2700
+            ],
+            "nominal_audio": false,
+            "correction": "Subtract each participant's fastest mean RT across the three tactile-only delay conditions from bimodal mean RTs.",
+            "gap": "Whether selection pools limbs or runs per limb is not explicitly stated. The related ageing analysis supports a per-hand minimum there, with no stroke-study dataset to verify that rule here."
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15 and Brain Communications pp. 5, 7, Results, Fig. 2",
+          "gap": "Whether selection pools limbs or runs per limb is not explicitly stated. The related ageing analysis supports a per-hand minimum there, with no stroke-study dataset to verify that rule here."
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": {
+            "equivalent_delay_ms": [
+              300,
+              1500,
+              2700
+            ],
+            "audio": false
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15"
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Sound-only looming trial to control automatic response",
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported_with_caveat",
+          "value": {
+            "bimodal": 20,
+            "tactile_only": 10
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "The supplement gives one count set and separately says both sides were tested. It does not explicitly anchor the count set to each side or both sides combined. Exact delivered per-side counts and block structure are unverified."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 30,
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "Ten per delay × three delays, within the described count set."
+        },
+        "catch_count": {
+          "status": "reported_with_caveat",
+          "value": 20,
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "The supplement gives one count set and separately says both sides were tested. It does not explicitly anchor the count set to each side or both sides combined. Exact delivered per-side counts and block structure are unverified."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "bimodal_each_delay": 20,
+            "tactile_only_each_delay": 10,
+            "auditory_only": 20,
+            "bimodal_described": 60,
+            "tactile_only_described": 30,
+            "described_sum": 110,
+            "caveat": "The supplement gives one count set and separately says both sides were tested. It does not explicitly anchor the count set to each side or both sides combined. Exact delivered per-side counts and block structure are unverified."
+          },
+          "source": "Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15",
+          "gap": "110 for the stated set only. Delivered total is unverified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Original broadband waveform and opposing loudspeaker gains are unavailable. The tactile load, route timing and patient/foot-pedal hardware require calibration.",
+      "Per-side delivery counts, block structure and exact baseline pooling are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Bassolino 2022 · Chronic stroke hand PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [
+        300,
+        1500,
+        2700
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "baseline_soa_values_ms": [
+        300,
+        1500,
+        2700
+      ],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1093/braincomms/fcac179. Brain Communications p. 4, PPS task, and Supplement pp. 7, 12–15 and Brain Communications pp. 5, 7, Results, Fig. 2"
+    }
+  ]
+}

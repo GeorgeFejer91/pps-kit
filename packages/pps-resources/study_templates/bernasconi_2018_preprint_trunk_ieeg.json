@@ -1,0 +1,350 @@
+{
+  "template_id": "bernasconi_2018_preprint_trunk_ieeg",
+  "title": "Bernasconi 2018 preprint · Trunk PPS with intracranial EEG",
+  "citation": "Bernasconi et al. (2018). Audio-tactile and peripersonal space processing around the trunk in human parietal and temporal cortex: an intracranial EEG study. bioRxiv v1.",
+  "source_url": "https://doi.org/10.1101/249078",
+  "doi": "10.1101/249078",
+  "verification_status": "partial",
+  "notes": "Preprint study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1101/249078",
+    "publication_status": "preprint",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": "Six patients with clinically indicated intracranial recording for epilepsy surgery evaluation.",
+      "audio": "Front-to-body 3 s recorded white-noise approach starting at 2 m, nominal speed 0.66 m/s, played through Etymotic ER-4P earphones. Binaural recording used two eight-speaker arrays and a 3Dio microphone.",
+      "touch": "Three 100 ms commands to a 312-101 shaftless vibration motor on upper sternum, controlled by Arduino and ExpyVR.",
+      "allocation": {
+        "audio_only": 85,
+        "tactile_only": 85,
+        "paired": 85,
+        "total": 255
+      },
+      "tactile_nominal_onsets_ms": [
+        500,
+        1500,
+        2500
+      ],
+      "tactile_jitter_ms": [
+        0,
+        50,
+        100,
+        150,
+        200
+      ],
+      "nominal_distances_cm": [
+        170,
+        100,
+        30
+      ],
+      "iti_ms": [
+        1400,
+        1700,
+        1900
+      ],
+      "timing_note": "Pulse onsets for paired trials are relative to sound onset and for tactile-only trials relative to the silent trial start. Interpret the third printed value as milliseconds using the 3 s stimulus duration. Reported nominal distances label categories.",
+      "outcome": "Patient attends to sound and vibration with eyes closed, without an overt response. Analyze local field potentials, nonlinear integration, distance dependence and tactile habituation.",
+      "related_journal_profile_id": "bernasconi_2018_trunk_ieeg"
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Looming white noise presented as a binaural recording.",
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Prerecorded from two eight-speaker arrays with a binaural head model and 3Dio Omni binaural microphones.",
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures",
+          "gap": "Original recording, signal-generation settings and asset identifiers not given."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 1,
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "direction": "Virtual frontal approach centered on trunk",
+            "furthest_simulated_cm": 200,
+            "nominal_distances_cm": [
+              170,
+              100,
+              30
+            ],
+            "recording_apparatus": "Two eight-speaker arrays; 2 m total length"
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures",
+          "gap": "The trajectory was prerecorded through a binaural head model. Exact ending coordinate, waveform and measured distance-to-time map are unavailable."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 3000
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "stimulus_speed": {
+          "status": "reported",
+          "value": {
+            "speed_m_s": 0.66
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "A: looming sound alone",
+            "AT: same sound with three tactile stimuli"
+          ],
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures",
+          "gap": "Recording and physical array are described. Exact per-channel gains, crossfade, SPL and waveform asset not reported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "headphones": "Etymotic Research ER-4P insert earphones",
+            "capture": "3Dio Omni binaural microphone, two eight-speaker recording arrays",
+            "tactile": "Precision MicroDrives 312-101 via Arduino and ExpyVR serial"
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "A: one approaching sound",
+            "T: three successive tactile events, no sound",
+            "AT: approaching sound plus three successive tactile events"
+          ],
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "A, T, and AT trials randomized across experiment.",
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "85 of each condition, presented in random order.",
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures",
+          "gap": "No runtime block count or block split reported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "iti_values_ms": [
+              1400,
+              1700,
+              1900
+            ],
+            "tactile_jitter_ms": [
+              0,
+              50,
+              100,
+              150,
+              200
+            ]
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures",
+          "gap": "Shuffled ITI and per-delay tactile jitter. Event anchors and realized jitter correlations not published. The authors treat jittered locations as the nominal categories."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Recline in bed with eyes closed, attend to sound and vibrations without an overt task. Record local field potentials throughout.",
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "Precision MicroDrives 312-101 shaftless vibration motor",
+            "site": "Upper sternum",
+            "command_duration_ms": 100,
+            "controller": "Arduino, 10 kHz refresh; ExpyVR direct serial",
+            "listed_motor_specs": {
+              "voltage_V": 3,
+              "current_mA": 60,
+              "nominal_rpm": 9000,
+              "nominal_frequency_Hz": 150,
+              "printed_5g": "Meaning not specified",
+              "surface_mm2": 113,
+              "full_speed_time_ms": 50
+            }
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures",
+          "gap": "Specs are listed rather than measured delivered vibration. Meaning of 5g and physical onset latency unreported."
+        },
+        "soa_table": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "AT_anchor": "trial and auditory onset",
+            "T_anchor": "silent trial onset",
+            "nominal_ms": [
+              500,
+              1500,
+              2500
+            ],
+            "jitter_ms": [
+              0,
+              50,
+              100,
+              150,
+              200
+            ],
+            "nominal_distances_cm": [
+              170,
+              100,
+              30
+            ],
+            "events_per_AT_or_T_trial": 3
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures; Cerebral Cortex issue pp. 3387–3389",
+          "gap": "Both preprint and journal print 2500m or 2500 m. Interpreted as 2500 ms because the earlier delays are 500 and 1500 ms, the trial is 3000 ms, and 0.66 m/s from 2 m gives about 0.35 m at 2.5 s, near the reported 0.3 m. Actual event schedule and measured onset are unverified."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Use matched T and A trials for additive comparison. For active-electrode screening use uncorrected LFPs and compare prestimulus with poststimulus activity. Follow-up response contrasts use baseline correction. T-only pulse-order control checks anticipation and habituation.",
+          "source": "bioRxiv v1 pp. 5–6, Electrode implantation, recording and preprocessing; bioRxiv v1 pp. 6–7, Statistical analysis"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "T_nominal_trial_ms": [
+              500,
+              1500,
+              2500
+            ],
+            "jitter_ms": [
+              0,
+              50,
+              100,
+              150,
+              200
+            ],
+            "initial_trial_epoch_ms": [
+              -800,
+              3000
+            ],
+            "event_epoch_ms": [
+              -100,
+              300
+            ],
+            "event_baseline_ms": [
+              -100,
+              0
+            ]
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures; bioRxiv v1 pp. 5–6, Electrode implantation, recording and preprocessing; bioRxiv v1 pp. 6–7, Statistical analysis; Cerebral Cortex issue pp. 3387–3389",
+          "gap": "Both preprint and journal print 2500m or 2500 m. Interpreted as 2500 ms because the earlier delays are 500 and 1500 ms, the trial is 3000 ms, and 0.66 m/s from 2 m gives about 0.35 m at 2.5 s, near the reported 0.3 m. Actual event schedule and measured onset are unverified."
+        },
+        "catch_trial_type": {
+          "status": "reported_absent",
+          "value": "No no-go response family. Auditory-only trials are physiological controls.",
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "trials_per_family": 85,
+            "tactile_events_per_T_or_AT_trial": 3
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "baseline_count": {
+          "status": "reported",
+          "value": {
+            "T_trials": 85,
+            "A_trials": 85
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "catch_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures"
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures",
+          "gap": "Three randomized trial families, but no explicit block count."
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "total_trials": 255,
+            "per_family": {
+              "A": 85,
+              "T": 85,
+              "AT": 85
+            },
+            "tactile_events_per_T_or_AT_family": 255,
+            "tactile_events_total": 510
+          },
+          "source": "bioRxiv v1 pp. 4–5, Material and apparatus and Procedures; bioRxiv v1 pp. 6–7, Statistical analysis",
+          "gap": "3 × 85 trials. Each of the two tactile-containing trial families contributes 85 × 3 tactile events."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires three within-trial pulses with controlled physical latency and jitter and synchronized iEEG event codes.",
+      "Original binaural recording, sound level, exact pulse schedules and physical output calibration are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Bernasconi 2018 preprint · Trunk PPS with intracranial EEG",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [
+        500,
+        1500,
+        2500
+      ],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [
+        "upper sternum"
+      ],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1101/249078. bioRxiv v1 pp. 4–5, Material and apparatus and Procedures; bioRxiv v1 pp. 5–6, Electrode implantation, recording and preprocessing; bioRxiv v1 pp. 6–7, Statistical analysis; bioRxiv v1 pp. 8–12 and 22–23, results and supplement"
+    }
+  ]
+}

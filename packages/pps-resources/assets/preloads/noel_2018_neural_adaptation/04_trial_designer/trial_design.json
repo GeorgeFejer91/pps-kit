@@ -1,0 +1,66 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "noel_2018_neural_adaptation",
+  "repetitions_per_condition": 1,
+  "soa_values_ms": [],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [
+    {
+      "strip_id": "noel-2018-slow",
+      "label": "25 cm/s approaching noise",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        1000,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000
+      ],
+      "spatial_values_cm": [
+        175.0,
+        150.0,
+        125.0,
+        100.0,
+        75.0,
+        50.0,
+        25.0
+      ],
+      "metadata": {},
+      "elements": []
+    },
+    {
+      "strip_id": "noel-2018-fast",
+      "label": "75 cm/s approaching noise",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [
+        330,
+        660,
+        1000,
+        1330,
+        1660,
+        2000,
+        2330
+      ],
+      "spatial_values_cm": [
+        175.0,
+        150.0,
+        125.0,
+        100.0,
+        75.0,
+        50.0,
+        25.0
+      ],
+      "metadata": {},
+      "elements": []
+    }
+  ],
+  "prestimulus_files": [],
+  "preview_trial_count": 0
+}

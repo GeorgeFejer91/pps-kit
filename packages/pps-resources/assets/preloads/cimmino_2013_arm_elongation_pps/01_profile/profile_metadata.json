@@ -1,0 +1,331 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "cimmino_2013_arm_elongation_pps",
+  "title": "Cimmino 2013 \u00b7 Arm elongation and hand PPS",
+  "citation": "Cimmino et al. (2013). Plasticity of body representations after surgical arm elongation in an achondroplasic patient. Restorative Neurology and Neuroscience, 31(3), 287\u2013298.",
+  "doi": "10.3233/rnn-120286",
+  "source_url": "https://doi.org/10.3233/rnn-120286",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3233/rnn-120286",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": "Longitudinal case with bilateral Ilizarov arm lengthening of approximately 10 cm. The PPS result reports case pre/post assessments and one comparison row. Control counts differ across the publication.",
+      "sound": "Two fixed loudspeakers, near at 5 cm from hand and far separated 25 or 100 cm from near. White-noise bursts last 150 ms and are matched to 70 dB at the ear.",
+      "timing": "Near audio onset is simultaneous with touch. Far audio leads touch by 5 ms at emission. Actual acoustic arrival time is unverified.",
+      "touch": "Two DS7A units on dorsal right index, individually titrated weak target (approximately 90% detected) and strong non-target (100%).",
+      "trial_count_per_far_setting": 240,
+      "groups_per_setting": {
+        "near_weak": 60,
+        "far_weak": 60,
+        "near_strong": 40,
+        "far_strong": 40,
+        "near_audio_only": 20,
+        "far_audio_only": 20
+      },
+      "case_block_order": [
+        "far 100 cm",
+        "far 25 cm",
+        "far 25 cm",
+        "far 100 cm"
+      ],
+      "response": "Say \u2018tah\u2019 for weak targets only. Voice relay measured RT. Compare near versus far within each geometry.",
+      "other_assessments": "The clinical battery also assessed Von Frey, two-point acuity, tactile distance and pressure discrimination, and body image reconstruction."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "White-noise burst",
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Computer with XGen",
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "Original XGen project and waveform not recovered."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "static_positions_per_condition": 2,
+            "far_placements": 2
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "motion": "Static loudspeakers",
+            "near_hand_distance_cm": 5,
+            "conditions": {
+              "far_25": {
+                "interspeaker_separation_cm": 25
+              },
+              "far_100": {
+                "interspeaker_separation_cm": 100
+              }
+            },
+            "reference": "Methods define far labels as distance from the near loudspeaker. Exact far-to-hand distance and spatial coordinates unreported."
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "No continuous motion. Exact hand-to-far distance is unknown."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 150,
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "Static speakers."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": {
+            "motion": "Static loudspeakers",
+            "near_hand_distance_cm": 5,
+            "conditions": {
+              "far_25": {
+                "interspeaker_separation_cm": 25
+              },
+              "far_100": {
+                "interspeaker_separation_cm": 100
+              }
+            },
+            "reference": "Methods define far labels as distance from the near loudspeaker. Exact far-to-hand distance and spatial coordinates unreported."
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "signal": "White-noise burst",
+            "duration_ms": 150,
+            "calibrated_db": 70,
+            "measurement_location": "Participant ear",
+            "speaker_count": 2,
+            "speaker_model": null,
+            "equivalence": "Identical loudspeakers with sound-meter level matching and inspection of recorded phono-spectral signals",
+            "generation_control": "Computer with XGen"
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "Envelope, SPL weighting and individual gain values unreported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "audio": {
+              "signal": "White-noise burst",
+              "duration_ms": 150,
+              "calibrated_db": 70,
+              "measurement_location": "Participant ear",
+              "speaker_count": 2,
+              "speaker_model": null,
+              "equivalence": "Identical loudspeakers with sound-meter level matching and inspection of recorded phono-spectral signals",
+              "generation_control": "Computer with XGen"
+            },
+            "tactile": {
+              "modality": "Constant-current electrical cutaneous stimulation",
+              "site": "Dorsal right index finger",
+              "stimulator": "Two Digitimer DS7A units",
+              "electrodes": "Two pairs of Ambu Neuroline electrodes, one pair for each intensity",
+              "target": "Weak, approximately 90% detectable",
+              "non_target": "Strong, 100% detectable",
+              "calibration": "Individual pre-test titration",
+              "current_mA": null,
+              "pulse_duration_ms": null,
+              "waveform": null
+            },
+            "response": "Voice-activated relay"
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "Speaker and relay models, timing measurements and pulse current unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "near_target": 60,
+            "far_target": 60,
+            "near_strong_non_target": 40,
+            "far_strong_non_target": 40,
+            "near_sound_only_catch": 20,
+            "far_sound_only_catch": 20
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "Conditions assigned by block. Within-block sequence not stated."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "conditions": [
+              "far-100",
+              "far-25"
+            ],
+            "per_condition": 240,
+            "blocks_per_condition": 2,
+            "approx_block_duration_min": 6,
+            "formal_total_per_session": 480,
+            "counts_per_condition": {
+              "near_target": 60,
+              "far_target": 60,
+              "near_strong_non_target": 40,
+              "far_strong_non_target": 40,
+              "near_sound_only_catch": 20,
+              "far_sound_only_catch": 20
+            },
+            "case_block_order": [
+              "far-100",
+              "far-25",
+              "far-25",
+              "far-100"
+            ],
+            "reported_control_orders": "Half same, half reverse in \u00a72.5 cohort description. Assignment for the seven-person Methods cohort cannot be reconstructed.",
+            "within_block_order": null,
+            "per_block_family_counts": null
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "Counterbalance details conflict with the overall control cohort count."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "No ITI or foreperiod distribution reported."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "No numeric response deadline or voice-key threshold reported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Respond to weak tactile targets only. Strong stimulation is a no-go event, distinct from sound-only catches.",
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "modality": "Constant-current electrical cutaneous stimulation",
+            "site": "Dorsal right index finger",
+            "stimulator": "Two Digitimer DS7A units",
+            "electrodes": "Two pairs of Ambu Neuroline electrodes, one pair for each intensity",
+            "target": "Weak, approximately 90% detectable",
+            "non_target": "Strong, 100% detectable",
+            "calibration": "Individual pre-test titration",
+            "current_mA": null,
+            "pulse_duration_ms": null,
+            "waveform": null
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "Current, pulse duration and wave shape unresolved."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "near_audio_minus_touch_ms": 0,
+            "far_audio_minus_touch_ms": -5,
+            "anchor": "Scheduled audio emission onset minus tactile onset",
+            "rationale": "Compensate far-sound acoustic travel",
+            "measured_physical_SOA_ms": null,
+            "iti_ms": null,
+            "response_deadline_ms": null
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "Nominal relative onsets. No measured physical arrival alignment."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "Near/far RT contrast. No tactile-only baseline family."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "No tactile-only baseline."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": {
+            "sound_only_no_touch": [
+              "Near",
+              "Far"
+            ],
+            "strong_tactile_non_target": "Separate no-go trial"
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "near_target": 60,
+            "far_target": 60,
+            "near_strong": 40,
+            "far_strong": 40
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5",
+          "gap": "No tactile-only baseline."
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": {
+            "per_condition": 40,
+            "per_session": 80
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_condition": 2,
+            "total": 4
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": {
+            "per_condition": 240,
+            "per_PPS_session": 480
+          },
+          "source": "Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires two calibrated, independently routed near/far loudspeaker positions and selective delivery of electrical pulses with distinct threshold settings.",
+      "The original pulse width and shape, stimulus order, acoustic arrival offsets, voice-relay settings, and definitive control assignment are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3233/rnn-120286. Cimmino et al. 2013, pp. 291\u2013292, \u00a72.5; Cimmino et al. 2013, pp. 294\u2013295, \u00a73.4 and Table 5"
+    }
+  ]
+}

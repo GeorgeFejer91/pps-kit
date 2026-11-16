@@ -1,0 +1,336 @@
+{
+  "template_id": "spadone_2021_connectivity_fmri",
+  "title": "Spadone 2021 · Scanner PPS connectivity",
+  "citation": "Spadone et al. (2021). Frontal and parietal background connectivity and their dynamic changes account for individual differences in the multisensory representation of peripersonal space. Scientific Reports, 11, 20533.",
+  "source_url": "https://doi.org/10.1038/s41598-021-00048-5",
+  "doi": "10.1038/s41598-021-00048-5",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1038/s41598-021-00048-5::fmri-connectivity",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sample": "Secondary analysis of 28 of 38 participants in the Ferri et al. cohort. Subset demographics are uncertain.",
+      "pink_noise": "3100 ms pink-noise trains. Looming 55 to 70 dB SPL, flat 62.5 dB SPL.",
+      "tactile": "Electrical stimulation of right index in the main task. Parent experiment describes a 100 µs monophasic rectangular suprathreshold DS7A pulse.",
+      "delay_selection": "Select individually from the five behavioral delays. Near = fast and stable response in looming. Far = slow and stable. Match the flat control delays within participant.",
+      "families": [
+        "looming near",
+        "looming far",
+        "flat near",
+        "flat far"
+      ],
+      "allocation": "Study reports eight six-minute runs and 48 trials per each main cell. Parent study reports five runs and 30 per cell. Scope of the reported 20 catches and actual runs are unresolved.",
+      "TR_ms": 1550,
+      "iti": "Printed figure uses 4560, 6200 and 7750 ms. Parent methods report 4650 ms for the lowest interval.",
+      "response": "Withhold on right-hand main trials. Left-middle-finger press to left-index catch. Ignore sound and keep eyes closed.",
+      "analysis": "Compare background connectivity for looming vs flat in relation to the behavioral boundary, using the reused fMRI data."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "auditory": "looming and flat pink noise",
+            "tactile": "suprathreshold electrical index-finger touch"
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "stimulus_reuse": "Ferri et al. 2015",
+            "editor_from_ferri": "Sound Forge 4.5",
+            "sample_rate_hz_from_ferri": 44100
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329–16330 and 16333, behavioral PPS",
+          "gap": "Original audio, code and calibration unavailable."
+        },
+        "trajectory_count": {
+          "status": "derived",
+          "value": {
+            "looming": 1,
+            "flat_control": 1
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A",
+          "gap": "Two waveform families. Looming cues approach."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "geometry": "amplitude-driven approach over headphones",
+            "matched_flat_delays": true
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B",
+          "gap": "Scanner-specific metric positions unavailable."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 3100,
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A",
+          "gap": "Apparent amplitude-driven motion. Physical source velocity is inapplicable."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming pink noise",
+            "flat pink noise"
+          ],
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming": "rising, fit to exponential",
+            "looming_db": [
+              55,
+              70
+            ],
+            "flat_db": 62.5
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A",
+          "gap": "Exact envelope coefficients, SPL weighting and calibration unknown."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "output": "MRI headphones",
+            "audio_system_from_ferri": "NordicNeuroLab",
+            "response_from_ferri": "Cedrus Lumina LU400 and LSC-400"
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B; Ferri et al. 2015, J. Neurosci. pp. 16329 and 16331–16332, fMRI PPS and Fig. 2",
+          "gap": "Headphone model, levels and runtime unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "main": "sound + right-index touch",
+            "catch": "sound + left-index touch"
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Pseudorandom groups of 2–3 consecutive trials of the same condition and type, alternating with different single trials.",
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B"
+        },
+        "blocked_or_random_order": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "main_each_cell_spadone": 48,
+            "main_derived": 192,
+            "catches_printed": 20,
+            "total_if_20_session": 212,
+            "total_if_20_per_cell": 272,
+            "run_count_spadone": 8,
+            "run_minutes": 6,
+            "main_each_cell_ferri": 30,
+            "run_count_ferri": 5
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B; Ferri et al. 2015, J. Neurosci. pp. 16329 and 16331–16332, fMRI PPS and Fig. 2",
+          "gap": "Spadone reports eight runs and 48 main trials per cell. Ferri reports five runs and 30 per cell. Spadone describes reusing the fMRI data. The run manifest and exact allocation of 20 printed catches remain unavailable."
+        },
+        "iti_jitter_policy": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "figure_1B_ms": [
+              4560,
+              6200,
+              7750
+            ],
+            "ferri_methods_ms": [
+              4650,
+              6200,
+              7750
+            ],
+            "TR_ms": 1550,
+            "post_catch_extension_spadone_ms": null
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B; Ferri et al. 2015, J. Neurosci. pp. 16329 and 16331–16332, fMRI PPS and Fig. 2",
+          "gap": "Spadone Fig. 1B and Ferri Fig. 2 label 4.56, 6.2 and 7.75 s. Ferri Methods say 4.65 s, exactly three 1.55 s TRs. Delivered ITIs and any post-catch extension for the reanalysis are unverified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A",
+          "gap": "Response deadline and lockout unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "eyes": "blindfolded and closed",
+            "main": "right-index touch, withhold",
+            "catch": "left-index touch, left-middle-finger button press as quickly as possible",
+            "sounds": "ignore"
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "site": "index finger, paired electrodes",
+            "threshold": "suprathreshold",
+            "ferri_details": {
+              "site": "hairy right index finger",
+              "device": "Digitimer DS7A",
+              "pulse_shape": "single rectangular monophasic pulse",
+              "duration_us": 100,
+              "reported_current_range_mA": [
+                60,
+                90
+              ],
+              "calibration": {
+                "initial": "minimum then increase until perceived",
+                "validation_targets": 10,
+                "validation_empty_catches": 5,
+                "required_percent_correct": 100,
+                "step_on_error_mA": 5
+              }
+            },
+            "main_side": "right index",
+            "catch_side": "left index"
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B; Ferri et al. 2015, J. Neurosci. pp. 16329 and 16331–16332, fMRI PPS and Fig. 2",
+          "gap": "Ferri reports a DS7A constant-current device and a constant-voltage pulse. Output mode and participant-level currents are unverified."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "anchor": "auditory onset",
+            "near_rule": "fastest and less variable mean RT in behavioral looming trials",
+            "far_rule": "slowest and less variable mean RT in behavioral looming trials",
+            "possible_behavioral_soas_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ],
+            "flat_controls_match": true
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B",
+          "gap": "Participant-level SOA assignment and exact RT/variance selection algorithm unavailable."
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": {
+            "tactile_only": false,
+            "auditory_only": false,
+            "flat": "matched SOA multisensory control"
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B",
+          "gap": "Sound and touch on all scanner trials."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Left-index audio–tactile catch requiring a left-middle-finger press. Response rules govern despite printed active/passive labels.",
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "main_each_spadone": 48,
+            "main_each_ferri": 30
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B; Ferri et al. 2015, J. Neurosci. pp. 16329 and 16331–16332, fMRI PPS and Fig. 2",
+          "gap": "Spadone reports eight runs and 48 main trials per cell. Ferri reports five runs and 30 per cell. Spadone describes reusing the fMRI data. The run manifest and exact allocation of 20 printed catches remain unavailable."
+        },
+        "baseline_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B"
+        },
+        "catch_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "printed": 20,
+            "if_total": 20,
+            "if_per_cell": 80
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B",
+          "gap": "Spadone reports eight runs and 48 main trials per cell. Ferri reports five runs and 30 per cell. Spadone describes reusing the fMRI data. The run manifest and exact allocation of 20 printed catches remain unavailable."
+        },
+        "block_count": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "runs_spadone": 8,
+            "runs_ferri": 5,
+            "minutes_each": 6
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B; Ferri et al. 2015, J. Neurosci. pp. 16329 and 16331–16332, fMRI PPS and Fig. 2",
+          "gap": "Spadone reports eight runs and 48 main trials per cell. Ferri reports five runs and 30 per cell. Spadone describes reusing the fMRI data. The run manifest and exact allocation of 20 printed catches remain unavailable."
+        },
+        "total_trial_count": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "main_each_cell_spadone": 48,
+            "main_derived": 192,
+            "catches_printed": 20,
+            "total_if_20_session": 212,
+            "total_if_20_per_cell": 272,
+            "run_count_spadone": 8,
+            "run_minutes": 6,
+            "main_each_cell_ferri": 30,
+            "run_count_ferri": 5
+          },
+          "source": "Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B; Ferri et al. 2015, J. Neurosci. pp. 16329 and 16331–16332, fMRI PPS and Fig. 2",
+          "gap": "Spadone reports eight runs and 48 main trials per cell. Ferri reports five runs and 30 per cell. Spadone describes reusing the fMRI data. The run manifest and exact allocation of 20 printed catches remain unavailable."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Timed MR-compatible audio and stimulation with scan synchronization and a left-index catch path are required.",
+      "Delivered run manifest, exact catch allocation and event intervals remain unresolved, and the original acquisition and connectivity data are needed for analysis replication."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Spadone 2021 · Scanner PPS connectivity",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1038/s41598-021-00048-5. Scientific Reports pp. 3 and 10, fMRI Task and Fig. 1B; Scientific Reports pp. 2–7 and 10–11, fMRI analysis and Results; Ferri et al. 2015, J. Neurosci. pp. 16329 and 16331–16332, fMRI PPS and Fig. 2"
+    }
+  ]
+}

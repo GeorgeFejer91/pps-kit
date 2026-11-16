@@ -8,6 +8,7 @@
   "verification_status": "verified",
   "notes": "Smartphone/DynaSpace audio-tactile PPS validation profile. The profile encodes the reported left-hemispace looming trajectory, fixed 640 cm comparator, six tactile timing anchors, no-vibration catch trials, and 72 recorded-trial distribution from the paper and app source. Bundled preload WAVs are toolkit-generated DynaSpace-style Gaussian white-noise burst trains rendered with the PPS Toolkit FABIAN/SOFA path; the original Android bursttrain WAVs are recorded as provenance but not redistributed.",
   "reference_parameters": {
+    "study_row_id": "doi:10.3390/s25196072",
     "profile_type": "published_mobile_dynaspace_pps_validation",
     "publication_status": "published",
     "paper_role": "smartphone methods validation using an audio-tactile PPS-style looming versus fixed-source task",

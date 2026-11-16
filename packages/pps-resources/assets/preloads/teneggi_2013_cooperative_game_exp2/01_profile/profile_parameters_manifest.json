@@ -1,0 +1,378 @@
+{
+  "schema": "pps-study-profile-parameters.v1",
+  "template_id": "teneggi_2013_cooperative_game_exp2",
+  "title": "Teneggi 2013 \u00b7 Experiment 2, cooperative decision",
+  "citation": "Teneggi, C., Canzoneri, E., di Pellegrino, G., & Serino, A. (2013). Social modulation of peripersonal space boundaries. Current Biology, 23(5), 406-411.",
+  "doi": "10.1016/j.cub.2013.01.043",
+  "source_url": "https://doi.org/10.1016/j.cub.2013.01.043",
+  "verification_status": "partial",
+  "publication_status": "published",
+  "profile_type": "published_method_inspection",
+  "paper_group_key": "doi:10.1016/j.cub.2013.01.043",
+  "visible_variant_label": "A",
+  "variant_display": "Teneggi 2013 \u00b7 Experiment 2, cooperative decision - Variant A",
+  "recreation_status": {
+    "primary_category": "toolkit_structural_gap",
+    "category_label": "Toolkit structural gap",
+    "runner_readiness": "blocked_unsupported_toolkit_structure",
+    "profile_checks_passed": false,
+    "gui_recreatable": false,
+    "segment_0_to_4_profile_checks_passed": false,
+    "segment_1_to_6_materializable": false,
+    "finished_profile": false,
+    "segment_6_launchable": false,
+    "profile_completion_status": "unfinished_preload",
+    "missing_parameter_count": 3,
+    "unsupported_structure_count": 2
+  },
+  "segment_0_to_4_profile_checks": {
+    "gate": "segments_0_to_4",
+    "passed": false,
+    "segments": [
+      {
+        "segment": "0",
+        "segment_label": "Segment 0 profile manifest and provenance",
+        "passed": true,
+        "field_count": 3,
+        "blocking_reasons": []
+      },
+      {
+        "segment": "1",
+        "segment_label": "Segment 1 source/stimulus assets",
+        "passed": false,
+        "field_count": 6,
+        "blocking_reasons": [
+          {
+            "parameter": "profile_gap",
+            "status": "missing_publication_parameter",
+            "reason": "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable."
+          },
+          {
+            "parameter": "profile_gap",
+            "status": "unsupported_toolkit_structure",
+            "reason": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
+          },
+          {
+            "parameter": "profile_gap",
+            "status": "missing_publication_parameter",
+            "reason": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
+          }
+        ]
+      },
+      {
+        "segment": "2",
+        "segment_label": "Segment 2 trial rows and sequences",
+        "passed": false,
+        "field_count": 5,
+        "blocking_reasons": [
+          {
+            "parameter": "profile_gap",
+            "status": "unsupported_toolkit_structure",
+            "reason": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
+          },
+          {
+            "parameter": "profile_gap",
+            "status": "missing_publication_parameter",
+            "reason": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
+          }
+        ]
+      },
+      {
+        "segment": "3",
+        "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+        "passed": true,
+        "field_count": 5,
+        "blocking_reasons": []
+      },
+      {
+        "segment": "4",
+        "segment_label": "Segment 4 repetition pool settings",
+        "passed": true,
+        "field_count": 1,
+        "blocking_reasons": []
+      }
+    ]
+  },
+  "field_inventory": [
+    {
+      "segment": "0",
+      "segment_label": "Segment 0 profile manifest and provenance",
+      "parameter": "profile_identity",
+      "status": "reported",
+      "value": {
+        "template_id": "teneggi_2013_cooperative_game_exp2",
+        "title": "Teneggi 2013 \u00b7 Experiment 2, cooperative decision"
+      },
+      "note": "Profile ID and title are encoded."
+    },
+    {
+      "segment": "0",
+      "segment_label": "Segment 0 profile manifest and provenance",
+      "parameter": "publication_reference",
+      "status": "reported",
+      "value": {
+        "citation": "Teneggi, C., Canzoneri, E., di Pellegrino, G., & Serino, A. (2013). Social modulation of peripersonal space boundaries. Current Biology, 23(5), 406-411.",
+        "doi": "10.1016/j.cub.2013.01.043",
+        "source_url": "https://doi.org/10.1016/j.cub.2013.01.043"
+      },
+      "note": "Publication reference metadata is encoded."
+    },
+    {
+      "segment": "0",
+      "segment_label": "Segment 0 profile manifest and provenance",
+      "parameter": "profile_parameter_provenance",
+      "status": "reported",
+      "value": 8,
+      "note": "Profile provenance/reference parameters are encoded."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "source_stimulus_inventory",
+      "status": "reported",
+      "value": 2,
+      "note": "Prebaked/profile source assets available."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "trajectory_snapshots",
+      "status": "reported",
+      "value": 2,
+      "note": "Source-level trajectory snapshots are available."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "stimulus_duration",
+      "status": "reported",
+      "value": [
+        3.0
+      ],
+      "note": "Duration comes from generated WAV metadata."
+    },
+    {
+      "segment": "2",
+      "segment_label": "Segment 2 trial rows and sequences",
+      "parameter": "trial_sequence_rows",
+      "status": "reported",
+      "value": 1,
+      "note": "Current Segment 2 row/box representation is encoded."
+    },
+    {
+      "segment": "2",
+      "segment_label": "Segment 2 trial rows and sequences",
+      "parameter": "jitter_values_ms",
+      "status": "reported",
+      "value": [
+        1000,
+        1000
+      ],
+      "note": "Explicit jitter values encoded."
+    },
+    {
+      "segment": "2",
+      "segment_label": "Segment 2 trial rows and sequences",
+      "parameter": "iti_jitter_policy",
+      "status": "reported",
+      "value": "jitter/iti box",
+      "note": "Segment 2 encodes explicit ITI/jitter timing values."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "soa_values_ms",
+      "status": "reported",
+      "value": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "note": "SOA values are encoded."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "tactile_sites",
+      "status": "reported",
+      "value": [
+        "right cheek"
+      ],
+      "note": "Tactile site labels are encoded."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "baseline_mode",
+      "status": "reported",
+      "value": "none",
+      "note": "Baseline strategy is encoded."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "baseline_count",
+      "status": "defaulted",
+      "value": 0,
+      "note": "No baseline trials are configured."
+    },
+    {
+      "segment": "3",
+      "segment_label": "Segment 3 SOA, tactile, baseline, and catch settings",
+      "parameter": "catch_mode",
+      "status": "reported",
+      "value": 12,
+      "note": "Catch settings are encoded."
+    },
+    {
+      "segment": "4",
+      "segment_label": "Segment 4 repetition pool settings",
+      "parameter": "trial_pool_repetitions",
+      "status": "inferred",
+      "value": 4,
+      "note": "Segment 4 can infer repetitions from repetitions_per_condition."
+    },
+    {
+      "segment": "5",
+      "segment_label": "Segment 5 block CSV settings",
+      "parameter": "block_count",
+      "status": "reported",
+      "value": 4,
+      "note": "Block count is encoded."
+    },
+    {
+      "segment": "5",
+      "segment_label": "Segment 5 block CSV settings",
+      "parameter": "row_order_constraints",
+      "status": "reported",
+      "value": 1,
+      "note": "Row order can be preserved through Segment 5."
+    },
+    {
+      "segment": "6",
+      "segment_label": "Segment 6 run setup settings",
+      "parameter": "participants",
+      "status": "reported",
+      "value": 32,
+      "note": "Participant count default is encoded."
+    },
+    {
+      "segment": "6",
+      "segment_label": "Segment 6 run setup settings",
+      "parameter": "experiment_parts",
+      "status": "defaulted",
+      "value": "1 part",
+      "note": "Current dashboard default; phase/intervention context is non-blocking unless it changes the audiotactile PPS task execution."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "profile_gap",
+      "status": "missing_publication_parameter",
+      "value": "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable.",
+      "note": "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable."
+    },
+    {
+      "segment": "2",
+      "segment_label": "Segment 2 trial rows and sequences",
+      "parameter": "profile_gap",
+      "status": "unsupported_toolkit_structure",
+      "value": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration.",
+      "note": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
+    },
+    {
+      "segment": "2",
+      "segment_label": "Segment 2 trial rows and sequences",
+      "parameter": "profile_gap",
+      "status": "missing_publication_parameter",
+      "value": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration.",
+      "note": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "profile_gap",
+      "status": "unsupported_toolkit_structure",
+      "value": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment.",
+      "note": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
+    },
+    {
+      "segment": "1",
+      "segment_label": "Segment 1 source/stimulus assets",
+      "parameter": "profile_gap",
+      "status": "missing_publication_parameter",
+      "value": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment.",
+      "note": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
+    }
+  ],
+  "missing_publication_parameters": [
+    {
+      "segment": "1",
+      "parameter": "profile_gap",
+      "reason": "Original pink-noise waveforms and calibrated two-speaker gain trajectories are unavailable."
+    },
+    {
+      "segment": "2",
+      "parameter": "profile_gap",
+      "reason": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
+    },
+    {
+      "segment": "1",
+      "parameter": "profile_gap",
+      "reason": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
+    }
+  ],
+  "unsupported_toolkit_structures": [
+    {
+      "segment": "2",
+      "parameter": "profile_gap",
+      "reason": "A synchronized cheek stimulator and voice-key response scheduler require original pulse and microphone calibration."
+    },
+    {
+      "segment": "1",
+      "parameter": "profile_gap",
+      "reason": "A session scheduler must preserve pre/post ordering around the bargaining game and between-participant assignment."
+    }
+  ],
+  "generated_segment_artifacts": {
+    "01_profile": {
+      "profile_metadata": "assets/preloads/teneggi_2013_cooperative_game_exp2/01_profile/profile_metadata.json",
+      "profile_parameters_manifest": "assets/preloads/teneggi_2013_cooperative_game_exp2/01_profile/profile_parameters_manifest.json"
+    },
+    "02_looming_stimuli": {
+      "stimulus_sources": "assets/preloads/teneggi_2013_cooperative_game_exp2/02_looming_stimuli/stimulus_sources.json",
+      "trajectory_inventory": "assets/preloads/teneggi_2013_cooperative_game_exp2/02_looming_stimuli/trajectory_inventory.json",
+      "asset_count": 2
+    },
+    "03_baseline_strategy": {
+      "baseline_strategy": "assets/preloads/teneggi_2013_cooperative_game_exp2/03_baseline_strategy/baseline_strategy.json"
+    },
+    "04_trial_designer": {
+      "trial_design": "assets/preloads/teneggi_2013_cooperative_game_exp2/04_trial_designer/trial_design.json",
+      "trial_row_count": 1
+    },
+    "05_run_setup": {
+      "run_defaults": "assets/preloads/teneggi_2013_cooperative_game_exp2/05_run_setup/run_defaults.json",
+      "block_count": 4,
+      "participant_count": 32
+    },
+    "local_segment_0_to_4_profile_gate": {
+      "mode": "publication_parameter_check",
+      "scope": "Segments 0-4 must have no missing or unsupported profile parameters before native app materialization."
+    },
+    "local_segment_1_to_6_materialization": {
+      "mode": "local_companion_batch",
+      "tool": "For-AI/engineering/tooling/materialize_profile_segments.py",
+      "tracked_in_git": false
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.cub.2013.01.043. Current Biology issue pp. 407\u2013409, Experiment 2 and Fig. 3, supplement pp. 7 and 10\u201311"
+    }
+  ],
+  "notes": "This manifest audits recreation inside the PPS Toolkit GUI. It distinguishes toolkit-generated recreations of reported parameters from the original authors' exact stimulus set."
+}

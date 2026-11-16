@@ -1,0 +1,271 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "dellanna_2021_jazz_baseline",
+  "title": "Dell\u2019Anna 2021 \u00b7 Musician baseline comparison",
+  "citation": "Dell\u2019Anna et al. (2021). Does musical interaction in a jazz duet modulate peripersonal space?. Psychological Research, 85(5), 2107\u20132118.",
+  "doi": "10.1007/s00426-020-01365-6",
+  "source_url": "https://doi.org/10.1007/s00426-020-01365-6",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00426-020-01365-6::musician_comparison",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sound": "50 ms 784 Hz sinusoid, 50 Hz sinusoidal amplitude modulation, 5 ms attack and release. Near loudspeaker by the right arm and far loudspeaker near the partner chair, nominally 120 cm.",
+      "touch": "DS7A, 200 \u00b5s constant-current pulse on right hand dorsum, individually set to twice perception threshold.",
+      "timing": "Paired audio and touch nominally simultaneous. Interstimulus interval reported as 6000\u20138000 ms.",
+      "allocation": "60 trials per block with 12 each of A Near, A Far, T, TA Near and TA Far, with at most two consecutive trials of the same type.",
+      "response": "Right-index response-box press for touch, omit for auditory-only catches. A separate tactile rating uses a 0\u20137 scale.",
+      "participants": {
+        "musicians": 14,
+        "nonmusicians": 14
+      },
+      "baseline": "One two-block assessment, 120 trials, seated alone facing a wall at 120 cm. The musicians\u2019 baseline observations are shared with the duet experiment.",
+      "analysis": "Compare raw detection RT by group and stimulus condition."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Stationary amplitude-modulated tone and transcutaneous electrical tactile stimulation",
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "Sinusoidally amplitude-modulated tone",
+            "carrier_hz": 784,
+            "modulation_hz": 50,
+            "duration_ms": 50,
+            "rise_ms": 5,
+            "fall_ms": 5,
+            "software": "Audacity",
+            "software_version": null,
+            "level_dBA": null,
+            "delivery": {
+              "kind": "Two fixed loudspeakers",
+              "near": "Beside the participant\u2019s right arm on a desk",
+              "far": "Beside the second chair representing partner position",
+              "nominal_far_cm": 120,
+              "reference_note": "The thesis reports both about 120 cm from the participant's chair and about 120 cm between loudspeakers. Exact near and ear-relative distances are unspecified."
+            }
+          },
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Original waveforms, Audacity version and physical sound levels are unavailable."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Fixed near and far speakers."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Fixed near and far speakers."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "tone_ms": 50,
+            "tactile_ms": 0.2
+          },
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Fixed speakers."
+        },
+        "auditory_conditions": {
+          "status": "reported_with_caveat",
+          "value": {
+            "kind": "Two fixed loudspeakers",
+            "near": "Beside the participant\u2019s right arm on a desk",
+            "far": "Beside the second chair representing partner position",
+            "nominal_far_cm": 120,
+            "reference_note": "The thesis reports both about 120 cm from the participant's chair and about 120 cm between loudspeakers. Exact near and ear-relative distances are unspecified."
+          },
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2; Springer journal Fig. 2 and caption",
+          "gap": "Nominal far reference is 120 cm. Exact ear-relative geometry and SPL are unspecified."
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "modulation_hz": 50,
+            "rise_ms": 5,
+            "fall_ms": 5
+          },
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Modulation depth and absolute output level are unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "software": "E-Prime v2",
+            "stimulator": "Digitimer DS7A",
+            "speaker_count": 2,
+            "response_box": "Unspecified model"
+          },
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Exact presentation file and hardware synchronization checks unavailable."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "A Near",
+            "A Far",
+            "T",
+            "TA Near",
+            "TA Far"
+          ],
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2; Springer journal Fig. 2 and caption"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Pseudorandom order with no more than two identical trials consecutively",
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Two blocks of 60 with pseudorandom trial order. Block order beyond the baseline placement is unreported.",
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": [
+            6000,
+            8000
+          ],
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "The thesis specifies an interstimulus interval. Distribution and timestamp anchor are unspecified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Maximum accepted RT, online timeout, and rating prompt timing are unspecified."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Single baseline test in the absence of the partner. For musicians, baseline timing was placed before visit 1 or after visit 2.",
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 71\u201372, Experimental design and procedure, Fig. 1; Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2; Springer journal Fig. 1 and caption; Springer journal Fig. 2 and caption"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "Transcutaneous constant-current square-wave pulse",
+            "device": "Digitimer DS7A",
+            "duration_us": 200,
+            "duration_ms": 0.2,
+            "site": "Right hand dorsum",
+            "electrodes": {
+              "type": "Surface bipolar, attached with Velcro",
+              "separation_cm": 1,
+              "position_shift_approx_cm": 1,
+              "position_shift_purpose": "Randomly change placement to reduce habituation"
+            },
+            "calibration": {
+              "rule": "Two times the individual perceptual threshold, established with the method of limits",
+              "mean_mA": 2.01,
+              "reported_range_order_mA": [
+                3.2,
+                0.51
+              ],
+              "min_max_mA": [
+                0.51,
+                3.2
+              ],
+              "qualitative": "Perceptible and nonpainful as reported"
+            }
+          },
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Exact threshold search steps and per-person calibration values are unavailable."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": [
+            0
+          ],
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Simultaneity is reported. Measured onset alignment and hardware latency are unavailable."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Compare raw RT from tactile-only and paired conditions across baseline-order subgroups and non-musicians.",
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 75\u201376, 78\u201379, Data analysis and Fig. 5; Springer journal Fig. 1 and caption; Springer journal Fig. 2 and caption"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "Tactile-only trials have no sound-relative onset."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": [
+            "A Near",
+            "A Far"
+          ],
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_block": 12,
+            "at": "Each of five trial families"
+          },
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": {
+            "tactile_only_per_block": 12
+          },
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "12 tactile-only trials in each 60-trial block."
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": {
+            "auditory_only_per_block": 24
+          },
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "12 near plus 12 far auditory-only trials in each block."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": 120,
+          "source": "Dell\u2019Anna thesis Chapter 3, pp. 73\u201374, Experimental task, Stimuli and Fig. 2",
+          "gap": "2 \u00d7 60 trials for the baseline administration."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires calibrated fixed loudspeakers and DS7A tactile delivery, plus the response-box and separate tactile-rating workflow.",
+      "Original tone, rendered modulation depth, acoustic SPL and exact interstimulus clock reference remain unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1007/s00426-020-01365-6. Psychological Research pp. 2109\u20132110, Participants; Psychological Research pp. 2110\u20132111, Experimental design and procedure, Figs. 1\u20132; Psychological Research p. 2111, Experimental task and Stimuli; Psychological Research pp. 2111\u20132112, Data analysis; Psychological Research pp. 2113\u20132114, Results and Fig. 5"
+    }
+  ]
+}

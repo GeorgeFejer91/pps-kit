@@ -1402,7 +1402,9 @@ def test_all_study_templates_load_and_summarize():
         warnings = validate_design(template.design)
         assert all("Unsupported" not in warning for warning in warnings)
         summary = protocol_summary(template.design)
-        if template.template_id in {
+        if template.reference_parameters.get("planner_scope"):
+            assert summary["total_trials"] == 0, template.template_id
+        elif template.template_id in {
             "ferri_2015_ecological_looming_valence",
             "taffou_2021_auditory_roughness",
             "di_cosmo_2021_phase_coupling",

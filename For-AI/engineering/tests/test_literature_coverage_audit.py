@@ -36,19 +36,21 @@ def test_literature_coverage_ledger_matches_current_template_inventory():
     assert coverage["coverage_summary"]["literature_record_category_counts"] == {
         "covered_runnable_profile": 19,
         "covered_blocked_missing_publication_parameters": 11,
-        "covered_blocked_toolkit_structure": 21,
+        "covered_blocked_toolkit_structure": 43,
         "not_yet_templated_requires_toolkit_structure": 0,
-        "not_yet_templated_missing_publication_parameters": 25,
+        "not_yet_templated_missing_publication_parameters": 3,
         "candidate_needs_full_text_task_audit": 0,
         "adjacent_out_of_scope": 4,
     }
-    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 81
+    assert coverage["coverage_summary"]["current_template_count"] == status["profile_count"] == 194
     assert coverage["coverage_summary"]["current_profile_check_pass_count"] == len(
         status["categories"]["gui_recreatable"]
     ) == 26
     assert coverage["coverage_summary"]["published_profile_check_pass_count"] == 24
     assert coverage["coverage_summary"]["local_unpublished_profile_check_pass_count"] == 2
-    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == 38
+    assert coverage["coverage_summary"]["current_templates_with_toolkit_structural_gaps"] == len(
+        status["categories"]["toolkit_structural_gap"]
+    )
     assert coverage["coverage_summary"]["pubmed_screened_records"] == 48
     assert coverage["coverage_summary"]["openalex_broad_candidate_like_hits"] == 103
     assert coverage["coverage_summary"]["openalex_broad_linked_candidate_like_hits"] == 47
@@ -656,20 +658,12 @@ def test_literature_coverage_constraints_focus_on_task_execution():
 
     records = {record["record_id"]: record for record in coverage["literature_records"]}
     assert records["spiousas_2025_auditory_only"]["coverage_category"] == "adjacent_out_of_scope"
-    assert records["ladavas_2001_auditory_tactile_extinction"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
-    assert records["ladavas_2001_auditory_tactile_extinction"]["blocking_constraint_ids"] == []
-    assert "runner-supported" in records["ladavas_2001_auditory_tactile_extinction"][
-        "missing_publication_parameters"
-    ][0]
-    assert records["farne_ladavas_2002_auditory_pps_humans"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
-    assert records["farne_ladavas_2002_auditory_pps_humans"]["blocking_constraint_ids"] == []
-    assert "runner-supported" in records["farne_ladavas_2002_auditory_pps_humans"][
-        "missing_publication_parameters"
-    ][0]
+    for record_id in ("ladavas_2001_auditory_tactile_extinction", "farne_ladavas_2002_auditory_pps_humans"):
+        record = records[record_id]
+        assert record["coverage_category"] == "covered_blocked_toolkit_structure"
+        assert record["current_template_ids"]
+        assert "study_specific_physical_apparatus" in record["blocking_constraint_ids"]
+        assert record["missing_publication_parameters"]
     assert records["rossi_sebastiano_2022_visuotactile"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["teraoka_2024_front_rear"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["teraoka_2024_front_rear"]["blocking_constraint_ids"] == [
@@ -711,57 +705,39 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "missing_core_soa_iti_baseline_repetition_parameters",
         "exact_audio_envelope_or_gain_files",
     ]
-    assert records["ferri_2015_jneurosci_itv"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["ferri_2015_jneurosci_itv"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["autism_2019"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["social_coding_2019"]["coverage_category"] == "covered_blocked_toolkit_structure"
-    assert records["social_perception_2017"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["social_perception_2017"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["ferroni_2020_tool_observation"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["ferroni_2026_pps_plasticity"]["doi"] == "10.1016/j.neuropsychologia.2026.109490"
-    assert records["ferroni_2026_pps_plasticity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["ferroni_2026_pps_plasticity"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-    ]
+    assert records["ferroni_2026_pps_plasticity"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["ferroni_2026_pps_plasticity"]["blocking_constraint_ids"]
     assert records["ageing_2021"]["coverage_category"] == "covered_blocked_toolkit_structure"
-    assert records["seeming_confines_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["jazz_duet_2021"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["seeming_confines_2021"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert records["jazz_duet_2021"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["schizophrenia_tool_use_2022"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["novel_two_phase_audio_tactile_2025"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["depersonalisation_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["depersonalisation_2024"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["lower_limb_pps_2017"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["lower_limb_pps_2017"]["blocking_constraint_ids"] == []
-    assert records["cell_reports_medicine_2026_consciousness"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["cell_reports_medicine_2026_consciousness"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-    ]
-    assert records["serino_2015_exps_4_to_6"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
-    assert records["serino_2015_exps_4_to_6"]["blocking_constraint_ids"] == []
-    assert "runner-supported" in records["serino_2015_exps_4_to_6"][
-        "missing_publication_parameters"
-    ][0]
-    assert records["serino_2018_mixed_reality_pps"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
+    assert records["cell_reports_medicine_2026_consciousness"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["cell_reports_medicine_2026_consciousness"]["blocking_constraint_ids"]
+    assert records["serino_2015_exps_4_to_6"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["serino_2015_exps_4_to_6"]["blocking_constraint_ids"]
+    assert len(records["serino_2015_exps_4_to_6"]["current_template_ids"]) == 3
+    assert records["serino_2018_mixed_reality_pps"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert "audiovisual_or_trisensory_trial_family" in records["serino_2018_mixed_reality_pps"]["blocking_constraint_ids"]
-    assert "audiovisual/MR provenance metadata are now runner-supported" in records[
-        "serino_2018_mixed_reality_pps"
-    ]["missing_publication_parameters"][0]
+    assert len(records["serino_2018_mixed_reality_pps"]["current_template_ids"]) == 2
     assert records["amemiya_2017_pseudowalking_footsole"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["serino_2011_professional_fencers"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
     assert records["interoception_exteroception_2025"]["doi"] == "10.1073/pnas.2516229122"
-    assert records["interoception_exteroception_2025"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["interoception_exteroception_2025"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-    ]
-    assert records["amiel_2025_front_rear"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["amiel_2025_front_rear"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters",
-    ]
-    assert "trajectory-family metadata is now runner-supported" in records["amiel_2025_front_rear"][
-        "missing_publication_parameters"
-    ][0]
-    assert records["body_image_social_cognition_2024"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
+    assert records["interoception_exteroception_2025"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["interoception_exteroception_2025"]["blocking_constraint_ids"]
+    assert records["amiel_2025_front_rear"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["amiel_2025_front_rear"]["blocking_constraint_ids"]
+    assert "Max/MSP/Spat" in records["amiel_2025_front_rear"]["missing_publication_parameters"][0]
+    assert records["body_image_social_cognition_2024"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["taffou_2021_auditory_roughness"]["coverage_category"] == "covered_blocked_toolkit_structure"
     assert records["taffou_2021_auditory_roughness"]["blocking_constraint_ids"] == [
         "hrtf_database_or_binaural_engine_mismatch",
@@ -786,11 +762,9 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "exact_audio_envelope_or_gain_files",
         "hrtf_database_or_binaural_engine_mismatch",
     ]
-    assert records["spadone_2021_connectivity"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["spadone_2021_connectivity"]["blocking_constraint_ids"] == []
-    assert records["spadone_2021_connectivity"]["missing_publication_parameters"] == [
-        "extract near/far, flat/dynamic, fMRI block timing, and paper-specific ITI/foreperiod/hazard values separately from scanner context before templating"
-    ]
+    assert records["spadone_2021_connectivity"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["spadone_2021_connectivity"]["blocking_constraint_ids"]
+    assert len(records["spadone_2021_connectivity"]["current_template_ids"]) == 2
     assert records["hobeika_2018_anisotropy"]["coverage_category"] == "covered_blocked_missing_publication_parameters"
     assert records["hobeika_2018_anisotropy"]["blocking_constraint_ids"] == [
         "hrtf_database_or_binaural_engine_mismatch",
@@ -859,12 +833,8 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "missing_core_soa_iti_baseline_repetition_parameters",
         "exact_audio_envelope_or_gain_files",
     ]
-    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == (
-        "not_yet_templated_missing_publication_parameters"
-    )
-    assert records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"] == [
-        "missing_core_soa_iti_baseline_repetition_parameters"
-    ]
+    assert records["finisguerra_2015_moving_sounds_motor"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["finisguerra_2015_moving_sounds_motor"]["blocking_constraint_ids"]
     assert records["biggio_2017_racket_tool_use"]["coverage_category"] == "covered_runnable_profile"
     assert records["biggio_2017_racket_tool_use"]["current_template_ids"] == [
         "biggio_2017_no_racket",
@@ -884,10 +854,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         "electrical_tactile_calibration",
         "voice_key_response_capture",
     ]
-    assert records["serino_2011_rtms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["serino_2011_rtms"]["blocking_constraint_ids"] == []
-    assert records["cimmino_2013_surgical_arm_elongation"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["cimmino_2013_surgical_arm_elongation"]["blocking_constraint_ids"] == []
+    assert records["serino_2011_rtms"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["serino_2011_rtms"]["blocking_constraint_ids"]
+    assert records["cimmino_2013_surgical_arm_elongation"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["cimmino_2013_surgical_arm_elongation"]["blocking_constraint_ids"]
     assert records["serino_2007_blind_cane_users"]["coverage_category"] == (
         "covered_blocked_missing_publication_parameters"
     )
@@ -954,10 +924,10 @@ def test_literature_coverage_constraints_focus_on_task_execution():
         if "fixed_iti_or_hazard_control_policy" in record["blocking_constraint_ids"]
     } == {"serino_2007_blind_cane_users"}
     assert records["teneggi_2013_social_face"]["doi"] == "10.1016/j.cub.2013.01.043"
-    assert records["serino_2009_tms"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["serino_2009_tms"]["blocking_constraint_ids"] == []
-    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "not_yet_templated_missing_publication_parameters"
-    assert records["avenanti_2012_motor_cortex"]["blocking_constraint_ids"] == []
+    assert records["serino_2009_tms"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["serino_2009_tms"]["blocking_constraint_ids"]
+    assert records["avenanti_2012_motor_cortex"]["coverage_category"] == "covered_blocked_toolkit_structure"
+    assert "study_specific_physical_apparatus" in records["avenanti_2012_motor_cortex"]["blocking_constraint_ids"]
     assert records["barumerli_2026_semantic_looming_auditory_only"]["coverage_category"] == "adjacent_out_of_scope"
     assert records["barumerli_2026_semantic_looming_auditory_only"]["doi"] == "10.1038/s41598-026-48067-4"
 

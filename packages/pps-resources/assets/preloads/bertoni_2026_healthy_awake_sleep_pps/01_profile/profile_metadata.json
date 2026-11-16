@@ -1,0 +1,261 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "bertoni_2026_healthy_awake_sleep_pps",
+  "title": "Bertoni 2026 \u00b7 Experiment 1 \u00b7 Awake and sleep EEG",
+  "citation": "Bertoni, T., Ricci, G., J\u00f6hr, J., et al. (2026). Multisensory integration in peripersonal space indexes consciousness states in sleep and disorders of consciousness. Cell Reports Medicine, 7(4), 102705.",
+  "doi": "10.1016/j.xcrm.2026.102705",
+  "source_url": "https://doi.org/10.1016/j.xcrm.2026.102705",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.xcrm.2026.102705::a",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "trial_conditions": {
+        "T": "Tactile-only",
+        "AN": "Auditory near",
+        "AF": "Auditory far",
+        "ANT": "Audio-tactile near",
+        "AFT": "Audio-tactile far"
+      },
+      "paired_soa_ms": 0,
+      "response": "Primary outcome comes from synchronized passive EEG. No overt trial response is required.",
+      "index": "Contrast auditory near minus auditory far with audio-tactile near minus audio-tactile far, using poststimulus high-beta power (20\u201330 Hz).",
+      "cohort": {
+        "awake": 15,
+        "analyzable_sleep": 13,
+        "analyzable_REM": 12
+      },
+      "stimulus": "Stationary 100 ms white noise at 30 cm or 130 cm above the chest, equalized at the ear. Deliver a chest electrocutaneous event 2 cm below the manubrium with Digitimer DS7AH, after individual intensity matching.",
+      "awake_assessment": {
+        "blocks": 3,
+        "trials_per_block": 110,
+        "repetitions_per_condition_per_block": 22,
+        "intertrial_interval_ms": [
+          2500,
+          3000
+        ]
+      },
+      "overnight_assessment": "Run five-minute stimulation and unstimulated periods from about 23:30 to 06:30, with assessment in N2, N3 and REM. The report uses both alternation and randomization language. Obtain serial awakening reports and analyze the 20 s before NREM awakenings for the pre-awakening comparison."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "White-noise bursts.",
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Generated using E-Prime 2.",
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types",
+          "gap": "Original noise seed, sample rate and waveform files are unspecified."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "stationary": true,
+            "near_cm": 30,
+            "far_cm": 130,
+            "anchor": "chest",
+            "direction": "above chest in bed"
+          },
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 100
+          },
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "AN",
+            "AF",
+            "ANT",
+            "AFT"
+          ],
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": "Individually selected level stated as auditory threshold plus 40%; mean 51 dB, SD 4.01. Match near/far sound pressure at the ear.",
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types",
+          "gap": "The operational reference for the 40% change and the original waveform/gain envelope are unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "speaker_count": 2,
+            "speaker_model": "Logitech Z120 in Key resources",
+            "tactile_device": "Digitimer DS7AH",
+            "generator": "E-Prime 2"
+          },
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "T",
+            "AN",
+            "AF",
+            "ANT",
+            "AFT"
+          ],
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Five conditions fully randomized within a block, with 22 of each condition.",
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Three wakefulness blocks. Trials fully randomized within each block.",
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reported_range_ms": [
+              2500,
+              3000
+            ],
+            "reported_step_ms": 100,
+            "reported_step_count": 5
+          },
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol",
+          "gap": "The text does not specify the exact eligible ITI values or whether both endpoints are sampled. It does not give the event anchor for the interval."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Lie in bed with eyes closed, receive stimulation passively while EEG is recorded. No active per-trial response.",
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "Digitimer DS7AH",
+            "site": "anterior chest, 2 cm below manubrium sternum",
+            "window_ms": 5,
+            "calibration": "Perceived-intensity matching to the PPS auditory stimulus.",
+            "cohort_mean_mA": 8.7,
+            "cohort_sd_mA": 5.5
+          },
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types",
+          "gap": "The 5 ms chest stimulus is reported. The single rectangular pulse description appears in calibration; exact acquisition waveform and electrode placement geometry are not independently restated."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "bimodal_ms": 0,
+            "reference": "tactile onset minus auditory onset",
+            "soa_ladder": false
+          },
+          "source": "STAR Methods pp. e1\u2013e2, Key resources and Healthy participants, stimulus types"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "T, AN and AF are measured unimodal controls. The high-beta index uses the auditory near/far contrast and the paired near/far contrast. The EEG and PSD each have a prestimulus baseline.",
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol; STAR Methods p. e3, Healthy participants, EEG recording and preprocessing; STAR Methods pp. e4\u2013e5, Spectral analysis and PPS index definition"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "epoch_ms": [
+              -1000,
+              2000
+            ],
+            "anchor": "stimulus onset",
+            "baseline": "prestimulus mean for EEG; mean baseline PSD across all five conditions"
+          },
+          "source": "STAR Methods p. e3, Healthy participants, EEG recording and preprocessing; STAR Methods pp. e4\u2013e5, Spectral analysis and PPS index definition",
+          "gap": "The source does not give a distinct range for the EEG baseline window within the prestimulus epoch."
+        },
+        "catch_trial_type": {
+          "status": "reported_absent",
+          "value": "No response-inhibition condition among five passive EEG stimulus families.",
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_condition_per_block": 22
+          },
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        },
+        "baseline_count": {
+          "status": "reported",
+          "value": {
+            "T_per_block": 22,
+            "AN_per_block": 22,
+            "AF_per_block": 22
+          },
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        },
+        "catch_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_wake_participant": 3,
+            "approx_minutes_per_block": 7
+          },
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "per_block": 110,
+            "per_participant": 330
+          },
+          "source": "Main Fig. 1; STAR Methods p. e3, Healthy participants, Experimental protocol",
+          "gap": "Five conditions \u00d7 22 repetitions \u00d7 3 blocks."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Deliver calibrated simultaneous electrical pulses and calibrated sound from two chest-relative positions while synchronizing EEG event codes.",
+      "The overnight branch requires polysomnographic staging, stimulation control, scheduled awakenings, and source-specific dream-report classification.",
+      "Resolve the healthy-awake jitter grid and overnight stimulation/awakening schedule against event logs. Validate artifact handling, montage and spectral index on the acquisition route."
+    ],
+    "alternate_study_row_ids": [
+      "doi:10.1016/j.xcrm.2026.102705::sleep-pps"
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.xcrm.2026.102705. Main Figs. 1\u20133 and Figs. S3\u2013S7, S10. STAR Methods pp. e2\u2013e5, healthy stimulus calibration, experimental protocol and spectral analysis"
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "aspell_2010_body_visibility_exp1",
+  "title": "Aspell 2010 \u00b7 own body visible",
+  "citation": "Aspell, J. E., Lavanchy, T., Lenggenhager, B., & Blanke, O. (2010). Seeing the body modulates audiotactile integration. European Journal of Neuroscience, 31(10), 1868\u20131873.",
+  "doi": "10.1111/j.1460-9568.2010.07210.x",
+  "source_url": "https://doi.org/10.1111/j.1460-9568.2010.07210.x",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1111/j.1460-9568.2010.07210.x::a",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "apparatus": "Four sound locations at upper/lower back height, to the left or right. Physical loudspeakers sit 60 cm laterally from the body; the visible fake loudspeakers are distinct props.",
+      "timing": {
+        "sound_duration_ms": 40,
+        "tactile_onset_after_sound_ms": 56,
+        "tactile_drive_ms": 70,
+        "next_trial_after_response_ms": 1000
+      },
+      "response": "Classify back vibration as upper or lower with a two-button box, ignoring sound and side. Exclude incorrect trials and RT above 1500 ms.",
+      "design": "Compare the effect of auditory\u2013tactile elevation congruency in paired trials. Audio location and tactile target vary independently. Each formal trial has touch, so it has no blank catches or separate tactile-only baseline.",
+      "trials_per_block": 80,
+      "participants": 14,
+      "body_visibility": "Live rear video of the participant wearing four fake speakers, captured from 2 m away; view hides the real sound sources.",
+      "sound_longitudinal_cm_positive_front": [
+        -50,
+        50,
+        150
+      ]
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "White-noise distractor burst.",
+          "source": "Article p. 1869, Materials"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "White noise delivered by an active speaker at one of four positions.",
+          "source": "Article p. 1869, Materials",
+          "gap": "No original waveform, sample rate or noise synthesis settings."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "speaker_positions_per_block": 4,
+            "longitudinal_configurations": [
+              -50,
+              50,
+              150
+            ],
+            "unit": "cm"
+          },
+          "source": "Article p. 1869, Materials"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "motion": "Stationary within block",
+            "lateral_offset_cm": 60,
+            "elevations": [
+              "upper",
+              "lower"
+            ],
+            "longitudinal_positions_cm": [
+              -50,
+              50,
+              150
+            ]
+          },
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "auditory_ms": 40,
+            "tactile_ms": 70
+          },
+          "source": "Article p. 1869, Materials"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Article p. 1869, Materials",
+          "gap": "No moving sound source."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": "Four physical positions crossed independently with four tactile positions, generating same/different side and congruent/incongruent elevation.",
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "reported_level_db": 120
+          },
+          "source": "Article p. 1869, Materials",
+          "gap": "Measurement location, frequency weighting, ramp and delivered exposure not stated. This is the authors' reported number."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "speaker": "Velleman MLS 3 2W, 8 \u03a9, 66 mm",
+            "control": "E-Prime",
+            "visual_feedback": "HMD with rear camera 2 m behind or pre-recorded image",
+            "response": "Two-button box"
+          },
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": "Each formal trial has one white-noise distractor then one vibrotactile elevation target.",
+          "source": "Article p. 1869, Materials"
+        },
+        "condition_intermixing": {
+          "status": "reported_with_caveat",
+          "value": "Speaker and vibrator independently randomized across trials.",
+          "source": "Article p. 1869, Materials",
+          "gap": "Exact per-cell balance, seed and constraints unknown."
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "trial_count_per_block": 80,
+            "block_order": "Random",
+            "repositioning": "Speakers moved between blocks as needed."
+          },
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1",
+          "gap": "Number of repeats of each condition block is not explicit."
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "delay_ms": 1000,
+            "anchor": "Response to next trial"
+          },
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1"
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": {
+            "analysis_max_rt_ms": 1500,
+            "incorrect_trials": "Discarded"
+          },
+          "source": "Article p. 1870, Statistical analysis",
+          "gap": "The online timeout and no-response scheduling behavior are not established."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Right hand chooses one of two buttons for upper or lower vibration, regardless of side. Ignore sound.",
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "modality": "Vibration",
+            "stimulator_count": 4,
+            "site": "Back skin",
+            "upper_pair_spacing_cm_approx": 20,
+            "lower_offset_cm": 9,
+            "duration_ms": 70
+          },
+          "source": "Article p. 1869, Materials",
+          "gap": "Exact motor model for this study, waveform, amplitude and delivered timing not stated."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "anchor": "Audio onset",
+            "tactile_onset_ms": [
+              56
+            ]
+          },
+          "source": "Article p. 1869, Materials"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": "Formal trials all pair audio and touch. Body-hidden and congruent comparisons are experimental conditions, not unimodal baselines.",
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1",
+          "gap": "No formal unimodal baseline timing."
+        },
+        "catch_trial_type": {
+          "status": "reported_absent",
+          "value": "Each formal trial includes a tactile target.",
+          "source": "Article p. 1869, Materials"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article p. 1869, Materials",
+          "gap": "Independent randomization and block size do not establish counts for each speaker-by-motor pairing."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": {
+            "formal_unimodal_trials": 0
+          },
+          "source": "Article p. 1869, Materials"
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": {
+            "formal_no_target_trials": 0
+          },
+          "source": "Article p. 1869, Materials"
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1",
+          "gap": "Condition set and 80 trials per block are stated. Exact number of blocks is not explicit."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Article pp. 1869\u20131870, Procedure and Fig. 1",
+          "gap": "Exact block repetition and total count unknown."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires the source body-visibility video conditions, reproducible HMD image alignment and latency, a four-position physical loudspeaker rig and four independently calibrated skin stimulators.",
+      "The publication's reported 120 dB value has no sufficient calibration reference for playback; it is provenance only. Never use it as an executable level.",
+      "The paper does not specify per-configuration repetitions, a measured tactile waveform, original source settings, or the online response deadline."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1111/j.1460-9568.2010.07210.x. Article pp. 1870\u20131871, Experiment 1 and Fig. 2"
+    }
+  ]
+}

@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Experiment 4 trial allocation with a duration-matched white-noise marker for the horn. Response capture and the original tactile stimulus require external apparatus. The simulator condition labels mark the study's three external contexts.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1007/s00221-020-05771-5::d",
     "profile_type": "static_near_far_audio_tactile_pps",
     "publication_study_row_id": "doi:10.1007/s00221-020-05771-5::d",
     "formal_experiment": 4,

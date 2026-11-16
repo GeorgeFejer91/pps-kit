@@ -1,0 +1,414 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "hobeika_2020_social_collaboration",
+  "title": "Hobeika 2020 \u00b7 Collaboration",
+  "citation": "Hobeika, Taffou, and Viaud-Delmon (2020). Social impact on audiotactile integration near the body. Acoustical Science and Technology, 41(1), 345\u2013348.",
+  "doi": "10.1250/ast.41.345",
+  "source_url": "https://doi.org/10.1250/ast.41.345",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1250/ast.41.345",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "parallel_publication_doi": "10.1098/rsos.181878",
+      "relationship": "The parallel Royal Society Open Science report has the same three assessments, analyzed counts and multiple statistics. Participant-level overlap is unverified.",
+      "audio": "Three-second binaural bubbling water at \u221260\u00b0 or +60\u00b0, approaching from 135 to 20 cm in an IRCAM Spat room simulation with LISTEN HRTFs.",
+      "sound_gaps": "Original waveform, renderer patch and calibration are unavailable.",
+      "sound_onset_relative_tactile_ms": [
+        0,
+        375,
+        750,
+        1125,
+        1500,
+        1875,
+        2250,
+        2625,
+        3000
+      ],
+      "tactile": "20 ms, 250 Hz sinusoid delivered by a 28 mm miniature loudspeaker to palmar left index.",
+      "baselines": "Periods nominally \u2212650 and +3650 ms relative to sound onset, using actual silent windows around sound in the thesis procedure.",
+      "totals": {
+        "paired": 360,
+        "silent_window_targets": 80,
+        "sound_only_catch": 40,
+        "blocks": 10,
+        "per_block": 48
+      },
+      "posture": "Seated in a fixed side position, hands covered, partner at 100 cm in dyad compared with isolated condition.",
+      "response": "Speeded right-finger response to touch, withhold on audio-only. Analyze effects by sound side and social context.",
+      "analyzed": 26,
+      "dyad_instruction": "Dyad instruction frames both partners as pursuing a combined performance goal.",
+      "related_profile_id": "hobeika_2019_social_collaboration"
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Bubbling-water sound plus palmar index vibration",
+          "source": "Acoustical Science and Technology p. 345, Material and methods"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "software": "Max/MSP 6.1.8",
+            "renderer": "IRCAM Spat",
+            "HRTF": "LISTEN",
+            "sample_rate_Hz": 44100,
+            "source_bit_depth": 32
+          },
+          "source": "Acoustical Science and Technology p. 345, Material and methods",
+          "gap": "Original WAV, patch, Spat build, HRTF subject and filter identifiers unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 2,
+          "source": "Acoustical Science and Technology p. 345, Material and methods"
+        },
+        "trajectory_path": {
+          "status": "protocol_lineage_derived",
+          "value": {
+            "side_degrees": {
+              "left": -60,
+              "right": 60
+            },
+            "start_cm_from_head": 135,
+            "end_cm_from_head": 20,
+            "speed_cm_s": 38.33,
+            "estimated_cm_at_soa": [
+              135,
+              120.625,
+              106.25,
+              91.875,
+              77.5,
+              63.125,
+              48.75,
+              34.375,
+              20
+            ],
+            "distance_formula": "135 \u2212 (135\u221220) \u00d7 SOA_ms/3000, assuming the constant nominal speed and the stated endpoints"
+          },
+          "source": "Acoustical Science and Technology p. 345, Material and methods; Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "Start, endpoint and velocity from thesis. Nominal distance table derived by linear interpolation. The 2 m limit in article specifies the filter correction range, with no 2 m stimulus onset stated."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "sound_ms": 3000,
+            "touch_ms": 20
+          },
+          "source": "Acoustical Science and Technology p. 345, Material and methods"
+        },
+        "stimulus_speed": {
+          "status": "protocol_lineage_derived",
+          "value": 38.33,
+          "source": "Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "cm/s as reported in the thesis. Journal omits numeric speed."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Left \u221260\u00b0",
+            "Right +60\u00b0"
+          ],
+          "source": "Acoustical Science and Technology p. 345, Material and methods"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "relative_to": "Direct sound at 0.20 m",
+            "time_ms": [
+              0,
+              375,
+              750,
+              1125,
+              1500,
+              1875,
+              2250,
+              2625,
+              3000
+            ],
+            "direct_dB": [
+              -42,
+              -40,
+              -38,
+              -35,
+              -32,
+              -28,
+              -22,
+              -14,
+              0
+            ],
+            "overall_room_dB": [
+              -34,
+              -35,
+              -34,
+              -34,
+              -34,
+              -34,
+              -33,
+              -33,
+              -33
+            ]
+          },
+          "source": "Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods",
+          "gap": "All levels relative to nearest direct sound. Between-sample interpolation not published. Per-ear calibrated SPL bounds are separately reported."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "name": "Bubbling water",
+            "bits": 32,
+            "sample_rate_Hz": 44100,
+            "renderer": "IRCAM Spat in Max/MSP 6.1.8",
+            "HRTF": "Nonindividual LISTEN",
+            "room_m3": 650,
+            "early_reflection_order": 3,
+            "dynamic_late_reverb": true,
+            "near_field_correction_m": [
+              2,
+              0.2
+            ],
+            "SPL_dBA": {
+              "contra": [
+                35,
+                61
+              ],
+              "ipsi": [
+                37,
+                78
+              ]
+            },
+            "headphones_as_printed_thesis": "Beyer Dynamic DD770",
+            "sound_levels": {
+              "relative_to": "Direct sound at 0.20 m",
+              "time_ms": [
+                0,
+                375,
+                750,
+                1125,
+                1500,
+                1875,
+                2250,
+                2625,
+                3000
+              ],
+              "direct_dB": [
+                -42,
+                -40,
+                -38,
+                -35,
+                -32,
+                -28,
+                -22,
+                -14,
+                0
+              ],
+              "overall_room_dB": [
+                -34,
+                -35,
+                -34,
+                -34,
+                -34,
+                -34,
+                -33,
+                -33,
+                -33
+              ]
+            }
+          },
+          "source": "Acoustical Science and Technology p. 345, Material and methods; Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "Headphone name DD770 as printed in thesis. Exact hardware revision, HRTF identity, shoebox dimensions, filter coefficients and original assets unresolved."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "protocol_lineage_derived",
+          "value": [
+            "Bimodal target",
+            "Silent-window touch control",
+            "Sound-only catch"
+          ],
+          "source": "Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "Thesis identifies the silent-window placement and the sound-only catch trials."
+        },
+        "condition_intermixing": {
+          "status": "protocol_lineage_derived",
+          "value": "Randomly mix tactile target delays and sound-only catches within the experiment, with social condition order counterbalanced.",
+          "source": "Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399); Hobeika thesis Ch. 7, printed pp. 83\u201387 (PDF pp. 104\u2013108); Hobeika thesis Ch. 7, printed pp. 88\u201391 (PDF pp. 109\u2013112)",
+          "gap": "Exact randomization algorithm and per-block family allocation unreported."
+        },
+        "blocked_or_random_order": {
+          "status": "protocol_lineage_derived",
+          "value": {
+            "blocks": 10,
+            "trials_per_block": 48,
+            "minutes_per_block_approx": 5,
+            "social_order": "Counterbalanced",
+            "seating": "Fixed assigned left or right seat"
+          },
+          "source": "Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399); Hobeika thesis Ch. 7, printed pp. 83\u201387 (PDF pp. 104\u2013108); Hobeika thesis Ch. 7, printed pp. 88\u201391 (PDF pp. 109\u2013112)",
+          "gap": "No exact allocation of the trial families per block."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "sound_ms": 3000,
+            "between_sound_ms": [
+              3700,
+              4300
+            ],
+            "thesis_trial_presound_ms": 1000,
+            "thesis_trial_postsound_ms": [
+              2700,
+              3300
+            ],
+            "distribution": null
+          },
+          "source": "Acoustical Science and Technology p. 345, Material and methods; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "The sum of post-sound and next pre-sound silence is consistent with the article's 3700\u20134300 ms interval. The distribution is unreported."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Acoustical Science and Technology p. 345, Material and methods; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "Online RT window, timeout and lockout unavailable."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": {
+            "dyad": "Perform with a partner toward a shared goal. Instructions emphasize combined dyad performance.",
+            "isolated": "Perform alone. Thesis retains empty adjacent chair.",
+            "common": "Speeded right-finger button press for tactile stimulation. Ignore sound; withhold on auditory-only trials."
+          },
+          "source": "Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399); Hobeika thesis Ch. 7, printed pp. 78\u201379 (PDF pp. 99\u2013100)",
+          "gap": "Instructions describe the performance recording rule. Backend scoring implementation is unavailable."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "device": "28 mm miniature speaker",
+            "site": "Palmar left index",
+            "signal": "Sinusoid",
+            "frequency_Hz": 250,
+            "duration_ms": 20
+          },
+          "source": "Acoustical Science and Technology p. 345, Material and methods",
+          "gap": "Drive amplitude, speaker model and measured tactile timing unknown."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "anchor": "Sound onset",
+            "values_ms": [
+              0,
+              375,
+              750,
+              1125,
+              1500,
+              1875,
+              2250,
+              2625,
+              3000
+            ]
+          },
+          "source": "Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods"
+        },
+        "baseline_strategy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_ms_relative_to_sound_onset": [
+              -650,
+              3650
+            ],
+            "window_roles": [
+              "Before sound",
+              "After sound offset"
+            ],
+            "description": "Tactile probes in the silent windows of sound-containing trials in the thesis. Article describes these as unimodal tactile baselines."
+          },
+          "source": "Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399); Hobeika thesis Ch. 7, printed pp. 78\u201379 (PDF pp. 99\u2013100); Hobeika thesis Ch. 7, printed pp. 83\u201387 (PDF pp. 104\u2013108); Hobeika thesis Ch. 7, printed pp. 88\u201391 (PDF pp. 109\u2013112)",
+          "gap": "No numeric correction was specified by the journal. The thesis compares the silent windows and analyzes condition-level back-transformed RTs."
+        },
+        "baseline_timing": {
+          "status": "protocol_lineage_derived",
+          "value": {
+            "nominal_ms_relative_to_sound_onset": [
+              -650,
+              3650
+            ],
+            "window_roles": [
+              "Before sound",
+              "After sound offset"
+            ],
+            "description": "Tactile probes in the silent windows of sound-containing trials in the thesis. Article describes these as unimodal tactile baselines."
+          },
+          "source": "Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "Silent windows of the same trial, defined relative to audio onset. Tafter is 650 ms after sound offset."
+        },
+        "catch_trial_type": {
+          "status": "protocol_lineage_derived",
+          "value": "Auditory-only withhold",
+          "source": "Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "The short article omits catches."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "protocol_lineage_derived",
+          "value": 10,
+          "source": "Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "Per social condition \u00d7 sound side \u00d7 one of 11 touch timings."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 80,
+          "source": "Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "2 social contexts \u00d7 2 sound sides \u00d7 2 silent windows \u00d7 10 repetitions."
+        },
+        "catch_count": {
+          "status": "protocol_lineage_derived",
+          "value": 40,
+          "source": "Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "The thesis states 40 in the whole session. Exact distribution unknown."
+        },
+        "block_count": {
+          "status": "protocol_lineage_derived",
+          "value": 10,
+          "source": "Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399)",
+          "gap": "Ten blocks of 48 trials."
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "paired": 360,
+            "silent_window_tactile": 80,
+            "sound_only_catch": 40,
+            "tactile_target_trials": 440,
+            "total": 480,
+            "blocks": 10,
+            "per_block_total": 48,
+            "target_each_social_side_timing_cell": 10
+          },
+          "source": "Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399); Hobeika thesis Ch. 7, printed pp. 83\u201387 (PDF pp. 104\u2013108); Hobeika thesis Ch. 7, printed pp. 88\u201391 (PDF pp. 109\u2013112)",
+          "gap": "2 social contexts \u00d7 2 sides \u00d7 11 timings \u00d7 10 = 440 target trials. Add 40 catches. Silent-window touches are included in the 440."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires shared-clock coordination for two participants, routed and calibrated physical tactile and response paths, and the original audio rendering assets.",
+      "The exact per-block trial manifest, ITI draw distribution and response cutoff are unavailable. Silent-window tactile probes retain the sound sequence."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1250/ast.41.345. Acoustical Science and Technology p. 345, Material and methods; Acoustical Science and Technology p. 346, Table 1, Fig. 1 and Methods; Acoustical Science and Technology pp. 346\u2013348, Results, Fig. 2 and Discussion; Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399); Hobeika thesis Ch. 7, printed pp. 76\u201378 (PDF pp. 97\u201399); Hobeika thesis Ch. 7, printed pp. 78\u201379 (PDF pp. 99\u2013100)"
+    }
+  ]
+}

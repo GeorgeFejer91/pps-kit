@@ -1,0 +1,217 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "sancristobal_2022_ornstein_uhlenbeck_model",
+  "title": "Sancrist\u00f3bal 2022 \u00b7 Computational EEG power model",
+  "citation": "Sancrist\u00f3bal et al. (2022). Slow Resting State Fluctuations Enhance Neuronal and Behavioral Responses to Looming Sounds. Brain Topography, 35(1), 121\u2013141.",
+  "doi": "10.1007/s10548-021-00826-4",
+  "source_url": "https://doi.org/10.1007/s10548-021-00826-4",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1007/s10548-021-00826-4::ou-model",
+    "publication_status": "published",
+    "profile_type": "computational_model_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "companion_resting_profile_id": "sancristobal_2022_resting_eeg",
+      "model": "Simulate 62 Ornstein\u2013Uhlenbeck processes using channel- and frequency-band-specific resting decay and variance from positive-lag autocorrelations.",
+      "integration": {
+        "method": "Euler\u2013Maruyama",
+        "reported_step": 0.0001,
+        "coupling_A": [
+          0,
+          0.1
+        ],
+        "coupling_delay": "none"
+      },
+      "inputs": "Drive looming trials with the exponential input labelled 55\u201370 dB SPL over 3.1 s. Use zero input for rest and compare proportional versus decay-scaled stimulus coupling.",
+      "gain_settings": {
+        "low_rt_gain": 0.000167,
+        "high_rt_gain": 0.000667
+      },
+      "simulation_repetitions": 100,
+      "readout": "Correlate the averaged simulated response with sound intensity and compare with channel-specific resting decay. The printed dB labels alone do not resolve the numerical scaling of the drive."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Simulated deterministic intensity input to a stochastic model.",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139"
+        },
+        "source_provenance": {
+          "status": "reported",
+          "value": "Input intensity trajectory parameterized from the experimental sound.",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139"
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "value": 3100,
+            "unit": "ms"
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "auditory_conditions": {
+          "status": "reported_with_caveat",
+          "value": [
+            "exponentially rising input",
+            "constant flat parameter",
+            "zero-input rest"
+          ],
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "Figures 7\u20139 use the looming input for \u03c1 and zero-input for resting dynamics."
+        },
+        "gain_envelope": {
+          "status": "reported",
+          "value": {
+            "looming_start_dB_SPL": 55,
+            "looming_end_dB_SPL": 70,
+            "looming_envelope": "exponential increase",
+            "flat_dB_SPL": 62.5
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139"
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Euler\u2013Maruyama simulation of Ornstein\u2013Uhlenbeck processes.",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Simulated looming input",
+            "Simulated rest"
+          ],
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139"
+        },
+        "condition_intermixing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Compare two coupling strengths and two stimulus-timescale scaling rules across model cases.",
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "The 100 repeated simulations are repetitions of model input, not tactile trials."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "This procedure does not have the corresponding stimulus or trial family."
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming_repetitions_for_averaged_trace": 100
+          },
+          "source": "Sancrist\u00f3bal et al., author-shared journal PDF, PDF p. 7, Computational Model and PDF pp. 13\u201318, Eqs. 1\u20134 and Figs. 6\u20139",
+          "gap": "Number of independent random seeds or all executed simulation trials is unreported."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires executable model integration with original fitted parameters, exact drive scaling, initialization, random seed and coupled variance adjustment.",
+      "This computational assessment has no participant trial schedule. Its source-defined benchmark requires resting EEG-derived parameters and archived numerical results."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1007/s10548-021-00826-4. Brain Topography pp. 127 and 133\u2013138, Computational Model, Eqs. 1\u20134 and Figs. 6\u20139"
+    }
+  ]
+}

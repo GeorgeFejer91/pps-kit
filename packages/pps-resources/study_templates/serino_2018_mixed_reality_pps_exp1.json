@@ -1,0 +1,315 @@
+{
+  "template_id": "serino_2018_mixed_reality_pps_exp1",
+  "title": "Serino 2018 · mixed-reality visual–tactile PPS",
+  "citation": "Serino, A., Noel, J. P., Mange, R., Canzoneri, E., Pellencin, E., Ruiz, J. B., Bernasconi, F., Blanke, O., & Herbelin, B. (2018). Peripersonal Space: An Index of Multisensory Body–Environment Interactions in Real, Virtual, and Mixed Realities. Frontiers in ICT, 4, 31.",
+  "source_url": "https://doi.org/10.3389/fict.2017.00031",
+  "doi": "10.3389/fict.2017.00031",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3389/fict.2017.00031::a",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "visual": {
+        "object": "Virtual tennis ball approaches the face, starting nominally 2 m away.",
+        "speed_cm_s": 75,
+        "motion_ms": 2600,
+        "stationary_hold_ms": 400
+      },
+      "trial_timeline": {
+        "fixation_ms": 1200,
+        "pre_motion_ms": 300,
+        "approach_ms": 2600,
+        "hold_ms": 400,
+        "final_no_stimulation_ms": 500,
+        "total_ms": 5000
+      },
+      "target": "10 ms solenoid pulse to right cheek.",
+      "response": "Make a speeded button press when the cheek is touched; ignore the animated ball and withhold on trials without touch.",
+      "analysis": "Compare each multisensory delay's mean RT with the participant's fastest mean tactile-only delay. Fit the uncorrected multisensory means for the PPS transition.",
+      "participants": 27,
+      "schedule": {
+        "blocks": 4,
+        "trials_per_block": 75,
+        "delay_levels": 6,
+        "closest_delay_label": "D1",
+        "visual_tactile_trials": 216,
+        "tactile_only_trials": 48,
+        "visual_only_catch_trials": 36,
+        "total": 300
+      }
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "visual": "Virtual looming tennis ball",
+            "tactile": "Mechanical solenoid tap to right cheek"
+          },
+          "source": "Frontiers p. 5, Visual Stimuli and Fig. 3C–D and Frontiers pp. 3–4, Technological Components and Fig. 2"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Virtual ball superimposed on stereoscopic recording in RealiSM. ExpyVR coordinates stimuli and responses.",
+          "source": "Frontiers pp. 3–4, Technological Components and Fig. 2 and Frontiers p. 5, Visual Stimuli and Fig. 3C–D",
+          "gap": "Original scene, model, XML schedule and source version unavailable."
+        },
+        "trajectory_count": {
+          "status": "derived",
+          "value": 1,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "The procedure specifies one looming ball path."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "nominal_start_cm": 200,
+            "endpoint": "fictive contact with the face",
+            "speed_cm_s": 75,
+            "direction": "toward face",
+            "stimulus": "virtual tennis ball"
+          },
+          "source": "Frontiers p. 5, Visual Stimuli and Fig. 3C–D and Frontiers p. 6, Procedure",
+          "gap": "Published nominal path is 200 cm. The reported 75 cm/s × 2.6 s gives 195 cm. Start position and contact geometry require the original scene settings for exact reproduction."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "movement_ms": 2600,
+            "visual_hold_ms": 400,
+            "touch_ms": 10
+          },
+          "source": "Frontiers p. 6, Procedure and Frontiers pp. 3–4, Technological Components and Fig. 2"
+        },
+        "stimulus_speed": {
+          "status": "reported",
+          "value": 75,
+          "source": "Frontiers p. 5, Visual Stimuli and Fig. 3C–D and Frontiers p. 6, Procedure",
+          "gap": "cm/s, visual approach."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Experiment 1 probe is visual."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Experiment 1 has no task-irrelevant audio probe."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "renderer": "RealiSM",
+            "experiment_control": "ExpyVR with Qt4 and Python 2.7",
+            "scene_capture": "Seven stereoscopic GoPro Hero4 pairs on 3D 360hero 3DH3PRO14H rig",
+            "pair_spacing_cm": 6.3,
+            "video_stitching": "Two panoramic views, one per eye",
+            "audio_capture": "Four pairs of 3Dio Omni binaural microphones with interpolation between directions",
+            "HMD": {
+              "model": "Oculus Rift DK2",
+              "resolution_per_eye": [
+                960,
+                1080
+              ],
+              "refresh_Hz": 75,
+              "FOV_deg": {
+                "diagonal_approx": 105,
+                "horizontal_approx": 85
+              }
+            },
+            "body_camera": {
+              "model": "Duo3D MLX",
+              "resolution": [
+                752,
+                480
+              ],
+              "frame_rate_Hz": 56
+            },
+            "body_view": "First-person stereoscopic video of the user's own body overlaid on the panoramic scene",
+            "tracking": "Head rotation around the captured viewpoint",
+            "tactile": "MSTC-3 tappers, M&E Solve"
+          },
+          "source": "Frontiers pp. 3–4, Technological Components and Fig. 2",
+          "gap": "No source project or hardware latency measurements."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "visuotactile": 216,
+            "tactile_only": 48,
+            "visual_only_catch": 36,
+            "total": 300,
+            "proportions": {
+              "general_design_percent": {
+                "multisensory": 70,
+                "tactile_only": 20,
+                "catch": 10
+              },
+              "experiment_1_percent": {
+                "visuotactile": 72,
+                "tactile_only": 16,
+                "visual_only_catch": 12
+              }
+            }
+          },
+          "source": "Frontiers pp. 5–6, Experimental Design and Procedure",
+          "gap": "The paper describes a general 70%/20%/10% design. The Experiment 1 counts imply 72%/16%/12%. Use the stated 300-trial counts for Experiment 1."
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Visuotactile, tactile-only and visual-only catch trials randomly intermixed.",
+          "source": "Frontiers p. 6, Procedure"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": "Four 75-trial blocks, approximately seven minutes each. Random trial order.",
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Exact per-block family balance, randomization procedure and seed unreported."
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "fixation_between_trials_ms": 1200,
+            "after_fixation_to_motion_ms": 300,
+            "ball_approach_ms": 2600,
+            "ball_hold_ms": 400,
+            "no_stimulation_ms": 500,
+            "trial_duration_ms": 5000
+          },
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Fixation is described as between trials. The phases sum to 5000 ms. Separate ITI and jitter details are unreported."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "The article specifies speeded button detection. Online timeout and RT inclusion window unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Respond quickly and accurately to a cheek tap. Ignore the approaching ball. Withhold for catch trials.",
+          "source": "Frontiers pp. 5–6, Experimental Design and Procedure"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "right cheek",
+            "duration_ms": 10,
+            "type": "mechanical solenoid",
+            "model": "MSTC-3, M&E Solve"
+          },
+          "source": "Frontiers pp. 3–4, Technological Components and Fig. 2",
+          "gap": "Amplitude, pulse calibration and threshold procedure unreported."
+        },
+        "soa_table": {
+          "status": "reported_with_caveat",
+          "value": {
+            "delay_levels": 6,
+            "relative_anchor": "time from trial start",
+            "mapping": "D1 is closest and corresponds to the last temporal delay."
+          },
+          "source": "Frontiers pp. 5–6, Experimental Design and Procedure and Frontiers pp. 7–8, Experiment 1 Results and Fig. 4",
+          "gap": "Exact delay offsets and distances are unreported. Fig. 4 uses categorical labels."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Tactile-only trials at six delays. Subtract each participant's fastest mean tactile-only delay from every multisensory delay mean.",
+          "source": "Frontiers pp. 6–7, Analysis and Eq. 1 and Frontiers pp. 7–8, Experiment 1 Results and Fig. 4"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "levels": 6,
+            "timing": "same number of levels as visuotactile"
+          },
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Exact offsets unreported."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Visual-only virtual ball with no tactile pulse.",
+          "source": "Frontiers pp. 5–6, Experimental Design and Procedure"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "visuotactile": 36,
+            "tactile_only": 8
+          },
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Per delay across the full experiment."
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 48,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "Six tactile-only delay cells ×8."
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": 36,
+          "source": "Frontiers p. 6, Procedure"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 4,
+          "source": "Frontiers p. 6, Procedure"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": 300,
+          "source": "Frontiers p. 6, Procedure",
+          "gap": "216 visuotactile plus 48 tactile-only plus 36 catches."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The source stereoscopic scene and first-person body capture, tennis-ball placement, exact tactile delay table and participant-specific geometry are unavailable.",
+      "Requires rendering of the scene and approaching ball against a calibrated headset clock with 10 ms mechanical right-cheek stimulation and an aligned button response. The audio-tactile runner does not reproduce the mixed-reality task."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Serino 2018 · mixed-reality visual–tactile PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3389/fict.2017.00031. Frontiers p. 6, Procedure and Frontiers pp. 7–8, Experiment 1 Results and Fig. 4"
+    }
+  ]
+}

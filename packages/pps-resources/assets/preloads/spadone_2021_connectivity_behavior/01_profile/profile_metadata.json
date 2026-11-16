@@ -1,0 +1,299 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "spadone_2021_connectivity_behavior",
+  "title": "Spadone 2021 \u00b7 Behavioral PPS boundary",
+  "citation": "Spadone et al. (2021). Frontal and parietal background connectivity and their dynamic changes account for individual differences in the multisensory representation of peripersonal space. Scientific Reports, 11, 20533.",
+  "doi": "10.1038/s41598-021-00048-5",
+  "source_url": "https://doi.org/10.1038/s41598-021-00048-5",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1038/s41598-021-00048-5",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "sample": "Secondary analysis of 28 of 38 participants in the Ferri et al. cohort. Subset demographics are uncertain.",
+      "pink_noise": "3100 ms pink-noise trains. Looming 55 to 70 dB SPL, flat 62.5 dB SPL.",
+      "tactile": "Electrical stimulation of right index in the main task. Parent experiment describes a 100 \u00b5s monophasic rectangular suprathreshold DS7A pulse.",
+      "soa_ms": [
+        300,
+        800,
+        1500,
+        2200,
+        2700
+      ],
+      "candidate_distances_cm": [
+        97.7,
+        95.3,
+        88.6,
+        70.5,
+        41.7
+      ],
+      "allocation": "18 paired repetitions per sound and delay (180). Parent paper\u2019s 40% catch fraction implies 120 auditory-only trials. Three blocks.",
+      "response": "Left-index press for right-index touch. Fit a sigmoid to each participant\u2019s looming RT across the five delays and use its center as a boundary estimate.",
+      "iti_ms": 1000,
+      "relationship": "Behavioral data reanalyzed from 10.1523/JNEUROSCI.1696-15.2015."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "auditory": "looming and flat pink noise",
+            "tactile": "suprathreshold electrical index-finger touch"
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "stimulus_reuse": "Ferri et al. 2015",
+            "editor_from_ferri": "Sound Forge 4.5",
+            "sample_rate_hz_from_ferri": 44100
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "Original audio, code and calibration unavailable."
+        },
+        "trajectory_count": {
+          "status": "derived",
+          "value": {
+            "looming": 1,
+            "flat_control": 1
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A",
+          "gap": "Two waveform families. Looming cues approach."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": {
+            "geometry": "apparent approach toward right hand",
+            "speaker_separation_cm_from_ferri": 100,
+            "estimated_cm_at_soa": [
+              97.7,
+              95.3,
+              88.6,
+              70.5,
+              41.7
+            ],
+            "soa_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ],
+            "fit": "a * exp(b * x)"
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "Five perceived-distance estimates from intensity fit assuming constant sound speed. Coefficients, mapping implementation and direct metric validation unavailable."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": 3100,
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A",
+          "gap": "Apparent amplitude-driven motion. Physical source velocity is inapplicable."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming pink noise",
+            "flat pink noise"
+          ],
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming": "rising, fit to exponential",
+            "looming_db": [
+              55,
+              70
+            ],
+            "flat_db": 62.5
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A",
+          "gap": "Exact envelope coefficients, SPL weighting and calibration unknown."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "output": "two loudspeakers",
+            "response_box_from_ferri": "Cedrus RB-834",
+            "experiment_control_from_ferri": "custom MATLAB"
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "Speaker model, channel gains and runtime version unknown."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": {
+            "paired": "sound \u00d7 five delays",
+            "catches_from_ferri": "sound only"
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "Ferri reports 40% sound-only catches for the shared behavioral task. Spadone does not separately specify their proportion or allocation."
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Both sounds and five delays randomly intermingled with catch trials.",
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "blocks": 3,
+            "equal_size": true,
+            "within_block": "random"
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A",
+          "gap": "Per-cell block counts and order unavailable."
+        },
+        "iti_jitter_policy": {
+          "status": "reported",
+          "value": {
+            "fixed_ms": 1000,
+            "after": "trial"
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A",
+          "gap": "Response deadline and lockout unreported."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": {
+            "eyes": "blindfolded",
+            "right_index_target_from_ferri": true,
+            "response": "Left-index press as quickly as possible when touch occurs. Ignore sound.",
+            "session_sequence": "Behavioral estimates used to select fMRI delays."
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "Interval between sessions unreported."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "site": "index finger, paired electrodes",
+            "threshold": "suprathreshold",
+            "ferri_details": {
+              "site": "hairy right index finger",
+              "device": "Digitimer DS7A",
+              "pulse_shape": "single rectangular monophasic pulse",
+              "duration_us": 100,
+              "reported_current_range_mA": [
+                60,
+                90
+              ],
+              "calibration": {
+                "initial": "minimum then increase until perceived",
+                "validation_targets": 10,
+                "validation_empty_catches": 5,
+                "required_percent_correct": 100,
+                "step_on_error_mA": 5
+              }
+            }
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "Ferri reports a DS7A constant-current device and a constant-voltage pulse. Output mode and participant-level currents are unverified."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "anchor": "audio onset",
+            "tactile_ms": [
+              300,
+              800,
+              1500,
+              2200,
+              2700
+            ]
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": {
+            "tactile_only": false,
+            "flat": "matched timing and intensity control for looming"
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "Paired trials and sound-only catches exhaust the parent trial pool."
+        },
+        "catch_trial_type": {
+          "status": "protocol_lineage_derived",
+          "value": "Looming or flat sound only, withhold",
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "Ferri reports 40% sound-only catches for the shared behavioral task. Spadone does not separately specify their proportion or allocation."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "main_each_sound_delay": 18
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "baseline_count": {
+          "status": "protocol_lineage_derived",
+          "value": 0,
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "Parent describes exhaustive paired/catch allocation."
+        },
+        "catch_count": {
+          "status": "protocol_lineage_derived",
+          "value": 120,
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "180 paired trials at 60% give 300 trials, of which 40% are catches."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 3,
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A"
+        },
+        "total_trial_count": {
+          "status": "protocol_lineage_derived",
+          "value": {
+            "paired": 180,
+            "paired_each_sound_soa": 18,
+            "catch_from_ferri_derived": 120,
+            "total_from_ferri_derived": 300,
+            "blocks": 3,
+            "per_block_from_ferri_derived": 100
+          },
+          "source": "Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS",
+          "gap": "180 = 18 \u00d7 2 \u00d7 5. Total and block size derived using Ferri's 60/40 split."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires original loudspeaker envelopes and measured sound level, verified DS7A route and calibration, and original behavioral dataset for the same reanalysis.",
+      "Ferri\u2019s catch proportion belongs to the shared parent task. Spadone does not report its split by sound or block."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1038/s41598-021-00048-5. Scientific Reports pp. 3 and 9, Behavioral session and Fig. 1A; Scientific Reports pp. 3 and 9\u201310, Behavioral data analysis and Fig. 1A; Ferri et al. 2015, J. Neurosci. pp. 16329\u201316330 and 16333, behavioral PPS"
+    }
+  ]
+}

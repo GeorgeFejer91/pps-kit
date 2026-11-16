@@ -1,0 +1,274 @@
+{
+  "template_id": "cuppini_2011_superior_colliculus_maturation",
+  "title": "Cuppini 2011 · Superior colliculus maturation",
+  "citation": "Cuppini, C., Magosso, E., & Ursino, M. (2011). Organization, maturation, and plasticity of multisensory integration: Insights from computational modeling studies. Frontiers in Psychology, 2, 77.",
+  "source_url": "https://doi.org/10.3389/fpsyg.2011.00077",
+  "doi": "10.3389/fpsyg.2011.00077",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3389/fpsyg.2011.00077::sc_maturation",
+    "publication_status": "published",
+    "profile_type": "computational_pps_method",
+    "profile_check_complete": false,
+    "published_method": {
+      "initial_state": "Negligible descending AES inputs and weak ascending inputs with broad receptive fields.",
+      "training": "Hebbian training with modality and position draws. Use capped summed input weights.",
+      "evaluation": "Compare cospatial and discrepant audiovisual effects on steady-state SC activity before and after learning.",
+      "example_disparity_deg_as_captioned": 9,
+      "trial_count_exact": null
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "Spatial visual and auditory network inputs",
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "populations": [
+              "AEV visual",
+              "FAES auditory",
+              "non-AEV visual",
+              "non-FAES auditory",
+              "SC multisensory"
+            ],
+            "interneuron_populations": 4,
+            "spatial_representation": "One-dimensional topological chains with overlapping receptive fields",
+            "unit": "Sigmoid with threshold and saturation plus low-pass response",
+            "lateral_connections": "Mexican-hat excitation nearby and inhibition at larger distances",
+            "input_competition": "Interneurons suppress ascending inputs under AES influence and mediate competition among ascending modalities"
+          },
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Original implementation and some prior equations and numerical constants remain unavailable."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Independent spatial inputs. Figure comparisons vary locations."
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": "Visual input at the observed RF center with an auditory input at controlled spatial offsets.",
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Complete numerical stimulation schedule unavailable."
+        },
+        "stimulus_duration": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini et al. (2011), Frontiers in Psychology, pp. 3–7, model and simulations. Cuppini et al. (2011), Experimental Brain Research, Methods, training phase.",
+          "gap": "The Frontiers review provides no numerical duration for its simulations. The distinct 2011 Experimental Brain Research companion specifies 50 ms per training input. Its use in the review and the duration of assessment inputs remain unverified."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Spatial samples replace a moving source."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "A alone",
+            "V alone",
+            "A+V"
+          ],
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion"
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "No physical audio waveform is generated."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "Connectionist neural network",
+            "dynamics": {
+              "populations": [
+                "AEV visual",
+                "FAES auditory",
+                "non-AEV visual",
+                "non-FAES auditory",
+                "SC multisensory"
+              ],
+              "interneuron_populations": 4,
+              "spatial_representation": "One-dimensional topological chains with overlapping receptive fields",
+              "unit": "Sigmoid with threshold and saturation plus low-pass response",
+              "lateral_connections": "Mexican-hat excitation nearby and inhibition at larger distances",
+              "input_competition": "Interneurons suppress ascending inputs under AES influence and mediate competition among ascending modalities"
+            },
+            "prior_SC_reference": "Cuppini 2010 numerical Table 1"
+          },
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Solver, code version, time step and phase-specific numerical constants unavailable. The earlier SC table has its own source scope."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "Modality-specific training",
+            "Cross-modal training",
+            "Colocalized test",
+            "9° disparity test"
+          ],
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion"
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Training input mixture and exact order unspecified."
+        },
+        "blocked_or_random_order": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Training order and exact replay policy unspecified."
+        },
+        "iti_jitter_policy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Readout is approximately steady-state activity. Integration duration and tolerance unavailable."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "initial_state": "Descending AES synapses initially negligible. Ascending synapses weak with broad spatial RFs.",
+            "training_rule": {
+              "potentiation": "Both pre- and postsynaptic activity above threshold",
+              "depotentiation": "Presynaptic inhibited while postsynaptic above threshold",
+              "normalization": "Cap the summed incoming synaptic strength",
+              "plastic_paths": "Descending excitatory, descending inhibitory and SC lateral pathways are described as learning"
+            },
+            "input_schedule": {
+              "composition": "Thousands of cross-modal and modality-specific inputs",
+              "count_exact": null,
+              "modality_mix": null,
+              "amplitude_distribution": null,
+              "order": null,
+              "random_seed": null
+            },
+            "assessment": {
+              "pre_post": "Repeat adult-style colocalized and spatially disparate integration tests before and after learning",
+              "example_disparate_deg": 9
+            },
+            "findings": "Multisensory enhancement and depression emerge after learning in the illustrated simulated SC.",
+            "additional_predictions": "Dark rearing and training with spatially disparate inputs are discussed as predictions and preliminary simulations whose data are not reported."
+          },
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "This SC simulation concerns visual and auditory modalities."
+        },
+        "soa_table": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Cross-modal training involves concurrent stimuli, but exact event timing and temporal statistics are unavailable."
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Compare pretraining immature configuration to trained configuration",
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "The model reference condition is a separate configuration or stimulation mode."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "source_unavailable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "The review states thousands of training stimuli without an exact count or complete training protocol."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "No acquired baseline trial pool."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "block_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Neural simulations have no human acquisition schedule or response device."
+        },
+        "total_trial_count": {
+          "status": "source_unavailable",
+          "value": null,
+          "source": "Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion",
+          "gap": "Exact count of training and evaluation events unavailable."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "A neural network model solver is required. Exact weights, solver settings and the implementation from this figure series are unavailable.",
+      "The exact training schedule, mix, drive amplitudes and seed are unreported. The later related maturation run is distinct."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Cuppini 2011 · Superior colliculus maturation",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3389/fpsyg.2011.00077. Cuppini 2011, pp. 6–8, Maturation of multisensory integrative capabilities, Fig. 5 and discussion"
+    }
+  ]
+}

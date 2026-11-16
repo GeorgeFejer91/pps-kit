@@ -2,7 +2,7 @@
   "schema": "pps-preload-profile-assets.v1",
   "template_id": "serino_2015_peri_trunk_exp1",
   "title": "Serino 2015 peri-trunk PPS Experiment 1",
-  "visible_variant_label": "C",
+  "visible_variant_label": "G",
   "publication_status": "published",
   "profile_type": "",
   "asset_mode": "bundled_local",

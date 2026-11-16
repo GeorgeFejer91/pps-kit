@@ -8,6 +8,10 @@
   "verification_status": "verified",
   "notes": "Paper-extracted standing/walking full-body PPS profile. The runnable toolkit profile captures the reported white-noise source, 2 m approach/recede path, 0.75 m/s velocity, chest vibrotactile target, tactile delay/distance table, 512-trial experiment count, and mouse-click proxy for the right-thumb button response. The original treadmill, optic-flow display, physical two-array loudspeaker interpolation, and motor calibration remain apparatus context rather than generated stimuli.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2014.08.030::a",
+    "alternate_study_row_ids": [
+      "doi:10.1016/j.neuropsychologia.2014.08.030::b"
+    ],
     "profile_check_complete": true,
     "publication_status": "published",
     "profile_type": "full_body_action_walking_white_noise_vibrotactile_button_response",

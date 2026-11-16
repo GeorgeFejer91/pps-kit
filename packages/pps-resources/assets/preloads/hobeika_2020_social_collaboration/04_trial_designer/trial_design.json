@@ -1,0 +1,21 @@
+{
+  "schema": "pps-preload-trial-designer-segment.v1",
+  "template_id": "hobeika_2020_social_collaboration",
+  "repetitions_per_condition": 1,
+  "soa_values_ms": [
+    0,
+    375,
+    750,
+    1125,
+    1500,
+    1875,
+    2250,
+    2625,
+    3000
+  ],
+  "spatial_values_cm": [],
+  "custom_clip_assets": [],
+  "trial_strips": [],
+  "prestimulus_files": [],
+  "preview_trial_count": 0
+}

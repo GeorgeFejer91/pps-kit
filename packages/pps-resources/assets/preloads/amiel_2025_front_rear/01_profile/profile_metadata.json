@@ -1,0 +1,327 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "amiel_2025_front_rear",
+  "title": "Amiel 2026 \u00b7 Front and rear audiotactile PPS",
+  "citation": "Amiel, A., Hobeika, L., Viaud-Delmon, I., & Taffou, M. (2026). Functional organization of distance-dependent audio-tactile integration is different in rear and front spaces. Cortex, 194, 220\u2013238.",
+  "doi": "10.1016/j.cortex.2025.11.015",
+  "source_url": "https://doi.org/10.1016/j.cortex.2025.11.015",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.cortex.2025.11.015",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "cohort": {
+        "enrolled": 50,
+        "analyzed": 34,
+        "front_rear_confusion_exclusions": 15,
+        "trait_anxiety_exclusions": 1
+      },
+      "sessions": "Counterbalance front and rear across two days. Each session contains 20 blocks of 40 trials, with 32 tactile-present and eight no-touch trials per block.",
+      "conditions": "Within each hemifield, compare the fixed sound at 640 cm with looming sound from 640 to 20 cm on both sides. Positions in the authors' positive-left convention are \u00b145\u00b0 front and \u00b1135\u00b0 rear.",
+      "sound_onset_ms_from_trial_start": 300,
+      "reference_tactile_delays_ms_from_sound_onset": [
+        -250,
+        105,
+        1625,
+        2385,
+        2765,
+        2955,
+        3050,
+        3500
+      ],
+      "sampled_looming_distances_cm": [
+        640,
+        320,
+        160,
+        80,
+        40,
+        20
+      ],
+      "timing": "A 3,250 ms sound separates silent windows. The earliest and latest touch delays occur outside the sound within sound-present trials. The post-sound silence varies from 700 to 1,100 ms.",
+      "touch_and_response": "Apply 20 ms of 250 Hz vibration to the palmar left index finger through a 28 mm miniature speaker. A right-index button press reports touch. Withhold on no-touch trials.",
+      "sound_reconstruction": "The cited Hobeika burst recipe is consistent with the six nominal within-sound stimulation times. A candidate 95 ms onset period places each touch 10 ms inside its corresponding burst. This is a timing inference from the precursor protocol.",
+      "controls": "Initial hearing and handedness eligibility screening and trait anxiety assessment precede the sessions. After every block, verify tactile detectability and the reported auditory hemifield.",
+      "analysis": "Compare logged tactile reaction times for looming and fixed cues within each sampled delay and direction, with distributional and delta-plot analyses. The significant onset distances are discrete sampled positions."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "auditory": "3250 ms spatialized burst train, fixed or looming",
+            "tactile": "20 ms 250 Hz sinusoidal vibration"
+          },
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Generated in Max/MSP 6.1.10 using Spat and nonindividual LISTEN HRTFs; burst-train recipe delegated to Hobeika et al. 2020.",
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli",
+          "gap": "The cited Hobeika recipe is consistent with every nominal delay. The Amiel sound files and task code are required to verify the exact burst count, envelope and timing."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": 8,
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli",
+          "gap": "Four looming radial paths plus four fixed-source conditions; not eight moving trajectories."
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "ear_level": true,
+            "anchor": "head center",
+            "azimuth_degrees": {
+              "front_left": 45,
+              "front_right": -45,
+              "rear_left": 135,
+              "rear_right": -135
+            },
+            "looming_cm": [
+              640,
+              20
+            ],
+            "fixed_cm": 640,
+            "looming_travel_cm": 620,
+            "azimuth_sign_convention": "Positive left, negative right as printed."
+          },
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli; publisher Fig. 1b"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "auditory_ms": 3250,
+            "tactile_ms": 20
+          },
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli"
+        },
+        "stimulus_speed": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming_cm_s": 210,
+            "fixed_cm_s": 0
+          },
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli",
+          "gap": "The six nominal position\u2013time anchors span 2945 ms from T1 to T6. Each adjacent segment implies 210.53 cm/s, consistent with the reported 210 cm/s at its stated precision. The 105 ms before T1 and 200 ms after T6 are audio intervals outside the sampled motion span. The original position command, endpoint holds and measured playback motion remain unverified."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "fixed",
+            "looming"
+          ],
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli"
+        },
+        "gain_envelope": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli",
+          "gap": "Distance rendering uses direct sound, early reflections and late reverberation; no numerical gain curve, SPL endpoints or calibration recipe supplied."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "generation": "Max/MSP 6.1.10, Spat",
+            "hrtf": "nonindividual LISTEN",
+            "headphones": "Beyerdynamic DT770",
+            "controller": "PC with Presentation",
+            "touch": "28 mm miniature speaker"
+          },
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli",
+          "gap": "Spat version, HRTF listener/filter, headphone impedance, audio interface and trigger latencies not supplied."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "target_with_sound": "touch at one of eight delays, including before/after sound",
+            "catch": "sound with no touch"
+          },
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Fixed and looming trials randomly intermixed within a block; front and rear sessions separate.",
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Two separate-day hemifield sessions counterbalanced across participants; randomized stimuli within each block.",
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "pre_sound_ms": 300,
+            "post_sound_silence_ms": [
+              700,
+              1100
+            ],
+            "post_sound_silence_randomized": true,
+            "sound_duration_ms": 3250,
+            "trial_sequence_duration_ms_derived": [
+              4250,
+              4650
+            ]
+          },
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1; publisher Fig. 1a",
+          "gap": "Derived interval covers the illustrated 300 ms silence, 3250 ms sound and 700\u20131100 ms final silence. Any additional ITI, sampling distribution, step and seed remain unspecified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1; Journal pp. 225\u2013230, \u00a7\u00a73.1\u20133.2.2, Figs. 2\u20135 and Appendix Figs. A1\u2013A3",
+          "gap": "Speeded button press; offline retention at 100\u20131000 ms is not an online capture window or timeout."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "response": "right-index button press on detecting left-index touch; ignore sound; avoid anticipation",
+            "fixation": "front wall cross",
+            "head": "headrest restricts movement",
+            "post_block": "check touch detectability and intended front/rear perception"
+          },
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "site": "palmar left index finger",
+            "actuator_diameter_mm": 28,
+            "waveform": "sinusoidal",
+            "frequency_hz": 250,
+            "duration_ms": 20,
+            "calibration": "easily felt but inaudible in silence; checked after every block"
+          },
+          "source": "Journal p. 223, \u00a72.2 Experimental setup and stimuli",
+          "gap": "Manufacturer/model, amplitude and latency not stated."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "reference": "sound onset",
+            "labels": [
+              "Tbefore",
+              "T1",
+              "T2",
+              "T3",
+              "T4",
+              "T5",
+              "T6",
+              "Tafter"
+            ],
+            "ms": [
+              -250,
+              105,
+              1625,
+              2385,
+              2765,
+              2955,
+              3050,
+              3500
+            ],
+            "looming_distance_cm_T1_T6": [
+              640,
+              320,
+              160,
+              80,
+              40,
+              20
+            ]
+          },
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Before/after silent windows in trials that still contain sound; matched fixed-far sound controls temporal expectancy at all delays.",
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "reported",
+          "value": {
+            "reference": "sound onset",
+            "ms": [
+              -250,
+              3500
+            ],
+            "sound_offset_ms": 3250,
+            "before_ms_from_trial_start_derived": 50,
+            "after_ms_from_trial_start_derived": 3800,
+            "after_ms_from_sound_offset_derived": 250
+          },
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1; publisher Fig. 1a",
+          "gap": "Trial-relative values are derived by adding the 300 ms initial silence to the sound-onset-referenced delays. The after-offset value is 3500 \u2212 3250 ms."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Auditory stimulus with no tactile stimulation; withhold button press.",
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": 20,
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": {
+            "across_both_sessions": 320,
+            "before": 160,
+            "after": 160,
+            "per_session": 160,
+            "standalone_sound_free_trials": 0
+          },
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1",
+          "gap": "2 sound types \u00d7 2 hemifields \u00d7 2 sides \u00d7 2 baseline times \u00d7 20 repetitions."
+        },
+        "catch_count": {
+          "status": "reported",
+          "value": {
+            "across_sessions": 320,
+            "per_block": 8,
+            "percent": 20
+          },
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1",
+          "gap": "Per sound \u00d7 side catch allocation not specified."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "per_session": 20,
+            "sessions": 2
+          },
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        },
+        "total_trial_count": {
+          "status": "reported",
+          "value": {
+            "both_sessions": 1600,
+            "tactile_present": 1280,
+            "no_touch_catches": 320,
+            "per_block": 40
+          },
+          "source": "Journal pp. 223\u2013225, \u00a72.3 Procedure and Fig. 1"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Recover or validate the 3,250 ms Max/MSP/Spat binaural stimuli, exact burst samples, LISTEN HRTF selection, reverberation and delivered headphone levels.",
+      "Synchronize left-index stimulation and the right-hand response to both silent-window and sound-present events. Validate tactile amplitude and physical trigger latency.",
+      "Recover exact within-block allocation, realized random orders and the post-sound jitter distribution for both counterbalanced sessions."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.cortex.2025.11.015. Amiel et al. (2026), Cortex 194, pp. 222\u2013230 and 233\u2013235, \u00a7\u00a72.1\u20133.2.2, Figs. 1\u20135 and A.1\u2013A.3."
+    }
+  ]
+}

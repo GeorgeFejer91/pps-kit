@@ -1,0 +1,289 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "bertoni_2024_clinical_arm_pps",
+  "title": "Bertoni 2024 preprint \u00b7 Bedside arm PPS",
+  "citation": "Bertoni et al. (2024). Multisensory integration in Peripersonal Space indexes consciousness states in sleep and disorders of consciousness. bioRxiv v1.",
+  "doi": "10.1101/2024.10.25.619776",
+  "source_url": "https://doi.org/10.1101/2024.10.25.619776",
+  "verification_status": "partial",
+  "notes": "Preprint study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1101/2024.10.25.619776::clinical-pps",
+    "publication_status": "preprint",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "reported_n": 72,
+      "families": [
+        "T",
+        "AN",
+        "AF",
+        "ANT",
+        "AFT"
+      ],
+      "sound": {
+        "white_noise_ms": 50,
+        "distances_cm": [
+          5,
+          75
+        ],
+        "dB_SPL": [
+          65.2,
+          64.1
+        ]
+      },
+      "tactile": "MEDEL MOTIONSTIM 8 functional electrical stimulation on the right extensor digitorum communis with shoulder ground. 50 ms train at 35 Hz and 70% of measured motor threshold.",
+      "paired_soa_ms": 0,
+      "iti_ms": [
+        1500,
+        2000
+      ],
+      "planned_counts": {
+        "per_family_per_block": 50,
+        "per_block": 250,
+        "session_blocks": [
+          1,
+          3
+        ]
+      },
+      "response": "Passive task with clinical classification and outcomes recorded separately.",
+      "analysis": "Apply the high-beta PPS index to CRS-R, cognitive-motor dissociation, functional outcomes and any available MRI measures. Methods specify first sessions, but the description of exclusions and pooled sessions leaves the denominator unresolved."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": "White-noise bursts.",
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "source_provenance": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol",
+          "gap": "Patient variant does not identify the waveform files or generator. E-Prime 2 generation is stated for healthy participants."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "stationary": true,
+            "near_cm": 5,
+            "far_cm": 75,
+            "anchor": "extended arm",
+            "axis": "depth"
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 50
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "AN",
+            "AF",
+            "ANT",
+            "AFT"
+          ],
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "near_dB_SPL": 65.2,
+            "far_dB_SPL": 64.1
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol",
+          "gap": "Waveform envelope and SPL calibration procedure unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "speaker_count": 2,
+            "speaker_model": "Logitech Z120",
+            "tactile_device": "MEDEL MOTIONSTIM 8",
+            "eeg": "16-channel g.USBamp or g.Nautilus"
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": [
+            "T",
+            "AN",
+            "AF",
+            "ANT",
+            "AFT"
+          ],
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Five conditions fully randomized within each block, with 50 of each.",
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": "Fully randomized within blocks. Number of blocks depends on clinical constraints.",
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "range_ms": [
+              1500,
+              2000
+            ],
+            "distribution": "uniform"
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol",
+          "gap": "Event anchor for interval unspecified."
+        },
+        "response_window": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Passive EEG in a lighting- and sound-controlled bedside environment, supine at about 130\u00b0. Brief breaks between blocks.",
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "mode": "functional electrical stimulation",
+            "device": "MEDEL MOTIONSTIM 8",
+            "site": "extensor digitorum communis, dorsal arm near elbow",
+            "earth_contact": "right shoulder",
+            "electrodes": "Flextrode Plus pair",
+            "stimulation_window_ms": 50,
+            "rate_hz": 35,
+            "motor_threshold_percent": 70,
+            "reported_current_range_mA": [
+              5,
+              11
+            ],
+            "right_arm": true
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol",
+          "gap": "Individual pulse width, waveform and stimulation laterality exceptions are not specified in this report."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "bimodal_ms": 0,
+            "reference": "tactile onset minus auditory onset",
+            "soa_ladder": false
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Measured unimodal controls. Baseline correction of EEG epochs. Normalize Welch power to mean baseline PSD across the five stimulus conditions.",
+          "source": "bioRxiv v1 pp. 20\u201322, DoC EEG and spectral methods"
+        },
+        "baseline_timing": {
+          "status": "reported_with_caveat",
+          "value": {
+            "epoch_ms": [
+              -100,
+              500
+            ],
+            "prestimulus_EEG_baseline_ms": [
+              -100,
+              0
+            ],
+            "separate_Fig4g_PSD_baseline_ms": 500,
+            "anchor": "stimulus onset"
+          },
+          "source": "bioRxiv v1 pp. 20\u201322, DoC EEG and spectral methods; bioRxiv v1 p. 14, Fig. 4g",
+          "gap": "Fig. 4g describes a separate 0.5 s prestimulus PSD comparison. Its relationship to the shorter EEG baseline and normalization window is unclear."
+        },
+        "catch_trial_type": {
+          "status": "reported_absent",
+          "value": "Five passive EEG stimulus families with no response-inhibition row.",
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_condition_per_block": 50
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "baseline_count": {
+          "status": "reported",
+          "value": {
+            "T_per_block": 50,
+            "AN_per_block": 50,
+            "AF_per_block": 50
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "catch_count": {
+          "status": "reported_absent",
+          "value": 0,
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol"
+        },
+        "block_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "range_per_session": [
+              1,
+              3
+            ],
+            "mean_per_session": 2.8,
+            "SD": 0.5,
+            "minutes_per_block": 10
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol",
+          "gap": "Participants section gives these figures. The later Protocol paragraph contains placeholders for the mean and range."
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "per_block": 250,
+            "possible_session_totals": [
+              250,
+              500,
+              750
+            ]
+          },
+          "source": "bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol",
+          "gap": "50 \u00d7 5 trials per block, 1\u20133 blocks per session."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires clinical screening, FES calibration, two independently triggered loudspeakers and synchronized clinical EEG.",
+      "The exact trial manifest, delivered FES waveform and clinical session denominators are unresolved."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1101/2024.10.25.619776. bioRxiv v1 pp. 19\u201320, DoC participants, Stimuli and Protocol; bioRxiv v1 pp. 20\u201322, DoC EEG and spectral methods; bioRxiv v1 pp. 10\u201311 and 19\u201321, clinical evaluation and Fig. 4"
+    }
+  ]
+}

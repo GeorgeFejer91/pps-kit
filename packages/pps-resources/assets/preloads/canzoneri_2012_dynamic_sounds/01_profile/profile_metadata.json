@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Canonical dynamic audio-tactile PPS task with 80 sound-overlap targets, 32 sound-present T0/T6 targets delivered in silence, and 76 auditory-only catches. The software recreates the moving sound virtually. Exact author gains, room transfer, tactile calibration and voice-key timing are unverified.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1371/journal.pone.0044306",
     "profile_type": "canonical_dynamic_audio_tactile_pps",
     "sound_duration_ms": 3000,
     "pre_sound_silence_ms": 1000,

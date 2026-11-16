@@ -1,0 +1,349 @@
+{
+  "template_id": "ferri_2015_premotor_itv_fmri",
+  "title": "Ferri 2015 · personalized scanner PPS",
+  "citation": "Ferri, F., Costantini, M., Huang, Z., Perrucci, M. G., Ferretti, A., Romani, G. L., & Northoff, G. (2015). Intertrial Variability in the Premotor Cortex Accounts for Individual Differences in Peripersonal Space. Journal of Neuroscience, 35(49), 16328–16339.",
+  "source_url": "https://doi.org/10.1523/jneurosci.1696-15.2015",
+  "doi": "10.1523/jneurosci.1696-15.2015",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1523/jneurosci.1696-15.2015::fmri",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": {
+        "enrolled": 38,
+        "whole_brain_analysis": 36,
+        "boundary_linked_roi_analysis": 28
+      },
+      "conditions": [
+        "Flat near",
+        "Flat far",
+        "Looming near",
+        "Looming far"
+      ],
+      "sound": "The pink-noise amplitude cues are delivered through MRI-compatible headphones; the external loudspeaker spatial coordinates do not apply.",
+      "delays": {
+        "anchor": "Sound onset",
+        "near_candidates_ms": [
+          1500,
+          2200,
+          2700
+        ],
+        "far_candidates_ms": [
+          300,
+          800
+        ],
+        "rule": "Select participant-specific behavioral delays using fast/slow and low-variability looming responses. Reuse them in both sound conditions."
+      },
+      "schedule": {
+        "runs": 5,
+        "main_trials_per_condition": 30,
+        "main_trials_total": 120,
+        "published_catch_count": 20,
+        "catch_scope": "The report does not resolve total versus per-condition catches."
+      },
+      "response": "Left middle-finger press only on a left-index catch. Withhold on right-index targets; model false alarms and misses separately.",
+      "endpoint": "Measure BOLD and premotor intertrial variability with independently specified ROIs, relating the latter to the independently estimated behavioral boundary."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "noise": "pink (1/f)",
+            "sample_hz": 44100,
+            "conditions": [
+              "looming pink noise",
+              "flat pink noise"
+            ]
+          },
+          "source": "Author web-print PDF p. 2, Stimuli"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": {
+            "editor": "Sound Forge 4.5",
+            "levels": {
+              "looming_exponential_db": [
+                55,
+                70
+              ],
+              "flat_db": 62.5
+            }
+          },
+          "source": "Author web-print PDF p. 2, Stimuli",
+          "gap": "Exact waveforms, seed and processing scripts not available."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "looming": 1,
+            "flat": 1,
+            "flat_role": "stationary intensity control"
+          },
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "trajectory_path": {
+          "status": "reported_with_caveat",
+          "value": "Same amplitude-only stimuli over MRI headphones.",
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2",
+          "gap": "No equivalent metric spatial coordinates for scanner presentation."
+        },
+        "stimulus_duration": {
+          "status": "reported",
+          "value": {
+            "audio_ms": 3100,
+            "tactile_us": 100
+          },
+          "source": "Author web-print PDF p. 2, Stimuli"
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "Apparent approach via intensity, with no physical source velocity."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "looming pink noise",
+            "flat pink noise"
+          ],
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "looming_exponential_db": [
+              55,
+              70
+            ],
+            "flat_db": 62.5
+          },
+          "source": "Author web-print PDF p. 2, Stimuli",
+          "gap": "Gain coefficients, SPL weighting and calibration unspecified."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "headphones": "MRI-compatible headphones with NordicNeuroLab audio system",
+            "button": "Cedrus Lumina LU400 with LSC-400",
+            "control": "MATLAB"
+          },
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2",
+          "gap": "Headphone model and timing calibration unreported."
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported_with_caveat",
+          "value": {
+            "main": 120,
+            "left_index_catch": "20 with ambiguous scope"
+          },
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2",
+          "gap": "The Methods say 20 catch trials for the same conditions. Per-condition versus aggregate scope is not explicit."
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": "Four main conditions and matched catch conditions randomly intermixed, equally distributed over runs.",
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2"
+        },
+        "blocked_or_random_order": {
+          "status": "reported_with_caveat",
+          "value": {
+            "runs": 5,
+            "run_minutes": 6,
+            "main_trials_each_derived": 24,
+            "conditions": "randomly intermixed"
+          },
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2",
+          "gap": "The Methods say 20 catch trials for the same conditions. Per-condition versus aggregate scope is not explicit."
+        },
+        "iti_jitter_policy": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "base_ms": [
+              4650,
+              6200,
+              7750
+            ],
+            "catch_extension": {
+              "printed_after_catch_ms": 1.55,
+              "described_as_TR": 1,
+              "TR_ms": 1550,
+              "likely_intended_ms": 1550,
+              "author_web_print_ms": 1.55,
+              "version_of_record_ms": 1.55,
+              "indexed_text_rendering_ms": 1550,
+              "actual_ms": null
+            },
+            "figure_ms": [
+              4560,
+              6200,
+              7750
+            ]
+          },
+          "source": "Journal PDF pp. 16331–16332, Fig. 2, fMRI PPS Methods and Image acquisition; coauthor web print PDF p. 3",
+          "gap": "The published PDF figure labels the shortest interval 4.56 s, while Methods give 4.65 s (three 1.55 s TRs). The published PDF and coauthor web print both give the extra catch interval as 1.55 ms and describe it as one TR. One TR implies 1550 ms. The search-index text displays 1.55 s. The delivered interval is unverified."
+        },
+        "response_window": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "Speed instruction and outlier rule described. Online deadline unspecified."
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": {
+            "vision": "blindfolded, eyes closed",
+            "main": "Right index touch, no response",
+            "catch": "Left index touch, respond with left middle finger on MRI response pad"
+          },
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "source_inconsistency_caveat",
+          "value": {
+            "site": "hairy index finger, right main or left catch",
+            "device": "Digitimer DS7A",
+            "pulse_shape": "single rectangular monophasic pulse",
+            "duration_us": 100,
+            "reported_current_range_mA": [
+              60,
+              90
+            ],
+            "calibration": {
+              "initial": "minimum then increase until perceived",
+              "validation_targets": 10,
+              "validation_empty_catches": 5,
+              "required_percent_correct": 100,
+              "step_on_error_mA": 5
+            }
+          },
+          "source": "Author web-print PDF p. 2, Stimuli; Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2",
+          "gap": "Constant-current device and constant-voltage pulse descriptions conflict."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "relative_to_sound_onset": true,
+            "near_ms": {
+              "1500": 4,
+              "2200": 14,
+              "2700": 20
+            },
+            "far_ms": {
+              "300": 25,
+              "800": 13
+            },
+            "selection": "For each participant, use behavioral delay with fastest and least variable looming RTs for near and slowest and least variable for far. Same delay used for matched flat condition."
+          },
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2"
+        },
+        "baseline_strategy": {
+          "status": "reported_absent",
+          "value": {
+            "separate_tactile_only": false,
+            "reason": "Every scanner PPS trial includes sound and touch. Flat trials are an intensity control."
+          },
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "No tactile-only baseline."
+        },
+        "catch_trial_type": {
+          "status": "reported",
+          "value": "Left-index audio–tactile event requiring a left-middle-finger press. Right-index main trials are no-response.",
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "main_per_cell": 30,
+            "conditions": 4
+          },
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": 0,
+          "source": "Author web-print PDF pp. 2–3 and 5, Behavioral PPS and Fig. 1",
+          "gap": "Exhaustive main trial families leave no tactile-only trials."
+        },
+        "catch_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "printed": 20,
+            "per_session_if_total": 20,
+            "per_session_if_per_cell": 80
+          },
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2",
+          "gap": "The Methods say 20 catch trials for the same conditions. Per-condition versus aggregate scope is not explicit."
+        },
+        "block_count": {
+          "status": "reported",
+          "value": 5,
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2"
+        },
+        "total_trial_count": {
+          "status": "reported_with_caveat",
+          "value": {
+            "main": 120,
+            "if_catch_total": 140,
+            "if_catch_per_cell": 200
+          },
+          "source": "Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2",
+          "gap": "The Methods say 20 catch trials for the same conditions. Per-condition versus aggregate scope is not explicit."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "The original flat and exponential rising pink-noise waveforms, full amplitude envelopes, loudspeaker gains and absolute acoustic calibration are unavailable.",
+      "Requires a calibrated Digitimer DS7A trigger and measured electrical tactile delivery. The software touch marker does not recreate the physical electrical target.",
+      "The protocol requires trial selection from each participant’s behavioral data, MRI-compatible playback and tactile targets, scanner trigger and BOLD acquisition, and an independent auditory localizer.",
+      "The scanner catch-trial count and post-catch interval are ambiguous in the report; obtain the original schedule before a research run."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Ferri 2015 · personalized scanner PPS",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1523/jneurosci.1696-15.2015. Author web-print PDF pp. 3–4 and 6–7, fMRI PPS and Fig. 2"
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+{
+  "template_id": "cimmino_2013_arm_elongation_body_image",
+  "title": "Cimmino 2013 · Body image reconstruction",
+  "citation": "Cimmino et al. (2013). Plasticity of body representations after surgical arm elongation in an achondroplasic patient. Restorative Neurology and Neuroscience, 31(3), 287–298.",
+  "source_url": "https://doi.org/10.3233/rnn-120286",
+  "doi": "10.3233/rnn-120286",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.3233/rnn-120286::body_image",
+    "publication_status": "published",
+    "profile_type": "companion_assessment_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "companion_pps_profile_id": "cimmino_2013_arm_elongation_pps",
+      "context": "Companion outcome in the surgical arm-elongation case study.",
+      "comparison": {
+        "assessed": 20,
+        "analyzed": 16
+      },
+      "apparatus": "Daurat–Hmeljak body image reconstruction using a board with a face outline and rectangular body-part tiles.",
+      "procedure": "The seated participant places each tile in the front-view reconstruction without a time limit. Remove the preceding tile before each new placement.",
+      "capture": "Record perpendicular 600 by 800 pixel images. Convert image coordinates to centimeters and score right shoulder to right index fingertip and right hip to right great toe."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "source_provenance": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "trajectory_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "trajectory_path": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "stimulus_duration": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "auditory_conditions": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "gain_envelope": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": "Board marked with a face outline, rectangular tiles depicting body parts",
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "Exact allocation not given."
+        },
+        "condition_intermixing": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No exact within-block ordering provided."
+        },
+        "blocked_or_random_order": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "iti_jitter_policy": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No ITI rule specified."
+        },
+        "response_window": {
+          "status": "reported",
+          "value": "No time limit",
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3"
+        },
+        "task_sequence_rules": {
+          "status": "reported",
+          "value": "Place one tile to reconstruct the front-view body. Remove the previous tile after each placement.",
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3"
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "Visual reconstruction without controlled tactile target."
+        },
+        "soa_table": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "baseline_strategy": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "catch_trial_type": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No catch procedure documented for this assessment."
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "baseline_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No auditory source or audio–tactile timing in this assessment."
+        },
+        "catch_count": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "No separate catch family described."
+        },
+        "block_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "Formal block count not specified."
+        },
+        "total_trial_count": {
+          "status": "not_reported_after_review",
+          "value": null,
+          "source": "Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3",
+          "gap": "Total trials not specified."
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires the physical tiles and fixture, calibrated image capture and continuous placement scoring.",
+      "Original tile artwork and geometry, exact capture scale and trial manifest are unavailable."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "design": {
+    "name": "Cimmino 2013 · Body image reconstruction",
+    "sofa_file": "",
+    "noises": [],
+    "custom_looming_files": [],
+    "prestimulus_files": [],
+    "protocol": {
+      "spatial_values_cm": [],
+      "soa_values_ms": [],
+      "include_catch_trials": false,
+      "catch_trial_percentage": 0,
+      "include_baseline_trials": false,
+      "baseline_trial_percentage": 0,
+      "baseline_strategy": "none",
+      "trial_strips": [],
+      "tactile_sites": [],
+      "pair_spatial_values_with_soas": false,
+      "respiratory_phases": [
+        "Any"
+      ],
+      "blocks": 1,
+      "participants": 1,
+      "block_order_randomization": "fixed"
+    }
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.3233/rnn-120286. Cimmino et al. 2013, pp. 290–291, §2.4; Cimmino et al. 2013, pp. 293–295, §3.3, Table 4 and Fig. 3"
+    }
+  ]
+}

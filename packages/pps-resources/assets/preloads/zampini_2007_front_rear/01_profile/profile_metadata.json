@@ -1,0 +1,291 @@
+{
+  "schema": "pps-preload-profile-segment.v1",
+  "template_id": "zampini_2007_front_rear",
+  "title": "Zampini 2007 \u00b7 front and rear multisensory detection",
+  "citation": "Zampini, M., Torresan, D., Spence, C., & Murray, M. M. (2007). Auditory\u2013somatosensory multisensory interactions in front and rear space. Neuropsychologia, 45(8), 1869\u20131877.",
+  "doi": "10.1016/j.neuropsychologia.2006.12.004",
+  "source_url": "https://doi.org/10.1016/j.neuropsychologia.2006.12.004",
+  "verification_status": "partial",
+  "notes": "Published study settings are available for inspection. See the source-backed method and remaining execution requirements.",
+  "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2006.12.004",
+    "publication_status": "published",
+    "profile_type": "published_method_inspection",
+    "profile_check_complete": false,
+    "published_method": {
+      "participants": 12,
+      "geometry": "Hands are held one front and one rear, about 70 cm from the ears. Each transient loudspeaker sits 1 cm from its paired stimulator; continuous maskers sit 10 cm outward from each stimulator.",
+      "audio": "50 ms white-noise burst (82 dBA at the head) and continuous white-noise maskers (75 dBA at the head).",
+      "schedule": {
+        "formal_blocks": 8,
+        "trials_per_block": 80,
+        "formal_trials": 640,
+        "practice_trials": 32,
+        "configurations": [
+          "Audio front",
+          "Audio rear",
+          "Touch front",
+          "Touch rear",
+          "Aligned front",
+          "Aligned rear",
+          "Audio front with touch rear",
+          "Audio rear with touch front"
+        ],
+        "hand_posture": "Counterbalanced across blocks",
+        "nominal_audio_tactile_onset_offset_ms": 0,
+        "interstimulus_interval_ms": [
+          1500,
+          2500
+        ],
+        "empty_trials": 0
+      },
+      "response": "Right-foot pedal to every stimulus arrangement, including both kinds of unimodal comparison. Compare paired RT distributions with probability-summation predictions using retained RTs of 150\u20131000 ms."
+    },
+    "publication_parameters": {
+      "stimulus": {
+        "stimulus_type": {
+          "status": "reported",
+          "value": {
+            "transient": "White noise",
+            "continuous_masker": "White noise"
+          },
+          "source": "Article p. 1871, \u00a72.2"
+        },
+        "source_provenance": {
+          "status": "reported_with_caveat",
+          "value": "Transient bursts and continuous masking noise played through separate sets of loudspeakers.",
+          "source": "Article p. 1871, \u00a72.2",
+          "gap": "Exact waveforms, sample rate and generation settings unavailable."
+        },
+        "trajectory_count": {
+          "status": "reported",
+          "value": {
+            "fixed_transient_positions": 2,
+            "fixed_masker_positions": 2
+          },
+          "source": "Article p. 1871, \u00a72.2"
+        },
+        "trajectory_path": {
+          "status": "reported",
+          "value": {
+            "motion": "Stationary",
+            "target_source_offsets_from_tactile_cm": 1,
+            "hand_distances_to_ears_cm": [
+              70,
+              70
+            ],
+            "maskers": "10 cm outward from each tactile stimulator."
+          },
+          "source": "Article p. 1871, \u00a72.2"
+        },
+        "stimulus_duration": {
+          "status": "reported_with_caveat",
+          "value": {
+            "auditory_burst_ms": 50,
+            "masker": "Continuous"
+          },
+          "source": "Article p. 1871, \u00a72.2",
+          "gap": "Tactile pulse duration not specified."
+        },
+        "stimulus_speed": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Article p. 1871, \u00a72.3 and Fig. 1",
+          "gap": "Sources stay fixed."
+        },
+        "auditory_conditions": {
+          "status": "reported",
+          "value": [
+            "Front transient",
+            "Rear transient",
+            "Continuous background masking"
+          ],
+          "source": "Article p. 1871, \u00a72.2"
+        },
+        "gain_envelope": {
+          "status": "reported_with_caveat",
+          "value": {
+            "transient_head_level_dba": 82,
+            "masker_head_level_dba": 75
+          },
+          "source": "Article p. 1871, \u00a72.2",
+          "gap": "Burst ramp and equalization unavailable."
+        },
+        "renderer_or_apparatus": {
+          "status": "reported",
+          "value": {
+            "transient_and_masker_speaker": "VE100AO, Audax, separate pairs",
+            "control": "E-Prime",
+            "response_device": "Right footpedal"
+          },
+          "source": "Article p. 1871, \u00a72.2; Article p. 1872, \u00a72.4"
+        }
+      },
+      "trial_sequence": {
+        "trial_rows_families": {
+          "status": "reported",
+          "value": {
+            "unisensory": [
+              "Auditory front",
+              "Auditory rear",
+              "Touch front",
+              "Touch rear"
+            ],
+            "bimodal": [
+              "Aligned front",
+              "Aligned rear",
+              "Audio front + touch rear",
+              "Audio rear + touch front"
+            ]
+          },
+          "source": "Article p. 1871, \u00a72.3 and Fig. 1"
+        },
+        "condition_intermixing": {
+          "status": "reported",
+          "value": {
+            "configuration_count": 8,
+            "balance": "Equal frequency and random order within each 80-trial block."
+          },
+          "source": "Article p. 1871, \u00a72.2"
+        },
+        "blocked_or_random_order": {
+          "status": "reported",
+          "value": {
+            "formal_blocks": 8,
+            "hand_posture": "Counterbalanced across blocks",
+            "starting_hand": "Counterbalanced across participants"
+          },
+          "source": "Article p. 1871, \u00a72.3 and Fig. 1"
+        },
+        "iti_jitter_policy": {
+          "status": "reported_with_caveat",
+          "value": {
+            "random_interstimulus_interval_ms": [
+              1500,
+              2500
+            ]
+          },
+          "source": "Article p. 1871, \u00a72.2",
+          "gap": "Distribution and onset/offset anchor unknown."
+        },
+        "response_window": {
+          "status": "reported_with_caveat",
+          "value": {
+            "valid_rt_ms": [
+              150,
+              1000
+            ]
+          },
+          "source": "Article p. 1872, \u00a72.4",
+          "gap": "Analysis validity range. Online timeout unknown."
+        },
+        "task_sequence_rules": {
+          "status": "reported_with_caveat",
+          "value": "Respond quickly with the right foot to any target stimulus. Avoid anticipation.",
+          "source": "Article p. 1872, \u00a72.4",
+          "gap": "Methods say eyes closed. Figure 1 caption describes central fixation. Confirm the gaze protocol before recreation."
+        }
+      },
+      "touch_and_timing": {
+        "tactile_stimulus": {
+          "status": "reported_with_caveat",
+          "value": {
+            "type": "Vibration",
+            "device": "Oticon-A 100 \u03a9 bone-conduction vibrator",
+            "dimensions_cm": [
+              1.6,
+              2.4
+            ],
+            "site": "Between thumb and index finger of either hand",
+            "drive": "White noise generator"
+          },
+          "source": "Article p. 1871, \u00a72.2",
+          "gap": "Pulse duration, mechanical intensity, and timing calibration unknown. The electrical audio-generator specification is not a tactile exposure level."
+        },
+        "soa_table": {
+          "status": "reported",
+          "value": {
+            "bimodal_soa_ms": [
+              0
+            ],
+            "anchor": "Synchronous auditory and tactile onset"
+          },
+          "source": "Article p. 1871, \u00a72.3 and Fig. 1"
+        },
+        "baseline_strategy": {
+          "status": "reported",
+          "value": "Auditory-only and tactile-only active detection trials are unimodal comparisons for paired stimuli.",
+          "source": "Article p. 1871, \u00a72.3 and Fig. 1"
+        },
+        "baseline_timing": {
+          "status": "not_applicable",
+          "value": null,
+          "source": "Article p. 1871, \u00a72.3 and Fig. 1",
+          "gap": "There is no cross-modal offset in a unimodal trial."
+        },
+        "catch_trial_type": {
+          "status": "derived",
+          "value": "The reported pool consists of eight active response-required configurations.",
+          "source": "Article p. 1871, \u00a72.3 and Fig. 1"
+        }
+      },
+      "trial_allocation": {
+        "repetitions_per_tactile_soa_condition": {
+          "status": "reported",
+          "value": {
+            "per_configuration_per_participant": 80
+          },
+          "source": "Article p. 1871, \u00a72.2"
+        },
+        "baseline_count": {
+          "status": "derived",
+          "value": {
+            "auditory_only": 160,
+            "tactile_only": 160,
+            "total_unimodal": 320,
+            "derivation": "4 unimodal configurations \u00d7 80"
+          },
+          "source": "Article p. 1871, \u00a72.2; Article p. 1871, \u00a72.3 and Fig. 1"
+        },
+        "catch_count": {
+          "status": "derived",
+          "value": {
+            "formal_no_target_trials": 0,
+            "derivation": "Eight response-required configurations exhaust the formal pool."
+          },
+          "source": "Article p. 1871, \u00a72.2; Article p. 1871, \u00a72.3 and Fig. 1"
+        },
+        "block_count": {
+          "status": "reported",
+          "value": {
+            "formal": 8,
+            "practice": 2,
+            "formal_trials_per_block": 80,
+            "practice_trials_per_block": 16
+          },
+          "source": "Article p. 1871, \u00a72.2; Article p. 1872, \u00a72.4"
+        },
+        "total_trial_count": {
+          "status": "derived",
+          "value": {
+            "formal": 640,
+            "practice": 32,
+            "derivation": "8 \u00d7 80 formal and 2 \u00d7 16 practice trials"
+          },
+          "source": "Article p. 1871, \u00a72.2; Article p. 1872, \u00a72.4"
+        }
+      }
+    },
+    "implementation_gaps": [
+      "Requires independent front/rear transient and continuous masking channels, participant-relative physical loudspeaker placement, two calibrated vibrators and a right footpedal on a common clock. The available renderer does not instantiate this four-speaker arrangement.",
+      "Need exact burst and masking calibration reference, delivered tactile waveform/level, physical latency and original randomization to verify equivalence."
+    ],
+    "planner_scope": "The study settings describe the source procedure. The Planner contains no executable trial schedule for this profile."
+  },
+  "provenance": [
+    {
+      "field": "Study design and execution parameters",
+      "source": "https://doi.org/10.1016/j.neuropsychologia.2006.12.004. Article pp. 1872\u20131874, Tables 1\u20132 and Fig. 2"
+    }
+  ]
+}

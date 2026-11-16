@@ -8,6 +8,7 @@
   "verification_status": "partial",
   "notes": "Experiment 2 specification. The three IADS sounds and a white-noise comparator are listed in the filmstrip. The sample-accurate sound files must be supplied before the trial pool can be generated.",
   "reference_parameters": {
+    "study_row_id": "doi:10.1016/j.neuropsychologia.2015.03.001::b",
     "profile_type": "audio_tactile_ecological_valence",
     "implemented_controls": [
       "Tactile timing at 300\u20133000 ms in 300-ms steps, with D0 at \u2212500 ms on trials that still present the sound.",
