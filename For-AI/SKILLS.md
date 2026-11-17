@@ -116,6 +116,7 @@ acceptance criteria pass. Do not create a duplicate progress ledger.
 | Scope | Required route |
 | --- | --- |
 | Shell output in every project | [rtk](skills/rtk/SKILL.md); use supported compact commands, with raw reads for editing, parsers, hashes, and exact evidence |
+| Token use in every project | `saia-task-router` before delegation or subagent spawn. Use local tools for deterministic work and offload only provider-authorized inputs. Continue in the current agent if SAIA is unavailable. |
 | Lifecycle in every project | Use `gsd-help` when installed; otherwise use [gsd-core-workflow](skills/gsd-core-workflow/SKILL.md). Reuse `.planning/` state when present and apply bounded outcome/evidence discipline inline for small changes |
 | Engineering in every project | Use `superpowers-using-superpowers` when installed; otherwise use [superpowers-workflow](skills/superpowers-workflow/SKILL.md) for relevant practices. Preserve similarly named local skills |
 | Coding and review | `ponytail`, then the affected domain skill |
