@@ -25,6 +25,7 @@ from peripersonal_space_toolkit.dashboard_app import DashboardController, create
 from peripersonal_space_toolkit.runtime_paths import designer_frontend_root
 from peripersonal_space_toolkit.design import (
     AudioFileSpec,
+    BlockSpec,
     NoiseDefinition,
     PPS_LOOMING_GOLD_STANDARD_SOURCE_PROFILE,
     ProtocolSpec,
@@ -753,6 +754,18 @@ def test_dashboard_static_assets_are_packaged():
     assert "radiusChanged" not in viewer_js
     assert "trajectory-viewer.js?v=" in viewer_files.joinpath("index.html").read_text(encoding="utf-8")
     assert "/api/" not in html
+
+
+def test_segment5_condition_locked_allocator_uses_all_eligible_blocks():
+    specs = [BlockSpec(label, ["Audio-Tactile"], ["a", "b"]) for label in ["first", "second"]]
+    rows = [
+        {"trial_pool_index": i, "row_id": strip_id, "row_label": strip_id,
+         "folder_key": f"row_{i:02d}__{strip_id}__audio_tactile", "family": "audio_tactile", "soa_ms": 100}
+        for i, strip_id in enumerate(["a", "b"], start=1)
+    ]
+    blocks = dashboard_app._assign_condition_locked_rows(rows, specs, seed=2, repeat=False)
+    assert [len(block) for block in blocks] == [1, 1]
+    assert {block[0]["trial_pool_index"] for block in blocks} == {1, 2}
 
 
 def test_segment5_block_scheduler_is_seeded_gellermann_and_row_order_preserving():
@@ -3962,7 +3975,8 @@ def test_dashboard_bakes_baseline_tactile_trial_files_with_three_channels(tmp_pa
     assert "already prepared" in second_prepare.json()["detail"]
 
 
-def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_csv(tmp_path: Path):
+@pytest.mark.parametrize("locked", [False, True])
+def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_csv(tmp_path: Path, locked):
     client = _client(tmp_path)
     custom = client.post("/api/templates/__custom__/load").json()
     sample_rate = 44100
@@ -3997,6 +4011,7 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
     custom["design"]["protocol"]["pair_spatial_values_with_soas"] = True
     custom["design"]["protocol"]["include_catch_trials"] = False
     custom["design"]["protocol"]["include_baseline_trials"] = False
+    custom["design"]["protocol"]["baseline_strategy"] = "none"
     custom["design"]["protocol"]["blocks"] = 1
     custom["design"]["protocol"]["trial_strips"] = [
         {
@@ -4044,6 +4059,12 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
             ],
         },
     ]
+    if locked:
+        custom["design"]["protocol"]["blocks"] = 2
+        custom["design"]["protocol"]["block_specs"] = [
+            {"label": label, "stimulus_types": ["Audio-Tactile"], "trial_strip_ids": [strip_id]}
+            for label, strip_id in [("Far condition", "strong-far"), ("Near condition", "weak-near")]
+        ]
     custom = client.post("/api/design", json={"design": custom["design"]}).json()
 
     sequence_job = client.post(
@@ -4101,13 +4122,19 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
         json={
             "participant_id": "P001",
             "design": custom["design"],
-            "bake_recipe": {"kind": "block_csv_preview", "label": "5_block_csv_preview", "block_count": 1},
+            "bake_recipe": {"kind": "block_csv_preview", "label": "5_block_csv_preview", "block_count": 2 if locked else 1},
         },
     ).json()
     block_done = _wait_job(client, block_job["job_id"])
     assert block_done["status"] == "succeeded"
     block_manifest = _read_json_file(block_done["result"]["manifest_path"])
-    block_rows = list(csv.DictReader(Path(block_manifest["blocks"][0]["csv_path"]).open(encoding="utf-8")))
+    rows_by_block = []
+    for block in block_manifest["blocks"]:
+        with Path(block["csv_path"]).open(encoding="utf-8") as stream:
+            rows_by_block.append(list(csv.DictReader(stream)))
+    if locked:
+        assert [[row["row_id"] for row in rows] for rows in rows_by_block] == [["strong-far"], ["weak-near"]]
+    block_rows = [row for rows in rows_by_block for row in rows]
     block_by_role = {row["target_role"]: row for row in block_rows}
     assert block_by_role["weak_target"]["expected_response"] == "respond"
     assert block_by_role["weak_target"]["soa_ms"] == "0"
@@ -4116,6 +4143,25 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
     assert block_by_role["strong_nontarget"]["soa_ms"] == "5"
     assert block_by_role["strong_nontarget"]["spatial_value_cm"] == "125.0"
     assert block_by_role["strong_nontarget"]["tactile_stimulation_modality"] == "electrical"
+
+    if locked:
+        accepted = client.post("/api/block-csv/accept", json={})
+        assert accepted.status_code == 200, accepted.text
+        setup = client.post("/api/run-sequence/prepare", json={})
+        assert setup.status_code == 200, setup.text
+        prepared = client.post("/api/session/prepare", json={"participant_id": "P001"})
+        assert prepared.status_code == 200, prepared.text
+        assert Path(prepared.json()["session"]["manifest_path"]).is_file()
+
+        changed_design = client.get("/api/state").json()["design"]
+        specs = changed_design["protocol"]["block_specs"]
+        specs[0]["trial_strip_ids"] = ["weak-near"]
+        specs[1]["trial_strip_ids"] = ["strong-far"]
+        changed = client.post("/api/design", json={"design": changed_design})
+        assert changed.status_code == 200, changed.text
+        stale = client.post("/api/block-csv/accept", json={})
+        assert stale.status_code == 400
+        assert "condition-locked block design changed" in stale.json()["detail"]
 
 
 def test_auditory_only_bake_render_writes_stereo_wav(tmp_path: Path):

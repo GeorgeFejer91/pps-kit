@@ -5,7 +5,7 @@
   "doi": "10.1109/whc.2017.7989970",
   "source_url": "https://doi.org/10.1109/whc.2017.7989970",
   "verification_status": "partial",
-  "notes": "Design inspection of the 192 conditioning trials in the 2017 IEEE study. Original sound, independently synchronized heel and chest outputs, and the reported condition-block scheduler are required for a participant session.",
+  "notes": "Design inspection for the 192 conditioning trials in six condition-specific blocks. Original sound, independently synchronized heel and chest outputs, and study-specific response capture are still required for a participant session.",
   "reference_parameters": {
     "study_row_id": "doi:10.1109/whc.2017.7989970",
     "publication_status": "published",
@@ -55,7 +55,7 @@
       "audio": "Generated 5 s, 44.1 kHz, fixed-gain continuous white noise for software timing. These files are preview assets; the reported perceived approach and dB(A) envelope require original or validated calibrated audio.",
       "trajectory": "Path-length and propagation-speed fields provide the five-second render duration. The paper's 0.7 m/s and nominal probe distances are retained as separate study evidence.",
       "target": "Any generated Toolkit tactile cue is a software marker for verifying schedule offsets. The Acouve drive waveform and delivery latency require external validation.",
-      "schedule": "One pooled inspection block uses a deterministic replay seed and implements stated total cell repetitions. Participant-specific block order, response capture and physical actuation remain separately gated."
+      "schedule": "The preview uses one illustrative ABCCBA assignment and eight repeats per distance in each block. Each pattern occurs in two blocks, giving the reported 16 repeats per distance and 192 total trials. Realized block assignments, per-block frequency and trial order are unknown."
     },
     "heel_conditioning": {
       "apparatus": "Acouve Lab Vp416 voice coils attached to slippers",
@@ -151,12 +151,12 @@
       "locator": "p. 607, §III.E"
     },
     "implemented_controls": [
-      "Three condition labels × four probe locations × 16 repetitions in the inspection pool."
+      "Six condition-locked blocks × four probe distances × eight preview repeats reproduce the 192 conditioning trials under a symmetric split."
     ],
     "implementation_gaps": [
       "Original 2017 white-noise audio, sample format, dose calibration and author-confirmed magnitude law.",
       "Independent synchronized bilateral heel and chest actuator scheduler, Acouve drive files, measured amplitude and verified tactile timing.",
-      "A condition-locking ABCCBA trial scheduler for six blocks plus the original participant assignments and between-block rest.",
+      "Original participant-to-order assignments, per-block distance counts, rest realization and numeric key capture.",
       "Exact sound/chest timing anchor resolution, tactile-only baseline allocation and any catch trials or ITI schedule."
     ]
   },
@@ -180,7 +180,7 @@
       "use_inverse_square": false
     },
     "protocol": {
-      "repetitions_per_condition": 16,
+      "repetitions_per_condition": 8,
       "soa_values_ms": [
         2710,
         3290,
@@ -207,12 +207,61 @@
         "Main-task preview"
       ],
       "participants": 1,
-      "blocks": 1,
+      "blocks": 6,
+      "repeat_trial_pool_per_block": true,
       "block_specs": [
         {
-          "label": "Design inspection only",
+          "label": "01 · Walking-sound vibration",
           "stimulus_types": [
             "Audio-Tactile"
+          ],
+          "trial_strip_ids": [
+            "walking_sound_heels"
+          ]
+        },
+        {
+          "label": "02 · Asynchronous walking-sound vibration",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ],
+          "trial_strip_ids": [
+            "asynchronous_walking_sound_heels"
+          ]
+        },
+        {
+          "label": "03 · 60 Hz sinusoidal vibration",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ],
+          "trial_strip_ids": [
+            "sinusoidal_heels"
+          ]
+        },
+        {
+          "label": "04 · 60 Hz sinusoidal vibration",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ],
+          "trial_strip_ids": [
+            "sinusoidal_heels"
+          ]
+        },
+        {
+          "label": "05 · Asynchronous walking-sound vibration",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ],
+          "trial_strip_ids": [
+            "asynchronous_walking_sound_heels"
+          ]
+        },
+        {
+          "label": "06 · Walking-sound vibration",
+          "stimulus_types": [
+            "Audio-Tactile"
+          ],
+          "trial_strip_ids": [
+            "walking_sound_heels"
           ]
         }
       ],

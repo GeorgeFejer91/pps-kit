@@ -482,6 +482,21 @@ def test_replication_assessments_preserve_counts_and_declared_motion():
     assert {row["motion_direction"] for row in rows if "looming" in row["noise_label"].lower()} == {"looming"}
 
 
+def test_amemiya_2017_preview_schedules_six_condition_locked_blocks():
+    template_id = "amemiya_2017_ieee_foot_sole_vibration"
+    templates = {t.template_id: t for t in load_templates(ROOT / "packages/pps-resources/study_templates")}
+    rows = block_trial_rows(templates[template_id].design)
+    expected_order = [
+        "walking_sound_heels", "asynchronous_walking_sound_heels", "sinusoidal_heels",
+        "sinusoidal_heels", "asynchronous_walking_sound_heels", "walking_sound_heels",
+    ]
+    assert len(rows) == 192
+    for block_index, strip_id in enumerate(expected_order, start=1):
+        block = [row for row in rows if row["block_index"] == block_index]
+        assert {row["trial_strip_id"] for row in block} == {strip_id}
+        assert Counter(row["spatial_value_cm"] for row in block) == {40: 8, 80: 8, 120: 8, 160: 8}
+
+
 def test_barumerli_segment2_expands_analog_motion_to_binaural_source_variants():
     root = ROOT
     trial_design = json.loads(

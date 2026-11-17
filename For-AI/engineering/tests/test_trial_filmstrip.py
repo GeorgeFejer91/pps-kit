@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+import pytest
 import soundfile as sf
 
 from peripersonal_space_toolkit.design import (
@@ -83,6 +84,38 @@ def test_trial_strips_round_trip_and_interleave_within_block_event_sequences():
     assert sum(1 for row in rows if row["trial_type_label"] == "Inhale trial type") == 20
     assert sum(1 for row in rows if row["trial_type_label"] == "Exhale trial type") == 20
     assert all(" | " in row["sequence_labels"] for row in rows)
+
+
+@pytest.mark.parametrize("repeat", [False, True])
+def test_condition_locked_blocks_use_strip_ids_after_round_trip(repeat):
+    payload = design_to_dict(_filmstrip_design(source_count=1))
+    protocol = payload["protocol"]
+    protocol["blocks"] = 3
+    protocol["repeat_trial_pool_per_block"] = repeat
+    protocol["block_specs"] = [
+        {"label": label, "stimulus_types": ["Audio-Tactile"], "trial_strip_ids": [strip_id]}
+        for label, strip_id in [("A1", "inhale-row"), ("B", "exhale-row"), ("A2", "inhale-row")]
+    ]
+    for strip in protocol["trial_strips"]:
+        strip["label"] = "Shared display label"
+    design = design_from_dict(design_to_dict(design_from_dict(payload)))
+    rows = block_trial_rows(design)
+    assert rows == block_trial_rows(design)
+    assert {(r["block_label"], r["trial_strip_id"]) for r in rows} == {
+        ("A1", "inhale-row"), ("B", "exhale-row"), ("A2", "inhale-row")
+    }
+    assert Counter(r["trial_strip_id"] for r in rows) == {
+        "inhale-row": 10 if repeat else 5, "exhale-row": 5
+    }
+    broken = design_to_dict(design)
+    broken["protocol"]["block_specs"][0]["trial_strip_ids"] = ["missing-strip"]
+    with pytest.raises(ValueError, match="missing-strip"):
+        block_trial_rows(design_from_dict(broken))
+    orphan = design_to_dict(design)
+    orphan["protocol"]["include_catch_trials"] = True
+    orphan["protocol"]["catch_trials_exact"] = 2
+    with pytest.raises(ValueError, match="No block accepts Catch trials"):
+        block_trial_rows(design_from_dict(orphan))
 
 
 def test_trial_sequence_jitter_multiplies_sequence_variants():

@@ -50,6 +50,7 @@ from .design import (
     design_to_dict,
     effective_block_specs,
     expand_trial_strip_source_labels,
+    fill_empty_condition_blocks,
     gold_standard_looming_source_parameters,
     has_trial_strips,
     load_design,
@@ -2266,7 +2267,7 @@ class DashboardController:
                     {
                         "kind": "block_csv_preview",
                         "label": "5_block_csv_preview",
-                        "block_count": max(1, int(getattr(design.protocol, "blocks", 1) or 1)),
+                        "block_count": len(_condition_locked_block_specs(design)) or max(1, int(design.protocol.blocks or 1)),
                     },
                 ),
             )
@@ -5597,6 +5598,13 @@ def _validate_trial_pool_manifest(
     csv_path = Path(str(manifest.get("csv_path") or _trial_pool_csv_path(project_dir)))
     if not _path_exists(csv_path):
         return ["Segment 4 trial-pool CSV is missing."]
+    if _condition_locked_block_specs(design):
+        if "row_id" not in (manifest.get("csv_columns") or []):
+            return ["Rebake Segment 4 to include trial strip IDs for condition-locked blocks."]
+        if (manifest.get("segment_lineage") or {}).get("design_signature") != _design_segment_signatures(design)[4]:
+            return ["Rebake Segment 4 because its condition-locked trial-pool settings changed."]
+        if manifest.get("csv_sha256") != _local_file_sha256(csv_path):
+            return ["Rebake Segment 4 because its condition-locked trial pool changed."]
     if _count_files(_trial_pool_root(project_dir), suffix=".wav"):
         return ["Segment 4 must not duplicate WAV files; remove WAVs from the trial-pool folder."]
     if int(manifest.get("total_trials") or 0) <= 0:
@@ -5614,6 +5622,7 @@ def _validate_block_csv_preview_manifest(
         return ["Segment 5 manifest is missing."]
     if manifest.get("schema") != BLOCK_CSV_PREVIEW_MANIFEST_SCHEMA:
         return ["Segment 5 manifest schema is not recognized."]
+    locked_specs = _condition_locked_block_specs(design)
     source_manifest_path = _trial_pool_manifest_path(project_dir)
     lineage_errors = validate_segment_lineage(
         manifest,
@@ -5622,6 +5631,10 @@ def _validate_block_csv_preview_manifest(
     )
     if lineage_errors:
         return lineage_errors
+    if design is not None and (locked_specs or manifest.get("condition_locked")):
+        stored_signature = (manifest.get("segment_lineage") or {}).get("design_signature")
+        if not locked_specs or stored_signature != _design_segment_signatures(design)[5]:
+            return ["Segment 5 must be rebaked after the condition-locked block design changed."]
     source_manifest = _load_json(source_manifest_path)
     source_errors = _validate_trial_pool_manifest(source_manifest, project_dir=project_dir, design=design)
     if source_errors:
@@ -5632,16 +5645,27 @@ def _validate_block_csv_preview_manifest(
     blocks = manifest.get("blocks", []) if isinstance(manifest.get("blocks"), list) else []
     if not blocks:
         return ["Segment 5 manifest does not contain any block CSVs."]
+    if locked_specs and [block.get("block_label") for block in blocks] != [spec.label for spec in locked_specs]:
+        return ["Segment 5 block labels differ from the condition-locked design."]
     total_rows = 0
-    for block in blocks:
+    for index, block in enumerate(blocks):
         csv_path = Path(str(block.get("csv_path") or ""))
         if not _path_exists(csv_path):
             return [f"Segment 5 block CSV is missing: {csv_path.name}."]
+        if locked_specs and block.get("csv_sha256") != _local_file_sha256(csv_path):
+            return [f"Segment 5 condition-locked block CSV changed: {csv_path.name}."]
         try:
             with open(_filesystem_path(csv_path), encoding="utf-8") as handle:
-                row_count = sum(1 for _row in csv.DictReader(handle))
+                rows = csv.DictReader(handle)
+                row_count = 0
+                for row in rows:
+                    if locked_specs and not _locked_block_accepts_row(locked_specs[index], row):
+                        return [f"Segment 5 block CSV contains a trial outside its condition: {csv_path.name}."]
+                    row_count += 1
         except Exception as exc:
             return [f"Segment 5 block CSV could not be read: {exc}"]
+        if locked_specs and row_count == 0:
+            return [f"Condition-locked block CSV has no trials: {csv_path.name}."]
         expected = int(block.get("trial_count") or 0)
         if expected and row_count != expected:
             return [f"Segment 5 block CSV row count changed: {csv_path.name}."]
@@ -7194,6 +7218,7 @@ def _trial_pool_row_from_record(
         "family": family,
         "folder_key": str(source.get("folder_key") or ""),
         "folder_name": str(source.get("folder_name") or ""),
+        "row_id": str(source.get("row_id") or ""),
         "row_label": str(source.get("row_label") or ""),
         "source_file_name": str(source.get("source_file_name") or Path(str(source.get("file_path") or "")).name),
         "trial_file_path": str(source.get("file_path") or ""),
@@ -7254,6 +7279,7 @@ def _build_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recip
         "family",
         "folder_key",
         "folder_name",
+        "row_id",
         "row_label",
         "source_file_name",
         "trial_file_path",
@@ -7361,6 +7387,7 @@ def _build_trial_repetition_pool(design: StimulusDesign, render_dir: Path, recip
         "written_at": datetime.now().isoformat(timespec="seconds"),
         "root": str(root),
         "csv_path": str(csv_path),
+        "csv_sha256": _local_file_sha256(csv_path),
         "source_segment3_manifest": str(source_manifest_path),
         "source_segment3_manifest_sha256": _local_file_sha256(source_manifest_path),
         "segment_lineage": build_segment_lineage(
@@ -7690,6 +7717,46 @@ def _block_csv_family_label(family: str) -> str:
     }.get(family, family.replace("_", " ").title() if family else "Trial")
 
 
+def _condition_locked_block_specs(design: StimulusDesign | None) -> list[BlockSpec]:
+    if design is None or not any(block.trial_strip_ids for block in design.protocol.block_specs):
+        return []
+    return effective_block_specs(design.protocol)
+
+
+def _locked_block_accepts_row(block: BlockSpec, row: dict[str, Any]) -> bool:
+    row_id = str(row.get("row_id") or "")
+    stimulus_type = _family_label(_trial_pool_family_key(row.get("family")))
+    return bool(row_id) and block.allows_strip(row_id) and stimulus_type in block.stimulus_types
+
+
+def _assign_condition_locked_rows(
+    pool_rows: list[dict[str, Any]], specs: list[BlockSpec], *, seed: int, repeat: bool,
+) -> list[list[dict[str, Any]]]:
+    eligibility: dict[tuple[str, str], tuple[int, ...]] = {}
+    by_eligible_blocks: dict[tuple[int, ...], list[dict[str, Any]]] = {}
+    for row in pool_rows:
+        row_id = str(row.get("row_id") or "")
+        family = _trial_pool_family_key(row.get("family"))
+        key = (row_id, family)
+        if key not in eligibility:
+            eligibility[key] = tuple(index for index, spec in enumerate(specs) if _locked_block_accepts_row(spec, row))
+        eligible = eligibility[key]
+        if not eligible:
+            raise ValueError(f"No condition-locked block accepts {family} trials with strip ID {row_id!r}.")
+        by_eligible_blocks.setdefault(eligible, []).append(row)
+
+    if repeat:
+        require_plan_size(sum(len(eligible) * len(rows) for eligible, rows in by_eligible_blocks.items()),
+                          "Repeated condition-locked block schedule")
+    blocks: list[list[dict[str, Any]]] = [[] for _ in specs]
+    for eligible, rows in by_eligible_blocks.items():
+        assignments = [rows] * len(eligible) if repeat else _assign_trial_pool_rows_to_blocks(rows, len(eligible), seed=seed)
+        for index, assigned in zip(eligible, assignments, strict=True):
+            blocks[index].extend(assigned)
+    fill_empty_condition_blocks(blocks, specs, _locked_block_accepts_row)
+    return blocks
+
+
 def _block_csv_row(
     source: dict[str, Any],
     *,
@@ -7716,6 +7783,7 @@ def _block_csv_row(
         "family": family,
         "family_label": _block_csv_family_label(family),
         "family_color_hex": TRIAL_FAMILY_COLORS.get(family, "#68746c"),
+        "row_id": source.get("row_id", ""),
         "row_label": row_label,
         "row_color_hex": _hashed_feature_color(row_label),
         "folder_key": source.get("folder_key", ""),
@@ -7802,15 +7870,22 @@ def _build_block_csv_preview(
     if not pool_rows:
         raise ValueError("Segment 4 trial-pool CSV does not contain any rows.")
 
-    block_count = max(1, int(recipe.get("block_count") or getattr(design.protocol, "blocks", 1) or 1))
+    locked_specs = _condition_locked_block_specs(design)
+    requested_block_count = recipe.get("block_count")
+    block_count = max(1, int(requested_block_count or len(locked_specs) or design.protocol.blocks or 1))
+    if locked_specs and block_count != len(locked_specs):
+        raise ValueError("Segment 5 block count must match the condition-locked block design.")
     recipe_seed = recipe.get("seed")
-    seed = int(getattr(design.protocol, "random_seed", 20250604) if recipe_seed is None else recipe_seed)
+    seed = int(design.protocol.random_seed if locked_specs or recipe_seed is None else recipe_seed)
     recipe_repeat = recipe.get("repeat_trial_pool_per_block")
     if isinstance(recipe_repeat, str):
         recipe_repeat = recipe_repeat.strip().lower() in {"1", "true", "yes", "on"}
     repeat_trial_pool_per_block = bool(recipe_repeat or getattr(design.protocol, "repeat_trial_pool_per_block", False))
+    if locked_specs:
+        repeat_trial_pool_per_block = design.protocol.repeat_trial_pool_per_block
     require_plan_size(block_count, "Blocks", limit=MAX_BLOCKS)
-    require_plan_size(len(pool_rows) * (block_count if repeat_trial_pool_per_block else 1), "Block schedule")
+    multiplier = block_count if repeat_trial_pool_per_block and not locked_specs else 1
+    require_plan_size(len(pool_rows) * multiplier, "Block schedule")
     soa_values: list[int] = []
     for row in pool_rows:
         try:
@@ -7828,11 +7903,13 @@ def _build_block_csv_preview(
         progress(0, block_count, "Reading Segment 4 trial pool")
 
     row_order = _block_csv_row_order(pool_rows)
-    if repeat_trial_pool_per_block:
+    if locked_specs:
+        blocks = _assign_condition_locked_rows(pool_rows, locked_specs, seed=seed, repeat=repeat_trial_pool_per_block)
+    elif repeat_trial_pool_per_block:
         blocks = [list(pool_rows) for _ in range(block_count)]
     else:
         blocks = _assign_trial_pool_rows_to_blocks(pool_rows, block_count, seed=seed)
-    explicit_block_specs = list(getattr(design.protocol, "block_specs", []) or [])
+    explicit_block_specs = locked_specs or design.protocol.block_specs
     block_spec_labels = [str(block.label or "").strip() for block in explicit_block_specs]
     fieldnames = [
         "block_index",
@@ -7842,6 +7919,7 @@ def _build_block_csv_preview(
         "family",
         "family_label",
         "family_color_hex",
+        "row_id",
         "row_label",
         "row_color_hex",
         "folder_key",
@@ -7891,6 +7969,8 @@ def _build_block_csv_preview(
             writer.writeheader()
             writer.writerows(rows)
         summary = _block_csv_summary(block_index, block_label, csv_path, rows)
+        if locked_specs:
+            summary["csv_sha256"] = _local_file_sha256(csv_path)
         block_summaries.append(summary)
         total_duration_ms += int(summary["duration_ms"])
         if progress:
@@ -7898,6 +7978,12 @@ def _build_block_csv_preview(
 
     scheduled_trial_count = sum(int(block["trial_count"]) for block in block_summaries)
     manifest_path = _block_csv_preview_manifest_path(render_dir)
+    row_sequence_strategy = "cycle_preserved_segment_row_order_within_each_block"
+    if repeat_trial_pool_per_block:
+        row_sequence_strategy = (
+            "matching_segment4_trials_repeated_within_each_eligible_block"
+            if locked_specs else "full_segment4_trial_pool_repeated_within_each_block"
+        )
     manifest_payload = {
         "schema": BLOCK_CSV_PREVIEW_MANIFEST_SCHEMA,
         "status": "baked",
@@ -7925,11 +8011,7 @@ def _build_block_csv_preview(
         "estimated_total_duration_s": round(total_duration_ms / 1000.0, 3),
         "repeat_trial_pool_per_block": repeat_trial_pool_per_block,
         "balancing_strategy": "row_order_preserving_minimum_divergence_by_family_soa_source_lineage_with_gellermann_constraints",
-        "row_sequence_strategy": (
-            "full_segment4_trial_pool_repeated_within_each_block"
-            if repeat_trial_pool_per_block
-            else "cycle_preserved_segment_row_order_within_each_block"
-        ),
+        "row_sequence_strategy": row_sequence_strategy,
         "row_order": row_order,
         "soa_color_gradient": {
             "minimum_soa_ms": soa_min,
@@ -7940,6 +8022,8 @@ def _build_block_csv_preview(
         "csv_columns": fieldnames,
         "blocks": block_summaries,
     }
+    if locked_specs:
+        manifest_payload["condition_locked"] = True
     errors = _validate_block_csv_preview_manifest(manifest_payload, project_dir=render_dir, design=design)
     if errors:
         _remove_tree(root)
@@ -10370,6 +10454,11 @@ def _stable_json_hash(value: Any) -> str:
 def _design_segment_signatures(design: StimulusDesign) -> dict[int, str]:
     protocol = design.protocol
     params = dict(design.study_profile_reference_parameters or {})
+    condition_locked = any(block.trial_strip_ids for block in protocol.block_specs)
+    locked_pool_settings = {
+        "random_seed": protocol.random_seed,
+        "exact_family_counts": _protocol_trial_pool_exact_family_counts(design),
+    } if condition_locked else {}
     return {
         1: _stable_json_hash({
             "trajectory": asdict(design.trajectory),
@@ -10391,13 +10480,15 @@ def _design_segment_signatures(design: StimulusDesign) -> dict[int, str]:
         4: _stable_json_hash({
             "repetitions_per_condition": protocol.repetitions_per_condition,
             "trial_pool_repetition_defaults": protocol.trial_pool_repetition_defaults,
+            **locked_pool_settings,
         }),
         5: _stable_json_hash({
             "blocks": protocol.blocks,
-            "block_specs": [asdict(item) for item in protocol.block_specs],
+            "block_specs": [item.to_dict() for item in protocol.block_specs],
             "repeat_trial_pool_per_block": protocol.repeat_trial_pool_per_block,
             "distribute_trial_pool_across_blocks": protocol.distribute_trial_pool_across_blocks,
             "trial_randomization_strategy": protocol.trial_randomization_strategy,
+            **({"random_seed": protocol.random_seed} if condition_locked else {}),
         }),
         6: _stable_json_hash({
             "preview_count": protocol.participants,

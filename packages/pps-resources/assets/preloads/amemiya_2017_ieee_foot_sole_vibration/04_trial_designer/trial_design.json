@@ -1,7 +1,7 @@
 {
   "schema": "pps-preload-trial-designer-segment.v1",
   "template_id": "amemiya_2017_ieee_foot_sole_vibration",
-  "repetitions_per_condition": 16,
+  "repetitions_per_condition": 8,
   "soa_values_ms": [
     2710,
     3290,

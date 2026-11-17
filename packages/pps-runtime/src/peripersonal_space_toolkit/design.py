@@ -10,9 +10,10 @@ import os
 import random
 import re
 import sys
+from collections import deque
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
@@ -155,6 +156,24 @@ class NoiseDefinition:
 class BlockSpec:
     label: str
     stimulus_types: list[str] = field(default_factory=lambda: list(DEFAULT_BLOCK_STIMULUS_TYPES))
+    trial_strip_ids: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.trial_strip_ids, list) or any(
+            not isinstance(strip_id, str) or not strip_id.strip() for strip_id in self.trial_strip_ids
+        ):
+            raise ValueError(f"Block {self.label!r} trial_strip_ids must be a list of nonempty strip IDs.")
+        if len(set(self.trial_strip_ids)) != len(self.trial_strip_ids):
+            raise ValueError(f"Block {self.label!r} repeats a trial strip ID.")
+
+    def allows_strip(self, strip_id: str) -> bool:
+        return not self.trial_strip_ids or strip_id in self.trial_strip_ids
+
+    def to_dict(self) -> dict[str, Any]:
+        spec = asdict(self)
+        if not self.trial_strip_ids:
+            del spec["trial_strip_ids"]
+        return spec
 
 
 @dataclass
@@ -281,7 +300,9 @@ def default_design() -> StimulusDesign:
 
 def design_to_dict(design: StimulusDesign) -> dict[str, Any]:
     normalize_generated_looming_source_profiles(design)
-    return asdict(design)
+    payload = asdict(design)
+    payload["protocol"]["block_specs"] = [block.to_dict() for block in design.protocol.block_specs]
+    return payload
 
 
 def _slug(value: str) -> str:
@@ -887,10 +908,27 @@ def validate_design(design: StimulusDesign) -> list[str]:
 def effective_block_specs(protocol: ProtocolSpec) -> list[BlockSpec]:
     require_plan_size(len(protocol.block_specs) or max(1, protocol.blocks), "Blocks", limit=MAX_BLOCKS)
     if protocol.block_specs:
+        condition_locked = any(block.trial_strip_ids for block in protocol.block_specs)
+        if condition_locked:
+            active_ids = [strip.strip_id for strip in protocol.trial_strips if strip.elements]
+            known_ids = set(active_ids)
+            if len(known_ids) != len(active_ids) or any(not strip_id.strip() for strip_id in active_ids):
+                raise ValueError("Condition-locked blocks need distinct IDs for all active trial strips.")
+            labels = [block.label.strip() for block in protocol.block_specs]
+            if len(set(labels)) != len(labels) or any(not label.strip() for label in labels):
+                raise ValueError("Condition-locked blocks need distinct, nonempty block labels.")
+            for block in protocol.block_specs:
+                unknown = set(block.trial_strip_ids) - known_ids
+                if unknown:
+                    raise ValueError(f"Block {block.label!r} references unknown trial strip IDs: {', '.join(sorted(unknown))}.")
+            for strip_id in active_ids:
+                if not any(block.allows_strip(strip_id) for block in protocol.block_specs):
+                    raise ValueError(f"No block accepts trial strip {strip_id!r}.")
         return [
             BlockSpec(
-                label=block.label,
+                label=block.label.strip() if condition_locked else block.label,
                 stimulus_types=[trial_type for trial_type in block.stimulus_types if trial_type],
+                trial_strip_ids=list(block.trial_strip_ids),
             )
             for block in protocol.block_specs
         ]
@@ -1690,16 +1728,57 @@ def _filmstrip_rows_for_stimulus_types(
     return combined
 
 
+def fill_empty_condition_blocks(
+    buckets: list[list[dict[str, Any]]],
+    specs: list[BlockSpec],
+    accepts: Callable[[BlockSpec, dict[str, Any]], bool],
+) -> None:
+    for empty_index, bucket in enumerate(buckets):
+        if bucket:
+            continue
+        # A singleton can donate its trial if another eligible trial fills its place.
+        pending = deque([empty_index])
+        visited = {empty_index}
+        moves: dict[int, tuple[int, dict[str, Any]]] = {}
+        surplus_index = None
+        while pending and surplus_index is None:
+            target = pending.popleft()
+            for source, rows in enumerate(buckets):
+                if source in visited:
+                    continue
+                trial = next((row for row in rows if accepts(specs[target], row)), None)
+                if trial is None:
+                    continue
+                visited.add(source)
+                moves[source] = (target, trial)
+                if len(rows) > 1:
+                    surplus_index = source
+                    break
+                pending.append(source)
+        if surplus_index is None:
+            raise ValueError(f"Condition-locked schedule leaves block {specs[empty_index].label!r} empty.")
+        while surplus_index in moves:
+            target, trial = moves[surplus_index]
+            buckets[surplus_index].remove(trial)
+            buckets[target].append(trial)
+            surplus_index = target
+
+
 def _filmstrip_distributed_block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
     protocol = design.protocol
     blocks = effective_block_specs(protocol)
+    condition_locked = any(block.trial_strip_ids for block in blocks)
     available_types = {
         trial_type
         for block in blocks
         for trial_type in block.stimulus_types
         if trial_type in set(SUPPORTED_TRIAL_TYPES)
     }
-    pool_rows = _filmstrip_rows_for_stimulus_types(design, available_types)
+    pool_rows = _filmstrip_rows_for_stimulus_types(
+        design, set(SUPPORTED_TRIAL_TYPES) if condition_locked else available_types,
+    )
+    repeat_locked_pool = condition_locked and protocol.repeat_trial_pool_per_block
+    repeated_row_count = 0
     block_rows: dict[str, list[dict[str, Any]]] = {block.label: [] for block in blocks}
     rows_by_type: dict[str, list[dict[str, Any]]] = {trial_type: [] for trial_type in SUPPORTED_TRIAL_TYPES}
     for row in pool_rows:
@@ -1709,22 +1788,42 @@ def _filmstrip_distributed_block_trial_rows(design: StimulusDesign) -> list[dict
         if not rows:
             continue
         eligible_blocks = [block for block in blocks if trial_type in block.stimulus_types]
-        if not eligible_blocks:
+        if not eligible_blocks and not condition_locked:
             continue
         shuffled = list(rows)
         random.Random(protocol.random_seed + sum(ord(ch) for ch in trial_type)).shuffle(shuffled)
         for idx, row in enumerate(shuffled):
-            min_count = min(len(block_rows[block.label]) for block in eligible_blocks)
+            strip_blocks = eligible_blocks
+            if condition_locked:
+                strip_id = str(row.get("trial_strip_id") or "")
+                strip_blocks = [block for block in eligible_blocks if block.allows_strip(strip_id)]
+                if not strip_blocks:
+                    raise ValueError(f"No block accepts {trial_type} trials from strip {strip_id!r}.")
+            if repeat_locked_pool:
+                repeated_row_count += len(strip_blocks)
+                require_plan_size(repeated_row_count, "Repeated condition-locked block schedule")
+                for block in strip_blocks:
+                    block_rows[block.label].append(row)
+                continue
+            min_count = min(len(block_rows[block.label]) for block in strip_blocks)
             candidates = [
                 block
-                for block in eligible_blocks
+                for block in strip_blocks
                 if len(block_rows[block.label]) == min_count
             ]
             block = candidates[idx % len(candidates)]
             block_rows[block.label].append(dict(row))
 
+    if condition_locked and not repeat_locked_pool:
+        fill_empty_condition_blocks(
+            [block_rows[block.label] for block in blocks],
+            blocks,
+            lambda block, row: row["trial_type"] in block.stimulus_types and block.allows_strip(row["trial_strip_id"]),
+        )
     scheduled: list[dict[str, Any]] = []
     for block_index, block in enumerate(blocks, start=1):
+        if condition_locked and not block_rows[block.label]:
+            raise ValueError(f"Condition-locked schedule leaves block {block.label!r} empty.")
         randomized = _randomize_rows(
             block_rows.get(block.label, []),
             protocol,
@@ -1745,11 +1844,14 @@ def _filmstrip_distributed_block_trial_rows(design: StimulusDesign) -> list[dict
 
 def _filmstrip_block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
     protocol = design.protocol
-    if protocol.distribute_trial_pool_across_blocks and not protocol.repeat_trial_pool_per_block:
+    blocks = effective_block_specs(protocol)
+    if any(block.trial_strip_ids for block in blocks) or (
+        protocol.distribute_trial_pool_across_blocks and not protocol.repeat_trial_pool_per_block
+    ):
         return _filmstrip_distributed_block_trial_rows(design)
     scheduled: list[dict[str, Any]] = []
     strips = [strip for strip in protocol.trial_strips if strip.elements]
-    for block_index, block in enumerate(effective_block_specs(protocol), start=1):
+    for block_index, block in enumerate(blocks, start=1):
         if not any(trial_type in block.stimulus_types for trial_type in SUPPORTED_TRIAL_TYPES):
             continue
         strip_payloads: list[tuple[int, list[dict[str, Any]]]] = []

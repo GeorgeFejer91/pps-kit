@@ -1,6 +1,6 @@
 # Current work
 
-Reviewed: 2026-11-16. Overall completion goal: **OPEN**.
+Reviewed: 2026-11-17. Overall completion goal: **OPEN**.
 This file is the active checklist and handoff owner; replace state, do not append logs.
 
 - **Goal:** deliver the [standalone study preview PWA and offline Planner +
@@ -19,10 +19,15 @@ This file is the active checklist and handoff owner; replace state, do not appen
   remain gated for participant launch. The
   [profile status](../docs/PUBLISHED_STUDY_RECREATION_STATUS.md) and
   [workflow](../docs/replication_workflow.md#published-study-profiles) record
-  substitutions and physical setup requirements. Continue with mixed cue-only
-  catch scheduling, synchronized participant stations and source assets that
-  block the remaining profiles. Source PDFs and extraction protocols reside
-  in the private archive.
+  substitutions and physical setup requirements. The Amemiya 2017 main
+  preview schedules six condition-specific blocks of 32 trials using an
+  illustrative ABCCBA assignment and an equal split across distances. Optional
+  block `trial_strip_ids` select saved strip IDs in the preview and the
+  prepared block CSVs. Condition-set or seed changes require rebuilding the
+  schedule. The main and localization profiles remain gated on source timing,
+  assets, response capture and actuator delivery. Continue with mixed cue-only
+  catches and synchronized participant stations. Source PDFs and extraction
+  protocols reside in the private archive.
 - **Timeline-first Runner UI: VERIFIED SOURCE AND HOSTED.** Study 5 Focus
   Mode inspires the native landscape timeline's audio, tactile, and response
   lanes. It shows scheduled cues and software playback positions, with one

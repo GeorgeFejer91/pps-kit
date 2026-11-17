@@ -23,7 +23,7 @@
     "segment_6_launchable": false,
     "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 2,
-    "unsupported_structure_count": 2
+    "unsupported_structure_count": 1
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
@@ -53,17 +53,12 @@
         "segment": "2",
         "segment_label": "Segment 2 trial rows and sequences",
         "passed": false,
-        "field_count": 5,
+        "field_count": 4,
         "blocking_reasons": [
           {
             "parameter": "profile_gap",
             "status": "unsupported_toolkit_structure",
             "reason": "Independent synchronized bilateral heel and chest actuator scheduler, Acouve drive files, measured amplitude and verified tactile timing."
-          },
-          {
-            "parameter": "profile_gap",
-            "status": "unsupported_toolkit_structure",
-            "reason": "A condition-locking ABCCBA trial scheduler for six blocks plus the original participant assignments and between-block rest."
           }
         ]
       },
@@ -223,7 +218,7 @@
       "segment_label": "Segment 4 repetition pool settings",
       "parameter": "trial_pool_repetitions",
       "status": "inferred",
-      "value": 16,
+      "value": 8,
       "note": "Segment 4 can infer repetitions from repetitions_per_condition."
     },
     {
@@ -231,7 +226,7 @@
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "block_count",
       "status": "reported",
-      "value": 1,
+      "value": 6,
       "note": "Block count is encoded."
     },
     {
@@ -275,12 +270,12 @@
       "note": "Independent synchronized bilateral heel and chest actuator scheduler, Acouve drive files, measured amplitude and verified tactile timing."
     },
     {
-      "segment": "2",
-      "segment_label": "Segment 2 trial rows and sequences",
+      "segment": "5",
+      "segment_label": "Segment 5 block CSV settings",
       "parameter": "profile_gap",
-      "status": "unsupported_toolkit_structure",
-      "value": "A condition-locking ABCCBA trial scheduler for six blocks plus the original participant assignments and between-block rest.",
-      "note": "A condition-locking ABCCBA trial scheduler for six blocks plus the original participant assignments and between-block rest."
+      "status": "missing_publication_parameter",
+      "value": "Original participant-to-order assignments, per-block distance counts, rest realization and numeric key capture.",
+      "note": "Original participant-to-order assignments, per-block distance counts, rest realization and numeric key capture."
     },
     {
       "segment": "1",
@@ -298,6 +293,11 @@
       "reason": "Original 2017 white-noise audio, sample format, dose calibration and author-confirmed magnitude law."
     },
     {
+      "segment": "5",
+      "parameter": "profile_gap",
+      "reason": "Original participant-to-order assignments, per-block distance counts, rest realization and numeric key capture."
+    },
+    {
       "segment": "1",
       "parameter": "profile_gap",
       "reason": "Exact sound/chest timing anchor resolution, tactile-only baseline allocation and any catch trials or ITI schedule."
@@ -308,11 +308,6 @@
       "segment": "2",
       "parameter": "profile_gap",
       "reason": "Independent synchronized bilateral heel and chest actuator scheduler, Acouve drive files, measured amplitude and verified tactile timing."
-    },
-    {
-      "segment": "2",
-      "parameter": "profile_gap",
-      "reason": "A condition-locking ABCCBA trial scheduler for six blocks plus the original participant assignments and between-block rest."
     }
   ],
   "generated_segment_artifacts": {
@@ -334,7 +329,7 @@
     },
     "05_run_setup": {
       "run_defaults": "assets/preloads/amemiya_2017_ieee_foot_sole_vibration/05_run_setup/run_defaults.json",
-      "block_count": 1,
+      "block_count": 6,
       "participant_count": 1
     },
     "local_segment_0_to_4_profile_gate": {

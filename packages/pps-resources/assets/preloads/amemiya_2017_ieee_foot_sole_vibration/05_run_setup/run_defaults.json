@@ -1,20 +1,68 @@
 {
   "schema": "pps-preload-run-setup-segment.v1",
   "template_id": "amemiya_2017_ieee_foot_sole_vibration",
-  "blocks": 1,
+  "blocks": 6,
   "participants": 1,
   "random_seed": 20170607,
   "trial_randomization_strategy": "balanced_shuffle",
   "block_order_randomization": "fixed",
-  "repeat_trial_pool_per_block": false,
+  "repeat_trial_pool_per_block": true,
   "distribute_trial_pool_across_blocks": false,
   "baseline_crosses_sequence_variants": true,
   "catch_crosses_sequence_variants": true,
   "block_specs": [
     {
-      "label": "Design inspection only",
+      "label": "01 \u00b7 Walking-sound vibration",
       "stimulus_types": [
         "Audio-Tactile"
+      ],
+      "trial_strip_ids": [
+        "walking_sound_heels"
+      ]
+    },
+    {
+      "label": "02 \u00b7 Asynchronous walking-sound vibration",
+      "stimulus_types": [
+        "Audio-Tactile"
+      ],
+      "trial_strip_ids": [
+        "asynchronous_walking_sound_heels"
+      ]
+    },
+    {
+      "label": "03 \u00b7 60 Hz sinusoidal vibration",
+      "stimulus_types": [
+        "Audio-Tactile"
+      ],
+      "trial_strip_ids": [
+        "sinusoidal_heels"
+      ]
+    },
+    {
+      "label": "04 \u00b7 60 Hz sinusoidal vibration",
+      "stimulus_types": [
+        "Audio-Tactile"
+      ],
+      "trial_strip_ids": [
+        "sinusoidal_heels"
+      ]
+    },
+    {
+      "label": "05 \u00b7 Asynchronous walking-sound vibration",
+      "stimulus_types": [
+        "Audio-Tactile"
+      ],
+      "trial_strip_ids": [
+        "asynchronous_walking_sound_heels"
+      ]
+    },
+    {
+      "label": "06 \u00b7 Walking-sound vibration",
+      "stimulus_types": [
+        "Audio-Tactile"
+      ],
+      "trial_strip_ids": [
+        "walking_sound_heels"
       ]
     }
   ]
