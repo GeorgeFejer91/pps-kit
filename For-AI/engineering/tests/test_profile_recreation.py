@@ -7,6 +7,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+import pytest
+
 from peripersonal_space_toolkit.design import block_trial_rows, participant_block_orders
 from peripersonal_space_toolkit.profile_recreation import (
     PROFILE_PARAMETERS_SCHEMA,
@@ -164,8 +166,8 @@ def test_new_assessment_preloads_preserve_trial_counts_and_launch_gates():
         "holmes_2020_exp3": (160, False),
         "holmes_2020_exp4": (180, False),
         "taffou_2021_auditory_roughness": (0, False),
-        "teraoka_2024_front_pps": (54, False),
-        "teraoka_2024_rear_pps": (54, False),
+        "teraoka_2024_front_pps": (56, False),
+        "teraoka_2024_rear_pps": (56, False),
         "teneggi_2013_social_face_pps": (208, True),
         "ardizzi_ferri_2018_looming_flat": (300, True),
         "amemiya_2019_foot_sole_exp1": (180, False),
@@ -480,6 +482,17 @@ def test_replication_assessments_preserve_counts_and_declared_motion():
     rows = block_trial_rows(templates["ardizzi_ferri_2018_looming_flat"].design)
     assert {row["motion_direction"] for row in rows if "flat" in row["noise_label"].lower()} == {"stationary"}
     assert {row["motion_direction"] for row in rows if "looming" in row["noise_label"].lower()} == {"looming"}
+
+
+@pytest.mark.parametrize("direction", ["front", "rear"])
+def test_teraoka_tone_only_and_probe_catches_keep_their_published_counts(direction):
+    template_id = f"teraoka_2024_{direction}_pps"
+    templates = {t.template_id: t for t in load_templates(ROOT / "packages/pps-resources/study_templates")}
+    rows = block_trial_rows(templates[template_id].design)
+    assert Counter(row["trial_type"] for row in rows) == {"Audio-Tactile": 36, "Baseline": 12, "Catch": 8}
+    catches = [row for row in rows if row["trial_type"] == "Catch"]
+    assert sum(row["trial_strip_id"].endswith("tone-only") for row in catches) == 2
+    assert all(row["expected_response"] == "withhold" and not row["tactile_enabled"] for row in catches)
 
 
 def test_amemiya_2017_preview_schedules_six_condition_locked_blocks():

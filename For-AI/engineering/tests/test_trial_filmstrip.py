@@ -118,6 +118,28 @@ def test_condition_locked_blocks_use_strip_ids_after_round_trip(repeat):
         block_trial_rows(design_from_dict(orphan))
 
 
+def test_cue_only_strip_has_an_exact_catch_allocation_without_ordinary_trials():
+    payload = design_to_dict(_filmstrip_design(source_count=1))
+    protocol = payload["protocol"]
+    protocol["include_catch_trials"] = True
+    protocol["catch_trials_exact"] = 6
+    protocol["trial_strips"] = [protocol["trial_strips"][0], {
+        "strip_id": "cue-only",
+        "label": "Start tone only",
+        "catch_only_repetitions": 2,
+        "elements": [{"kind": "fixed_audio", "source_label": "Inhale"}],
+    }]
+    design = design_from_dict(design_to_dict(design_from_dict(payload)))
+    rows = block_trial_rows(design)
+    cue_only = [row for row in rows if row["trial_strip_id"] == "cue-only"]
+    assert len(cue_only) == 2
+    assert {(r["trial_type"], r["expected_response"], r["tactile_enabled"]) for r in cue_only} == {("Catch", "withhold", False)}
+    assert Counter(row["trial_type"] for row in rows) == {"Audio-Tactile": 5, "Catch": 8}
+    payload["protocol"]["trial_strips"][-1]["catch_only_repetitions"] = 0
+    with pytest.raises(ValueError, match="positive integer"):
+        design_from_dict(payload)
+
+
 def test_trial_sequence_jitter_multiplies_sequence_variants():
     design = _filmstrip_design(source_count=1)
     design.protocol.soa_values_ms = [100, 200, 300, 400]

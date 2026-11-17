@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1007/s00221-024-06782-2",
   "doi": "10.1007/s00221-024-06782-2",
   "verification_status": "partial",
-  "notes": "The rear timing preview includes the generated 500 ms start tone and 54 of the 56 published main trials. Both tone-only catches and the calibrated speaker-array procedure are required for a research launch.",
+  "notes": "The rear timing preview includes all 56 published main trials, with the 500 ms start tone in each trial. Research launch requires the calibrated speaker array, actuator delivery and study response timing.",
   "reference_parameters": {
     "study_row_id": "doi:10.1007/s00221-024-06782-2",
     "publication_status": "published",
@@ -193,7 +193,7 @@
     ],
     "analysis": "Trim log-transformed RTs once at ±3 SD per participant and condition. Collapse tactile timings. Compare probe RTs by direction and distance against the corresponding direction’s no-probe baseline.",
     "inspection_scope": {
-      "trial_rows_omitted": 2,
+      "trial_rows_omitted": 0,
       "matched_baseline": "The inspection builder retains the fixed 500 ms start tone and silences the pink probe. Baseline SOA values are stored relative to the nominal 1500 ms probe onset, including when the probe is silent.",
       "inspection_only_cue_waveform": {
         "sample_rate_hz": 44100,
@@ -207,12 +207,11 @@
       },
       "inspection_only_tactile_waveform": "A 300 Hz, 100 ms digital sine marker uses a peak of 0.2 full scale. The original actuator drive shape and delivered mechanical amplitude are unreported.",
       "renderer": "Each head-relative path is represented with a straight binaural pink-noise approach. Digital spatialization and level settings are inspection substitutes for the physical crossfading speaker array.",
-      "timing_exclusions": "The schedule omits the two tone-only catches, original randomized intertrial intervals, main-task familiarization and auxiliary tasks. It is not intended for study data collection.",
-      "trial_rows_with_bundled_cue": 54
+      "timing_exclusions": "Original randomized intertrial intervals, main-task familiarization and auxiliary tasks are outside this timing preview. The tone-only waveform is 500 ms. The original withholding window and physical acoustic level are unverified.",
+      "trial_rows_with_bundled_cue": 56
     },
     "implementation_gaps": [
       "The speaker array scheduler must present the start tone simultaneously on all ten calibrated channels and crossfade four speakers per approach. The stereo inspection sources do not implement that physical output.",
-      "The trial scheduler needs two distinct no-touch families: six probe catches and two tone-only catches per direction. The inspection scheduler only produces the six probe catches.",
       "The bundled digital 1 kHz start tone is a synthesized timing cue. Original cue and probe files, speaker gains, calibrated sound levels and the Octave/Playrec routines are unavailable.",
       "The study requires calibrated 300 Hz anterior chest vibration, synchronized keypad timing and the original event clock. The digital inspection does not verify physical vibration or response latency.",
       "Exact intertrial interval sampling, between-direction order, keypad key and online response deadline are unreported. The original auditory estimation and familiarization schedules are outside the inspection."
@@ -413,6 +412,29 @@
                 "Near rear pink-noise probe",
                 "Middle rear pink-noise probe",
                 "Far rear pink-noise probe"
+              ],
+              "randomized": false
+            }
+          ]
+        },
+        {
+          "strip_id": "teraoka-2024-rear-tone-only",
+          "label": "Start tone only (catch)",
+          "catch_only_repetitions": 2,
+          "metadata": {
+            "response_rule": "withhold_without_touch",
+            "response_capture_device": "Numeric keypad",
+            "spatial_hemifield": "rear",
+            "source_asset_equivalence": "Generated 1 kHz timing cue for 500 ms. The study presented the start tone from all ten loudspeakers."
+          },
+          "elements": [
+            {
+              "element_id": "teraoka-rear-cue-only",
+              "kind": "fixed_audio",
+              "label": "Trial-start 1 kHz tone",
+              "source_label": "Trial-start 1 kHz tone",
+              "source_labels": [
+                "Trial-start 1 kHz tone"
               ],
               "randomized": false
             }

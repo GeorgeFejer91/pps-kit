@@ -1842,8 +1842,8 @@
         "finished_profile": false,
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 3,
-        "unsupported_structure_count": 3
+        "missing_parameter_count": 4,
+        "unsupported_structure_count": 2
       },
       "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
@@ -1852,8 +1852,8 @@
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
       "primary_recreation_category": "toolkit_structural_gap",
-      "missing_parameter_count": 3,
-      "unsupported_structure_count": 3,
+      "missing_parameter_count": 4,
+      "unsupported_structure_count": 2,
       "local_only": true,
       "source_recipe_count": 1,
       "catalog_segments": [
@@ -1952,8 +1952,8 @@
         "finished_profile": false,
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
-        "missing_parameter_count": 4,
-        "unsupported_structure_count": 3
+        "missing_parameter_count": 5,
+        "unsupported_structure_count": 2
       },
       "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
@@ -1962,8 +1962,8 @@
       "segment_6_launchable": false,
       "profile_completion_status": "unfinished_preload",
       "primary_recreation_category": "toolkit_structural_gap",
-      "missing_parameter_count": 4,
-      "unsupported_structure_count": 3,
+      "missing_parameter_count": 5,
+      "unsupported_structure_count": 2,
       "local_only": true,
       "source_recipe_count": 1,
       "catalog_segments": [
@@ -20760,7 +20760,7 @@
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
         "missing_parameter_count": 4,
-        "unsupported_structure_count": 2
+        "unsupported_structure_count": 1
       },
       "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
@@ -20770,7 +20770,7 @@
       "profile_completion_status": "unfinished_preload",
       "primary_recreation_category": "toolkit_structural_gap",
       "missing_parameter_count": 4,
-      "unsupported_structure_count": 2,
+      "unsupported_structure_count": 1,
       "local_only": true,
       "source_recipe_count": 3,
       "catalog_segments": [
@@ -20956,7 +20956,7 @@
         "segment_6_launchable": false,
         "profile_completion_status": "unfinished_preload",
         "missing_parameter_count": 4,
-        "unsupported_structure_count": 2
+        "unsupported_structure_count": 1
       },
       "runner_readiness": "blocked_unsupported_toolkit_structure",
       "profile_checks_passed": false,
@@ -20966,7 +20966,7 @@
       "profile_completion_status": "unfinished_preload",
       "primary_recreation_category": "toolkit_structural_gap",
       "missing_parameter_count": 4,
-      "unsupported_structure_count": 2,
+      "unsupported_structure_count": 1,
       "local_only": true,
       "source_recipe_count": 3,
       "catalog_segments": [

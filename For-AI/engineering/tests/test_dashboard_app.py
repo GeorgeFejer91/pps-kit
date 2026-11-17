@@ -4061,9 +4061,15 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
     ]
     if locked:
         custom["design"]["protocol"]["blocks"] = 2
+        custom["design"]["protocol"]["trial_strips"].append({
+            "strip_id": "cue-only",
+            "label": "Cue-only catch",
+            "catch_only_repetitions": 2,
+            "elements": [{"kind": "fixed_audio", "source_label": "Near white burst"}],
+        })
         custom["design"]["protocol"]["block_specs"] = [
-            {"label": label, "stimulus_types": ["Audio-Tactile"], "trial_strip_ids": [strip_id]}
-            for label, strip_id in [("Far condition", "strong-far"), ("Near condition", "weak-near")]
+            {"label": "Far condition", "stimulus_types": ["Audio-Tactile"], "trial_strip_ids": ["strong-far"]},
+            {"label": "Near condition", "stimulus_types": ["Audio-Tactile", "Catch"], "trial_strip_ids": ["weak-near", "cue-only"]},
         ]
     custom = client.post("/api/design", json={"design": custom["design"]}).json()
 
@@ -4078,7 +4084,7 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
     sequence_done = _wait_job(client, sequence_job["job_id"])
     assert sequence_done["status"] == "succeeded"
     sequence_manifest = _read_json_file(sequence_done["result"]["manifest_path"])
-    assert {tuple(row["soa_values_ms"]) for row in sequence_manifest["variants"]} == {(0,), (5,)}
+    assert {tuple(row["soa_values_ms"]) for row in sequence_manifest["variants"] if row["row_id"] != "cue-only"} == {(0,), (5,)}
 
     tactile_job = client.post(
         "/api/stimulus/bake",
@@ -4097,6 +4103,17 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
     assert by_role["weak_target"]["spatial_value_cm"] == pytest.approx(30.0)
     assert by_role["strong_nontarget"]["soa_ms"] == 5
     assert by_role["strong_nontarget"]["spatial_value_cm"] == pytest.approx(125.0)
+    if locked:
+        cue_files = [row for row in tactile_manifest["files"] if row["row_id"] == "cue-only"]
+        assert len(cue_files) == 1
+        assert cue_files[0]["family"] == "catch"
+        assert cue_files[0]["channels"] == 2 and cue_files[0]["tactile_channel"] == ""
+        assert cue_files[0]["expected_response"] == "withhold"
+        report = _read_json_file(tactile_done["result"]["validation_report_path"])
+        expected = report["expected"]["3_tactile_and_baseline_trials"]
+        assert expected["audio_tactile_count"] == 2
+        assert expected["catch_count"] == 1
+        assert expected["total_count"] == 3
     assert client.get("/api/state").json()["project_segments"]["3_tactile_and_baseline_trials"]["status"] == "ready"
 
     pool_job = client.post(
@@ -4133,7 +4150,9 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
         with Path(block["csv_path"]).open(encoding="utf-8") as stream:
             rows_by_block.append(list(csv.DictReader(stream)))
     if locked:
-        assert [[row["row_id"] for row in rows] for rows in rows_by_block] == [["strong-far"], ["weak-near"]]
+        assert [Counter(row["row_id"] for row in rows) for rows in rows_by_block] == [
+            {"strong-far": 1}, {"weak-near": 1, "cue-only": 2},
+        ]
     block_rows = [row for rows in rows_by_block for row in rows]
     block_by_role = {row["target_role"]: row for row in block_rows}
     assert block_by_role["weak_target"]["expected_response"] == "respond"
@@ -4156,7 +4175,7 @@ def test_dashboard_preserves_row_contract_fields_and_strip_soas_through_block_cs
         changed_design = client.get("/api/state").json()["design"]
         specs = changed_design["protocol"]["block_specs"]
         specs[0]["trial_strip_ids"] = ["weak-near"]
-        specs[1]["trial_strip_ids"] = ["strong-far"]
+        specs[1]["trial_strip_ids"] = ["strong-far", "cue-only"]
         changed = client.post("/api/design", json={"design": changed_design})
         assert changed.status_code == 200, changed.text
         stale = client.post("/api/block-csv/accept", json={})

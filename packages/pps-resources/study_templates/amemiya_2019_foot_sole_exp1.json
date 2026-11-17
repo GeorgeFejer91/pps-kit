@@ -5,7 +5,7 @@
   "source_url": "https://doi.org/10.1177/0956797619869337",
   "doi": "10.1177/0956797619869337",
   "verification_status": "partial",
-  "notes": "Software timing preview with a generated chest-target waveform and procedural audio. Figure 1b supplies the preview offsets. A participant session requires the exact recordings, independent conditioning outputs, baseline allocation and calibrated hardware timing.",
+  "notes": "Software timing preview with a generated chest-target waveform and procedural audio. Figure 1b supplies the preview offsets. The active blocks use one illustrative ABCCBA assignment. A participant session requires the exact recordings, independent conditioning outputs, baseline allocation and calibrated hardware timing.",
   "reference_parameters": {
     "study_row_id": "doi:10.1177/0956797619869337::exp1",
     "publication_status": "published",
@@ -168,7 +168,7 @@
       "auditory_rendering": "Procedural continuous white noise along a virtual approach at the reported velocity. The figure-derived preview uses a 5 s approach with a 1 cm near endpoint and 1 s tail. Those endpoints and the inverse-square setting describe a preview reconstruction.",
       "catch_pool": "The scaffold uses 20% no-chest rows within each active condition. The original catch allocation by condition and block is unknown.",
       "baseline": "The published comparison used constant-level white noise with the same four target delays and no conditioning. The software timing preview excludes baseline trials because their exact allocation and original audio are unresolved.",
-      "conditioning_and_blocks": "Condition labels identify the paper’s intended outputs. The toolkit distributes the illustrated paired and catch pool across equal software blocks. These mix condition labels and keep block audio within the preparation limit. The condition waveforms and mirrored participant schedules are unimplemented."
+      "conditioning_and_blocks": "The software assigns exactly one condition to each block and uses the fixed ABCCBA order as an illustration of the reported forward-and-reverse sequence. The condition letters denote walking-sound heel vibration, asynchronous walking-sound heel vibration and sinusoidal heel vibration in that order. Paired and catch allocations across the matched blocks are software choices."
     },
     "replication_inputs": {
       "source_payloads": "Obtain the original binaural recording, the constant-level baseline audio and the left/right conditioning source waveforms with checked provenance. The article's Open Practices statement on p. 1530 says the data and materials were not made public.",
@@ -186,7 +186,7 @@
     "implementation_gaps": [
       "The exact binaural looming source and original left and right conditioning waveforms are unavailable. Absolute output levels, hardware calibration and timing from recorded sound onset are unreported.",
       "A synchronized five-output scheduler needs independent left and right conditioning outputs, binaural playback and the chest target. The current three-role output map and its fourth-channel tactile duplicate cannot deliver those roles. Catch trials suppress only the chest target.",
-      "The trial scheduler needs a condition-specific block order with a reversed second half and a dedicated constant-level white-noise baseline with its own chest-target and catch trials.",
+      "A participant run requires participant-level counterbalancing and a dedicated constant-level white-noise baseline with its own chest targets and catches. The original assignment and baseline placement are unreported.",
       "Exact baseline trial allocation and catch counts by condition and block are unreported.",
       "The response scheduler needs numeric-keypad capture timestamped relative to the chest target.",
       "The exact accepted numeric key and online response deadline are unreported."
@@ -271,6 +271,11 @@
       "blocks": 6,
       "distribute_trial_pool_across_blocks": true,
       "block_order_randomization": "fixed",
+      "participant_order_policy": {
+        "schema": "pps-participant-order-policy.v1",
+        "algorithm": "fixed",
+        "preview_count": 23
+      },
       "trial_randomization_strategy": "balanced_shuffle",
       "trial_strips": [
         {
@@ -395,12 +400,12 @@
         "PPS assessment"
       ],
       "block_specs": [
-        {"label": "Timing inspection 1", "stimulus_types": ["Audio-Tactile", "Catch"]},
-        {"label": "Timing inspection 2", "stimulus_types": ["Audio-Tactile", "Catch"]},
-        {"label": "Timing inspection 3", "stimulus_types": ["Audio-Tactile", "Catch"]},
-        {"label": "Timing inspection 4", "stimulus_types": ["Audio-Tactile", "Catch"]},
-        {"label": "Timing inspection 5", "stimulus_types": ["Audio-Tactile", "Catch"]},
-        {"label": "Timing inspection 6", "stimulus_types": ["Audio-Tactile", "Catch"]}
+        {"label": "Timing inspection 1", "stimulus_types": ["Audio-Tactile", "Catch"], "trial_strip_ids": ["amemiya-exp1-walking_heels"]},
+        {"label": "Timing inspection 2", "stimulus_types": ["Audio-Tactile", "Catch"], "trial_strip_ids": ["amemiya-exp1-asynchronous_walking_heels"]},
+        {"label": "Timing inspection 3", "stimulus_types": ["Audio-Tactile", "Catch"], "trial_strip_ids": ["amemiya-exp1-sinusoidal_heels"]},
+        {"label": "Timing inspection 4", "stimulus_types": ["Audio-Tactile", "Catch"], "trial_strip_ids": ["amemiya-exp1-sinusoidal_heels"]},
+        {"label": "Timing inspection 5", "stimulus_types": ["Audio-Tactile", "Catch"], "trial_strip_ids": ["amemiya-exp1-asynchronous_walking_heels"]},
+        {"label": "Timing inspection 6", "stimulus_types": ["Audio-Tactile", "Catch"], "trial_strip_ids": ["amemiya-exp1-walking_heels"]}
       ],
       "trial_pool_repetition_defaults": {
         "audio_tactile": 12

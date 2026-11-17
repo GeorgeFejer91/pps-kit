@@ -24,10 +24,13 @@ This file is the active checklist and handoff owner; replace state, do not appen
   illustrative ABCCBA assignment and an equal split across distances. Optional
   block `trial_strip_ids` select saved strip IDs in the preview and the
   prepared block CSVs. Condition-set or seed changes require rebuilding the
-  schedule. The main and localization profiles remain gated on source timing,
-  assets, response capture and actuator delivery. Continue with mixed cue-only
-  catches and synchronized participant stations. Source PDFs and extraction
-  protocols reside in the private archive.
+  schedule. The Teraoka front and rear previews each schedule 56 trials,
+  including six probe-only catches and two start-tone-only catches. The
+  Amemiya 2019 previews schedule six and four condition-specific blocks of
+  30 trials with illustrative ABCCBA and ABBA assignments. These previews
+  remain gated on apparatus, source timing and response capture. Continue
+  with synchronized participant stations and calibrated multichannel
+  delivery. Source PDFs and extraction protocols reside in the private archive.
 - **Timeline-first Runner UI: VERIFIED SOURCE AND HOSTED.** Study 5 Focus
   Mode inspires the native landscape timeline's audio, tactile, and response
   lanes. It shows scheduled cues and software playback positions, with one

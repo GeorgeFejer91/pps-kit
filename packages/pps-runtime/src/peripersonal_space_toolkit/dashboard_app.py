@@ -4431,6 +4431,7 @@ def _build_trial_sequence_variants(design: StimulusDesign, render_dir: Path) -> 
                     "jitter_values_ms": "; ".join(jitter_values),
                     "soa_values_ms": list(strip.soa_values_ms),
                     "spatial_values_cm": list(strip.spatial_values_cm),
+                    "catch_only_repetitions": strip.catch_only_repetitions,
                     "duration_ms": duration_ms,
                     "duration_s": round(duration_s, 6),
                     "segment_duration_ms": total_duration_ms,
@@ -5830,23 +5831,25 @@ def _write_run_setup_outputs(project_dir: Path, design: StimulusDesign) -> dict[
 def _expected_segment_counts(design: StimulusDesign, project_dir: Path) -> dict[str, dict[str, Any]]:
     segment2_manifest = _load_json(_trial_sequence_bake_root(project_dir) / "trial_sequence_variants_manifest.json")
     segment2_variants = segment2_manifest.get("variants", []) if isinstance(segment2_manifest, dict) else []
-    variant_count = len(segment2_variants)
-    if not variant_count:
-        try:
-            variant_count = sum(_estimated_trial_strip_variant_counts(design, project_dir))
-        except Exception:
-            variant_count = 0
     if segment2_variants:
+        variants = [variant for variant in segment2_variants if isinstance(variant, dict)]
+        ordinary_variants = [variant for variant in variants if variant.get("catch_only_repetitions") is None]
+        ordinary_count = len(ordinary_variants)
+        catch_only_count = len(variants) - ordinary_count
         expected_audio_tactile = sum(
-            len(_variant_soa_values(dict(variant), design.protocol))
-            for variant in segment2_variants
-            if isinstance(variant, dict)
+            len(_variant_soa_values(variant, design.protocol)) for variant in ordinary_variants
         )
     else:
-        expected_audio_tactile = variant_count * len([value for value in design.protocol.soa_values_ms if isinstance(value, (int, float))])
-    expected_baseline = variant_count * len(_baseline_anchor_specs(design))
-    expected_catch = variant_count if bool(getattr(design.protocol, "include_catch_trials", False)) else 0
-    expected_auditory_only = variant_count if bool(getattr(design.protocol, "include_auditory_only_trials", False)) else 0
+        try:
+            ordinary_count, catch_only_count = _estimated_trial_strip_variant_counts(design, project_dir)
+        except Exception:
+            ordinary_count, catch_only_count = 0, 0
+        global_soas = [value for value in design.protocol.soa_values_ms if isinstance(value, (int, float))]
+        expected_audio_tactile = ordinary_count * len(global_soas)
+    variant_count = ordinary_count + catch_only_count
+    expected_baseline = ordinary_count * len(_baseline_anchor_specs(design))
+    expected_catch = catch_only_count + (ordinary_count if design.protocol.include_catch_trials else 0)
+    expected_auditory_only = ordinary_count if design.protocol.include_auditory_only_trials else 0
     segment3_manifest = _load_json(_baseline_tactile_bake_root(project_dir) / "baseline_tactile_trial_files_manifest.json")
     segment3_files = segment3_manifest.get("files", []) if isinstance(segment3_manifest, dict) else []
     expected_pool = 0
@@ -5887,17 +5890,19 @@ def _expected_segment_counts(design: StimulusDesign, project_dir: Path) -> dict[
     }
 
 
-def _estimated_trial_strip_variant_counts(design: StimulusDesign, project_dir: Path) -> list[int]:
-    counts: list[int] = []
+def _estimated_trial_strip_variant_counts(design: StimulusDesign, project_dir: Path) -> tuple[int, int]:
+    ordinary_count = 0
+    catch_only_count = 0
     for strip in design.protocol.trial_strips:
         if not strip.elements:
             continue
         factors = _trial_variant_factors(design, strip, project_dir)
-        total = 1
-        for factor in factors:
-            total *= len(factor)
-        counts.append(total if factors else 0)
-    return counts
+        total = math.prod(len(factor) for factor in factors) if factors else 0
+        if strip.catch_only_repetitions is None:
+            ordinary_count += total
+        else:
+            catch_only_count += total
+    return ordinary_count, catch_only_count
 
 
 def _write_segment_validation_report(
@@ -6549,6 +6554,7 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
             {
                 **_trial_family_contract_payload(variant, family),
                 "family": family,
+                "catch_only_repetitions": variant.get("catch_only_repetitions"),
                 "row_index": row_index,
                 "row_id": str(variant.get("row_id") or ""),
                 "row_label": row_label,
@@ -6600,15 +6606,12 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
             row_index = int(variant.get("row_index") or 0)
             row_label = str(variant.get("row_label") or f"Row {row_index}")
             row_key = (row_index, row_label)
-            waveform_row = _vibrotactile_bake_row(variant)
-            waveform_spec = _tactile_waveform_spec(waveform_row, "audio_tactile")
+            catch_only = variant.get("catch_only_repetitions") is not None
             variant_index = int(variant.get("variant_index") or 0)
             variant_key = str(variant.get("variant_key") or f"variant_{variant_index:03d}")
             source_path = Path(str(variant.get("file_path") or ""))
             looming_onset_s = float(variant.get("looming_segment_onset_s") or 0.0)
-            audio_folder = root / _trial_bake_output_folder_name("audio_tactile", row_index, row_label)
-            _ensure_dir(audio_folder)
-            if include_catch and (catch_crosses_variants or row_key not in catch_rows_seen):
+            if catch_only or (include_catch and (catch_crosses_variants or row_key not in catch_rows_seen)):
                 catch_rows_seen.add(row_key)
                 source_info = _audio_file_info(source_path)
                 output_stem = _trial_bake_file_stem(
@@ -6633,9 +6636,15 @@ def _build_audio_tactile_trial_files(design: StimulusDesign, render_dir: Path) -
                     duration_s=float(source_info["duration_s"]),
                     merge_engine="copy_segment2_audio",
                     tactile_onset_s=0.0,
-                    spatial_value_cm=_variant_spatial_value_for_soa(variant, design.protocol, 0),
+                    spatial_value_cm="" if catch_only else _variant_spatial_value_for_soa(variant, design.protocol, 0),
                     row_folder=catch_folder,
                 )
+            if catch_only:
+                continue
+            waveform_row = _vibrotactile_bake_row(variant)
+            waveform_spec = _tactile_waveform_spec(waveform_row, "audio_tactile")
+            audio_folder = root / _trial_bake_output_folder_name("audio_tactile", row_index, row_label)
+            _ensure_dir(audio_folder)
             if include_auditory_only and (auditory_only_crosses_variants or row_key not in auditory_only_rows_seen):
                 auditory_only_rows_seen.add(row_key)
                 source_info = _audio_file_info(source_path)
@@ -7027,6 +7036,9 @@ def _trial_pool_fractional_parent_stratum(source: dict[str, Any], fractional_rem
 
 
 def _configured_trial_pool_repetitions(source: dict[str, Any], settings: dict[str, Any]) -> float:
+    catch_only_repetitions = source.get("catch_only_repetitions")
+    if catch_only_repetitions is not None:
+        return float(catch_only_repetitions)
     folder_key = str(source.get("folder_key") or "")
     file_key = str(source.get("file_key") or "")
     family = _trial_pool_family_key(source.get("family"))
@@ -7173,6 +7185,7 @@ def _apply_trial_pool_exact_family_counts(
             record
             for record in records
             if _trial_pool_family_key(record["source"].get("family")) == family
+            and record["source"].get("catch_only_repetitions") is None
         ]
         if not family_records:
             if target_count:
@@ -10467,7 +10480,7 @@ def _design_segment_signatures(design: StimulusDesign) -> dict[int, str]:
             "prestimulus_files": [asdict(item) for item in design.prestimulus_files],
             "loudness_policy": params.get(LOUDNESS_POLICY_KEY, {}),
         }),
-        2: _stable_json_hash([asdict(item) for item in protocol.trial_strips]),
+        2: _stable_json_hash([strip.to_dict() for strip in protocol.trial_strips]),
         3: _stable_json_hash({
             "soa_values_ms": protocol.soa_values_ms,
             "include_catch_trials": protocol.include_catch_trials,
@@ -10513,7 +10526,7 @@ def _changed_design_segments(previous: StimulusDesign, current: StimulusDesign) 
 def _segment2_design_signature(design: StimulusDesign) -> str:
     return _stable_json_hash(
         {
-            "trial_strips": [asdict(strip) for strip in design.protocol.trial_strips],
+            "trial_strips": [strip.to_dict() for strip in design.protocol.trial_strips],
             "required_segment1_labels": _required_segment1_labels_for_trial_sequences(design),
             "loudness_policy": loudness_policy_for_design(design),
         }

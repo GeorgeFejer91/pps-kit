@@ -16,6 +16,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp1-walking_heels"
       ]
     },
     {
@@ -23,6 +26,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp1-asynchronous_walking_heels"
       ]
     },
     {
@@ -30,6 +36,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp1-sinusoidal_heels"
       ]
     },
     {
@@ -37,6 +46,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp1-sinusoidal_heels"
       ]
     },
     {
@@ -44,6 +56,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp1-asynchronous_walking_heels"
       ]
     },
     {
@@ -51,6 +66,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp1-walking_heels"
       ]
     }
   ]

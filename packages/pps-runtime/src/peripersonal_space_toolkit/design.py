@@ -198,6 +198,18 @@ class TrialStripSpec:
     spatial_values_cm: list[float] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
     elements: list[TrialStripElementSpec] = field(default_factory=list)
+    catch_only_repetitions: int | None = None
+
+    def __post_init__(self) -> None:
+        repetitions = self.catch_only_repetitions
+        if repetitions is not None and (type(repetitions) is not int or repetitions < 1):
+            raise ValueError(f"Trial strip {self.label!r} needs a positive integer for catch-only repetitions.")
+
+    def to_dict(self) -> dict[str, Any]:
+        strip = asdict(self)
+        if self.catch_only_repetitions is None:
+            del strip["catch_only_repetitions"]
+        return strip
 
 
 @dataclass
@@ -302,6 +314,7 @@ def design_to_dict(design: StimulusDesign) -> dict[str, Any]:
     normalize_generated_looming_source_profiles(design)
     payload = asdict(design)
     payload["protocol"]["block_specs"] = [block.to_dict() for block in design.protocol.block_specs]
+    payload["protocol"]["trial_strips"] = [strip.to_dict() for strip in design.protocol.trial_strips]
     return payload
 
 
@@ -389,6 +402,7 @@ def _trial_strip_specs_from_dicts(
                 spatial_values_cm=_float_list(item.get("spatial_values_cm")),
                 metadata=dict(item.get("metadata") or {}) if isinstance(item.get("metadata"), dict) else {},
                 elements=elements,
+                catch_only_repetitions=item.get("catch_only_repetitions"),
             )
         )
     return strips
@@ -885,7 +899,12 @@ def validate_design(design: StimulusDesign) -> list[str]:
         and _baseline_strategy(p) != "none"
         and not using_trial_strips
     )
-    required_types = {"Audio-Tactile"}
+    active_strips = [strip for strip in p.trial_strips if strip.elements]
+    required_types = {"Audio-Tactile"} if not active_strips or any(
+        strip.catch_only_repetitions is None for strip in active_strips
+    ) else set()
+    if any(strip.catch_only_repetitions is not None for strip in active_strips):
+        required_types.add("Catch")
     if p.catch_trials_exact is not None and p.catch_trials_exact > 0:
         required_types.add("Catch")
     elif p.catch_trial_percentage > 0 or row_catch_required:
@@ -1429,15 +1448,24 @@ def _filmstrip_condition_rows_for_strip(
     trial_type_label = strip_label
     row_mix = _strip_mix_metadata(strip, protocol)
     row_metadata = _strip_metadata(strip)
-    soa_values = _strip_soa_values(strip, protocol)
+    catch_only = strip.catch_only_repetitions is not None
+    repetitions = strip.catch_only_repetitions if catch_only else protocol.repetitions_per_condition
+    if catch_only:
+        row_metadata.update({
+            "expected_response": "withhold",
+            "target_role": "catch_no_target",
+            "response_rule": row_metadata.get("response_rule") or "withhold_response_to_audio_only_catch",
+        })
+    soa_values = [0] if catch_only else _strip_soa_values(strip, protocol)
     rows: list[dict[str, Any]] = []
-    tactile_sites = protocol.tactile_sites or ["hand"]
+    tactile_sites = [""] if catch_only else (protocol.tactile_sites or ["hand"])
 
-    require_plan_size(protocol.repetitions_per_condition * len(tactile_sites) * len(soa_values) * len(variants), "Audio-tactile trials")
-    for repetition in range(1, protocol.repetitions_per_condition + 1):
+    trial_type = "Catch" if catch_only else "Audio-Tactile"
+    require_plan_size(repetitions * len(tactile_sites) * len(soa_values) * len(variants), f"{trial_type} trials")
+    for repetition in range(1, repetitions + 1):
         for tactile_site in tactile_sites:
             for soa_index, soa_ms in enumerate(soa_values):
-                spatial_cm = _strip_spatial_value_for_soa(strip, protocol, soa_index)
+                spatial_cm = "" if catch_only else _strip_spatial_value_for_soa(strip, protocol, soa_index)
                 for variant_index, variant in enumerate(variants, start=1):
                     metadata = _variant_metadata(strip, variant)
                     source = metadata.pop("primary_source", {})
@@ -1448,7 +1476,7 @@ def _filmstrip_condition_rows_for_strip(
                     unit_key = f"{strip_id}_{variant_key}_{soa_ms}_{repetition}"
                     rows.append(
                         {
-                            "trial_type": "Audio-Tactile",
+                            "trial_type": trial_type,
                             "repetition": repetition,
                             "tactile_site": tactile_site,
                             "motion_direction": motion_direction,
@@ -1467,7 +1495,7 @@ def _filmstrip_condition_rows_for_strip(
                             "trial_type_index": strip_index,
                             "sequence_variant_index": variant_index,
                             **row_mix,
-                            "tactile_enabled": True,
+                            "tactile_enabled": not catch_only,
                             **metadata,
                             **row_metadata,
                             "trial_unit_key": _slug(unit_key),
@@ -1652,6 +1680,10 @@ def _filmstrip_rows_for_stimulus_types(
     exact_auditory_only_candidates: list[dict[str, Any]] = []
     legacy_baseline_audio_count = 0
     for strip_index, strip in enumerate(strips, start=1):
+        if strip.catch_only_repetitions is not None:
+            if "Catch" in stimulus_types:
+                rows_by_strip.append((strip_index, _filmstrip_condition_rows_for_strip(design, strip, strip_index)))
+            continue
         audio_rows = (
             _filmstrip_condition_rows_for_strip(design, strip, strip_index)
             if any(trial_type in stimulus_types for trial_type in ("Audio-Tactile", "Catch", "Auditory-Only"))
@@ -1860,6 +1892,10 @@ def _filmstrip_block_trial_rows(design: StimulusDesign) -> list[dict[str, Any]]:
         exact_auditory_only_candidates: list[dict[str, Any]] = []
         legacy_baseline_audio_count = 0
         for strip_index, strip in enumerate(strips, start=1):
+            if strip.catch_only_repetitions is not None:
+                if "Catch" in block.stimulus_types:
+                    strip_payloads.append((strip_index, _filmstrip_condition_rows_for_strip(design, strip, strip_index)))
+                continue
             audio_rows = (
                 _filmstrip_condition_rows_for_strip(design, strip, strip_index)
                 if any(trial_type in block.stimulus_types for trial_type in ("Audio-Tactile", "Catch", "Auditory-Only"))

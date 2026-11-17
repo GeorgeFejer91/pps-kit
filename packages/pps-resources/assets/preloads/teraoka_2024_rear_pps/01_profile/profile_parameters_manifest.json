@@ -23,7 +23,7 @@
     "segment_6_launchable": false,
     "profile_completion_status": "unfinished_preload",
     "missing_parameter_count": 4,
-    "unsupported_structure_count": 2
+    "unsupported_structure_count": 1
   },
   "segment_0_to_4_profile_checks": {
     "gate": "segments_0_to_4",
@@ -63,13 +63,8 @@
         "segment": "2",
         "segment_label": "Segment 2 trial rows and sequences",
         "passed": false,
-        "field_count": 5,
+        "field_count": 4,
         "blocking_reasons": [
-          {
-            "parameter": "profile_gap",
-            "status": "unsupported_toolkit_structure",
-            "reason": "The trial scheduler needs two distinct no-touch families: six probe catches and two tone-only catches per direction. The inspection scheduler only produces the six probe catches."
-          },
           {
             "parameter": "profile_gap",
             "status": "missing_publication_parameter",
@@ -162,7 +157,7 @@
       "segment_label": "Segment 2 trial rows and sequences",
       "parameter": "trial_sequence_rows",
       "status": "reported",
-      "value": 1,
+      "value": 2,
       "note": "Current Segment 2 row/box representation is encoded."
     },
     {
@@ -254,7 +249,7 @@
       "segment_label": "Segment 5 block CSV settings",
       "parameter": "row_order_constraints",
       "status": "reported",
-      "value": 1,
+      "value": 2,
       "note": "Row order can be preserved through Segment 5."
     },
     {
@@ -288,14 +283,6 @@
       "status": "missing_publication_parameter",
       "value": "The speaker array scheduler must present the start tone simultaneously on all ten calibrated channels and crossfade four speakers per approach. The stereo inspection sources do not implement that physical output.",
       "note": "The speaker array scheduler must present the start tone simultaneously on all ten calibrated channels and crossfade four speakers per approach. The stereo inspection sources do not implement that physical output."
-    },
-    {
-      "segment": "2",
-      "segment_label": "Segment 2 trial rows and sequences",
-      "parameter": "profile_gap",
-      "status": "unsupported_toolkit_structure",
-      "value": "The trial scheduler needs two distinct no-touch families: six probe catches and two tone-only catches per direction. The inspection scheduler only produces the six probe catches.",
-      "note": "The trial scheduler needs two distinct no-touch families: six probe catches and two tone-only catches per direction. The inspection scheduler only produces the six probe catches."
     },
     {
       "segment": "1",
@@ -349,11 +336,6 @@
       "segment": "1",
       "parameter": "profile_gap",
       "reason": "The speaker array scheduler must present the start tone simultaneously on all ten calibrated channels and crossfade four speakers per approach. The stereo inspection sources do not implement that physical output."
-    },
-    {
-      "segment": "2",
-      "parameter": "profile_gap",
-      "reason": "The trial scheduler needs two distinct no-touch families: six probe catches and two tone-only catches per direction. The inspection scheduler only produces the six probe catches."
     }
   ],
   "generated_segment_artifacts": {
@@ -371,7 +353,7 @@
     },
     "04_trial_designer": {
       "trial_design": "assets/preloads/teraoka_2024_rear_pps/04_trial_designer/trial_design.json",
-      "trial_row_count": 1
+      "trial_row_count": 2
     },
     "05_run_setup": {
       "run_defaults": "assets/preloads/teraoka_2024_rear_pps/05_run_setup/run_defaults.json",

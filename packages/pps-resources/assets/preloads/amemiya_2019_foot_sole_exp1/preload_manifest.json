@@ -47,8 +47,8 @@
     "finished_profile": false,
     "segment_6_launchable": false,
     "profile_completion_status": "unfinished_preload",
-    "missing_parameter_count": 3,
-    "unsupported_structure_count": 3
+    "missing_parameter_count": 4,
+    "unsupported_structure_count": 2
   },
   "render_contract": {
     "stage": "auditory_looming_prebake",

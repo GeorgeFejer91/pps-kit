@@ -73,6 +73,35 @@
           "randomized": false
         }
       ]
+    },
+    {
+      "strip_id": "teraoka-2024-rear-tone-only",
+      "label": "Start tone only (catch)",
+      "audio_tactile_percentage": null,
+      "catch_percentage": null,
+      "baseline_percentage": null,
+      "soa_values_ms": [],
+      "spatial_values_cm": [],
+      "metadata": {
+        "response_rule": "withhold_without_touch",
+        "response_capture_device": "Numeric keypad",
+        "spatial_hemifield": "rear",
+        "source_asset_equivalence": "Generated 1 kHz timing cue for 500 ms. The study presented the start tone from all ten loudspeakers."
+      },
+      "elements": [
+        {
+          "element_id": "teraoka-rear-cue-only",
+          "kind": "fixed_audio",
+          "label": "Trial-start 1 kHz tone",
+          "source_label": "Trial-start 1 kHz tone",
+          "source_labels": [
+            "Trial-start 1 kHz tone"
+          ],
+          "jitter_values_ms": [],
+          "randomized": false
+        }
+      ],
+      "catch_only_repetitions": 2
     }
   ],
   "prestimulus_files": [
@@ -94,5 +123,5 @@
       "source_input_path": ""
     }
   ],
-  "preview_trial_count": 54
+  "preview_trial_count": 56
 }

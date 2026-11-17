@@ -16,6 +16,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp2-walking_heels"
       ]
     },
     {
@@ -23,6 +26,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp2-walking_forearms"
       ]
     },
     {
@@ -30,6 +36,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp2-walking_forearms"
       ]
     },
     {
@@ -37,6 +46,9 @@
       "stimulus_types": [
         "Audio-Tactile",
         "Catch"
+      ],
+      "trial_strip_ids": [
+        "amemiya-exp2-walking_heels"
       ]
     }
   ]
