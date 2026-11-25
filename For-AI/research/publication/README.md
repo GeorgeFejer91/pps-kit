@@ -4,12 +4,11 @@
 companion repository for the Toolkit's software and methods paper and related
 conference abstracts. Start with its [working abstracts](https://github.com/GeorgeFejer91/pps-kit-paper/blob/main/abstract.md).
 
-From the Toolkit checkout root, clone the paper repository into this folder.
-The Toolkit checkout ignores the nested repository so each repository keeps
-its own history and access.
+From the directory containing your `pps-kit` checkout, clone the paper
+repository into its own sibling folder.
 
 ```powershell
-git clone https://github.com/GeorgeFejer91/pps-kit-paper.git For-AI/research/publication/pps-kit-paper
+git clone https://github.com/GeorgeFejer91/pps-kit-paper.git pps-kit-paper
 ```
 
 The [earlier Behavior Research Methods draft](behavior-research-methods/manuscript/README.md)
