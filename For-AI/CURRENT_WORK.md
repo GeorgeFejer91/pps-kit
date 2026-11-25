@@ -229,6 +229,11 @@ This file is the active checklist and handoff owner; replace state, do not appen
 - **Installed agent baseline:** retain the [reviewed baseline lock](skills/baseline-lock.json)
   and existing RTK/GSD/Superpowers routes. No configuration/hooks or agent
   packages were changed by this validation task.
+- **Companion paper:** the [publication workspace](research/publication/README.md)
+  links the private paper repository. Its GitHub `main` checkpoint `e1c44be`
+  contains journal and conference drafts, with the profile-preparation result
+  traced to the recorded software evaluation. Select a venue and recheck that
+  result on the software revision the submission will cite.
 - **Publication archive:** original PDFs and working extraction protocols
   have a separate private home. The current Pages assembly tests pass, and the
   component manifests exclude `For-AI/` and local research artifacts. Continue

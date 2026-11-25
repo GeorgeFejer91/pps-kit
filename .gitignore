@@ -10,6 +10,9 @@ build/
 dist/
 tmp/
 apps/runner/src-tauri/gen/
+# Private publication repository checked out under For-AI
+/For-AI/research/publication/pps-kit-paper/
+
 For-AI/experiments/android-companion/**/.gradle/
 For-AI/experiments/android-companion/**/.kotlin/
 For-AI/experiments/android-companion/**/build/

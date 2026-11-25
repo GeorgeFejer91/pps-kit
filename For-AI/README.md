@@ -21,6 +21,7 @@ then load only its relevant references and skills. Do not read all of `For-AI/`,
 | Designer controls, layout, segment interaction, browser previews | [Design and UI](domains/design-ui.md) |
 | Stimuli, schedules, schemas, execution, response/LSL evidence, Rust/Tauri | [Experiment runtime](domains/experiment-runtime.md) |
 | Published paradigms, paper audits, replication claims, analysis, manuscript | [Scientific evidence](domains/scientific-evidence.md) |
+| PPS Kit software paper and conference abstracts | [Publication workspaces](research/publication/README.md) |
 | Git checkpoints, tests, Pages, component ownership, installers | [Release operations](domains/release-operations.md) |
 
 <!-- for-ai-coding-workflows-route:start -->
